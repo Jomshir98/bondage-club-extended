@@ -1,0 +1,92 @@
+{
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:@typescript-eslint/recommended-requiring-type-checking"
+	],
+	"env": {
+		"es6": true,
+		"browser": true
+	},
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"project": "tsconfig.json",
+		"sourceType": "module"
+	},
+	"plugins": ["@typescript-eslint"],
+	"root": true,
+	"rules": {
+		"@typescript-eslint/no-inferrable-types": "off",
+		"@typescript-eslint/array-type": [
+			"error",
+			{
+				"default": "array"
+			}
+		],
+		"@typescript-eslint/no-unsafe-assignment": "off",
+		"@typescript-eslint/no-explicit-any": "off",
+		"@typescript-eslint/no-unsafe-member-access": "off",
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"@typescript-eslint/restrict-template-expressions": "off",
+		"@typescript-eslint/explicit-module-boundary-types": "off",
+		"@typescript-eslint/no-unused-vars": [
+			"warn",
+			{
+				"args": "none"
+			}
+		],
+		"@typescript-eslint/ban-ts-comment": [
+			"error",
+			{
+				"ts-ignore": "allow-with-description"
+			}
+		],
+		"@typescript-eslint/consistent-type-assertions": "error",
+		"@typescript-eslint/dot-notation": "error",
+		"@typescript-eslint/no-parameter-properties": "error",
+		"@typescript-eslint/no-unused-expressions": "error",
+		"@typescript-eslint/prefer-for-of": "warn",
+		"@typescript-eslint/prefer-function-type": "error",
+		"@typescript-eslint/unified-signatures": "error",
+		"@typescript-eslint/no-this-alias": [
+			"error",
+			{
+				"allowedNames": ["self"]
+			}
+		],
+		"@typescript-eslint/semi": "warn",
+		"@typescript-eslint/indent": ["warn", "tab", {
+			"SwitchCase": 1,
+			"ignoredNodes": ["ConditionalExpression"]
+		}],
+		"@typescript-eslint/no-unnecessary-boolean-literal-compare": "warn",
+		"comma-dangle": "error",
+		"eqeqeq": ["error", "always", { "null": "ignore" }],
+		"id-blacklist": ["error", "any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"],
+		"id-match": "error",
+		"new-parens": "error",
+		"no-bitwise": "error",
+		"no-caller": "error",
+		"no-console": "off",
+		"no-eval": "error",
+		"no-new-wrappers": "error",
+		"no-throw-literal": "error",
+		"no-trailing-spaces": "error",
+		"no-undef-init": "error",
+		"no-var": "error",
+		"object-shorthand": "error",
+		"one-var": ["error", "never"],
+		"prefer-const": "warn",
+		"radix": "warn",
+		"no-debugger": "off",
+		"require-yield": "off",
+		"no-use-before-define": "off",
+		"no-shadow": "off",
+		"@typescript-eslint/no-shadow": [
+			"error",
+			{
+				"hoist": "all"
+			}
+		]
+	}
+}

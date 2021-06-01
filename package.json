@@ -1,0 +1,24 @@
+{
+	"name": "bondage-club-extended",
+	"version": "0.1.0",
+	"repository": "git@github.com:jomshir98/bondage-club-extended.git",
+	"author": "jomshir98 <jomshir98@protonmail.com>",
+	"license": "MIT",
+	"private": true,
+  "scripts": {
+    "build": "rollup -c",
+    "serve": "rollup -c -w",
+    "test": "tsc --noEmit -p . && eslint src"
+  },
+	"devDependencies": {
+		"@rollup/plugin-typescript": "^8.2.1",
+		"@typescript-eslint/eslint-plugin": "^4.26.0",
+		"@typescript-eslint/parser": "^4.26.0",
+		"eslint": "^7.27.0",
+		"rollup": "^2.50.5",
+		"rollup-plugin-progress": "^1.1.2",
+		"rollup-plugin-serve": "^1.1.0",
+		"tslib": "^2.2.0",
+		"typescript": "^4.3.2"
+	}
+}

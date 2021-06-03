@@ -1,3 +1,4 @@
+import { detectOtherMods } from "./clubUtils";
 import { allowMode } from "./console";
 import { hookFunction, patchFunction } from "./patching";
 
@@ -11,8 +12,12 @@ export function init_miscPatches() {
 		return element != null && element.scrollHeight - element.scrollTop - element.clientHeight <= 1;
 	});
 
-	patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
-	patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
+	const { NMod } = detectOtherMods();
+
+	if (!NMod) {
+		patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
+		patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
+	}
 
 	if (Player.Inventory.length > 0) {
 		LoginMistressItems();

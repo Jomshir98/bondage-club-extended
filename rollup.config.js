@@ -11,7 +11,17 @@ const config = {
 		file: "dist/bcx.js",
 		format: "iife",
 		sourcemap: true,
-		banner: "// BCX: Bondage Club Extended\n"
+		banner: `// BCX: Bondage Club Extended
+if (typeof window.ImportBondageCollege !== "function") {
+	alert("Club not detected! Please only use this while you have Club open!");
+	throw "Dependency not met";
+}
+if (window.BCX_Loaded !== undefined) {
+	alert("BCX is already detected in current window. To reload, please refresh the window.");
+	throw "Already loaded";
+}
+window.BCX_Loaded = false;
+`
 	},
 	treeshake: false,
 	plugins: [
@@ -24,7 +34,6 @@ const config = {
 			case "CIRCULAR_DEPENDENCY":
 				return;
 			default:
-				console.log(warning.code);
 				warn(warning);
 		}
 	}

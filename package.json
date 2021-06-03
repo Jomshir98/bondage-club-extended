@@ -5,11 +5,14 @@
 	"author": "jomshir98 <jomshir98@protonmail.com>",
 	"license": "MIT",
 	"private": true,
-  "scripts": {
-    "build": "rollup -c",
-    "serve": "rollup -c -w",
-    "test": "tsc --noEmit -p . && eslint src"
-  },
+	"scripts": {
+		"build": "rollup -c",
+		"serve": "rollup -c -w",
+		"test": "tsc --noEmit -p . && eslint src"
+	},
+	"dependencies": {
+		"@types/socket.io-client": "^3.0.0"
+	},
 	"devDependencies": {
 		"@rollup/plugin-typescript": "^8.2.1",
 		"@typescript-eslint/eslint-plugin": "^4.26.0",

@@ -1,20 +1,19 @@
 {
-    "compilerOptions": {
+	"compilerOptions": {
 		"target": "ES2018",
-        "lib": ["ESNext", "dom"],
+		"lib": ["ESNext", "dom"],
 		"module": "ESNext",
 		"moduleResolution": "Node",
-        "sourceMap": true,
-        "removeComments": false,
-        "outDir": "./dist",
-        "baseUrl": "./src",
-        "strict": true,
-        "listEmittedFiles": true,
-        "noEmit": true,
+		"sourceMap": true,
+		"removeComments": false,
+		"outDir": "./dist",
+		"baseUrl": "./src",
+		"strict": true,
+		"noEmit": true,
 		"experimentalDecorators": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": false,
-		"esModuleInterop": true,
-    },
-    "include": ["./src/**/*"]
+		"esModuleInterop": true
+	},
+	"include": ["./src/**/*"]
 }

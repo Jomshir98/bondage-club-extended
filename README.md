@@ -31,6 +31,7 @@ You can find instructions on how to run the script [HERE](https://jomshir98.gith
 **Made by Jomshir98 - Jomshir98#0022**
 
 Associated Discord server:
+
 [![Discord image](https://discordapp.com/api/guilds/842082194209112074/widget.png?style=banner1)](https://discord.gg/SHJMjEh9VH)
 
 **THIS PAGE WAS LAST EDITED ON 03-06-2021**

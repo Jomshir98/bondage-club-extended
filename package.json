@@ -19,6 +19,7 @@
 		"@typescript-eslint/parser": "^4.26.0",
 		"eslint": "^7.27.0",
 		"rollup": "^2.50.5",
+		"rollup-plugin-copy": "^3.4.0",
 		"rollup-plugin-progress": "^1.1.2",
 		"rollup-plugin-serve": "^1.1.0",
 		"tslib": "^2.2.0",

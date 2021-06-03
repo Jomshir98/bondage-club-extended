@@ -29,7 +29,7 @@ window.BCX_Loaded = false;
 		progress({ clearLine: true }),
 		typescript({ tsconfig: "./tsconfig.json" }),
 		copy({
-			targets: [{ src: 'dist_static/*', dest: 'dist' }]
+			targets: [{ src: 'static/*', dest: 'dist' }]
 		})
 	],
 	onwarn: function (warning, warn) {

@@ -2,7 +2,7 @@ import { detectOtherMods, DrawImageEx } from "./clubUtils";
 import { VERSION } from "./config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { hookFunction, patchFunction } from "./patching";
-import { icon_PurpleHeart } from "./resources";
+import { icon_Emote, icon_PurpleHeart, icon_Typing } from "./resources";
 
 class ChatroomCharacter {
 	BCXVersion: string | null = null;
@@ -32,6 +32,85 @@ function getChatroomCharacter(memberNumber: number): ChatroomCharacter | null {
 	}
 	return character;
 }
+
+class ChatRoomStatusManager {
+	InputTimeoutMs = 3_000;
+
+	StatusTypes = {
+		None: "None",
+		Typing: "Typing",
+		Emote: "Emote",
+		Whisper: "Whisper",
+		// NMod
+		Action: "Action",
+		Afk: 'Afk'
+	};
+
+	private InputElement: HTMLTextAreaElement | null = null;
+
+	private InputTimeout: number | null = null;
+
+	Status: string;
+
+	constructor() {
+		this.Status = this.StatusTypes.None;
+	}
+
+	SetInputElement(elem: HTMLTextAreaElement | null) {
+		if (this.InputElement !== elem) {
+			this.InputElement = elem;
+			if (elem !== null) {
+				elem.addEventListener("blur", this.InputEnd.bind(this));
+				elem.addEventListener("input", this.InputChange.bind(this));
+			}
+		}
+	}
+
+	SetStatus(type: string, target: number | null = null) {
+		if (type !== this.Status) {
+			if (target !== null && this.Status === this.StatusTypes.Whisper) {
+				this.SetStatus(this.StatusTypes.None, null);
+			}
+			this.Status = type;
+			sendHiddenMessage("ChatRoomStatusEvent", { Type: type, Target: target }, target);
+			const { NMod } = detectOtherMods();
+			if (NMod) ServerSend("ChatRoomStatusEvent", { Type: type, Target: target });
+		}
+	}
+
+	InputChange() {
+		const value = this.InputElement?.value;
+		if (typeof value === "string" && value.length > 1) {
+			let type = this.StatusTypes.Typing;
+			let target = null;
+			if (value.startsWith("*") || value.startsWith("/me ") || value.startsWith("/emote ") || value.startsWith("/action ")) {
+				type = this.StatusTypes.Emote;
+			} else if (value.startsWith("/") || value.startsWith(".")) {
+				return this.InputEnd();
+			} else if (ChatRoomTargetMemberNumber !== null) {
+				type = this.StatusTypes.Whisper;
+				target = ChatRoomTargetMemberNumber;
+			}
+			if (this.InputTimeout !== null) {
+				clearTimeout(this.InputTimeout);
+			}
+			this.InputTimeout = (setTimeout as (handler: TimerHandler, timeout?: number) => number)(this.InputEnd.bind(this), this.InputTimeoutMs);
+			this.SetStatus(type, target);
+		} else {
+			this.InputEnd();
+		}
+	}
+
+	InputEnd() {
+		if (this.InputTimeout !== null) {
+			clearTimeout(this.InputTimeout);
+			this.InputTimeout = null;
+		}
+		this.SetStatus(this.StatusTypes.None);
+	}
+}
+
+export let ChatroomSM: ChatRoomStatusManager;
 
 export function init_chatroom() {
 	hiddenMessageHandlers.set("hello", (sender, message: any) => {
@@ -95,7 +174,7 @@ export function init_chatroom() {
 				DrawImageEx(icon_PurpleHeart, CharX + 375 * Zoom, CharY, {
 					Width: 50 * Zoom,
 					Height: 50 * Zoom,
-					Alpha:  C.ID === 0 || Friend ? 1 : 0.5
+					Alpha: C.ID === 0 || Friend ? 1 : 0.5
 				});
 			} else if (Friend) {
 				DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {
@@ -103,8 +182,59 @@ export function init_chatroom() {
 					Height: 50 * Zoom
 				});
 			}
+
+			switch (C.ID === 0 ? ChatroomSM.Status : C.Status) {
+				case ChatroomSM.StatusTypes.Typing:
+					DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom
+					});
+					break;
+				case ChatroomSM.StatusTypes.Whisper:
+					DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom,
+						Alpha: 0.5
+					});
+					break;
+				case ChatroomSM.StatusTypes.Emote:
+					DrawImageEx(icon_Emote, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom
+					});
+					break;
+			}
 		});
 	}
+
+	ChatroomSM = new ChatRoomStatusManager();
+
+	if (document.getElementById("InputChat") != null) {
+		ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
+	}
+
+	hookFunction("ChatRoomSendChat", 0, (args, next) => {
+		next(args);
+		ChatroomSM.InputEnd();
+	});
+
+	hookFunction("ChatRoomCreateElement", 0, (args, next) => {
+		next(args);
+		ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
+	});
+
+	hookFunction("ChatRoomClearAllElements", 0, (args, next) => {
+		next(args);
+		ChatroomSM.SetInputElement(null);
+	});
+
+	hiddenMessageHandlers.set("ChatRoomStatusEvent", (src, data: any) => {
+		for (const char of ChatRoomCharacter) {
+			if (char.MemberNumber === src) {
+				char.Status = data.Target == null || data.Target === Player.MemberNumber ? data.Type : "None";
+			}
+		}
+	});
 
 	announceSelf(true);
 }

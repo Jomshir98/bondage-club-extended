@@ -136,3 +136,32 @@ export function DrawImageEx(
 	Canvas.restore();
 	return true;
 }
+
+export function isCloth(item: Item | Asset, allowCosplay: boolean = false): boolean {
+	const asset = (item as any).Asset ? (item as Item).Asset : item as Asset;
+	return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
+}
+
+export function isBind(item: Item | Asset): boolean {
+	const asset = (item as any).Asset ? (item as Item).Asset : item as Asset;
+	if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay) return false;
+	return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
+}
+
+export function j_InvisEarbuds() {
+	const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
+	if (!asset) return;
+	Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
+	Player.Appearance.push({
+		Asset: asset,
+		Color: "Default",
+		Difficulty: -100,
+		Property: {
+			Type: "Light",
+			Effect: [],
+			Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
+		}
+	});
+	CharacterRefresh(Player);
+	ChatRoomCharacterUpdate(Player);
+}

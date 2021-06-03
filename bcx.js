@@ -121,16 +121,57 @@ window.BCX_Loaded = false;
         Canvas.restore();
         return true;
     }
+    function isCloth(item, allowCosplay = false) {
+        const asset = item.Asset ? item.Asset : item;
+        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
+    }
+    function isBind(item) {
+        const asset = item.Asset ? item.Asset : item;
+        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
+            return false;
+        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
+    }
+    function j_InvisEarbuds() {
+        const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
+        if (!asset)
+            return;
+        Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
+        Player.Appearance.push({
+            Asset: asset,
+            Color: "Default",
+            Difficulty: -100,
+            Property: {
+                Type: "Light",
+                Effect: [],
+                Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
+            }
+        });
+        CharacterRefresh(Player);
+        ChatRoomCharacterUpdate(Player);
+    }
 
     const VERSION = "0.1.0";
     const FUNCTION_HASHES = {
+        AppearanceClick: ["CA4ED810", "B895612C"],
+        AppearanceRun: ["904E8E84", "791E142F"],
         AsylumEntranceCanWander: ["3F5F4041"],
+        ChatRoomCanLeave: ["B964B0B0", "7EDA9A86"],
+        ChatRoomClearAllElements: ["D1E1F8C3", "9EA1595C"],
+        ChatRoomCreateElement: ["4837C2F6", "76299AEC"],
         ChatRoomDrawCharacterOverlay: ["1E1A1B60", "10CE4173"],
+        ChatRoomDrawFriendList: ["2A9BD99D"],
         ChatRoomMessage: ["2C6E4EC3", "AA8D20E0"],
+        ChatRoomSendChat: ["39B06D87", "385B9E9C"],
         CheatImport: ["412422CC", "1ECB0CC4"],
+        DialogDrawExpressionMenu: ["071C32ED", "EEFB3D22"],
+        DialogDrawItemMenu: ["E0313EBF", "7C83D23C"],
+        DialogDrawPoseMenu: ["6145B7D7", "4B146E82"],
         ElementIsScrolledToEnd: ["064E4232", "D28B0638"],
+        ExtendedItemDraw: ["486A52DF", "AABA9073"],
+        LoginMistressItems: ["984A6AD9"],
+        LoginStableItems: ["C3F50DD1"],
         ServerAccountBeep: ["0057EF1D", "96F8C34D"],
-        ChatRoomDrawFriendList: ["2A9BD99D"]
+        SpeechGarble: ["1BC8E005", "B3A5973D"]
     };
 
     const encoder = new TextEncoder();
@@ -387,6 +428,78 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         }
         return character;
     }
+    class ChatRoomStatusManager {
+        constructor() {
+            this.InputTimeoutMs = 3000;
+            this.StatusTypes = {
+                None: "None",
+                Typing: "Typing",
+                Emote: "Emote",
+                Whisper: "Whisper",
+                // NMod
+                Action: "Action",
+                Afk: 'Afk'
+            };
+            this.InputElement = null;
+            this.InputTimeout = null;
+            this.Status = this.StatusTypes.None;
+        }
+        SetInputElement(elem) {
+            if (this.InputElement !== elem) {
+                this.InputElement = elem;
+                if (elem !== null) {
+                    elem.addEventListener("blur", this.InputEnd.bind(this));
+                    elem.addEventListener("input", this.InputChange.bind(this));
+                }
+            }
+        }
+        SetStatus(type, target = null) {
+            if (type !== this.Status) {
+                if (target !== null && this.Status === this.StatusTypes.Whisper) {
+                    this.SetStatus(this.StatusTypes.None, null);
+                }
+                this.Status = type;
+                sendHiddenMessage("ChatRoomStatusEvent", { Type: type, Target: target }, target);
+                const { NMod } = detectOtherMods();
+                if (NMod)
+                    ServerSend("ChatRoomStatusEvent", { Type: type, Target: target });
+            }
+        }
+        InputChange() {
+            var _a;
+            const value = (_a = this.InputElement) === null || _a === void 0 ? void 0 : _a.value;
+            if (typeof value === "string" && value.length > 1) {
+                let type = this.StatusTypes.Typing;
+                let target = null;
+                if (value.startsWith("*") || value.startsWith("/me ") || value.startsWith("/emote ") || value.startsWith("/action ")) {
+                    type = this.StatusTypes.Emote;
+                }
+                else if (value.startsWith("/") || value.startsWith(".")) {
+                    return this.InputEnd();
+                }
+                else if (ChatRoomTargetMemberNumber !== null) {
+                    type = this.StatusTypes.Whisper;
+                    target = ChatRoomTargetMemberNumber;
+                }
+                if (this.InputTimeout !== null) {
+                    clearTimeout(this.InputTimeout);
+                }
+                this.InputTimeout = setTimeout(this.InputEnd.bind(this), this.InputTimeoutMs);
+                this.SetStatus(type, target);
+            }
+            else {
+                this.InputEnd();
+            }
+        }
+        InputEnd() {
+            if (this.InputTimeout !== null) {
+                clearTimeout(this.InputTimeout);
+                this.InputTimeout = null;
+            }
+            this.SetStatus(this.StatusTypes.None);
+        }
+    }
+    let ChatroomSM;
     function init_chatroom() {
         hiddenMessageHandlers.set("hello", (sender, message) => {
             const char = getChatroomCharacter(sender);
@@ -455,8 +568,52 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
                         Height: 50 * Zoom
                     });
                 }
+                switch (C.ID === 0 ? ChatroomSM.Status : C.Status) {
+                    case ChatroomSM.StatusTypes.Typing:
+                        DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+                            Width: 50 * Zoom,
+                            Height: 50 * Zoom
+                        });
+                        break;
+                    case ChatroomSM.StatusTypes.Whisper:
+                        DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+                            Width: 50 * Zoom,
+                            Height: 50 * Zoom,
+                            Alpha: 0.5
+                        });
+                        break;
+                    case ChatroomSM.StatusTypes.Emote:
+                        DrawImageEx(icon_Emote, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+                            Width: 50 * Zoom,
+                            Height: 50 * Zoom
+                        });
+                        break;
+                }
             });
         }
+        ChatroomSM = new ChatRoomStatusManager();
+        if (document.getElementById("InputChat") != null) {
+            ChatroomSM.SetInputElement(document.getElementById("InputChat"));
+        }
+        hookFunction("ChatRoomSendChat", 0, (args, next) => {
+            next(args);
+            ChatroomSM.InputEnd();
+        });
+        hookFunction("ChatRoomCreateElement", 0, (args, next) => {
+            next(args);
+            ChatroomSM.SetInputElement(document.getElementById("InputChat"));
+        });
+        hookFunction("ChatRoomClearAllElements", 0, (args, next) => {
+            next(args);
+            ChatroomSM.SetInputElement(null);
+        });
+        hiddenMessageHandlers.set("ChatRoomStatusEvent", (src, data) => {
+            for (const char of ChatRoomCharacter) {
+                if (char.MemberNumber === src) {
+                    char.Status = data.Target == null || data.Target === Player.MemberNumber ? data.Type : "None";
+                }
+            }
+        });
         announceSelf(true);
     }
     function announceSelf(request = false) {
@@ -464,6 +621,346 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             version: VERSION,
             request
         });
+    }
+
+    function j_WardrobeExportSelectionClothes(includeBinds = false) {
+        if (!CharacterAppearanceSelection)
+            return "";
+        const save = CharacterAppearanceSelection.Appearance
+            .filter(a => isCloth(a, true) || (includeBinds && isBind(a)))
+            .map(WardrobeAssetBundle);
+        return LZString.compressToBase64(JSON.stringify(save));
+    }
+    function j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
+        if (typeof data !== "string" || data.length < 1)
+            return "No data";
+        try {
+            if (data[0] !== "[") {
+                const decompressed = LZString.decompressFromBase64(data);
+                if (!decompressed)
+                    return "Bad data";
+                data = decompressed;
+            }
+            data = JSON.parse(data);
+            if (!Array.isArray(data))
+                return "Bad data";
+        }
+        catch (error) {
+            console.warn(error);
+            return "Bad data";
+        }
+        const C = CharacterAppearanceSelection;
+        if (!C) {
+            return "No character";
+        }
+        if (includeBinds && !force && C.Appearance.some(a => { var _a, _b; return isBind(a) && ((_b = (_a = a.Property) === null || _a === void 0 ? void 0 : _a.Effect) === null || _b === void 0 ? void 0 : _b.includes("Lock")); })) {
+            return "Character is bound";
+        }
+        const Allow = (a) => isCloth(a, CharacterAppearanceSelection.ID === 0) || (includeBinds && isBind(a));
+        C.Appearance = C.Appearance.filter(a => !Allow(a));
+        for (const cloth of data) {
+            if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group))
+                continue;
+            const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
+            if (A != null) {
+                CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
+                const item = InventoryGet(C, cloth.Group);
+                if (cloth.Property && item) {
+                    if (item.Property == null)
+                        item.Property = {};
+                    Object.assign(item.Property, cloth.Property);
+                }
+            }
+            else {
+                console.warn(`Clothing not found: `, cloth);
+            }
+        }
+        CharacterRefresh(C);
+        return true;
+    }
+    let j_WardrobeIncludeBinds = false;
+    function init_wardrobe() {
+        const { NMod } = detectOtherMods();
+        hookFunction("AppearanceRun", 0, (args, next) => {
+            next(args);
+            if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                const Y = NMod ? 265 : 125;
+                DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
+                DrawButton(1534, Y, 207, 50, "Export", "White", "");
+                DrawButton(1768, Y, 207, 50, "Import", "White", "");
+            }
+        });
+        hookFunction("AppearanceClick", 0, (args, next) => {
+            if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                const Y = NMod ? 265 : 125;
+                // Restraints toggle
+                if (MouseIn(1457, Y, 50, 50)) {
+                    j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+                }
+                // Export
+                if (MouseIn(1534, Y, 207, 50)) {
+                    setTimeout(async () => {
+                        await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
+                        CharacterAppearanceWardrobeText = "Copied to clipboard!";
+                    }, 0);
+                    return;
+                }
+                // Import
+                if (MouseIn(1768, Y, 207, 50)) {
+                    setTimeout(async () => {
+                        if (typeof navigator.clipboard.readText !== "function") {
+                            CharacterAppearanceWardrobeText = "Please press Ctrl+V";
+                            return;
+                        }
+                        const data = await navigator.clipboard.readText();
+                        const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+                        CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+                    }, 0);
+                    return;
+                }
+            }
+            next(args);
+        });
+        document.addEventListener("paste", ev => {
+            if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+                const data = (ev.clipboardData || window.clipboardData).getData("text");
+                const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+                CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+            }
+        });
+    }
+
+    let allowMode = false;
+    let developmentMode = false;
+    let antigarble = 0;
+    class ConsoleInterface {
+        get isAllow() {
+            return allowMode;
+        }
+        Allow(allow) {
+            if (typeof allow !== "boolean") {
+                return false;
+            }
+            if (allowMode === allow)
+                return true;
+            allowMode = allow;
+            if (allow) {
+                console.warn("Cheats enabled; please be careful not to break things");
+            }
+            else {
+                this.Devel(false);
+                console.info("Cheats disabled");
+            }
+            return true;
+        }
+        get isDevel() {
+            return developmentMode;
+        }
+        Devel(devel) {
+            if (typeof devel !== "boolean") {
+                return false;
+            }
+            if (developmentMode === devel)
+                return true;
+            if (devel) {
+                if (!this.Allow(true))
+                    return false;
+                AssetGroup.forEach(G => G.Description = G.Name);
+                Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
+                BackgroundSelectionAll.forEach(B => {
+                    B.Description = B.Name;
+                    B.Low = B.Description.toLowerCase();
+                });
+                console.warn("Developer mode enabled");
+            }
+            else {
+                AssetLoadDescription("Female3DCG");
+                BackgroundSelectionAll.forEach(B => {
+                    B.Description = DialogFindPlayer(B.Name);
+                    B.Low = B.Description.toLowerCase();
+                });
+                console.info("Developer mode disabled");
+            }
+            developmentMode = devel;
+            return true;
+        }
+        get antigarble() {
+            return antigarble;
+        }
+        set antigarble(value) {
+            if (![0, 1, 2].includes(value)) {
+                throw new Error("Bad antigarble value, expected 0/1/2");
+            }
+            antigarble = value;
+        }
+        j_WardrobeExportSelectionClothes(includeBinds = false) {
+            return j_WardrobeExportSelectionClothes(includeBinds);
+        }
+        j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
+            return j_WardrobeImportSelectionClothes(data, includeBinds, force);
+        }
+        j_InvisEarbuds() {
+            return j_InvisEarbuds();
+        }
+    }
+    const consoleInterface = Object.freeze(new ConsoleInterface());
+    function init_console() {
+        window.bcx = consoleInterface;
+        const { NMod } = detectOtherMods();
+        patchFunction("ChatRoomMessage", NMod ? {
+            "A.DynamicDescription(Source).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(Source).toLowerCase() )`,
+            "G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
+        } : {
+            "Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? Asset[A].Description : Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase() )`,
+            "AssetGroup[A].Description.toLowerCase()": `( bcx.isDevel ? AssetGroup[A].Description : AssetGroup[A].Description.toLowerCase() )`
+        });
+        patchFunction("ExtendedItemDraw", {
+            "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
+        });
+        hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+            if (developmentMode) {
+                DialogTextDefault = args[0].FocusGroup.Description;
+            }
+            return next(args);
+        });
+        patchFunction("DialogDrawPoseMenu", {
+            '"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`
+        });
+        hookFunction("DialogDrawExpressionMenu", 0, (args, next) => {
+            next(args);
+            if (developmentMode) {
+                for (let I = 0; I < DialogFacialExpressions.length; I++) {
+                    const FE = DialogFacialExpressions[I];
+                    const OffsetY = 185 + 100 * I;
+                    if (MouseIn(20, OffsetY, 90, 90)) {
+                        DrawText(JSON.stringify(FE.Group), 300, 950, "White");
+                    }
+                    if (I === DialogFacialExpressionsSelected) {
+                        for (let j = 0; j < FE.ExpressionList.length; j++) {
+                            const EOffsetX = 155 + 100 * (j % 3);
+                            const EOffsetY = 185 + 100 * Math.floor(j / 3);
+                            if (MouseIn(EOffsetX, EOffsetY, 90, 90)) {
+                                DrawText(JSON.stringify(FE.ExpressionList[j]), 300, 950, "White");
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        DialogSelfMenuOptions.forEach(opt => {
+            if (opt.Name === "Pose") {
+                opt.IsAvailable = () => true;
+                opt.Draw = DialogDrawPoseMenu;
+            }
+            else if (opt.Name === "Expression") {
+                opt.Draw = DialogDrawExpressionMenu;
+            }
+        });
+        hookFunction("SpeechGarble", 0, (args, next) => {
+            if (antigarble === 2)
+                return args[1];
+            let res = next(args);
+            if (typeof res === "string" && res !== args[1] && antigarble === 1)
+                res += ` <> ${args[1]}`;
+            return res;
+        });
+    }
+
+    const commands = new Map();
+    function registerCommand(name, callback, description = "") {
+        name = name.toLocaleLowerCase();
+        if (commands.has(name)) {
+            throw new Error(`Command "${name}" already registered!`);
+        }
+        commands.set(name, {
+            parse: false,
+            callback,
+            description
+        });
+    }
+    function registerCommandParsed(name, callback, description = "") {
+        name = name.toLocaleLowerCase();
+        if (commands.has(name)) {
+            throw new Error(`Command "${name}" already registered!`);
+        }
+        commands.set(name, {
+            parse: true,
+            callback,
+            description
+        });
+    }
+    function RunCommand(msg) {
+        const commandMatch = /^\s*(\S+)(?:\s|$)(.*)$/.exec(msg);
+        if (msg && !commandMatch) {
+            ChatRoomSendLocal("There was an error during parsing of your command");
+            return false;
+        }
+        const command = msg ? commandMatch[1].toLocaleLowerCase() : "";
+        const args = msg ? commandMatch[2] : "";
+        const commandInfo = commands.get(command);
+        if (!commandInfo) {
+            // Command not found
+            ChatRoomSendLocal(`Unknown command "${command}"\n` +
+                `To see list of valid commands whisper '!help'`, 15000);
+            return false;
+        }
+        if (commandInfo.parse) {
+            const argv = [...args.matchAll(/".+?(?:"|$)|'.+?(?:'|$)|[^ ]+/g)]
+                .map(a => a[0])
+                .map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
+            return commandInfo.callback(argv);
+        }
+        else {
+            return commandInfo.callback(args);
+        }
+    }
+    function init_commands() {
+        hookFunction("ChatRoomSendChat", 10, (args, next) => {
+            const chat = document.getElementById("InputChat");
+            if (chat) {
+                const msg = chat.value.trim();
+                if (msg.startsWith("..")) {
+                    chat.value = msg.substr(1);
+                }
+                else if (msg.startsWith(".")) {
+                    if (RunCommand(msg.substr(1))) {
+                        chat.value = "";
+                    }
+                    return;
+                }
+            }
+            return next(args);
+        });
+        const command_help = () => {
+            ChatRoomSendLocal(`Available commands:\n` +
+                Array.from(commands.entries())
+                    .filter(c => c[1].description !== null)
+                    .map(c => `.${c[0]}` + (c[1].description ? ` - ${c[1].description}` : ""))
+                    .sort()
+                    .join("\n"));
+            return true;
+        };
+        registerCommand("help", command_help, "display this help [alias: . ]");
+        registerCommand("", command_help, null);
+        const command_action = (msg) => {
+            ChatRoomActionMessage(msg);
+            return true;
+        };
+        registerCommand("action", command_action, "send custom (action) [alias: .a ]");
+        registerCommand("a", command_action, null);
+        registerCommand("antigarble", (value) => {
+            if (["0", "1", "2"].includes(value)) {
+                consoleInterface.antigarble = Number.parseInt(value, 10);
+                ChatRoomSendLocal(`Antigarble set to ${value}`);
+                return true;
+            }
+            else {
+                ChatRoomSendLocal(`Invalid antigarble level; use 0 1 or 2`);
+                return false;
+            }
+        }, "set garble prevention to show [garbled|both|ungarbled] messages (only affects received messages!)");
     }
 
     function init_miscPatches() {
@@ -474,6 +971,20 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             const element = document.getElementById(args[0]);
             return element != null && element.scrollHeight - element.scrollTop - element.clientHeight <= 1;
         });
+        const { NMod } = detectOtherMods();
+        if (!NMod) {
+            patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
+            patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
+        }
+        if (Player.Inventory.length > 0) {
+            LoginMistressItems();
+            LoginStableItems();
+            ServerPlayerInventorySync();
+        }
+        // Cheats
+        const o_Player_CanChange = Player.CanChange;
+        Player.CanChange = () => allowMode || o_Player_CanChange.call(Player);
+        hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
     }
 
     function init() {
@@ -482,7 +993,40 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         DrawScreen = "";
         init_messaging();
         init_chatroom();
+        init_wardrobe();
+        init_commands();
+        init_console();
         init_miscPatches();
+        //#region Other mod compatability
+        const { NMod, BondageClubTools } = detectOtherMods();
+        if (NMod) {
+            console.warn("BCX: NMod load!");
+            window.ChatRoomSM = ChatroomSM;
+            ServerSocket.on("ChatRoomMessageSync", () => {
+                announceSelf(true);
+            });
+        }
+        if (BondageClubTools) {
+            console.warn("BCX: Bondage Club Tools detected!");
+            const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
+            const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
+            console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
+            ServerSocket.off("ChatRoomMessage");
+            ServerSocket.on("ChatRoomMessage", data => {
+                if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "JModMsg" || typeof data.Sender !== "number") {
+                    ChatRoomMessageForwarder(data);
+                }
+                return ChatRoomMessage(data);
+            });
+            ServerSocket.off("AccountBeep");
+            ServerSocket.on("AccountBeep", data => {
+                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
+                    AccountBeepForwarder(data);
+                }
+                return ServerAccountBeep(data);
+            });
+        }
+        //#endregion
         window.BCX_Loaded = true;
         InfoBeep(`BCX loaded! Version: ${VERSION}`);
     }

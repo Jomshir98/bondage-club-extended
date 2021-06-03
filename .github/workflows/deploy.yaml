@@ -20,11 +20,8 @@ jobs:
 
     - run: yarn test
 
-    - run: ls -lA ./dist
-
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.3
       with:
         branch: gh-pages
         folder: dist
-        single-commit: true

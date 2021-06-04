@@ -18,6 +18,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ElementIsScrolledToEnd: ["064E4232", "D28B0638"],
 	ExtendedItemDraw: ["486A52DF", "AABA9073"],
 	LoginMistressItems: ["984A6AD9"],
+	LoginResponse: ["16C2C651"],
 	LoginStableItems: ["C3F50DD1"],
 	ServerAccountBeep: ["0057EF1D", "96F8C34D"],
 	SpeechGarble: ["1BC8E005", "B3A5973D"]

@@ -6,6 +6,24 @@ import { init_console } from "./console";
 import { init_messaging } from "./messaging";
 import { init_miscPatches } from "./miscPatches";
 import { init_wardrobe } from "./wardrobe";
+import { hookFunction } from "./patching";
+
+async function initWait() {
+	if (CurrentScreen == null || CurrentScreen === "Login") {
+		InfoBeep(`BCX Ready!`);
+		hookFunction("LoginResponse", 0, (args, next) => {
+			next(args);
+			loginInit(args[0]);
+		});
+	} else {
+		init();
+	}
+}
+
+function loginInit(C: any) {
+	if (window.BCX_Loaded) return;
+	init();
+}
 
 function init() {
 	// Loading into already loaded club - clear some caches
@@ -57,4 +75,4 @@ function init() {
 	InfoBeep(`BCX loaded! Version: ${VERSION}`);
 }
 
-init();
+initWait();

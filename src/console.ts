@@ -1,7 +1,7 @@
 import { detectOtherMods } from "./clubUtils";
 import { hookFunction, patchFunction } from "./patching";
 import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } from "./wardrobe";
-import { j_InvisEarbuds } from "./clubUtils";
+import { InvisibilityEarbuds } from "./clubUtils";
 
 export let allowMode: boolean = false;
 export let developmentMode: boolean = false;
@@ -12,12 +12,15 @@ class ConsoleInterface {
 		return allowMode;
 	}
 
-	Allow(allow: boolean) {
-		if (typeof allow !== "boolean") {
+	AllowCheats(allow?: boolean) {
+		if (typeof allow !== "boolean" && allow !== undefined) {
 			return false;
 		}
 		if (allowMode === allow)
 			return true;
+		if (allow === undefined) {
+			allow = !allowMode;
+		}
 		allowMode = allow;
 		if (allow) {
 			console.warn("Cheats enabled; please be careful not to break things");
@@ -32,14 +35,20 @@ class ConsoleInterface {
 		return developmentMode;
 	}
 
-	Devel(devel: boolean) {
-		if (typeof devel !== "boolean") {
+	Devel(devel?: boolean) {
+		if (typeof devel !== "boolean" && devel !== undefined) {
 			return false;
 		}
 		if (developmentMode === devel)
 			return true;
+		if (devel === undefined) {
+			devel = !developmentMode;
+		}
 		if (devel) {
-			if (!this.Allow(true)) return false;
+			if (!this.AllowCheats(true)) {
+				console.info("To use developer mode, cheats must be enabled first!");
+				return false;
+			}
 			AssetGroup.forEach(G => G.Description = G.Name);
 			Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
 			BackgroundSelectionAll.forEach(B => {
@@ -78,8 +87,8 @@ class ConsoleInterface {
 		return j_WardrobeImportSelectionClothes(data, includeBinds, force);
 	}
 
-	j_InvisEarbuds(): void {
-		return j_InvisEarbuds();
+	ToggleInvisibilityEarbuds(): void {
+		return InvisibilityEarbuds();
 	}
 }
 

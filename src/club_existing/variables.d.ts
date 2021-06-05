@@ -77,6 +77,7 @@ declare function WardrobeAssetBundle(A: Item): ItemBundle;
 
 // Inventory.js
 declare function InventoryGet(C: Character, AssetGroup: string): Item;
+declare function InventoryRemove(C: Character, AssetGroup: string, Refresh?: boolean): void;
 
 // Mouse.js
 declare function MouseIn(Left: number, Top: number, Width: number, Height: number): boolean;

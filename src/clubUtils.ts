@@ -148,20 +148,24 @@ export function isBind(item: Item | Asset): boolean {
 	return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
 }
 
-export function j_InvisEarbuds() {
-	const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
-	if (!asset) return;
-	Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
-	Player.Appearance.push({
-		Asset: asset,
-		Color: "Default",
-		Difficulty: -100,
-		Property: {
-			Type: "Light",
-			Effect: [],
-			Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
-		}
-	});
-	CharacterRefresh(Player);
+export function InvisibilityEarbuds() {
+	if (InventoryGet(Player, "ItemEars")?.Asset.Name === "BluetoothEarbuds") {
+		InventoryRemove(Player, "ItemEars");
+	} else {
+		const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
+		if (!asset) return;
+		Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
+		Player.Appearance.push({
+			Asset: asset,
+			Color: "Default",
+			Difficulty: -100,
+			Property: {
+				Type: "Light",
+				Effect: [],
+				Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
+			}
+		});
+		CharacterRefresh(Player);
+	}
 	ChatRoomCharacterUpdate(Player);
 }

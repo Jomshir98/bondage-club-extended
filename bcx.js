@@ -175,6 +175,7 @@ window.BCX_Loaded = false;
         ElementIsScrolledToEnd: ["064E4232", "D28B0638"],
         ExtendedItemDraw: ["486A52DF", "AABA9073"],
         LoginMistressItems: ["984A6AD9"],
+        LoginResponse: ["16C2C651"],
         LoginStableItems: ["C3F50DD1"],
         ServerAccountBeep: ["0057EF1D", "96F8C34D"],
         SpeechGarble: ["1BC8E005", "B3A5973D"]
@@ -1001,6 +1002,23 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
     }
 
+    async function initWait() {
+        if (CurrentScreen == null || CurrentScreen === "Login") {
+            InfoBeep(`BCX Ready!`);
+            hookFunction("LoginResponse", 0, (args, next) => {
+                next(args);
+                loginInit(args[0]);
+            });
+        }
+        else {
+            init();
+        }
+    }
+    function loginInit(C) {
+        if (window.BCX_Loaded)
+            return;
+        init();
+    }
     function init() {
         // Loading into already loaded club - clear some caches
         DrawRunMap.clear();
@@ -1044,7 +1062,7 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         window.BCX_Loaded = true;
         InfoBeep(`BCX loaded! Version: ${VERSION}`);
     }
-    init();
+    initWait();
 
 }());
 //# sourceMappingURL=bcx.js.map

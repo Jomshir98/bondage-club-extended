@@ -21,7 +21,7 @@ The extension is very modular and highly customizable. The following modules are
 8. Rules - your dommes can create and set rules for you that will be monitored by the extension
 9. Speech - any actions, restrictions and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk
 10. Punishment - automatic punishments can be set by the dommes for breaking any of your rules
-11. Miscellaneous - other nifty features such as restrained wardrobe access, mistress items, or a chat typing indicator on other BCX users
+11. Miscellaneous - other nifty features such as wardrobe outfit import/export (incl. restraints), bound wardrobe access, or a chat typing indicator on other BCX users
 
 # Running the script
 
@@ -34,4 +34,4 @@ Associated Discord server:
 
 [![Discord image](https://discordapp.com/api/guilds/842082194209112074/widget.png?style=banner1)](https://discord.gg/SHJMjEh9VH)
 
-**THIS PAGE WAS LAST EDITED ON 03-06-2021**
+**THIS PAGE WAS LAST EDITED ON 05-06-2021**

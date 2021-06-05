@@ -131,22 +131,28 @@ window.BCX_Loaded = false;
             return false;
         return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
     }
-    function j_InvisEarbuds() {
-        const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
-        if (!asset)
-            return;
-        Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
-        Player.Appearance.push({
-            Asset: asset,
-            Color: "Default",
-            Difficulty: -100,
-            Property: {
-                Type: "Light",
-                Effect: [],
-                Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
-            }
-        });
-        CharacterRefresh(Player);
+    function InvisibilityEarbuds() {
+        var _a;
+        if (((_a = InventoryGet(Player, "ItemEars")) === null || _a === void 0 ? void 0 : _a.Asset.Name) === "BluetoothEarbuds") {
+            InventoryRemove(Player, "ItemEars");
+        }
+        else {
+            const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
+            if (!asset)
+                return;
+            Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
+            Player.Appearance.push({
+                Asset: asset,
+                Color: "Default",
+                Difficulty: -100,
+                Property: {
+                    Type: "Light",
+                    Effect: [],
+                    Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
+                }
+            });
+            CharacterRefresh(Player);
+        }
         ChatRoomCharacterUpdate(Player);
     }
 
@@ -739,12 +745,15 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         get isAllow() {
             return allowMode;
         }
-        Allow(allow) {
-            if (typeof allow !== "boolean") {
+        AllowCheats(allow) {
+            if (typeof allow !== "boolean" && allow !== undefined) {
                 return false;
             }
             if (allowMode === allow)
                 return true;
+            if (allow === undefined) {
+                allow = !allowMode;
+            }
             allowMode = allow;
             if (allow) {
                 console.warn("Cheats enabled; please be careful not to break things");
@@ -759,14 +768,19 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             return developmentMode;
         }
         Devel(devel) {
-            if (typeof devel !== "boolean") {
+            if (typeof devel !== "boolean" && devel !== undefined) {
                 return false;
             }
             if (developmentMode === devel)
                 return true;
+            if (devel === undefined) {
+                devel = !developmentMode;
+            }
             if (devel) {
-                if (!this.Allow(true))
+                if (!this.AllowCheats(true)) {
+                    console.info("To use developer mode, cheats must be enabled first!");
                     return false;
+                }
                 AssetGroup.forEach(G => G.Description = G.Name);
                 Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
                 BackgroundSelectionAll.forEach(B => {
@@ -801,8 +815,8 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
             return j_WardrobeImportSelectionClothes(data, includeBinds, force);
         }
-        j_InvisEarbuds() {
-            return j_InvisEarbuds();
+        ToggleInvisibilityEarbuds() {
+            return InvisibilityEarbuds();
         }
     }
     const consoleInterface = Object.freeze(new ConsoleInterface());

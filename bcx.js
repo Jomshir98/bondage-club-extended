@@ -212,6 +212,16 @@ window.BCX_Loaded = false;
     function isObject(obj) {
         return !!obj && typeof obj === "object" && !Array.isArray(obj);
     }
+    function longestCommonPrefix(strings) {
+        if (strings.length === 0)
+            return "";
+        strings = strings.slice().sort();
+        let i = 0;
+        while (i < strings[0].length && strings[0][i] === strings[strings.length - 1][i]) {
+            i++;
+        }
+        return strings[0].substring(0, i);
+    }
     const clipboardAvailable = Boolean(navigator.clipboard);
 
     const patchedFunctions = new Map();
@@ -884,7 +894,7 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
     }
 
     const commands = new Map();
-    function registerCommand(name, callback, description = "") {
+    function registerCommand(name, description, callback, autocomplete = null) {
         name = name.toLocaleLowerCase();
         if (commands.has(name)) {
             throw new Error(`Command "${name}" already registered!`);
@@ -892,10 +902,11 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         commands.set(name, {
             parse: false,
             callback,
+            autocomplete,
             description
         });
     }
-    function registerCommandParsed(name, callback, description = "") {
+    function registerCommandParsed(name, description, callback, autocomplete = null) {
         name = name.toLocaleLowerCase();
         if (commands.has(name)) {
             throw new Error(`Command "${name}" already registered!`);
@@ -903,17 +914,41 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         commands.set(name, {
             parse: true,
             callback,
+            autocomplete,
             description
         });
     }
-    function RunCommand(msg) {
-        const commandMatch = /^\s*(\S+)(?:\s|$)(.*)$/.exec(msg);
-        if (msg && !commandMatch) {
-            ChatRoomSendLocal("There was an error during parsing of your command");
-            return false;
+    function CommandParse(msg) {
+        msg = msg.trimStart();
+        const commandMatch = /^(\S+)(?:\s|$)(.*)$/.exec(msg);
+        if (!commandMatch) {
+            return ["", ""];
         }
-        const command = msg ? commandMatch[1].toLocaleLowerCase() : "";
-        const args = msg ? commandMatch[2] : "";
+        return [(commandMatch[1] || "").toLocaleLowerCase(), commandMatch[2]];
+    }
+    function CommandParseArguments(args) {
+        return [...args.matchAll(/".*?(?:"|$)|'.*?(?:'|$)|[^ ]+/g)]
+            .map(a => a[0])
+            .map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
+    }
+    function CommandHasEmptyArgument(args) {
+        const argv = CommandParseArguments(args);
+        return argv.length === 0 || !args.endsWith(argv[argv.length - 1]);
+    }
+    function CommandQuoteArgument(arg) {
+        if (arg.startsWith(`"`)) {
+            return `'${arg}'`;
+        }
+        else if (arg.startsWith(`'`)) {
+            return `"${arg}"`;
+        }
+        else if (arg.includes(" ")) {
+            return arg.includes('"') ? `'${arg}'` : `"${arg}"`;
+        }
+        return arg;
+    }
+    function RunCommand(msg) {
+        const [command, args] = CommandParse(msg);
         const commandInfo = commands.get(command);
         if (!commandInfo) {
             // Command not found
@@ -922,14 +957,57 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             return false;
         }
         if (commandInfo.parse) {
-            const argv = [...args.matchAll(/".+?(?:"|$)|'.+?(?:'|$)|[^ ]+/g)]
-                .map(a => a[0])
-                .map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
-            return commandInfo.callback(argv);
+            return commandInfo.callback(CommandParseArguments(args));
         }
         else {
             return commandInfo.callback(args);
         }
+    }
+    function CommandAutocomplete(msg) {
+        msg = msg.trimStart();
+        const [command, args] = CommandParse(msg);
+        if (msg.length === command.length) {
+            const prefixes = Array.from(commands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
+            if (prefixes.length === 0)
+                return msg;
+            const best = longestCommonPrefix(prefixes);
+            if (best === msg) {
+                ChatRoomSendLocal(prefixes.slice().sort().join("\n"), 10000);
+            }
+            return best;
+        }
+        const commandInfo = commands.get(command);
+        if (commandInfo && commandInfo.autocomplete) {
+            if (commandInfo.parse) {
+                const argv = CommandParseArguments(args);
+                if (CommandHasEmptyArgument(args)) {
+                    argv.push("");
+                }
+                const lastOptions = commandInfo.autocomplete(argv);
+                if (lastOptions.length > 0) {
+                    const best = longestCommonPrefix(lastOptions);
+                    if (best === argv[argv.length - 1]) {
+                        ChatRoomSendLocal(lastOptions.slice().sort().join("\n"), 10000);
+                    }
+                    argv[argv.length - 1] = best;
+                }
+                return `${command} ` +
+                    argv.map(CommandQuoteArgument).join(" ") +
+                    (lastOptions.length === 1 ? " " : "");
+            }
+            else {
+                const possibleArgs = commandInfo.autocomplete(args);
+                if (possibleArgs.length === 0) {
+                    return msg;
+                }
+                const best = longestCommonPrefix(possibleArgs);
+                if (best === args) {
+                    ChatRoomSendLocal(possibleArgs.slice().sort().join("\n"), 10000);
+                }
+                return `${command} ${best}`;
+            }
+        }
+        return "";
     }
     function init_commands() {
         hookFunction("ChatRoomSendChat", 10, (args, next) => {
@@ -948,34 +1026,57 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             }
             return next(args);
         });
+        hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+            const chat = document.getElementById("InputChat");
+            // Tab for command completion
+            if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..")) {
+                event === null || event === void 0 ? void 0 : event.preventDefault();
+                chat.value = "." + CommandAutocomplete(chat.value.substr(1));
+            }
+            else {
+                return next(args);
+            }
+        });
         const command_help = () => {
             ChatRoomSendLocal(`Available commands:\n` +
                 Array.from(commands.entries())
                     .filter(c => c[1].description !== null)
-                    .map(c => `.${c[0]}` + (c[1].description ? ` - ${c[1].description}` : ""))
+                    .map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
                     .sort()
                     .join("\n"));
             return true;
         };
-        registerCommand("help", command_help, "display this help [alias: . ]");
-        registerCommand("", command_help, null);
+        registerCommand("help", "- display this help [alias: . ]", command_help);
+        registerCommand("", null, command_help);
         const command_action = (msg) => {
             ChatRoomActionMessage(msg);
             return true;
         };
-        registerCommand("action", command_action, "send custom (action) [alias: .a ]");
-        registerCommand("a", command_action, null);
-        registerCommand("antigarble", (value) => {
-            if (["0", "1", "2"].includes(value)) {
-                consoleInterface.antigarble = Number.parseInt(value, 10);
-                ChatRoomSendLocal(`Antigarble set to ${value}`);
+        registerCommand("action", "- send custom (action) [alias: .a ]", command_action);
+        registerCommand("a", null, command_action);
+        const ANTIGARBLE_LEVELS = {
+            "0": 0,
+            "1": 1,
+            "2": 2,
+            "normal": 0,
+            "both": 1,
+            "ungarbled": 2
+        };
+        const ANTIGARBLE_LEVEL_NAMES = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
+        registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
+            const val = ANTIGARBLE_LEVELS[value || ""];
+            if (val !== undefined) {
+                consoleInterface.antigarble = val;
+                ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
                 return true;
             }
             else {
-                ChatRoomSendLocal(`Invalid antigarble level; use 0 1 or 2`);
+                ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
                 return false;
             }
-        }, "set garble prevention to show [garbled|both|ungarbled] messages (only affects received messages!)");
+        }, value => {
+            return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
+        });
     }
 
     function init_miscPatches() {

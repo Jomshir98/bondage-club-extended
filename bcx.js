@@ -502,7 +502,7 @@ window.BCX_Loaded = false;
                 const lastOptions = commandInfo.autocomplete(argv);
                 if (lastOptions.length > 0) {
                     const best = longestCommonPrefix(lastOptions);
-                    if (best === argv[argv.length - 1]) {
+                    if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
                         ChatRoomSendLocal(lastOptions.slice().sort().join("\n"), 10000);
                     }
                     argv[argv.length - 1] = best;
@@ -517,7 +517,7 @@ window.BCX_Loaded = false;
                     return msg;
                 }
                 const best = longestCommonPrefix(possibleArgs);
-                if (best === args) {
+                if (possibleArgs.length > 1 && best === args) {
                     ChatRoomSendLocal(possibleArgs.slice().sort().join("\n"), 10000);
                 }
                 return `${command} ${best}`;

@@ -4,9 +4,21 @@ import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { hookFunction, patchFunction } from "./patching";
 import { icon_Emote, icon_PurpleHeart, icon_Typing } from "./resources";
 
-class ChatroomCharacter {
+export class ChatroomCharacter {
 	BCXVersion: string | null = null;
 	Character: Character;
+
+	get MemberNumber(): number | null {
+		return this.Character.MemberNumber ?? null;
+	}
+
+	get Name(): string {
+		return this.Character.Name;
+	}
+
+	toString(): string {
+		return `${this.Name} (${this.MemberNumber})`;
+	}
 
 	constructor(character: Character) {
 		this.Character = character;
@@ -31,6 +43,10 @@ function getChatroomCharacter(memberNumber: number): ChatroomCharacter | null {
 		currentRoomCharacters.push(character);
 	}
 	return character;
+}
+
+export function getAllCharactersInRoom(): ChatroomCharacter[] {
+	return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber!)).filter(Boolean) as ChatroomCharacter[];
 }
 
 class ChatRoomStatusManager {

@@ -47,4 +47,9 @@ export function longestCommonPrefix(strings: string[]): string {
 	return strings[0].substring(0, i);
 }
 
+export function arrayUnique<T>(arr: T[]): T[] {
+	const seen = new Set<T>();
+	return arr.filter(i => !seen.has(i) && seen.add(i));
+}
+
 export const clipboardAvailable = Boolean(navigator.clipboard);

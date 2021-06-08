@@ -1,5 +1,5 @@
 import { announceSelf, ChatroomSM, init_chatroom } from "./chatroom";
-import { detectOtherMods, InfoBeep } from "./clubUtils";
+import { detectOtherMods, InfoBeep, init_clubUtils } from "./clubUtils";
 import { VERSION } from "./config";
 import { init_commands } from "./commands";
 import { init_console } from "./console";
@@ -35,6 +35,7 @@ function init() {
 	init_wardrobe();
 	init_commands();
 	init_console();
+	init_clubUtils();
 	init_miscPatches();
 
 	//#region Other mod compatability

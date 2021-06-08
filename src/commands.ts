@@ -1,7 +1,8 @@
-import { ChatRoomActionMessage, ChatRoomSendLocal } from "./clubUtils";
+import { ChatRoomActionMessage, ChatRoomSendLocal, isBind } from "./clubUtils";
+import { ChatroomCharacter, getAllCharactersInRoom } from "./chatroom";
 import { hookFunction } from "./patching";
 import { consoleInterface } from "./console";
-import { longestCommonPrefix } from "./utils";
+import { arrayUnique, longestCommonPrefix } from "./utils";
 
 interface ICommandInfo {
 	description: string | null;
@@ -150,6 +151,74 @@ function CommandAutocomplete(msg: string): string {
 	}
 
 	return "";
+}
+
+export function Command_selectCharacter(selector: string): ChatroomCharacter | string {
+	const characters = getAllCharactersInRoom();
+	if (/^[0-9]+$/.test(selector)) {
+		const MemberNumber = Number.parseInt(selector, 10);
+		const target = characters.find(c => c.MemberNumber === MemberNumber);
+		if (!target) {
+			return `Player #${MemberNumber} not found in the room.`;
+		}
+		return target;
+	}
+	let targets = characters.filter(c => c.Name === selector);
+	if (targets.length === 0)
+		targets = characters.filter(c => c.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+
+	if (targets.length === 1) {
+		return targets[0];
+	} else if (targets.length === 0) {
+		return `Player "${selector}" not found in the room.`;
+	} else {
+		return `Multiple players match "${selector}". Please use Member Number instead.`;
+	}
+}
+
+export function Command_selectCharacterAutocomplete(selector: string): string[] {
+	const characters = getAllCharactersInRoom();
+	if (/^[0-9]+$/.test(selector)) {
+		return characters.map(c => c.MemberNumber?.toString(10)).filter(n => n != null && n.startsWith(selector)) as string[];
+	}
+	return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+}
+
+export function Command_selectWornItem(character: ChatroomCharacter, selector: string): Item | string {
+	const items = character.Character.Appearance.filter(isBind);
+	let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+	if (targets.length === 0)
+		targets = items.filter(A => A.Asset.Group.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
+	if (targets.length === 0)
+		targets = items.filter(A => A.Asset.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+	if (targets.length === 0)
+		targets = items.filter(A => A.Asset.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
+
+	if (targets.length === 1) {
+		return targets[0];
+	} else if (targets.length === 0) {
+		return `Item "${selector}" not found on character ${character}.`;
+	} else {
+		return `Multiple items match, please use group name instead. (eg. arms)`;
+	}
+}
+
+export function Command_selectWornItemAutocomplete(character: ChatroomCharacter, selector: string): string[] {
+	const items = character.Character.Appearance.filter(isBind);
+
+	let possible = arrayUnique(
+		items.map(A => A.Asset.Group.Description)
+			.concat(items.map(A => A.Asset.Description))
+	).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+
+	if (possible.length === 0) {
+		possible = arrayUnique(
+			items.map(A => A.Asset.Group.Name)
+				.concat(items.map(A => A.Asset.Name))
+		).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+	}
+
+	return possible;
 }
 
 export function init_commands() {

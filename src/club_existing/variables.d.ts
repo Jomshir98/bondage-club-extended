@@ -19,6 +19,7 @@ declare var CurrentTime: number;
 // Common.js
 declare const Player: PlayerCharacter;
 declare var CurrentScreen: string;
+declare var KeyPress: number | string;
 
 // Character.js
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;

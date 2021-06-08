@@ -36,4 +36,15 @@ export function isObject(obj: unknown): obj is Record<string, any> {
 	return !!obj && typeof obj === "object" && !Array.isArray(obj);
 }
 
+export function longestCommonPrefix(strings: string[]): string {
+	if (strings.length === 0) return "";
+
+	strings = strings.slice().sort();
+	let i = 0;
+	while (i < strings[0].length && strings[0][i] === strings[strings.length - 1][i]) {
+		i++;
+	}
+	return strings[0].substring(0, i);
+}
+
 export const clipboardAvailable = Boolean(navigator.clipboard);

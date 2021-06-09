@@ -218,4 +218,40 @@ export function init_clubUtils(): void {
 			return [];
 		}
 	);
+	registerCommandParsed("allowactivities", "<charcater> <item> - Modifies item to not block activities",
+		(argv) => {
+			if (argv.length !== 2) {
+				ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);
+				return false;
+			}
+			const char = Command_selectCharacter(argv[0]);
+			if (typeof char === "string") {
+				ChatRoomSendLocal(char);
+				return false;
+			}
+			const item = Command_selectWornItem(char, argv[1]);
+			if (typeof item === "string") {
+				ChatRoomSendLocal(item);
+				return false;
+			}
+			if (!item.Property) {
+				item.Property = {};
+			}
+			item.Property.AllowActivityOn = AssetGroup.map(A => A.Name);
+			CharacterRefresh(char.Character);
+			ChatRoomCharacterUpdate(char.Character);
+			return true;
+		},
+		(argv) => {
+			if (argv.length === 1) {
+				return Command_selectCharacterAutocomplete(argv[0]);
+			} else if (argv.length === 2) {
+				const source = Command_selectCharacter(argv[0]);
+				if (typeof source !== "string") {
+					return Command_selectWornItemAutocomplete(source, argv[1]);
+				}
+			}
+			return [];
+		}
+	);
 }

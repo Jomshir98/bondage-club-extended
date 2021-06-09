@@ -218,7 +218,7 @@ export function init_clubUtils(): void {
 			return [];
 		}
 	);
-	registerCommandParsed("allowactivities", "<charcater> <item> - Modifies item to not block activities",
+	registerCommandParsed("allowactivities", "<character> <item> - Modifies item to not block activities",
 		(argv) => {
 			if (argv.length !== 2) {
 				ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);

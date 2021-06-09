@@ -842,7 +842,7 @@ window.BCX_Loaded = false;
             }
             return [];
         });
-        registerCommandParsed("allowactivities", "<charcater> <item> - Modifies item to not block activities", (argv) => {
+        registerCommandParsed("allowactivities", "<character> <item> - Modifies item to not block activities", (argv) => {
             if (argv.length !== 2) {
                 ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);
                 return false;

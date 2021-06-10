@@ -16,7 +16,7 @@ function sendVersionCheckBeep(): void {
 	}, VERSION_CHECK_BOT, true);
 
 	// Set check retry timer to 5 minutes
-	nextCheckTimer = setTimeout(sendVersionCheckBeep, 5 * 60_000) as any as number;
+	nextCheckTimer = setTimeout(sendVersionCheckBeep, 5 * 60_000);
 }
 
 export function init_versionCheck(): void {
@@ -34,7 +34,7 @@ export function init_versionCheck(): void {
 		if (nextCheckTimer !== null) {
 			clearTimeout(nextCheckTimer);
 		}
-		nextCheckTimer = setTimeout(sendVersionCheckBeep, 15 * 60_000) as any as number;
+		nextCheckTimer = setTimeout(sendVersionCheckBeep, 15 * 60_000);
 
 		if (message.status === "current") {
 			return;

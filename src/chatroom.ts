@@ -110,7 +110,7 @@ class ChatRoomStatusManager {
 			if (this.InputTimeout !== null) {
 				clearTimeout(this.InputTimeout);
 			}
-			this.InputTimeout = (setTimeout as (handler: TimerHandler, timeout?: number) => number)(this.InputEnd.bind(this), this.InputTimeoutMs);
+			this.InputTimeout = setTimeout(this.InputEnd.bind(this), this.InputTimeoutMs);
 			this.SetStatus(type, target);
 		} else {
 			this.InputEnd();

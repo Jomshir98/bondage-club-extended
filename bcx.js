@@ -1260,6 +1260,42 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
     }
 
+    let modStorage = {};
+    function modStorageSync() {
+        if (!Player.OnlineSettings) {
+            console.error("BCX: Player OnlineSettings not defined during storage sync!");
+            return;
+        }
+        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
+        if (typeof ServerAccountUpdate !== "undefined") {
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+        }
+        else {
+            console.debug("BCX: Old sync method");
+            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+        }
+    }
+    function init_storage() {
+        var _a;
+        const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+        if (typeof saved === "string") {
+            try {
+                const storage = JSON.parse(LZString.decompressFromBase64(saved));
+                if (!isObject(storage)) {
+                    throw new Error("Bad data");
+                }
+                modStorage = storage;
+            }
+            catch (error) {
+                console.error("BCX: Error while loading saved data, full reset.", error);
+            }
+        }
+        else {
+            console.log("BCX: First time init");
+        }
+        modStorageSync();
+    }
+
     let nextCheckTimer = null;
     function sendVersionCheckBeep() {
         if (nextCheckTimer !== null) {
@@ -1328,6 +1364,7 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         // Loading into already loaded club - clear some caches
         DrawRunMap.clear();
         DrawScreen = "";
+        init_storage();
         init_messaging();
         init_chatroom();
         init_wardrobe();

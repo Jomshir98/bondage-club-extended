@@ -7,6 +7,7 @@ import { init_messaging } from "./messaging";
 import { init_miscPatches } from "./miscPatches";
 import { init_wardrobe } from "./wardrobe";
 import { hookFunction } from "./patching";
+import { init_storage } from "./storage";
 import { init_versionCheck } from "./versionCheck";
 
 async function initWait() {
@@ -30,6 +31,8 @@ function init() {
 	// Loading into already loaded club - clear some caches
 	DrawRunMap.clear();
 	DrawScreen = "";
+
+	init_storage();
 
 	init_messaging();
 	init_chatroom();

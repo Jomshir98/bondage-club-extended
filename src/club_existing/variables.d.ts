@@ -62,6 +62,7 @@ declare var ServerBeep: {
 	Message?: string;
 };
 declare var ServerSocket: import("socket.io-client").Socket;
+declare var ServerAccountUpdate: any;
 declare function ServerPlayerIsInChatRoom(): boolean;
 declare function ServerSend(Message: string, Data: any): void;
 declare function ServerAppearanceBundle(Appearance: Item[]): AppearanceBundle;

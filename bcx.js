@@ -13,6 +13,7 @@ window.BCX_Loaded = false;
     'use strict';
 
     const VERSION = "0.1.0";
+    const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         AppearanceClick: ["CA4ED810", "B895612C"],
         AppearanceRun: ["904E8E84", "791E142F"],
@@ -926,10 +927,10 @@ window.BCX_Loaded = false;
         hookFunction("ServerAccountBeep", 10, (args, next) => {
             var _a;
             const data = args[0];
-            if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"] && isObject((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
+            if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
                 const { type, message } = data.Message.BCX;
                 if (typeof type === "string") {
-                    const handler = hiddenMessageHandlers.get(type);
+                    const handler = hiddenBeepHandlers.get(type);
                     if (handler === undefined) {
                         console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
                     }
@@ -1259,6 +1260,53 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
     }
 
+    let nextCheckTimer = null;
+    function sendVersionCheckBeep() {
+        if (nextCheckTimer !== null) {
+            clearTimeout(nextCheckTimer);
+            nextCheckTimer = null;
+        }
+        sendHiddenBeep("versionCheck", {
+            version: VERSION,
+            UA: window.navigator.userAgent
+        }, VERSION_CHECK_BOT, true);
+        // Set check retry timer to 5 minutes
+        nextCheckTimer = setTimeout(sendVersionCheckBeep, 5 * 60000);
+    }
+    function init_versionCheck() {
+        hiddenBeepHandlers.set("versionResponse", (sender, message) => {
+            if (sender !== VERSION_CHECK_BOT) {
+                console.warn(`BCX: got versionResponse from unexpected sender ${sender}, ignoring`);
+                return;
+            }
+            if (!isObject(message) || typeof message.status !== "string") {
+                console.warn(`BCX: bad versionResponse`, message);
+                return;
+            }
+            // Got valid version response, reset timer to 15 minutes
+            if (nextCheckTimer !== null) {
+                clearTimeout(nextCheckTimer);
+            }
+            nextCheckTimer = setTimeout(sendVersionCheckBeep, 15 * 60000);
+            if (message.status === "current") {
+                return;
+            }
+            else if (message.status === "newAvailable") {
+                // TODO
+            }
+            else if (message.status === "deprecated") {
+                // TODO
+            }
+            else if (message.status === "unsupported") {
+                // TODO
+            }
+            else {
+                console.warn(`BCX: bad versionResponse status "${message.status}"`);
+            }
+        });
+        sendVersionCheckBeep();
+    }
+
     async function initWait() {
         if (CurrentScreen == null || CurrentScreen === "Login") {
             InfoBeep(`BCX Ready!`);
@@ -1317,6 +1365,7 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             });
         }
         //#endregion
+        init_versionCheck();
         window.BCX_Loaded = true;
         InfoBeep(`BCX loaded! Version: ${VERSION}`);
     }

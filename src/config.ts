@@ -1,5 +1,7 @@
 export const VERSION = "0.1.0";
 
+export const VERSION_CHECK_BOT: number = 37685;
+
 export const FUNCTION_HASHES: Record<string, string[]> = {
 	AppearanceClick: ["CA4ED810", "B895612C"],
 	AppearanceRun: ["904E8E84", "791E142F"],

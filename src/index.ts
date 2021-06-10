@@ -7,6 +7,7 @@ import { init_messaging } from "./messaging";
 import { init_miscPatches } from "./miscPatches";
 import { init_wardrobe } from "./wardrobe";
 import { hookFunction } from "./patching";
+import { init_versionCheck } from "./versionCheck";
 
 async function initWait() {
 	if (CurrentScreen == null || CurrentScreen === "Login") {
@@ -71,6 +72,8 @@ function init() {
 	}
 
 	//#endregion
+
+	init_versionCheck();
 
 	window.BCX_Loaded = true;
 	InfoBeep(`BCX loaded! Version: ${VERSION}`);

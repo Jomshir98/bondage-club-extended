@@ -1,8 +1,8 @@
 import { hookFunction } from "./patching";
 import { isObject } from "./utils";
 
-export const hiddenMessageHandlers: Map<string, (sender: number, message: unknown) => void> = new Map();
-export const hiddenBeepHandlers: Map<string, (sender: number, message: unknown) => void> = new Map();
+export const hiddenMessageHandlers: Map<string, (sender: number, message: any) => void> = new Map();
+export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();
 
 export function sendHiddenMessage(type: string, message: any, Target: number | null = null) {
 	if (!ServerPlayerIsInChatRoom())
@@ -15,7 +15,7 @@ export function sendHiddenMessage(type: string, message: any, Target: number | n
 	});
 }
 
-export function sendHiddenBeep(type: string, message: any, target: number, asLeashBeep: boolean = false) {
+export function sendHiddenBeep<T extends keyof BCX_beeps>(type: T, message: BCX_beeps[T], target: number, asLeashBeep: boolean = false) {
 	ServerSend("AccountBeep", {
 		MemberNumber: target,
 		BeepType: asLeashBeep ? "Leash" : "BCX",
@@ -54,10 +54,10 @@ export function init_messaging() {
 	hookFunction("ServerAccountBeep", 10, (args, next) => {
 		const data = args[0];
 
-		if (typeof data?.BeepType === "string" && ["Leash", "BCX"] && isObject(data.Message?.BCX)) {
+		if (typeof data?.BeepType === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject(data.Message?.BCX)) {
 			const { type, message } = data.Message.BCX;
 			if (typeof type === "string") {
-				const handler = hiddenMessageHandlers.get(type);
+				const handler = hiddenBeepHandlers.get(type as keyof BCX_beeps);
 				if (handler === undefined) {
 					console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
 				} else {

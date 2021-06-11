@@ -1,5 +1,5 @@
 interface Window {
-	BCX_Loaded: boolean;
+	BCX_Loaded?: boolean;
 }
 
 declare const LZString: import("lz-string").LZStringStatic;

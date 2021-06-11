@@ -1,5 +1,6 @@
 import { detectOtherMods, isBind, isCloth } from "./clubUtils";
 import { allowMode } from "./console";
+import { BaseModule } from "./moduleManager";
 import { hookFunction } from "./patching";
 import { clipboardAvailable } from "./utils";
 
@@ -57,59 +58,67 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 
 let j_WardrobeIncludeBinds = false;
 
-export function init_wardrobe() {
+function PasteListener(ev: ClipboardEvent) {
+	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
+		ev.preventDefault();
+		ev.stopImmediatePropagation();
+		const data = (ev.clipboardData || (window as any).clipboardData).getData("text");
+		const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+		CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+	}
+}
 
-	const { NMod } = detectOtherMods();
+export class ModuleWardrobe extends BaseModule {
 
-	hookFunction("AppearanceRun", 0, (args, next) => {
-		next(args);
-		if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-			const Y = NMod ? 265 : 125;
-			DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
-			DrawButton(1534, Y, 207, 50, "Export", "White", "");
-			DrawButton(1768, Y, 207, 50, "Import", "White", "");
-		}
-	});
+	load() {
+		const { NMod } = detectOtherMods();
 
-	hookFunction("AppearanceClick", 0, (args, next) => {
-		if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-			const Y = NMod ? 265 : 125;
-			// Restraints toggle
-			if (MouseIn(1457, Y, 50, 50)) {
-				j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+		hookFunction("AppearanceRun", 0, (args, next) => {
+			next(args);
+			if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+				const Y = NMod ? 265 : 125;
+				DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
+				DrawButton(1534, Y, 207, 50, "Export", "White", "");
+				DrawButton(1768, Y, 207, 50, "Import", "White", "");
 			}
-			// Export
-			if (MouseIn(1534, Y, 207, 50)) {
-				setTimeout(async () => {
-					await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
-					CharacterAppearanceWardrobeText = "Copied to clipboard!";
-				}, 0);
-				return;
-			}
-			// Import
-			if (MouseIn(1768, Y, 207, 50)) {
-				setTimeout(async () => {
-					if (typeof navigator.clipboard.readText !== "function") {
-						CharacterAppearanceWardrobeText = "Please press Ctrl+V";
-						return;
-					}
-					const data = await navigator.clipboard.readText();
-					const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-					CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
-				}, 0);
-				return;
-			}
-		}
-		next(args);
-	});
+		});
 
-	document.addEventListener("paste", ev => {
-		if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
-			ev.preventDefault();
-			ev.stopImmediatePropagation();
-			const data = (ev.clipboardData || (window as any).clipboardData).getData("text");
-			const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-			CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
-		}
-	});
+		hookFunction("AppearanceClick", 0, (args, next) => {
+			if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+				const Y = NMod ? 265 : 125;
+				// Restraints toggle
+				if (MouseIn(1457, Y, 50, 50)) {
+					j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+				}
+				// Export
+				if (MouseIn(1534, Y, 207, 50)) {
+					setTimeout(async () => {
+						await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
+						CharacterAppearanceWardrobeText = "Copied to clipboard!";
+					}, 0);
+					return;
+				}
+				// Import
+				if (MouseIn(1768, Y, 207, 50)) {
+					setTimeout(async () => {
+						if (typeof navigator.clipboard.readText !== "function") {
+							CharacterAppearanceWardrobeText = "Please press Ctrl+V";
+							return;
+						}
+						const data = await navigator.clipboard.readText();
+						const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+						CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+					}, 0);
+					return;
+				}
+			}
+			next(args);
+		});
+
+		document.addEventListener("paste", PasteListener);
+	}
+
+	unload() {
+		document.removeEventListener("paste", PasteListener);
+	}
 }

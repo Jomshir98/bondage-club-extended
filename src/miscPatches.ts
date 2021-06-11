@@ -1,34 +1,45 @@
 import { detectOtherMods } from "./clubUtils";
 import { allowMode } from "./console";
+import { BaseModule } from "./moduleManager";
 import { hookFunction, patchFunction } from "./patching";
 
-export function init_miscPatches() {
-	hookFunction("AsylumEntranceCanWander", 0, () => true);
-	patchFunction("CheatImport", { "MainCanvas == null": "true" });
-	CheatImport();
+export class ModuleMiscPatches extends BaseModule {
+	private o_Player_CanChange: (typeof Player.CanChange) | null = null;
 
-	hookFunction("ElementIsScrolledToEnd", 0, (args) => {
-		const element = document.getElementById(args[0]);
-		return element != null && element.scrollHeight - element.scrollTop - element.clientHeight <= 1;
-	});
+	load() {
+		hookFunction("AsylumEntranceCanWander", 0, () => true);
+		patchFunction("CheatImport", { "MainCanvas == null": "true" });
 
-	const { NMod } = detectOtherMods();
+		hookFunction("ElementIsScrolledToEnd", 0, (args) => {
+			const element = document.getElementById(args[0]);
+			return element != null && element.scrollHeight - element.scrollTop - element.clientHeight <= 1;
+		});
 
-	if (!NMod) {
-		patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
-		patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
+		const { NMod } = detectOtherMods();
+
+		if (!NMod) {
+			patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
+			patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
+		}
+
+		// Cheats
+
+		this.o_Player_CanChange = Player.CanChange;
+		Player.CanChange = () => allowMode || !!(this.o_Player_CanChange?.call(Player));
+
+		hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
 	}
 
-	if (Player.Inventory.length > 0) {
+	run() {
+		CheatImport();
 		LoginMistressItems();
 		LoginStableItems();
 		ServerPlayerInventorySync();
 	}
 
-	// Cheats
-
-	const o_Player_CanChange = Player.CanChange;
-	Player.CanChange = () => allowMode || o_Player_CanChange.call(Player);
-
-	hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
+	unload() {
+		if (this.o_Player_CanChange) {
+			Player.CanChange = this.o_Player_CanChange;
+		}
+	}
 }

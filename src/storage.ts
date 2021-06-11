@@ -1,3 +1,4 @@
+import { BaseModule } from "./moduleManager";
 import { isObject } from "./utils";
 
 export let modStorage: Partial<ModStorage> = {};
@@ -16,21 +17,25 @@ export function modStorageSync() {
 	}
 }
 
-export function init_storage() {
-	const saved = (Player.OnlineSettings as any)?.BCX;
-	if (typeof saved === "string") {
-		try {
-			const storage = JSON.parse(LZString.decompressFromBase64(saved)!);
-			if (!isObject(storage)) {
-				throw new Error("Bad data");
+export class ModuleStorage extends BaseModule {
+	init() {
+		const saved = (Player.OnlineSettings as any)?.BCX;
+		if (typeof saved === "string") {
+			try {
+				const storage = JSON.parse(LZString.decompressFromBase64(saved)!);
+				if (!isObject(storage)) {
+					throw new Error("Bad data");
+				}
+				modStorage = storage;
+			} catch (error) {
+				console.error("BCX: Error while loading saved data, full reset.", error);
 			}
-			modStorage = storage;
-		} catch (error) {
-			console.error("BCX: Error while loading saved data, full reset.", error);
+		} else {
+			console.log("BCX: First time init");
 		}
-	} else {
-		console.log("BCX: First time init");
 	}
 
-	modStorageSync();
+	run() {
+		modStorageSync();
+	}
 }

@@ -14,9 +14,15 @@ interface IpatchedFunctionData {
 }
 
 const patchedFunctions: Map<string, IpatchedFunctionData> = new Map();
+let unloaded: boolean = false;
+
 
 function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 	return (...args: any[]) => {
+		if (unloaded) {
+			console.warn(`BCX: Function router called while unloaded for ${data.original.name}`);
+			return data.original(...args);
+		}
 		const hooks = data.hooks.slice();
 		let hookIndex = 0;
 		const callNextHook = (nextargs: any[]) => {
@@ -32,6 +38,9 @@ function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 }
 
 function initPatchableFunction(target: string): IpatchedFunctionData {
+	if (unloaded) {
+		throw new Error("Cannot init patchable function after unload");
+	}
 	let result = patchedFunctions.get(target);
 	if (!result) {
 		const original = (window as any)[target];
@@ -89,4 +98,15 @@ export function patchFunction(target: string, patches: Record<string, string>): 
 	const data = initPatchableFunction(target);
 	Object.assign(data.patches, patches);
 	applyPatches(data);
+}
+
+export function unload_patches() {
+	unloaded = true;
+	for (const [k, v] of patchedFunctions.entries()) {
+		v.hooks = [];
+		v.patches = {};
+		v.final = v.original;
+		(window as any)[k] = v.original;
+	}
+	patchedFunctions.clear();
 }

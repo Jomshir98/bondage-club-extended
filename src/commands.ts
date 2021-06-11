@@ -3,6 +3,7 @@ import { ChatroomCharacter, getAllCharactersInRoom } from "./chatroom";
 import { hookFunction } from "./patching";
 import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "./utils";
+import { BaseModule } from "./moduleManager";
 
 interface ICommandInfo {
 	description: string | null;
@@ -38,6 +39,30 @@ export function registerCommand(name: string, description: string | null, callba
 		autocomplete,
 		description
 	});
+}
+
+export function aliasCommand(originalName: string, alias: string): void {
+	originalName = originalName.toLocaleLowerCase();
+	alias = alias.toLocaleLowerCase();
+	const original = commands.get(originalName);
+	if (!original) {
+		throw new Error(`Command "${originalName}" to alias not found`);
+	}
+	if (original.parse) {
+		commands.set(alias, {
+			parse: true,
+			description: null,
+			callback: original.callback,
+			autocomplete: original.autocomplete
+		});
+	} else {
+		commands.set(alias, {
+			parse: false,
+			description: null,
+			callback: original.callback,
+			autocomplete: original.autocomplete
+		});
+	}
 }
 
 export function registerCommandParsed(name: string, description: string | null, callback: CommandHandlerParsed, autocomplete: CommandAutocompleterParsed | null = null) {
@@ -221,78 +246,82 @@ export function Command_selectWornItemAutocomplete(character: ChatroomCharacter,
 	return possible;
 }
 
-export function init_commands() {
-	hookFunction("ChatRoomSendChat", 10, (args, next) => {
-		const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
-		if (chat) {
-			const msg = chat.value.trim();
-			if (msg.startsWith("..")) {
-				chat.value = msg.substr(1);
-			} else if (msg.startsWith(".")) {
-				if (RunCommand(msg.substr(1))) {
-					chat.value = "";
+export class ModuleCommands extends BaseModule {
+	load() {
+		hookFunction("ChatRoomSendChat", 10, (args, next) => {
+			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+			if (chat) {
+				const msg = chat.value.trim();
+				if (msg.startsWith("..")) {
+					chat.value = msg.substr(1);
+				} else if (msg.startsWith(".")) {
+					if (RunCommand(msg.substr(1))) {
+						chat.value = "";
+					}
+					return;
 				}
-				return;
 			}
-		}
-		return next(args);
-	});
-
-	hookFunction("ChatRoomKeyDown", 10, (args, next) => {
-		const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
-		// Tab for command completion
-		if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..")) {
-			event?.preventDefault();
-
-			chat.value = "." + CommandAutocomplete(chat.value.substr(1));
-		} else {
 			return next(args);
-		}
-	});
+		});
 
-	const command_help: CommandHandlerRaw = () => {
-		ChatRoomSendLocal(
-			`Available commands:\n` +
-			Array.from(commands.entries())
-				.filter(c => c[1].description !== null)
-				.map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
-				.sort()
-				.join("\n")
-		);
-		return true;
-	};
-	registerCommand("help", "- display this help [alias: . ]", command_help);
-	registerCommand("", null, command_help);
+		hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+			// Tab for command completion
+			if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..")) {
+				event?.preventDefault();
 
-	const command_action: CommandHandlerRaw = (msg) => {
-		ChatRoomActionMessage(msg);
-		return true;
-	};
-	registerCommand("action", "- send custom (action) [alias: .a ]", command_action);
-	registerCommand("a", null, command_action);
+				chat.value = "." + CommandAutocomplete(chat.value.substr(1));
+			} else {
+				return next(args);
+			}
+		});
 
-	const ANTIGARBLE_LEVELS: Record<string, number> = {
-		"0": 0,
-		"1": 1,
-		"2": 2,
-		"normal": 0,
-		"both": 1,
-		"ungarbled": 2
-	};
-
-	const ANTIGARBLE_LEVEL_NAMES: string[] = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
-
-	registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
-		const val = ANTIGARBLE_LEVELS[value || ""];
-		if (val !== undefined) {
-			consoleInterface.antigarble = val;
-			ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
+		registerCommand("help", "- display this help [alias: . ]", () => {
+			ChatRoomSendLocal(
+				`Available commands:\n` +
+				Array.from(commands.entries())
+					.filter(c => c[1].description !== null)
+					.map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
+					.sort()
+					.join("\n")
+			);
 			return true;
-		} else {
-			ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
-			return false;
-		}
-	}, value => {
-		return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
-	});
+		});
+		aliasCommand("help", "");
+
+		registerCommand("action", "- send custom (action) [alias: .a ]", (msg) => {
+			ChatRoomActionMessage(msg);
+			return true;
+		});
+		aliasCommand("action", "a");
+
+		const ANTIGARBLE_LEVELS: Record<string, number> = {
+			"0": 0,
+			"1": 1,
+			"2": 2,
+			"normal": 0,
+			"both": 1,
+			"ungarbled": 2
+		};
+
+		const ANTIGARBLE_LEVEL_NAMES: string[] = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
+
+		registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
+			const val = ANTIGARBLE_LEVELS[value || ""];
+			if (val !== undefined) {
+				consoleInterface.antigarble = val;
+				ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
+				return true;
+			} else {
+				ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
+				return false;
+			}
+		}, value => {
+			return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
+		});
+	}
+
+	unload() {
+		commands.clear();
+	}
 }

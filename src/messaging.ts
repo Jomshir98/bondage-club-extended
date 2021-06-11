@@ -1,10 +1,11 @@
+import { BaseModule } from "./moduleManager";
 import { hookFunction } from "./patching";
 import { isObject } from "./utils";
 
 export const hiddenMessageHandlers: Map<string, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();
 
-export function sendHiddenMessage(type: string, message: any, Target: number | null = null) {
+export function sendHiddenMessage(type: string, message?: any, Target: number | null = null) {
 	if (!ServerPlayerIsInChatRoom())
 		return;
 	ServerSend("ChatRoomChat", {
@@ -25,49 +26,55 @@ export function sendHiddenBeep<T extends keyof BCX_beeps>(type: T, message: BCX_
 	});
 }
 
-export function init_messaging() {
-	hookFunction("ChatRoomMessage", 10, (args, next) => {
-		const data = args[0];
+export class ModuleMessaging extends BaseModule {
+	load() {
+		hookFunction("ChatRoomMessage", 10, (args, next) => {
+			const data = args[0];
 
-		if (data?.Type === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
-			if (data.Sender === Player.MemberNumber)
-				return;
-			if (!isObject(data.Dictionary)) {
-				console.warn("BCX: Hidden message no Dictionary", data);
-				return;
-			}
-			const { type, message } = data.Dictionary;
-			if (typeof type === "string") {
-				const handler = hiddenMessageHandlers.get(type);
-				if (handler === undefined) {
-					console.warn("BCX: Hidden message no handler", data.Sender, type, message);
-				} else {
-					handler(data.Sender, message);
+			if (data?.Type === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
+				if (data.Sender === Player.MemberNumber)
+					return;
+				if (!isObject(data.Dictionary)) {
+					console.warn("BCX: Hidden message no Dictionary", data);
+					return;
 				}
-			}
-			return;
-		}
-
-		return next(args);
-	});
-
-	hookFunction("ServerAccountBeep", 10, (args, next) => {
-		const data = args[0];
-
-		if (typeof data?.BeepType === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject(data.Message?.BCX)) {
-			const { type, message } = data.Message.BCX;
-			if (typeof type === "string") {
-				const handler = hiddenBeepHandlers.get(type as keyof BCX_beeps);
-				if (handler === undefined) {
-					console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
-				} else {
-					handler(data.MemberNumber, message);
+				const { type, message } = data.Dictionary;
+				if (typeof type === "string") {
+					const handler = hiddenMessageHandlers.get(type);
+					if (handler === undefined) {
+						console.warn("BCX: Hidden message no handler", data.Sender, type, message);
+					} else {
+						handler(data.Sender, message);
+					}
 				}
+				return;
 			}
-			return;
-		} else {
+
 			return next(args);
-		}
-	});
+		});
 
+		hookFunction("ServerAccountBeep", 10, (args, next) => {
+			const data = args[0];
+
+			if (typeof data?.BeepType === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject(data.Message?.BCX)) {
+				const { type, message } = data.Message.BCX;
+				if (typeof type === "string") {
+					const handler = hiddenBeepHandlers.get(type as keyof BCX_beeps);
+					if (handler === undefined) {
+						console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
+					} else {
+						handler(data.MemberNumber, message);
+					}
+				}
+				return;
+			} else {
+				return next(args);
+			}
+		});
+	}
+
+	unload() {
+		hiddenBeepHandlers.clear();
+		hiddenMessageHandlers.clear();
+	}
 }

@@ -2,10 +2,10 @@ import { BaseModule } from "./moduleManager";
 import { hookFunction } from "./patching";
 import { isObject } from "./utils";
 
-export const hiddenMessageHandlers: Map<string, (sender: number, message: any) => void> = new Map();
+export const hiddenMessageHandlers: Map<keyof BCX_messages, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();
 
-export function sendHiddenMessage(type: string, message?: any, Target: number | null = null) {
+export function sendHiddenMessage<T extends keyof BCX_messages>(type: T, message: BCX_messages[T], Target: number | null = null) {
 	if (!ServerPlayerIsInChatRoom())
 		return;
 	ServerSend("ChatRoomChat", {
@@ -40,7 +40,7 @@ export class ModuleMessaging extends BaseModule {
 				}
 				const { type, message } = data.Dictionary;
 				if (typeof type === "string") {
-					const handler = hiddenMessageHandlers.get(type);
+					const handler = hiddenMessageHandlers.get(type as keyof BCX_messages);
 					if (handler === undefined) {
 						console.warn("BCX: Hidden message no handler", data.Sender, type, message);
 					} else {

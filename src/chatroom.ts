@@ -288,7 +288,7 @@ export class ModuleChatroom extends BaseModule {
 			(window as any).ChatRoomSM = this.o_ChatRoomSM;
 		}
 		ServerSocket.off("ChatRoomMessageSync", queryAnnounce);
-		sendHiddenMessage("goodbye");
+		sendHiddenMessage("goodbye", undefined);
 	}
 }
 

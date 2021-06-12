@@ -1,9 +1,9 @@
-import { ChatRoomActionMessage, ChatRoomSendLocal, isBind } from "./clubUtils";
+import { ChatRoomActionMessage, ChatRoomSendLocal, isBind } from "../utilsClub";
 import { ChatroomCharacter, getAllCharactersInRoom } from "./chatroom";
-import { hookFunction } from "./patching";
+import { hookFunction } from "../patching";
 import { consoleInterface } from "./console";
-import { arrayUnique, longestCommonPrefix } from "./utils";
-import { BaseModule } from "./moduleManager";
+import { arrayUnique, longestCommonPrefix } from "../utils";
+import { BaseModule } from "../moduleManager";
 
 interface ICommandInfo {
 	description: string | null;

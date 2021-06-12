@@ -1,4 +1,4 @@
-import { detectOtherMods, InfoBeep } from "./clubUtils";
+import { detectOtherMods, InfoBeep } from "./utilsClub";
 import { VERSION } from "./config";
 import { init_modules, unload_modules } from "./moduleManager";
 import { unload_patches } from "./patching";

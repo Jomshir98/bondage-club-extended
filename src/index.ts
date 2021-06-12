@@ -1,4 +1,4 @@
-import { InfoBeep } from "./clubUtils";
+import { InfoBeep } from "./utilsClub";
 import { hookFunction } from "./patching";
 import { init, loginInit } from "./main";
 

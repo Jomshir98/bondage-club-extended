@@ -1,5 +1,5 @@
-import { BaseModule } from "./moduleManager";
-import { isObject } from "./utils";
+import { BaseModule } from "../moduleManager";
+import { isObject } from "../utils";
 
 export let modStorage: Partial<ModStorage> = {};
 

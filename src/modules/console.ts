@@ -1,9 +1,9 @@
-import { detectOtherMods } from "./clubUtils";
-import { hookFunction, patchFunction } from "./patching";
+import { detectOtherMods } from "../utilsClub";
+import { hookFunction, patchFunction } from "../patching";
 import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } from "./wardrobe";
 import { InvisibilityEarbuds } from "./clubUtils";
-import { BaseModule } from "./moduleManager";
-import { unload } from "./main";
+import { BaseModule } from "../moduleManager";
+import { unload } from "../main";
 
 export let allowMode: boolean = false;
 export let developmentMode: boolean = false;

@@ -1,9 +1,9 @@
-import { detectOtherMods, DrawImageEx } from "./clubUtils";
-import { VERSION } from "./config";
+import { detectOtherMods, DrawImageEx } from "../utilsClub";
+import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
-import { BaseModule } from "./moduleManager";
-import { hookFunction, patchFunction } from "./patching";
-import { icon_Emote, icon_PurpleHeart, icon_Typing } from "./resources";
+import { BaseModule } from "../moduleManager";
+import { hookFunction, patchFunction } from "../patching";
+import { icon_Emote, icon_PurpleHeart, icon_Typing } from "../resources";
 
 export class ChatroomCharacter {
 	BCXVersion: string | null = null;

@@ -1,9 +1,9 @@
 import { ChatroomCharacter, getChatroomCharacter } from "./chatroom";
-import { GuiMainMenu } from "./gui/mainmenu";
-import { GuiSubscreen } from "./gui/subscreen";
-import { BaseModule } from "./moduleManager";
-import { hookFunction } from "./patching";
-import { icon_BCX } from "./resources";
+import { GuiMainMenu } from "../gui/mainmenu";
+import { GuiSubscreen } from "../gui/subscreen";
+import { BaseModule } from "../moduleManager";
+import { hookFunction } from "../patching";
+import { icon_BCX } from "../resources";
 
 export class ModuleGUI extends BaseModule {
 	currentSubscreen: GuiSubscreen | null = null;

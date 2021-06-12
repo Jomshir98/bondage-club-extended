@@ -1,8 +1,8 @@
-import { detectOtherMods, isBind, isCloth } from "./clubUtils";
+import { detectOtherMods, isBind, isCloth } from "../utilsClub";
 import { allowMode } from "./console";
-import { BaseModule } from "./moduleManager";
-import { hookFunction } from "./patching";
-import { clipboardAvailable } from "./utils";
+import { BaseModule } from "../moduleManager";
+import { hookFunction } from "../patching";
+import { clipboardAvailable } from "../utils";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";

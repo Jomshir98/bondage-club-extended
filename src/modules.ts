@@ -1,15 +1,15 @@
 import { registerModule } from "./moduleManager";
 
-import { ModuleChatroom } from "./chatroom";
-import { ModuleClubUtils } from "./clubUtils";
-import { ModuleCommands } from "./commands";
-import { ModuleConsole } from "./console";
-import { ModuleMessaging } from "./messaging";
-import { ModuleMiscPatches } from "./miscPatches";
-import { ModuleStorage } from "./storage";
-import { ModuleVersionCheck } from "./versionCheck";
-import { ModuleWardrobe } from "./wardrobe";
-import { ModuleGUI } from "./gui";
+import { ModuleChatroom } from "./modules/chatroom";
+import { ModuleClubUtils } from "./modules/clubUtils";
+import { ModuleCommands } from "./modules/commands";
+import { ModuleGUI } from "./modules/gui";
+import { ModuleConsole } from "./modules/console";
+import { ModuleMessaging } from "./modules/messaging";
+import { ModuleMiscPatches } from "./modules/miscPatches";
+import { ModuleStorage } from "./modules/storage";
+import { ModuleVersionCheck } from "./modules/versionCheck";
+import { ModuleWardrobe } from "./modules/wardrobe";
 
 export const module_chatroom = registerModule(new ModuleChatroom());
 export const module_clubUtils = registerModule(new ModuleClubUtils());

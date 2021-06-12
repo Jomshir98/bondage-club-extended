@@ -1,7 +1,7 @@
-import { detectOtherMods } from "./clubUtils";
+import { detectOtherMods } from "../utilsClub";
 import { allowMode } from "./console";
-import { BaseModule } from "./moduleManager";
-import { hookFunction, patchFunction } from "./patching";
+import { BaseModule } from "../moduleManager";
+import { hookFunction, patchFunction } from "../patching";
 
 export class ModuleMiscPatches extends BaseModule {
 	private o_Player_CanChange: (typeof Player.CanChange) | null = null;

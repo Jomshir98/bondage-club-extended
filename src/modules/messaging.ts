@@ -1,6 +1,6 @@
-import { BaseModule } from "./moduleManager";
-import { hookFunction } from "./patching";
-import { isObject } from "./utils";
+import { BaseModule } from "../moduleManager";
+import { hookFunction } from "../patching";
+import { isObject } from "../utils";
 
 export const hiddenMessageHandlers: Map<keyof BCX_messages, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();

@@ -12,6 +12,126 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
+    function InfoBeep(msg) {
+        console.log(`BCX msg: ${msg}`);
+        ServerBeep = {
+            Timer: Date.now() + 3000,
+            Message: msg
+        };
+    }
+    function ChatRoomActionMessage(msg) {
+        if (!msg)
+            return;
+        ServerSend("ChatRoomChat", {
+            Content: "Beep",
+            Type: "Action",
+            Dictionary: [
+                { Tag: "Beep", Text: "msg" },
+                { Tag: "Biep", Text: "msg" },
+                { Tag: "Sonner", Text: "msg" },
+                { Tag: "msg", Text: msg }
+            ]
+        });
+    }
+    function ChatRoomSendLocal(msg, timeout, sender) {
+        var _a, _b;
+        // Adds the message and scrolls down unless the user has scrolled up
+        const div = document.createElement("div");
+        div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
+        div.setAttribute("data-time", ChatRoomCurrentTime());
+        div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
+        if (typeof msg === 'string')
+            div.innerText = msg;
+        else
+            div.appendChild(msg);
+        if (timeout)
+            setTimeout(() => div.remove(), timeout);
+        // Returns the focus on the chat box
+        const Refocus = ((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.id) === "InputChat";
+        const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
+        const ChatLog = document.getElementById("TextAreaChatLog");
+        if (ChatLog != null) {
+            ChatLog.appendChild(div);
+            if (ShouldScrollDown)
+                ElementScrollToEnd("TextAreaChatLog");
+            if (Refocus)
+                ElementFocus("InputChat");
+        }
+    }
+    function detectOtherMods() {
+        const w = window;
+        return {
+            NMod: typeof w.ChatRoomDrawFriendList === "function",
+            BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
+        };
+    }
+    /**
+     * Draws an image on canvas, applying all options
+     * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
+     * @param {number} X - Position of the image on the X axis
+     * @param {number} Y - Position of the image on the Y axis
+     * @param {object} [options] - any extra options, optional
+     * @param {CanvasRenderingContext2D} [options.Canvas] - Canvas on which to draw the image, defaults to `MainCanvas`
+     * @param {number} [options.Alpha] - transparency between 0-1
+     * @param {[number, number, number, number]} [options.SourcePos] - Area in original image to draw in format `[left, top, width, height]`
+     * @param {number} [options.Width] - Width of the drawn image, defaults to width of original image
+     * @param {number} [options.Height] - Height of the drawn image, defaults to height of original image
+     * @param {boolean} [options.Invert=false] - If image should be flipped vertically
+     * @param {boolean} [options.Mirror=false] - If image should be flipped horizontally
+     * @param {number} [options.Zoom=1] - Zoom factor
+     * @returns {boolean} - whether the image was complete or not
+     */
+    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 }) {
+        if (typeof Source === "string") {
+            Source = DrawGetImage(Source);
+            if (!Source.complete)
+                return false;
+            if (!Source.naturalWidth)
+                return true;
+        }
+        const sizeChanged = Width != null || Height != null;
+        if (Width == null) {
+            Width = SourcePos ? SourcePos[2] : Source.width;
+        }
+        if (Height == null) {
+            Height = SourcePos ? SourcePos[3] : Source.height;
+        }
+        Canvas.save();
+        Canvas.globalCompositeOperation = "source-over";
+        Canvas.globalAlpha = Alpha;
+        Canvas.translate(X, Y);
+        if (Zoom !== 1) {
+            Canvas.scale(Zoom, Zoom);
+        }
+        if (Invert) {
+            Canvas.transform(1, 0, 0, -1, 0, Height);
+        }
+        if (Mirror) {
+            Canvas.transform(-1, 0, 0, 1, Width, 0);
+        }
+        if (SourcePos) {
+            Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
+        }
+        else if (sizeChanged) {
+            Canvas.drawImage(Source, 0, 0, Width, Height);
+        }
+        else {
+            Canvas.drawImage(Source, 0, 0);
+        }
+        Canvas.restore();
+        return true;
+    }
+    function isCloth(item, allowCosplay = false) {
+        const asset = item.Asset ? item.Asset : item;
+        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
+    }
+    function isBind(item) {
+        const asset = item.Asset ? item.Asset : item;
+        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
+            return false;
+        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
+    }
+
     const VERSION = "0.1.0";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
@@ -23,6 +143,7 @@ window.BCX_Loaded = false;
         ChatRoomCreateElement: ["4837C2F6", "76299AEC"],
         ChatRoomDrawCharacterOverlay: ["1E1A1B60", "10CE4173"],
         ChatRoomDrawFriendList: ["2A9BD99D"],
+        ChatRoomKeyDown: ["C6EEC498"],
         ChatRoomMessage: ["2C6E4EC3", "AA8D20E0"],
         ChatRoomSendChat: ["39B06D87", "385B9E9C"],
         CheatImport: ["412422CC", "1ECB0CC4"],
@@ -31,57 +152,15 @@ window.BCX_Loaded = false;
         DialogDrawPoseMenu: ["6145B7D7", "4B146E82"],
         ElementIsScrolledToEnd: ["064E4232", "D28B0638"],
         ExtendedItemDraw: ["486A52DF", "AABA9073"],
+        InformationSheetClick: ["39AD580B"],
+        InformationSheetExit: ["4BC15B0A"],
+        InformationSheetRun: ["58B7879C"],
         LoginMistressItems: ["984A6AD9"],
         LoginResponse: ["16C2C651"],
         LoginStableItems: ["C3F50DD1"],
         ServerAccountBeep: ["0057EF1D", "96F8C34D"],
         SpeechGarble: ["1BC8E005", "B3A5973D"]
     };
-
-    class BaseModule {
-        init() {
-            // Empty
-        }
-        load() {
-            // Empty
-        }
-        run() {
-            // Empty
-        }
-        unload() {
-            // Empty
-        }
-    }
-    let moduleInitPhase = 0 /* construct */;
-    const modules = [];
-    function registerModule(module) {
-        if (moduleInitPhase !== 0 /* construct */) {
-            throw new Error("Modules can be registered only before initialization");
-        }
-        modules.push(module);
-        console.debug(`BCX: Registered module ${module.constructor.name}`);
-        return module;
-    }
-    function init_modules() {
-        moduleInitPhase = 1 /* init */;
-        for (const m of modules) {
-            m.init();
-        }
-        moduleInitPhase = 2 /* load */;
-        for (const m of modules) {
-            m.load();
-        }
-        moduleInitPhase = 3 /* ready */;
-        for (const m of modules) {
-            m.run();
-        }
-    }
-    function unload_modules() {
-        moduleInitPhase = 4 /* destroy */;
-        for (const m of modules) {
-            m.unload();
-        }
-    }
 
     const encoder = new TextEncoder();
     /* eslint-disable no-bitwise */
@@ -220,6 +299,101 @@ window.BCX_Loaded = false;
         patchedFunctions.clear();
     }
 
+    class BaseModule {
+        init() {
+            // Empty
+        }
+        load() {
+            // Empty
+        }
+        run() {
+            // Empty
+        }
+        unload() {
+            // Empty
+        }
+    }
+    let moduleInitPhase = 0 /* construct */;
+    const modules = [];
+    function registerModule(module) {
+        if (moduleInitPhase !== 0 /* construct */) {
+            throw new Error("Modules can be registered only before initialization");
+        }
+        modules.push(module);
+        console.debug(`BCX: Registered module ${module.constructor.name}`);
+        return module;
+    }
+    function init_modules() {
+        moduleInitPhase = 1 /* init */;
+        for (const m of modules) {
+            m.init();
+        }
+        moduleInitPhase = 2 /* load */;
+        for (const m of modules) {
+            m.load();
+        }
+        moduleInitPhase = 3 /* ready */;
+        for (const m of modules) {
+            m.run();
+        }
+    }
+    function unload_modules() {
+        moduleInitPhase = 4 /* destroy */;
+        for (const m of modules) {
+            m.unload();
+        }
+    }
+
+    function loginInit(C) {
+        if (window.BCX_Loaded)
+            return;
+        init();
+    }
+    function init() {
+        // Loading into already loaded club - clear some caches
+        DrawRunMap.clear();
+        DrawScreen = "";
+        init_modules();
+        //#region Other mod compatability
+        const { BondageClubTools } = detectOtherMods();
+        if (BondageClubTools) {
+            console.warn("BCX: Bondage Club Tools detected!");
+            const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
+            const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
+            console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
+            ServerSocket.off("ChatRoomMessage");
+            ServerSocket.on("ChatRoomMessage", data => {
+                if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
+                    ChatRoomMessageForwarder(data);
+                }
+                return ChatRoomMessage(data);
+            });
+            ServerSocket.off("AccountBeep");
+            ServerSocket.on("AccountBeep", data => {
+                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
+                    AccountBeepForwarder(data);
+                }
+                return ServerAccountBeep(data);
+            });
+        }
+        //#endregion
+        window.BCX_Loaded = true;
+        InfoBeep(`BCX loaded! Version: ${VERSION}`);
+    }
+    function unload() {
+        const { BondageClubTools } = detectOtherMods();
+        if (BondageClubTools) {
+            throw new Error("BCX: Unload not supported when BondageClubTools are present");
+        }
+        unload_patches();
+        unload_modules();
+        // clear some caches
+        DrawRunMap.clear();
+        DrawScreen = "";
+        delete window.BCX_Loaded;
+        console.log("BCX: Unloaded.");
+    }
+
     const hiddenMessageHandlers = new Map();
     const hiddenBeepHandlers = new Map();
     function sendHiddenMessage(type, message, Target = null) {
@@ -349,6 +523,101 @@ BS7XNtOVBiyJByJuEAmzVeY4A87EO3e+QHv76+c9YWZl/cmePSs4dMjUAX0MLBNCa4n7CDyYtS3X
 NfCSEJo/oepKooFMCM3LuW/ke4wOwOWqprPzNbzez2hvbzCLYS8Bb8tMImXkImA7sX/UXE+yS5BJ
 lKuAfTFA7AIuJ8VlFtB+HojvOPeLhyEhC4BuE4gTwK0MMVkr0+8+iBDwDkNQRsh6Uh/IAcDKEJVR
 wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
+    const icon_BCX = `data:image/png;base64,
+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
+`.replaceAll("\n", "");
 
     class ChatroomCharacter {
         constructor(character) {
@@ -376,7 +645,7 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             return null;
         let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
         if (!character) {
-            const BCCharacter = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
+            const BCCharacter = Player.MemberNumber === memberNumber ? Player : ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
             if (!BCCharacter) {
                 return null;
             }
@@ -731,53 +1000,6 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         unload() {
             document.removeEventListener("paste", PasteListener);
         }
-    }
-
-    function loginInit(C) {
-        if (window.BCX_Loaded)
-            return;
-        init();
-    }
-    function init() {
-        // Loading into already loaded club - clear some caches
-        DrawRunMap.clear();
-        DrawScreen = "";
-        init_modules();
-        //#region Other mod compatability
-        const { BondageClubTools } = detectOtherMods();
-        if (BondageClubTools) {
-            console.warn("BCX: Bondage Club Tools detected!");
-            const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
-            const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
-            console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
-            ServerSocket.off("ChatRoomMessage");
-            ServerSocket.on("ChatRoomMessage", data => {
-                if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
-                    ChatRoomMessageForwarder(data);
-                }
-                return ChatRoomMessage(data);
-            });
-            ServerSocket.off("AccountBeep");
-            ServerSocket.on("AccountBeep", data => {
-                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
-                    AccountBeepForwarder(data);
-                }
-                return ServerAccountBeep(data);
-            });
-        }
-        //#endregion
-        window.BCX_Loaded = true;
-        InfoBeep(`BCX loaded! Version: ${VERSION}`);
-    }
-    function unload() {
-        const { BondageClubTools } = detectOtherMods();
-        if (BondageClubTools) {
-            throw new Error("BCX: Unload not supported when BondageClubTools are present");
-        }
-        unload_patches();
-        unload_modules();
-        delete window.BCX_Loaded;
-        console.log("BCX: Unloaded.");
     }
 
     let allowMode = false;
@@ -1204,125 +1426,6 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         }
     }
 
-    function InfoBeep(msg) {
-        console.log(`BCX msg: ${msg}`);
-        ServerBeep = {
-            Timer: CurrentTime + 3000,
-            Message: msg
-        };
-    }
-    function ChatRoomActionMessage(msg) {
-        if (!msg)
-            return;
-        ServerSend("ChatRoomChat", {
-            Content: "Beep",
-            Type: "Action",
-            Dictionary: [
-                { Tag: "Beep", Text: "msg" },
-                { Tag: "Biep", Text: "msg" },
-                { Tag: "Sonner", Text: "msg" },
-                { Tag: "msg", Text: msg }
-            ]
-        });
-    }
-    function ChatRoomSendLocal(msg, timeout, sender) {
-        var _a, _b;
-        // Adds the message and scrolls down unless the user has scrolled up
-        const div = document.createElement("div");
-        div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
-        div.setAttribute("data-time", ChatRoomCurrentTime());
-        div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
-        if (typeof msg === 'string')
-            div.innerText = msg;
-        else
-            div.appendChild(msg);
-        if (timeout)
-            setTimeout(() => div.remove(), timeout);
-        // Returns the focus on the chat box
-        const Refocus = ((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.id) === "InputChat";
-        const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
-        const ChatLog = document.getElementById("TextAreaChatLog");
-        if (ChatLog != null) {
-            ChatLog.appendChild(div);
-            if (ShouldScrollDown)
-                ElementScrollToEnd("TextAreaChatLog");
-            if (Refocus)
-                ElementFocus("InputChat");
-        }
-    }
-    function detectOtherMods() {
-        const w = window;
-        return {
-            NMod: typeof w.ChatRoomDrawFriendList === "function",
-            BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
-        };
-    }
-    /**
-     * Draws an image on canvas, applying all options
-     * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
-     * @param {number} X - Position of the image on the X axis
-     * @param {number} Y - Position of the image on the Y axis
-     * @param {object} [options] - any extra options, optional
-     * @param {CanvasRenderingContext2D} [options.Canvas] - Canvas on which to draw the image, defaults to `MainCanvas`
-     * @param {number} [options.Alpha] - transparency between 0-1
-     * @param {[number, number, number, number]} [options.SourcePos] - Area in original image to draw in format `[left, top, width, height]`
-     * @param {number} [options.Width] - Width of the drawn image, defaults to width of original image
-     * @param {number} [options.Height] - Height of the drawn image, defaults to height of original image
-     * @param {boolean} [options.Invert=false] - If image should be flipped vertically
-     * @param {boolean} [options.Mirror=false] - If image should be flipped horizontally
-     * @param {number} [options.Zoom=1] - Zoom factor
-     * @returns {boolean} - whether the image was complete or not
-     */
-    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 }) {
-        if (typeof Source === "string") {
-            Source = DrawGetImage(Source);
-            if (!Source.complete)
-                return false;
-            if (!Source.naturalWidth)
-                return true;
-        }
-        const sizeChanged = Width != null || Height != null;
-        if (Width == null) {
-            Width = SourcePos ? SourcePos[2] : Source.width;
-        }
-        if (Height == null) {
-            Height = SourcePos ? SourcePos[3] : Source.height;
-        }
-        Canvas.save();
-        Canvas.globalCompositeOperation = "source-over";
-        Canvas.globalAlpha = Alpha;
-        Canvas.translate(X, Y);
-        if (Zoom !== 1) {
-            Canvas.scale(Zoom, Zoom);
-        }
-        if (Invert) {
-            Canvas.transform(1, 0, 0, -1, 0, Height);
-        }
-        if (Mirror) {
-            Canvas.transform(-1, 0, 0, 1, Width, 0);
-        }
-        if (SourcePos) {
-            Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
-        }
-        else if (sizeChanged) {
-            Canvas.drawImage(Source, 0, 0, Width, Height);
-        }
-        else {
-            Canvas.drawImage(Source, 0, 0);
-        }
-        Canvas.restore();
-        return true;
-    }
-    function isCloth(item, allowCosplay = false) {
-        const asset = item.Asset ? item.Asset : item;
-        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
-    }
-    function isBind(item) {
-        const asset = item.Asset ? item.Asset : item;
-        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
-            return false;
-        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
-    }
     function InvisibilityEarbuds() {
         var _a;
         if (((_a = InventoryGet(Player, "ItemEars")) === null || _a === void 0 ? void 0 : _a.Asset.Name) === "BluetoothEarbuds") {
@@ -1426,6 +1529,75 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
                     }
                 }
                 return [];
+            });
+        }
+    }
+
+    class GuiSubscreen {
+        Run() {
+            // Empty
+        }
+        Click() {
+            // Empty
+        }
+        Exit() {
+            module_gui.currentSubscreen = null;
+        }
+    }
+
+    class GuiMainMenu extends GuiSubscreen {
+        Run() {
+            DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                this.Exit();
+        }
+    }
+
+    class ModuleGUI extends BaseModule {
+        constructor() {
+            super(...arguments);
+            this.currentSubscreen = null;
+        }
+        getInformationSheetCharacter() {
+            const C = InformationSheetSelection;
+            if (!C || typeof C.MemberNumber !== "number")
+                return null;
+            return getChatroomCharacter(C.MemberNumber);
+        }
+        load() {
+            hookFunction("InformationSheetRun", 10, (args, next) => {
+                if (this.currentSubscreen !== null) {
+                    MainCanvas.textAlign = "left";
+                    this.currentSubscreen.Run();
+                    MainCanvas.textAlign = "center";
+                    return;
+                }
+                next(args);
+                const C = this.getInformationSheetCharacter();
+                if (C) {
+                    DrawButton(1815, 650, 90, 90, "", "White", icon_BCX, "BCX");
+                }
+            });
+            hookFunction("InformationSheetClick", 10, (args, next) => {
+                if (this.currentSubscreen !== null) {
+                    return this.currentSubscreen.Click();
+                }
+                const C = this.getInformationSheetCharacter();
+                if (C && MouseIn(1815, 650, 90, 90)) {
+                    this.currentSubscreen = new GuiMainMenu();
+                }
+                else {
+                    return next(args);
+                }
+            });
+            hookFunction("InformationSheetExit", 10, (args, next) => {
+                if (this.currentSubscreen !== null) {
+                    return this.currentSubscreen.Exit();
+                }
+                return next(args);
             });
         }
     }
@@ -1566,6 +1738,7 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
     const module_clubUtils = registerModule(new ModuleClubUtils());
     const module_commands = registerModule(new ModuleCommands());
     const module_console = registerModule(new ModuleConsole());
+    const module_gui = registerModule(new ModuleGUI());
     const module_messaging = registerModule(new ModuleMessaging());
     const module_miscPatches = registerModule(new ModuleMiscPatches());
     const module_storage = registerModule(new ModuleStorage());

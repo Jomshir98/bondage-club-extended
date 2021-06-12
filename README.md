@@ -1,4 +1,4 @@
-# Bondage Club Extended (BCX)
+# ![logo](resources/BCX_small.png)  Bondage Club Extended (BCX)
 
 An extension for the Bondage Club online game ([https://www.bondageprojects.com/club_game/](https://www.bondageprojects.com/club_game/)) by Jomshir98, one of the club's coders.
 

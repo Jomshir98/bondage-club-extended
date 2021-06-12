@@ -1,7 +1,7 @@
 export function InfoBeep(msg: string) {
 	console.log(`BCX msg: ${msg}`);
 	ServerBeep = {
-		Timer: CurrentTime + 3000,
+		Timer: Date.now() + 3000,
 		Message: msg
 	};
 }

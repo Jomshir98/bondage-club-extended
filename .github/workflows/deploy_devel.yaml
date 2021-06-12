@@ -1,9 +1,9 @@
-name: Deploy
+name: Deploy (devel)
 concurrency: pages_deployment
 
 on:
   push:
-    branches: [ stable ]
+    branches: [ master ]
 
 jobs:
   deploy:
@@ -21,11 +21,9 @@ jobs:
 
     - run: yarn test
 
-    - name: Copy to devel
-      run: cp -R dist dist_devel && mv dist_devel dist/devel
-
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
         branch: gh-pages
         folder: dist
+        target-folder: devel

@@ -132,7 +132,7 @@ window.BCX_Loaded = false;
         return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
     }
 
-    const VERSION = "0.1.0";
+    const VERSION = "0.1.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         AppearanceClick: ["CA4ED810", "B895612C"],

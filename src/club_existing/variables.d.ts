@@ -87,3 +87,6 @@ declare function MouseIn(Left: number, Top: number, Width: number, Height: numbe
 // Login.js
 declare function LoginMistressItems(): void;
 declare function LoginStableItems(): void;
+
+// Screens/Character/InformationSheet/InformationSheet.js
+declare var InformationSheetSelection: Character | null;

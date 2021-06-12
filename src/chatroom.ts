@@ -32,11 +32,11 @@ export class ChatroomCharacter {
 
 const currentRoomCharacters: ChatroomCharacter[] = [];
 
-function getChatroomCharacter(memberNumber: number): ChatroomCharacter | null {
+export function getChatroomCharacter(memberNumber: number): ChatroomCharacter | null {
 	if (typeof memberNumber !== "number") return null;
 	let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
 	if (!character) {
-		const BCCharacter = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
+		const BCCharacter = Player.MemberNumber === memberNumber ? Player : ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
 		if (!BCCharacter) {
 			return null;
 		}

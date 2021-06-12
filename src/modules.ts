@@ -9,11 +9,13 @@ import { ModuleMiscPatches } from "./miscPatches";
 import { ModuleStorage } from "./storage";
 import { ModuleVersionCheck } from "./versionCheck";
 import { ModuleWardrobe } from "./wardrobe";
+import { ModuleGUI } from "./gui";
 
 export const module_chatroom = registerModule(new ModuleChatroom());
 export const module_clubUtils = registerModule(new ModuleClubUtils());
 export const module_commands = registerModule(new ModuleCommands());
 export const module_console = registerModule(new ModuleConsole());
+export const module_gui = registerModule(new ModuleGUI());
 export const module_messaging = registerModule(new ModuleMessaging());
 export const module_miscPatches = registerModule(new ModuleMiscPatches());
 export const module_storage = registerModule(new ModuleStorage());

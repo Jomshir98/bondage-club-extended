@@ -56,6 +56,10 @@ export function unload() {
 	unload_patches();
 	unload_modules();
 
+	// clear some caches
+	DrawRunMap.clear();
+	DrawScreen = "";
+
 	delete window.BCX_Loaded;
 	console.log("BCX: Unloaded.");
 }

@@ -1,5 +1,5 @@
 import { ChatRoomActionMessage, ChatRoomSendLocal, isBind } from "../utilsClub";
-import { ChatroomCharacter, getAllCharactersInRoom } from "./chatroom";
+import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { hookFunction } from "../patching";
 import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "../utils";

@@ -1,4 +1,4 @@
-import { ChatroomCharacter, getChatroomCharacter } from "./chatroom";
+import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { GuiMainMenu } from "../gui/mainmenu";
 import { GuiSubscreen } from "../gui/subscreen";
 import { BaseModule } from "../moduleManager";

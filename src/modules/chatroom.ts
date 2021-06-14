@@ -4,51 +4,7 @@ import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "../moduleManager";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_Emote, icon_PurpleHeart, icon_Typing } from "../resources";
-
-export class ChatroomCharacter {
-	BCXVersion: string | null = null;
-	Character: Character;
-
-	get MemberNumber(): number | null {
-		return this.Character.MemberNumber ?? null;
-	}
-
-	get Name(): string {
-		return this.Character.Name;
-	}
-
-	toString(): string {
-		return `${this.Name} (${this.MemberNumber})`;
-	}
-
-	constructor(character: Character) {
-		this.Character = character;
-		if (character.ID === 0) {
-			this.BCXVersion = VERSION;
-		}
-		console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
-	}
-}
-
-const currentRoomCharacters: ChatroomCharacter[] = [];
-
-export function getChatroomCharacter(memberNumber: number): ChatroomCharacter | null {
-	if (typeof memberNumber !== "number") return null;
-	let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
-	if (!character) {
-		const BCCharacter = Player.MemberNumber === memberNumber ? Player : ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
-		if (!BCCharacter) {
-			return null;
-		}
-		character = new ChatroomCharacter(BCCharacter);
-		currentRoomCharacters.push(character);
-	}
-	return character;
-}
-
-export function getAllCharactersInRoom(): ChatroomCharacter[] {
-	return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber!)).filter(Boolean) as ChatroomCharacter[];
-}
+import { getChatroomCharacter } from "../characters";
 
 class ChatRoomStatusManager {
 	InputTimeoutMs = 3_000;
@@ -202,6 +158,7 @@ export class ModuleChatroom extends BaseModule {
 			patchFunction("ChatRoomDrawCharacterOverlay", {
 				'DrawImageResize("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom);': ""
 			});
+
 			hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
 				next(args);
 
@@ -243,16 +200,16 @@ export class ModuleChatroom extends BaseModule {
 						break;
 				}
 			});
+
+			hookFunction("ChatRoomCreateElement", 0, (args, next) => {
+				next(args);
+				ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
+			});
 		}
 
 		hookFunction("ChatRoomSendChat", 0, (args, next) => {
 			next(args);
 			ChatroomSM.InputEnd();
-		});
-
-		hookFunction("ChatRoomCreateElement", 0, (args, next) => {
-			next(args);
-			ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
 		});
 
 		hookFunction("ChatRoomClearAllElements", 0, (args, next) => {

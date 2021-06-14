@@ -4,6 +4,7 @@ import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } fr
 import { InvisibilityEarbuds } from "./clubUtils";
 import { BaseModule } from "../moduleManager";
 import { unload } from "../main";
+import { modStorage } from "./storage";
 
 export let allowMode: boolean = false;
 export let developmentMode: boolean = false;
@@ -95,6 +96,13 @@ class ConsoleInterface {
 
 	Unload() {
 		return unload();
+	}
+
+	get storage(): any {
+		if (!developmentMode) {
+			return "Development mode required";
+		}
+		return modStorage;
 	}
 }
 

@@ -1628,6 +1628,9 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
             return getChatroomCharacter(C.MemberNumber);
         }
         load() {
+            patchFunction("InformationSheetRun", {
+                'DrawButton(1815, 765, 90, 90,': 'DrawButton(1815, 800, 90, 90,'
+            });
             hookFunction("InformationSheetRun", 10, (args, next) => {
                 if (this.currentSubscreen !== null) {
                     MainCanvas.textAlign = "left";
@@ -1638,7 +1641,7 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
                 next(args);
                 const C = this.getInformationSheetCharacter();
                 if (C) {
-                    DrawButton(1815, 650, 90, 90, "", "White", icon_BCX, "BCX");
+                    DrawButton(1815, 685, 90, 90, "", "White", icon_BCX, "BCX");
                 }
             });
             hookFunction("InformationSheetClick", 10, (args, next) => {

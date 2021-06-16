@@ -2,7 +2,7 @@ import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { GuiMainMenu } from "../gui/mainmenu";
 import { GuiSubscreen } from "../gui/subscreen";
 import { BaseModule } from "../moduleManager";
-import { hookFunction } from "../patching";
+import { hookFunction, patchFunction } from "../patching";
 import { icon_BCX } from "../resources";
 
 export class ModuleGUI extends BaseModule {
@@ -15,6 +15,9 @@ export class ModuleGUI extends BaseModule {
 	}
 
 	load() {
+		patchFunction("InformationSheetRun", {
+			'DrawButton(1815, 765, 90, 90,': 'DrawButton(1815, 800, 90, 90,'
+		});
 		hookFunction("InformationSheetRun", 10, (args, next) => {
 			if (this.currentSubscreen !== null) {
 				MainCanvas.textAlign = "left";
@@ -26,7 +29,7 @@ export class ModuleGUI extends BaseModule {
 			next(args);
 			const C = this.getInformationSheetCharacter();
 			if (C) {
-				DrawButton(1815, 650, 90, 90, "", "White", icon_BCX, "BCX");
+				DrawButton(1815, 685, 90, 90, "", "White", icon_BCX, "BCX");
 			}
 		});
 

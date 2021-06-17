@@ -1,4 +1,5 @@
 import { VERSION } from "./config";
+import { getPlayerPermissionSettings, PermissionData } from "./modules/authority";
 
 export class ChatroomCharacter {
 	isPlayer(): this is PlayerCharacter {
@@ -27,11 +28,20 @@ export class ChatroomCharacter {
 		}
 		console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
 	}
+
+	getPermissions(): Promise<PermissionData> {
+		// TODO
+		return Promise.reject("Not implemented");
+	}
 }
 
 export class PlayerCharacter extends ChatroomCharacter {
 	override isPlayer(): this is PlayerCharacter {
 		return true;
+	}
+
+	override getPermissions(): Promise<PermissionData> {
+		return Promise.resolve(getPlayerPermissionSettings());
 	}
 }
 
@@ -58,4 +68,13 @@ export function getChatroomCharacter(memberNumber: number): ChatroomCharacter | 
 
 export function getAllCharactersInRoom(): ChatroomCharacter[] {
 	return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber!)).filter(Boolean) as ChatroomCharacter[];
+}
+
+export function getPlayerCharacter(): PlayerCharacter {
+	let character = currentRoomCharacters.find(c => c.Character === Player) as PlayerCharacter | undefined;
+	if (!character) {
+		character = new PlayerCharacter(Player);
+		currentRoomCharacters.push(character);
+	}
+	return character;
 }

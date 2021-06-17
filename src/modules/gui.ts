@@ -1,4 +1,4 @@
-import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { GuiMainMenu } from "../gui/mainmenu";
 import { GuiSubscreen } from "../gui/subscreen";
 import { BaseModule } from "../moduleManager";
@@ -40,7 +40,7 @@ export class ModuleGUI extends BaseModule {
 
 			const C = this.getInformationSheetCharacter();
 			if (C && MouseIn(1815, 650, 90, 90)) {
-				this.currentSubscreen = new GuiMainMenu();
+				this.currentSubscreen = new GuiMainMenu(getPlayerCharacter());
 			} else {
 				return next(args);
 			}

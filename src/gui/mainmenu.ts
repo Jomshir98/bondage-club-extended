@@ -1,14 +1,19 @@
+import { ChatroomCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
+import { module_gui } from "../modules";
+import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiSubscreen } from "./subscreen";
 
-const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: () => void; }[] = [
+const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
 		module: ModuleCategory.Basic,
 		onclick: () => null
 	},
 	{
 		module: ModuleCategory.Authority,
-		onclick: () => null
+		onclick: (C) => {
+			module_gui.currentSubscreen = new GuiAuthorityPermissions(C);
+		}
 	},
 	{
 		module: ModuleCategory.Misc,
@@ -17,6 +22,14 @@ const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: () => void; }[] = [
 ];
 
 export class GuiMainMenu extends GuiSubscreen {
+
+	readonly character: ChatroomCharacter;
+
+	constructor(character: ChatroomCharacter) {
+		super();
+		this.character = character;
+	}
+
 	Run() {
 		DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
@@ -38,7 +51,7 @@ export class GuiMainMenu extends GuiSubscreen {
 			const PX = Math.floor(i / 7);
 			const PY = i % 7;
 			if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90)) {
-				return e.onclick();
+				return e.onclick(this.character);
 			}
 		}
 	}

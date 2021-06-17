@@ -46,6 +46,7 @@ declare function DrawGetImage(Source: string): HTMLImageElement;
 declare function DrawButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, HoveringText?: string, Disabled?: boolean): void;
 declare function DrawText(Text: string, X: number, Y: number, Color: string, BackColor?: string): void;
 declare function DrawTextFit(Text: string, X: number, Y: number, Width: number, Color: string, BackColor?: string): void;
+declare function DrawBackNextButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, BackText?: () => string, NextText?: () => string, Disabled?: boolean, ArrowWidth?: number): void;
 
 // Cheat.js
 declare function CheatImport(): void;

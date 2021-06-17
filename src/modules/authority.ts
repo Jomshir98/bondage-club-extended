@@ -14,16 +14,18 @@ export enum AccessLevel {
 	public = 6
 }
 
-export interface PermissionData {
+export interface PermissionInfo {
 	name: string;
 	category: ModuleCategory;
 	self: boolean;
 	min: AccessLevel;
 }
 
-const permissions: Map<BCX_Permissions, PermissionData> = new Map();
+export type PermissionData = Partial<Record<BCX_Permissions, PermissionInfo>>;
 
-export function registerPermission(name: BCX_Permissions, data: PermissionData) {
+const permissions: Map<BCX_Permissions, PermissionInfo> = new Map();
+
+export function registerPermission(name: BCX_Permissions, data: PermissionInfo) {
 	if (moduleInitPhase !== ModuleInitPhase.init) {
 		throw new Error("Permissions can be registered only during init");
 	}
@@ -95,6 +97,14 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 function permissionsSync() {
 	modStorage.permissions = permissionsMakeBundle();
 	modStorageSync();
+}
+
+export function getPlayerPermissionSettings(): PermissionData {
+	const res: PermissionData = {};
+	for (const [k, v] of permissions.entries()) {
+		res[k] = {...v};
+	}
+	return res;
 }
 
 export class ModuleAuthority extends BaseModule {

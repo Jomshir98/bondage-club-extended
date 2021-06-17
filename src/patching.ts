@@ -1,5 +1,6 @@
-import { FUNCTION_HASHES } from "./config";
+import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
 import { crc32 } from "./utils";
+import { detectOtherMods } from "./utilsClub";
 
 type PatchHook = (args: any[], next: (args: any[]) => any) => any;
 
@@ -44,7 +45,10 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 	let result = patchedFunctions.get(target);
 	if (!result) {
 		const original = (window as any)[target];
-		const expectedHashes = FUNCTION_HASHES[target] ?? [];
+
+		const { NMod } = detectOtherMods();
+
+		const expectedHashes = ( NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[target] ?? [];
 
 		if (typeof original !== "function") {
 			throw new Error(`BCX: Function ${target} to be patched not found`);

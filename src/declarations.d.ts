@@ -10,7 +10,12 @@ interface Character {
 
 // Player.OnlineSettings.BCX?: string;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ModStorage {
+type BCX_Permissions =
+	| "authority_edit_min"
+	| "authority_grant_self"
+	| "authority_revoke_self";
+type PermissionsBundle = Record<string, [boolean, number]>;
 
+interface ModStorage {
+	permissions: PermissionsBundle;
 }

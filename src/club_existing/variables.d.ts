@@ -45,6 +45,7 @@ declare var MainCanvas: CanvasRenderingContext2D;
 declare function DrawGetImage(Source: string): HTMLImageElement;
 declare function DrawButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, HoveringText?: string, Disabled?: boolean): void;
 declare function DrawText(Text: string, X: number, Y: number, Color: string, BackColor?: string): void;
+declare function DrawTextFit(Text: string, X: number, Y: number, Width: number, Color: string, BackColor?: string): void;
 
 // Cheat.js
 declare function CheatImport(): void;

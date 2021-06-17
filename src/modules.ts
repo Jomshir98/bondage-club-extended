@@ -1,5 +1,6 @@
 import { registerModule } from "./moduleManager";
 
+import { ModuleAuthority } from "./modules/authority";
 import { ModuleChatroom } from "./modules/chatroom";
 import { ModuleClubUtils } from "./modules/clubUtils";
 import { ModuleCommands } from "./modules/commands";
@@ -11,6 +12,7 @@ import { ModuleStorage } from "./modules/storage";
 import { ModuleVersionCheck } from "./modules/versionCheck";
 import { ModuleWardrobe } from "./modules/wardrobe";
 
+export const module_authority = registerModule(new ModuleAuthority());
 export const module_chatroom = registerModule(new ModuleChatroom());
 export const module_clubUtils = registerModule(new ModuleClubUtils());
 export const module_commands = registerModule(new ModuleCommands());

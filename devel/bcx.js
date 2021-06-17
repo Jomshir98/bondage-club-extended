@@ -135,31 +135,56 @@ window.BCX_Loaded = false;
     const VERSION = "0.1.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
-        AppearanceClick: ["CA4ED810", "B895612C"],
-        AppearanceRun: ["904E8E84", "791E142F"],
+        AppearanceClick: ["CA4ED810"],
+        AppearanceRun: ["904E8E84", "066E8E43"],
         AsylumEntranceCanWander: ["3F5F4041"],
-        ChatRoomCanLeave: ["B964B0B0", "7EDA9A86"],
-        ChatRoomClearAllElements: ["D1E1F8C3", "9EA1595C", "C2131E9B"],
-        ChatRoomCreateElement: ["4837C2F6", "76299AEC"],
-        ChatRoomDrawCharacterOverlay: ["1E1A1B60", "10CE4173"],
-        ChatRoomDrawFriendList: ["2A9BD99D", "B35AFCDF"],
-        ChatRoomKeyDown: ["C6EEC498", "F457D077"],
-        ChatRoomMessage: ["2C6E4EC3", "AA8D20E0", "DDC933C5"],
-        ChatRoomSendChat: ["39B06D87", "385B9E9C"],
+        ChatRoomCanLeave: ["B964B0B0"],
+        ChatRoomClearAllElements: ["D1E1F8C3", "D0FE8299"],
+        ChatRoomCreateElement: ["4837C2F6", "F1D4043C"],
+        ChatRoomDrawCharacterOverlay: ["1E1A1B60"],
+        ChatRoomKeyDown: ["C6EEC498"],
+        ChatRoomMessage: ["2C6E4EC3", "FF31370D"],
+        ChatRoomSendChat: ["39B06D87", "589B50FD"],
         CheatImport: ["412422CC", "1ECB0CC4"],
-        DialogDrawExpressionMenu: ["071C32ED", "EEFB3D22"],
-        DialogDrawItemMenu: ["E0313EBF", "7C83D23C"],
-        DialogDrawPoseMenu: ["6145B7D7", "4B146E82"],
-        ElementIsScrolledToEnd: ["064E4232", "D28B0638"],
-        ExtendedItemDraw: ["486A52DF", "AABA9073", "9256549A"],
-        InformationSheetClick: ["39AD580B", "E535609B"],
-        InformationSheetExit: ["4BC15B0A", "75521907"],
-        InformationSheetRun: ["58B7879C", "19872251"],
+        DialogDrawExpressionMenu: ["071C32ED"],
+        DialogDrawItemMenu: ["E0313EBF"],
+        DialogDrawPoseMenu: ["6145B7D7"],
+        ElementIsScrolledToEnd: ["064E4232"],
+        ExtendedItemDraw: ["486A52DF", "59BAFBC6"],
+        InformationSheetClick: ["39AD580B"],
+        InformationSheetExit: ["4BC15B0A"],
+        InformationSheetRun: ["58B7879C", "B96EA18A"],
         LoginMistressItems: ["984A6AD9"],
-        LoginResponse: ["16C2C651", "E77283C0"],
+        LoginResponse: ["16C2C651", "2E1916A1"],
         LoginStableItems: ["C3F50DD1"],
-        ServerAccountBeep: ["0057EF1D", "96F8C34D", "CE3BE4A4"],
-        SpeechGarble: ["1BC8E005", "B3A5973D", "99C1A7BA"]
+        ServerAccountBeep: ["0057EF1D"],
+        SpeechGarble: ["1BC8E005", "CF18316C"]
+    };
+    const FUNCTION_HASHES_NMOD = {
+        AppearanceClick: ["B895612C"],
+        AppearanceRun: ["791E142F"],
+        AsylumEntranceCanWander: ["3F5F4041"],
+        ChatRoomCanLeave: ["7EDA9A86"],
+        ChatRoomClearAllElements: ["C2131E9B"],
+        ChatRoomCreateElement: ["76299AEC"],
+        ChatRoomDrawFriendList: ["327DA1B8"],
+        ChatRoomKeyDown: ["D41B4525"],
+        ChatRoomMessage: ["4BC817B8"],
+        ChatRoomSendChat: ["385B9E9C"],
+        CheatImport: ["1ECB0CC4"],
+        DialogDrawExpressionMenu: ["EEFB3D22"],
+        DialogDrawItemMenu: ["7C83D23C"],
+        DialogDrawPoseMenu: ["4B146E82"],
+        ElementIsScrolledToEnd: ["D28B0638"],
+        ExtendedItemDraw: ["9256549A"],
+        InformationSheetClick: ["E535609B"],
+        InformationSheetExit: ["75521907"],
+        InformationSheetRun: ["19872251"],
+        LoginMistressItems: ["984A6AD9"],
+        LoginResponse: ["E77283C0"],
+        LoginStableItems: ["C3F50DD1"],
+        ServerAccountBeep: ["A6DFD3B9"],
+        SpeechGarble: ["99C1A7BA"]
     };
 
     const encoder = new TextEncoder();
@@ -239,7 +264,8 @@ window.BCX_Loaded = false;
         let result = patchedFunctions.get(target);
         if (!result) {
             const original = window[target];
-            const expectedHashes = (_a = FUNCTION_HASHES[target]) !== null && _a !== void 0 ? _a : [];
+            const { NMod } = detectOtherMods();
+            const expectedHashes = (_a = (NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[target]) !== null && _a !== void 0 ? _a : [];
             if (typeof original !== "function") {
                 throw new Error(`BCX: Function ${target} to be patched not found`);
             }
@@ -313,6 +339,22 @@ window.BCX_Loaded = false;
             // Empty
         }
     }
+    var ModuleCategory;
+    (function (ModuleCategory) {
+        ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
+        ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
+        ModuleCategory[ModuleCategory["Misc"] = 2] = "Misc";
+    })(ModuleCategory || (ModuleCategory = {}));
+    const MODULE_NAMES = {
+        [ModuleCategory.Basic]: "Basic",
+        [ModuleCategory.Authority]: "Authority",
+        [ModuleCategory.Misc]: "Miscellaneous"
+    };
+    const MODULE_ICONS = {
+        [ModuleCategory.Basic]: "Icons/General.png",
+        [ModuleCategory.Authority]: "Icons/Security.png",
+        [ModuleCategory.Misc]: "Icons/Random.png"
+    };
     let moduleInitPhase = 0 /* construct */;
     const modules = [];
     function registerModule(module) {
@@ -392,6 +434,172 @@ window.BCX_Loaded = false;
         DrawScreen = "";
         delete window.BCX_Loaded;
         console.log("BCX: Unloaded.");
+    }
+
+    let modStorage = {};
+    function modStorageSync() {
+        if (!Player.OnlineSettings) {
+            console.error("BCX: Player OnlineSettings not defined during storage sync!");
+            return;
+        }
+        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
+        if (typeof ServerAccountUpdate !== "undefined") {
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+        }
+        else {
+            console.debug("BCX: Old sync method");
+            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+        }
+    }
+    class ModuleStorage extends BaseModule {
+        init() {
+            var _a;
+            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+            if (typeof saved === "string") {
+                try {
+                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
+                    if (!isObject(storage)) {
+                        throw new Error("Bad data");
+                    }
+                    modStorage = storage;
+                }
+                catch (error) {
+                    console.error("BCX: Error while loading saved data, full reset.", error);
+                }
+            }
+            else {
+                console.log("BCX: First time init");
+            }
+        }
+        run() {
+            modStorageSync();
+        }
+    }
+
+    var AccessLevel;
+    (function (AccessLevel) {
+        AccessLevel[AccessLevel["self"] = 0] = "self";
+        AccessLevel[AccessLevel["clubowner"] = 1] = "clubowner";
+        AccessLevel[AccessLevel["owner"] = 2] = "owner";
+        AccessLevel[AccessLevel["lover"] = 3] = "lover";
+        AccessLevel[AccessLevel["mistress"] = 4] = "mistress";
+        AccessLevel[AccessLevel["whitelist"] = 5] = "whitelist";
+        AccessLevel[AccessLevel["public"] = 6] = "public";
+    })(AccessLevel || (AccessLevel = {}));
+    const permissions = new Map();
+    function registerPermission(name, data) {
+        if (moduleInitPhase !== 1 /* init */) {
+            throw new Error("Permissions can be registered only during init");
+        }
+        if (permissions.has(name)) {
+            throw new Error(`Permission "${name}" already defined!`);
+        }
+        permissions.set(name, data);
+    }
+    function getCharacterAccessLevel(character) {
+        if (character.isPlayer())
+            return AccessLevel.self;
+        if (character.MemberNumber !== null) {
+            if (Player.IsOwnedByMemberNumber(character.MemberNumber))
+                return AccessLevel.clubowner;
+            if (Player.IsLoverOfMemberNumber(character.MemberNumber))
+                return AccessLevel.lover;
+            if (Player.WhiteList.includes(character.MemberNumber))
+                return AccessLevel.whitelist;
+        }
+        return AccessLevel.public;
+    }
+    function checkPermissionAccess(permission, character) {
+        const permData = permissions.get(permission);
+        if (!permData) {
+            console.error(new Error(`Check for unknown permission "${permission}"`));
+            return false;
+        }
+        if (character.isPlayer()) {
+            return permData.self || permData.min === AccessLevel.self;
+        }
+        // TODO: Check item access
+        const accessLevel = getCharacterAccessLevel(character);
+        return accessLevel <= permData.min;
+    }
+    function permissionsMakeBundle() {
+        const res = {};
+        for (const [k, v] of permissions.entries()) {
+            res[k] = [v.self, v.min];
+        }
+        return res;
+    }
+    function setPermissionSelfAccess(permission, self) {
+        const permData = permissions.get(permission);
+        if (!permData) {
+            throw new Error(`Attempt to edit unknown permission "${permission}"`);
+        }
+        const last = permData.self;
+        permData.self = self || permData.min === AccessLevel.self;
+        if (permData.self !== last) {
+            permissionsSync();
+        }
+    }
+    function setPermissionMinAccess(permission, min) {
+        const permData = permissions.get(permission);
+        if (!permData) {
+            throw new Error(`Attempt to edit unknown permission "${permission}"`);
+        }
+        const last = permData.min;
+        permData.min = min;
+        if (min === AccessLevel.self) {
+            permData.self = true;
+        }
+        if (permData.min !== last) {
+            permissionsSync();
+        }
+    }
+    function permissionsSync() {
+        modStorage.permissions = permissionsMakeBundle();
+        modStorageSync();
+    }
+    class ModuleAuthority extends BaseModule {
+        init() {
+            registerPermission("authority_grant_self", {
+                name: "Allow granting self access",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("authority_revoke_self", {
+                name: "Allow forbidding self access",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("authority_edit_min", {
+                name: "Allow minimal access modification",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.self
+            });
+        }
+        load() {
+            if (isObject(modStorage.permissions)) {
+                for (const [k, v] of Object.entries(modStorage.permissions)) {
+                    const perm = permissions.get(k);
+                    if (!Array.isArray(v) || typeof v[0] !== "boolean" || typeof v[1] !== "number") {
+                        console.warn(`BCX: Storage: bad permission ${k}`);
+                    }
+                    else if (AccessLevel[v[1]] === undefined) {
+                        console.warn(`BCX: Storage: bad permission ${k} level ${v[1]}`);
+                    }
+                    else if (perm === undefined) {
+                        console.warn(`BCX: Storage: unknown permission ${k}`);
+                    }
+                    else {
+                        perm.self = v[0];
+                        perm.min = v[1];
+                    }
+                }
+            }
+            modStorage.permissions = permissionsMakeBundle();
+        }
     }
 
     const hiddenMessageHandlers = new Map();
@@ -1016,46 +1224,6 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
         }
     }
 
-    let modStorage = {};
-    function modStorageSync() {
-        if (!Player.OnlineSettings) {
-            console.error("BCX: Player OnlineSettings not defined during storage sync!");
-            return;
-        }
-        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
-        if (typeof ServerAccountUpdate !== "undefined") {
-            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
-        }
-        else {
-            console.debug("BCX: Old sync method");
-            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-        }
-    }
-    class ModuleStorage extends BaseModule {
-        init() {
-            var _a;
-            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
-            if (typeof saved === "string") {
-                try {
-                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
-                    if (!isObject(storage)) {
-                        throw new Error("Bad data");
-                    }
-                    modStorage = storage;
-                }
-                catch (error) {
-                    console.error("BCX: Error while loading saved data, full reset.", error);
-                }
-            }
-            else {
-                console.log("BCX: First time init");
-            }
-        }
-        run() {
-            modStorageSync();
-        }
-    }
-
     let allowMode = false;
     let developmentMode = false;
     let antigarble = 0;
@@ -1605,14 +1773,43 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
         }
     }
 
+    const MAIN_MENU_ITEMS = [
+        {
+            module: ModuleCategory.Basic,
+            onclick: () => null
+        },
+        {
+            module: ModuleCategory.Authority,
+            onclick: () => null
+        },
+        {
+            module: ModuleCategory.Misc,
+            onclick: () => null
+        }
+    ];
     class GuiMainMenu extends GuiSubscreen {
         Run() {
             DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+            for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
+                const e = MAIN_MENU_ITEMS[i];
+                const PX = Math.floor(i / 7);
+                const PY = i % 7;
+                DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", "White", MODULE_ICONS[e.module]);
+                DrawTextFit(MODULE_NAMES[e.module], 250 + 420 * PX, 205 + 110 * PY, 310, "Black");
+            }
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
-                this.Exit();
+                return this.Exit();
+            for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
+                const e = MAIN_MENU_ITEMS[i];
+                const PX = Math.floor(i / 7);
+                const PY = i % 7;
+                if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90)) {
+                    return e.onclick();
+                }
+            }
         }
     }
 
@@ -1757,6 +1954,7 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
         }
     }
 
+    const module_authority = registerModule(new ModuleAuthority());
     const module_chatroom = registerModule(new ModuleChatroom());
     const module_clubUtils = registerModule(new ModuleClubUtils());
     const module_commands = registerModule(new ModuleCommands());

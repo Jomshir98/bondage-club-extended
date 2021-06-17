@@ -558,6 +558,13 @@ window.BCX_Loaded = false;
         modStorage.permissions = permissionsMakeBundle();
         modStorageSync();
     }
+    function getPlayerPermissionSettings() {
+        const res = {};
+        for (const [k, v] of permissions.entries()) {
+            res[k] = { ...v };
+        }
+        return res;
+    }
     class ModuleAuthority extends BaseModule {
         init() {
             registerPermission("authority_grant_self", {
@@ -826,6 +833,68 @@ PFm2cZvVPZY56EVp9vKvfqYLa5pmJw8fbCLbcVnGeAl6PSu3L+cXiMl5R07tM43LNtpWOnyBLk3y
 myofK1isU1ysF+cKelHLmKMM0HBxR+VhW4OuqS2TJ7WNLES99DXarxMhYZeVQSJRdX9Y8k1Bj8UI
 Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
 `.replaceAll("\n", "");
+    const icon_OwnerList = `data:image/png;base64,
+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
+xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
+`.replaceAll("\n", "");
 
     class ChatroomCharacter {
         constructor(character) {
@@ -849,10 +918,17 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
         toString() {
             return `${this.Name} (${this.MemberNumber})`;
         }
+        getPermissions() {
+            // TODO
+            return Promise.reject("Not implemented");
+        }
     }
     class PlayerCharacter extends ChatroomCharacter {
         isPlayer() {
             return true;
+        }
+        getPermissions() {
+            return Promise.resolve(getPlayerPermissionSettings());
         }
     }
     const currentRoomCharacters = [];
@@ -877,6 +953,14 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
     }
     function getAllCharactersInRoom() {
         return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber)).filter(Boolean);
+    }
+    function getPlayerCharacter() {
+        let character = currentRoomCharacters.find(c => c.Character === Player);
+        if (!character) {
+            character = new PlayerCharacter(Player);
+            currentRoomCharacters.push(character);
+        }
+        return character;
     }
 
     class ChatRoomStatusManager {
@@ -1773,6 +1857,143 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
         }
     }
 
+    const PER_PAGE_COUNT = 6;
+    class GuiAuthorityPermissions extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.permissionData = null;
+            this.failed = false;
+            this.permList = [];
+            this.page = 0;
+            this.character = character;
+            character.getPermissions().then(res => {
+                this.permissionData = res;
+                this.rebuildList();
+            }, err => {
+                console.error(`BCX: Failed to get permission info for ${character}`, err);
+                this.failed = true;
+            });
+        }
+        rebuildList() {
+            const categories = new Map();
+            this.permList = [];
+            this.page = 0;
+            if (this.permissionData === null) {
+                return;
+            }
+            for (const [k, v] of Object.entries(this.permissionData)) {
+                let permdata = categories.get(v.category);
+                if (!permdata) {
+                    categories.set(v.category, permdata = {});
+                }
+                permdata[k] = v;
+            }
+            for (const [category, data] of Array.from(categories.entries()).sort((a, b) => a[0] - b[0])) {
+                this.permList.push({
+                    separator: true,
+                    name: MODULE_NAMES[category]
+                });
+                for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+                    this.permList.push({
+                        separator: false,
+                        permission: k,
+                        permissionInfo: v
+                    });
+                }
+            }
+        }
+        Run() {
+            if (this.permissionData !== null) {
+                DrawText("Self", 1250, 200, "Black");
+                DrawText("Lowest permitted role", 1350, 200, "Black");
+                MainCanvas.beginPath();
+                MainCanvas.moveTo(1345, 275);
+                MainCanvas.lineTo(1345, 275 + 600);
+                MainCanvas.stroke();
+                DrawText("Filter", 1200, 150, "Black");
+                DrawButton(1300, 150, 300, 64, "", "White", undefined, undefined, true);
+                for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                    const i = this.page * PER_PAGE_COUNT + off;
+                    if (i >= this.permList.length)
+                        break;
+                    const e = this.permList[i];
+                    const Y = 275 + off * 100;
+                    if (e.separator) {
+                        DrawText(e.name, 200, Y + 32, "Black", "Black");
+                    }
+                    else {
+                        DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
+                            Height: 64,
+                            Width: 64
+                        });
+                        // Permission name
+                        DrawButton(200, Y, 1000, 64, "", "White");
+                        DrawTextFit(e.permissionInfo.name, 210, Y + 32, 990, "Black");
+                        // Self checkbox
+                        DrawButton(1250, Y, 90, 90, "", "White", e.permissionInfo.self ? "Icons/Checked.png" : "");
+                        // Min access
+                        DrawButton(1350, Y, 150, 64, "", "White");
+                        MainCanvas.textAlign = "center";
+                        DrawTextFit(AccessLevel[e.permissionInfo.min], 1360, Y + 32, 150, "Black");
+                        MainCanvas.textAlign = "left";
+                    }
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
+                MainCanvas.textAlign = "center";
+                DrawBackNextButton(1675, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+                MainCanvas.textAlign = "left";
+            }
+            DrawText("- Authority: Permissions -", 125, 125, "Black", "Gray");
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+            DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList);
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (this.permissionData !== null) {
+                for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                    const i = this.page * PER_PAGE_COUNT + off;
+                    if (i >= this.permList.length)
+                        break;
+                    const e = this.permList[i];
+                    const Y = 275 + i * 100;
+                    if (!e.separator) {
+                        // Permission name
+                        if (MouseIn(200, Y, 1000, 64)) {
+                            // TODO
+                        }
+                        // Self checkbox
+                        if (MouseIn(1250, Y, 90, 90)) {
+                            // TODO
+                        }
+                        // Min access
+                        if (MouseIn(1350, Y, 150, 64)) {
+                            // TODO
+                        }
+                    }
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
+                if (MouseIn(1675, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = totalPages - 1;
+                    }
+                }
+                else if (MouseIn(1825, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+    }
+
     const MAIN_MENU_ITEMS = [
         {
             module: ModuleCategory.Basic,
@@ -1780,7 +2001,9 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
         },
         {
             module: ModuleCategory.Authority,
-            onclick: () => null
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiAuthorityPermissions(C);
+            }
         },
         {
             module: ModuleCategory.Misc,
@@ -1788,6 +2011,10 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
         }
     ];
     class GuiMainMenu extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
         Run() {
             DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
@@ -1807,7 +2034,7 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
                 const PX = Math.floor(i / 7);
                 const PY = i % 7;
                 if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90)) {
-                    return e.onclick();
+                    return e.onclick(this.character);
                 }
             }
         }
@@ -1847,7 +2074,7 @@ Vf3Prs+si28Oxyrs186+j4rnjTI88dYRrUd78R9j+f8DAFFTI9BZXoPgAAAAAElFTkSuQmCC
                 }
                 const C = this.getInformationSheetCharacter();
                 if (C && MouseIn(1815, 650, 90, 90)) {
-                    this.currentSubscreen = new GuiMainMenu();
+                    this.currentSubscreen = new GuiMainMenu(getPlayerCharacter());
                 }
                 else {
                     return next(args);

@@ -232,6 +232,9 @@ window.BCX_Loaded = false;
         const seen = new Set();
         return arr.filter(i => !seen.has(i) && seen.add(i));
     }
+    function capitalizeFirstLetter(str) {
+        return str.charAt(0).toLocaleUpperCase() + str.slice(1);
+    }
     const clipboardAvailable = Boolean(navigator.clipboard);
 
     const patchedFunctions = new Map();
@@ -924,6 +927,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
     class PlayerCharacter extends ChatroomCharacter {
+        constructor() {
+            super(...arguments);
+            /** HACK: Otherwise TS wrongly assumes PlayerCharacter to be identical to ChatroomCharacter */
+            this.playerObject = true;
+        }
         isPlayer() {
             return true;
         }
@@ -1846,6 +1854,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
 
     class GuiSubscreen {
+        Load() {
+            // Empty
+        }
         Run() {
             // Empty
         }
@@ -1854,6 +1865,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         Exit() {
             module_gui.currentSubscreen = null;
+        }
+        Unload() {
+            // Empty
         }
     }
 
@@ -1866,11 +1880,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.permList = [];
             this.page = 0;
             this.character = character;
-            character.getPermissions().then(res => {
+        }
+        Load() {
+            this.permissionData = null;
+            this.rebuildList();
+            this.character.getPermissions().then(res => {
                 this.permissionData = res;
                 this.rebuildList();
             }, err => {
-                console.error(`BCX: Failed to get permission info for ${character}`, err);
+                console.error(`BCX: Failed to get permission info for ${this.character}`, err);
                 this.failed = true;
             });
         }
@@ -1878,11 +1896,26 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             const categories = new Map();
             this.permList = [];
             this.page = 0;
+            let Input = document.getElementById("BCX_PermissionsFilter");
             if (this.permissionData === null) {
+                if (Input) {
+                    Input.remove();
+                }
                 return;
             }
+            if (!Input) {
+                Input = ElementCreateInput("BCX_PermissionsFilter", "text", "", "30");
+                Input.addEventListener("input", ev => {
+                    this.rebuildList();
+                });
+            }
+            const filter = Input.value.trim().toLocaleLowerCase().split(" ");
             for (const [k, v] of Object.entries(this.permissionData)) {
                 let permdata = categories.get(v.category);
+                if (filter.some(i => !MODULE_NAMES[v.category].toLocaleLowerCase().includes(i) &&
+                    !v.name.toLocaleLowerCase().includes(i) &&
+                    !k.toLocaleLowerCase().includes(i)))
+                    continue;
                 if (!permdata) {
                     categories.set(v.category, permdata = {});
                 }
@@ -1903,15 +1936,22 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
         }
         Run() {
+            var _a;
             if (this.permissionData !== null) {
-                DrawText("Self", 1250, 200, "Black");
-                DrawText("Lowest permitted role", 1350, 200, "Black");
+                DrawText("Self is permitted", 1041, 235, "Black");
+                DrawText("Lowest permitted role", 1370, 235, "Black");
                 MainCanvas.beginPath();
-                MainCanvas.moveTo(1345, 275);
-                MainCanvas.lineTo(1345, 275 + 600);
+                MainCanvas.moveTo(1335, 230);
+                MainCanvas.lineTo(1335, 230 + 610);
                 MainCanvas.stroke();
-                DrawText("Filter", 1200, 150, "Black");
-                DrawButton(1300, 150, 300, 64, "", "White", undefined, undefined, true);
+                // filter
+                DrawText("Filter:", 130, 215, "Black");
+                ElementPosition("BCX_PermissionsFilter", 550, 210, 600, 64);
+                //reset button
+                if ((_a = document.getElementById("BCX_PermissionsFilter")) === null || _a === void 0 ? void 0 : _a.value) {
+                    DrawButton(870, 182, 64, 64, "", "White");
+                    DrawTextFit("X", 889, 217, 54, "Black");
+                }
                 for (let off = 0; off < PER_PAGE_COUNT; off++) {
                     const i = this.page * PER_PAGE_COUNT + off;
                     if (i >= this.permList.length)
@@ -1919,7 +1959,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     const e = this.permList[i];
                     const Y = 275 + off * 100;
                     if (e.separator) {
-                        DrawText(e.name, 200, Y + 32, "Black", "Black");
+                        // idea to highlight the section separator
+                        MainCanvas.beginPath();
+                        MainCanvas.rect(125, Y, 1173, 64);
+                        MainCanvas.fillStyle = "#eeeeee";
+                        MainCanvas.fill();
+                        DrawText(`${e.name} module permissions`, 140, Y + 34, "Black");
                     }
                     else {
                         DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
@@ -1928,30 +1973,39 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         });
                         // Permission name
                         DrawButton(200, Y, 1000, 64, "", "White");
-                        DrawTextFit(e.permissionInfo.name, 210, Y + 32, 990, "Black");
+                        DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
                         // Self checkbox
-                        DrawButton(1250, Y, 90, 90, "", "White", e.permissionInfo.self ? "Icons/Checked.png" : "");
+                        DrawButton(1235, Y, 64, 64, "", "White", e.permissionInfo.self ? "Icons/Checked.png" : "");
                         // Min access
-                        DrawButton(1350, Y, 150, 64, "", "White");
+                        DrawButton(1370, Y, 170, 64, "", "White");
                         MainCanvas.textAlign = "center";
-                        DrawTextFit(AccessLevel[e.permissionInfo.min], 1360, Y + 32, 150, "Black");
+                        DrawTextFit(capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
                         MainCanvas.textAlign = "left";
                     }
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
+                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT));
                 MainCanvas.textAlign = "center";
-                DrawBackNextButton(1675, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+                DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
                 MainCanvas.textAlign = "left";
             }
-            DrawText("- Authority: Permissions -", 125, 125, "Black", "Gray");
+            DrawText(`- Authority: Permission Settings for ${this.character.Name} (${this.character.isPlayer() ? "Self" : this.character.MemberNumber}) -`, 125, 125, "Black", "Gray");
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
             DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList);
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
                 return this.Exit();
+            // Owner list
+            if (MouseIn(815, 190, 90, 90)) {
+                // TODO
+            }
             if (this.permissionData !== null) {
+                //reset button
+                const elem = document.getElementById("BCX_PermissionsFilter");
+                if (MouseIn(870, 182, 64, 64) && elem) {
+                    elem.value = "";
+                }
                 for (let off = 0; off < PER_PAGE_COUNT; off++) {
                     const i = this.page * PER_PAGE_COUNT + off;
                     if (i >= this.permList.length)
@@ -1964,24 +2018,24 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                             // TODO
                         }
                         // Self checkbox
-                        if (MouseIn(1250, Y, 90, 90)) {
+                        if (MouseIn(1235, Y, 64, 64)) {
                             // TODO
                         }
                         // Min access
-                        if (MouseIn(1350, Y, 150, 64)) {
+                        if (MouseIn(1370, Y, 170, 64)) {
                             // TODO
                         }
                     }
                 }
                 // Pagination
                 const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
-                if (MouseIn(1675, 800, 150, 90)) {
+                if (MouseIn(1455, 800, 150, 90)) {
                     this.page--;
                     if (this.page < 0) {
-                        this.page = totalPages - 1;
+                        this.page = Math.max(totalPages - 1, 0);
                     }
                 }
-                else if (MouseIn(1825, 800, 150, 90)) {
+                else if (MouseIn(1605, 800, 150, 90)) {
                     this.page++;
                     if (this.page >= totalPages) {
                         this.page = 0;
@@ -1991,6 +2045,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         Exit() {
             module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Unload() {
+            ElementRemove("BCX_PermissionsFilter");
         }
     }
 
@@ -2043,7 +2100,19 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     class ModuleGUI extends BaseModule {
         constructor() {
             super(...arguments);
-            this.currentSubscreen = null;
+            this._currentSubscreen = null;
+        }
+        get currentSubscreen() {
+            return this._currentSubscreen;
+        }
+        set currentSubscreen(subscreen) {
+            if (this._currentSubscreen !== null) {
+                this._currentSubscreen.Unload();
+            }
+            this._currentSubscreen = subscreen;
+            if (this._currentSubscreen !== null) {
+                this._currentSubscreen.Load();
+            }
         }
         getInformationSheetCharacter() {
             const C = InformationSheetSelection;
@@ -2055,10 +2124,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             patchFunction("InformationSheetRun", {
                 'DrawButton(1815, 765, 90, 90,': 'DrawButton(1815, 800, 90, 90,'
             });
+            patchFunction("InformationSheetClick", {
+                'MouseIn(1815, 765, 90, 90)': 'MouseIn(1815, 800, 90, 90)'
+            });
             hookFunction("InformationSheetRun", 10, (args, next) => {
-                if (this.currentSubscreen !== null) {
+                if (this._currentSubscreen !== null) {
                     MainCanvas.textAlign = "left";
-                    this.currentSubscreen.Run();
+                    this._currentSubscreen.Run();
                     MainCanvas.textAlign = "center";
                     return;
                 }
@@ -2069,23 +2141,26 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             });
             hookFunction("InformationSheetClick", 10, (args, next) => {
-                if (this.currentSubscreen !== null) {
-                    return this.currentSubscreen.Click();
+                if (this._currentSubscreen !== null) {
+                    return this._currentSubscreen.Click();
                 }
                 const C = this.getInformationSheetCharacter();
-                if (C && MouseIn(1815, 650, 90, 90)) {
-                    this.currentSubscreen = new GuiMainMenu(getPlayerCharacter());
+                if (C && MouseIn(1815, 685, 90, 90)) {
+                    this.currentSubscreen = new GuiMainMenu(C);
                 }
                 else {
                     return next(args);
                 }
             });
             hookFunction("InformationSheetExit", 10, (args, next) => {
-                if (this.currentSubscreen !== null) {
-                    return this.currentSubscreen.Exit();
+                if (this._currentSubscreen !== null) {
+                    return this._currentSubscreen.Exit();
                 }
                 return next(args);
             });
+        }
+        unload() {
+            this.currentSubscreen = null;
         }
     }
 

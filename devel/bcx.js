@@ -940,9 +940,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
     const currentRoomCharacters = [];
+    function cleanOldCharacters() {
+        for (let i = currentRoomCharacters.length - 1; i >= 0; i--) {
+            if (!currentRoomCharacters[i].isPlayer() && !ChatRoomCharacter.includes(currentRoomCharacters[i].Character)) {
+                currentRoomCharacters.splice(i, 1);
+            }
+        }
+    }
     function getChatroomCharacter(memberNumber) {
         if (typeof memberNumber !== "number")
             return null;
+        cleanOldCharacters();
         let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
         if (!character) {
             if (Player.MemberNumber === memberNumber) {

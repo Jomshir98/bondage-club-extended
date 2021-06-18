@@ -28,6 +28,9 @@ declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: 
 declare function ElementIsScrolledToEnd(ID: string): boolean;
 declare function ElementScrollToEnd(ID: string): void;
 declare function ElementFocus(ID: string): void;
+declare function ElementCreateInput(ID: string, Type: string, Value: string, MaxLength: string): HTMLInputElement;
+declare function ElementPosition(ElementID: string, X: number, Y: number, W: number, H?: number): void;
+declare function ElementRemove(ID: string): void;
 
 // Dialog.js
 declare var DialogTextDefault: string;

@@ -36,7 +36,7 @@ export function registerPermission(name: BCX_Permissions, data: PermissionInfo) 
 }
 
 export function getCharacterAccessLevel(character: ChatroomCharacter): AccessLevel {
-	if (character.isPlayer() as boolean) return AccessLevel.self;
+	if (character.isPlayer()) return AccessLevel.self;
 	if (character.MemberNumber !== null) {
 		if (Player.IsOwnedByMemberNumber(character.MemberNumber)) return AccessLevel.clubowner;
 		if (Player.IsLoverOfMemberNumber(character.MemberNumber)) return AccessLevel.lover;

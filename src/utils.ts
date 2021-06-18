@@ -52,4 +52,8 @@ export function arrayUnique<T>(arr: T[]): T[] {
 	return arr.filter(i => !seen.has(i) && seen.add(i));
 }
 
+export function capitalizeFirstLetter(str: string): string {
+	return str.charAt(0).toLocaleUpperCase() + str.slice(1);
+}
+
 export const clipboardAvailable = Boolean(navigator.clipboard);

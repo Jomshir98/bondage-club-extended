@@ -3,6 +3,7 @@ import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
 import { module_gui } from "../modules";
 import { AccessLevel, PermissionData, PermissionInfo } from "../modules/authority";
 import { icon_OwnerList } from "../resources";
+import { capitalizeFirstLetter } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
@@ -31,12 +32,16 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+	}
 
-		character.getPermissions().then(res => {
+	Load() {
+		this.permissionData = null;
+		this.rebuildList();
+		this.character.getPermissions().then(res => {
 			this.permissionData = res;
 			this.rebuildList();
 		}, err => {
-			console.error(`BCX: Failed to get permission info for ${character}`, err);
+			console.error(`BCX: Failed to get permission info for ${this.character}`, err);
 			this.failed = true;
 		});
 	}
@@ -45,11 +50,30 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		const categories: Map<ModuleCategory, PermissionData> = new Map();
 		this.permList = [];
 		this.page = 0;
+		let Input = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
 		if (this.permissionData === null) {
+			if (Input) {
+				Input.remove();
+			}
 			return;
 		}
+
+		if (!Input) {
+			Input = ElementCreateInput("BCX_PermissionsFilter", "text", "", "30");
+			Input.addEventListener("input", ev => {
+				this.rebuildList();
+			});
+		}
+
+		const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+
 		for (const [k, v] of Object.entries(this.permissionData)) {
 			let permdata = categories.get(v.category);
+			if (filter.some(i =>
+				!MODULE_NAMES[v.category].toLocaleLowerCase().includes(i) &&
+				!v.name.toLocaleLowerCase().includes(i) &&
+				!k.toLocaleLowerCase().includes(i)
+			)) continue;
 			if (!permdata) {
 				categories.set(v.category, permdata = {});
 			}
@@ -73,15 +97,22 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	Run() {
 		if (this.permissionData !== null) {
 
-			DrawText("Self", 1250, 200, "Black");
-			DrawText("Lowest permitted role", 1350, 200, "Black");
+			DrawText("Self is permitted", 1041, 235, "Black");
+			DrawText("Lowest permitted role", 1370, 235, "Black");
 			MainCanvas.beginPath();
-			MainCanvas.moveTo(1345, 275);
-			MainCanvas.lineTo(1345, 275 + 600);
+			MainCanvas.moveTo(1335, 230);
+			MainCanvas.lineTo(1335, 230 + 610);
 			MainCanvas.stroke();
 
-			DrawText("Filter", 1200, 150, "Black");
-			DrawButton(1300, 150, 300, 64, "", "White", undefined, undefined, true);
+			// filter
+			DrawText("Filter:", 130, 215, "Black");
+			ElementPosition("BCX_PermissionsFilter", 550, 210, 600, 64);
+
+			//reset button
+			if ((document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined)?.value) {
+				DrawButton(870, 182, 64, 64, "", "White");
+				DrawTextFit("X", 889, 217, 54, "Black");
+			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
 				const i = this.page * PER_PAGE_COUNT + off;
@@ -91,7 +122,12 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 				const Y = 275 + off * 100;
 
 				if (e.separator) {
-					DrawText(e.name, 200, Y + 32, "Black", "Black");
+					// idea to highlight the section separator
+					MainCanvas.beginPath();
+					MainCanvas.rect(125, Y, 1173, 64);
+					MainCanvas.fillStyle = "#eeeeee";
+					MainCanvas.fill();
+					DrawText(`${e.name} module permissions`, 140, Y + 34, "Black");
 				} else {
 					DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
 						Height: 64,
@@ -99,25 +135,24 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					});
 					// Permission name
 					DrawButton(200, Y, 1000, 64, "", "White");
-					DrawTextFit(e.permissionInfo.name, 210, Y + 32, 990, "Black");
+					DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
 					// Self checkbox
-					DrawButton(1250, Y, 90, 90, "", "White", e.permissionInfo.self ? "Icons/Checked.png" : "");
+					DrawButton(1235, Y, 64, 64, "", "White", e.permissionInfo.self ? "Icons/Checked.png" : "");
 					// Min access
-					DrawButton(1350, Y, 150, 64, "", "White");
+					DrawButton(1370, Y, 170, 64, "", "White");
 					MainCanvas.textAlign = "center";
-					DrawTextFit(AccessLevel[e.permissionInfo.min], 1360, Y + 32, 150, "Black");
+					DrawTextFit(capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
 					MainCanvas.textAlign = "left";
 				}
 			}
 
 			// Pagination
-			const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
+			const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT));
 			MainCanvas.textAlign = "center";
-			DrawBackNextButton(1675, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+			DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 			MainCanvas.textAlign = "left";
 		}
-
-		DrawText("- Authority: Permissions -", 125, 125, "Black", "Gray");
+		DrawText(`- Authority: Permission Settings for ${this.character.Name} (${this.character.isPlayer() ? "Self" : this.character.MemberNumber}) -`, 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 		DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList);
 	}
@@ -125,7 +160,18 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
+		// Owner list
+		if (MouseIn(815, 190, 90, 90)) {
+			// TODO
+		}
+
 		if (this.permissionData !== null) {
+
+			//reset button
+			const elem = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
+			if (MouseIn(870, 182, 64, 64) && elem) {
+				elem.value = "";
+			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
 				const i = this.page * PER_PAGE_COUNT + off;
@@ -140,11 +186,11 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						// TODO
 					}
 					// Self checkbox
-					if (MouseIn(1250, Y, 90, 90)) {
+					if (MouseIn(1235, Y, 64, 64)) {
 						// TODO
 					}
 					// Min access
-					if (MouseIn(1350, Y, 150, 64)) {
+					if (MouseIn(1370, Y, 170, 64)) {
 						// TODO
 					}
 				}
@@ -152,12 +198,12 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 			// Pagination
 			const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
-			if (MouseIn(1675, 800, 150, 90)) {
+			if (MouseIn(1455, 800, 150, 90)) {
 				this.page--;
 				if (this.page < 0) {
-					this.page = totalPages - 1;
+					this.page = Math.max(totalPages - 1, 0);
 				}
-			} else if (MouseIn(1825, 800, 150, 90)) {
+			} else if (MouseIn(1605, 800, 150, 90)) {
 				this.page++;
 				if (this.page >= totalPages) {
 					this.page = 0;
@@ -168,5 +214,9 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 	Exit() {
 		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+	}
+
+	Unload() {
+		ElementRemove("BCX_PermissionsFilter");
 	}
 }

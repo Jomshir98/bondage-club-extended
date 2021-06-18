@@ -1,6 +1,10 @@
 import { module_gui } from "../modules";
 
 export abstract class GuiSubscreen {
+	Load() {
+		// Empty
+	}
+
 	Run() {
 		// Empty
 	}
@@ -11,5 +15,9 @@ export abstract class GuiSubscreen {
 
 	Exit() {
 		module_gui.currentSubscreen = null;
+	}
+
+	Unload() {
+		// Empty
 	}
 }

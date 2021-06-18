@@ -36,6 +36,9 @@ export class ChatroomCharacter {
 }
 
 export class PlayerCharacter extends ChatroomCharacter {
+	/** HACK: Otherwise TS wrongly assumes PlayerCharacter to be identical to ChatroomCharacter */
+	public readonly playerObject = true;
+
 	override isPlayer(): this is PlayerCharacter {
 		return true;
 	}

@@ -50,9 +50,18 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 const currentRoomCharacters: ChatroomCharacter[] = [];
 
+function cleanOldCharacters(): void {
+	for(let i = currentRoomCharacters.length - 1; i >= 0; i--) {
+		if (!currentRoomCharacters[i].isPlayer() && !ChatRoomCharacter.includes(currentRoomCharacters[i].Character)) {
+			currentRoomCharacters.splice(i, 1);
+		}
+	}
+}
+
 export function getChatroomCharacter(memberNumber: number): ChatroomCharacter | null {
 	if (typeof memberNumber !== "number")
 		return null;
+	cleanOldCharacters();
 	let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
 	if (!character) {
 		if (Player.MemberNumber === memberNumber) {

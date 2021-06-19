@@ -22,12 +22,26 @@ type BCX_message_hello = {
 	request: boolean;
 };
 
-type BCX_message_ = {
+type BCX_message_query = {
+	id: string;
+	query: keyof BCX_queries;
+	data?: any;
+};
 
+type BCX_message_queryAnswer = {
+	id: string;
+	ok: boolean;
+	data?: any;
 };
 
 type BCX_messages = {
 	ChatRoomStatusEvent: BCX_message_ChatRoomStatusEvent;
 	hello: BCX_message_hello;
 	goodbye: undefined;
+	query: BCX_message_query;
+	queryAnswer: BCX_message_queryAnswer;
+};
+
+type BCX_queries = {
+	permissions: [undefined, PermissionsBundle];
 };

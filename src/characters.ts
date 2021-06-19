@@ -1,5 +1,7 @@
 import { VERSION } from "./config";
-import { getPlayerPermissionSettings, PermissionData } from "./modules/authority";
+import { AccessLevel, getPermissionDataFromBundle, getPlayerPermissionSettings, PermissionData } from "./modules/authority";
+import { sendQuery } from "./modules/messaging";
+import { isObject } from "./utils";
 
 export class ChatroomCharacter {
 	isPlayer(): this is PlayerCharacter {
@@ -9,8 +11,11 @@ export class ChatroomCharacter {
 	BCXVersion: string | null = null;
 	Character: Character;
 
-	get MemberNumber(): number | null {
-		return this.Character.MemberNumber ?? null;
+	get MemberNumber(): number {
+		if (typeof this.Character.MemberNumber !== "number") {
+			throw new Error("Character without MemberNumber");
+		}
+		return this.Character.MemberNumber;
 	}
 
 	get Name(): string {
@@ -30,8 +35,20 @@ export class ChatroomCharacter {
 	}
 
 	getPermissions(): Promise<PermissionData> {
-		// TODO
-		return Promise.reject("Not implemented");
+		return sendQuery("permissions", undefined, this.MemberNumber).then(data => {
+			if (!isObject(data) ||
+				Object.values(data).some(v =>
+					!Array.isArray(v) ||
+					typeof v[0] !== "boolean" ||
+					typeof v[1] !== "number" ||
+					AccessLevel[v[1]] === undefined
+				)
+			) {
+				throw new Error("Bad data");
+			}
+
+			return getPermissionDataFromBundle(data);
+		});
 	}
 }
 

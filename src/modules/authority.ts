@@ -3,6 +3,7 @@ import { ModuleCategory } from "../moduleManager";
 import { isObject } from "../utils";
 import { ChatroomCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
+import { queryHandlers } from "./messaging";
 
 export enum AccessLevel {
 	self = 0,
@@ -69,6 +70,23 @@ function permissionsMakeBundle(): PermissionsBundle {
 	return res;
 }
 
+export function getPermissionDataFromBundle(bundle: PermissionsBundle): PermissionData {
+	const res: PermissionData = {};
+	for (const [k, v] of permissions.entries()) {
+		if (bundle[k]) {
+			res[k] = {
+				category: v.category,
+				name: v.name,
+				self: bundle[k][0],
+				min: bundle[k][1]
+			};
+		}
+	}
+
+	return res;
+}
+
+
 export function setPermissionSelfAccess(permission: BCX_Permissions, self: boolean) {
 	const permData = permissions.get(permission);
 	if (!permData) {
@@ -129,6 +147,10 @@ export class ModuleAuthority extends BaseModule {
 			self: true,
 			min: AccessLevel.self
 		});
+
+		queryHandlers.permissions = (sender, resolve) => {
+			resolve(true, permissionsMakeBundle());
+		};
 	}
 
 	load() {

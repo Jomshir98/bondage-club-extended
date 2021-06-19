@@ -56,4 +56,12 @@ export function capitalizeFirstLetter(str: string): string {
 	return str.charAt(0).toLocaleUpperCase() + str.slice(1);
 }
 
+/* eslint-disable no-bitwise */
+export function uuidv4() {
+	return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c: any) =>
+		(c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+	);
+}
+/* eslint-enable no-bitwise */
+
 export const clipboardAvailable = Boolean(navigator.clipboard);

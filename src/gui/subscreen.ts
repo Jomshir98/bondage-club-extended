@@ -20,4 +20,8 @@ export abstract class GuiSubscreen {
 	Unload() {
 		// Empty
 	}
+
+	onChange(source: number) {
+		// Empty
+	}
 }

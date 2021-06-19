@@ -9,6 +9,8 @@ export const queryHandlers: {
 	[K in keyof BCX_queries]?: (sender: number, resolve: (ok: boolean, data?: BCX_queries[K][1]) => void, data: BCX_queries[K][0]) => void;
 } = {};
 
+export const changeHandlers: ((source: number) => void)[] = [];
+
 export function sendHiddenMessage<T extends keyof BCX_messages>(type: T, message: BCX_messages[T], Target: number | null = null) {
 	if (!ServerPlayerIsInChatRoom())
 		return;
@@ -86,7 +88,7 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 			id: message.id,
 			ok,
 			data
-		});
+		}, sender);
 	}, message.data);
 });
 
@@ -119,6 +121,14 @@ hiddenMessageHandlers.set("queryAnswer", (sender, message: BCX_message_queryAnsw
 		info.reject(message.data);
 	}
 });
+
+hiddenMessageHandlers.set("somethingChanged", (sender) => {
+	changeHandlers.forEach(h => h(sender));
+});
+
+export function notifyOfChange(): void {
+	sendHiddenMessage("somethingChanged", undefined);
+}
 
 export class ModuleMessaging extends BaseModule {
 	load() {

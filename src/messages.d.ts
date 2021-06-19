@@ -40,6 +40,7 @@ type BCX_messages = {
 	goodbye: undefined;
 	query: BCX_message_query;
 	queryAnswer: BCX_message_queryAnswer;
+	somethingChanged: undefined;
 };
 
 type BCX_queries = {

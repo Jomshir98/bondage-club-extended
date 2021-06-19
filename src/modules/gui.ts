@@ -4,6 +4,7 @@ import { GuiSubscreen } from "../gui/subscreen";
 import { BaseModule } from "../moduleManager";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_BCX } from "../resources";
+import { changeHandlers } from "./messaging";
 
 export class ModuleGUI extends BaseModule {
 	private _currentSubscreen: GuiSubscreen | null = null;
@@ -26,6 +27,14 @@ export class ModuleGUI extends BaseModule {
 		const C = InformationSheetSelection;
 		if (!C || typeof C.MemberNumber !== "number") return null;
 		return getChatroomCharacter(C.MemberNumber);
+	}
+
+	init() {
+		changeHandlers.push(source => {
+			if (this._currentSubscreen) {
+				this._currentSubscreen.onChange(source);
+			}
+		});
 	}
 
 	load() {

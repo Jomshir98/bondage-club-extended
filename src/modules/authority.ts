@@ -11,7 +11,8 @@ export enum AccessLevel {
 	lover = 3,
 	mistress = 4, // TODO
 	whitelist = 5,
-	public = 6
+	friend = 6,
+	public = 7
 }
 
 export interface PermissionInfo {
@@ -41,6 +42,7 @@ export function getCharacterAccessLevel(character: ChatroomCharacter): AccessLev
 		if (Player.IsOwnedByMemberNumber(character.MemberNumber)) return AccessLevel.clubowner;
 		if (Player.IsLoverOfMemberNumber(character.MemberNumber)) return AccessLevel.lover;
 		if (Player.WhiteList.includes(character.MemberNumber)) return AccessLevel.whitelist;
+		if (Player.FriendList?.includes(character.MemberNumber)) return AccessLevel.friend;
 	}
 	return AccessLevel.public;
 }

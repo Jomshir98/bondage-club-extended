@@ -7,6 +7,7 @@ import { capitalizeFirstLetter } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
+import { GuiAuthorityRoles } from "./authority_roles";
 
 type PermListItem = (
 	{
@@ -35,6 +36,16 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	}
 
 	Load() {
+		this.requestData();
+	}
+
+	onChange(sender: number) {
+		if (sender === this.character.MemberNumber) {
+			this.requestData();
+		}
+	}
+
+	private requestData() {
 		this.permissionData = null;
 		this.rebuildList();
 		this.character.getPermissions().then(res => {
@@ -97,7 +108,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	Run() {
 		if (this.permissionData !== null) {
 
-			DrawText("Self is permitted", 1041, 235, "Black");
+			DrawTextFit(this.character.Name, 1111, 190, 189, "Black");
+			DrawText("is permitted", 1111, 235, "Black");
 			DrawText("Lowest permitted role", 1370, 235, "Black");
 			MainCanvas.beginPath();
 			MainCanvas.moveTo(1335, 230);
@@ -111,7 +123,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			//reset button
 			if ((document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined)?.value) {
 				DrawButton(870, 182, 64, 64, "", "White");
-				DrawTextFit("X", 889, 217, 54, "Black");
+				DrawText("X", 890, 217, "Black");
 			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
@@ -141,7 +153,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					// Min access
 					DrawButton(1370, Y, 170, 64, "", "White");
 					MainCanvas.textAlign = "center";
-					DrawTextFit(capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
+					DrawTextFit(e.permissionInfo.min === AccessLevel.self ? this.character.Name : capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
 					MainCanvas.textAlign = "left";
 				}
 			}
@@ -150,9 +162,17 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT));
 			MainCanvas.textAlign = "center";
 			DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
-			MainCanvas.textAlign = "left";
+		} else if (this.failed) {
+			MainCanvas.textAlign = "center";
+			DrawText(`Failed to get permission data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+		} else {
+			MainCanvas.textAlign = "center";
+			DrawText("Loading...", 1000, 480, "Black");
 		}
-		DrawText(`- Authority: Permission Settings for ${this.character.Name} (${this.character.isPlayer() ? "Self" : this.character.MemberNumber}) -`, 125, 125, "Black", "Gray");
+
+		MainCanvas.textAlign = "left";
+
+		DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 		DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList);
 	}
@@ -161,9 +181,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
 		// Owner list
-		if (MouseIn(815, 190, 90, 90)) {
-			// TODO
-		}
+		if (MouseIn(1815, 190, 90, 90)) return module_gui.currentSubscreen = new GuiAuthorityRoles(this.character);
 
 		if (this.permissionData !== null) {
 
@@ -171,6 +189,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			const elem = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
 			if (MouseIn(870, 182, 64, 64) && elem) {
 				elem.value = "";
+				this.rebuildList();
 			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {

@@ -1996,6 +1996,54 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    class GuiAuthorityRoles extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
+        Run() {
+            DrawText("Hierarchy of roles:", 1436, 95, "Black");
+            // hierarchy background
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(1550, 134);
+            MainCanvas.lineTo(1550 + 150, 134);
+            MainCanvas.lineTo(1550 + 80, 740);
+            MainCanvas.lineTo(1550 + 70, 740);
+            MainCanvas.lineTo(1550, 134);
+            MainCanvas.fillStyle = "Black";
+            MainCanvas.fill();
+            // hierarchy roles
+            for (let i = 0; i < 8; i++) {
+                DrawButton(1530, 130 + 80 * i, 188, 54, "", "White");
+            }
+            MainCanvas.textAlign = "center";
+            DrawTextFit(`${this.character.Name}`, 1534 + 88, 130 + 28, 198, "Black");
+            for (let i = 1; i < 8; i++) {
+                DrawText(capitalizeFirstLetter(AccessLevel[i]), 1534 + 88, 130 + 28 + 80 * i, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            // Pagination
+            MainCanvas.textAlign = "center";
+            DrawBackNextButton(1605, 800, 300, 90, `Page 1 / 1`, "White", "", () => "", () => "");
+            MainCanvas.textAlign = "left";
+            DrawText(`- Authority: Role Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (MouseIn(1815, 190, 90, 90))
+                return this.Back();
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Back() {
+            module_gui.currentSubscreen = new GuiAuthorityPermissions(this.character);
+        }
+    }
+
     const PER_PAGE_COUNT = 6;
     class GuiAuthorityPermissions extends GuiSubscreen {
         constructor(character) {
@@ -2007,6 +2055,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.character = character;
         }
         Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
             this.permissionData = null;
             this.rebuildList();
             this.character.getPermissions().then(res => {
@@ -2063,7 +2119,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         Run() {
             var _a;
             if (this.permissionData !== null) {
-                DrawText("Self is permitted", 1041, 235, "Black");
+                DrawTextFit(this.character.Name, 1111, 190, 189, "Black");
+                DrawText("is permitted", 1111, 235, "Black");
                 DrawText("Lowest permitted role", 1370, 235, "Black");
                 MainCanvas.beginPath();
                 MainCanvas.moveTo(1335, 230);
@@ -2075,7 +2132,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 //reset button
                 if ((_a = document.getElementById("BCX_PermissionsFilter")) === null || _a === void 0 ? void 0 : _a.value) {
                     DrawButton(870, 182, 64, 64, "", "White");
-                    DrawTextFit("X", 889, 217, 54, "Black");
+                    DrawText("X", 890, 217, "Black");
                 }
                 for (let off = 0; off < PER_PAGE_COUNT; off++) {
                     const i = this.page * PER_PAGE_COUNT + off;
@@ -2104,7 +2161,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         // Min access
                         DrawButton(1370, Y, 170, 64, "", "White");
                         MainCanvas.textAlign = "center";
-                        DrawTextFit(capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
+                        DrawTextFit(e.permissionInfo.min === AccessLevel.self ? this.character.Name : capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
                         MainCanvas.textAlign = "left";
                     }
                 }
@@ -2112,9 +2169,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT));
                 MainCanvas.textAlign = "center";
                 DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
-                MainCanvas.textAlign = "left";
             }
-            DrawText(`- Authority: Permission Settings for ${this.character.Name} (${this.character.isPlayer() ? "Self" : this.character.MemberNumber}) -`, 125, 125, "Black", "Gray");
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get permission data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 1000, 480, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
             DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList);
         }
@@ -2122,14 +2187,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (MouseIn(1815, 75, 90, 90))
                 return this.Exit();
             // Owner list
-            if (MouseIn(815, 190, 90, 90)) {
-                // TODO
-            }
+            if (MouseIn(1815, 190, 90, 90))
+                return module_gui.currentSubscreen = new GuiAuthorityRoles(this.character);
             if (this.permissionData !== null) {
                 //reset button
                 const elem = document.getElementById("BCX_PermissionsFilter");
                 if (MouseIn(870, 182, 64, 64) && elem) {
                     elem.value = "";
+                    this.rebuildList();
                 }
                 for (let off = 0; off < PER_PAGE_COUNT; off++) {
                     const i = this.page * PER_PAGE_COUNT + off;

@@ -487,7 +487,8 @@ window.BCX_Loaded = false;
         AccessLevel[AccessLevel["lover"] = 3] = "lover";
         AccessLevel[AccessLevel["mistress"] = 4] = "mistress";
         AccessLevel[AccessLevel["whitelist"] = 5] = "whitelist";
-        AccessLevel[AccessLevel["public"] = 6] = "public";
+        AccessLevel[AccessLevel["friend"] = 6] = "friend";
+        AccessLevel[AccessLevel["public"] = 7] = "public";
     })(AccessLevel || (AccessLevel = {}));
     const permissions = new Map();
     function registerPermission(name, data) {
@@ -500,6 +501,7 @@ window.BCX_Loaded = false;
         permissions.set(name, data);
     }
     function getCharacterAccessLevel(character) {
+        var _a;
         if (character.isPlayer())
             return AccessLevel.self;
         if (character.MemberNumber !== null) {
@@ -509,6 +511,8 @@ window.BCX_Loaded = false;
                 return AccessLevel.lover;
             if (Player.WhiteList.includes(character.MemberNumber))
                 return AccessLevel.whitelist;
+            if ((_a = Player.FriendList) === null || _a === void 0 ? void 0 : _a.includes(character.MemberNumber))
+                return AccessLevel.friend;
         }
         return AccessLevel.public;
     }

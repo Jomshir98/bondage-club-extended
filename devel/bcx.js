@@ -2013,7 +2013,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.fillStyle = "Black";
             MainCanvas.fill();
             // hierarchy roles
-            for (let i = 0; i < 8; i++) {
+            DrawButton(1520, 130, 208, 54, "", "White");
+            for (let i = 1; i < 8; i++) {
                 DrawButton(1530, 130 + 80 * i, 188, 54, "", "White");
             }
             MainCanvas.textAlign = "center";

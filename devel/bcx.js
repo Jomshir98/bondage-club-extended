@@ -235,6 +235,11 @@ window.BCX_Loaded = false;
     function capitalizeFirstLetter(str) {
         return str.charAt(0).toLocaleUpperCase() + str.slice(1);
     }
+    /* eslint-disable no-bitwise */
+    function uuidv4() {
+        return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16));
+    }
+    /* eslint-enable no-bitwise */
     const clipboardAvailable = Boolean(navigator.clipboard);
 
     const patchedFunctions = new Map();
@@ -479,6 +484,150 @@ window.BCX_Loaded = false;
         }
     }
 
+    const hiddenMessageHandlers = new Map();
+    const hiddenBeepHandlers = new Map();
+    const queryHandlers = {};
+    function sendHiddenMessage(type, message, Target = null) {
+        if (!ServerPlayerIsInChatRoom())
+            return;
+        ServerSend("ChatRoomChat", {
+            Content: "BCXMsg",
+            Type: "Hidden",
+            Target,
+            Dictionary: { type, message }
+        });
+    }
+    function sendHiddenBeep(type, message, target, asLeashBeep = false) {
+        ServerSend("AccountBeep", {
+            MemberNumber: target,
+            BeepType: asLeashBeep ? "Leash" : "BCX",
+            Message: {
+                BCX: { type, message }
+            }
+        });
+    }
+    const pendingQueries = new Map();
+    function sendQuery(type, data, target, timeout = 10000) {
+        return new Promise((resolve, reject) => {
+            const id = uuidv4();
+            const info = {
+                target,
+                resolve,
+                reject,
+                timeout: setTimeout(() => {
+                    console.warn("BCX: Query timed out", target, type);
+                    pendingQueries.delete(id);
+                    reject("Timed out");
+                }, timeout)
+            };
+            pendingQueries.set(id, info);
+            sendHiddenMessage("query", {
+                id,
+                query: type,
+                data
+            }, target);
+        });
+    }
+    hiddenMessageHandlers.set("query", (sender, message) => {
+        if (!isObject(message) ||
+            typeof message.id !== "string" ||
+            typeof message.query !== "string") {
+            console.warn(`BCX: Invalid query`, sender, message);
+            return;
+        }
+        const handler = queryHandlers[message.query];
+        if (!handler) {
+            console.warn("BCX: Query no handler", sender, message);
+            return sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok: false
+            });
+        }
+        handler(sender, (ok, data) => {
+            sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok,
+                data
+            });
+        }, message.data);
+    });
+    hiddenMessageHandlers.set("queryAnswer", (sender, message) => {
+        if (!isObject(message) ||
+            typeof message.id !== "string" ||
+            typeof message.ok !== "boolean") {
+            console.warn(`BCX: Invalid queryAnswer`, sender, message);
+            return;
+        }
+        const info = pendingQueries.get(message.id);
+        if (!info) {
+            console.warn(`BCX: Response to unknown query`, sender, message);
+            return;
+        }
+        if (info.target !== info.target) {
+            console.warn(`BCX: Response to query not from target`, sender, message, info);
+            return;
+        }
+        clearTimeout(info.timeout);
+        pendingQueries.delete(message.id);
+        if (message.ok) {
+            info.resolve(message.data);
+        }
+        else {
+            info.reject(message.data);
+        }
+    });
+    class ModuleMessaging extends BaseModule {
+        load() {
+            hookFunction("ChatRoomMessage", 10, (args, next) => {
+                const data = args[0];
+                if ((data === null || data === void 0 ? void 0 : data.Type) === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
+                    if (data.Sender === Player.MemberNumber)
+                        return;
+                    if (!isObject(data.Dictionary)) {
+                        console.warn("BCX: Hidden message no Dictionary", data);
+                        return;
+                    }
+                    const { type, message } = data.Dictionary;
+                    if (typeof type === "string") {
+                        const handler = hiddenMessageHandlers.get(type);
+                        if (handler === undefined) {
+                            console.warn("BCX: Hidden message no handler", data.Sender, type, message);
+                        }
+                        else {
+                            handler(data.Sender, message);
+                        }
+                    }
+                    return;
+                }
+                return next(args);
+            });
+            hookFunction("ServerAccountBeep", 10, (args, next) => {
+                var _a;
+                const data = args[0];
+                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
+                    const { type, message } = data.Message.BCX;
+                    if (typeof type === "string") {
+                        const handler = hiddenBeepHandlers.get(type);
+                        if (handler === undefined) {
+                            console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
+                        }
+                        else {
+                            handler(data.MemberNumber, message);
+                        }
+                    }
+                    return;
+                }
+                else {
+                    return next(args);
+                }
+            });
+        }
+        unload() {
+            hiddenBeepHandlers.clear();
+            hiddenMessageHandlers.clear();
+        }
+    }
+
     var AccessLevel;
     (function (AccessLevel) {
         AccessLevel[AccessLevel["self"] = 0] = "self";
@@ -533,6 +682,20 @@ window.BCX_Loaded = false;
         const res = {};
         for (const [k, v] of permissions.entries()) {
             res[k] = [v.self, v.min];
+        }
+        return res;
+    }
+    function getPermissionDataFromBundle(bundle) {
+        const res = {};
+        for (const [k, v] of permissions.entries()) {
+            if (bundle[k]) {
+                res[k] = {
+                    category: v.category,
+                    name: v.name,
+                    self: bundle[k][0],
+                    min: bundle[k][1]
+                };
+            }
         }
         return res;
     }
@@ -592,6 +755,9 @@ window.BCX_Loaded = false;
                 self: true,
                 min: AccessLevel.self
             });
+            queryHandlers.permissions = (sender, resolve) => {
+                resolve(true, permissionsMakeBundle());
+            };
         }
         load() {
             if (isObject(modStorage.permissions)) {
@@ -613,79 +779,6 @@ window.BCX_Loaded = false;
                 }
             }
             modStorage.permissions = permissionsMakeBundle();
-        }
-    }
-
-    const hiddenMessageHandlers = new Map();
-    const hiddenBeepHandlers = new Map();
-    function sendHiddenMessage(type, message, Target = null) {
-        if (!ServerPlayerIsInChatRoom())
-            return;
-        ServerSend("ChatRoomChat", {
-            Content: "BCXMsg",
-            Type: "Hidden",
-            Target,
-            Dictionary: { type, message }
-        });
-    }
-    function sendHiddenBeep(type, message, target, asLeashBeep = false) {
-        ServerSend("AccountBeep", {
-            MemberNumber: target,
-            BeepType: asLeashBeep ? "Leash" : "BCX",
-            Message: {
-                BCX: { type, message }
-            }
-        });
-    }
-    class ModuleMessaging extends BaseModule {
-        load() {
-            hookFunction("ChatRoomMessage", 10, (args, next) => {
-                const data = args[0];
-                if ((data === null || data === void 0 ? void 0 : data.Type) === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
-                    if (data.Sender === Player.MemberNumber)
-                        return;
-                    if (!isObject(data.Dictionary)) {
-                        console.warn("BCX: Hidden message no Dictionary", data);
-                        return;
-                    }
-                    const { type, message } = data.Dictionary;
-                    if (typeof type === "string") {
-                        const handler = hiddenMessageHandlers.get(type);
-                        if (handler === undefined) {
-                            console.warn("BCX: Hidden message no handler", data.Sender, type, message);
-                        }
-                        else {
-                            handler(data.Sender, message);
-                        }
-                    }
-                    return;
-                }
-                return next(args);
-            });
-            hookFunction("ServerAccountBeep", 10, (args, next) => {
-                var _a;
-                const data = args[0];
-                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
-                    const { type, message } = data.Message.BCX;
-                    if (typeof type === "string") {
-                        const handler = hiddenBeepHandlers.get(type);
-                        if (handler === undefined) {
-                            console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
-                        }
-                        else {
-                            handler(data.MemberNumber, message);
-                        }
-                    }
-                    return;
-                }
-                else {
-                    return next(args);
-                }
-            });
-        }
-        unload() {
-            hiddenBeepHandlers.clear();
-            hiddenMessageHandlers.clear();
         }
     }
 
@@ -916,8 +1009,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return false;
         }
         get MemberNumber() {
-            var _a;
-            return (_a = this.Character.MemberNumber) !== null && _a !== void 0 ? _a : null;
+            if (typeof this.Character.MemberNumber !== "number") {
+                throw new Error("Character without MemberNumber");
+            }
+            return this.Character.MemberNumber;
         }
         get Name() {
             return this.Character.Name;
@@ -926,8 +1021,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return `${this.Name} (${this.MemberNumber})`;
         }
         getPermissions() {
-            // TODO
-            return Promise.reject("Not implemented");
+            return sendQuery("permissions", undefined, this.MemberNumber).then(data => {
+                if (!isObject(data) ||
+                    Object.values(data).some(v => !Array.isArray(v) ||
+                        typeof v[0] !== "boolean" ||
+                        typeof v[1] !== "number" ||
+                        AccessLevel[v[1]] === undefined)) {
+                    throw new Error("Bad data");
+                }
+                return getPermissionDataFromBundle(data);
+            });
         }
     }
     class PlayerCharacter extends ChatroomCharacter {

@@ -487,6 +487,7 @@ window.BCX_Loaded = false;
     const hiddenMessageHandlers = new Map();
     const hiddenBeepHandlers = new Map();
     const queryHandlers = {};
+    const changeHandlers = [];
     function sendHiddenMessage(type, message, Target = null) {
         if (!ServerPlayerIsInChatRoom())
             return;
@@ -548,7 +549,7 @@ window.BCX_Loaded = false;
                 id: message.id,
                 ok,
                 data
-            });
+            }, sender);
         }, message.data);
     });
     hiddenMessageHandlers.set("queryAnswer", (sender, message) => {
@@ -576,6 +577,12 @@ window.BCX_Loaded = false;
             info.reject(message.data);
         }
     });
+    hiddenMessageHandlers.set("somethingChanged", (sender) => {
+        changeHandlers.forEach(h => h(sender));
+    });
+    function notifyOfChange() {
+        sendHiddenMessage("somethingChanged", undefined);
+    }
     class ModuleMessaging extends BaseModule {
         load() {
             hookFunction("ChatRoomMessage", 10, (args, next) => {
@@ -1984,6 +1991,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         Unload() {
             // Empty
         }
+        onChange(source) {
+            // Empty
+        }
     }
 
     const PER_PAGE_COUNT = 6;
@@ -2234,6 +2244,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (!C || typeof C.MemberNumber !== "number")
                 return null;
             return getChatroomCharacter(C.MemberNumber);
+        }
+        init() {
+            changeHandlers.push(source => {
+                if (this._currentSubscreen) {
+                    this._currentSubscreen.onChange(source);
+                }
+            });
         }
         load() {
             patchFunction("InformationSheetRun", {

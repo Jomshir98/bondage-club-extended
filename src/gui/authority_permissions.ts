@@ -8,11 +8,13 @@ import { DrawImageEx } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
 import { GuiAuthorityRoles } from "./authority_roles";
+import { GuiAuthorityDialogMin } from "./authority_dialogMin";
+import { GuiAuthorityDialogSelf } from "./authority_dialogSelf";
 
 type PermListItem = (
 	{
 		separator: false;
-		permission: string;
+		permission: BCX_Permissions;
 		permissionInfo: PermissionInfo;
 	} | {
 		separator: true;
@@ -98,7 +100,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
 				this.permList.push({
 					separator: false,
-					permission: k,
+					permission: k as BCX_Permissions,
 					permissionInfo: v
 				});
 			}
@@ -206,11 +208,16 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					}
 					// Self checkbox
 					if (MouseIn(1235, Y, 64, 64)) {
-						// TODO
+						// TODO: check if this dialogue is necessary or not
+						// if e.permission === "grant self access"
+						// OR if this.character.isPlayer() && player has no access to "grant self access" permission
+						module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+						return;
 					}
 					// Min access
 					if (MouseIn(1370, Y, 170, 64)) {
-						// TODO
+						module_gui.currentSubscreen = new GuiAuthorityDialogMin(this.character, e.permission, e.permissionInfo, this);
+						return;
 					}
 				}
 			}

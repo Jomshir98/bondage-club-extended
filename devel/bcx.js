@@ -2045,6 +2045,104 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    class GuiAuthorityDialogMin extends GuiSubscreen {
+        constructor(character, permission, data, back) {
+            super();
+            this.character = character;
+            this.permission = permission;
+            this.permissionData = data;
+            this.back = back;
+            this.selectedLevel = data.min;
+        }
+        Run() {
+            DrawTextFit(`- Authority: Changing minimum access to permission "${this.permissionData.name}" -`, 125, 125, 1850, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawText("Please select the new lowest role that should still have this permission.", 1000, 255, "Black");
+            DrawTextFit(`Info: Currently set role: ${this.permissionData.min === AccessLevel.self ?
+            this.character.Name : capitalizeFirstLetter(AccessLevel[this.permissionData.min])} → ` +
+                `Newly selected role: ${this.selectedLevel === AccessLevel.self ?
+                this.character.Name : capitalizeFirstLetter(AccessLevel[this.selectedLevel])}`, 1000, 320, 1850, "Black");
+            DrawText("All roles to the left of the selected one will also automatically get access.", 1000, 385, "Black");
+            DrawButton(1000 - 110, 460, 220, 72, "", this.selectedLevel === AccessLevel.self ? "Cyan" : "White", undefined, undefined, this.selectedLevel === AccessLevel.self);
+            DrawTextFit(`${this.character.Name}`, 1000, 460 + 36, 210, "Black");
+            for (let i = 1; i < 8; i++) {
+                const current = this.selectedLevel === i;
+                DrawButton(-15 + 230 * i, 577, 190, 72, "", current ? "Cyan" : "White", undefined, undefined, current);
+                if (i < 7)
+                    DrawText(">", 196 + 230 * i, 577 + 36, "Black");
+                DrawText(capitalizeFirstLetter(AccessLevel[i]), 80 + 230 * i, 577 + 36, "Black");
+            }
+            if (this.character.isPlayer() && this.permission === "authority_revoke_self" && this.selectedLevel !== AccessLevel.self) {
+                DrawText(`WARNING: If you confirm, all permitted roles can remove your access to this and all other permissions!`, 1000, 730, "Red", "Gray");
+            }
+            DrawButton(700, 800, 200, 80, "", "White");
+            DrawText("Confirm", 800, 840, "Black");
+            DrawButton(1120, 800, 200, 80, "", "White");
+            DrawText("Cancel", 1220, 840, "Black");
+        }
+        Click() {
+            if (MouseIn(700, 800, 200, 80))
+                return this.Confirm();
+            if (MouseIn(1120, 800, 200, 80))
+                return this.Exit();
+            if (MouseIn(1000 - 110, 460, 220, 72)) {
+                this.selectedLevel = AccessLevel.self;
+            }
+            for (let i = 1; i < 8; i++) {
+                const current = this.selectedLevel === i;
+                if (MouseIn(-15 + 230 * i, 577, 190, 72) && !current) {
+                    this.selectedLevel = i;
+                }
+            }
+        }
+        Confirm() {
+            // TODO
+        }
+        Exit() {
+            module_gui.currentSubscreen = this.back;
+        }
+        onChange() {
+            // When something changes, we bail from change dialog, because it might no longer be valid
+            this.Exit();
+        }
+    }
+
+    class GuiAuthorityDialogSelf extends GuiSubscreen {
+        constructor(character, permission, data, back) {
+            super();
+            this.character = character;
+            this.permission = permission;
+            this.permissionData = data;
+            this.back = back;
+        }
+        Run() {
+            DrawTextFit(`- Authority: Removing self access to permission "${this.permissionData.name}" -`, 125, 125, 1850, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawText("- Warning -", 1000, 375, "Black", "Black");
+            DrawText("If you confirm, you won't be able to change your access to this permission back yourself.", 1000, 525, "Black");
+            DrawButton(700, 720, 200, 80, "", "White");
+            DrawText("Confirm", 800, 760, "Black");
+            DrawButton(1120, 720, 200, 80, "", "White");
+            DrawText("Cancel", 1220, 760, "Black");
+        }
+        Click() {
+            if (MouseIn(700, 720, 200, 80))
+                return this.Confirm();
+            if (MouseIn(1120, 720, 200, 80))
+                return this.Exit();
+        }
+        Confirm() {
+            // TODO
+        }
+        Exit() {
+            module_gui.currentSubscreen = this.back;
+        }
+        onChange() {
+            // When something changes, we bail from change dialog, because it might no longer be valid
+            this.Exit();
+        }
+    }
+
     const PER_PAGE_COUNT = 6;
     class GuiAuthorityPermissions extends GuiSubscreen {
         constructor(character) {
@@ -2210,11 +2308,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         }
                         // Self checkbox
                         if (MouseIn(1235, Y, 64, 64)) {
-                            // TODO
+                            // TODO: check if this dialogue is necessary or not
+                            // if e.permission === "grant self access"
+                            // OR if this.character.isPlayer() && player has no access to "grant self access" permission
+                            module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+                            return;
                         }
                         // Min access
                         if (MouseIn(1370, Y, 170, 64)) {
-                            // TODO
+                            module_gui.currentSubscreen = new GuiAuthorityDialogMin(this.character, e.permission, e.permissionInfo, this);
+                            return;
                         }
                     }
                 }

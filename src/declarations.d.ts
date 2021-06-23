@@ -13,7 +13,9 @@ interface Character {
 type BCX_Permissions =
 	| "authority_edit_min"
 	| "authority_grant_self"
-	| "authority_revoke_self";
+	| "authority_revoke_self"
+	| "misc_test";
+
 type PermissionsBundle = Record<string, [boolean, number]>;
 
 interface ModStorage {

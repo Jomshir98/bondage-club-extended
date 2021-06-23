@@ -27,7 +27,7 @@ window.BCX_Loaded = false;
 	treeshake: false,
 	plugins: [
 		progress({ clearLine: true }),
-		typescript({ tsconfig: "./tsconfig.json" }),
+		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
 		copy({
 			targets: [{ src: 'static/*', dest: 'dist' }]
 		})

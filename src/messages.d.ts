@@ -45,4 +45,10 @@ type BCX_messages = {
 
 type BCX_queries = {
 	permissions: [undefined, PermissionsBundle];
+	myAccessLevel: [undefined, import("./modules/authority").AccessLevel];
+	editPermission: [{
+		permission: BCX_Permissions;
+		edit: "self" | "min";
+		target: boolean | number;
+	}, boolean];
 };

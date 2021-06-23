@@ -42,7 +42,7 @@ export class GuiAuthorityDialogSelf extends GuiSubscreen {
 	}
 
 	Confirm() {
-		// TODO
+		this.character.setPermission(this.permission, "self", false);
 	}
 
 	Exit() {

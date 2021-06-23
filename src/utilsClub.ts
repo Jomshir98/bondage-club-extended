@@ -91,7 +91,7 @@ export function DrawImageEx(
 		Invert?: boolean;
 		Mirror?: boolean;
 		Zoom?: number;
-	}
+	} = {}
 ) {
 	if (typeof Source === "string") {
 		Source = DrawGetImage(Source);

@@ -1,3 +1,4 @@
+import { getPlayerCharacter } from "../characters";
 import { BaseModule } from "../moduleManager";
 import { hookFunction } from "../patching";
 import { isObject, uuidv4 } from "../utils";
@@ -5,8 +6,13 @@ import { isObject, uuidv4 } from "../utils";
 export const hiddenMessageHandlers: Map<keyof BCX_messages, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();
 
+export type queryResolveFunction<T extends keyof BCX_queries> = {
+	(ok: true, data: BCX_queries[T][1]): void;
+	(ok: false, error?: any): void;
+};
+
 export const queryHandlers: {
-	[K in keyof BCX_queries]?: (sender: number, resolve: (ok: boolean, data?: BCX_queries[K][1]) => void, data: BCX_queries[K][0]) => void;
+	[K in keyof BCX_queries]?: (sender: number, resolve: queryResolveFunction<K>, data: BCX_queries[K][0]) => void;
 } = {};
 
 export const changeHandlers: ((source: number) => void)[] = [];
@@ -74,7 +80,7 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 		return;
 	}
 
-	const handler = queryHandlers[message.query];
+	const handler = queryHandlers[message.query] as (sender: number, resolve: queryResolveFunction<keyof BCX_queries>, data: any) => void;
 	if (!handler) {
 		console.warn("BCX: Query no handler", sender, message);
 		return sendHiddenMessage("queryAnswer", {
@@ -128,6 +134,8 @@ hiddenMessageHandlers.set("somethingChanged", (sender) => {
 
 export function notifyOfChange(): void {
 	sendHiddenMessage("somethingChanged", undefined);
+	const player = getPlayerCharacter().MemberNumber;
+	changeHandlers.forEach(h => h(player));
 }
 
 export class ModuleMessaging extends BaseModule {

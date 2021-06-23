@@ -1,5 +1,5 @@
 import { VERSION } from "./config";
-import { AccessLevel, getPermissionDataFromBundle, getPlayerPermissionSettings, PermissionData } from "./modules/authority";
+import { AccessLevel, getPermissionDataFromBundle, getPlayerPermissionSettings, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
 import { sendQuery } from "./modules/messaging";
 import { isObject } from "./utils";
 
@@ -50,6 +50,30 @@ export class ChatroomCharacter {
 			return getPermissionDataFromBundle(data);
 		});
 	}
+
+	getMyAccessLevel(): Promise<AccessLevel> {
+		return sendQuery("myAccessLevel", undefined, this.MemberNumber).then(data => {
+			if (typeof data !== "number" || AccessLevel[data] === undefined) {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	setPermission(permission: BCX_Permissions, type: "self", target: boolean): Promise<boolean>
+	setPermission(permission: BCX_Permissions, type: "min", target: AccessLevel): Promise<boolean>
+	setPermission(permission: BCX_Permissions, type: "self" | "min", target: boolean | AccessLevel): Promise<boolean> {
+		return sendQuery("editPermission", {
+			permission,
+			edit: type,
+			target
+		}, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
 }
 
 export class PlayerCharacter extends ChatroomCharacter {
@@ -62,6 +86,26 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override getPermissions(): Promise<PermissionData> {
 		return Promise.resolve(getPlayerPermissionSettings());
+	}
+
+	override getMyAccessLevel(): Promise<AccessLevel.self> {
+		return Promise.resolve(AccessLevel.self);
+	}
+
+	override setPermission(permission: BCX_Permissions, type: "self", target: boolean): Promise<boolean>
+	override setPermission(permission: BCX_Permissions, type: "min", target: AccessLevel): Promise<boolean>
+	override setPermission(permission: BCX_Permissions, type: "self" | "min", target: boolean | AccessLevel): Promise<boolean> {
+		if (type === "self") {
+			if (typeof target !== "boolean") {
+				throw new Error("Invalid target value for self permission edit");
+			}
+			return Promise.resolve(setPermissionSelfAccess(permission, target, this));
+		} else {
+			if (typeof target !== "number") {
+				throw new Error("Invalid target value for min permission edit");
+			}
+			return Promise.resolve(setPermissionMinAccess(permission, target, this));
+		}
 	}
 }
 

@@ -1,7 +1,7 @@
-import { ChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
 import { module_gui } from "../modules";
-import { AccessLevel, PermissionData, PermissionInfo } from "../modules/authority";
+import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, PermissionData, PermissionInfo } from "../modules/authority";
 import { icon_OwnerList } from "../resources";
 import { capitalizeFirstLetter } from "../utils";
 import { DrawImageEx } from "../utilsClub";
@@ -16,6 +16,8 @@ type PermListItem = (
 		separator: false;
 		permission: BCX_Permissions;
 		permissionInfo: PermissionInfo;
+		editSelf: boolean;
+		editMin: boolean;
 	} | {
 		separator: true;
 		name: string;
@@ -28,6 +30,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
 	private permissionData: PermissionData | null = null;
+	private myAccessLevel: AccessLevel = AccessLevel.public;
 	private failed: boolean = false;
 	private permList: PermListItem[] = [];
 	private page: number = 0;
@@ -35,6 +38,9 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+		if (this.character.isPlayer()) {
+			this.myAccessLevel = AccessLevel.self;
+		}
 	}
 
 	Load() {
@@ -50,8 +56,9 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	private requestData() {
 		this.permissionData = null;
 		this.rebuildList();
-		this.character.getPermissions().then(res => {
-			this.permissionData = res;
+		Promise.all([this.character.getPermissions(), this.character.getMyAccessLevel()]).then(res => {
+			this.permissionData = res[0];
+			this.myAccessLevel = res[1];
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get permission info for ${this.character}`, err);
@@ -80,6 +87,17 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 		const filter = Input.value.trim().toLocaleLowerCase().split(" ");
 
+		const access_grantSelf = this.permissionData.authority_grant_self ?
+			checkPermisionAccesData(this.permissionData.authority_grant_self, this.myAccessLevel) :
+			false;
+		const access_revokeSelf = this.permissionData.authority_revoke_self ?
+			checkPermisionAccesData(this.permissionData.authority_revoke_self, this.myAccessLevel) :
+			false;
+		const access_editMin = this.permissionData.authority_edit_min ?
+			checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+			false;
+		const isPlayer = this.myAccessLevel === AccessLevel.self;
+
 		for (const [k, v] of Object.entries(this.permissionData)) {
 			let permdata = categories.get(v.category);
 			if (filter.some(i =>
@@ -98,10 +116,24 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 				name: MODULE_NAMES[category]
 			});
 			for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+				const access = checkPermisionAccesData(v, this.myAccessLevel);
 				this.permList.push({
 					separator: false,
 					permission: k as BCX_Permissions,
-					permissionInfo: v
+					permissionInfo: v,
+					editSelf:
+						// character must have access to "allow granting/forbidding self access"
+						(v.self ? access_revokeSelf : access_grantSelf) &&
+						// Not player must have access to target rule
+						(isPlayer || access) &&
+						// "minimal access" set to "Self" forces "self access" to "Yes"
+						(!v.self || v.min !== AccessLevel.self),
+					editMin:
+						// Exception: Player can always lower permissions "Self"->"Owner"
+						(isPlayer && v.min < AccessLevel.owner) ||
+						// Character must have access to "allow minimal access modification" &&
+						// Character must have access to target rule
+						(access_editMin && access)
 				});
 			}
 		}
@@ -151,9 +183,9 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					DrawButton(200, Y, 1000, 64, "", "White");
 					DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
 					// Self checkbox
-					DrawButton(1235, Y, 64, 64, "", "White", e.permissionInfo.self ? "Icons/Checked.png" : "");
+					DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#eee", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
 					// Min access
-					DrawButton(1370, Y, 170, 64, "", "White");
+					DrawButton(1370, Y, 170, 64, "", e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
 					MainCanvas.textAlign = "center";
 					DrawTextFit(e.permissionInfo.min === AccessLevel.self ? this.character.Name : capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
 					MainCanvas.textAlign = "left";
@@ -207,16 +239,34 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						// TODO
 					}
 					// Self checkbox
-					if (MouseIn(1235, Y, 64, 64)) {
-						// TODO: check if this dialogue is necessary or not
-						// if e.permission === "grant self access"
-						// OR if this.character.isPlayer() && player has no access to "grant self access" permission
-						module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+					if (MouseIn(1235, Y, 64, 64) && e.editSelf) {
+						if (e.permissionInfo.self &&
+							this.character.isPlayer() &&
+							(
+								e.permission === "authority_grant_self" ||
+								!checkPermissionAccess("authority_grant_self", getPlayerCharacter())
+							)
+						) {
+							// If Player couldn't switch back on, show warning instead
+							module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+						} else {
+							this.character.setPermission(e.permission, "self", !e.permissionInfo.self);
+						}
 						return;
 					}
 					// Min access
-					if (MouseIn(1370, Y, 170, 64)) {
-						module_gui.currentSubscreen = new GuiAuthorityDialogMin(this.character, e.permission, e.permissionInfo, this);
+					if (MouseIn(1370, Y, 170, 64) && e.editMin) {
+						const access_editMin = this.permissionData.authority_edit_min ?
+							checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+							false;
+						module_gui.currentSubscreen = new GuiAuthorityDialogMin(
+							this.character,
+							e.permission,
+							e.permissionInfo,
+							this.myAccessLevel,
+							!access_editMin || !checkPermisionAccesData(e.permissionInfo, this.myAccessLevel),
+							this
+						);
 						return;
 					}
 				}

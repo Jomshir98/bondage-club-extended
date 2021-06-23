@@ -14,11 +14,11 @@ export class ModuleGUI extends BaseModule {
 	}
 
 	set currentSubscreen(subscreen: GuiSubscreen | null) {
-		if (this._currentSubscreen !== null) {
+		if (this._currentSubscreen) {
 			this._currentSubscreen.Unload();
 		}
 		this._currentSubscreen = subscreen;
-		if (this._currentSubscreen !== null) {
+		if (this._currentSubscreen) {
 			this._currentSubscreen.Load();
 		}
 	}
@@ -45,7 +45,7 @@ export class ModuleGUI extends BaseModule {
 			'MouseIn(1815, 765, 90, 90)': 'MouseIn(1815, 800, 90, 90)'
 		});
 		hookFunction("InformationSheetRun", 10, (args, next) => {
-			if (this._currentSubscreen !== null) {
+			if (this._currentSubscreen) {
 				MainCanvas.textAlign = "left";
 				this._currentSubscreen.Run();
 				MainCanvas.textAlign = "center";
@@ -54,18 +54,18 @@ export class ModuleGUI extends BaseModule {
 
 			next(args);
 			const C = this.getInformationSheetCharacter();
-			if (C) {
+			if (C && C.BCXVersion !== null) {
 				DrawButton(1815, 685, 90, 90, "", "White", icon_BCX, "BCX");
 			}
 		});
 
 		hookFunction("InformationSheetClick", 10, (args, next) => {
-			if (this._currentSubscreen !== null) {
+			if (this._currentSubscreen) {
 				return this._currentSubscreen.Click();
 			}
 
 			const C = this.getInformationSheetCharacter();
-			if (C && MouseIn(1815, 685, 90, 90)) {
+			if (C && C.BCXVersion !== null && MouseIn(1815, 685, 90, 90)) {
 				this.currentSubscreen = new GuiMainMenu(C);
 			} else {
 				return next(args);
@@ -73,7 +73,7 @@ export class ModuleGUI extends BaseModule {
 		});
 
 		hookFunction("InformationSheetExit", 10, (args, next) => {
-			if (this._currentSubscreen !== null) {
+			if (this._currentSubscreen) {
 				return this._currentSubscreen.Exit();
 			}
 

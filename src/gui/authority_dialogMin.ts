@@ -10,17 +10,21 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 	readonly character: ChatroomCharacter;
 	readonly permission: BCX_Permissions;
 	private permissionData: PermissionInfo;
+	private myAccessLevel: AccessLevel;
+	private noAccess: boolean;
 
 	private selectedLevel: AccessLevel;
 
 	public back: GuiSubscreen;
 
-	constructor(character: ChatroomCharacter, permission: BCX_Permissions, data: PermissionInfo, back: GuiSubscreen) {
+	constructor(character: ChatroomCharacter, permission: BCX_Permissions, data: PermissionInfo, myAccesLevel: AccessLevel, noAccess: boolean, back: GuiSubscreen) {
 		super();
 		this.character = character;
 		this.permission = permission;
 		this.permissionData = data;
 		this.back = back;
+		this.myAccessLevel = myAccesLevel;
+		this.noAccess = noAccess;
 
 		this.selectedLevel = data.min;
 	}
@@ -38,12 +42,18 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 				this.character.Name : capitalizeFirstLetter(AccessLevel[this.selectedLevel])}`, 1000, 320, 1850, "Black");
 		DrawText("All roles to the left of the selected one will also automatically get access.", 1000, 385, "Black");
 
-		DrawButton(1000-110, 460, 220, 72, "", this.selectedLevel === AccessLevel.self ? "Cyan" : "White", undefined, undefined, this.selectedLevel === AccessLevel.self);
-		DrawTextFit(`${this.character.Name}`, 1000, 460 + 36, 210, "Black");
+		if (this.myAccessLevel === AccessLevel.self) {
+			const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
+			DrawButton(1000-110, 460, 220, 72, "", this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+			DrawTextFit(`${this.character.Name}`, 1000, 460 + 36, 210, "Black");
+		}
 
 		for (let i = 1; i < 8; i++) {
 			const current = this.selectedLevel === i;
-			DrawButton(-15 + 230 * i, 577, 190, 72, "", current ? "Cyan" : "White", undefined, undefined, current);
+			const available =
+				(this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
+				!this.noAccess && this.myAccessLevel <= i;
+			DrawButton(-15 + 230 * i, 577, 190, 72, "", current ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
 			if (i < 7)
 				DrawText(">", 196 + 230 * i, 577 + 36, "Black");
 			DrawText(capitalizeFirstLetter(AccessLevel[i]), 80 + 230 * i, 577 + 36, "Black");
@@ -65,13 +75,19 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 		if (MouseIn(700, 800, 200, 80)) return this.Confirm();
 		if (MouseIn(1120, 800, 200, 80)) return this.Exit();
 
-		if (MouseIn(1000-110, 460, 220, 72)) {
-			this.selectedLevel = AccessLevel.self;
+		if (MouseIn(1000-110, 460, 220, 72) && this.myAccessLevel === AccessLevel.self) {
+			const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
+			if (available) {
+				this.selectedLevel = AccessLevel.self;
+			}
 		}
 
 		for (let i = 1; i < 8; i++) {
 			const current = this.selectedLevel === i;
-			if (MouseIn(-15 + 230 * i, 577, 190, 72) && !current) {
+			const available =
+				(this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
+				!this.noAccess && this.myAccessLevel <= i;
+			if (MouseIn(-15 + 230 * i, 577, 190, 72) && !current && available) {
 				this.selectedLevel = i;
 			}
 		}
@@ -79,7 +95,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 	}
 
 	Confirm() {
-		// TODO
+		this.character.setPermission(this.permission, "min", this.selectedLevel);
 	}
 
 	Exit() {

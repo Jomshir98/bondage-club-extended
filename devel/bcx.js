@@ -81,7 +81,7 @@ window.BCX_Loaded = false;
      * @param {number} [options.Zoom=1] - Zoom factor
      * @returns {boolean} - whether the image was complete or not
      */
-    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 }) {
+    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 } = {}) {
         if (typeof Source === "string") {
             Source = DrawGetImage(Source);
             if (!Source.complete)
@@ -444,46 +444,6 @@ window.BCX_Loaded = false;
         console.log("BCX: Unloaded.");
     }
 
-    let modStorage = {};
-    function modStorageSync() {
-        if (!Player.OnlineSettings) {
-            console.error("BCX: Player OnlineSettings not defined during storage sync!");
-            return;
-        }
-        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
-        if (typeof ServerAccountUpdate !== "undefined") {
-            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
-        }
-        else {
-            console.debug("BCX: Old sync method");
-            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-        }
-    }
-    class ModuleStorage extends BaseModule {
-        init() {
-            var _a;
-            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
-            if (typeof saved === "string") {
-                try {
-                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
-                    if (!isObject(storage)) {
-                        throw new Error("Bad data");
-                    }
-                    modStorage = storage;
-                }
-                catch (error) {
-                    console.error("BCX: Error while loading saved data, full reset.", error);
-                }
-            }
-            else {
-                console.log("BCX: First time init");
-            }
-        }
-        run() {
-            modStorageSync();
-        }
-    }
-
     const hiddenMessageHandlers = new Map();
     const hiddenBeepHandlers = new Map();
     const queryHandlers = {};
@@ -582,6 +542,8 @@ window.BCX_Loaded = false;
     });
     function notifyOfChange() {
         sendHiddenMessage("somethingChanged", undefined);
+        const player = getPlayerCharacter().MemberNumber;
+        changeHandlers.forEach(h => h(player));
     }
     class ModuleMessaging extends BaseModule {
         load() {
@@ -635,6 +597,173 @@ window.BCX_Loaded = false;
         }
     }
 
+    class ChatroomCharacter {
+        constructor(character) {
+            this.BCXVersion = null;
+            this.Character = character;
+            if (character.ID === 0) {
+                this.BCXVersion = VERSION;
+            }
+            console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
+        }
+        isPlayer() {
+            return false;
+        }
+        get MemberNumber() {
+            if (typeof this.Character.MemberNumber !== "number") {
+                throw new Error("Character without MemberNumber");
+            }
+            return this.Character.MemberNumber;
+        }
+        get Name() {
+            return this.Character.Name;
+        }
+        toString() {
+            return `${this.Name} (${this.MemberNumber})`;
+        }
+        getPermissions() {
+            return sendQuery("permissions", undefined, this.MemberNumber).then(data => {
+                if (!isObject(data) ||
+                    Object.values(data).some(v => !Array.isArray(v) ||
+                        typeof v[0] !== "boolean" ||
+                        typeof v[1] !== "number" ||
+                        AccessLevel[v[1]] === undefined)) {
+                    throw new Error("Bad data");
+                }
+                return getPermissionDataFromBundle(data);
+            });
+        }
+        getMyAccessLevel() {
+            return sendQuery("myAccessLevel", undefined, this.MemberNumber).then(data => {
+                if (typeof data !== "number" || AccessLevel[data] === undefined) {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        setPermission(permission, type, target) {
+            return sendQuery("editPermission", {
+                permission,
+                edit: type,
+                target
+            }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+    }
+    class PlayerCharacter extends ChatroomCharacter {
+        constructor() {
+            super(...arguments);
+            /** HACK: Otherwise TS wrongly assumes PlayerCharacter to be identical to ChatroomCharacter */
+            this.playerObject = true;
+        }
+        isPlayer() {
+            return true;
+        }
+        getPermissions() {
+            return Promise.resolve(getPlayerPermissionSettings());
+        }
+        getMyAccessLevel() {
+            return Promise.resolve(AccessLevel.self);
+        }
+        setPermission(permission, type, target) {
+            if (type === "self") {
+                if (typeof target !== "boolean") {
+                    throw new Error("Invalid target value for self permission edit");
+                }
+                return Promise.resolve(setPermissionSelfAccess(permission, target, this));
+            }
+            else {
+                if (typeof target !== "number") {
+                    throw new Error("Invalid target value for min permission edit");
+                }
+                return Promise.resolve(setPermissionMinAccess(permission, target, this));
+            }
+        }
+    }
+    const currentRoomCharacters = [];
+    function cleanOldCharacters() {
+        for (let i = currentRoomCharacters.length - 1; i >= 0; i--) {
+            if (!currentRoomCharacters[i].isPlayer() && !ChatRoomCharacter.includes(currentRoomCharacters[i].Character)) {
+                currentRoomCharacters.splice(i, 1);
+            }
+        }
+    }
+    function getChatroomCharacter(memberNumber) {
+        if (typeof memberNumber !== "number")
+            return null;
+        cleanOldCharacters();
+        let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
+        if (!character) {
+            if (Player.MemberNumber === memberNumber) {
+                character = new PlayerCharacter(Player);
+            }
+            else {
+                const BCCharacter = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
+                if (!BCCharacter) {
+                    return null;
+                }
+                character = new ChatroomCharacter(BCCharacter);
+            }
+            currentRoomCharacters.push(character);
+        }
+        return character;
+    }
+    function getAllCharactersInRoom() {
+        return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber)).filter(Boolean);
+    }
+    function getPlayerCharacter() {
+        let character = currentRoomCharacters.find(c => c.Character === Player);
+        if (!character) {
+            character = new PlayerCharacter(Player);
+            currentRoomCharacters.push(character);
+        }
+        return character;
+    }
+
+    let modStorage = {};
+    function modStorageSync() {
+        if (!Player.OnlineSettings) {
+            console.error("BCX: Player OnlineSettings not defined during storage sync!");
+            return;
+        }
+        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
+        if (typeof ServerAccountUpdate !== "undefined") {
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+        }
+        else {
+            console.debug("BCX: Old sync method");
+            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+        }
+    }
+    class ModuleStorage extends BaseModule {
+        init() {
+            var _a;
+            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+            if (typeof saved === "string") {
+                try {
+                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
+                    if (!isObject(storage)) {
+                        throw new Error("Bad data");
+                    }
+                    modStorage = storage;
+                }
+                catch (error) {
+                    console.error("BCX: Error while loading saved data, full reset.", error);
+                }
+            }
+            else {
+                console.log("BCX: First time init");
+            }
+        }
+        run() {
+            modStorageSync();
+        }
+    }
+
     var AccessLevel;
     (function (AccessLevel) {
         AccessLevel[AccessLevel["self"] = 0] = "self";
@@ -678,11 +807,13 @@ window.BCX_Loaded = false;
             console.error(new Error(`Check for unknown permission "${permission}"`));
             return false;
         }
-        if (character.isPlayer()) {
+        // TODO: Check item access
+        return checkPermisionAccesData(permData, getCharacterAccessLevel(character));
+    }
+    function checkPermisionAccesData(permData, accessLevel) {
+        if (accessLevel === AccessLevel.self) {
             return permData.self || permData.min === AccessLevel.self;
         }
-        // TODO: Check item access
-        const accessLevel = getCharacterAccessLevel(character);
         return accessLevel <= permData.min;
     }
     function permissionsMakeBundle() {
@@ -706,30 +837,60 @@ window.BCX_Loaded = false;
         }
         return res;
     }
-    function setPermissionSelfAccess(permission, self) {
+    function setPermissionSelfAccess(permission, self, characterToCheck) {
         const permData = permissions.get(permission);
         if (!permData) {
             throw new Error(`Attempt to edit unknown permission "${permission}"`);
         }
-        const last = permData.self;
+        if (permData.self === self)
+            return true;
+        if (characterToCheck) {
+            if (!checkPermissionAccess(self ? "authority_grant_self" : "authority_revoke_self", characterToCheck) ||
+                !characterToCheck.isPlayer() && !checkPermissionAccess(permission, characterToCheck)) {
+                console.warn(`BCX: Unauthorized self permission edit attempt for "${permission}" by ${characterToCheck}`);
+                return false;
+            }
+        }
         permData.self = self || permData.min === AccessLevel.self;
-        if (permData.self !== last) {
-            permissionsSync();
-        }
+        permissionsSync();
+        notifyOfChange();
+        return true;
     }
-    function setPermissionMinAccess(permission, min) {
+    function setPermissionMinAccess(permission, min, characterToCheck) {
         const permData = permissions.get(permission);
         if (!permData) {
             throw new Error(`Attempt to edit unknown permission "${permission}"`);
         }
-        const last = permData.min;
+        if (permData.min === min)
+            return true;
+        if (characterToCheck) {
+            const allowed = 
+            // Exception: Player can always lower permissions "Self"->"Owner"
+            (characterToCheck.isPlayer() && permData.min < min && min <= AccessLevel.owner) ||
+                (
+                // Character must have access to "allow minimal access modification"
+                checkPermissionAccess("authority_edit_min", characterToCheck) &&
+                    (
+                    // Character must have access to target rule
+                    checkPermissionAccess(permission, characterToCheck) ||
+                        // Exception: Player bypasses this check when lowering "minimal access"
+                        characterToCheck.isPlayer() && min >= permData.min) &&
+                    (
+                    // Not player must have access to target level
+                    !characterToCheck.isPlayer() ||
+                        getCharacterAccessLevel(characterToCheck) <= min));
+            if (!allowed) {
+                console.warn(`BCX: Unauthorized min permission edit attempt for "${permission}" by ${characterToCheck}`);
+                return false;
+            }
+        }
         permData.min = min;
         if (min === AccessLevel.self) {
             permData.self = true;
         }
-        if (permData.min !== last) {
-            permissionsSync();
-        }
+        permissionsSync();
+        notifyOfChange();
+        return true;
     }
     function permissionsSync() {
         modStorage.permissions = permissionsMakeBundle();
@@ -764,6 +925,50 @@ window.BCX_Loaded = false;
             });
             queryHandlers.permissions = (sender, resolve) => {
                 resolve(true, permissionsMakeBundle());
+            };
+            queryHandlers.myAccessLevel = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, getCharacterAccessLevel(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.editPermission = (sender, resolve, data) => {
+                if (!isObject(data) ||
+                    typeof data.permission !== "string" ||
+                    (data.edit !== "min" && data.edit !== "self") ||
+                    (data.edit === "min" && typeof data.target !== "number") ||
+                    (data.edit === "self" && typeof data.target !== "boolean")) {
+                    console.warn(`BCX: Bad editPermission query from ${sender}`, data);
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (!character) {
+                    console.warn(`BCX: editPermission query from ${sender}; not found in room`, data);
+                    return resolve(false);
+                }
+                if (!permissions.has(data.permission)) {
+                    console.warn(`BCX: editPermission query from ${sender}; unknown permission`, data);
+                    return resolve(false);
+                }
+                if (data.edit === "self") {
+                    if (typeof data.target !== "boolean") {
+                        throw new Error("Assertion failed");
+                    }
+                    return resolve(true, setPermissionSelfAccess(data.permission, data.target, character));
+                }
+                else {
+                    if (typeof data.target !== "number") {
+                        throw new Error("Assertion failed");
+                    }
+                    if (AccessLevel[data.target] === undefined) {
+                        console.warn(`BCX: editPermission query from ${sender}; unknown access level`, data);
+                        return resolve(true, false);
+                    }
+                    return resolve(true, setPermissionMinAccess(data.permission, data.target, character));
+                }
             };
         }
         load() {
@@ -1002,96 +1207,6 @@ VYu2OirtP3M5XbZLFy91ea56Wvfu3etOVfnJ0euYsmlSzCksrXAmV3rmmWdYuLDyjKZpD5XZytTp
 SKihOBQKprG0dWItlwWvIA6Px3MVeDP+woinXnxx3ma6TYV/4jMPQtoCsQUUiC0QWyC2gAKxBWIL
 xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
 `.replaceAll("\n", "");
-
-    class ChatroomCharacter {
-        constructor(character) {
-            this.BCXVersion = null;
-            this.Character = character;
-            if (character.ID === 0) {
-                this.BCXVersion = VERSION;
-            }
-            console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
-        }
-        isPlayer() {
-            return false;
-        }
-        get MemberNumber() {
-            if (typeof this.Character.MemberNumber !== "number") {
-                throw new Error("Character without MemberNumber");
-            }
-            return this.Character.MemberNumber;
-        }
-        get Name() {
-            return this.Character.Name;
-        }
-        toString() {
-            return `${this.Name} (${this.MemberNumber})`;
-        }
-        getPermissions() {
-            return sendQuery("permissions", undefined, this.MemberNumber).then(data => {
-                if (!isObject(data) ||
-                    Object.values(data).some(v => !Array.isArray(v) ||
-                        typeof v[0] !== "boolean" ||
-                        typeof v[1] !== "number" ||
-                        AccessLevel[v[1]] === undefined)) {
-                    throw new Error("Bad data");
-                }
-                return getPermissionDataFromBundle(data);
-            });
-        }
-    }
-    class PlayerCharacter extends ChatroomCharacter {
-        constructor() {
-            super(...arguments);
-            /** HACK: Otherwise TS wrongly assumes PlayerCharacter to be identical to ChatroomCharacter */
-            this.playerObject = true;
-        }
-        isPlayer() {
-            return true;
-        }
-        getPermissions() {
-            return Promise.resolve(getPlayerPermissionSettings());
-        }
-    }
-    const currentRoomCharacters = [];
-    function cleanOldCharacters() {
-        for (let i = currentRoomCharacters.length - 1; i >= 0; i--) {
-            if (!currentRoomCharacters[i].isPlayer() && !ChatRoomCharacter.includes(currentRoomCharacters[i].Character)) {
-                currentRoomCharacters.splice(i, 1);
-            }
-        }
-    }
-    function getChatroomCharacter(memberNumber) {
-        if (typeof memberNumber !== "number")
-            return null;
-        cleanOldCharacters();
-        let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
-        if (!character) {
-            if (Player.MemberNumber === memberNumber) {
-                character = new PlayerCharacter(Player);
-            }
-            else {
-                const BCCharacter = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
-                if (!BCCharacter) {
-                    return null;
-                }
-                character = new ChatroomCharacter(BCCharacter);
-            }
-            currentRoomCharacters.push(character);
-        }
-        return character;
-    }
-    function getAllCharactersInRoom() {
-        return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber)).filter(Boolean);
-    }
-    function getPlayerCharacter() {
-        let character = currentRoomCharacters.find(c => c.Character === Player);
-        if (!character) {
-            character = new PlayerCharacter(Player);
-            currentRoomCharacters.push(character);
-        }
-        return character;
-    }
 
     class ChatRoomStatusManager {
         constructor() {
@@ -2046,12 +2161,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
 
     class GuiAuthorityDialogMin extends GuiSubscreen {
-        constructor(character, permission, data, back) {
+        constructor(character, permission, data, myAccesLevel, noAccess, back) {
             super();
             this.character = character;
             this.permission = permission;
             this.permissionData = data;
             this.back = back;
+            this.myAccessLevel = myAccesLevel;
+            this.noAccess = noAccess;
             this.selectedLevel = data.min;
         }
         Run() {
@@ -2063,11 +2180,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 `Newly selected role: ${this.selectedLevel === AccessLevel.self ?
                 this.character.Name : capitalizeFirstLetter(AccessLevel[this.selectedLevel])}`, 1000, 320, 1850, "Black");
             DrawText("All roles to the left of the selected one will also automatically get access.", 1000, 385, "Black");
-            DrawButton(1000 - 110, 460, 220, 72, "", this.selectedLevel === AccessLevel.self ? "Cyan" : "White", undefined, undefined, this.selectedLevel === AccessLevel.self);
-            DrawTextFit(`${this.character.Name}`, 1000, 460 + 36, 210, "Black");
+            if (this.myAccessLevel === AccessLevel.self) {
+                const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
+                DrawButton(1000 - 110, 460, 220, 72, "", this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+                DrawTextFit(`${this.character.Name}`, 1000, 460 + 36, 210, "Black");
+            }
             for (let i = 1; i < 8; i++) {
                 const current = this.selectedLevel === i;
-                DrawButton(-15 + 230 * i, 577, 190, 72, "", current ? "Cyan" : "White", undefined, undefined, current);
+                const available = (this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
+                    !this.noAccess && this.myAccessLevel <= i;
+                DrawButton(-15 + 230 * i, 577, 190, 72, "", current ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
                 if (i < 7)
                     DrawText(">", 196 + 230 * i, 577 + 36, "Black");
                 DrawText(capitalizeFirstLetter(AccessLevel[i]), 80 + 230 * i, 577 + 36, "Black");
@@ -2085,18 +2207,23 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return this.Confirm();
             if (MouseIn(1120, 800, 200, 80))
                 return this.Exit();
-            if (MouseIn(1000 - 110, 460, 220, 72)) {
-                this.selectedLevel = AccessLevel.self;
+            if (MouseIn(1000 - 110, 460, 220, 72) && this.myAccessLevel === AccessLevel.self) {
+                const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
+                if (available) {
+                    this.selectedLevel = AccessLevel.self;
+                }
             }
             for (let i = 1; i < 8; i++) {
                 const current = this.selectedLevel === i;
-                if (MouseIn(-15 + 230 * i, 577, 190, 72) && !current) {
+                const available = (this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
+                    !this.noAccess && this.myAccessLevel <= i;
+                if (MouseIn(-15 + 230 * i, 577, 190, 72) && !current && available) {
                     this.selectedLevel = i;
                 }
             }
         }
         Confirm() {
-            // TODO
+            this.character.setPermission(this.permission, "min", this.selectedLevel);
         }
         Exit() {
             module_gui.currentSubscreen = this.back;
@@ -2132,7 +2259,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return this.Exit();
         }
         Confirm() {
-            // TODO
+            this.character.setPermission(this.permission, "self", false);
         }
         Exit() {
             module_gui.currentSubscreen = this.back;
@@ -2148,10 +2275,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         constructor(character) {
             super();
             this.permissionData = null;
+            this.myAccessLevel = AccessLevel.public;
             this.failed = false;
             this.permList = [];
             this.page = 0;
             this.character = character;
+            if (this.character.isPlayer()) {
+                this.myAccessLevel = AccessLevel.self;
+            }
         }
         Load() {
             this.requestData();
@@ -2164,8 +2295,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         requestData() {
             this.permissionData = null;
             this.rebuildList();
-            this.character.getPermissions().then(res => {
-                this.permissionData = res;
+            Promise.all([this.character.getPermissions(), this.character.getMyAccessLevel()]).then(res => {
+                this.permissionData = res[0];
+                this.myAccessLevel = res[1];
                 this.rebuildList();
             }, err => {
                 console.error(`BCX: Failed to get permission info for ${this.character}`, err);
@@ -2190,6 +2322,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 });
             }
             const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+            const access_grantSelf = this.permissionData.authority_grant_self ?
+                checkPermisionAccesData(this.permissionData.authority_grant_self, this.myAccessLevel) :
+                false;
+            const access_revokeSelf = this.permissionData.authority_revoke_self ?
+                checkPermisionAccesData(this.permissionData.authority_revoke_self, this.myAccessLevel) :
+                false;
+            const access_editMin = this.permissionData.authority_edit_min ?
+                checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+                false;
+            const isPlayer = this.myAccessLevel === AccessLevel.self;
             for (const [k, v] of Object.entries(this.permissionData)) {
                 let permdata = categories.get(v.category);
                 if (filter.some(i => !MODULE_NAMES[v.category].toLocaleLowerCase().includes(i) &&
@@ -2207,10 +2349,24 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     name: MODULE_NAMES[category]
                 });
                 for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+                    const access = checkPermisionAccesData(v, this.myAccessLevel);
                     this.permList.push({
                         separator: false,
                         permission: k,
-                        permissionInfo: v
+                        permissionInfo: v,
+                        editSelf: 
+                        // character must have access to "allow granting/forbidding self access"
+                        (v.self ? access_revokeSelf : access_grantSelf) &&
+                            // Not player must have access to target rule
+                            (isPlayer || access) &&
+                            // "minimal access" set to "Self" forces "self access" to "Yes"
+                            (!v.self || v.min !== AccessLevel.self),
+                        editMin: 
+                        // Exception: Player can always lower permissions "Self"->"Owner"
+                        (isPlayer && v.min < AccessLevel.owner) ||
+                            // Character must have access to "allow minimal access modification" &&
+                            // Character must have access to target rule
+                            (access_editMin && access)
                     });
                 }
             }
@@ -2256,9 +2412,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         DrawButton(200, Y, 1000, 64, "", "White");
                         DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
                         // Self checkbox
-                        DrawButton(1235, Y, 64, 64, "", "White", e.permissionInfo.self ? "Icons/Checked.png" : "");
+                        DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#eee", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
                         // Min access
-                        DrawButton(1370, Y, 170, 64, "", "White");
+                        DrawButton(1370, Y, 170, 64, "", e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
                         MainCanvas.textAlign = "center";
                         DrawTextFit(e.permissionInfo.min === AccessLevel.self ? this.character.Name : capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
                         MainCanvas.textAlign = "left";
@@ -2307,16 +2463,25 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                             // TODO
                         }
                         // Self checkbox
-                        if (MouseIn(1235, Y, 64, 64)) {
-                            // TODO: check if this dialogue is necessary or not
-                            // if e.permission === "grant self access"
-                            // OR if this.character.isPlayer() && player has no access to "grant self access" permission
-                            module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+                        if (MouseIn(1235, Y, 64, 64) && e.editSelf) {
+                            if (e.permissionInfo.self &&
+                                this.character.isPlayer() &&
+                                (e.permission === "authority_grant_self" ||
+                                    !checkPermissionAccess("authority_grant_self", getPlayerCharacter()))) {
+                                // If Player couldn't switch back on, show warning instead
+                                module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+                            }
+                            else {
+                                this.character.setPermission(e.permission, "self", !e.permissionInfo.self);
+                            }
                             return;
                         }
                         // Min access
-                        if (MouseIn(1370, Y, 170, 64)) {
-                            module_gui.currentSubscreen = new GuiAuthorityDialogMin(this.character, e.permission, e.permissionInfo, this);
+                        if (MouseIn(1370, Y, 170, 64) && e.editMin) {
+                            const access_editMin = this.permissionData.authority_edit_min ?
+                                checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+                                false;
+                            module_gui.currentSubscreen = new GuiAuthorityDialogMin(this.character, e.permission, e.permissionInfo, this.myAccessLevel, !access_editMin || !checkPermisionAccesData(e.permissionInfo, this.myAccessLevel), this);
                             return;
                         }
                     }
@@ -2400,11 +2565,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return this._currentSubscreen;
         }
         set currentSubscreen(subscreen) {
-            if (this._currentSubscreen !== null) {
+            if (this._currentSubscreen) {
                 this._currentSubscreen.Unload();
             }
             this._currentSubscreen = subscreen;
-            if (this._currentSubscreen !== null) {
+            if (this._currentSubscreen) {
                 this._currentSubscreen.Load();
             }
         }
@@ -2429,7 +2594,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 'MouseIn(1815, 765, 90, 90)': 'MouseIn(1815, 800, 90, 90)'
             });
             hookFunction("InformationSheetRun", 10, (args, next) => {
-                if (this._currentSubscreen !== null) {
+                if (this._currentSubscreen) {
                     MainCanvas.textAlign = "left";
                     this._currentSubscreen.Run();
                     MainCanvas.textAlign = "center";
@@ -2437,16 +2602,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 next(args);
                 const C = this.getInformationSheetCharacter();
-                if (C) {
+                if (C && C.BCXVersion !== null) {
                     DrawButton(1815, 685, 90, 90, "", "White", icon_BCX, "BCX");
                 }
             });
             hookFunction("InformationSheetClick", 10, (args, next) => {
-                if (this._currentSubscreen !== null) {
+                if (this._currentSubscreen) {
                     return this._currentSubscreen.Click();
                 }
                 const C = this.getInformationSheetCharacter();
-                if (C && MouseIn(1815, 685, 90, 90)) {
+                if (C && C.BCXVersion !== null && MouseIn(1815, 685, 90, 90)) {
                     this.currentSubscreen = new GuiMainMenu(C);
                 }
                 else {
@@ -2454,7 +2619,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             });
             hookFunction("InformationSheetExit", 10, (args, next) => {
-                if (this._currentSubscreen !== null) {
+                if (this._currentSubscreen) {
                     return this._currentSubscreen.Exit();
                 }
                 return next(args);

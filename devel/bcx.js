@@ -2635,6 +2635,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             super(...arguments);
             this.o_Player_CanChange = null;
         }
+        init() {
+            registerPermission("misc_test", {
+                name: "Some permission to test things",
+                category: ModuleCategory.Misc,
+                min: AccessLevel.public,
+                self: false
+            });
+        }
         load() {
             hookFunction("AsylumEntranceCanWander", 0, () => true);
             patchFunction("CheatImport", { "MainCanvas == null": "true" });

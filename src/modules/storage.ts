@@ -1,9 +1,11 @@
-import { BaseModule } from "../moduleManager";
+import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
 import { isObject } from "../utils";
 
 export let modStorage: Partial<ModStorage> = {};
 
 export function modStorageSync() {
+	if (moduleInitPhase !== ModuleInitPhase.ready && moduleInitPhase !== ModuleInitPhase.destroy)
+		return;
 	if (!Player.OnlineSettings) {
 		console.error("BCX: Player OnlineSettings not defined during storage sync!");
 		return;

@@ -69,7 +69,6 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	private rebuildList() {
 		const categories: Map<ModuleCategory, PermissionData> = new Map();
 		this.permList = [];
-		this.page = 0;
 		let Input = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
 		if (this.permissionData === null) {
 			if (Input) {
@@ -136,6 +135,13 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						(access_editMin && access)
 				});
 			}
+		}
+
+		const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
+		if (this.page < 0) {
+			this.page = Math.max(totalPages - 1, 0);
+		} else if (this.page >= totalPages) {
+			this.page = 0;
 		}
 	}
 
@@ -231,7 +237,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 				if (i >= this.permList.length) break;
 				const e = this.permList[i];
 
-				const Y = 275 + i * 100;
+				const Y = 275 + off * 100;
 
 				if (!e.separator) {
 					// Permission name
@@ -274,12 +280,12 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 			// Pagination
 			const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
-			if (MouseIn(1455, 800, 150, 90)) {
+			if (MouseIn(1605, 800, 150, 90)) {
 				this.page--;
 				if (this.page < 0) {
 					this.page = Math.max(totalPages - 1, 0);
 				}
-			} else if (MouseIn(1605, 800, 150, 90)) {
+			} else if (MouseIn(1755, 800, 150, 90)) {
 				this.page++;
 				if (this.page >= totalPages) {
 					this.page = 0;

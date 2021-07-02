@@ -51,4 +51,12 @@ type BCX_queries = {
 		edit: "self" | "min";
 		target: boolean | number;
 	}, boolean];
+	permissionAccess: [BCX_Permissions, boolean];
+	logData: [undefined, import("./modules/log").LogEntry[]];
+	logDelete: [number, boolean];
+	logConfigGet: [undefined, import("./modules/log").LogConfig];
+	logConfigEdit: [{
+		category: BCX_LogCategory;
+		target: import("./modules/log").LogAccessLevel;
+	}, boolean];
 };

@@ -1,6 +1,8 @@
 import { VERSION } from "./config";
-import { AccessLevel, getPermissionDataFromBundle, getPlayerPermissionSettings, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
+import { AccessLevel, checkPermissionAccess, getPermissionDataFromBundle, getPlayerPermissionSettings, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
+import { getVisibleLogEntries, LogAccessLevel, LogConfig, logConfigSet, LogEntry, logMessageDelete } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
+import { modStorage } from "./modules/storage";
 import { isObject } from "./utils";
 
 export class ChatroomCharacter {
@@ -51,6 +53,18 @@ export class ChatroomCharacter {
 		});
 	}
 
+	getPermissionAccess(permission: BCX_Permissions): Promise<boolean> {
+		return sendQuery("permissionAccess", permission, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		}).catch(err => {
+			console.error(`BCX: Error while querying permission "${permission}" access for ${this}`, err);
+			return false;
+		});
+	}
+
 	getMyAccessLevel(): Promise<AccessLevel> {
 		return sendQuery("myAccessLevel", undefined, this.MemberNumber).then(data => {
 			if (typeof data !== "number" || AccessLevel[data] === undefined) {
@@ -74,6 +88,61 @@ export class ChatroomCharacter {
 			return data;
 		});
 	}
+
+	getLogEntries(): Promise<LogEntry[]> {
+		return sendQuery("logData", undefined, this.MemberNumber).then(data => {
+			if (
+				!Array.isArray(data) ||
+				!data.every(e =>
+					Array.isArray(e) &&
+					e.length === 4 &&
+					typeof e[0] === "number" &&
+					typeof e[1] === "number" &&
+					typeof e[2] === "number"
+				)
+			) {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	logMessageDelete(time: number): Promise<boolean> {
+		return sendQuery("logDelete", time, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	getLogConfig(): Promise<LogConfig> {
+		return sendQuery("logConfigGet", undefined, this.MemberNumber).then(data => {
+			if (!isObject(data) ||
+				Object.values(data).some(v => typeof v !== "number")
+			) {
+				throw new Error("Bad data");
+			}
+			for (const k of Object.keys(data) as BCX_LogCategory[]) {
+				if (!modStorage.logConfig?.[k] || LogAccessLevel[data[k]] === undefined) {
+					delete data[k];
+				}
+			}
+			return data;
+		});
+	}
+
+	setLogConfig(category: BCX_LogCategory, target: LogAccessLevel): Promise<boolean> {
+		return sendQuery("logConfigEdit", {
+			category,
+			target
+		}, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
 }
 
 export class PlayerCharacter extends ChatroomCharacter {
@@ -86,6 +155,10 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override getPermissions(): Promise<PermissionData> {
 		return Promise.resolve(getPlayerPermissionSettings());
+	}
+
+	override getPermissionAccess(permission: BCX_Permissions): Promise<boolean> {
+		return Promise.resolve(checkPermissionAccess(permission, this));
 	}
 
 	override getMyAccessLevel(): Promise<AccessLevel.self> {
@@ -107,12 +180,31 @@ export class PlayerCharacter extends ChatroomCharacter {
 			return Promise.resolve(setPermissionMinAccess(permission, target, this));
 		}
 	}
+
+	override getLogEntries(): Promise<LogEntry[]> {
+		return Promise.resolve(getVisibleLogEntries(this));
+	}
+
+	override logMessageDelete(time: number): Promise<boolean> {
+		return Promise.resolve(logMessageDelete(time, this));
+	}
+
+	override getLogConfig(): Promise<LogConfig> {
+		if (!modStorage.logConfig) {
+			return Promise.reject("Not initialized");
+		}
+		return Promise.resolve({...modStorage.logConfig});
+	}
+
+	override setLogConfig(category: BCX_LogCategory, target: LogAccessLevel): Promise<boolean> {
+		return Promise.resolve(logConfigSet(category, target, this));
+	}
 }
 
 const currentRoomCharacters: ChatroomCharacter[] = [];
 
 function cleanOldCharacters(): void {
-	for(let i = currentRoomCharacters.length - 1; i >= 0; i--) {
+	for (let i = currentRoomCharacters.length - 1; i >= 0; i--) {
 		if (!currentRoomCharacters[i].isPlayer() && !ChatRoomCharacter.includes(currentRoomCharacters[i].Character)) {
 			currentRoomCharacters.splice(i, 1);
 		}

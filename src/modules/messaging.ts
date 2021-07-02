@@ -1,5 +1,5 @@
 import { getPlayerCharacter } from "../characters";
-import { BaseModule } from "../moduleManager";
+import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
 import { hookFunction } from "../patching";
 import { isObject, uuidv4 } from "../utils";
 
@@ -133,6 +133,8 @@ hiddenMessageHandlers.set("somethingChanged", (sender) => {
 });
 
 export function notifyOfChange(): void {
+	if (moduleInitPhase !== ModuleInitPhase.ready)
+		return;
 	sendHiddenMessage("somethingChanged", undefined);
 	const player = getPlayerCharacter().MemberNumber;
 	changeHandlers.forEach(h => h(player));

@@ -20,18 +20,21 @@ export abstract class BaseModule {
 export enum ModuleCategory {
 	Basic,
 	Authority,
+	Log,
 	Misc
 }
 
 export const MODULE_NAMES: Record<ModuleCategory, string> = {
 	[ModuleCategory.Basic]: "Basic",
 	[ModuleCategory.Authority]: "Authority",
+	[ModuleCategory.Log]: "Behaviour Log",
 	[ModuleCategory.Misc]: "Miscellaneous"
 };
 
 export const MODULE_ICONS: Record<ModuleCategory, string> = {
 	[ModuleCategory.Basic]: "Icons/General.png",
 	[ModuleCategory.Authority]: "Icons/Security.png",
+	[ModuleCategory.Log]: "Icons/Title.png",
 	[ModuleCategory.Misc]: "Icons/Random.png"
 };
 

@@ -193,6 +193,14 @@ export class ModuleAuthority extends BaseModule {
 		queryHandlers.permissions = (sender, resolve) => {
 			resolve(true, permissionsMakeBundle());
 		};
+		queryHandlers.permissionAccess = (sender, resolve, data) => {
+			const character = getChatroomCharacter(sender);
+			if (character && typeof data === "string") {
+				resolve(true, checkPermissionAccess(data, character));
+			} else {
+				resolve(false);
+			}
+		};
 		queryHandlers.myAccessLevel = (sender, resolve) => {
 			const character = getChatroomCharacter(sender);
 			if (character) {

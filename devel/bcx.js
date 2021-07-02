@@ -351,16 +351,19 @@ window.BCX_Loaded = false;
     (function (ModuleCategory) {
         ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
         ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
-        ModuleCategory[ModuleCategory["Misc"] = 2] = "Misc";
+        ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
+        ModuleCategory[ModuleCategory["Misc"] = 3] = "Misc";
     })(ModuleCategory || (ModuleCategory = {}));
     const MODULE_NAMES = {
         [ModuleCategory.Basic]: "Basic",
         [ModuleCategory.Authority]: "Authority",
+        [ModuleCategory.Log]: "Behaviour Log",
         [ModuleCategory.Misc]: "Miscellaneous"
     };
     const MODULE_ICONS = {
         [ModuleCategory.Basic]: "Icons/General.png",
         [ModuleCategory.Authority]: "Icons/Security.png",
+        [ModuleCategory.Log]: "Icons/Title.png",
         [ModuleCategory.Misc]: "Icons/Random.png"
     };
     let moduleInitPhase = 0 /* construct */;
@@ -541,6 +544,8 @@ window.BCX_Loaded = false;
         changeHandlers.forEach(h => h(sender));
     });
     function notifyOfChange() {
+        if (moduleInitPhase !== 3 /* ready */)
+            return;
         sendHiddenMessage("somethingChanged", undefined);
         const player = getPlayerCharacter().MemberNumber;
         changeHandlers.forEach(h => h(player));
@@ -597,6 +602,261 @@ window.BCX_Loaded = false;
         }
     }
 
+    let modStorage = {};
+    function modStorageSync() {
+        if (moduleInitPhase !== 3 /* ready */ && moduleInitPhase !== 4 /* destroy */)
+            return;
+        if (!Player.OnlineSettings) {
+            console.error("BCX: Player OnlineSettings not defined during storage sync!");
+            return;
+        }
+        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
+        if (typeof ServerAccountUpdate !== "undefined") {
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+        }
+        else {
+            console.debug("BCX: Old sync method");
+            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+        }
+    }
+    class ModuleStorage extends BaseModule {
+        init() {
+            var _a;
+            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+            if (typeof saved === "string") {
+                try {
+                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
+                    if (!isObject(storage)) {
+                        throw new Error("Bad data");
+                    }
+                    modStorage = storage;
+                }
+                catch (error) {
+                    console.error("BCX: Error while loading saved data, full reset.", error);
+                }
+            }
+            else {
+                console.log("BCX: First time init");
+            }
+        }
+        run() {
+            modStorageSync();
+        }
+    }
+
+    const LOG_ENTRIES_LIMIT = 256;
+    var LogEntryType;
+    (function (LogEntryType) {
+        LogEntryType[LogEntryType["plaintext"] = 0] = "plaintext";
+        LogEntryType[LogEntryType["deleted"] = 1] = "deleted";
+    })(LogEntryType || (LogEntryType = {}));
+    var LogAccessLevel;
+    (function (LogAccessLevel) {
+        LogAccessLevel[LogAccessLevel["none"] = 0] = "none";
+        LogAccessLevel[LogAccessLevel["protected"] = 1] = "protected";
+        LogAccessLevel[LogAccessLevel["normal"] = 2] = "normal";
+        LogAccessLevel[LogAccessLevel["everyone"] = 3] = "everyone";
+    })(LogAccessLevel || (LogAccessLevel = {}));
+    function logMessage(category, type, data) {
+        var _a;
+        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category];
+        if (access === undefined) {
+            throw new Error(`Attempt to log message with unknown category "${category}"`);
+        }
+        if (access > LogAccessLevel.none) {
+            logMessageAdd(access, type, data);
+        }
+    }
+    function logMessageAdd(access, type, data) {
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        modStorage.log.unshift([Date.now(), access, type, data]);
+        // Time must me unique
+        if (modStorage.log.length >= 2 && modStorage.log[0][0] <= modStorage.log[1][0]) {
+            modStorage.log[0][0] = modStorage.log[1][0] + 1;
+        }
+        modStorage.log.splice(LOG_ENTRIES_LIMIT);
+        modStorageSync();
+        notifyOfChange();
+    }
+    function logMessageDelete(time, character) {
+        var _a;
+        if (character && !checkPermissionAccess("log_delete", character)) {
+            return false;
+        }
+        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.logDeleted;
+        if (access === undefined) {
+            throw new Error("logDeleted category not found");
+        }
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        for (let i = 0; i < modStorage.log.length; i++) {
+            const e = modStorage.log[i];
+            if (e[0] === time) {
+                if (access === LogAccessLevel.none) {
+                    modStorage.log.splice(i, 1);
+                }
+                else {
+                    e[1] = access;
+                    e[2] = LogEntryType.deleted;
+                    e[3] = null;
+                }
+                modStorageSync();
+                notifyOfChange();
+                return true;
+            }
+        }
+        return false;
+    }
+    function logConfigSet(category, accessLevel, character) {
+        var _a;
+        if (character && !checkPermissionAccess("log_configure", character)) {
+            return false;
+        }
+        if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category]) === undefined) {
+            return false;
+        }
+        if (![LogAccessLevel.none, LogAccessLevel.normal, LogAccessLevel.protected].includes(accessLevel)) {
+            return false;
+        }
+        modStorage.logConfig[category] = accessLevel;
+        modStorageSync();
+        notifyOfChange();
+        return true;
+    }
+    function logClear() {
+        modStorage.log = [];
+        logMessageAdd(LogAccessLevel.everyone, LogEntryType.plaintext, "The log has been cleared");
+    }
+    function getVisibleLogEntries(character) {
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        const allow = {
+            [LogAccessLevel.none]: character.isPlayer(),
+            [LogAccessLevel.normal]: checkPermissionAccess("log_view_normal", character),
+            [LogAccessLevel.protected]: checkPermissionAccess("log_view_protected", character),
+            [LogAccessLevel.everyone]: true
+        };
+        return modStorage.log.filter(e => allow[e[1]]);
+    }
+    function logMessageRender(entry) {
+        if (entry[2] === LogEntryType.plaintext) {
+            const e = entry;
+            return e[3];
+        }
+        else if (entry[2] === LogEntryType.deleted) {
+            return "[Log message deleted]";
+        }
+        return `[ERROR: Unknown entry type ${entry[2]}]`;
+    }
+    const logConfigDefaults = {
+        logConfigChange: LogAccessLevel.protected,
+        logDeleted: LogAccessLevel.normal
+    };
+    class ModuleLog extends BaseModule {
+        init() {
+            registerPermission("log_view_normal", {
+                name: "See normal log entries",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.public
+            });
+            registerPermission("log_view_protected", {
+                name: "See protected log entries",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.mistress
+            });
+            registerPermission("log_configure", {
+                name: "Configure what is logged",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("log_delete", {
+                name: "Delete log entries",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.self
+            });
+            queryHandlers.logData = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, getVisibleLogEntries(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logDelete = (sender, resolve, data) => {
+                const character = getChatroomCharacter(sender);
+                if (character && typeof data === "number") {
+                    resolve(true, logMessageDelete(data, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logConfigGet = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character && checkPermissionAccess("log_configure", character) && modStorage.logConfig) {
+                    resolve(true, { ...modStorage.logConfig });
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logConfigEdit = (sender, resolve, data) => {
+                if (!isObject(data) ||
+                    typeof data.category !== "string" ||
+                    typeof data.target !== "number") {
+                    console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logConfigSet(data.category, data.target, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+        }
+        load() {
+            if (!Array.isArray(modStorage.log)) {
+                logClear();
+            }
+            else if (!modStorage.log.every(e => Array.isArray(e) &&
+                e.length === 4 &&
+                typeof e[0] === "number" &&
+                typeof e[1] === "number" &&
+                typeof e[2] === "number")) {
+                console.error("BCX: Some log entries have invalid format, reseting whole log!");
+                logClear();
+            }
+            if (!modStorage.logConfig) {
+                modStorage.logConfig = { ...logConfigDefaults };
+            }
+            else {
+                for (const k of Object.keys(modStorage.logConfig)) {
+                    if (logConfigDefaults[k] === undefined) {
+                        console.info(`BCX: Removing unknown log config category "${k}"`);
+                        delete modStorage.logConfig[k];
+                    }
+                }
+                for (const k of Object.keys(logConfigDefaults)) {
+                    if (modStorage.logConfig[k] === undefined) {
+                        console.info(`BCX: Adding missing log category "${k}"`);
+                        modStorage.logConfig[k] = logConfigDefaults[k];
+                    }
+                }
+            }
+        }
+    }
+
     class ChatroomCharacter {
         constructor(character) {
             this.BCXVersion = null;
@@ -633,6 +893,17 @@ window.BCX_Loaded = false;
                 return getPermissionDataFromBundle(data);
             });
         }
+        getPermissionAccess(permission) {
+            return sendQuery("permissionAccess", permission, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            }).catch(err => {
+                console.error(`BCX: Error while querying permission "${permission}" access for ${this}`, err);
+                return false;
+            });
+        }
         getMyAccessLevel() {
             return sendQuery("myAccessLevel", undefined, this.MemberNumber).then(data => {
                 if (typeof data !== "number" || AccessLevel[data] === undefined) {
@@ -645,6 +916,53 @@ window.BCX_Loaded = false;
             return sendQuery("editPermission", {
                 permission,
                 edit: type,
+                target
+            }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        getLogEntries() {
+            return sendQuery("logData", undefined, this.MemberNumber).then(data => {
+                if (!Array.isArray(data) ||
+                    !data.every(e => Array.isArray(e) &&
+                        e.length === 4 &&
+                        typeof e[0] === "number" &&
+                        typeof e[1] === "number" &&
+                        typeof e[2] === "number")) {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logMessageDelete(time) {
+            return sendQuery("logDelete", time, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        getLogConfig() {
+            return sendQuery("logConfigGet", undefined, this.MemberNumber).then(data => {
+                var _a;
+                if (!isObject(data) ||
+                    Object.values(data).some(v => typeof v !== "number")) {
+                    throw new Error("Bad data");
+                }
+                for (const k of Object.keys(data)) {
+                    if (!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[k]) || LogAccessLevel[data[k]] === undefined) {
+                        delete data[k];
+                    }
+                }
+                return data;
+            });
+        }
+        setLogConfig(category, target) {
+            return sendQuery("logConfigEdit", {
+                category,
                 target
             }, this.MemberNumber).then(data => {
                 if (typeof data !== "boolean") {
@@ -666,6 +984,9 @@ window.BCX_Loaded = false;
         getPermissions() {
             return Promise.resolve(getPlayerPermissionSettings());
         }
+        getPermissionAccess(permission) {
+            return Promise.resolve(checkPermissionAccess(permission, this));
+        }
         getMyAccessLevel() {
             return Promise.resolve(AccessLevel.self);
         }
@@ -682,6 +1003,21 @@ window.BCX_Loaded = false;
                 }
                 return Promise.resolve(setPermissionMinAccess(permission, target, this));
             }
+        }
+        getLogEntries() {
+            return Promise.resolve(getVisibleLogEntries(this));
+        }
+        logMessageDelete(time) {
+            return Promise.resolve(logMessageDelete(time, this));
+        }
+        getLogConfig() {
+            if (!modStorage.logConfig) {
+                return Promise.reject("Not initialized");
+            }
+            return Promise.resolve({ ...modStorage.logConfig });
+        }
+        setLogConfig(category, target) {
+            return Promise.resolve(logConfigSet(category, target, this));
         }
     }
     const currentRoomCharacters = [];
@@ -722,46 +1058,6 @@ window.BCX_Loaded = false;
             currentRoomCharacters.push(character);
         }
         return character;
-    }
-
-    let modStorage = {};
-    function modStorageSync() {
-        if (!Player.OnlineSettings) {
-            console.error("BCX: Player OnlineSettings not defined during storage sync!");
-            return;
-        }
-        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
-        if (typeof ServerAccountUpdate !== "undefined") {
-            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
-        }
-        else {
-            console.debug("BCX: Old sync method");
-            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-        }
-    }
-    class ModuleStorage extends BaseModule {
-        init() {
-            var _a;
-            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
-            if (typeof saved === "string") {
-                try {
-                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
-                    if (!isObject(storage)) {
-                        throw new Error("Bad data");
-                    }
-                    modStorage = storage;
-                }
-                catch (error) {
-                    console.error("BCX: Error while loading saved data, full reset.", error);
-                }
-            }
-            else {
-                console.log("BCX: First time init");
-            }
-        }
-        run() {
-            modStorageSync();
-        }
     }
 
     var AccessLevel;
@@ -925,6 +1221,15 @@ window.BCX_Loaded = false;
             });
             queryHandlers.permissions = (sender, resolve) => {
                 resolve(true, permissionsMakeBundle());
+            };
+            queryHandlers.permissionAccess = (sender, resolve, data) => {
+                const character = getChatroomCharacter(sender);
+                if (character && typeof data === "string") {
+                    resolve(true, checkPermissionAccess(data, character));
+                }
+                else {
+                    resolve(false);
+                }
             };
             queryHandlers.myAccessLevel = (sender, resolve) => {
                 const character = getChatroomCharacter(sender);
@@ -2270,7 +2575,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT = 6;
+    const PER_PAGE_COUNT$2 = 6;
     class GuiAuthorityPermissions extends GuiSubscreen {
         constructor(character) {
             super();
@@ -2307,7 +2612,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         rebuildList() {
             const categories = new Map();
             this.permList = [];
-            this.page = 0;
             let Input = document.getElementById("BCX_PermissionsFilter");
             if (this.permissionData === null) {
                 if (Input) {
@@ -2370,6 +2674,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     });
                 }
             }
+            const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$2);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
+            }
         }
         Run() {
             var _a;
@@ -2389,8 +2700,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawButton(870, 182, 64, 64, "", "White");
                     DrawText("X", 890, 217, "Black");
                 }
-                for (let off = 0; off < PER_PAGE_COUNT; off++) {
-                    const i = this.page * PER_PAGE_COUNT + off;
+                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
+                    const i = this.page * PER_PAGE_COUNT$2 + off;
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
@@ -2421,7 +2732,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
                 // Pagination
-                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT));
+                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT$2));
                 MainCanvas.textAlign = "center";
                 DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
             }
@@ -2451,12 +2762,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     elem.value = "";
                     this.rebuildList();
                 }
-                for (let off = 0; off < PER_PAGE_COUNT; off++) {
-                    const i = this.page * PER_PAGE_COUNT + off;
+                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
+                    const i = this.page * PER_PAGE_COUNT$2 + off;
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
-                    const Y = 275 + i * 100;
+                    const Y = 275 + off * 100;
                     if (!e.separator) {
                         // Permission name
                         if (MouseIn(200, Y, 1000, 64)) {
@@ -2487,14 +2798,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT);
-                if (MouseIn(1455, 800, 150, 90)) {
+                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$2);
+                if (MouseIn(1605, 800, 150, 90)) {
                     this.page--;
                     if (this.page < 0) {
                         this.page = Math.max(totalPages - 1, 0);
                     }
                 }
-                else if (MouseIn(1605, 800, 150, 90)) {
+                else if (MouseIn(1755, 800, 150, 90)) {
                     this.page++;
                     if (this.page >= totalPages) {
                         this.page = 0;
@@ -2510,6 +2821,294 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    const PER_PAGE_COUNT$1 = 6;
+    const CONFIG_NAMES = {
+        logConfigChange: "Log changes in logging configuration",
+        logDeleted: "Log deleted log entries"
+    };
+    const LEVEL_NAMES = {
+        [LogAccessLevel.everyone]: "[ERROR]",
+        [LogAccessLevel.none]: "No",
+        [LogAccessLevel.protected]: "Protected",
+        [LogAccessLevel.normal]: "Yes"
+    };
+    class GuiLogConfig extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.config = null;
+            this.failed = false;
+            this.configList = [];
+            this.page = 0;
+            this.character = character;
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.config = null;
+            this.rebuildList();
+            Promise.all([this.character.getLogConfig()]).then(res => {
+                this.config = res[0];
+                this.rebuildList();
+            }, err => {
+                console.error(`BCX: Failed to get log config for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        rebuildList() {
+            this.configList = [];
+            let Input = document.getElementById("BCX_LogConfigFilter");
+            if (this.config === null) {
+                if (Input) {
+                    Input.remove();
+                }
+                return;
+            }
+            if (!Input) {
+                Input = ElementCreateInput("BCX_LogConfigFilter", "text", "", "30");
+                Input.addEventListener("input", ev => {
+                    this.rebuildList();
+                });
+            }
+            const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+            for (const [k, v] of Object.entries(this.config)) {
+                if (CONFIG_NAMES[k] !== undefined &&
+                    LEVEL_NAMES[v] !== undefined &&
+                    filter.every(i => CONFIG_NAMES[k].toLocaleLowerCase().includes(i) ||
+                        k.toLocaleLowerCase().includes(i))) {
+                    this.configList.push({
+                        category: k,
+                        access: v,
+                        name: CONFIG_NAMES[k]
+                    });
+                }
+            }
+            this.configList.sort((a, b) => a.name.localeCompare(b.name));
+            const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$1);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
+            }
+        }
+        Run() {
+            var _a;
+            if (this.config !== null) {
+                // filter
+                DrawText("Filter:", 130, 215, "Black");
+                ElementPosition("BCX_LogConfigFilter", 550, 210, 600, 64);
+                //reset button
+                if ((_a = document.getElementById("BCX_LogConfigFilter")) === null || _a === void 0 ? void 0 : _a.value) {
+                    DrawButton(870, 182, 64, 64, "", "White");
+                    DrawText("X", 890, 217, "Black");
+                }
+                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
+                    const i = this.page * PER_PAGE_COUNT$1 + off;
+                    if (i >= this.configList.length)
+                        break;
+                    const e = this.configList[i];
+                    const Y = 275 + off * 100;
+                    // Config name
+                    DrawButton(200, Y, 1000, 64, "", "White");
+                    DrawTextFit(e.name, 210, Y + 34, 990, "Black");
+                    // Config access
+                    MainCanvas.textAlign = "center";
+                    DrawBackNextButton(1370, Y, 170, 64, LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LEVEL_NAMES[(e.access + 1)] : ""));
+                    MainCanvas.textAlign = "left";
+                }
+                // Pagination
+                const totalPages = Math.max(1, Math.ceil(this.configList.length / PER_PAGE_COUNT$1));
+                MainCanvas.textAlign = "center";
+                DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+            }
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get log config data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 1000, 480, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Behaviour Log: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (MouseIn(1815, 190, 90, 90))
+                return module_gui.currentSubscreen = new GuiLog(this.character);
+            if (this.config !== null) {
+                //reset button
+                const elem = document.getElementById("BCX_LogConfigFilter");
+                if (MouseIn(870, 182, 64, 64) && elem) {
+                    elem.value = "";
+                    this.rebuildList();
+                }
+                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
+                    const i = this.page * PER_PAGE_COUNT$1 + off;
+                    if (i >= this.configList.length)
+                        break;
+                    const e = this.configList[i];
+                    const Y = 275 + off * 100;
+                    if (e.access > 0 && MouseIn(1370, Y, 85, 64)) {
+                        this.character.setLogConfig(e.category, (e.access - 1));
+                        return;
+                    }
+                    else if (e.access < 2 && MouseIn(1455, Y, 85, 64)) {
+                        this.character.setLogConfig(e.category, (e.access + 1));
+                        return;
+                    }
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$1);
+                if (MouseIn(1605, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = Math.max(totalPages - 1, 0);
+                    }
+                }
+                else if (MouseIn(1755, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Unload() {
+            ElementRemove("BCX_LogConfigFilter");
+        }
+    }
+
+    const PER_PAGE_COUNT = 6;
+    class GuiLog extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.failed = false;
+            this.logEntries = null;
+            this.allowDeletion = false;
+            this.allowConfiguration = false;
+            this.page = 0;
+            this.character = character;
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.logEntries = null;
+            this.refreshScreen();
+            Promise.all([this.character.getLogEntries(), this.character.getPermissionAccess("log_delete"), this.character.getPermissionAccess("log_configure")]).then(res => {
+                this.logEntries = res[0];
+                this.allowDeletion = res[1];
+                this.allowConfiguration = res[2];
+                this.refreshScreen();
+            }, err => {
+                console.error(`BCX: Failed to get log data for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        refreshScreen() {
+            if (this.logEntries !== null) {
+                const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+                if (this.page < 0) {
+                    this.page = Math.max(totalPages - 1, 0);
+                }
+                else if (this.page >= totalPages) {
+                    this.page = 0;
+                }
+            }
+        }
+        Run() {
+            if (this.logEntries !== null) {
+                for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                    const i = this.page * PER_PAGE_COUNT + off;
+                    if (i >= this.logEntries.length)
+                        break;
+                    const e = this.logEntries[i];
+                    const Y = 275 + off * 100;
+                    // Log message
+                    DrawButton(200, Y, 1000, 64, "", "White");
+                    const msg = logMessageRender(e);
+                    DrawTextFit(msg, 210, Y + 34, 990, msg.startsWith("[") ? "Gray" : "Black");
+                    DrawTextFit(new Date(e[0]).toLocaleString(), 1210, Y + 34, 300, "Gray");
+                    if (this.allowDeletion) {
+                        DrawButton(1530, Y, 64, 64, "", "White");
+                        DrawText("X", 1550, Y + 34, "Black");
+                    }
+                }
+                // Pagination
+                const totalPages = Math.max(1, Math.ceil(this.logEntries.length / PER_PAGE_COUNT));
+                MainCanvas.textAlign = "center";
+                DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+            }
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get log data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 1000, 480, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Behaviour Log for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 190, 90, 90, "", this.allowConfiguration ? "White" : "#eee", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (MouseIn(1815, 190, 90, 90) && this.allowConfiguration)
+                return module_gui.currentSubscreen = new GuiLogConfig(this.character);
+            if (this.logEntries !== null) {
+                for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                    const i = this.page * PER_PAGE_COUNT + off;
+                    if (i >= this.logEntries.length)
+                        break;
+                    const e = this.logEntries[i];
+                    const Y = 275 + off * 100;
+                    if (this.allowDeletion && MouseIn(1530, Y, 64, 64)) {
+                        this.character.logMessageDelete(e[0]);
+                        return;
+                    }
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+                if (MouseIn(1605, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = Math.max(totalPages - 1, 0);
+                    }
+                }
+                else if (MouseIn(1755, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+    }
+
     const MAIN_MENU_ITEMS = [
         {
             module: ModuleCategory.Basic,
@@ -2519,6 +3118,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             module: ModuleCategory.Authority,
             onclick: (C) => {
                 module_gui.currentSubscreen = new GuiAuthorityPermissions(C);
+            }
+        },
+        {
+            module: ModuleCategory.Log,
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiLog(C);
             }
         },
         {
@@ -2736,6 +3341,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     const module_commands = registerModule(new ModuleCommands());
     const module_console = registerModule(new ModuleConsole());
     const module_gui = registerModule(new ModuleGUI());
+    const module_log = registerModule(new ModuleLog());
     const module_messaging = registerModule(new ModuleMessaging());
     const module_miscPatches = registerModule(new ModuleMiscPatches());
     const module_storage = registerModule(new ModuleStorage());

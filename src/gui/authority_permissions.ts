@@ -67,6 +67,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	}
 
 	private rebuildList() {
+		if (!this.active) return;
+
 		const categories: Map<ModuleCategory, PermissionData> = new Map();
 		this.permList = [];
 		let Input = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
@@ -213,8 +215,9 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		MainCanvas.textAlign = "left";
 
 		DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-		DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList);
+		MainCanvas.textAlign = "center";
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+		DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList, "Role management");
 	}
 
 	Click() {

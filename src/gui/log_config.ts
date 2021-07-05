@@ -17,7 +17,12 @@ const PER_PAGE_COUNT = 6;
 
 const CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	logConfigChange: "Log changes in logging configuration",
-	logDeleted: "Log deleted log entries"
+	logDeleted: "Log deleted log entries",
+	praise: "Log praising or scolding behavior",
+	userNote: "Ability to attach notes",
+	enteredPublicRoom: "Log which public rooms are entered",
+	enteredPrivateRoom: "Log which private rooms are entered",
+	hadOrgasm: "Log each single orgasm"
 };
 
 const LEVEL_NAMES: Record<LogAccessLevel, string> = {
@@ -33,6 +38,7 @@ export class GuiLogConfig extends GuiSubscreen {
 	private config: LogConfig | null = null;
 	private failed: boolean = false;
 	private configList: ConfigListItem[] = [];
+	private allowDelete: boolean = false;
 	private page: number = 0;
 
 	constructor(character: ChatroomCharacter) {
@@ -53,8 +59,12 @@ export class GuiLogConfig extends GuiSubscreen {
 	private requestData() {
 		this.config = null;
 		this.rebuildList();
-		Promise.all([this.character.getLogConfig()]).then(res => {
+		Promise.all([
+			this.character.getLogConfig(),
+			this.character.getPermissionAccess("log_delete")
+		]).then(res => {
 			this.config = res[0];
+			this.allowDelete = res[1];
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get log config for ${this.character}`, err);
@@ -63,6 +73,8 @@ export class GuiLogConfig extends GuiSubscreen {
 	}
 
 	private rebuildList() {
+		if (!this.active) return;
+
 		this.configList = [];
 		let Input = document.getElementById("BCX_LogConfigFilter") as HTMLInputElement | undefined;
 		if (this.config === null) {
@@ -124,14 +136,14 @@ export class GuiLogConfig extends GuiSubscreen {
 				if (i >= this.configList.length) break;
 				const e = this.configList[i];
 
-				const Y = 275 + off * 100;
+				const Y = 290 + off * 100;
 
 				// Config name
-				DrawButton(200, Y, 1000, 64, "", "White");
-				DrawTextFit(e.name, 210, Y + 34, 990, "Black");
+				DrawButton(130, Y, 1070, 64, "", "White");
+				DrawTextFit(e.name, 140, Y + 34, 1060, "Black");
 				// Config access
 				MainCanvas.textAlign = "center";
-				DrawBackNextButton(1370, Y, 170, 64, LEVEL_NAMES[e.access], "White", "",
+				DrawBackNextButton(1270, Y, 170, 64, LEVEL_NAMES[e.access], "White", "",
 					() => (e.access > 0 ? LEVEL_NAMES[(e.access-1) as LogAccessLevel] : ""),
 					() => (e.access < 2 ? LEVEL_NAMES[(e.access+1) as LogAccessLevel] : "")
 				);
@@ -153,8 +165,14 @@ export class GuiLogConfig extends GuiSubscreen {
 		MainCanvas.textAlign = "left";
 
 		DrawText(`- Behaviour Log: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png");
+		MainCanvas.textAlign = "center";
+		if (this.allowDelete) {
+			DrawButton(1525, 690, 380, 64, "", "White");
+			DrawText("Delete all log entries", 1715, 722, "Black");
+		}
+
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
 	}
 
 	Click() {
@@ -176,16 +194,24 @@ export class GuiLogConfig extends GuiSubscreen {
 				if (i >= this.configList.length) break;
 				const e = this.configList[i];
 
-				const Y = 275 + off * 100;
+				const Y = 290 + off * 100;
 
-				if (e.access > 0 && MouseIn(1370, Y, 85, 64)) {
+				if (e.access > 0 && MouseIn(1270, Y, 85, 64)) {
 					this.character.setLogConfig(e.category, (e.access-1) as LogAccessLevel);
 					return;
-				} else if (e.access < 2 && MouseIn(1455, Y, 85, 64)) {
+				} else if (e.access < 2 && MouseIn(1355, Y, 85, 64)) {
 					this.character.setLogConfig(e.category, (e.access+1) as LogAccessLevel);
 					return;
 				}
 
+			}
+
+			// Clear log button
+			if (MouseIn(1525, 690, 380, 64) && this.allowDelete) {
+				this.character.logClear().then(() => {
+					module_gui.currentSubscreen = new GuiLog(this.character);
+				});
+				return;
 			}
 
 			// Pagination

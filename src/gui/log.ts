@@ -5,15 +5,18 @@ import { GuiSubscreen } from "./subscreen";
 import { LogEntry, logMessageRender } from "../modules/log";
 import { GuiLogConfig } from "./log_config";
 
-const PER_PAGE_COUNT = 6;
+const PER_PAGE_COUNT = 5;
 
 export class GuiLog extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
 	private failed: boolean = false;
-	private logEntries: LogEntry[] | null = null;
+	private logData: LogEntry[] | null = null;
+	private logEntries: LogEntry[] = [];
 	private allowDeletion: boolean = false;
 	private allowConfiguration: boolean = false;
+	private allowPraise: boolean = false;
+	private allowLeaveMessage: boolean = false;
 	private page: number = 0;
 
 	constructor(character: ChatroomCharacter) {
@@ -32,12 +35,17 @@ export class GuiLog extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.logEntries = null;
+		this.logData = null;
 		this.refreshScreen();
-		Promise.all([this.character.getLogEntries(), this.character.getPermissionAccess("log_delete"), this.character.getPermissionAccess("log_configure")]).then(res => {
-			this.logEntries = res[0];
-			this.allowDeletion = res[1];
-			this.allowConfiguration = res[2];
+		Promise.all([
+			this.character.getLogEntries(),
+			this.character.logGetAllowedActions()
+		]).then(res => {
+			this.logData = res[0];
+			this.allowDeletion = res[1].delete;
+			this.allowConfiguration = res[1].configure;
+			this.allowPraise = res[1].praise;
+			this.allowLeaveMessage = res[1].leaveMessage;
 			this.refreshScreen();
 		}, err => {
 			console.error(`BCX: Failed to get log data for ${this.character}`, err);
@@ -46,36 +54,108 @@ export class GuiLog extends GuiSubscreen {
 	}
 
 	private refreshScreen() {
-		if (this.logEntries !== null) {
-			const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
-			if (this.page < 0) {
-				this.page = Math.max(totalPages - 1, 0);
-			} else if (this.page >= totalPages) {
-				this.page = 0;
+		if (!this.active) return;
+
+		this.logEntries = [];
+
+		let LogFilter = document.getElementById("BCX_LogFilter") as HTMLInputElement | undefined;
+		let NoteField = document.getElementById("BCX_NoteField") as HTMLInputElement | undefined;
+
+		if (this.logData === null) {
+			if (LogFilter) {
+				LogFilter.remove();
 			}
+			if (NoteField) {
+				NoteField.remove();
+			}
+			return;
+		}
+
+		if (!LogFilter) {
+			LogFilter = ElementCreateInput("BCX_LogFilter", "text", "", "30");
+			LogFilter.addEventListener("input", ev => {
+				this.refreshScreen();
+			});
+		}
+
+		if (!this.allowLeaveMessage && NoteField) {
+			NoteField.remove();
+		} else if (this.allowLeaveMessage && !NoteField) {
+			NoteField = ElementCreateInput("BCX_NoteField", "text", "", "30");
+		}
+
+		const filter = LogFilter.value.trim().toLocaleLowerCase().split(" ");
+
+		this.logEntries = this.logData.filter(e => {
+			const msg = logMessageRender(e).toLocaleLowerCase();
+			return filter.every(f => msg.includes(f));
+		});
+
+		const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+		if (this.page < 0) {
+			this.page = Math.max(totalPages - 1, 0);
+		} else if (this.page >= totalPages) {
+			this.page = 0;
 		}
 	}
 
 	Run() {
-		if (this.logEntries !== null) {
+		if (this.logData !== null) {
+
+			// filter
+			DrawText("Filter:", 130, 215, "Black");
+			ElementPosition("BCX_LogFilter", 550, 210, 600, 64);
+
+			//reset button
+			if ((document.getElementById("BCX_LogFilter") as HTMLInputElement | undefined)?.value) {
+				DrawButton(870, 182, 64, 64, "", "White");
+				DrawText("X", 890, 217, "Black");
+			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
 				const i = this.page * PER_PAGE_COUNT + off;
 				if (i >= this.logEntries.length) break;
 				const e = this.logEntries[i];
 
-				const Y = 275 + off * 100;
+				const Y = 290 + off * 95;
 
 				// Log message
-				DrawButton(200, Y, 1000, 64, "", "White");
+				DrawButton(130, Y, 1100, 64, "", "White");
 				const msg = logMessageRender(e);
-				DrawTextFit(msg, 210, Y + 34, 990, msg.startsWith("[") ? "Gray" : "Black");
-				DrawTextFit(new Date(e[0]).toLocaleString(), 1210, Y + 34, 300, "Gray");
+				DrawTextFit(msg, 140, Y + 34, 1090, msg.startsWith("[") ? "Gray" : "Black");
+				MainCanvas.beginPath();
+				MainCanvas.rect(1270, Y, 320, 64);
+				MainCanvas.stroke();
+				DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Gray", "Black");
 
 				if (this.allowDeletion) {
-					DrawButton(1530, Y, 64, 64, "", "White");
-					DrawText("X", 1550, Y + 34, "Black");
+					DrawButton(1630, Y, 64, 64, "", "White");
+					DrawText("X", 1650, Y + 34, "Black");
 				}
+			}
+
+			// Message field
+			if (this.allowLeaveMessage) {
+				MainCanvas.textAlign = "left";
+				DrawText("Attach", 130, 831, "Black");
+				DrawText("note:", 130, 869, "Black");
+				ElementPosition("BCX_NoteField", 580, 842, 660, 64);
+				MainCanvas.textAlign = "center";
+			}
+			// Praise button
+			if (this.allowPraise) {
+				DrawButton(950, 815, 150, 64, "", "White");
+				DrawText("Praise", 1025, 847, "Black");
+			}
+			// Leave message button
+			if (this.allowLeaveMessage) {
+				DrawButton(1150, 815, 200, 64, "", "White");
+				DrawText("Only note", 1250, 847, "Black");
+			}
+			// Scold button
+			if (this.allowPraise) {
+				DrawButton(1400, 815, 150, 64, "", "White");
+				DrawText("Scold", 1475, 847, "Black");
 			}
 
 			// Pagination
@@ -91,10 +171,9 @@ export class GuiLog extends GuiSubscreen {
 		}
 
 		MainCanvas.textAlign = "left";
-
-		DrawText(`- Behaviour Log for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+		DrawText(`- Behaviour Log: About ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
 		DrawButton(1815, 190, 90, 90, "", this.allowConfiguration ? "White" : "#eee", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
 	}
 
@@ -102,19 +181,54 @@ export class GuiLog extends GuiSubscreen {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 		if (MouseIn(1815, 190, 90, 90) && this.allowConfiguration) return module_gui.currentSubscreen = new GuiLogConfig(this.character);
 
-		if (this.logEntries !== null) {
+		if (this.logData !== null) {
+
+			//reset button
+			const elem = document.getElementById("BCX_LogFilter") as HTMLInputElement | undefined;
+			if (MouseIn(870, 182, 64, 64) && elem) {
+				elem.value = "";
+				this.refreshScreen();
+			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
 				const i = this.page * PER_PAGE_COUNT + off;
 				if (i >= this.logEntries.length) break;
 				const e = this.logEntries[i];
 
-				const Y = 275 + off * 100;
+				const Y = 290 + off * 95;
 
-				if (this.allowDeletion && MouseIn(1530, Y, 64, 64)) {
+				if (this.allowDeletion && MouseIn(1630, Y, 64, 64)) {
 					this.character.logMessageDelete(e[0]);
 					return;
 				}
+			}
+
+			const field = document.getElementById("BCX_NoteField") as HTMLInputElement | undefined;
+			const msg = field?.value || null;
+			let didPraise = false;
+
+			// Praise button
+			if (this.allowPraise && MouseIn(950, 815, 150, 64)) {
+				this.character.logPraise(1, msg);
+				didPraise = true;
+			}
+			// Leave message button
+			if (this.allowLeaveMessage && MouseIn(1150, 815, 200, 64) && msg) {
+				this.character.logPraise(0, msg);
+				didPraise = true;
+			}
+			// Scold button
+			if (this.allowPraise && MouseIn(1400, 815, 150, 64)) {
+				this.character.logPraise(-1, msg);
+				didPraise = true;
+			}
+
+			if (didPraise) {
+				this.allowPraise = false;
+				if (field) {
+					field.value = "";
+				}
+				return;
 			}
 
 			// Pagination
@@ -135,5 +249,10 @@ export class GuiLog extends GuiSubscreen {
 
 	Exit() {
 		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+	}
+
+	Unload() {
+		ElementRemove("BCX_LogFilter");
+		ElementRemove("BCX_NoteField");
 	}
 }

@@ -1,6 +1,6 @@
 import { VERSION } from "./config";
 import { AccessLevel, checkPermissionAccess, getPermissionDataFromBundle, getPlayerPermissionSettings, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
-import { getVisibleLogEntries, LogAccessLevel, LogConfig, logConfigSet, LogEntry, logMessageDelete } from "./modules/log";
+import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { modStorage } from "./modules/storage";
 import { isObject } from "./utils";
@@ -124,7 +124,7 @@ export class ChatroomCharacter {
 				throw new Error("Bad data");
 			}
 			for (const k of Object.keys(data) as BCX_LogCategory[]) {
-				if (!modStorage.logConfig?.[k] || LogAccessLevel[data[k]] === undefined) {
+				if (modStorage.logConfig?.[k] === undefined || LogAccessLevel[data[k]] === undefined) {
 					delete data[k];
 				}
 			}
@@ -138,6 +138,41 @@ export class ChatroomCharacter {
 			target
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	logClear(): Promise<boolean> {
+		return sendQuery("logClear", undefined, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	logPraise(value: -1 | 0 | 1, message: string | null): Promise<boolean> {
+		return sendQuery("logPraise", {
+			message,
+			value
+		}, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	logGetAllowedActions(): Promise<BCX_logAllowedActions> {
+		return sendQuery("logGetAllowedActions", undefined, this.MemberNumber).then(data => {
+			if (!isObject(data) ||
+				typeof data.delete !== "boolean" ||
+				typeof data.configure !== "boolean" ||
+				typeof data.praise !== "boolean" ||
+				typeof data.leaveMessage !== "boolean"
+			) {
 				throw new Error("Bad data");
 			}
 			return data;
@@ -198,6 +233,18 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override setLogConfig(category: BCX_LogCategory, target: LogAccessLevel): Promise<boolean> {
 		return Promise.resolve(logConfigSet(category, target, this));
+	}
+
+	override logClear(): Promise<boolean> {
+		return Promise.resolve(logClear(this));
+	}
+
+	override logPraise(value: -1 | 0 | 1, message: string | null): Promise<boolean> {
+		return Promise.resolve(logPraise(value, message, this));
+	}
+
+	override logGetAllowedActions(): Promise<BCX_logAllowedActions> {
+		return Promise.resolve(logGetAllowedActions(this));
 	}
 }
 

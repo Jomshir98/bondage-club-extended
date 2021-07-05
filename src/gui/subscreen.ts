@@ -1,6 +1,10 @@
 import { module_gui } from "../modules";
 
 export abstract class GuiSubscreen {
+	get active(): boolean {
+		return module_gui.currentSubscreen === this;
+	}
+
 	Load() {
 		// Empty
 	}

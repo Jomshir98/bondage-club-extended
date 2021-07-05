@@ -110,9 +110,15 @@ export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLe
 	return true;
 }
 
-export function logClear() {
+export function logClear(character: ChatroomCharacter | null): boolean {
+	if (character && !checkPermissionAccess("log_delete", character)) {
+		return false;
+	}
+
 	modStorage.log = [];
 	logMessageAdd(LogAccessLevel.everyone, LogEntryType.plaintext, "The log has been cleared");
+
+	return true;
 }
 
 export function getVisibleLogEntries(character: ChatroomCharacter): LogEntry[] {
@@ -138,36 +144,102 @@ export function logMessageRender(entry: LogEntry): string {
 	return `[ERROR: Unknown entry type ${entry[2]}]`;
 }
 
+const alreadyPraisedBy: Set<number> = new Set();
+
+export function logGetAllowedActions(character: ChatroomCharacter): BCX_logAllowedActions {
+	return {
+		configure: checkPermissionAccess("log_configure", character),
+		delete: checkPermissionAccess("log_delete", character),
+		leaveMessage: checkPermissionAccess("log_leaveMessage", character) && !!(modStorage.logConfig?.userNote),
+		praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
+	};
+}
+
+export function logPraise(value: -1 | 0 | 1, message: string | null, character: ChatroomCharacter): boolean {
+	if (![-1, 0, 1].includes(value)) {
+		throw new Error("Invalid value");
+	}
+
+	if (value === 0 && !message)
+		return false;
+
+	const allowed = logGetAllowedActions(character);
+
+	if (value !== 0 && !allowed.praise)
+		return false;
+	if (message && !allowed.leaveMessage)
+		return false;
+
+	if (value !== 0) {
+		alreadyPraisedBy.add(character.MemberNumber);
+	}
+
+	if (value > 0) {
+		if (message) {
+			logMessage("userNote", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+		} else {
+			logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
+		}
+	} else if (value < 0) {
+		if (message) {
+			logMessage("userNote", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+		} else {
+			logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
+		}
+	} else if (message) {
+		logMessage("userNote", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+	}
+
+	return true;
+}
+
 const logConfigDefaults: LogConfig = {
 	logConfigChange: LogAccessLevel.protected,
-	logDeleted: LogAccessLevel.normal
+	logDeleted: LogAccessLevel.normal,
+	praise: LogAccessLevel.normal,
+	userNote: LogAccessLevel.protected,
+	enteredPublicRoom: LogAccessLevel.none,
+	enteredPrivateRoom: LogAccessLevel.none,
+	hadOrgasm: LogAccessLevel.none
 };
 
 export class ModuleLog extends BaseModule {
 	init() {
 		registerPermission("log_view_normal", {
-			name: "See normal log entries",
+			name: "Allow to see normal log entries",
 			category: ModuleCategory.Log,
 			self: true,
 			min: AccessLevel.public
 		});
 		registerPermission("log_view_protected", {
-			name: "See protected log entries",
+			name: "Allow to see protected log entries",
 			category: ModuleCategory.Log,
 			self: true,
 			min: AccessLevel.mistress
 		});
 		registerPermission("log_configure", {
-			name: "Configure what is logged",
+			name: "Allow to configure what is logged",
 			category: ModuleCategory.Log,
 			self: true,
 			min: AccessLevel.self
 		});
 		registerPermission("log_delete", {
-			name: "Delete log entries",
+			name: "Allow deleting log entries",
 			category: ModuleCategory.Log,
 			self: true,
 			min: AccessLevel.self
+		});
+		registerPermission("log_praise", {
+			name: "Allow to praise or scold",
+			category: ModuleCategory.Log,
+			self: false,
+			min: AccessLevel.public
+		});
+		registerPermission("log_leaveMessage", {
+			name: "Allow to attach notes to the body",
+			category: ModuleCategory.Log,
+			self: false,
+			min: AccessLevel.mistress
 		});
 
 		queryHandlers.logData = (sender, resolve) => {
@@ -209,11 +281,42 @@ export class ModuleLog extends BaseModule {
 				resolve(false);
 			}
 		};
+		queryHandlers.logClear = (sender, resolve) => {
+			const character = getChatroomCharacter(sender);
+			if (character) {
+				resolve(true, logClear(character));
+			} else {
+				resolve(false);
+			}
+		};
+		queryHandlers.logPraise = (sender, resolve, data) => {
+			if (!isObject(data) ||
+				(data.message !== null && typeof data.message !== "string") ||
+				![-1, 0, 1].includes(data.value)
+			) {
+				console.warn(`BCX: Bad logPraise query from ${sender}`, data);
+				return resolve(false);
+			}
+			const character = getChatroomCharacter(sender);
+			if (character) {
+				resolve(true, logPraise(data.value, data.message, character));
+			} else {
+				resolve(false);
+			}
+		};
+		queryHandlers.logGetAllowedActions = (sender, resolve) => {
+			const character = getChatroomCharacter(sender);
+			if (character) {
+				resolve(true, logGetAllowedActions(character));
+			} else {
+				resolve(false);
+			}
+		};
 	}
 
 	load() {
 		if (!Array.isArray(modStorage.log)) {
-			logClear();
+			logClear(null);
 		} else if (!modStorage.log.every(e =>
 			Array.isArray(e) &&
 			e.length === 4 &&
@@ -222,7 +325,7 @@ export class ModuleLog extends BaseModule {
 			typeof e[2] === "number"
 		)) {
 			console.error("BCX: Some log entries have invalid format, reseting whole log!");
-			logClear();
+			logClear(null);
 		}
 
 		if (!modStorage.logConfig) {

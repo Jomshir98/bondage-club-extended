@@ -18,13 +18,20 @@ type BCX_Permissions =
 	| "log_view_protected"
 	| "log_configure"
 	| "log_delete"
+	| "log_praise"
+	| "log_leaveMessage"
 	| "misc_test";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
 
 type BCX_LogCategory =
 	| "logConfigChange"
-	| "logDeleted";
+	| "logDeleted"
+	| "praise"
+	| "userNote"
+	| "enteredPublicRoom"
+	| "enteredPrivateRoom"
+	| "hadOrgasm";
 
 interface ModStorage {
 	permissions: PermissionsBundle;

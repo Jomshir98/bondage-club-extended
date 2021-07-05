@@ -43,6 +43,13 @@ type BCX_messages = {
 	somethingChanged: undefined;
 };
 
+type BCX_logAllowedActions = {
+	delete: boolean;
+	configure: boolean;
+	praise: boolean;
+	leaveMessage: boolean;
+};
+
 type BCX_queries = {
 	permissions: [undefined, PermissionsBundle];
 	myAccessLevel: [undefined, import("./modules/authority").AccessLevel];
@@ -59,4 +66,13 @@ type BCX_queries = {
 		category: BCX_LogCategory;
 		target: import("./modules/log").LogAccessLevel;
 	}, boolean];
+	logClear: [undefined, boolean];
+	logPraise: [
+		{
+			message: string | null;
+			value: -1 | 0 | 1;
+		},
+		boolean
+	];
+	logGetAllowedActions: [undefined, BCX_logAllowedActions];
 };

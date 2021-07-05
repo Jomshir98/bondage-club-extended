@@ -50,9 +50,10 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 		DrawBackNextButton(1605, 800, 300, 90, `Page 1 / 1`, "White", "", () => "", () => "");
 		MainCanvas.textAlign = "left";
 
-		DrawText(`- Authority: Role Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png");
+		DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+		MainCanvas.textAlign = "center";
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
 
 	}
 

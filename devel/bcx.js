@@ -726,9 +726,13 @@ window.BCX_Loaded = false;
         notifyOfChange();
         return true;
     }
-    function logClear() {
+    function logClear(character) {
+        if (character && !checkPermissionAccess("log_delete", character)) {
+            return false;
+        }
         modStorage.log = [];
         logMessageAdd(LogAccessLevel.everyone, LogEntryType.plaintext, "The log has been cleared");
+        return true;
     }
     function getVisibleLogEntries(character) {
         if (!modStorage.log) {
@@ -752,35 +756,97 @@ window.BCX_Loaded = false;
         }
         return `[ERROR: Unknown entry type ${entry[2]}]`;
     }
+    const alreadyPraisedBy = new Set();
+    function logGetAllowedActions(character) {
+        var _a;
+        return {
+            configure: checkPermissionAccess("log_configure", character),
+            delete: checkPermissionAccess("log_delete", character),
+            leaveMessage: checkPermissionAccess("log_leaveMessage", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.userNote),
+            praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
+        };
+    }
+    function logPraise(value, message, character) {
+        if (![-1, 0, 1].includes(value)) {
+            throw new Error("Invalid value");
+        }
+        if (value === 0 && !message)
+            return false;
+        const allowed = logGetAllowedActions(character);
+        if (value !== 0 && !allowed.praise)
+            return false;
+        if (message && !allowed.leaveMessage)
+            return false;
+        if (value !== 0) {
+            alreadyPraisedBy.add(character.MemberNumber);
+        }
+        if (value > 0) {
+            if (message) {
+                logMessage("userNote", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+            }
+            else {
+                logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
+            }
+        }
+        else if (value < 0) {
+            if (message) {
+                logMessage("userNote", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+            }
+            else {
+                logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
+            }
+        }
+        else if (message) {
+            logMessage("userNote", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+        }
+        return true;
+    }
     const logConfigDefaults = {
         logConfigChange: LogAccessLevel.protected,
-        logDeleted: LogAccessLevel.normal
+        logDeleted: LogAccessLevel.normal,
+        praise: LogAccessLevel.normal,
+        userNote: LogAccessLevel.protected,
+        enteredPublicRoom: LogAccessLevel.none,
+        enteredPrivateRoom: LogAccessLevel.none,
+        hadOrgasm: LogAccessLevel.none
     };
     class ModuleLog extends BaseModule {
         init() {
             registerPermission("log_view_normal", {
-                name: "See normal log entries",
+                name: "Allow to see normal log entries",
                 category: ModuleCategory.Log,
                 self: true,
                 min: AccessLevel.public
             });
             registerPermission("log_view_protected", {
-                name: "See protected log entries",
+                name: "Allow to see protected log entries",
                 category: ModuleCategory.Log,
                 self: true,
                 min: AccessLevel.mistress
             });
             registerPermission("log_configure", {
-                name: "Configure what is logged",
+                name: "Allow to configure what is logged",
                 category: ModuleCategory.Log,
                 self: true,
                 min: AccessLevel.self
             });
             registerPermission("log_delete", {
-                name: "Delete log entries",
+                name: "Allow deleting log entries",
                 category: ModuleCategory.Log,
                 self: true,
                 min: AccessLevel.self
+            });
+            registerPermission("log_praise", {
+                name: "Allow to praise or scold",
+                category: ModuleCategory.Log,
+                self: false,
+                min: AccessLevel.public
+            });
+            registerPermission("log_leaveMessage", {
+                name: "Allow to attach notes to the body",
+                category: ModuleCategory.Log,
+                self: false,
+                min: AccessLevel.mistress
             });
             queryHandlers.logData = (sender, resolve) => {
                 const character = getChatroomCharacter(sender);
@@ -824,10 +890,43 @@ window.BCX_Loaded = false;
                     resolve(false);
                 }
             };
+            queryHandlers.logClear = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logClear(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logPraise = (sender, resolve, data) => {
+                if (!isObject(data) ||
+                    (data.message !== null && typeof data.message !== "string") ||
+                    ![-1, 0, 1].includes(data.value)) {
+                    console.warn(`BCX: Bad logPraise query from ${sender}`, data);
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logPraise(data.value, data.message, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logGetAllowedActions = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logGetAllowedActions(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
         }
         load() {
             if (!Array.isArray(modStorage.log)) {
-                logClear();
+                logClear(null);
             }
             else if (!modStorage.log.every(e => Array.isArray(e) &&
                 e.length === 4 &&
@@ -835,7 +934,7 @@ window.BCX_Loaded = false;
                 typeof e[1] === "number" &&
                 typeof e[2] === "number")) {
                 console.error("BCX: Some log entries have invalid format, reseting whole log!");
-                logClear();
+                logClear(null);
             }
             if (!modStorage.logConfig) {
                 modStorage.logConfig = { ...logConfigDefaults };
@@ -953,7 +1052,7 @@ window.BCX_Loaded = false;
                     throw new Error("Bad data");
                 }
                 for (const k of Object.keys(data)) {
-                    if (!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[k]) || LogAccessLevel[data[k]] === undefined) {
+                    if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[k]) === undefined || LogAccessLevel[data[k]] === undefined) {
                         delete data[k];
                     }
                 }
@@ -966,6 +1065,37 @@ window.BCX_Loaded = false;
                 target
             }, this.MemberNumber).then(data => {
                 if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logClear() {
+            return sendQuery("logClear", undefined, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logPraise(value, message) {
+            return sendQuery("logPraise", {
+                message,
+                value
+            }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logGetAllowedActions() {
+            return sendQuery("logGetAllowedActions", undefined, this.MemberNumber).then(data => {
+                if (!isObject(data) ||
+                    typeof data.delete !== "boolean" ||
+                    typeof data.configure !== "boolean" ||
+                    typeof data.praise !== "boolean" ||
+                    typeof data.leaveMessage !== "boolean") {
                     throw new Error("Bad data");
                 }
                 return data;
@@ -1018,6 +1148,15 @@ window.BCX_Loaded = false;
         }
         setLogConfig(category, target) {
             return Promise.resolve(logConfigSet(category, target, this));
+        }
+        logClear() {
+            return Promise.resolve(logClear(this));
+        }
+        logPraise(value, message) {
+            return Promise.resolve(logPraise(value, message, this));
+        }
+        logGetAllowedActions() {
+            return Promise.resolve(logGetAllowedActions(this));
         }
     }
     const currentRoomCharacters = [];
@@ -2396,6 +2535,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
 
     class GuiSubscreen {
+        get active() {
+            return module_gui.currentSubscreen === this;
+        }
         Load() {
             // Empty
         }
@@ -2447,9 +2589,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.textAlign = "center";
             DrawBackNextButton(1605, 800, 300, 90, `Page 1 / 1`, "White", "", () => "", () => "");
             MainCanvas.textAlign = "left";
-            DrawText(`- Authority: Role Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png");
+            DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -2610,6 +2753,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             });
         }
         rebuildList() {
+            if (!this.active)
+                return;
             const categories = new Map();
             this.permList = [];
             let Input = document.getElementById("BCX_PermissionsFilter");
@@ -2746,8 +2891,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             MainCanvas.textAlign = "left";
             DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-            DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList);
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList, "Role management");
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -2824,7 +2970,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     const PER_PAGE_COUNT$1 = 6;
     const CONFIG_NAMES = {
         logConfigChange: "Log changes in logging configuration",
-        logDeleted: "Log deleted log entries"
+        logDeleted: "Log deleted log entries",
+        praise: "Log praising or scolding behavior",
+        userNote: "Ability to attach notes",
+        enteredPublicRoom: "Log which public rooms are entered",
+        enteredPrivateRoom: "Log which private rooms are entered",
+        hadOrgasm: "Log each single orgasm"
     };
     const LEVEL_NAMES = {
         [LogAccessLevel.everyone]: "[ERROR]",
@@ -2838,6 +2989,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.config = null;
             this.failed = false;
             this.configList = [];
+            this.allowDelete = false;
             this.page = 0;
             this.character = character;
         }
@@ -2852,8 +3004,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         requestData() {
             this.config = null;
             this.rebuildList();
-            Promise.all([this.character.getLogConfig()]).then(res => {
+            Promise.all([
+                this.character.getLogConfig(),
+                this.character.getPermissionAccess("log_delete")
+            ]).then(res => {
                 this.config = res[0];
+                this.allowDelete = res[1];
                 this.rebuildList();
             }, err => {
                 console.error(`BCX: Failed to get log config for ${this.character}`, err);
@@ -2861,6 +3017,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             });
         }
         rebuildList() {
+            if (!this.active)
+                return;
             this.configList = [];
             let Input = document.getElementById("BCX_LogConfigFilter");
             if (this.config === null) {
@@ -2913,13 +3071,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     if (i >= this.configList.length)
                         break;
                     const e = this.configList[i];
-                    const Y = 275 + off * 100;
+                    const Y = 290 + off * 100;
                     // Config name
-                    DrawButton(200, Y, 1000, 64, "", "White");
-                    DrawTextFit(e.name, 210, Y + 34, 990, "Black");
+                    DrawButton(130, Y, 1070, 64, "", "White");
+                    DrawTextFit(e.name, 140, Y + 34, 1060, "Black");
                     // Config access
                     MainCanvas.textAlign = "center";
-                    DrawBackNextButton(1370, Y, 170, 64, LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LEVEL_NAMES[(e.access + 1)] : ""));
+                    DrawBackNextButton(1270, Y, 170, 64, LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LEVEL_NAMES[(e.access + 1)] : ""));
                     MainCanvas.textAlign = "left";
                 }
                 // Pagination
@@ -2937,8 +3095,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             MainCanvas.textAlign = "left";
             DrawText(`- Behaviour Log: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png");
+            MainCanvas.textAlign = "center";
+            if (this.allowDelete) {
+                DrawButton(1525, 690, 380, 64, "", "White");
+                DrawText("Delete all log entries", 1715, 722, "Black");
+            }
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -2957,15 +3120,22 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     if (i >= this.configList.length)
                         break;
                     const e = this.configList[i];
-                    const Y = 275 + off * 100;
-                    if (e.access > 0 && MouseIn(1370, Y, 85, 64)) {
+                    const Y = 290 + off * 100;
+                    if (e.access > 0 && MouseIn(1270, Y, 85, 64)) {
                         this.character.setLogConfig(e.category, (e.access - 1));
                         return;
                     }
-                    else if (e.access < 2 && MouseIn(1455, Y, 85, 64)) {
+                    else if (e.access < 2 && MouseIn(1355, Y, 85, 64)) {
                         this.character.setLogConfig(e.category, (e.access + 1));
                         return;
                     }
+                }
+                // Clear log button
+                if (MouseIn(1525, 690, 380, 64) && this.allowDelete) {
+                    this.character.logClear().then(() => {
+                        module_gui.currentSubscreen = new GuiLog(this.character);
+                    });
+                    return;
                 }
                 // Pagination
                 const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$1);
@@ -2991,14 +3161,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT = 6;
+    const PER_PAGE_COUNT = 5;
     class GuiLog extends GuiSubscreen {
         constructor(character) {
             super();
             this.failed = false;
-            this.logEntries = null;
+            this.logData = null;
+            this.logEntries = [];
             this.allowDeletion = false;
             this.allowConfiguration = false;
+            this.allowPraise = false;
+            this.allowLeaveMessage = false;
             this.page = 0;
             this.character = character;
         }
@@ -3011,12 +3184,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
         }
         requestData() {
-            this.logEntries = null;
+            this.logData = null;
             this.refreshScreen();
-            Promise.all([this.character.getLogEntries(), this.character.getPermissionAccess("log_delete"), this.character.getPermissionAccess("log_configure")]).then(res => {
-                this.logEntries = res[0];
-                this.allowDeletion = res[1];
-                this.allowConfiguration = res[2];
+            Promise.all([
+                this.character.getLogEntries(),
+                this.character.logGetAllowedActions()
+            ]).then(res => {
+                this.logData = res[0];
+                this.allowDeletion = res[1].delete;
+                this.allowConfiguration = res[1].configure;
+                this.allowPraise = res[1].praise;
+                this.allowLeaveMessage = res[1].leaveMessage;
                 this.refreshScreen();
             }, err => {
                 console.error(`BCX: Failed to get log data for ${this.character}`, err);
@@ -3024,33 +3202,97 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             });
         }
         refreshScreen() {
-            if (this.logEntries !== null) {
-                const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
-                if (this.page < 0) {
-                    this.page = Math.max(totalPages - 1, 0);
+            if (!this.active)
+                return;
+            this.logEntries = [];
+            let LogFilter = document.getElementById("BCX_LogFilter");
+            let NoteField = document.getElementById("BCX_NoteField");
+            if (this.logData === null) {
+                if (LogFilter) {
+                    LogFilter.remove();
                 }
-                else if (this.page >= totalPages) {
-                    this.page = 0;
+                if (NoteField) {
+                    NoteField.remove();
                 }
+                return;
+            }
+            if (!LogFilter) {
+                LogFilter = ElementCreateInput("BCX_LogFilter", "text", "", "30");
+                LogFilter.addEventListener("input", ev => {
+                    this.refreshScreen();
+                });
+            }
+            if (!this.allowLeaveMessage && NoteField) {
+                NoteField.remove();
+            }
+            else if (this.allowLeaveMessage && !NoteField) {
+                NoteField = ElementCreateInput("BCX_NoteField", "text", "", "30");
+            }
+            const filter = LogFilter.value.trim().toLocaleLowerCase().split(" ");
+            this.logEntries = this.logData.filter(e => {
+                const msg = logMessageRender(e).toLocaleLowerCase();
+                return filter.every(f => msg.includes(f));
+            });
+            const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
             }
         }
         Run() {
-            if (this.logEntries !== null) {
+            var _a;
+            if (this.logData !== null) {
+                // filter
+                DrawText("Filter:", 130, 215, "Black");
+                ElementPosition("BCX_LogFilter", 550, 210, 600, 64);
+                //reset button
+                if ((_a = document.getElementById("BCX_LogFilter")) === null || _a === void 0 ? void 0 : _a.value) {
+                    DrawButton(870, 182, 64, 64, "", "White");
+                    DrawText("X", 890, 217, "Black");
+                }
                 for (let off = 0; off < PER_PAGE_COUNT; off++) {
                     const i = this.page * PER_PAGE_COUNT + off;
                     if (i >= this.logEntries.length)
                         break;
                     const e = this.logEntries[i];
-                    const Y = 275 + off * 100;
+                    const Y = 290 + off * 95;
                     // Log message
-                    DrawButton(200, Y, 1000, 64, "", "White");
+                    DrawButton(130, Y, 1100, 64, "", "White");
                     const msg = logMessageRender(e);
-                    DrawTextFit(msg, 210, Y + 34, 990, msg.startsWith("[") ? "Gray" : "Black");
-                    DrawTextFit(new Date(e[0]).toLocaleString(), 1210, Y + 34, 300, "Gray");
+                    DrawTextFit(msg, 140, Y + 34, 1090, msg.startsWith("[") ? "Gray" : "Black");
+                    MainCanvas.beginPath();
+                    MainCanvas.rect(1270, Y, 320, 64);
+                    MainCanvas.stroke();
+                    DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Gray", "Black");
                     if (this.allowDeletion) {
-                        DrawButton(1530, Y, 64, 64, "", "White");
-                        DrawText("X", 1550, Y + 34, "Black");
+                        DrawButton(1630, Y, 64, 64, "", "White");
+                        DrawText("X", 1650, Y + 34, "Black");
                     }
+                }
+                // Message field
+                if (this.allowLeaveMessage) {
+                    MainCanvas.textAlign = "left";
+                    DrawText("Attach", 130, 831, "Black");
+                    DrawText("note:", 130, 869, "Black");
+                    ElementPosition("BCX_NoteField", 580, 842, 660, 64);
+                    MainCanvas.textAlign = "center";
+                }
+                // Praise button
+                if (this.allowPraise) {
+                    DrawButton(950, 815, 150, 64, "", "White");
+                    DrawText("Praise", 1025, 847, "Black");
+                }
+                // Leave message button
+                if (this.allowLeaveMessage) {
+                    DrawButton(1150, 815, 200, 64, "", "White");
+                    DrawText("Only note", 1250, 847, "Black");
+                }
+                // Scold button
+                if (this.allowPraise) {
+                    DrawButton(1400, 815, 150, 64, "", "White");
+                    DrawText("Scold", 1475, 847, "Black");
                 }
                 // Pagination
                 const totalPages = Math.max(1, Math.ceil(this.logEntries.length / PER_PAGE_COUNT));
@@ -3066,9 +3308,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 DrawText("Loading...", 1000, 480, "Black");
             }
             MainCanvas.textAlign = "left";
-            DrawText(`- Behaviour Log for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+            DrawText(`- Behaviour Log: About ${this.character.Name} -`, 125, 125, "Black", "Gray");
             MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
             DrawButton(1815, 190, 90, 90, "", this.allowConfiguration ? "White" : "#eee", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
         }
         Click() {
@@ -3076,17 +3318,48 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return this.Exit();
             if (MouseIn(1815, 190, 90, 90) && this.allowConfiguration)
                 return module_gui.currentSubscreen = new GuiLogConfig(this.character);
-            if (this.logEntries !== null) {
+            if (this.logData !== null) {
+                //reset button
+                const elem = document.getElementById("BCX_LogFilter");
+                if (MouseIn(870, 182, 64, 64) && elem) {
+                    elem.value = "";
+                    this.refreshScreen();
+                }
                 for (let off = 0; off < PER_PAGE_COUNT; off++) {
                     const i = this.page * PER_PAGE_COUNT + off;
                     if (i >= this.logEntries.length)
                         break;
                     const e = this.logEntries[i];
-                    const Y = 275 + off * 100;
-                    if (this.allowDeletion && MouseIn(1530, Y, 64, 64)) {
+                    const Y = 290 + off * 95;
+                    if (this.allowDeletion && MouseIn(1630, Y, 64, 64)) {
                         this.character.logMessageDelete(e[0]);
                         return;
                     }
+                }
+                const field = document.getElementById("BCX_NoteField");
+                const msg = (field === null || field === void 0 ? void 0 : field.value) || null;
+                let didPraise = false;
+                // Praise button
+                if (this.allowPraise && MouseIn(950, 815, 150, 64)) {
+                    this.character.logPraise(1, msg);
+                    didPraise = true;
+                }
+                // Leave message button
+                if (this.allowLeaveMessage && MouseIn(1150, 815, 200, 64) && msg) {
+                    this.character.logPraise(0, msg);
+                    didPraise = true;
+                }
+                // Scold button
+                if (this.allowPraise && MouseIn(1400, 815, 150, 64)) {
+                    this.character.logPraise(-1, msg);
+                    didPraise = true;
+                }
+                if (didPraise) {
+                    this.allowPraise = false;
+                    if (field) {
+                        field.value = "";
+                    }
+                    return;
                 }
                 // Pagination
                 const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
@@ -3106,6 +3379,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         Exit() {
             module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Unload() {
+            ElementRemove("BCX_LogFilter");
+            ElementRemove("BCX_NoteField");
         }
     }
 

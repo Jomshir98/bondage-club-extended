@@ -26,6 +26,7 @@ export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?:
 	div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
 	div.setAttribute("data-time", ChatRoomCurrentTime());
 	div.setAttribute('data-sender', `${sender ?? Player.MemberNumber ?? 0}`);
+	div.style.background = "#6e6eff54";
 
 	if (typeof msg === 'string')
 		div.innerText = msg;

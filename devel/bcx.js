@@ -40,6 +40,7 @@ window.BCX_Loaded = false;
         div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
         div.setAttribute("data-time", ChatRoomCurrentTime());
         div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
+        div.style.background = "#6e6eff54";
         if (typeof msg === 'string')
             div.innerText = msg;
         else

@@ -136,35 +136,35 @@ window.BCX_Loaded = false;
     const VERSION = "0.1.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
-        AppearanceClick: ["CA4ED810"],
-        AppearanceRun: ["904E8E84", "066E8E43"],
-        AsylumEntranceCanWander: ["3F5F4041"],
-        ChatRoomCanLeave: ["B964B0B0"],
-        ChatRoomClearAllElements: ["D1E1F8C3", "D0FE8299"],
-        ChatRoomCreateElement: ["4837C2F6", "F1D4043C"],
-        ChatRoomDrawCharacterOverlay: ["1E1A1B60"],
-        ChatRoomKeyDown: ["C6EEC498"],
-        ChatRoomMessage: ["2C6E4EC3", "FF31370D"],
-        ChatRoomSendChat: ["39B06D87", "589B50FD"],
-        CheatImport: ["412422CC", "1ECB0CC4"],
-        DialogDrawExpressionMenu: ["071C32ED"],
-        DialogDrawItemMenu: ["E0313EBF"],
-        DialogDrawPoseMenu: ["6145B7D7"],
-        ElementIsScrolledToEnd: ["064E4232"],
-        ExtendedItemDraw: ["486A52DF", "59BAFBC6"],
-        InformationSheetClick: ["39AD580B"],
-        InformationSheetExit: ["4BC15B0A"],
-        InformationSheetRun: ["58B7879C", "B96EA18A"],
-        LoginMistressItems: ["984A6AD9"],
-        LoginResponse: ["16C2C651", "2E1916A1"],
-        LoginStableItems: ["C3F50DD1"],
-        ServerAccountBeep: ["0057EF1D"],
-        SpeechGarble: ["1BC8E005", "CF18316C"]
+        AppearanceClick: ["48FA3705", "BA17EA90"],
+        AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA"],
+        AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
+        ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],
+        ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED"],
+        ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383"],
+        ChatRoomDrawCharacterOverlay: ["D58A9AD3"],
+        ChatRoomKeyDown: ["5FD37EC9", "111B6F0C"],
+        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6"],
+        ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D"],
+        CheatImport: ["412422CC", "26C67608"],
+        DialogDrawExpressionMenu: ["EEFB3D22"],
+        DialogDrawItemMenu: ["7B1D71E9", "0199F25B"],
+        DialogDrawPoseMenu: ["4B146E82"],
+        ElementIsScrolledToEnd: ["D28B0638"],
+        ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84"],
+        InformationSheetClick: ["E535609B"],
+        InformationSheetExit: ["75521907"],
+        InformationSheetRun: ["58B7879C", "A8A56ACA"],
+        LoginMistressItems: ["B58EF410"],
+        LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246"],
+        LoginStableItems: ["EA93FBF7"],
+        ServerAccountBeep: ["2D918B69"],
+        SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"]
     };
     const FUNCTION_HASHES_NMOD = {
         AppearanceClick: ["B895612C"],
         AppearanceRun: ["791E142F"],
-        AsylumEntranceCanWander: ["3F5F4041"],
+        AsylumEntranceCanWander: ["609FA096"],
         ChatRoomCanLeave: ["7EDA9A86"],
         ChatRoomClearAllElements: ["C2131E9B"],
         ChatRoomCreateElement: ["76299AEC"],
@@ -278,7 +278,7 @@ window.BCX_Loaded = false;
             if (typeof original !== "function") {
                 throw new Error(`BCX: Function ${target} to be patched not found`);
             }
-            const hash = crc32(original.toString());
+            const hash = crc32(original.toString().replaceAll("\r\n", "\n"));
             if (!expectedHashes.includes(hash)) {
                 console.warn(`BCX: Patched function ${target} has unknown hash ${hash}`);
             }
@@ -403,11 +403,28 @@ window.BCX_Loaded = false;
             return;
         init();
     }
+    function clearCaches() {
+        if (typeof DrawRunMap !== "undefined") {
+            DrawRunMap.clear();
+            DrawScreen = "";
+        }
+        if (typeof CurrentScreenFunctions !== "undefined") {
+            const w = window;
+            CurrentScreenFunctions = {
+                Run: w[`${CurrentScreen}Run`],
+                Click: w[`${CurrentScreen}Click`],
+                Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
+                Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
+                Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
+                KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
+                Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined
+            };
+        }
+    }
     function init() {
-        // Loading into already loaded club - clear some caches
-        DrawRunMap.clear();
-        DrawScreen = "";
         init_modules();
+        // Loading into already loaded club - clear some caches
+        clearCaches();
         //#region Other mod compatability
         const { BondageClubTools } = detectOtherMods();
         if (BondageClubTools) {
@@ -442,8 +459,7 @@ window.BCX_Loaded = false;
         unload_patches();
         unload_modules();
         // clear some caches
-        DrawRunMap.clear();
-        DrawScreen = "";
+        clearCaches();
         delete window.BCX_Loaded;
         console.log("BCX: Unloaded.");
     }
@@ -2104,8 +2120,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
             });
             hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+                var _a;
                 if (developmentMode) {
-                    DialogTextDefault = args[0].FocusGroup.Description;
+                    DialogTextDefault = ((_a = args[0].FocusGroup) === null || _a === void 0 ? void 0 : _a.Description) || "";
                 }
                 return next(args);
             });
@@ -2374,10 +2391,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return next(args);
             });
             hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+                var _a;
                 const chat = document.getElementById("InputChat");
                 // Tab for command completion
                 if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..")) {
-                    event === null || event === void 0 ? void 0 : event.preventDefault();
+                    const e = (_a = args[0]) !== null && _a !== void 0 ? _a : event;
+                    e === null || e === void 0 ? void 0 : e.preventDefault();
                     chat.value = "." + CommandAutocomplete(chat.value.substr(1));
                 }
                 else {

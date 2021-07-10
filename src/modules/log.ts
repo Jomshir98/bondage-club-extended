@@ -1,5 +1,6 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { BaseModule, ModuleCategory } from "../moduleManager";
+import { hookFunction } from "../patching";
 import { isObject } from "../utils";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
@@ -200,7 +201,26 @@ const logConfigDefaults: LogConfig = {
 	userNote: LogAccessLevel.protected,
 	enteredPublicRoom: LogAccessLevel.none,
 	enteredPrivateRoom: LogAccessLevel.none,
-	hadOrgasm: LogAccessLevel.none
+	hadOrgasm: LogAccessLevel.none,
+	permissionChange: LogAccessLevel.protected
+};
+
+export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
+	logConfigChange: "Log changes in logging configuration",
+	logDeleted: "Log deleted log entries",
+	praise: "Log praising or scolding behavior",
+	userNote: "Ability to attach notes",
+	enteredPublicRoom: "Log which public rooms are entered",
+	enteredPrivateRoom: "Log which private rooms are entered",
+	hadOrgasm: "Log each single orgasm",
+	permissionChange: "Log changes in permission settings"
+};
+
+export const LOG_LEVEL_NAMES: Record<LogAccessLevel, string> = {
+	[LogAccessLevel.everyone]: "[ERROR]",
+	[LogAccessLevel.none]: "No",
+	[LogAccessLevel.protected]: "Protected",
+	[LogAccessLevel.normal]: "Yes"
 };
 
 export class ModuleLog extends BaseModule {
@@ -344,5 +364,13 @@ export class ModuleLog extends BaseModule {
 				}
 			}
 		}
+
+		hookFunction("ActivityOrgasmStart", 0, (args, next) => {
+			const C = args[0] as Character;
+			if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
+				logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+			}
+			return next(args);
+		});
 	}
 }

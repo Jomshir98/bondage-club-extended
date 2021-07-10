@@ -140,8 +140,8 @@ export class GuiLog extends GuiSubscreen {
 				DrawText("Attach", 130, 831, "Black");
 				DrawText("note:", 130, 869, "Black");
 				ElementPosition("BCX_NoteField", 580, 842, 660, 64);
-				MainCanvas.textAlign = "center";
 			}
+			MainCanvas.textAlign = "center";
 			// Praise button
 			if (this.allowPraise) {
 				DrawButton(950, 815, 150, 64, "", "White");
@@ -160,7 +160,6 @@ export class GuiLog extends GuiSubscreen {
 
 			// Pagination
 			const totalPages = Math.max(1, Math.ceil(this.logEntries.length / PER_PAGE_COUNT));
-			MainCanvas.textAlign = "center";
 			DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 		} else if (this.failed) {
 			MainCanvas.textAlign = "center";

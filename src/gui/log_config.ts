@@ -2,7 +2,7 @@ import { ChatroomCharacter } from "../characters";
 import { module_gui } from "../modules";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
-import { LogAccessLevel, LogConfig } from "../modules/log";
+import { LogAccessLevel, LogConfig, LOG_CONFIG_NAMES, LOG_LEVEL_NAMES } from "../modules/log";
 import { GuiLog } from "./log";
 
 type ConfigListItem = (
@@ -14,23 +14,6 @@ type ConfigListItem = (
 );
 
 const PER_PAGE_COUNT = 6;
-
-const CONFIG_NAMES: Record<BCX_LogCategory, string> = {
-	logConfigChange: "Log changes in logging configuration",
-	logDeleted: "Log deleted log entries",
-	praise: "Log praising or scolding behavior",
-	userNote: "Ability to attach notes",
-	enteredPublicRoom: "Log which public rooms are entered",
-	enteredPrivateRoom: "Log which private rooms are entered",
-	hadOrgasm: "Log each single orgasm"
-};
-
-const LEVEL_NAMES: Record<LogAccessLevel, string> = {
-	[LogAccessLevel.everyone]: "[ERROR]",
-	[LogAccessLevel.none]: "No",
-	[LogAccessLevel.protected]: "Protected",
-	[LogAccessLevel.normal]: "Yes"
-};
 
 export class GuiLogConfig extends GuiSubscreen {
 
@@ -94,17 +77,17 @@ export class GuiLogConfig extends GuiSubscreen {
 		const filter = Input.value.trim().toLocaleLowerCase().split(" ");
 
 		for (const [k, v] of Object.entries(this.config) as [BCX_LogCategory, LogAccessLevel][]) {
-			if (CONFIG_NAMES[k] !== undefined &&
-				LEVEL_NAMES[v] !== undefined &&
+			if (LOG_CONFIG_NAMES[k] !== undefined &&
+				LOG_LEVEL_NAMES[v] !== undefined &&
 				filter.every(i =>
-					CONFIG_NAMES[k].toLocaleLowerCase().includes(i) ||
+					LOG_CONFIG_NAMES[k].toLocaleLowerCase().includes(i) ||
 					k.toLocaleLowerCase().includes(i)
 				)
 			) {
 				this.configList.push({
 					category: k,
 					access: v,
-					name: CONFIG_NAMES[k]
+					name: LOG_CONFIG_NAMES[k]
 				});
 			}
 		}
@@ -143,9 +126,9 @@ export class GuiLogConfig extends GuiSubscreen {
 				DrawTextFit(e.name, 140, Y + 34, 1060, "Black");
 				// Config access
 				MainCanvas.textAlign = "center";
-				DrawBackNextButton(1270, Y, 170, 64, LEVEL_NAMES[e.access], "White", "",
-					() => (e.access > 0 ? LEVEL_NAMES[(e.access-1) as LogAccessLevel] : ""),
-					() => (e.access < 2 ? LEVEL_NAMES[(e.access+1) as LogAccessLevel] : "")
+				DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "",
+					() => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access-1) as LogAccessLevel] : ""),
+					() => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access+1) as LogAccessLevel] : "")
 				);
 				MainCanvas.textAlign = "left";
 			}

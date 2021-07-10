@@ -1,6 +1,9 @@
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-shadow */
 
+// Activity.js
+declare var ActivityOrgasmRuined: boolean;
+
 // Appearance.js
 declare var CharacterAppearanceSelection: Character | null;
 declare var CharacterAppearanceMode: string;
@@ -50,6 +53,7 @@ declare var DrawScreen: string;
 declare var MainCanvas: CanvasRenderingContext2D;
 declare function DrawGetImage(Source: string): HTMLImageElement;
 declare function DrawButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, HoveringText?: string, Disabled?: boolean): void;
+declare function DrawCheckbox(Left: number, Top: number, Width: number, Height: number, Text: string, IsChecked: boolean, Disabled?: boolean, TextColor?: string, CheckImage?: string): void;
 declare function DrawText(Text: string, X: number, Y: number, Color: string, BackColor?: string): void;
 declare function DrawTextFit(Text: string, X: number, Y: number, Width: number, Color: string, BackColor?: string): void;
 declare function DrawBackNextButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, BackText?: () => string, NextText?: () => string, Disabled?: boolean, ArrowWidth?: number): void;

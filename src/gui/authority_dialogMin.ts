@@ -1,7 +1,7 @@
 import { ChatroomCharacter } from "../characters";
 import { module_gui } from "../modules";
 import { GuiSubscreen } from "./subscreen";
-import { AccessLevel, PermissionInfo } from "../modules/authority";
+import { AccessLevel, getPermissionMinDisplayText, PermissionInfo } from "../modules/authority";
 import { capitalizeFirstLetter } from "../utils";
 
 
@@ -45,7 +45,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 		if (this.myAccessLevel === AccessLevel.self) {
 			const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
 			DrawButton(1000-110, 460, 220, 72, "", this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
-			DrawTextFit(`${this.character.Name}`, 1000, 460 + 36, 210, "Black");
+			DrawTextFit(getPermissionMinDisplayText(AccessLevel.self, this.character), 1000, 460 + 36, 210, "Black");
 		}
 
 		for (let i = 1; i < 8; i++) {
@@ -56,7 +56,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 			DrawButton(-15 + 230 * i, 577, 190, 72, "", current ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
 			if (i < 7)
 				DrawText(">", 196 + 230 * i, 577 + 36, "Black");
-			DrawText(capitalizeFirstLetter(AccessLevel[i]), 80 + 230 * i, 577 + 36, "Black");
+			DrawText(getPermissionMinDisplayText(i, this.character), 80 + 230 * i, 577 + 36, "Black");
 		}
 
 		if (this.character.isPlayer() && this.permission === "authority_revoke_self" && this.selectedLevel !== AccessLevel.self) {

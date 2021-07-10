@@ -30,6 +30,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 };
 
 export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
+	ActivityOrgasmStart: ["5C3627D7"],
 	AppearanceClick: ["B895612C"],
 	AppearanceRun: ["791E142F"],
 	AsylumEntranceCanWander: ["609FA096"],

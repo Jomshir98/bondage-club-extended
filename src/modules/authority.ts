@@ -1,9 +1,11 @@
 import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
 import { ModuleCategory } from "../moduleManager";
-import { isObject } from "../utils";
+import { capitalizeFirstLetter, isObject } from "../utils";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
+import { LogEntryType, logMessage } from "./log";
+import { ChatRoomSendLocal } from "../utilsClub";
 
 export enum AccessLevel {
 	self = 0,
@@ -95,6 +97,8 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 		throw new Error(`Attempt to edit unknown permission "${permission}"`);
 	}
 
+	self = self || permData.min === AccessLevel.self;
+
 	if (permData.self === self) return true;
 
 	if (characterToCheck) {
@@ -106,7 +110,17 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 		}
 	}
 
-	permData.self = self || permData.min === AccessLevel.self;
+	if (characterToCheck) {
+		const msg = `${characterToCheck} ` +
+			(self ? `gave ${characterToCheck.isPlayer() ? "herself" : Player.Name}` : `removed ${characterToCheck?.isPlayer() ? "her" : Player.Name + "'s"}`) +
+			` control over permission "${permData.name}"`;
+		logMessage("permissionChange", LogEntryType.plaintext, msg);
+		if (!characterToCheck.isPlayer()) {
+			ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+		}
+	}
+
+	permData.self = self;
 	permissionsSync();
 	notifyOfChange();
 
@@ -146,6 +160,14 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 		}
 	}
 
+	if (characterToCheck) {
+		const msg = `${characterToCheck} changed permission "${permData.name}" from ${getPermissionMinDisplayText(permData.min, characterToCheck)} to ${getPermissionMinDisplayText(min, characterToCheck)}`;
+		logMessage("permissionChange", LogEntryType.plaintext, msg);
+		if (!characterToCheck.isPlayer()) {
+			ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+		}
+	}
+
 	permData.min = min;
 	if (min === AccessLevel.self) {
 		permData.self = true;
@@ -167,6 +189,13 @@ export function getPlayerPermissionSettings(): PermissionData {
 		res[k] = {...v};
 	}
 	return res;
+}
+
+export function getPermissionMinDisplayText(minAccess: AccessLevel, character?: ChatroomCharacter): string {
+	if (minAccess === AccessLevel.self) {
+		return character ? character.Name : "Self";
+	}
+	return capitalizeFirstLetter(AccessLevel[minAccess]);
 }
 
 export class ModuleAuthority extends BaseModule {

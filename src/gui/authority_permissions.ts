@@ -1,9 +1,8 @@
 import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
 import { module_gui } from "../modules";
-import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, PermissionData, PermissionInfo } from "../modules/authority";
+import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, getPermissionMinDisplayText, PermissionData, PermissionInfo } from "../modules/authority";
 import { icon_OwnerList } from "../resources";
-import { capitalizeFirstLetter } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
@@ -195,7 +194,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					// Min access
 					DrawButton(1370, Y, 170, 64, "", e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
 					MainCanvas.textAlign = "center";
-					DrawTextFit(e.permissionInfo.min === AccessLevel.self ? this.character.Name : capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
+					DrawTextFit(getPermissionMinDisplayText(e.permissionInfo.min, this.character), 1453, Y + 34, 150, "Black");
 					MainCanvas.textAlign = "left";
 				}
 			}

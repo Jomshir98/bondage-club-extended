@@ -5,6 +5,7 @@ import { BaseModule } from "../moduleManager";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_Emote, icon_PurpleHeart, icon_Typing } from "../resources";
 import { getChatroomCharacter } from "../characters";
+import { modStorage } from "./storage";
 
 class ChatRoomStatusManager {
 	InputTimeoutMs = 3_000;
@@ -40,6 +41,9 @@ class ChatRoomStatusManager {
 	}
 
 	SetStatus(type: string, target: number | null = null) {
+		if (!modStorage.typingIndicatorEnable) {
+			type = this.StatusTypes.None;
+		}
 		if (type !== this.Status) {
 			if (target !== null && this.Status === this.StatusTypes.Whisper) {
 				this.SetStatus(this.StatusTypes.None, null);
@@ -101,6 +105,10 @@ export class ModuleChatroom extends BaseModule {
 	private o_ChatRoomSM: any | null = null;
 
 	load() {
+		if (typeof modStorage.typingIndicatorEnable !== "boolean") {
+			modStorage.typingIndicatorEnable = true;
+		}
+
 		hiddenMessageHandlers.set("hello", (sender, message: any) => {
 			const char = getChatroomCharacter(sender);
 			if (!char) {

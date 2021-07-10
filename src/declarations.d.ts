@@ -31,10 +31,12 @@ type BCX_LogCategory =
 	| "userNote"
 	| "enteredPublicRoom"
 	| "enteredPrivateRoom"
-	| "hadOrgasm";
+	| "hadOrgasm"
+	| "permissionChange";
 
 interface ModStorage {
 	permissions: PermissionsBundle;
 	log: import("./modules/log").LogEntry[];
 	logConfig: import("./modules/log").LogConfig;
+	typingIndicatorEnable: boolean;
 }

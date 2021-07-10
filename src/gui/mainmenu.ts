@@ -3,6 +3,7 @@ import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
 import { module_gui } from "../modules";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiLog } from "./log";
+import { GuiMisc } from "./misc";
 import { GuiSubscreen } from "./subscreen";
 
 const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
@@ -24,7 +25,9 @@ const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) 
 	},
 	{
 		module: ModuleCategory.Misc,
-		onclick: () => null
+		onclick: (C) => {
+			module_gui.currentSubscreen = new GuiMisc(C);
+		}
 	}
 ];
 

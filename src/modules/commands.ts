@@ -268,7 +268,8 @@ export class ModuleCommands extends BaseModule {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			// Tab for command completion
 			if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..")) {
-				event?.preventDefault();
+				const e = args[0] as KeyboardEvent ?? event;
+				e?.preventDefault();
 
 				chat.value = "." + CommandAutocomplete(chat.value.substr(1));
 			} else {

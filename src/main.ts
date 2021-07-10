@@ -8,12 +8,31 @@ export function loginInit(C: any) {
 	init();
 }
 
+function clearCaches() {
+	if (typeof DrawRunMap !== "undefined") {
+		DrawRunMap.clear();
+		DrawScreen = "";
+	}
+	if (typeof CurrentScreenFunctions !== "undefined") {
+		const w = window as any;
+		CurrentScreenFunctions = {
+			Run: w[`${CurrentScreen}Run`],
+			Click: w[`${CurrentScreen}Click`],
+			Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
+			Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
+			Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
+			KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
+			Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined
+		};
+	}
+}
+
 export function init() {
-	// Loading into already loaded club - clear some caches
-	DrawRunMap.clear();
-	DrawScreen = "";
 
 	init_modules();
+
+	// Loading into already loaded club - clear some caches
+	clearCaches();
 
 	//#region Other mod compatability
 
@@ -57,8 +76,7 @@ export function unload() {
 	unload_modules();
 
 	// clear some caches
-	DrawRunMap.clear();
-	DrawScreen = "";
+	clearCaches();
 
 	delete window.BCX_Loaded;
 	console.log("BCX: Unloaded.");

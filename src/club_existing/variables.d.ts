@@ -20,6 +20,7 @@ declare var CurrentTime: number;
 declare const Player: PlayerCharacter;
 declare var CurrentScreen: string;
 declare var KeyPress: number | string;
+declare var CurrentScreenFunctions: ScreenFunctions;
 
 // Character.js
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
@@ -42,7 +43,9 @@ declare function DialogDrawPoseMenu(): void;
 declare function DialogDrawExpressionMenu(): void;
 
 // Drawing.js
+/** @deprecated */
 declare const DrawRunMap: Map<string, () => void>;
+/** @deprecated */
 declare var DrawScreen: string;
 declare var MainCanvas: CanvasRenderingContext2D;
 declare function DrawGetImage(Source: string): HTMLImageElement;

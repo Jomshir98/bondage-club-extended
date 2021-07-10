@@ -44,7 +44,7 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 	}
 	let result = patchedFunctions.get(target);
 	if (!result) {
-		const original = (window as any)[target];
+		const original = (window as any)[target] as (...args: any[]) => any;
 
 		const { NMod } = detectOtherMods();
 
@@ -54,7 +54,7 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 			throw new Error(`BCX: Function ${target} to be patched not found`);
 		}
 
-		const hash = crc32(original.toString());
+		const hash = crc32(original.toString().replaceAll("\r\n", "\n"));
 		if (!expectedHashes.includes(hash)) {
 			console.warn(`BCX: Patched function ${target} has unknown hash ${hash}`);
 		}

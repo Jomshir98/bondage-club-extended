@@ -162,6 +162,7 @@ window.BCX_Loaded = false;
         SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"]
     };
     const FUNCTION_HASHES_NMOD = {
+        ActivityOrgasmStart: ["5C3627D7"],
         AppearanceClick: ["B895612C"],
         AppearanceRun: ["791E142F"],
         AsylumEntranceCanWander: ["609FA096"],
@@ -825,7 +826,24 @@ window.BCX_Loaded = false;
         userNote: LogAccessLevel.protected,
         enteredPublicRoom: LogAccessLevel.none,
         enteredPrivateRoom: LogAccessLevel.none,
-        hadOrgasm: LogAccessLevel.none
+        hadOrgasm: LogAccessLevel.none,
+        permissionChange: LogAccessLevel.protected
+    };
+    const LOG_CONFIG_NAMES = {
+        logConfigChange: "Log changes in logging configuration",
+        logDeleted: "Log deleted log entries",
+        praise: "Log praising or scolding behavior",
+        userNote: "Ability to attach notes",
+        enteredPublicRoom: "Log which public rooms are entered",
+        enteredPrivateRoom: "Log which private rooms are entered",
+        hadOrgasm: "Log each single orgasm",
+        permissionChange: "Log changes in permission settings"
+    };
+    const LOG_LEVEL_NAMES = {
+        [LogAccessLevel.everyone]: "[ERROR]",
+        [LogAccessLevel.none]: "No",
+        [LogAccessLevel.protected]: "Protected",
+        [LogAccessLevel.normal]: "Yes"
     };
     class ModuleLog extends BaseModule {
         init() {
@@ -970,6 +988,13 @@ window.BCX_Loaded = false;
                     }
                 }
             }
+            hookFunction("ActivityOrgasmStart", 0, (args, next) => {
+                const C = args[0];
+                if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
+                    logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+                }
+                return next(args);
+            });
         }
     }
 
@@ -1294,6 +1319,7 @@ window.BCX_Loaded = false;
         if (!permData) {
             throw new Error(`Attempt to edit unknown permission "${permission}"`);
         }
+        self = self || permData.min === AccessLevel.self;
         if (permData.self === self)
             return true;
         if (characterToCheck) {
@@ -1303,7 +1329,16 @@ window.BCX_Loaded = false;
                 return false;
             }
         }
-        permData.self = self || permData.min === AccessLevel.self;
+        if (characterToCheck) {
+            const msg = `${characterToCheck} ` +
+                (self ? `gave ${characterToCheck.isPlayer() ? "herself" : Player.Name}` : `removed ${(characterToCheck === null || characterToCheck === void 0 ? void 0 : characterToCheck.isPlayer()) ? "her" : Player.Name + "'s"}`) +
+                ` control over permission "${permData.name}"`;
+            logMessage("permissionChange", LogEntryType.plaintext, msg);
+            if (!characterToCheck.isPlayer()) {
+                ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+            }
+        }
+        permData.self = self;
         permissionsSync();
         notifyOfChange();
         return true;
@@ -1336,6 +1371,13 @@ window.BCX_Loaded = false;
                 return false;
             }
         }
+        if (characterToCheck) {
+            const msg = `${characterToCheck} changed permission "${permData.name}" from ${getPermissionMinDisplayText(permData.min, characterToCheck)} to ${getPermissionMinDisplayText(min, characterToCheck)}`;
+            logMessage("permissionChange", LogEntryType.plaintext, msg);
+            if (!characterToCheck.isPlayer()) {
+                ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+            }
+        }
         permData.min = min;
         if (min === AccessLevel.self) {
             permData.self = true;
@@ -1354,6 +1396,12 @@ window.BCX_Loaded = false;
             res[k] = { ...v };
         }
         return res;
+    }
+    function getPermissionMinDisplayText(minAccess, character) {
+        if (minAccess === AccessLevel.self) {
+            return character ? character.Name : "Self";
+        }
+        return capitalizeFirstLetter(AccessLevel[minAccess]);
     }
     class ModuleAuthority extends BaseModule {
         init() {
@@ -1695,6 +1743,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
         }
         SetStatus(type, target = null) {
+            if (!modStorage.typingIndicatorEnable) {
+                type = this.StatusTypes.None;
+            }
             if (type !== this.Status) {
                 if (target !== null && this.Status === this.StatusTypes.Whisper) {
                     this.SetStatus(this.StatusTypes.None, null);
@@ -1756,6 +1807,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             ChatroomSM = new ChatRoomStatusManager();
         }
         load() {
+            if (typeof modStorage.typingIndicatorEnable !== "boolean") {
+                modStorage.typingIndicatorEnable = true;
+            }
             hiddenMessageHandlers.set("hello", (sender, message) => {
                 const char = getChatroomCharacter(sender);
                 if (!char) {
@@ -2651,7 +2705,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (this.myAccessLevel === AccessLevel.self) {
                 const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
                 DrawButton(1000 - 110, 460, 220, 72, "", this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
-                DrawTextFit(`${this.character.Name}`, 1000, 460 + 36, 210, "Black");
+                DrawTextFit(getPermissionMinDisplayText(AccessLevel.self, this.character), 1000, 460 + 36, 210, "Black");
             }
             for (let i = 1; i < 8; i++) {
                 const current = this.selectedLevel === i;
@@ -2660,7 +2714,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 DrawButton(-15 + 230 * i, 577, 190, 72, "", current ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
                 if (i < 7)
                     DrawText(">", 196 + 230 * i, 577 + 36, "Black");
-                DrawText(capitalizeFirstLetter(AccessLevel[i]), 80 + 230 * i, 577 + 36, "Black");
+                DrawText(getPermissionMinDisplayText(i, this.character), 80 + 230 * i, 577 + 36, "Black");
             }
             if (this.character.isPlayer() && this.permission === "authority_revoke_self" && this.selectedLevel !== AccessLevel.self) {
                 DrawText(`WARNING: If you confirm, all permitted roles can remove your access to this and all other permissions!`, 1000, 730, "Red", "Gray");
@@ -2892,7 +2946,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         // Min access
                         DrawButton(1370, Y, 170, 64, "", e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
                         MainCanvas.textAlign = "center";
-                        DrawTextFit(e.permissionInfo.min === AccessLevel.self ? this.character.Name : capitalizeFirstLetter(AccessLevel[e.permissionInfo.min]), 1453, Y + 34, 150, "Black");
+                        DrawTextFit(getPermissionMinDisplayText(e.permissionInfo.min, this.character), 1453, Y + 34, 150, "Black");
                         MainCanvas.textAlign = "left";
                     }
                 }
@@ -2988,21 +3042,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
 
     const PER_PAGE_COUNT$1 = 6;
-    const CONFIG_NAMES = {
-        logConfigChange: "Log changes in logging configuration",
-        logDeleted: "Log deleted log entries",
-        praise: "Log praising or scolding behavior",
-        userNote: "Ability to attach notes",
-        enteredPublicRoom: "Log which public rooms are entered",
-        enteredPrivateRoom: "Log which private rooms are entered",
-        hadOrgasm: "Log each single orgasm"
-    };
-    const LEVEL_NAMES = {
-        [LogAccessLevel.everyone]: "[ERROR]",
-        [LogAccessLevel.none]: "No",
-        [LogAccessLevel.protected]: "Protected",
-        [LogAccessLevel.normal]: "Yes"
-    };
     class GuiLogConfig extends GuiSubscreen {
         constructor(character) {
             super();
@@ -3055,14 +3094,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             const filter = Input.value.trim().toLocaleLowerCase().split(" ");
             for (const [k, v] of Object.entries(this.config)) {
-                if (CONFIG_NAMES[k] !== undefined &&
-                    LEVEL_NAMES[v] !== undefined &&
-                    filter.every(i => CONFIG_NAMES[k].toLocaleLowerCase().includes(i) ||
+                if (LOG_CONFIG_NAMES[k] !== undefined &&
+                    LOG_LEVEL_NAMES[v] !== undefined &&
+                    filter.every(i => LOG_CONFIG_NAMES[k].toLocaleLowerCase().includes(i) ||
                         k.toLocaleLowerCase().includes(i))) {
                     this.configList.push({
                         category: k,
                         access: v,
-                        name: CONFIG_NAMES[k]
+                        name: LOG_CONFIG_NAMES[k]
                     });
                 }
             }
@@ -3097,7 +3136,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawTextFit(e.name, 140, Y + 34, 1060, "Black");
                     // Config access
                     MainCanvas.textAlign = "center";
-                    DrawBackNextButton(1270, Y, 170, 64, LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LEVEL_NAMES[(e.access + 1)] : ""));
+                    DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access + 1)] : ""));
                     MainCanvas.textAlign = "left";
                 }
                 // Pagination
@@ -3297,8 +3336,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawText("Attach", 130, 831, "Black");
                     DrawText("note:", 130, 869, "Black");
                     ElementPosition("BCX_NoteField", 580, 842, 660, 64);
-                    MainCanvas.textAlign = "center";
                 }
+                MainCanvas.textAlign = "center";
                 // Praise button
                 if (this.allowPraise) {
                     DrawButton(950, 815, 150, 64, "", "White");
@@ -3316,7 +3355,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 // Pagination
                 const totalPages = Math.max(1, Math.ceil(this.logEntries.length / PER_PAGE_COUNT));
-                MainCanvas.textAlign = "center";
                 DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
             }
             else if (this.failed) {
@@ -3406,6 +3444,38 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    class GuiMisc extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
+        Run() {
+            MainCanvas.textAlign = "left";
+            DrawText(`- Miscellaneous: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            if (!this.character.isPlayer()) {
+                DrawText(`Miscellaneous module configuration is not possible on others`, 1000, 500, "Black");
+                return;
+            }
+            MainCanvas.textAlign = "left";
+            DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (!this.character.isPlayer())
+                return;
+            if (MouseIn(125, 200, 64, 64)) {
+                modStorage.typingIndicatorEnable = !modStorage.typingIndicatorEnable;
+                modStorageSync();
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+    }
+
     const MAIN_MENU_ITEMS = [
         {
             module: ModuleCategory.Basic,
@@ -3425,7 +3495,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         },
         {
             module: ModuleCategory.Misc,
-            onclick: () => null
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiMisc(C);
+            }
         }
     ];
     class GuiMainMenu extends GuiSubscreen {

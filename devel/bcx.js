@@ -136,6 +136,7 @@ window.BCX_Loaded = false;
     const VERSION = "0.1.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
+        ActivityOrgasmStart: ["5C3627D7"],
         AppearanceClick: ["48FA3705", "BA17EA90"],
         AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA"],
         AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
@@ -146,6 +147,7 @@ window.BCX_Loaded = false;
         ChatRoomKeyDown: ["5FD37EC9", "111B6F0C"],
         ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6"],
         ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D"],
+        ChatRoomSync: ["BD048B94"],
         CheatImport: ["412422CC", "26C67608"],
         DialogDrawExpressionMenu: ["EEFB3D22"],
         DialogDrawItemMenu: ["7B1D71E9", "0199F25B"],
@@ -173,6 +175,7 @@ window.BCX_Loaded = false;
         ChatRoomKeyDown: ["D41B4525"],
         ChatRoomMessage: ["4BC817B8"],
         ChatRoomSendChat: ["385B9E9C"],
+        ChatRoomSync: ["2797D13E"],
         CheatImport: ["1ECB0CC4"],
         DialogDrawExpressionMenu: ["EEFB3D22"],
         DialogDrawItemMenu: ["7C83D23C"],
@@ -517,6 +520,13 @@ window.BCX_Loaded = false;
             console.warn(`BCX: Invalid query`, sender, message);
             return;
         }
+        const character = getChatroomCharacter(sender);
+        if (character && !character.hasAccessToPlayer()) {
+            return sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok: false
+            });
+        }
         const handler = queryHandlers[message.query];
         if (!handler) {
             console.warn("BCX: Query no handler", sender, message);
@@ -738,6 +748,14 @@ window.BCX_Loaded = false;
         }
         if (![LogAccessLevel.none, LogAccessLevel.normal, LogAccessLevel.protected].includes(accessLevel)) {
             return false;
+        }
+        if (character) {
+            const msg = `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
+                `from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`;
+            logMessage("logConfigChange", LogEntryType.plaintext, msg);
+            if (!character.isPlayer()) {
+                ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+            }
         }
         modStorage.logConfig[category] = accessLevel;
         modStorageSync();
@@ -995,6 +1013,16 @@ window.BCX_Loaded = false;
                 }
                 return next(args);
             });
+            hookFunction("ChatRoomSync", 0, (args, next) => {
+                const data = args[0];
+                if (data.Private) {
+                    logMessage("enteredPrivateRoom", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
+                }
+                else {
+                    logMessage("enteredPublicRoom", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
+                }
+                return next(args);
+            });
         }
     }
 
@@ -1143,6 +1171,12 @@ window.BCX_Loaded = false;
                 return data;
             });
         }
+        hasAccessToPlayer() {
+            return ServerChatRoomGetAllowItem(this.Character, Player);
+        }
+        playerHasAccessToCharacter() {
+            return ServerChatRoomGetAllowItem(Player, this.Character);
+        }
     }
     class PlayerCharacter extends ChatroomCharacter {
         constructor() {
@@ -1284,7 +1318,8 @@ window.BCX_Loaded = false;
             console.error(new Error(`Check for unknown permission "${permission}"`));
             return false;
         }
-        // TODO: Check item access
+        if (!character.hasAccessToPlayer())
+            return false;
         return checkPermisionAccesData(permData, getCharacterAccessLevel(character));
     }
     function checkPermisionAccesData(permData, accessLevel) {
@@ -1372,7 +1407,8 @@ window.BCX_Loaded = false;
             }
         }
         if (characterToCheck) {
-            const msg = `${characterToCheck} changed permission "${permData.name}" from ${getPermissionMinDisplayText(permData.min, characterToCheck)} to ${getPermissionMinDisplayText(min, characterToCheck)}`;
+            const msg = `${characterToCheck} changed permission "${permData.name}" from ` +
+                `"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`;
             logMessage("permissionChange", LogEntryType.plaintext, msg);
             if (!characterToCheck.isPlayer()) {
                 ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);

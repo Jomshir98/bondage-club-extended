@@ -2,6 +2,7 @@ import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { BaseModule, ModuleCategory } from "../moduleManager";
 import { hookFunction } from "../patching";
 import { isObject } from "../utils";
+import { ChatRoomSendLocal } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorage, modStorageSync } from "./storage";
@@ -103,6 +104,15 @@ export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLe
 
 	if (![LogAccessLevel.none, LogAccessLevel.normal, LogAccessLevel.protected].includes(accessLevel)) {
 		return false;
+	}
+
+	if (character) {
+		const msg = `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
+			`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`;
+		logMessage("logConfigChange", LogEntryType.plaintext, msg);
+		if (!character.isPlayer()) {
+			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+		}
 	}
 
 	modStorage.logConfig[category] = accessLevel;
@@ -369,6 +379,16 @@ export class ModuleLog extends BaseModule {
 			const C = args[0] as Character;
 			if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
 				logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+			}
+			return next(args);
+		});
+
+		hookFunction("ChatRoomSync", 0, (args, next) => {
+			const data = args[0];
+			if (data.Private) {
+				logMessage("enteredPrivateRoom", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
+			} else {
+				logMessage("enteredPublicRoom", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
 			}
 			return next(args);
 		});

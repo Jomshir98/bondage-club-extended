@@ -3,6 +3,7 @@ export const VERSION = "0.1.1";
 export const VERSION_CHECK_BOT: number = 37685;
 
 export const FUNCTION_HASHES: Record<string, string[]> = {
+	ActivityOrgasmStart: ["5C3627D7"],
 	AppearanceClick: ["48FA3705", "BA17EA90"],
 	AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA"],
 	AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
@@ -13,6 +14,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomKeyDown: ["5FD37EC9", "111B6F0C"],
 	ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6"],
 	ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D"],
+	ChatRoomSync: ["BD048B94"],
 	CheatImport: ["412422CC", "26C67608"],
 	DialogDrawExpressionMenu: ["EEFB3D22"],
 	DialogDrawItemMenu: ["7B1D71E9", "0199F25B"],
@@ -41,6 +43,7 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	ChatRoomKeyDown: ["D41B4525"],
 	ChatRoomMessage: ["4BC817B8"],
 	ChatRoomSendChat: ["385B9E9C"],
+	ChatRoomSync: ["2797D13E"],
 	CheatImport: ["1ECB0CC4"],
 	DialogDrawExpressionMenu: ["EEFB3D22"],
 	DialogDrawItemMenu: ["7C83D23C"],

@@ -178,6 +178,14 @@ export class ChatroomCharacter {
 			return data;
 		});
 	}
+
+	hasAccessToPlayer(): boolean {
+		return ServerChatRoomGetAllowItem(this.Character, Player);
+	}
+
+	playerHasAccessToCharacter(): boolean {
+		return ServerChatRoomGetAllowItem(Player, this.Character);
+	}
 }
 
 export class PlayerCharacter extends ChatroomCharacter {

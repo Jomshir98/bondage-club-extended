@@ -80,6 +80,7 @@ declare function ServerSend(Message: string, Data: any): void;
 declare function ServerAppearanceBundle(Appearance: Item[]): AppearanceBundle;
 declare function ServerPlayerInventorySync(): void;
 declare function ServerAccountBeep(data: any): void;
+declare function ServerChatRoomGetAllowItem(Source: Character, Target: Character): boolean;
 
 // Asset.js
 declare var Asset: Asset[];

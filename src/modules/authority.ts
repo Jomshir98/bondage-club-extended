@@ -56,7 +56,8 @@ export function checkPermissionAccess(permission: BCX_Permissions, character: Ch
 		console.error(new Error(`Check for unknown permission "${permission}"`));
 		return false;
 	}
-	// TODO: Check item access
+	if (!character.hasAccessToPlayer())
+		return false;
 	return checkPermisionAccesData(permData, getCharacterAccessLevel(character));
 }
 
@@ -161,7 +162,8 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 	}
 
 	if (characterToCheck) {
-		const msg = `${characterToCheck} changed permission "${permData.name}" from ${getPermissionMinDisplayText(permData.min, characterToCheck)} to ${getPermissionMinDisplayText(min, characterToCheck)}`;
+		const msg = `${characterToCheck} changed permission "${permData.name}" from ` +
+			`"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`;
 		logMessage("permissionChange", LogEntryType.plaintext, msg);
 		if (!characterToCheck.isPlayer()) {
 			ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);

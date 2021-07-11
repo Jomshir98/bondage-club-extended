@@ -1,4 +1,4 @@
-import { getPlayerCharacter } from "../characters";
+import { getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
 import { hookFunction } from "../patching";
 import { isObject, uuidv4 } from "../utils";
@@ -78,6 +78,14 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 	) {
 		console.warn(`BCX: Invalid query`, sender, message);
 		return;
+	}
+
+	const character = getChatroomCharacter(sender);
+	if (character && !character.hasAccessToPlayer()) {
+		return sendHiddenMessage("queryAnswer", {
+			id: message.id,
+			ok: false
+		});
 	}
 
 	const handler = queryHandlers[message.query] as (sender: number, resolve: queryResolveFunction<keyof BCX_queries>, data: any) => void;

@@ -10,6 +10,7 @@ type BCX_beep_versionResponse = {
 type BCX_beeps = {
 	versionCheck: BCX_beep_versionCheck;
 	versionResponse: BCX_beep_versionResponse;
+	clearData: true;
 };
 
 type BCX_message_ChatRoomStatusEvent = {

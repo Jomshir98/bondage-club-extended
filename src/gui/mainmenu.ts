@@ -2,6 +2,7 @@ import { ChatroomCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
 import { module_gui } from "../modules";
 import { GuiAuthorityPermissions } from "./authority_permissions";
+import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
 import { GuiMisc } from "./misc";
 import { GuiSubscreen } from "./subscreen";
@@ -9,7 +10,9 @@ import { GuiSubscreen } from "./subscreen";
 const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
 		module: ModuleCategory.Basic,
-		onclick: () => null
+		onclick: (C) => {
+			module_gui.currentSubscreen = new GuiGlobal(C);
+		}
 	},
 	{
 		module: ModuleCategory.Authority,

@@ -1,5 +1,5 @@
 import { VERSION } from "./config";
-import { AccessLevel, checkPermissionAccess, getPermissionDataFromBundle, getPlayerPermissionSettings, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
+import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { modStorage } from "./modules/storage";
@@ -80,6 +80,37 @@ export class ChatroomCharacter {
 		return sendQuery("editPermission", {
 			permission,
 			edit: type,
+			target
+		}, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	getRolesData(): Promise<PermissionRoleBundle> {
+		return sendQuery("rolesData", undefined, this.MemberNumber).then(data => {
+			if (!isObject(data) ||
+				!Array.isArray(data.mistresses) ||
+				!data.mistresses.every(i => Array.isArray(i) && i.length === 2 && typeof i[0] === "number" && typeof i[1] === "string") ||
+				!Array.isArray(data.owners) ||
+				!data.owners.every(i => Array.isArray(i) && i.length === 2 && typeof i[0] === "number" && typeof i[1] === "string") ||
+				typeof data.allowAddMistress !== "boolean" ||
+				typeof data.allowRemoveMistress !== "boolean" ||
+				typeof data.allowAddOwner !== "boolean" ||
+				typeof data.allowRemoveOwner !== "boolean"
+			) {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	editRole(role: "owner" | "mistress", action: "add" | "remove", target: number): Promise<boolean> {
+		return sendQuery("editRole", {
+			type: role,
+			action,
 			target
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
@@ -222,6 +253,14 @@ export class PlayerCharacter extends ChatroomCharacter {
 			}
 			return Promise.resolve(setPermissionMinAccess(permission, target, this));
 		}
+	}
+
+	override getRolesData(): Promise<PermissionRoleBundle> {
+		return Promise.resolve(getPlayerRoleData(this));
+	}
+
+	override editRole(role: "owner" | "mistress", action: "add" | "remove", target: number): Promise<boolean> {
+		return Promise.resolve(editRole(role, action, target, this));
 	}
 
 	override getLogEntries(): Promise<LogEntry[]> {

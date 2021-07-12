@@ -6,50 +6,163 @@ import { capitalizeFirstLetter } from "../utils";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 
+const PER_PAGE_COUNT = 6;
 
+type RoleListItem = {
+	type: "Owner" | "Mistress";
+	memberNumber: number;
+	name: string | null;
+};
 
 export class GuiAuthorityRoles extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
+
+	private roleData: PermissionRoleBundle | null = null;
+	private roleList: RoleListItem[] = [];
+	private failed: boolean = false;
+	private page: number = 0;
 
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
 	}
 
+	Load() {
+		this.requestData();
+	}
+
+	onChange(sender: number) {
+		if (sender === this.character.MemberNumber) {
+			this.requestData();
+		}
+	}
+
+	private requestData() {
+		this.roleData = null;
+		this.rebuildList();
+		Promise.all([this.character.getRolesData()]).then(res => {
+			this.roleData = res[0];
+			this.rebuildList();
+		}, err => {
+			console.error(`BCX: Failed to get role info for ${this.character}`, err);
+			this.failed = true;
+		});
+	}
+
+	private rebuildList() {
+		if (!this.active) return;
+
+		this.roleList = [];
+
+		let Input = document.getElementById("BCX_RoleAdd") as HTMLInputElement | undefined;
+
+		if (!this.roleData) {
+			if (Input) {
+				Input.remove();
+			}
+			return;
+		}
+
+		const showInput = this.roleData.allowAddMistress || this.roleData.allowAddOwner;
+
+		if (!showInput && Input) {
+			Input.remove();
+		} else if (showInput && !Input) {
+			Input = ElementCreateInput("BCX_RoleAdd", "text", "", "6");
+		}
+
+		this.roleList = this.roleData.owners.map((i): RoleListItem => ({
+			type: "Owner",
+			memberNumber: i[0],
+			name: Player.FriendNames?.get(i[0]) || i[1] || null
+		}));
+		this.roleList.push(...this.roleData.mistresses.map((i): RoleListItem => ({
+			type: "Mistress",
+			memberNumber: i[0],
+			name: Player.FriendNames?.get(i[0]) || i[1] || null
+		})));
+
+		const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);
+		if (this.page < 0) {
+			this.page = Math.max(totalPages - 1, 0);
+		} else if (this.page >= totalPages) {
+			this.page = 0;
+		}
+	}
+
 	Run() {
 
-		DrawText("Hierarchy of roles:", 1436, 95, "Black");
+		DrawText("Hierarchy of roles:", 1336, 95, "Black");
 
 		// hierarchy background
 		MainCanvas.beginPath();
-		MainCanvas.moveTo(1550, 134);
-		MainCanvas.lineTo(1550 + 150, 134);
-		MainCanvas.lineTo(1550 + 80, 740);
-		MainCanvas.lineTo(1550 + 70, 740);
-		MainCanvas.lineTo(1550, 134);
+		MainCanvas.moveTo(1450, 134);
+		MainCanvas.lineTo(1450 + 150, 134);
+		MainCanvas.lineTo(1450 + 80, 740);
+		MainCanvas.lineTo(1450 + 70, 740);
+		MainCanvas.lineTo(1450, 134);
 		MainCanvas.fillStyle = "Black";
 		MainCanvas.fill();
 
 		// hierarchy roles
-		DrawButton(1520, 130, 208, 54, "", "White");
-		for (let i = 1; i < 8; i++) {
-			DrawButton(1530, 130 + 80 * i, 188, 54, "", "White");
-		}
 		MainCanvas.textAlign = "center";
-		DrawTextFit(`${this.character.Name}`, 1534 + 88, 130 + 28, 198, "Black");
+		DrawButton(1420, 130, 208, 54, this.character.Name, "White");
 		for (let i = 1; i < 8; i++) {
-			DrawText(capitalizeFirstLetter(AccessLevel[i]), 1534 + 88, 130 + 28 + 80 * i, "Black");
+			DrawButton(1430, 130 + 80 * i, 188, 54, capitalizeFirstLetter(AccessLevel[i]), "White");
 		}
 		MainCanvas.textAlign = "left";
 
+		if (this.roleData) {
 
+			for (let off = 0; off < PER_PAGE_COUNT; off++) {
+				const i = this.page * PER_PAGE_COUNT + off;
+				if (i >= this.roleList.length) break;
+				const e = this.roleList[i];
 
-		// Pagination
-		MainCanvas.textAlign = "center";
-		DrawBackNextButton(1605, 800, 300, 90, `Page 1 / 1`, "White", "", () => "", () => "");
+				const Y = 210 + off * 95;
+
+				// Owner/Mistress list
+				MainCanvas.beginPath();
+				MainCanvas.rect(130, Y, 900, 64);
+				MainCanvas.stroke();
+				const msg = `${e.type} ${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
+				DrawTextFit(msg, 140, Y + 34, 590, "Black");
+
+				if ((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber ) {
+					MainCanvas.textAlign = "center";
+					DrawButton(1090, Y, 64, 64, "X", "White");
+					MainCanvas.textAlign = "left";
+				}
+			}
+
+			const Input = document.getElementById("BCX_RoleAdd") as HTMLInputElement | undefined;
+			if (Input) {
+				DrawText("Member Number:", 130, 847, "Black");
+				ElementPosition("BCX_RoleAdd", 580, 842, 300, 64);
+			}
+
+			MainCanvas.textAlign = "center";
+			if (this.roleData.allowAddOwner) {
+				DrawButton(760, 815, 210, 64, "Add owner", "white");
+			}
+
+			if (this.roleData.allowAddMistress) {
+				DrawButton(1008, 815, 210, 64, "Add mistress", "white");
+			}
+
+			// Pagination
+			const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);
+			DrawBackNextButton(1317, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+		} else if (this.failed) {
+			MainCanvas.textAlign = "center";
+			DrawText(`Failed to get role data from ${this.character.Name}. Maybe you have no access?`, 800, 480, "Black");
+		} else {
+			MainCanvas.textAlign = "center";
+			DrawText("Loading...", 800, 480, "Black");
+		}
+
 		MainCanvas.textAlign = "left";
-
 		DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
@@ -61,6 +174,52 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 		if (MouseIn(1815, 190, 90, 90)) return this.Back();
 
+		if (this.roleData) {
+
+			for (let off = 0; off < PER_PAGE_COUNT; off++) {
+				const i = this.page * PER_PAGE_COUNT + off;
+				if (i >= this.roleList.length) break;
+				const e = this.roleList[i];
+
+				const Y = 210 + off * 95;
+
+				if (((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber ) && MouseIn(1090, Y, 64, 64)) {
+					this.character.editRole(e.type === "Owner" ? "owner" : "mistress", "remove", e.memberNumber);
+					return;
+				}
+			}
+
+			const Input = document.getElementById("BCX_RoleAdd") as HTMLInputElement | undefined;
+			const inputText = Input?.value ?? "";
+			const inputNumber = /^[0-9]+$/.test(inputText) ? Number.parseInt(inputText, 10) : null;
+
+			if (this.roleData.allowAddOwner && Input && inputNumber !== null && MouseIn(760, 815, 210, 64)) {
+				Input.value = "";
+				this.character.editRole("owner", "add", inputNumber);
+				return;
+			}
+
+			if (this.roleData.allowAddMistress && Input && inputNumber !== null && MouseIn(1008, 815, 210, 64)) {
+				Input.value = "";
+				this.character.editRole("mistress", "add", inputNumber);
+				return;
+			}
+
+			// Pagination
+			const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);
+			if (MouseIn(1317, 800, 150, 90)) {
+				this.page--;
+				if (this.page < 0) {
+					this.page = Math.max(totalPages - 1, 0);
+				}
+			} else if (MouseIn(1467, 800, 150, 90)) {
+				this.page++;
+				if (this.page >= totalPages) {
+					this.page = 0;
+				}
+			}
+		}
+
 	}
 
 	Exit() {
@@ -69,5 +228,9 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 
 	Back() {
 		module_gui.currentSubscreen = new GuiAuthorityPermissions(this.character);
+	}
+
+	Unload() {
+		ElementRemove("BCX_RoleAdd");
 	}
 }

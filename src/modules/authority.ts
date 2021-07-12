@@ -10,9 +10,9 @@ import { ChatRoomSendLocal } from "../utilsClub";
 export enum AccessLevel {
 	self = 0,
 	clubowner = 1,
-	owner = 2, // TODO
+	owner = 2,
 	lover = 3,
-	mistress = 4, // TODO
+	mistress = 4,
 	whitelist = 5,
 	friend = 6,
 	public = 7
@@ -43,7 +43,9 @@ export function getCharacterAccessLevel(character: ChatroomCharacter): AccessLev
 	if (character.isPlayer()) return AccessLevel.self;
 	if (character.MemberNumber !== null) {
 		if (Player.IsOwnedByMemberNumber(character.MemberNumber)) return AccessLevel.clubowner;
+		if (modStorage.owners?.includes(character.MemberNumber)) return AccessLevel.owner;
 		if (Player.IsLoverOfMemberNumber(character.MemberNumber)) return AccessLevel.lover;
+		if (modStorage.mistresses?.includes(character.MemberNumber)) return AccessLevel.mistress;
 		if (Player.WhiteList.includes(character.MemberNumber)) return AccessLevel.whitelist;
 		if (Player.FriendList?.includes(character.MemberNumber)) return AccessLevel.friend;
 	}
@@ -138,23 +140,23 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 
 	if (characterToCheck) {
 		const allowed =
-		// Exception: Player can always lower permissions "Self"->"Owner"
-		(characterToCheck.isPlayer() && permData.min < min && min <= AccessLevel.owner) ||
-		(
-			// Character must have access to "allow minimal access modification"
-			checkPermissionAccess("authority_edit_min", characterToCheck) &&
+			// Exception: Player can always lower permissions "Self"->"Owner"
+			(characterToCheck.isPlayer() && permData.min < min && min <= AccessLevel.owner) ||
 			(
-				// Character must have access to target rule
-				checkPermissionAccess(permission, characterToCheck) ||
-				// Exception: Player bypasses this check when lowering "minimal access"
-				characterToCheck.isPlayer() && min >= permData.min
-			) &&
-			(
-				// Not player must have access to target level
-				!characterToCheck.isPlayer() ||
-				getCharacterAccessLevel(characterToCheck) <= min
-			)
-		);
+				// Character must have access to "allow minimal access modification"
+				checkPermissionAccess("authority_edit_min", characterToCheck) &&
+				(
+					// Character must have access to target rule
+					checkPermissionAccess(permission, characterToCheck) ||
+					// Exception: Player bypasses this check when lowering "minimal access"
+					characterToCheck.isPlayer() && min >= permData.min
+				) &&
+				(
+					// Not player must have access to target level
+					!characterToCheck.isPlayer() ||
+					getCharacterAccessLevel(characterToCheck) <= min
+				)
+			);
 		if (!allowed) {
 			console.warn(`BCX: Unauthorized min permission edit attempt for "${permission}" by ${characterToCheck}`);
 			return false;
@@ -188,7 +190,7 @@ function permissionsSync() {
 export function getPlayerPermissionSettings(): PermissionData {
 	const res: PermissionData = {};
 	for (const [k, v] of permissions.entries()) {
-		res[k] = {...v};
+		res[k] = { ...v };
 	}
 	return res;
 }
@@ -198,6 +200,76 @@ export function getPermissionMinDisplayText(minAccess: AccessLevel, character?: 
 		return character ? character.Name : "Self";
 	}
 	return capitalizeFirstLetter(AccessLevel[minAccess]);
+}
+
+export function getPlayerRoleData(character: ChatroomCharacter): PermissionRoleBundle {
+	const loadNames = (memberNumber: number): [number, string] => [memberNumber, Player.FriendNames?.get(memberNumber) ?? ""];
+
+	return {
+		mistresses: (modStorage.mistresses ?? []).map(loadNames),
+		owners: (modStorage.owners ?? []).map(loadNames),
+		allowAddMistress: checkPermissionAccess("authority_mistress_add", character),
+		allowRemoveMistress: checkPermissionAccess("authority_mistress_remove", character),
+		allowAddOwner: checkPermissionAccess("authority_owner_add", character),
+		allowRemoveOwner: checkPermissionAccess("authority_owner_remove", character)
+	};
+}
+
+export function editRole(role: "owner" | "mistress", action: "add" | "remove", target: number, character: ChatroomCharacter | null): boolean {
+	if (target === Player.MemberNumber)
+		return false;
+
+	if (!modStorage.owners || !modStorage.mistresses) {
+		throw new Error("Not initialized");
+	}
+
+	if (character) {
+		let permissionToCheck: BCX_Permissions = "authority_mistress_add";
+		if (role === "mistress" && action === "remove")
+			permissionToCheck = "authority_mistress_remove";
+		else if (role === "owner" && action === "add")
+			permissionToCheck = "authority_owner_add";
+		else if (role === "owner" && action === "remove")
+			permissionToCheck = "authority_owner_remove";
+
+		if (!checkPermissionAccess(permissionToCheck, character) && (action !== "remove" || target !== character.MemberNumber))
+			return false;
+
+		if (
+			role === "mistress" && action === "add" && modStorage.owners.includes(target) && !checkPermissionAccess("authority_owner_remove", character)
+		) {
+			return false;
+		}
+	}
+
+	if (
+		role === "owner" && action === "remove" && !modStorage.owners.includes(target) ||
+		role === "mistress" && action === "remove" && !modStorage.mistresses.includes(target)
+	) {
+		return true;
+	}
+
+	const ownerIndex = modStorage.owners.indexOf(target);
+	if (ownerIndex >= 0) {
+		modStorage.owners.splice(ownerIndex, 1);
+	}
+
+	const mistressIndex = modStorage.mistresses.indexOf(target);
+	if (mistressIndex >= 0) {
+		modStorage.mistresses.splice(mistressIndex, 1);
+	}
+
+	if (action === "add") {
+		if (role === "owner") {
+			modStorage.owners.push(target);
+		} else if (role === "mistress") {
+			modStorage.mistresses.push(target);
+		}
+	}
+
+	modStorageSync();
+	notifyOfChange();
+	return true;
 }
 
 export class ModuleAuthority extends BaseModule {
@@ -219,6 +291,30 @@ export class ModuleAuthority extends BaseModule {
 			category: ModuleCategory.Authority,
 			self: true,
 			min: AccessLevel.self
+		});
+		registerPermission("authority_mistress_add", {
+			name: "Allow granting Mistress status",
+			category: ModuleCategory.Authority,
+			self: true,
+			min: AccessLevel.mistress
+		});
+		registerPermission("authority_mistress_remove", {
+			name: "Allow revoking Mistress status",
+			category: ModuleCategory.Authority,
+			self: true,
+			min: AccessLevel.lover
+		});
+		registerPermission("authority_owner_add", {
+			name: "Allow granting Owner status",
+			category: ModuleCategory.Authority,
+			self: true,
+			min: AccessLevel.owner
+		});
+		registerPermission("authority_owner_remove", {
+			name: "Allow revoking Owner status",
+			category: ModuleCategory.Authority,
+			self: true,
+			min: AccessLevel.clubowner
 		});
 
 		queryHandlers.permissions = (sender, resolve) => {
@@ -278,6 +374,40 @@ export class ModuleAuthority extends BaseModule {
 				return resolve(true, setPermissionMinAccess(data.permission, data.target, character));
 			}
 		};
+
+		queryHandlers.rolesData = (sender, resolve) => {
+			const character = getChatroomCharacter(sender);
+			if (!character) {
+				console.warn(`BCX: rolesData query from ${sender}; not found in room`);
+				return resolve(false);
+			}
+
+			const accessLevel = getCharacterAccessLevel(character);
+			if (accessLevel > AccessLevel.mistress) {
+				return resolve(false);
+			}
+
+			resolve(true, getPlayerRoleData(character));
+		};
+
+		queryHandlers.editRole = (sender, resolve, data) => {
+			if (!isObject(data) ||
+				data.type !== "owner" && data.type !== "mistress" ||
+				data.action !== "add" && data.action !== "remove" ||
+				typeof data.target !== "number"
+			) {
+				console.warn(`BCX: Bad editRole query from ${sender}`, data);
+				return resolve(false);
+			}
+
+			const character = getChatroomCharacter(sender);
+			if (!character) {
+				console.warn(`BCX: editRole query from ${sender}; not found in room`, data);
+				return resolve(false);
+			}
+
+			resolve(true, editRole(data.type, data.action, data.target, character));
+		};
 	}
 
 	load() {
@@ -297,5 +427,23 @@ export class ModuleAuthority extends BaseModule {
 			}
 		}
 		modStorage.permissions = permissionsMakeBundle();
+
+		const seen = new Set<number>();
+		const test = (i: number): boolean => {
+			if (typeof i !== "number" || i === Player.MemberNumber || seen.has(i))
+				return false;
+			seen.add(i);
+			return true;
+		};
+		if (!Array.isArray(modStorage.owners)) {
+			modStorage.owners = [];
+		} else {
+			modStorage.owners = modStorage.owners.filter(test);
+		}
+		if (!Array.isArray(modStorage.mistresses)) {
+			modStorage.mistresses = [];
+		} else {
+			modStorage.mistresses = modStorage.mistresses.filter(test);
+		}
 	}
 }

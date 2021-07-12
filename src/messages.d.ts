@@ -60,6 +60,15 @@ type BCX_queries = {
 		target: boolean | number;
 	}, boolean];
 	permissionAccess: [BCX_Permissions, boolean];
+	rolesData: [undefined, PermissionRoleBundle];
+	editRole: [
+		{
+			type: "owner" | "mistress";
+			action: "add" | "remove";
+			target: number;
+		},
+		boolean
+	];
 	logData: [undefined, import("./modules/log").LogEntry[]];
 	logDelete: [number, boolean];
 	logConfigGet: [undefined, import("./modules/log").LogConfig];

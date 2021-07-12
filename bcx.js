@@ -12,76 +12,185 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const VERSION = "0.1.0";
+    function InfoBeep(msg) {
+        console.log(`BCX msg: ${msg}`);
+        ServerBeep = {
+            Timer: Date.now() + 3000,
+            Message: msg
+        };
+    }
+    function ChatRoomActionMessage(msg) {
+        if (!msg)
+            return;
+        ServerSend("ChatRoomChat", {
+            Content: "Beep",
+            Type: "Action",
+            Dictionary: [
+                { Tag: "Beep", Text: "msg" },
+                { Tag: "Biep", Text: "msg" },
+                { Tag: "Sonner", Text: "msg" },
+                { Tag: "msg", Text: msg }
+            ]
+        });
+    }
+    function ChatRoomSendLocal(msg, timeout, sender) {
+        var _a, _b;
+        // Adds the message and scrolls down unless the user has scrolled up
+        const div = document.createElement("div");
+        div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
+        div.setAttribute("data-time", ChatRoomCurrentTime());
+        div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
+        div.style.background = "#6e6eff54";
+        if (typeof msg === 'string')
+            div.innerText = msg;
+        else
+            div.appendChild(msg);
+        if (timeout)
+            setTimeout(() => div.remove(), timeout);
+        // Returns the focus on the chat box
+        const Refocus = ((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.id) === "InputChat";
+        const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
+        const ChatLog = document.getElementById("TextAreaChatLog");
+        if (ChatLog != null) {
+            ChatLog.appendChild(div);
+            if (ShouldScrollDown)
+                ElementScrollToEnd("TextAreaChatLog");
+            if (Refocus)
+                ElementFocus("InputChat");
+        }
+    }
+    function detectOtherMods() {
+        const w = window;
+        return {
+            NMod: typeof w.ChatRoomDrawFriendList === "function",
+            BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
+        };
+    }
+    /**
+     * Draws an image on canvas, applying all options
+     * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
+     * @param {number} X - Position of the image on the X axis
+     * @param {number} Y - Position of the image on the Y axis
+     * @param {object} [options] - any extra options, optional
+     * @param {CanvasRenderingContext2D} [options.Canvas] - Canvas on which to draw the image, defaults to `MainCanvas`
+     * @param {number} [options.Alpha] - transparency between 0-1
+     * @param {[number, number, number, number]} [options.SourcePos] - Area in original image to draw in format `[left, top, width, height]`
+     * @param {number} [options.Width] - Width of the drawn image, defaults to width of original image
+     * @param {number} [options.Height] - Height of the drawn image, defaults to height of original image
+     * @param {boolean} [options.Invert=false] - If image should be flipped vertically
+     * @param {boolean} [options.Mirror=false] - If image should be flipped horizontally
+     * @param {number} [options.Zoom=1] - Zoom factor
+     * @returns {boolean} - whether the image was complete or not
+     */
+    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 } = {}) {
+        if (typeof Source === "string") {
+            Source = DrawGetImage(Source);
+            if (!Source.complete)
+                return false;
+            if (!Source.naturalWidth)
+                return true;
+        }
+        const sizeChanged = Width != null || Height != null;
+        if (Width == null) {
+            Width = SourcePos ? SourcePos[2] : Source.width;
+        }
+        if (Height == null) {
+            Height = SourcePos ? SourcePos[3] : Source.height;
+        }
+        Canvas.save();
+        Canvas.globalCompositeOperation = "source-over";
+        Canvas.globalAlpha = Alpha;
+        Canvas.translate(X, Y);
+        if (Zoom !== 1) {
+            Canvas.scale(Zoom, Zoom);
+        }
+        if (Invert) {
+            Canvas.transform(1, 0, 0, -1, 0, Height);
+        }
+        if (Mirror) {
+            Canvas.transform(-1, 0, 0, 1, Width, 0);
+        }
+        if (SourcePos) {
+            Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
+        }
+        else if (sizeChanged) {
+            Canvas.drawImage(Source, 0, 0, Width, Height);
+        }
+        else {
+            Canvas.drawImage(Source, 0, 0);
+        }
+        Canvas.restore();
+        return true;
+    }
+    function isCloth(item, allowCosplay = false) {
+        const asset = item.Asset ? item.Asset : item;
+        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
+    }
+    function isBind(item) {
+        const asset = item.Asset ? item.Asset : item;
+        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
+            return false;
+        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
+    }
+
+    const VERSION = "0.2.0";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
-        AppearanceClick: ["CA4ED810", "B895612C"],
-        AppearanceRun: ["904E8E84", "791E142F"],
-        AsylumEntranceCanWander: ["3F5F4041"],
-        ChatRoomCanLeave: ["B964B0B0", "7EDA9A86"],
-        ChatRoomClearAllElements: ["D1E1F8C3", "9EA1595C"],
-        ChatRoomCreateElement: ["4837C2F6", "76299AEC"],
-        ChatRoomDrawCharacterOverlay: ["1E1A1B60", "10CE4173"],
-        ChatRoomDrawFriendList: ["2A9BD99D"],
-        ChatRoomMessage: ["2C6E4EC3", "AA8D20E0"],
-        ChatRoomSendChat: ["39B06D87", "385B9E9C"],
-        CheatImport: ["412422CC", "1ECB0CC4"],
-        DialogDrawExpressionMenu: ["071C32ED", "EEFB3D22"],
-        DialogDrawItemMenu: ["E0313EBF", "7C83D23C"],
-        DialogDrawPoseMenu: ["6145B7D7", "4B146E82"],
-        ElementIsScrolledToEnd: ["064E4232", "D28B0638"],
-        ExtendedItemDraw: ["486A52DF", "AABA9073"],
-        LoginMistressItems: ["984A6AD9"],
-        LoginResponse: ["16C2C651"],
-        LoginStableItems: ["C3F50DD1"],
-        ServerAccountBeep: ["0057EF1D", "96F8C34D"],
-        SpeechGarble: ["1BC8E005", "B3A5973D"]
+        ActivityOrgasmStart: ["5C3627D7"],
+        AppearanceClick: ["48FA3705", "BA17EA90"],
+        AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA"],
+        AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
+        ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],
+        ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED"],
+        ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383"],
+        ChatRoomDrawCharacterOverlay: ["D58A9AD3"],
+        ChatRoomKeyDown: ["5FD37EC9", "111B6F0C"],
+        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6"],
+        ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D"],
+        ChatRoomSync: ["BD048B94"],
+        CheatImport: ["412422CC", "26C67608"],
+        DialogDrawExpressionMenu: ["EEFB3D22"],
+        DialogDrawItemMenu: ["7B1D71E9", "0199F25B"],
+        DialogDrawPoseMenu: ["4B146E82"],
+        ElementIsScrolledToEnd: ["D28B0638"],
+        ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84"],
+        InformationSheetClick: ["E535609B"],
+        InformationSheetExit: ["75521907"],
+        InformationSheetRun: ["58B7879C", "A8A56ACA"],
+        LoginMistressItems: ["B58EF410"],
+        LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246"],
+        LoginStableItems: ["EA93FBF7"],
+        ServerAccountBeep: ["2D918B69"],
+        SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"]
     };
-
-    class BaseModule {
-        init() {
-            // Empty
-        }
-        load() {
-            // Empty
-        }
-        run() {
-            // Empty
-        }
-        unload() {
-            // Empty
-        }
-    }
-    let moduleInitPhase = 0 /* construct */;
-    const modules = [];
-    function registerModule(module) {
-        if (moduleInitPhase !== 0 /* construct */) {
-            throw new Error("Modules can be registered only before initialization");
-        }
-        modules.push(module);
-        console.debug(`BCX: Registered module ${module.constructor.name}`);
-        return module;
-    }
-    function init_modules() {
-        moduleInitPhase = 1 /* init */;
-        for (const m of modules) {
-            m.init();
-        }
-        moduleInitPhase = 2 /* load */;
-        for (const m of modules) {
-            m.load();
-        }
-        moduleInitPhase = 3 /* ready */;
-        for (const m of modules) {
-            m.run();
-        }
-    }
-    function unload_modules() {
-        moduleInitPhase = 4 /* destroy */;
-        for (const m of modules) {
-            m.unload();
-        }
-    }
+    const FUNCTION_HASHES_NMOD = {
+        ActivityOrgasmStart: ["5C3627D7"],
+        AppearanceClick: ["B895612C"],
+        AppearanceRun: ["791E142F"],
+        AsylumEntranceCanWander: ["609FA096"],
+        ChatRoomCanLeave: ["7EDA9A86"],
+        ChatRoomClearAllElements: ["C2131E9B"],
+        ChatRoomCreateElement: ["76299AEC"],
+        ChatRoomDrawFriendList: ["327DA1B8"],
+        ChatRoomKeyDown: ["D41B4525"],
+        ChatRoomMessage: ["4BC817B8"],
+        ChatRoomSendChat: ["385B9E9C"],
+        ChatRoomSync: ["2797D13E"],
+        CheatImport: ["1ECB0CC4"],
+        DialogDrawExpressionMenu: ["EEFB3D22"],
+        DialogDrawItemMenu: ["7C83D23C"],
+        DialogDrawPoseMenu: ["4B146E82"],
+        ElementIsScrolledToEnd: ["D28B0638"],
+        ExtendedItemDraw: ["9256549A"],
+        InformationSheetClick: ["E535609B"],
+        InformationSheetExit: ["75521907"],
+        InformationSheetRun: ["19872251"],
+        LoginMistressItems: ["984A6AD9"],
+        LoginResponse: ["E77283C0"],
+        LoginStableItems: ["C3F50DD1"],
+        ServerAccountBeep: ["A6DFD3B9"],
+        SpeechGarble: ["99C1A7BA"]
+    };
 
     const encoder = new TextEncoder();
     /* eslint-disable no-bitwise */
@@ -128,6 +237,14 @@ window.BCX_Loaded = false;
         const seen = new Set();
         return arr.filter(i => !seen.has(i) && seen.add(i));
     }
+    function capitalizeFirstLetter(str) {
+        return str.charAt(0).toLocaleUpperCase() + str.slice(1);
+    }
+    /* eslint-disable no-bitwise */
+    function uuidv4() {
+        return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16));
+    }
+    /* eslint-enable no-bitwise */
     const clipboardAvailable = Boolean(navigator.clipboard);
 
     const patchedFunctions = new Map();
@@ -160,11 +277,12 @@ window.BCX_Loaded = false;
         let result = patchedFunctions.get(target);
         if (!result) {
             const original = window[target];
-            const expectedHashes = (_a = FUNCTION_HASHES[target]) !== null && _a !== void 0 ? _a : [];
+            const { NMod } = detectOtherMods();
+            const expectedHashes = (_a = (NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[target]) !== null && _a !== void 0 ? _a : [];
             if (typeof original !== "function") {
                 throw new Error(`BCX: Function ${target} to be patched not found`);
             }
-            const hash = crc32(original.toString());
+            const hash = crc32(original.toString().replaceAll("\r\n", "\n"));
             if (!expectedHashes.includes(hash)) {
                 console.warn(`BCX: Patched function ${target} has unknown hash ${hash}`);
             }
@@ -220,8 +338,140 @@ window.BCX_Loaded = false;
         patchedFunctions.clear();
     }
 
+    class BaseModule {
+        init() {
+            // Empty
+        }
+        load() {
+            // Empty
+        }
+        run() {
+            // Empty
+        }
+        unload() {
+            // Empty
+        }
+    }
+    var ModuleCategory;
+    (function (ModuleCategory) {
+        ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
+        ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
+        ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
+        ModuleCategory[ModuleCategory["Misc"] = 3] = "Misc";
+    })(ModuleCategory || (ModuleCategory = {}));
+    const MODULE_NAMES = {
+        [ModuleCategory.Basic]: "Basic",
+        [ModuleCategory.Authority]: "Authority",
+        [ModuleCategory.Log]: "Behaviour Log",
+        [ModuleCategory.Misc]: "Miscellaneous"
+    };
+    const MODULE_ICONS = {
+        [ModuleCategory.Basic]: "Icons/General.png",
+        [ModuleCategory.Authority]: "Icons/Security.png",
+        [ModuleCategory.Log]: "Icons/Title.png",
+        [ModuleCategory.Misc]: "Icons/Random.png"
+    };
+    let moduleInitPhase = 0 /* construct */;
+    const modules = [];
+    function registerModule(module) {
+        if (moduleInitPhase !== 0 /* construct */) {
+            throw new Error("Modules can be registered only before initialization");
+        }
+        modules.push(module);
+        console.debug(`BCX: Registered module ${module.constructor.name}`);
+        return module;
+    }
+    function init_modules() {
+        moduleInitPhase = 1 /* init */;
+        for (const m of modules) {
+            m.init();
+        }
+        moduleInitPhase = 2 /* load */;
+        for (const m of modules) {
+            m.load();
+        }
+        moduleInitPhase = 3 /* ready */;
+        for (const m of modules) {
+            m.run();
+        }
+    }
+    function unload_modules() {
+        moduleInitPhase = 4 /* destroy */;
+        for (const m of modules) {
+            m.unload();
+        }
+    }
+
+    function loginInit(C) {
+        if (window.BCX_Loaded)
+            return;
+        init();
+    }
+    function clearCaches() {
+        if (typeof DrawRunMap !== "undefined") {
+            DrawRunMap.clear();
+            DrawScreen = "";
+        }
+        if (typeof CurrentScreenFunctions !== "undefined") {
+            const w = window;
+            CurrentScreenFunctions = {
+                Run: w[`${CurrentScreen}Run`],
+                Click: w[`${CurrentScreen}Click`],
+                Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
+                Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
+                Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
+                KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
+                Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined
+            };
+        }
+    }
+    function init() {
+        init_modules();
+        // Loading into already loaded club - clear some caches
+        clearCaches();
+        //#region Other mod compatability
+        const { BondageClubTools } = detectOtherMods();
+        if (BondageClubTools) {
+            console.warn("BCX: Bondage Club Tools detected!");
+            const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
+            const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
+            console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
+            ServerSocket.off("ChatRoomMessage");
+            ServerSocket.on("ChatRoomMessage", data => {
+                if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
+                    ChatRoomMessageForwarder(data);
+                }
+                return ChatRoomMessage(data);
+            });
+            ServerSocket.off("AccountBeep");
+            ServerSocket.on("AccountBeep", data => {
+                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
+                    AccountBeepForwarder(data);
+                }
+                return ServerAccountBeep(data);
+            });
+        }
+        //#endregion
+        window.BCX_Loaded = true;
+        InfoBeep(`BCX loaded! Version: ${VERSION}`);
+    }
+    function unload() {
+        const { BondageClubTools } = detectOtherMods();
+        if (BondageClubTools) {
+            throw new Error("BCX: Unload not supported when BondageClubTools are present");
+        }
+        unload_patches();
+        unload_modules();
+        // clear some caches
+        clearCaches();
+        delete window.BCX_Loaded;
+        console.log("BCX: Unloaded.");
+    }
+
     const hiddenMessageHandlers = new Map();
     const hiddenBeepHandlers = new Map();
+    const queryHandlers = {};
+    const changeHandlers = [];
     function sendHiddenMessage(type, message, Target = null) {
         if (!ServerPlayerIsInChatRoom())
             return;
@@ -240,6 +490,93 @@ window.BCX_Loaded = false;
                 BCX: { type, message }
             }
         });
+    }
+    const pendingQueries = new Map();
+    function sendQuery(type, data, target, timeout = 10000) {
+        return new Promise((resolve, reject) => {
+            const id = uuidv4();
+            const info = {
+                target,
+                resolve,
+                reject,
+                timeout: setTimeout(() => {
+                    console.warn("BCX: Query timed out", target, type);
+                    pendingQueries.delete(id);
+                    reject("Timed out");
+                }, timeout)
+            };
+            pendingQueries.set(id, info);
+            sendHiddenMessage("query", {
+                id,
+                query: type,
+                data
+            }, target);
+        });
+    }
+    hiddenMessageHandlers.set("query", (sender, message) => {
+        if (!isObject(message) ||
+            typeof message.id !== "string" ||
+            typeof message.query !== "string") {
+            console.warn(`BCX: Invalid query`, sender, message);
+            return;
+        }
+        const character = getChatroomCharacter(sender);
+        if (character && !character.hasAccessToPlayer()) {
+            return sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok: false
+            });
+        }
+        const handler = queryHandlers[message.query];
+        if (!handler) {
+            console.warn("BCX: Query no handler", sender, message);
+            return sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok: false
+            });
+        }
+        handler(sender, (ok, data) => {
+            sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok,
+                data
+            }, sender);
+        }, message.data);
+    });
+    hiddenMessageHandlers.set("queryAnswer", (sender, message) => {
+        if (!isObject(message) ||
+            typeof message.id !== "string" ||
+            typeof message.ok !== "boolean") {
+            console.warn(`BCX: Invalid queryAnswer`, sender, message);
+            return;
+        }
+        const info = pendingQueries.get(message.id);
+        if (!info) {
+            console.warn(`BCX: Response to unknown query`, sender, message);
+            return;
+        }
+        if (info.target !== info.target) {
+            console.warn(`BCX: Response to query not from target`, sender, message, info);
+            return;
+        }
+        clearTimeout(info.timeout);
+        pendingQueries.delete(message.id);
+        if (message.ok) {
+            info.resolve(message.data);
+        }
+        else {
+            info.reject(message.data);
+        }
+    });
+    hiddenMessageHandlers.set("somethingChanged", (sender) => {
+        changeHandlers.forEach(h => h(sender));
+    });
+    function notifyOfChange() {
+        if (moduleInitPhase !== 3 /* ready */)
+            return;
+        sendHiddenMessage("somethingChanged", undefined);
+        const player = getPlayerCharacter().MemberNumber;
+        changeHandlers.forEach(h => h(player));
     }
     class ModuleMessaging extends BaseModule {
         load() {
@@ -290,6 +627,1097 @@ window.BCX_Loaded = false;
         unload() {
             hiddenBeepHandlers.clear();
             hiddenMessageHandlers.clear();
+        }
+    }
+
+    let modStorage = {};
+    let deletionPending = false;
+    function modStorageSync() {
+        if (moduleInitPhase !== 3 /* ready */ && moduleInitPhase !== 4 /* destroy */)
+            return;
+        if (deletionPending)
+            return;
+        if (!Player.OnlineSettings) {
+            console.error("BCX: Player OnlineSettings not defined during storage sync!");
+            return;
+        }
+        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
+        if (typeof ServerAccountUpdate !== "undefined") {
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+        }
+        else {
+            console.debug("BCX: Old sync method");
+            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+        }
+    }
+    function clearAllData() {
+        deletionPending = true;
+        delete Player.OnlineSettings.BCX;
+        if (typeof ServerAccountUpdate !== "undefined") {
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
+        }
+        else {
+            console.debug("BCX: Old sync method");
+            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+        }
+        sendHiddenBeep("clearData", true, VERSION_CHECK_BOT, true);
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+    }
+    class ModuleStorage extends BaseModule {
+        init() {
+            var _a;
+            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+            if (typeof saved === "string") {
+                try {
+                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
+                    if (!isObject(storage)) {
+                        throw new Error("Bad data");
+                    }
+                    modStorage = storage;
+                }
+                catch (error) {
+                    console.error("BCX: Error while loading saved data, full reset.", error);
+                }
+            }
+            else {
+                console.log("BCX: First time init");
+            }
+        }
+        run() {
+            modStorageSync();
+        }
+    }
+
+    const LOG_ENTRIES_LIMIT = 256;
+    var LogEntryType;
+    (function (LogEntryType) {
+        LogEntryType[LogEntryType["plaintext"] = 0] = "plaintext";
+        LogEntryType[LogEntryType["deleted"] = 1] = "deleted";
+    })(LogEntryType || (LogEntryType = {}));
+    var LogAccessLevel;
+    (function (LogAccessLevel) {
+        LogAccessLevel[LogAccessLevel["none"] = 0] = "none";
+        LogAccessLevel[LogAccessLevel["protected"] = 1] = "protected";
+        LogAccessLevel[LogAccessLevel["normal"] = 2] = "normal";
+        LogAccessLevel[LogAccessLevel["everyone"] = 3] = "everyone";
+    })(LogAccessLevel || (LogAccessLevel = {}));
+    function logMessage(category, type, data) {
+        var _a;
+        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category];
+        if (access === undefined) {
+            throw new Error(`Attempt to log message with unknown category "${category}"`);
+        }
+        if (access > LogAccessLevel.none) {
+            logMessageAdd(access, type, data);
+        }
+    }
+    function logMessageAdd(access, type, data) {
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        modStorage.log.unshift([Date.now(), access, type, data]);
+        // Time must me unique
+        if (modStorage.log.length >= 2 && modStorage.log[0][0] <= modStorage.log[1][0]) {
+            modStorage.log[0][0] = modStorage.log[1][0] + 1;
+        }
+        modStorage.log.splice(LOG_ENTRIES_LIMIT);
+        modStorageSync();
+        notifyOfChange();
+    }
+    function logMessageDelete(time, character) {
+        var _a;
+        if (character && !checkPermissionAccess("log_delete", character)) {
+            return false;
+        }
+        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.logDeleted;
+        if (access === undefined) {
+            throw new Error("logDeleted category not found");
+        }
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        for (let i = 0; i < modStorage.log.length; i++) {
+            const e = modStorage.log[i];
+            if (e[0] === time) {
+                if (access === LogAccessLevel.none) {
+                    modStorage.log.splice(i, 1);
+                }
+                else {
+                    e[1] = access;
+                    e[2] = LogEntryType.deleted;
+                    e[3] = null;
+                }
+                modStorageSync();
+                notifyOfChange();
+                return true;
+            }
+        }
+        return false;
+    }
+    function logConfigSet(category, accessLevel, character) {
+        var _a;
+        if (character && !checkPermissionAccess("log_configure", character)) {
+            return false;
+        }
+        if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category]) === undefined) {
+            return false;
+        }
+        if (![LogAccessLevel.none, LogAccessLevel.normal, LogAccessLevel.protected].includes(accessLevel)) {
+            return false;
+        }
+        if (character) {
+            const msg = `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
+                `from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`;
+            logMessage("logConfigChange", LogEntryType.plaintext, msg);
+            if (!character.isPlayer()) {
+                ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+            }
+        }
+        modStorage.logConfig[category] = accessLevel;
+        modStorageSync();
+        notifyOfChange();
+        return true;
+    }
+    function logClear(character) {
+        if (character && !checkPermissionAccess("log_delete", character)) {
+            return false;
+        }
+        modStorage.log = [];
+        logMessageAdd(LogAccessLevel.everyone, LogEntryType.plaintext, "The log has been cleared");
+        return true;
+    }
+    function getVisibleLogEntries(character) {
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        const allow = {
+            [LogAccessLevel.none]: character.isPlayer(),
+            [LogAccessLevel.normal]: checkPermissionAccess("log_view_normal", character),
+            [LogAccessLevel.protected]: checkPermissionAccess("log_view_protected", character),
+            [LogAccessLevel.everyone]: true
+        };
+        return modStorage.log.filter(e => allow[e[1]]);
+    }
+    function logMessageRender(entry) {
+        if (entry[2] === LogEntryType.plaintext) {
+            const e = entry;
+            return e[3];
+        }
+        else if (entry[2] === LogEntryType.deleted) {
+            return "[Log message deleted]";
+        }
+        return `[ERROR: Unknown entry type ${entry[2]}]`;
+    }
+    const alreadyPraisedBy = new Set();
+    function logGetAllowedActions(character) {
+        var _a;
+        return {
+            configure: checkPermissionAccess("log_configure", character),
+            delete: checkPermissionAccess("log_delete", character),
+            leaveMessage: checkPermissionAccess("log_leaveMessage", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.userNote),
+            praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
+        };
+    }
+    function logPraise(value, message, character) {
+        if (![-1, 0, 1].includes(value)) {
+            throw new Error("Invalid value");
+        }
+        if (value === 0 && !message)
+            return false;
+        const allowed = logGetAllowedActions(character);
+        if (value !== 0 && !allowed.praise)
+            return false;
+        if (message && !allowed.leaveMessage)
+            return false;
+        if (value !== 0) {
+            alreadyPraisedBy.add(character.MemberNumber);
+        }
+        if (value > 0) {
+            if (message) {
+                logMessage("userNote", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+            }
+            else {
+                logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
+            }
+        }
+        else if (value < 0) {
+            if (message) {
+                logMessage("userNote", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+            }
+            else {
+                logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
+            }
+        }
+        else if (message) {
+            logMessage("userNote", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+        }
+        return true;
+    }
+    const logConfigDefaults = {
+        logConfigChange: LogAccessLevel.protected,
+        logDeleted: LogAccessLevel.normal,
+        praise: LogAccessLevel.normal,
+        userNote: LogAccessLevel.protected,
+        enteredPublicRoom: LogAccessLevel.none,
+        enteredPrivateRoom: LogAccessLevel.none,
+        hadOrgasm: LogAccessLevel.none,
+        permissionChange: LogAccessLevel.protected
+    };
+    const LOG_CONFIG_NAMES = {
+        logConfigChange: "Log changes in logging configuration",
+        logDeleted: "Log deleted log entries",
+        praise: "Log praising or scolding behavior",
+        userNote: "Ability to attach notes",
+        enteredPublicRoom: "Log which public rooms are entered",
+        enteredPrivateRoom: "Log which private rooms are entered",
+        hadOrgasm: "Log each single orgasm",
+        permissionChange: "Log changes in permission settings"
+    };
+    const LOG_LEVEL_NAMES = {
+        [LogAccessLevel.everyone]: "[ERROR]",
+        [LogAccessLevel.none]: "No",
+        [LogAccessLevel.protected]: "Protected",
+        [LogAccessLevel.normal]: "Yes"
+    };
+    class ModuleLog extends BaseModule {
+        init() {
+            registerPermission("log_view_normal", {
+                name: "Allow to see normal log entries",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.public
+            });
+            registerPermission("log_view_protected", {
+                name: "Allow to see protected log entries",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.mistress
+            });
+            registerPermission("log_configure", {
+                name: "Allow to configure what is logged",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("log_delete", {
+                name: "Allow deleting log entries",
+                category: ModuleCategory.Log,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("log_praise", {
+                name: "Allow to praise or scold",
+                category: ModuleCategory.Log,
+                self: false,
+                min: AccessLevel.public
+            });
+            registerPermission("log_leaveMessage", {
+                name: "Allow to attach notes to the body",
+                category: ModuleCategory.Log,
+                self: false,
+                min: AccessLevel.mistress
+            });
+            queryHandlers.logData = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, getVisibleLogEntries(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logDelete = (sender, resolve, data) => {
+                const character = getChatroomCharacter(sender);
+                if (character && typeof data === "number") {
+                    resolve(true, logMessageDelete(data, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logConfigGet = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character && checkPermissionAccess("log_configure", character) && modStorage.logConfig) {
+                    resolve(true, { ...modStorage.logConfig });
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logConfigEdit = (sender, resolve, data) => {
+                if (!isObject(data) ||
+                    typeof data.category !== "string" ||
+                    typeof data.target !== "number") {
+                    console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logConfigSet(data.category, data.target, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logClear = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logClear(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logPraise = (sender, resolve, data) => {
+                if (!isObject(data) ||
+                    (data.message !== null && typeof data.message !== "string") ||
+                    ![-1, 0, 1].includes(data.value)) {
+                    console.warn(`BCX: Bad logPraise query from ${sender}`, data);
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logPraise(data.value, data.message, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.logGetAllowedActions = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, logGetAllowedActions(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+        }
+        load() {
+            if (!Array.isArray(modStorage.log)) {
+                logClear(null);
+            }
+            else if (!modStorage.log.every(e => Array.isArray(e) &&
+                e.length === 4 &&
+                typeof e[0] === "number" &&
+                typeof e[1] === "number" &&
+                typeof e[2] === "number")) {
+                console.error("BCX: Some log entries have invalid format, reseting whole log!");
+                logClear(null);
+            }
+            if (!modStorage.logConfig) {
+                modStorage.logConfig = { ...logConfigDefaults };
+            }
+            else {
+                for (const k of Object.keys(modStorage.logConfig)) {
+                    if (logConfigDefaults[k] === undefined) {
+                        console.info(`BCX: Removing unknown log config category "${k}"`);
+                        delete modStorage.logConfig[k];
+                    }
+                }
+                for (const k of Object.keys(logConfigDefaults)) {
+                    if (modStorage.logConfig[k] === undefined) {
+                        console.info(`BCX: Adding missing log category "${k}"`);
+                        modStorage.logConfig[k] = logConfigDefaults[k];
+                    }
+                }
+            }
+            hookFunction("ActivityOrgasmStart", 0, (args, next) => {
+                const C = args[0];
+                if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
+                    logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+                }
+                return next(args);
+            });
+            hookFunction("ChatRoomSync", 0, (args, next) => {
+                const data = args[0];
+                if (data.Private) {
+                    logMessage("enteredPrivateRoom", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
+                }
+                else {
+                    logMessage("enteredPublicRoom", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
+                }
+                return next(args);
+            });
+        }
+    }
+
+    class ChatroomCharacter {
+        constructor(character) {
+            this.BCXVersion = null;
+            this.Character = character;
+            if (character.ID === 0) {
+                this.BCXVersion = VERSION;
+            }
+            console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
+        }
+        isPlayer() {
+            return false;
+        }
+        get MemberNumber() {
+            if (typeof this.Character.MemberNumber !== "number") {
+                throw new Error("Character without MemberNumber");
+            }
+            return this.Character.MemberNumber;
+        }
+        get Name() {
+            return this.Character.Name;
+        }
+        toString() {
+            return `${this.Name} (${this.MemberNumber})`;
+        }
+        getPermissions() {
+            return sendQuery("permissions", undefined, this.MemberNumber).then(data => {
+                if (!isObject(data) ||
+                    Object.values(data).some(v => !Array.isArray(v) ||
+                        typeof v[0] !== "boolean" ||
+                        typeof v[1] !== "number" ||
+                        AccessLevel[v[1]] === undefined)) {
+                    throw new Error("Bad data");
+                }
+                return getPermissionDataFromBundle(data);
+            });
+        }
+        getPermissionAccess(permission) {
+            return sendQuery("permissionAccess", permission, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            }).catch(err => {
+                console.error(`BCX: Error while querying permission "${permission}" access for ${this}`, err);
+                return false;
+            });
+        }
+        getMyAccessLevel() {
+            return sendQuery("myAccessLevel", undefined, this.MemberNumber).then(data => {
+                if (typeof data !== "number" || AccessLevel[data] === undefined) {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        setPermission(permission, type, target) {
+            return sendQuery("editPermission", {
+                permission,
+                edit: type,
+                target
+            }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        getRolesData() {
+            return sendQuery("rolesData", undefined, this.MemberNumber).then(data => {
+                if (!isObject(data) ||
+                    !Array.isArray(data.mistresses) ||
+                    !data.mistresses.every(i => Array.isArray(i) && i.length === 2 && typeof i[0] === "number" && typeof i[1] === "string") ||
+                    !Array.isArray(data.owners) ||
+                    !data.owners.every(i => Array.isArray(i) && i.length === 2 && typeof i[0] === "number" && typeof i[1] === "string") ||
+                    typeof data.allowAddMistress !== "boolean" ||
+                    typeof data.allowRemoveMistress !== "boolean" ||
+                    typeof data.allowAddOwner !== "boolean" ||
+                    typeof data.allowRemoveOwner !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        editRole(role, action, target) {
+            return sendQuery("editRole", {
+                type: role,
+                action,
+                target
+            }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        getLogEntries() {
+            return sendQuery("logData", undefined, this.MemberNumber).then(data => {
+                if (!Array.isArray(data) ||
+                    !data.every(e => Array.isArray(e) &&
+                        e.length === 4 &&
+                        typeof e[0] === "number" &&
+                        typeof e[1] === "number" &&
+                        typeof e[2] === "number")) {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logMessageDelete(time) {
+            return sendQuery("logDelete", time, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        getLogConfig() {
+            return sendQuery("logConfigGet", undefined, this.MemberNumber).then(data => {
+                var _a;
+                if (!isObject(data) ||
+                    Object.values(data).some(v => typeof v !== "number")) {
+                    throw new Error("Bad data");
+                }
+                for (const k of Object.keys(data)) {
+                    if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[k]) === undefined || LogAccessLevel[data[k]] === undefined) {
+                        delete data[k];
+                    }
+                }
+                return data;
+            });
+        }
+        setLogConfig(category, target) {
+            return sendQuery("logConfigEdit", {
+                category,
+                target
+            }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logClear() {
+            return sendQuery("logClear", undefined, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logPraise(value, message) {
+            return sendQuery("logPraise", {
+                message,
+                value
+            }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        logGetAllowedActions() {
+            return sendQuery("logGetAllowedActions", undefined, this.MemberNumber).then(data => {
+                if (!isObject(data) ||
+                    typeof data.delete !== "boolean" ||
+                    typeof data.configure !== "boolean" ||
+                    typeof data.praise !== "boolean" ||
+                    typeof data.leaveMessage !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        hasAccessToPlayer() {
+            return ServerChatRoomGetAllowItem(this.Character, Player);
+        }
+        playerHasAccessToCharacter() {
+            return ServerChatRoomGetAllowItem(Player, this.Character);
+        }
+    }
+    class PlayerCharacter extends ChatroomCharacter {
+        constructor() {
+            super(...arguments);
+            /** HACK: Otherwise TS wrongly assumes PlayerCharacter to be identical to ChatroomCharacter */
+            this.playerObject = true;
+        }
+        isPlayer() {
+            return true;
+        }
+        getPermissions() {
+            return Promise.resolve(getPlayerPermissionSettings());
+        }
+        getPermissionAccess(permission) {
+            return Promise.resolve(checkPermissionAccess(permission, this));
+        }
+        getMyAccessLevel() {
+            return Promise.resolve(AccessLevel.self);
+        }
+        setPermission(permission, type, target) {
+            if (type === "self") {
+                if (typeof target !== "boolean") {
+                    throw new Error("Invalid target value for self permission edit");
+                }
+                return Promise.resolve(setPermissionSelfAccess(permission, target, this));
+            }
+            else {
+                if (typeof target !== "number") {
+                    throw new Error("Invalid target value for min permission edit");
+                }
+                return Promise.resolve(setPermissionMinAccess(permission, target, this));
+            }
+        }
+        getRolesData() {
+            return Promise.resolve(getPlayerRoleData(this));
+        }
+        editRole(role, action, target) {
+            return Promise.resolve(editRole(role, action, target, this));
+        }
+        getLogEntries() {
+            return Promise.resolve(getVisibleLogEntries(this));
+        }
+        logMessageDelete(time) {
+            return Promise.resolve(logMessageDelete(time, this));
+        }
+        getLogConfig() {
+            if (!modStorage.logConfig) {
+                return Promise.reject("Not initialized");
+            }
+            return Promise.resolve({ ...modStorage.logConfig });
+        }
+        setLogConfig(category, target) {
+            return Promise.resolve(logConfigSet(category, target, this));
+        }
+        logClear() {
+            return Promise.resolve(logClear(this));
+        }
+        logPraise(value, message) {
+            return Promise.resolve(logPraise(value, message, this));
+        }
+        logGetAllowedActions() {
+            return Promise.resolve(logGetAllowedActions(this));
+        }
+    }
+    const currentRoomCharacters = [];
+    function cleanOldCharacters() {
+        for (let i = currentRoomCharacters.length - 1; i >= 0; i--) {
+            if (!currentRoomCharacters[i].isPlayer() && !ChatRoomCharacter.includes(currentRoomCharacters[i].Character)) {
+                currentRoomCharacters.splice(i, 1);
+            }
+        }
+    }
+    function getChatroomCharacter(memberNumber) {
+        if (typeof memberNumber !== "number")
+            return null;
+        cleanOldCharacters();
+        let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
+        if (!character) {
+            if (Player.MemberNumber === memberNumber) {
+                character = new PlayerCharacter(Player);
+            }
+            else {
+                const BCCharacter = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
+                if (!BCCharacter) {
+                    return null;
+                }
+                character = new ChatroomCharacter(BCCharacter);
+            }
+            currentRoomCharacters.push(character);
+        }
+        return character;
+    }
+    function getAllCharactersInRoom() {
+        return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber)).filter(Boolean);
+    }
+    function getPlayerCharacter() {
+        let character = currentRoomCharacters.find(c => c.Character === Player);
+        if (!character) {
+            character = new PlayerCharacter(Player);
+            currentRoomCharacters.push(character);
+        }
+        return character;
+    }
+
+    var AccessLevel;
+    (function (AccessLevel) {
+        AccessLevel[AccessLevel["self"] = 0] = "self";
+        AccessLevel[AccessLevel["clubowner"] = 1] = "clubowner";
+        AccessLevel[AccessLevel["owner"] = 2] = "owner";
+        AccessLevel[AccessLevel["lover"] = 3] = "lover";
+        AccessLevel[AccessLevel["mistress"] = 4] = "mistress";
+        AccessLevel[AccessLevel["whitelist"] = 5] = "whitelist";
+        AccessLevel[AccessLevel["friend"] = 6] = "friend";
+        AccessLevel[AccessLevel["public"] = 7] = "public";
+    })(AccessLevel || (AccessLevel = {}));
+    const permissions = new Map();
+    function registerPermission(name, data) {
+        if (moduleInitPhase !== 1 /* init */) {
+            throw new Error("Permissions can be registered only during init");
+        }
+        if (permissions.has(name)) {
+            throw new Error(`Permission "${name}" already defined!`);
+        }
+        permissions.set(name, data);
+    }
+    function getCharacterAccessLevel(character) {
+        var _a, _b, _c;
+        if (character.isPlayer())
+            return AccessLevel.self;
+        if (character.MemberNumber !== null) {
+            if (Player.IsOwnedByMemberNumber(character.MemberNumber))
+                return AccessLevel.clubowner;
+            if ((_a = modStorage.owners) === null || _a === void 0 ? void 0 : _a.includes(character.MemberNumber))
+                return AccessLevel.owner;
+            if (Player.IsLoverOfMemberNumber(character.MemberNumber))
+                return AccessLevel.lover;
+            if ((_b = modStorage.mistresses) === null || _b === void 0 ? void 0 : _b.includes(character.MemberNumber))
+                return AccessLevel.mistress;
+            if (Player.WhiteList.includes(character.MemberNumber))
+                return AccessLevel.whitelist;
+            if ((_c = Player.FriendList) === null || _c === void 0 ? void 0 : _c.includes(character.MemberNumber))
+                return AccessLevel.friend;
+        }
+        return AccessLevel.public;
+    }
+    function checkPermissionAccess(permission, character) {
+        const permData = permissions.get(permission);
+        if (!permData) {
+            console.error(new Error(`Check for unknown permission "${permission}"`));
+            return false;
+        }
+        if (!character.hasAccessToPlayer())
+            return false;
+        return checkPermisionAccesData(permData, getCharacterAccessLevel(character));
+    }
+    function checkPermisionAccesData(permData, accessLevel) {
+        if (accessLevel === AccessLevel.self) {
+            return permData.self || permData.min === AccessLevel.self;
+        }
+        return accessLevel <= permData.min;
+    }
+    function permissionsMakeBundle() {
+        const res = {};
+        for (const [k, v] of permissions.entries()) {
+            res[k] = [v.self, v.min];
+        }
+        return res;
+    }
+    function getPermissionDataFromBundle(bundle) {
+        const res = {};
+        for (const [k, v] of permissions.entries()) {
+            if (bundle[k]) {
+                res[k] = {
+                    category: v.category,
+                    name: v.name,
+                    self: bundle[k][0],
+                    min: bundle[k][1]
+                };
+            }
+        }
+        return res;
+    }
+    function setPermissionSelfAccess(permission, self, characterToCheck) {
+        const permData = permissions.get(permission);
+        if (!permData) {
+            throw new Error(`Attempt to edit unknown permission "${permission}"`);
+        }
+        self = self || permData.min === AccessLevel.self;
+        if (permData.self === self)
+            return true;
+        if (characterToCheck) {
+            if (!checkPermissionAccess(self ? "authority_grant_self" : "authority_revoke_self", characterToCheck) ||
+                !characterToCheck.isPlayer() && !checkPermissionAccess(permission, characterToCheck)) {
+                console.warn(`BCX: Unauthorized self permission edit attempt for "${permission}" by ${characterToCheck}`);
+                return false;
+            }
+        }
+        if (characterToCheck) {
+            const msg = `${characterToCheck} ` +
+                (self ? `gave ${characterToCheck.isPlayer() ? "herself" : Player.Name}` : `removed ${(characterToCheck === null || characterToCheck === void 0 ? void 0 : characterToCheck.isPlayer()) ? "her" : Player.Name + "'s"}`) +
+                ` control over permission "${permData.name}"`;
+            logMessage("permissionChange", LogEntryType.plaintext, msg);
+            if (!characterToCheck.isPlayer()) {
+                ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+            }
+        }
+        permData.self = self;
+        permissionsSync();
+        notifyOfChange();
+        return true;
+    }
+    function setPermissionMinAccess(permission, min, characterToCheck) {
+        const permData = permissions.get(permission);
+        if (!permData) {
+            throw new Error(`Attempt to edit unknown permission "${permission}"`);
+        }
+        if (permData.min === min)
+            return true;
+        if (characterToCheck) {
+            const allowed = 
+            // Exception: Player can always lower permissions "Self"->"Owner"
+            (characterToCheck.isPlayer() && permData.min < min && min <= AccessLevel.owner) ||
+                (
+                // Character must have access to "allow minimal access modification"
+                checkPermissionAccess("authority_edit_min", characterToCheck) &&
+                    (
+                    // Character must have access to target rule
+                    checkPermissionAccess(permission, characterToCheck) ||
+                        // Exception: Player bypasses this check when lowering "minimal access"
+                        characterToCheck.isPlayer() && min >= permData.min) &&
+                    (
+                    // Not player must have access to target level
+                    !characterToCheck.isPlayer() ||
+                        getCharacterAccessLevel(characterToCheck) <= min));
+            if (!allowed) {
+                console.warn(`BCX: Unauthorized min permission edit attempt for "${permission}" by ${characterToCheck}`);
+                return false;
+            }
+        }
+        if (characterToCheck) {
+            const msg = `${characterToCheck} changed permission "${permData.name}" from ` +
+                `"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`;
+            logMessage("permissionChange", LogEntryType.plaintext, msg);
+            if (!characterToCheck.isPlayer()) {
+                ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+            }
+        }
+        permData.min = min;
+        if (min === AccessLevel.self) {
+            permData.self = true;
+        }
+        permissionsSync();
+        notifyOfChange();
+        return true;
+    }
+    function permissionsSync() {
+        modStorage.permissions = permissionsMakeBundle();
+        modStorageSync();
+    }
+    function getPlayerPermissionSettings() {
+        const res = {};
+        for (const [k, v] of permissions.entries()) {
+            res[k] = { ...v };
+        }
+        return res;
+    }
+    function getPermissionMinDisplayText(minAccess, character) {
+        if (minAccess === AccessLevel.self) {
+            return character ? character.Name : "Self";
+        }
+        return capitalizeFirstLetter(AccessLevel[minAccess]);
+    }
+    function getPlayerRoleData(character) {
+        var _a, _b;
+        const loadNames = (memberNumber) => { var _a, _b; return [memberNumber, (_b = (_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(memberNumber)) !== null && _b !== void 0 ? _b : ""]; };
+        return {
+            mistresses: ((_a = modStorage.mistresses) !== null && _a !== void 0 ? _a : []).map(loadNames),
+            owners: ((_b = modStorage.owners) !== null && _b !== void 0 ? _b : []).map(loadNames),
+            allowAddMistress: checkPermissionAccess("authority_mistress_add", character),
+            allowRemoveMistress: checkPermissionAccess("authority_mistress_remove", character),
+            allowAddOwner: checkPermissionAccess("authority_owner_add", character),
+            allowRemoveOwner: checkPermissionAccess("authority_owner_remove", character)
+        };
+    }
+    function editRole(role, action, target, character) {
+        if (target === Player.MemberNumber)
+            return false;
+        if (!modStorage.owners || !modStorage.mistresses) {
+            throw new Error("Not initialized");
+        }
+        if (character) {
+            let permissionToCheck = "authority_mistress_add";
+            if (role === "mistress" && action === "remove")
+                permissionToCheck = "authority_mistress_remove";
+            else if (role === "owner" && action === "add")
+                permissionToCheck = "authority_owner_add";
+            else if (role === "owner" && action === "remove")
+                permissionToCheck = "authority_owner_remove";
+            if (!checkPermissionAccess(permissionToCheck, character) && (action !== "remove" || target !== character.MemberNumber))
+                return false;
+            if (role === "mistress" && action === "add" && modStorage.owners.includes(target) && !checkPermissionAccess("authority_owner_remove", character)) {
+                return false;
+            }
+        }
+        if (role === "owner" && action === "remove" && !modStorage.owners.includes(target) ||
+            role === "mistress" && action === "remove" && !modStorage.mistresses.includes(target)) {
+            return true;
+        }
+        const ownerIndex = modStorage.owners.indexOf(target);
+        if (ownerIndex >= 0) {
+            modStorage.owners.splice(ownerIndex, 1);
+        }
+        const mistressIndex = modStorage.mistresses.indexOf(target);
+        if (mistressIndex >= 0) {
+            modStorage.mistresses.splice(mistressIndex, 1);
+        }
+        if (action === "add") {
+            if (role === "owner") {
+                modStorage.owners.push(target);
+            }
+            else if (role === "mistress") {
+                modStorage.mistresses.push(target);
+            }
+        }
+        modStorageSync();
+        notifyOfChange();
+        return true;
+    }
+    class ModuleAuthority extends BaseModule {
+        init() {
+            registerPermission("authority_grant_self", {
+                name: "Allow granting self access",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("authority_revoke_self", {
+                name: "Allow forbidding self access",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("authority_edit_min", {
+                name: "Allow minimal access modification",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.self
+            });
+            registerPermission("authority_mistress_add", {
+                name: "Allow granting Mistress status",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.mistress
+            });
+            registerPermission("authority_mistress_remove", {
+                name: "Allow revoking Mistress status",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.lover
+            });
+            registerPermission("authority_owner_add", {
+                name: "Allow granting Owner status",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.owner
+            });
+            registerPermission("authority_owner_remove", {
+                name: "Allow revoking Owner status",
+                category: ModuleCategory.Authority,
+                self: true,
+                min: AccessLevel.clubowner
+            });
+            queryHandlers.permissions = (sender, resolve) => {
+                resolve(true, permissionsMakeBundle());
+            };
+            queryHandlers.permissionAccess = (sender, resolve, data) => {
+                const character = getChatroomCharacter(sender);
+                if (character && typeof data === "string") {
+                    resolve(true, checkPermissionAccess(data, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.myAccessLevel = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, getCharacterAccessLevel(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.editPermission = (sender, resolve, data) => {
+                if (!isObject(data) ||
+                    typeof data.permission !== "string" ||
+                    (data.edit !== "min" && data.edit !== "self") ||
+                    (data.edit === "min" && typeof data.target !== "number") ||
+                    (data.edit === "self" && typeof data.target !== "boolean")) {
+                    console.warn(`BCX: Bad editPermission query from ${sender}`, data);
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (!character) {
+                    console.warn(`BCX: editPermission query from ${sender}; not found in room`, data);
+                    return resolve(false);
+                }
+                if (!permissions.has(data.permission)) {
+                    console.warn(`BCX: editPermission query from ${sender}; unknown permission`, data);
+                    return resolve(false);
+                }
+                if (data.edit === "self") {
+                    if (typeof data.target !== "boolean") {
+                        throw new Error("Assertion failed");
+                    }
+                    return resolve(true, setPermissionSelfAccess(data.permission, data.target, character));
+                }
+                else {
+                    if (typeof data.target !== "number") {
+                        throw new Error("Assertion failed");
+                    }
+                    if (AccessLevel[data.target] === undefined) {
+                        console.warn(`BCX: editPermission query from ${sender}; unknown access level`, data);
+                        return resolve(true, false);
+                    }
+                    return resolve(true, setPermissionMinAccess(data.permission, data.target, character));
+                }
+            };
+            queryHandlers.rolesData = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (!character) {
+                    console.warn(`BCX: rolesData query from ${sender}; not found in room`);
+                    return resolve(false);
+                }
+                const accessLevel = getCharacterAccessLevel(character);
+                if (accessLevel > AccessLevel.mistress) {
+                    return resolve(false);
+                }
+                resolve(true, getPlayerRoleData(character));
+            };
+            queryHandlers.editRole = (sender, resolve, data) => {
+                if (!isObject(data) ||
+                    data.type !== "owner" && data.type !== "mistress" ||
+                    data.action !== "add" && data.action !== "remove" ||
+                    typeof data.target !== "number") {
+                    console.warn(`BCX: Bad editRole query from ${sender}`, data);
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (!character) {
+                    console.warn(`BCX: editRole query from ${sender}; not found in room`, data);
+                    return resolve(false);
+                }
+                resolve(true, editRole(data.type, data.action, data.target, character));
+            };
+        }
+        load() {
+            if (isObject(modStorage.permissions)) {
+                for (const [k, v] of Object.entries(modStorage.permissions)) {
+                    const perm = permissions.get(k);
+                    if (!Array.isArray(v) || typeof v[0] !== "boolean" || typeof v[1] !== "number") {
+                        console.warn(`BCX: Storage: bad permission ${k}`);
+                    }
+                    else if (AccessLevel[v[1]] === undefined) {
+                        console.warn(`BCX: Storage: bad permission ${k} level ${v[1]}`);
+                    }
+                    else if (perm === undefined) {
+                        console.warn(`BCX: Storage: unknown permission ${k}`);
+                    }
+                    else {
+                        perm.self = v[0];
+                        perm.min = v[1];
+                    }
+                }
+            }
+            modStorage.permissions = permissionsMakeBundle();
+            const seen = new Set();
+            const test = (i) => {
+                if (typeof i !== "number" || i === Player.MemberNumber || seen.has(i))
+                    return false;
+                seen.add(i);
+                return true;
+            };
+            if (!Array.isArray(modStorage.owners)) {
+                modStorage.owners = [];
+            }
+            else {
+                modStorage.owners = modStorage.owners.filter(test);
+            }
+            if (!Array.isArray(modStorage.mistresses)) {
+                modStorage.mistresses = [];
+            }
+            else {
+                modStorage.mistresses = modStorage.mistresses.filter(test);
+            }
         }
     }
 
@@ -349,45 +1777,164 @@ BS7XNtOVBiyJByJuEAmzVeY4A87EO3e+QHv76+c9YWZl/cmePSs4dMjUAX0MLBNCa4n7CDyYtS3X
 NfCSEJo/oepKooFMCM3LuW/ke4wOwOWqprPzNbzez2hvbzCLYS8Bb8tMImXkImA7sX/UXE+yS5BJ
 lKuAfTFA7AIuJ8VlFtB+HojvOPeLhyEhC4BuE4gTwK0MMVkr0+8+iBDwDkNQRsh6Uh/IAcDKEJVR
 wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
+    const icon_BCX = `data:image/png;base64,
+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
+`.replaceAll("\n", "");
+    const icon_OwnerList = `data:image/png;base64,
+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
+xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
+`.replaceAll("\n", "");
 
-    class ChatroomCharacter {
-        constructor(character) {
-            this.BCXVersion = null;
-            this.Character = character;
-            if (character.ID === 0) {
-                this.BCXVersion = VERSION;
-            }
-            console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
-        }
-        get MemberNumber() {
-            var _a;
-            return (_a = this.Character.MemberNumber) !== null && _a !== void 0 ? _a : null;
-        }
-        get Name() {
-            return this.Character.Name;
-        }
-        toString() {
-            return `${this.Name} (${this.MemberNumber})`;
-        }
-    }
-    const currentRoomCharacters = [];
-    function getChatroomCharacter(memberNumber) {
-        if (typeof memberNumber !== "number")
-            return null;
-        let character = currentRoomCharacters.find(c => c.Character.MemberNumber === memberNumber);
-        if (!character) {
-            const BCCharacter = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
-            if (!BCCharacter) {
-                return null;
-            }
-            character = new ChatroomCharacter(BCCharacter);
-            currentRoomCharacters.push(character);
-        }
-        return character;
-    }
-    function getAllCharactersInRoom() {
-        return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber)).filter(Boolean);
-    }
     class ChatRoomStatusManager {
         constructor() {
             this.InputTimeoutMs = 3000;
@@ -414,6 +1961,9 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             }
         }
         SetStatus(type, target = null) {
+            if (!modStorage.typingIndicatorEnable) {
+                type = this.StatusTypes.None;
+            }
             if (type !== this.Status) {
                 if (target !== null && this.Status === this.StatusTypes.Whisper) {
                     this.SetStatus(this.StatusTypes.None, null);
@@ -475,6 +2025,9 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             ChatroomSM = new ChatRoomStatusManager();
         }
         load() {
+            if (typeof modStorage.typingIndicatorEnable !== "boolean") {
+                modStorage.typingIndicatorEnable = true;
+            }
             hiddenMessageHandlers.set("hello", (sender, message) => {
                 const char = getChatroomCharacter(sender);
                 if (!char) {
@@ -570,14 +2123,14 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
                             break;
                     }
                 });
+                hookFunction("ChatRoomCreateElement", 0, (args, next) => {
+                    next(args);
+                    ChatroomSM.SetInputElement(document.getElementById("InputChat"));
+                });
             }
             hookFunction("ChatRoomSendChat", 0, (args, next) => {
                 next(args);
                 ChatroomSM.InputEnd();
-            });
-            hookFunction("ChatRoomCreateElement", 0, (args, next) => {
-                next(args);
-                ChatroomSM.SetInputElement(document.getElementById("InputChat"));
             });
             hookFunction("ChatRoomClearAllElements", 0, (args, next) => {
                 next(args);
@@ -733,53 +2286,6 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         }
     }
 
-    function loginInit(C) {
-        if (window.BCX_Loaded)
-            return;
-        init();
-    }
-    function init() {
-        // Loading into already loaded club - clear some caches
-        DrawRunMap.clear();
-        DrawScreen = "";
-        init_modules();
-        //#region Other mod compatability
-        const { BondageClubTools } = detectOtherMods();
-        if (BondageClubTools) {
-            console.warn("BCX: Bondage Club Tools detected!");
-            const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
-            const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
-            console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
-            ServerSocket.off("ChatRoomMessage");
-            ServerSocket.on("ChatRoomMessage", data => {
-                if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
-                    ChatRoomMessageForwarder(data);
-                }
-                return ChatRoomMessage(data);
-            });
-            ServerSocket.off("AccountBeep");
-            ServerSocket.on("AccountBeep", data => {
-                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
-                    AccountBeepForwarder(data);
-                }
-                return ServerAccountBeep(data);
-            });
-        }
-        //#endregion
-        window.BCX_Loaded = true;
-        InfoBeep(`BCX loaded! Version: ${VERSION}`);
-    }
-    function unload() {
-        const { BondageClubTools } = detectOtherMods();
-        if (BondageClubTools) {
-            throw new Error("BCX: Unload not supported when BondageClubTools are present");
-        }
-        unload_patches();
-        unload_modules();
-        delete window.BCX_Loaded;
-        console.log("BCX: Unloaded.");
-    }
-
     let allowMode = false;
     let developmentMode = false;
     let antigarble = 0;
@@ -863,6 +2369,12 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         Unload() {
             return unload();
         }
+        get storage() {
+            if (!developmentMode) {
+                return "Development mode required";
+            }
+            return modStorage;
+        }
     }
     const consoleInterface = Object.freeze(new ConsoleInterface());
     class ModuleConsole extends BaseModule {
@@ -880,8 +2392,9 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
                 "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
             });
             hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+                var _a;
                 if (developmentMode) {
-                    DialogTextDefault = args[0].FocusGroup.Description;
+                    DialogTextDefault = ((_a = args[0].FocusGroup) === null || _a === void 0 ? void 0 : _a.Description) || "";
                 }
                 return next(args);
             });
@@ -1150,10 +2663,12 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
                 return next(args);
             });
             hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+                var _a;
                 const chat = document.getElementById("InputChat");
                 // Tab for command completion
                 if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..")) {
-                    event === null || event === void 0 ? void 0 : event.preventDefault();
+                    const e = (_a = args[0]) !== null && _a !== void 0 ? _a : event;
+                    e === null || e === void 0 ? void 0 : e.preventDefault();
                     chat.value = "." + CommandAutocomplete(chat.value.substr(1));
                 }
                 else {
@@ -1204,125 +2719,6 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         }
     }
 
-    function InfoBeep(msg) {
-        console.log(`BCX msg: ${msg}`);
-        ServerBeep = {
-            Timer: CurrentTime + 3000,
-            Message: msg
-        };
-    }
-    function ChatRoomActionMessage(msg) {
-        if (!msg)
-            return;
-        ServerSend("ChatRoomChat", {
-            Content: "Beep",
-            Type: "Action",
-            Dictionary: [
-                { Tag: "Beep", Text: "msg" },
-                { Tag: "Biep", Text: "msg" },
-                { Tag: "Sonner", Text: "msg" },
-                { Tag: "msg", Text: msg }
-            ]
-        });
-    }
-    function ChatRoomSendLocal(msg, timeout, sender) {
-        var _a, _b;
-        // Adds the message and scrolls down unless the user has scrolled up
-        const div = document.createElement("div");
-        div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
-        div.setAttribute("data-time", ChatRoomCurrentTime());
-        div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
-        if (typeof msg === 'string')
-            div.innerText = msg;
-        else
-            div.appendChild(msg);
-        if (timeout)
-            setTimeout(() => div.remove(), timeout);
-        // Returns the focus on the chat box
-        const Refocus = ((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.id) === "InputChat";
-        const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
-        const ChatLog = document.getElementById("TextAreaChatLog");
-        if (ChatLog != null) {
-            ChatLog.appendChild(div);
-            if (ShouldScrollDown)
-                ElementScrollToEnd("TextAreaChatLog");
-            if (Refocus)
-                ElementFocus("InputChat");
-        }
-    }
-    function detectOtherMods() {
-        const w = window;
-        return {
-            NMod: typeof w.ChatRoomDrawFriendList === "function",
-            BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
-        };
-    }
-    /**
-     * Draws an image on canvas, applying all options
-     * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
-     * @param {number} X - Position of the image on the X axis
-     * @param {number} Y - Position of the image on the Y axis
-     * @param {object} [options] - any extra options, optional
-     * @param {CanvasRenderingContext2D} [options.Canvas] - Canvas on which to draw the image, defaults to `MainCanvas`
-     * @param {number} [options.Alpha] - transparency between 0-1
-     * @param {[number, number, number, number]} [options.SourcePos] - Area in original image to draw in format `[left, top, width, height]`
-     * @param {number} [options.Width] - Width of the drawn image, defaults to width of original image
-     * @param {number} [options.Height] - Height of the drawn image, defaults to height of original image
-     * @param {boolean} [options.Invert=false] - If image should be flipped vertically
-     * @param {boolean} [options.Mirror=false] - If image should be flipped horizontally
-     * @param {number} [options.Zoom=1] - Zoom factor
-     * @returns {boolean} - whether the image was complete or not
-     */
-    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 }) {
-        if (typeof Source === "string") {
-            Source = DrawGetImage(Source);
-            if (!Source.complete)
-                return false;
-            if (!Source.naturalWidth)
-                return true;
-        }
-        const sizeChanged = Width != null || Height != null;
-        if (Width == null) {
-            Width = SourcePos ? SourcePos[2] : Source.width;
-        }
-        if (Height == null) {
-            Height = SourcePos ? SourcePos[3] : Source.height;
-        }
-        Canvas.save();
-        Canvas.globalCompositeOperation = "source-over";
-        Canvas.globalAlpha = Alpha;
-        Canvas.translate(X, Y);
-        if (Zoom !== 1) {
-            Canvas.scale(Zoom, Zoom);
-        }
-        if (Invert) {
-            Canvas.transform(1, 0, 0, -1, 0, Height);
-        }
-        if (Mirror) {
-            Canvas.transform(-1, 0, 0, 1, Width, 0);
-        }
-        if (SourcePos) {
-            Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
-        }
-        else if (sizeChanged) {
-            Canvas.drawImage(Source, 0, 0, Width, Height);
-        }
-        else {
-            Canvas.drawImage(Source, 0, 0);
-        }
-        Canvas.restore();
-        return true;
-    }
-    function isCloth(item, allowCosplay = false) {
-        const asset = item.Asset ? item.Asset : item;
-        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
-    }
-    function isBind(item) {
-        const asset = item.Asset ? item.Asset : item;
-        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
-            return false;
-        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
-    }
     function InvisibilityEarbuds() {
         var _a;
         if (((_a = InventoryGet(Player, "ItemEars")) === null || _a === void 0 ? void 0 : _a.Asset.Name) === "BluetoothEarbuds") {
@@ -1430,10 +2826,1234 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         }
     }
 
+    class GuiSubscreen {
+        get active() {
+            return module_gui.currentSubscreen === this;
+        }
+        Load() {
+            // Empty
+        }
+        Run() {
+            // Empty
+        }
+        Click() {
+            // Empty
+        }
+        Exit() {
+            module_gui.currentSubscreen = null;
+        }
+        Unload() {
+            // Empty
+        }
+        onChange(source) {
+            // Empty
+        }
+    }
+
+    const PER_PAGE_COUNT$3 = 6;
+    class GuiAuthorityRoles extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.roleData = null;
+            this.roleList = [];
+            this.failed = false;
+            this.page = 0;
+            this.character = character;
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.roleData = null;
+            this.rebuildList();
+            Promise.all([this.character.getRolesData()]).then(res => {
+                this.roleData = res[0];
+                this.rebuildList();
+            }, err => {
+                console.error(`BCX: Failed to get role info for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        rebuildList() {
+            if (!this.active)
+                return;
+            this.roleList = [];
+            let Input = document.getElementById("BCX_RoleAdd");
+            if (!this.roleData) {
+                if (Input) {
+                    Input.remove();
+                }
+                return;
+            }
+            const showInput = this.roleData.allowAddMistress || this.roleData.allowAddOwner;
+            if (!showInput && Input) {
+                Input.remove();
+            }
+            else if (showInput && !Input) {
+                Input = ElementCreateInput("BCX_RoleAdd", "text", "", "6");
+            }
+            this.roleList = this.roleData.owners.map((i) => {
+                var _a;
+                return ({
+                    type: "Owner",
+                    memberNumber: i[0],
+                    name: ((_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(i[0])) || i[1] || null
+                });
+            });
+            this.roleList.push(...this.roleData.mistresses.map((i) => {
+                var _a;
+                return ({
+                    type: "Mistress",
+                    memberNumber: i[0],
+                    name: ((_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(i[0])) || i[1] || null
+                });
+            }));
+            const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
+            }
+        }
+        Run() {
+            DrawText("Hierarchy of roles:", 1336, 95, "Black");
+            // hierarchy background
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(1450, 134);
+            MainCanvas.lineTo(1450 + 150, 134);
+            MainCanvas.lineTo(1450 + 80, 740);
+            MainCanvas.lineTo(1450 + 70, 740);
+            MainCanvas.lineTo(1450, 134);
+            MainCanvas.fillStyle = "Black";
+            MainCanvas.fill();
+            // hierarchy roles
+            MainCanvas.textAlign = "center";
+            DrawButton(1420, 130, 208, 54, this.character.Name, "White");
+            for (let i = 1; i < 8; i++) {
+                DrawButton(1430, 130 + 80 * i, 188, 54, capitalizeFirstLetter(AccessLevel[i]), "White");
+            }
+            MainCanvas.textAlign = "left";
+            if (this.roleData) {
+                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
+                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                    if (i >= this.roleList.length)
+                        break;
+                    const e = this.roleList[i];
+                    const Y = 210 + off * 95;
+                    // Owner/Mistress list
+                    MainCanvas.beginPath();
+                    MainCanvas.rect(130, Y, 900, 64);
+                    MainCanvas.stroke();
+                    const msg = `${e.type} ${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
+                    DrawTextFit(msg, 140, Y + 34, 590, "Black");
+                    if ((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) {
+                        MainCanvas.textAlign = "center";
+                        DrawButton(1090, Y, 64, 64, "X", "White");
+                        MainCanvas.textAlign = "left";
+                    }
+                }
+                const Input = document.getElementById("BCX_RoleAdd");
+                if (Input) {
+                    DrawText("Member Number:", 130, 847, "Black");
+                    ElementPosition("BCX_RoleAdd", 580, 842, 300, 64);
+                }
+                MainCanvas.textAlign = "center";
+                if (this.roleData.allowAddOwner) {
+                    DrawButton(760, 815, 210, 64, "Add owner", "white");
+                }
+                if (this.roleData.allowAddMistress) {
+                    DrawButton(1008, 815, 210, 64, "Add mistress", "white");
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+                DrawBackNextButton(1317, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+            }
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get role data from ${this.character.Name}. Maybe you have no access?`, 800, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 800, 480, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
+        }
+        Click() {
+            var _a;
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (MouseIn(1815, 190, 90, 90))
+                return this.Back();
+            if (this.roleData) {
+                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
+                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                    if (i >= this.roleList.length)
+                        break;
+                    const e = this.roleList[i];
+                    const Y = 210 + off * 95;
+                    if (((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) && MouseIn(1090, Y, 64, 64)) {
+                        this.character.editRole(e.type === "Owner" ? "owner" : "mistress", "remove", e.memberNumber);
+                        return;
+                    }
+                }
+                const Input = document.getElementById("BCX_RoleAdd");
+                const inputText = (_a = Input === null || Input === void 0 ? void 0 : Input.value) !== null && _a !== void 0 ? _a : "";
+                const inputNumber = /^[0-9]+$/.test(inputText) ? Number.parseInt(inputText, 10) : null;
+                if (this.roleData.allowAddOwner && Input && inputNumber !== null && MouseIn(760, 815, 210, 64)) {
+                    Input.value = "";
+                    this.character.editRole("owner", "add", inputNumber);
+                    return;
+                }
+                if (this.roleData.allowAddMistress && Input && inputNumber !== null && MouseIn(1008, 815, 210, 64)) {
+                    Input.value = "";
+                    this.character.editRole("mistress", "add", inputNumber);
+                    return;
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+                if (MouseIn(1317, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = Math.max(totalPages - 1, 0);
+                    }
+                }
+                else if (MouseIn(1467, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Back() {
+            module_gui.currentSubscreen = new GuiAuthorityPermissions(this.character);
+        }
+        Unload() {
+            ElementRemove("BCX_RoleAdd");
+        }
+    }
+
+    class GuiAuthorityDialogMin extends GuiSubscreen {
+        constructor(character, permission, data, myAccesLevel, noAccess, back) {
+            super();
+            this.character = character;
+            this.permission = permission;
+            this.permissionData = data;
+            this.back = back;
+            this.myAccessLevel = myAccesLevel;
+            this.noAccess = noAccess;
+            this.selectedLevel = data.min;
+        }
+        Run() {
+            DrawTextFit(`- Authority: Changing minimum access to permission "${this.permissionData.name}" -`, 125, 125, 1850, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawText("Please select the new lowest role that should still have this permission.", 1000, 255, "Black");
+            DrawTextFit(`Info: Currently set role: ${this.permissionData.min === AccessLevel.self ?
+            this.character.Name : capitalizeFirstLetter(AccessLevel[this.permissionData.min])} → ` +
+                `Newly selected role: ${this.selectedLevel === AccessLevel.self ?
+                this.character.Name : capitalizeFirstLetter(AccessLevel[this.selectedLevel])}`, 1000, 320, 1850, "Black");
+            DrawText("All roles to the left of the selected one will also automatically get access.", 1000, 385, "Black");
+            if (this.myAccessLevel === AccessLevel.self) {
+                const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
+                DrawButton(1000 - 110, 460, 220, 72, getPermissionMinDisplayText(AccessLevel.self, this.character), this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+            }
+            for (let i = 1; i < 8; i++) {
+                const current = this.selectedLevel === i;
+                const available = (this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
+                    !this.noAccess && this.myAccessLevel <= i;
+                DrawButton(-15 + 230 * i, 577, 190, 72, getPermissionMinDisplayText(i, this.character), current ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+                if (i < 7)
+                    DrawText(">", 196 + 230 * i, 577 + 36, "Black");
+            }
+            if (this.character.isPlayer() && this.permission === "authority_revoke_self" && this.selectedLevel !== AccessLevel.self) {
+                DrawText(`WARNING: If you confirm, all permitted roles can remove your access to this and all other permissions!`, 1000, 730, "Red", "Gray");
+            }
+            DrawButton(700, 800, 200, 80, "Confirm", "White");
+            DrawButton(1120, 800, 200, 80, "Cancel", "White");
+        }
+        Click() {
+            if (MouseIn(700, 800, 200, 80))
+                return this.Confirm();
+            if (MouseIn(1120, 800, 200, 80))
+                return this.Exit();
+            if (MouseIn(1000 - 110, 460, 220, 72) && this.myAccessLevel === AccessLevel.self) {
+                const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
+                if (available) {
+                    this.selectedLevel = AccessLevel.self;
+                }
+            }
+            for (let i = 1; i < 8; i++) {
+                const current = this.selectedLevel === i;
+                const available = (this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
+                    !this.noAccess && this.myAccessLevel <= i;
+                if (MouseIn(-15 + 230 * i, 577, 190, 72) && !current && available) {
+                    this.selectedLevel = i;
+                }
+            }
+        }
+        Confirm() {
+            this.character.setPermission(this.permission, "min", this.selectedLevel);
+        }
+        Exit() {
+            module_gui.currentSubscreen = this.back;
+        }
+        onChange() {
+            // When something changes, we bail from change dialog, because it might no longer be valid
+            this.Exit();
+        }
+    }
+
+    class GuiAuthorityDialogSelf extends GuiSubscreen {
+        constructor(character, permission, data, back) {
+            super();
+            this.character = character;
+            this.permission = permission;
+            this.permissionData = data;
+            this.back = back;
+        }
+        Run() {
+            DrawTextFit(`- Authority: Removing self access to permission "${this.permissionData.name}" -`, 125, 125, 1850, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawText("- Warning -", 1000, 375, "Black", "Black");
+            DrawText("If you confirm, you won't be able to change your access to this permission back yourself.", 1000, 525, "Black");
+            DrawButton(700, 720, 200, 80, "Confirm", "White");
+            DrawButton(1120, 720, 200, 80, "Cancel", "White");
+        }
+        Click() {
+            if (MouseIn(700, 720, 200, 80))
+                return this.Confirm();
+            if (MouseIn(1120, 720, 200, 80))
+                return this.Exit();
+        }
+        Confirm() {
+            this.character.setPermission(this.permission, "self", false);
+        }
+        Exit() {
+            module_gui.currentSubscreen = this.back;
+        }
+        onChange() {
+            // When something changes, we bail from change dialog, because it might no longer be valid
+            this.Exit();
+        }
+    }
+
+    const PER_PAGE_COUNT$2 = 6;
+    class GuiAuthorityPermissions extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.permissionData = null;
+            this.myAccessLevel = AccessLevel.public;
+            this.failed = false;
+            this.permList = [];
+            this.page = 0;
+            this.character = character;
+            if (this.character.isPlayer()) {
+                this.myAccessLevel = AccessLevel.self;
+            }
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.permissionData = null;
+            this.rebuildList();
+            Promise.all([this.character.getPermissions(), this.character.getMyAccessLevel()]).then(res => {
+                this.permissionData = res[0];
+                this.myAccessLevel = res[1];
+                this.rebuildList();
+            }, err => {
+                console.error(`BCX: Failed to get permission info for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        rebuildList() {
+            if (!this.active)
+                return;
+            const categories = new Map();
+            this.permList = [];
+            let Input = document.getElementById("BCX_PermissionsFilter");
+            if (this.permissionData === null) {
+                if (Input) {
+                    Input.remove();
+                }
+                return;
+            }
+            if (!Input) {
+                Input = ElementCreateInput("BCX_PermissionsFilter", "text", "", "30");
+                Input.addEventListener("input", ev => {
+                    this.rebuildList();
+                });
+            }
+            const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+            const access_grantSelf = this.permissionData.authority_grant_self ?
+                checkPermisionAccesData(this.permissionData.authority_grant_self, this.myAccessLevel) :
+                false;
+            const access_revokeSelf = this.permissionData.authority_revoke_self ?
+                checkPermisionAccesData(this.permissionData.authority_revoke_self, this.myAccessLevel) :
+                false;
+            const access_editMin = this.permissionData.authority_edit_min ?
+                checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+                false;
+            const isPlayer = this.myAccessLevel === AccessLevel.self;
+            for (const [k, v] of Object.entries(this.permissionData)) {
+                let permdata = categories.get(v.category);
+                if (filter.some(i => !MODULE_NAMES[v.category].toLocaleLowerCase().includes(i) &&
+                    !v.name.toLocaleLowerCase().includes(i) &&
+                    !k.toLocaleLowerCase().includes(i)))
+                    continue;
+                if (!permdata) {
+                    categories.set(v.category, permdata = {});
+                }
+                permdata[k] = v;
+            }
+            for (const [category, data] of Array.from(categories.entries()).sort((a, b) => a[0] - b[0])) {
+                this.permList.push({
+                    separator: true,
+                    name: MODULE_NAMES[category]
+                });
+                for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+                    const access = checkPermisionAccesData(v, this.myAccessLevel);
+                    this.permList.push({
+                        separator: false,
+                        permission: k,
+                        permissionInfo: v,
+                        editSelf: 
+                        // character must have access to "allow granting/forbidding self access"
+                        (v.self ? access_revokeSelf : access_grantSelf) &&
+                            // Not player must have access to target rule
+                            (isPlayer || access) &&
+                            // "minimal access" set to "Self" forces "self access" to "Yes"
+                            (!v.self || v.min !== AccessLevel.self),
+                        editMin: 
+                        // Exception: Player can always lower permissions "Self"->"Owner"
+                        (isPlayer && v.min < AccessLevel.owner) ||
+                            // Character must have access to "allow minimal access modification" &&
+                            // Character must have access to target rule
+                            (access_editMin && access)
+                    });
+                }
+            }
+            const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$2);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
+            }
+        }
+        Run() {
+            var _a;
+            if (this.permissionData !== null) {
+                DrawTextFit(this.character.Name, 1111, 190, 189, "Black");
+                DrawText("is permitted", 1111, 235, "Black");
+                DrawText("Lowest permitted role", 1370, 235, "Black");
+                MainCanvas.beginPath();
+                MainCanvas.moveTo(1335, 230);
+                MainCanvas.lineTo(1335, 230 + 610);
+                MainCanvas.stroke();
+                // filter
+                DrawText("Filter:", 130, 215, "Black");
+                ElementPosition("BCX_PermissionsFilter", 550, 210, 600, 64);
+                //reset button
+                if ((_a = document.getElementById("BCX_PermissionsFilter")) === null || _a === void 0 ? void 0 : _a.value) {
+                    MainCanvas.textAlign = "center";
+                    DrawButton(870, 182, 64, 64, "X", "White");
+                }
+                MainCanvas.textAlign = "left";
+                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
+                    const i = this.page * PER_PAGE_COUNT$2 + off;
+                    if (i >= this.permList.length)
+                        break;
+                    const e = this.permList[i];
+                    const Y = 275 + off * 100;
+                    if (e.separator) {
+                        // idea to highlight the section separator
+                        MainCanvas.beginPath();
+                        MainCanvas.rect(125, Y, 1173, 64);
+                        MainCanvas.fillStyle = "#eeeeee";
+                        MainCanvas.fill();
+                        DrawText(`${e.name} module permissions`, 140, Y + 34, "Black");
+                    }
+                    else {
+                        DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
+                            Height: 64,
+                            Width: 64
+                        });
+                        // Permission name
+                        DrawButton(200, Y, 1000, 64, "", "White");
+                        DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
+                        // Self checkbox
+                        DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#eee", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
+                        // Min access
+                        MainCanvas.textAlign = "center";
+                        DrawButton(1370, Y, 170, 64, getPermissionMinDisplayText(e.permissionInfo.min, this.character), e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
+                        MainCanvas.textAlign = "left";
+                    }
+                }
+                // Pagination
+                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT$2));
+                MainCanvas.textAlign = "center";
+                DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+            }
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get permission data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 1000, 480, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList, "Role management");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            // Owner list
+            if (MouseIn(1815, 190, 90, 90))
+                return module_gui.currentSubscreen = new GuiAuthorityRoles(this.character);
+            if (this.permissionData !== null) {
+                //reset button
+                const elem = document.getElementById("BCX_PermissionsFilter");
+                if (MouseIn(870, 182, 64, 64) && elem) {
+                    elem.value = "";
+                    this.rebuildList();
+                }
+                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
+                    const i = this.page * PER_PAGE_COUNT$2 + off;
+                    if (i >= this.permList.length)
+                        break;
+                    const e = this.permList[i];
+                    const Y = 275 + off * 100;
+                    if (!e.separator) {
+                        // Permission name
+                        if (MouseIn(200, Y, 1000, 64)) {
+                            // TODO
+                        }
+                        // Self checkbox
+                        if (MouseIn(1235, Y, 64, 64) && e.editSelf) {
+                            if (e.permissionInfo.self &&
+                                this.character.isPlayer() &&
+                                (e.permission === "authority_grant_self" ||
+                                    !checkPermissionAccess("authority_grant_self", getPlayerCharacter()))) {
+                                // If Player couldn't switch back on, show warning instead
+                                module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+                            }
+                            else {
+                                this.character.setPermission(e.permission, "self", !e.permissionInfo.self);
+                            }
+                            return;
+                        }
+                        // Min access
+                        if (MouseIn(1370, Y, 170, 64) && e.editMin) {
+                            const access_editMin = this.permissionData.authority_edit_min ?
+                                checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+                                false;
+                            module_gui.currentSubscreen = new GuiAuthorityDialogMin(this.character, e.permission, e.permissionInfo, this.myAccessLevel, !access_editMin || !checkPermisionAccesData(e.permissionInfo, this.myAccessLevel), this);
+                            return;
+                        }
+                    }
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$2);
+                if (MouseIn(1605, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = Math.max(totalPages - 1, 0);
+                    }
+                }
+                else if (MouseIn(1755, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Unload() {
+            ElementRemove("BCX_PermissionsFilter");
+        }
+    }
+
+    class GuiGlobalDialogClearData extends GuiSubscreen {
+        constructor(back) {
+            super();
+            this.allowedConfirmTime = 0;
+            this.back = back;
+        }
+        Load() {
+            this.allowedConfirmTime = Date.now() + 10000;
+        }
+        Run() {
+            MainCanvas.textAlign = "center";
+            DrawText(`- Permanent deletion of ALL Bondage Club Extended data -`, 1000, 125, "Black");
+            DrawText("- Warning -", 1000, 225, "Black", "Black");
+            DrawText("If you confirm, all BCX data (including settings, curses, logs, ...) will be permanently deleted!", 1000, 325, "Black");
+            DrawText("As part of the deletion process, the window will reload, logging you out of your account.", 1000, 500, "Gray");
+            DrawText("You will be able to use BCX again, but none of your current data will be coming back!", 1000, 550, "Gray");
+            DrawText("This action cannot be undone!", 1000, 625, "Red", "Black");
+            if (this.allowedConfirmTime === null) {
+                DrawText("Deleting...", 1000, 720, "Black");
+                return;
+            }
+            const now = Date.now();
+            if (now < this.allowedConfirmTime) {
+                DrawButton(300, 720, 200, 80, `Confirm (${Math.floor((this.allowedConfirmTime - now) / 1000)})`, "Gray", undefined, undefined, true);
+            }
+            else {
+                DrawButton(300, 720, 200, 80, "Confirm", "White");
+            }
+            DrawButton(1520, 720, 200, 80, "Cancel", "White");
+        }
+        Click() {
+            if (this.allowedConfirmTime === null)
+                return;
+            if (MouseIn(1520, 720, 200, 80))
+                return this.Exit();
+            if (MouseIn(300, 720, 200, 80) && Date.now() >= this.allowedConfirmTime)
+                return this.Confirm();
+        }
+        Confirm() {
+            this.allowedConfirmTime = null;
+            clearAllData();
+        }
+        Exit() {
+            if (this.allowedConfirmTime === null)
+                return;
+            module_gui.currentSubscreen = this.back;
+        }
+    }
+
+    class GuiGlobal extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
+        Run() {
+            MainCanvas.textAlign = "left";
+            DrawText(`- Global: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            if (!this.character.isPlayer()) {
+                DrawText(`Global configuration is not possible on others`, 1000, 500, "Black");
+                return;
+            }
+            DrawButton(1605, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (!this.character.isPlayer())
+                return;
+            if (MouseIn(1605, 800, 300, 90)) {
+                module_gui.currentSubscreen = new GuiGlobalDialogClearData(this);
+                return;
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+    }
+
+    const PER_PAGE_COUNT$1 = 6;
+    class GuiLogConfig extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.config = null;
+            this.failed = false;
+            this.configList = [];
+            this.allowDelete = false;
+            this.page = 0;
+            this.character = character;
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.config = null;
+            this.rebuildList();
+            Promise.all([
+                this.character.getLogConfig(),
+                this.character.getPermissionAccess("log_delete")
+            ]).then(res => {
+                this.config = res[0];
+                this.allowDelete = res[1];
+                this.rebuildList();
+            }, err => {
+                console.error(`BCX: Failed to get log config for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        rebuildList() {
+            if (!this.active)
+                return;
+            this.configList = [];
+            let Input = document.getElementById("BCX_LogConfigFilter");
+            if (this.config === null) {
+                if (Input) {
+                    Input.remove();
+                }
+                return;
+            }
+            if (!Input) {
+                Input = ElementCreateInput("BCX_LogConfigFilter", "text", "", "30");
+                Input.addEventListener("input", ev => {
+                    this.rebuildList();
+                });
+            }
+            const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+            for (const [k, v] of Object.entries(this.config)) {
+                if (LOG_CONFIG_NAMES[k] !== undefined &&
+                    LOG_LEVEL_NAMES[v] !== undefined &&
+                    filter.every(i => LOG_CONFIG_NAMES[k].toLocaleLowerCase().includes(i) ||
+                        k.toLocaleLowerCase().includes(i))) {
+                    this.configList.push({
+                        category: k,
+                        access: v,
+                        name: LOG_CONFIG_NAMES[k]
+                    });
+                }
+            }
+            this.configList.sort((a, b) => a.name.localeCompare(b.name));
+            const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$1);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
+            }
+        }
+        Run() {
+            var _a;
+            if (this.config !== null) {
+                // filter
+                DrawText("Filter:", 130, 215, "Black");
+                ElementPosition("BCX_LogConfigFilter", 550, 210, 600, 64);
+                //reset button
+                if ((_a = document.getElementById("BCX_LogConfigFilter")) === null || _a === void 0 ? void 0 : _a.value) {
+                    MainCanvas.textAlign = "center";
+                    DrawButton(870, 182, 64, 64, "X", "White");
+                }
+                MainCanvas.textAlign = "left";
+                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
+                    const i = this.page * PER_PAGE_COUNT$1 + off;
+                    if (i >= this.configList.length)
+                        break;
+                    const e = this.configList[i];
+                    const Y = 290 + off * 100;
+                    // Config name
+                    DrawButton(130, Y, 1070, 64, "", "White");
+                    DrawTextFit(e.name, 140, Y + 34, 1060, "Black");
+                    // Config access
+                    MainCanvas.textAlign = "center";
+                    DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access + 1)] : ""));
+                    MainCanvas.textAlign = "left";
+                }
+                // Pagination
+                const totalPages = Math.max(1, Math.ceil(this.configList.length / PER_PAGE_COUNT$1));
+                MainCanvas.textAlign = "center";
+                DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+            }
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get log config data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 1000, 480, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Behaviour Log: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            if (this.allowDelete) {
+                DrawButton(1525, 690, 380, 64, "Delete all log entries", "White");
+            }
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (MouseIn(1815, 190, 90, 90))
+                return module_gui.currentSubscreen = new GuiLog(this.character);
+            if (this.config !== null) {
+                //reset button
+                const elem = document.getElementById("BCX_LogConfigFilter");
+                if (MouseIn(870, 182, 64, 64) && elem) {
+                    elem.value = "";
+                    this.rebuildList();
+                }
+                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
+                    const i = this.page * PER_PAGE_COUNT$1 + off;
+                    if (i >= this.configList.length)
+                        break;
+                    const e = this.configList[i];
+                    const Y = 290 + off * 100;
+                    if (e.access > 0 && MouseIn(1270, Y, 85, 64)) {
+                        this.character.setLogConfig(e.category, (e.access - 1));
+                        return;
+                    }
+                    else if (e.access < 2 && MouseIn(1355, Y, 85, 64)) {
+                        this.character.setLogConfig(e.category, (e.access + 1));
+                        return;
+                    }
+                }
+                // Clear log button
+                if (MouseIn(1525, 690, 380, 64) && this.allowDelete) {
+                    this.character.logClear().then(() => {
+                        module_gui.currentSubscreen = new GuiLog(this.character);
+                    });
+                    return;
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$1);
+                if (MouseIn(1605, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = Math.max(totalPages - 1, 0);
+                    }
+                }
+                else if (MouseIn(1755, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Unload() {
+            ElementRemove("BCX_LogConfigFilter");
+        }
+    }
+
+    const PER_PAGE_COUNT = 5;
+    class GuiLog extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.failed = false;
+            this.logData = null;
+            this.logEntries = [];
+            this.allowDeletion = false;
+            this.allowConfiguration = false;
+            this.allowPraise = false;
+            this.allowLeaveMessage = false;
+            this.page = 0;
+            this.character = character;
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.logData = null;
+            this.refreshScreen();
+            Promise.all([
+                this.character.getLogEntries(),
+                this.character.logGetAllowedActions()
+            ]).then(res => {
+                this.logData = res[0];
+                this.allowDeletion = res[1].delete;
+                this.allowConfiguration = res[1].configure;
+                this.allowPraise = res[1].praise;
+                this.allowLeaveMessage = res[1].leaveMessage;
+                this.refreshScreen();
+            }, err => {
+                console.error(`BCX: Failed to get log data for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        refreshScreen() {
+            if (!this.active)
+                return;
+            this.logEntries = [];
+            let LogFilter = document.getElementById("BCX_LogFilter");
+            let NoteField = document.getElementById("BCX_NoteField");
+            if (this.logData === null) {
+                if (LogFilter) {
+                    LogFilter.remove();
+                }
+                if (NoteField) {
+                    NoteField.remove();
+                }
+                return;
+            }
+            if (!LogFilter) {
+                LogFilter = ElementCreateInput("BCX_LogFilter", "text", "", "30");
+                LogFilter.addEventListener("input", ev => {
+                    this.refreshScreen();
+                });
+            }
+            if (!this.allowLeaveMessage && NoteField) {
+                NoteField.remove();
+            }
+            else if (this.allowLeaveMessage && !NoteField) {
+                NoteField = ElementCreateInput("BCX_NoteField", "text", "", "30");
+            }
+            const filter = LogFilter.value.trim().toLocaleLowerCase().split(" ");
+            this.logEntries = this.logData.filter(e => {
+                const msg = logMessageRender(e).toLocaleLowerCase();
+                return filter.every(f => msg.includes(f));
+            });
+            const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
+            }
+        }
+        Run() {
+            var _a;
+            if (this.logData !== null) {
+                // filter
+                DrawText("Filter:", 130, 215, "Black");
+                ElementPosition("BCX_LogFilter", 550, 210, 600, 64);
+                //reset button
+                if ((_a = document.getElementById("BCX_LogFilter")) === null || _a === void 0 ? void 0 : _a.value) {
+                    MainCanvas.textAlign = "center";
+                    DrawButton(870, 182, 64, 64, "X", "White");
+                }
+                for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                    const i = this.page * PER_PAGE_COUNT + off;
+                    if (i >= this.logEntries.length)
+                        break;
+                    const e = this.logEntries[i];
+                    const Y = 290 + off * 95;
+                    // Log message
+                    MainCanvas.textAlign = "left";
+                    DrawButton(130, Y, 1100, 64, "", "White");
+                    const msg = logMessageRender(e);
+                    DrawTextFit(msg, 140, Y + 34, 1090, msg.startsWith("[") ? "Gray" : "Black");
+                    MainCanvas.beginPath();
+                    MainCanvas.rect(1270, Y, 320, 64);
+                    MainCanvas.stroke();
+                    DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Gray", "Black");
+                    if (this.allowDeletion) {
+                        MainCanvas.textAlign = "center";
+                        DrawButton(1630, Y, 64, 64, "X", "White");
+                    }
+                }
+                // Message field
+                if (this.allowLeaveMessage) {
+                    MainCanvas.textAlign = "left";
+                    DrawText("Attach", 130, 831, "Black");
+                    DrawText("note:", 130, 869, "Black");
+                    ElementPosition("BCX_NoteField", 580, 842, 660, 64);
+                }
+                MainCanvas.textAlign = "center";
+                // Praise button
+                if (this.allowPraise) {
+                    DrawButton(950, 815, 150, 64, "Praise", "White");
+                }
+                // Leave message button
+                if (this.allowLeaveMessage) {
+                    DrawButton(1150, 815, 200, 64, "Only note", "White");
+                }
+                // Scold button
+                if (this.allowPraise) {
+                    DrawButton(1400, 815, 150, 64, "Scold", "White");
+                }
+                // Pagination
+                const totalPages = Math.max(1, Math.ceil(this.logEntries.length / PER_PAGE_COUNT));
+                DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+            }
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get log data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 1000, 480, "Black");
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Behaviour Log: About ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", this.allowConfiguration ? "White" : "#eee", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (MouseIn(1815, 190, 90, 90) && this.allowConfiguration)
+                return module_gui.currentSubscreen = new GuiLogConfig(this.character);
+            if (this.logData !== null) {
+                //reset button
+                const elem = document.getElementById("BCX_LogFilter");
+                if (MouseIn(870, 182, 64, 64) && elem) {
+                    elem.value = "";
+                    this.refreshScreen();
+                }
+                for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                    const i = this.page * PER_PAGE_COUNT + off;
+                    if (i >= this.logEntries.length)
+                        break;
+                    const e = this.logEntries[i];
+                    const Y = 290 + off * 95;
+                    if (this.allowDeletion && MouseIn(1630, Y, 64, 64)) {
+                        this.character.logMessageDelete(e[0]);
+                        return;
+                    }
+                }
+                const field = document.getElementById("BCX_NoteField");
+                const msg = (field === null || field === void 0 ? void 0 : field.value) || null;
+                let didPraise = false;
+                // Praise button
+                if (this.allowPraise && MouseIn(950, 815, 150, 64)) {
+                    this.character.logPraise(1, msg);
+                    didPraise = true;
+                }
+                // Leave message button
+                if (this.allowLeaveMessage && MouseIn(1150, 815, 200, 64) && msg) {
+                    this.character.logPraise(0, msg);
+                    didPraise = true;
+                }
+                // Scold button
+                if (this.allowPraise && MouseIn(1400, 815, 150, 64)) {
+                    this.character.logPraise(-1, msg);
+                    didPraise = true;
+                }
+                if (didPraise) {
+                    this.allowPraise = false;
+                    if (field) {
+                        field.value = "";
+                    }
+                    return;
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+                if (MouseIn(1605, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = Math.max(totalPages - 1, 0);
+                    }
+                }
+                else if (MouseIn(1755, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Unload() {
+            ElementRemove("BCX_LogFilter");
+            ElementRemove("BCX_NoteField");
+        }
+    }
+
+    class GuiMisc extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
+        Run() {
+            MainCanvas.textAlign = "left";
+            DrawText(`- Miscellaneous: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            if (!this.character.isPlayer()) {
+                DrawText(`Miscellaneous module configuration is not possible on others`, 1000, 500, "Black");
+                return;
+            }
+            MainCanvas.textAlign = "left";
+            DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (!this.character.isPlayer())
+                return;
+            if (MouseIn(125, 200, 64, 64)) {
+                modStorage.typingIndicatorEnable = !modStorage.typingIndicatorEnable;
+                modStorageSync();
+            }
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+    }
+
+    const MAIN_MENU_ITEMS = [
+        {
+            module: ModuleCategory.Basic,
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiGlobal(C);
+            }
+        },
+        {
+            module: ModuleCategory.Authority,
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiAuthorityPermissions(C);
+            }
+        },
+        {
+            module: ModuleCategory.Log,
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiLog(C);
+            }
+        },
+        {
+            module: ModuleCategory.Misc,
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiMisc(C);
+            }
+        }
+    ];
+    class GuiMainMenu extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
+        Run() {
+            DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+            for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
+                const e = MAIN_MENU_ITEMS[i];
+                const PX = Math.floor(i / 7);
+                const PY = i % 7;
+                DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", "White", MODULE_ICONS[e.module]);
+                DrawTextFit(MODULE_NAMES[e.module], 250 + 420 * PX, 205 + 110 * PY, 310, "Black");
+            }
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
+                const e = MAIN_MENU_ITEMS[i];
+                const PX = Math.floor(i / 7);
+                const PY = i % 7;
+                if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90)) {
+                    return e.onclick(this.character);
+                }
+            }
+        }
+    }
+
+    class ModuleGUI extends BaseModule {
+        constructor() {
+            super(...arguments);
+            this._currentSubscreen = null;
+        }
+        get currentSubscreen() {
+            return this._currentSubscreen;
+        }
+        set currentSubscreen(subscreen) {
+            if (this._currentSubscreen) {
+                this._currentSubscreen.Unload();
+            }
+            this._currentSubscreen = subscreen;
+            if (this._currentSubscreen) {
+                this._currentSubscreen.Load();
+            }
+        }
+        getInformationSheetCharacter() {
+            const C = InformationSheetSelection;
+            if (!C || typeof C.MemberNumber !== "number")
+                return null;
+            return getChatroomCharacter(C.MemberNumber);
+        }
+        init() {
+            changeHandlers.push(source => {
+                if (this._currentSubscreen) {
+                    this._currentSubscreen.onChange(source);
+                }
+            });
+        }
+        load() {
+            patchFunction("InformationSheetRun", {
+                'DrawButton(1815, 765, 90, 90,': 'DrawButton(1815, 800, 90, 90,'
+            });
+            patchFunction("InformationSheetClick", {
+                'MouseIn(1815, 765, 90, 90)': 'MouseIn(1815, 800, 90, 90)'
+            });
+            hookFunction("InformationSheetRun", 10, (args, next) => {
+                if (this._currentSubscreen) {
+                    MainCanvas.textAlign = "left";
+                    this._currentSubscreen.Run();
+                    MainCanvas.textAlign = "center";
+                    return;
+                }
+                next(args);
+                const C = this.getInformationSheetCharacter();
+                if (C && C.BCXVersion !== null) {
+                    DrawButton(1815, 685, 90, 90, "", "White", icon_BCX, "BCX");
+                }
+            });
+            hookFunction("InformationSheetClick", 10, (args, next) => {
+                if (this._currentSubscreen) {
+                    return this._currentSubscreen.Click();
+                }
+                const C = this.getInformationSheetCharacter();
+                if (C && C.BCXVersion !== null && MouseIn(1815, 685, 90, 90)) {
+                    this.currentSubscreen = new GuiMainMenu(C);
+                }
+                else {
+                    return next(args);
+                }
+            });
+            hookFunction("InformationSheetExit", 10, (args, next) => {
+                if (this._currentSubscreen) {
+                    return this._currentSubscreen.Exit();
+                }
+                return next(args);
+            });
+        }
+        unload() {
+            this.currentSubscreen = null;
+        }
+    }
+
     class ModuleMiscPatches extends BaseModule {
         constructor() {
             super(...arguments);
             this.o_Player_CanChange = null;
+        }
+        init() {
+            registerPermission("misc_test", {
+                name: "Some permission to test things",
+                category: ModuleCategory.Misc,
+                min: AccessLevel.public,
+                self: false
+            });
         }
         load() {
             hookFunction("AsylumEntranceCanWander", 0, () => true);
@@ -1462,46 +4082,6 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
             if (this.o_Player_CanChange) {
                 Player.CanChange = this.o_Player_CanChange;
             }
-        }
-    }
-
-    let modStorage = {};
-    function modStorageSync() {
-        if (!Player.OnlineSettings) {
-            console.error("BCX: Player OnlineSettings not defined during storage sync!");
-            return;
-        }
-        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
-        if (typeof ServerAccountUpdate !== "undefined") {
-            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
-        }
-        else {
-            console.debug("BCX: Old sync method");
-            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-        }
-    }
-    class ModuleStorage extends BaseModule {
-        init() {
-            var _a;
-            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
-            if (typeof saved === "string") {
-                try {
-                    const storage = JSON.parse(LZString.decompressFromBase64(saved));
-                    if (!isObject(storage)) {
-                        throw new Error("Bad data");
-                    }
-                    modStorage = storage;
-                }
-                catch (error) {
-                    console.error("BCX: Error while loading saved data, full reset.", error);
-                }
-            }
-            else {
-                console.log("BCX: First time init");
-            }
-        }
-        run() {
-            modStorageSync();
         }
     }
 
@@ -1562,10 +4142,13 @@ wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
         }
     }
 
+    const module_authority = registerModule(new ModuleAuthority());
     const module_chatroom = registerModule(new ModuleChatroom());
     const module_clubUtils = registerModule(new ModuleClubUtils());
     const module_commands = registerModule(new ModuleCommands());
     const module_console = registerModule(new ModuleConsole());
+    const module_gui = registerModule(new ModuleGUI());
+    const module_log = registerModule(new ModuleLog());
     const module_messaging = registerModule(new ModuleMessaging());
     const module_miscPatches = registerModule(new ModuleMiscPatches());
     const module_storage = registerModule(new ModuleStorage());

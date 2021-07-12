@@ -27,12 +27,9 @@ export class GuiAuthorityDialogSelf extends GuiSubscreen {
 		DrawText("- Warning -", 1000, 375, "Black", "Black");
 		DrawText("If you confirm, you won't be able to change your access to this permission back yourself.", 1000, 525, "Black");
 
-		DrawButton(700, 720, 200, 80, "", "White");
-		DrawText("Confirm", 800, 760, "Black");
+		DrawButton(700, 720, 200, 80, "Confirm", "White");
 
-		DrawButton(1120, 720, 200, 80, "", "White");
-		DrawText("Cancel", 1220, 760, "Black");
-
+		DrawButton(1120, 720, 200, 80, "Cancel", "White");
 	}
 
 	Click() {

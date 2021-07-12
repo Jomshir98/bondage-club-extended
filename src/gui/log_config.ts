@@ -110,10 +110,11 @@ export class GuiLogConfig extends GuiSubscreen {
 
 			//reset button
 			if ((document.getElementById("BCX_LogConfigFilter") as HTMLInputElement | undefined)?.value) {
-				DrawButton(870, 182, 64, 64, "", "White");
-				DrawText("X", 890, 217, "Black");
+				MainCanvas.textAlign = "center";
+				DrawButton(870, 182, 64, 64, "X", "White");
 			}
 
+			MainCanvas.textAlign = "left";
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
 				const i = this.page * PER_PAGE_COUNT + off;
 				if (i >= this.configList.length) break;
@@ -150,8 +151,7 @@ export class GuiLogConfig extends GuiSubscreen {
 		DrawText(`- Behaviour Log: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		if (this.allowDelete) {
-			DrawButton(1525, 690, 380, 64, "", "White");
-			DrawText("Delete all log entries", 1715, 722, "Black");
+			DrawButton(1525, 690, 380, 64, "Delete all log entries", "White");
 		}
 
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");

@@ -163,10 +163,11 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 			//reset button
 			if ((document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined)?.value) {
-				DrawButton(870, 182, 64, 64, "", "White");
-				DrawText("X", 890, 217, "Black");
+				MainCanvas.textAlign = "center";
+				DrawButton(870, 182, 64, 64, "X", "White");
 			}
 
+			MainCanvas.textAlign = "left";
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
 				const i = this.page * PER_PAGE_COUNT + off;
 				if (i >= this.permList.length) break;
@@ -192,9 +193,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					// Self checkbox
 					DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#eee", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
 					// Min access
-					DrawButton(1370, Y, 170, 64, "", e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
 					MainCanvas.textAlign = "center";
-					DrawTextFit(getPermissionMinDisplayText(e.permissionInfo.min, this.character), 1453, Y + 34, 150, "Black");
+					DrawButton(1370, Y, 170, 64, getPermissionMinDisplayText(e.permissionInfo.min, this.character), e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
 					MainCanvas.textAlign = "left";
 				}
 			}

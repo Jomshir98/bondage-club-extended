@@ -108,8 +108,8 @@ export class GuiLog extends GuiSubscreen {
 
 			//reset button
 			if ((document.getElementById("BCX_LogFilter") as HTMLInputElement | undefined)?.value) {
-				DrawButton(870, 182, 64, 64, "", "White");
-				DrawText("X", 890, 217, "Black");
+				MainCanvas.textAlign = "center";
+				DrawButton(870, 182, 64, 64, "X", "White");
 			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
@@ -120,6 +120,7 @@ export class GuiLog extends GuiSubscreen {
 				const Y = 290 + off * 95;
 
 				// Log message
+				MainCanvas.textAlign = "left";
 				DrawButton(130, Y, 1100, 64, "", "White");
 				const msg = logMessageRender(e);
 				DrawTextFit(msg, 140, Y + 34, 1090, msg.startsWith("[") ? "Gray" : "Black");
@@ -129,8 +130,8 @@ export class GuiLog extends GuiSubscreen {
 				DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Gray", "Black");
 
 				if (this.allowDeletion) {
-					DrawButton(1630, Y, 64, 64, "", "White");
-					DrawText("X", 1650, Y + 34, "Black");
+					MainCanvas.textAlign = "center";
+					DrawButton(1630, Y, 64, 64, "X", "White");
 				}
 			}
 
@@ -144,18 +145,15 @@ export class GuiLog extends GuiSubscreen {
 			MainCanvas.textAlign = "center";
 			// Praise button
 			if (this.allowPraise) {
-				DrawButton(950, 815, 150, 64, "", "White");
-				DrawText("Praise", 1025, 847, "Black");
+				DrawButton(950, 815, 150, 64, "Praise", "White");
 			}
 			// Leave message button
 			if (this.allowLeaveMessage) {
-				DrawButton(1150, 815, 200, 64, "", "White");
-				DrawText("Only note", 1250, 847, "Black");
+				DrawButton(1150, 815, 200, 64, "Only note", "White");
 			}
 			// Scold button
 			if (this.allowPraise) {
-				DrawButton(1400, 815, 150, 64, "", "White");
-				DrawText("Scold", 1475, 847, "Black");
+				DrawButton(1400, 815, 150, 64, "Scold", "White");
 			}
 
 			// Pagination

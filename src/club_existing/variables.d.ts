@@ -57,6 +57,7 @@ declare function DrawCheckbox(Left: number, Top: number, Width: number, Height: 
 declare function DrawText(Text: string, X: number, Y: number, Color: string, BackColor?: string): void;
 declare function DrawTextFit(Text: string, X: number, Y: number, Width: number, Color: string, BackColor?: string): void;
 declare function DrawBackNextButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, BackText?: () => string, NextText?: () => string, Disabled?: boolean, ArrowWidth?: number): void;
+declare function DrawButtonHover(Left: number, Top: number, Width: number, Height: number, HoveringText: string): void;
 
 // Cheat.js
 declare function CheatImport(): void;

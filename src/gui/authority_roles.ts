@@ -23,9 +23,32 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 	private failed: boolean = false;
 	private page: number = 0;
 
+	private hoveringTextList: string[] = [];
+
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+
+		this.hoveringTextList =
+		character.isPlayer() ? [
+			`You - either top or bottom of the hierarchy`,
+			`Your owner, visible on your character profile`,
+			`Any character, added to the list on the left as "Owner"`,
+			`Any of your lovers, visible on your character profile`,
+			`Any character, added to the list on the left as "Mistress"`,
+			`Anyone you have white-listed`,
+			`Anyone you have friend-listed`,
+			`Anyone, who can use items on you`
+		] : [
+			`This player - either top or bottom of the hierarchy`,
+			`This player's owner, visible on their character profile`,
+			`Any character, added to the list on the left as "Owner"`,
+			`Any lover of this player, visible on their profile`,
+			`Any character, added to the list on the left as "Mistress"`,
+			`Anyone this player has white-listed`,
+			`Anyone this player has friend-listed`,
+			`Anyone, who can use items on this player`
+		];
 	}
 
 	Load() {
@@ -105,14 +128,6 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 		MainCanvas.fillStyle = "Black";
 		MainCanvas.fill();
 
-		// hierarchy roles
-		MainCanvas.textAlign = "center";
-		DrawButton(1420, 130, 208, 54, this.character.Name, "White");
-		for (let i = 1; i < 8; i++) {
-			DrawButton(1430, 130 + 80 * i, 188, 54, capitalizeFirstLetter(AccessLevel[i]), "White");
-		}
-		MainCanvas.textAlign = "left";
-
 		if (this.roleData) {
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
@@ -160,6 +175,13 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 		} else {
 			MainCanvas.textAlign = "center";
 			DrawText("Loading...", 800, 480, "Black");
+		}
+
+		// hierarchy roles
+		MainCanvas.textAlign = "center";
+		DrawButton(1420, 130, 208, 54, this.character.Name, "White", undefined, this.hoveringTextList[0]);
+		for (let i = 1; i < 8; i++) {
+			DrawButton(1430, 130 + 80 * i, 188, 54, capitalizeFirstLetter(AccessLevel[i]), "White", undefined, this.hoveringTextList[i]);
 		}
 
 		MainCanvas.textAlign = "left";

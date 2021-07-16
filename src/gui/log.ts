@@ -2,8 +2,9 @@ import { ChatroomCharacter } from "../characters";
 import { module_gui } from "../modules";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
-import { LogEntry, logMessageRender } from "../modules/log";
+import { LogAccessLevel, LogEntry, logMessageRender } from "../modules/log";
 import { GuiLogConfig } from "./log_config";
+import { DrawImageEx } from "../utilsClub";
 
 const PER_PAGE_COUNT = 5;
 
@@ -120,10 +121,15 @@ export class GuiLog extends GuiSubscreen {
 				const Y = 290 + off * 95;
 
 				// Log message
+				DrawImageEx(e[1] === LogAccessLevel.protected ? "Icons/Security.png" : "Icons/Public.png", 125, Y, {
+					Height: 64,
+					Width: 64
+				});
+
 				MainCanvas.textAlign = "left";
-				DrawButton(130, Y, 1100, 64, "", "White");
+				DrawButton(200, Y, 1030, 64, "", "White");
 				const msg = logMessageRender(e);
-				DrawTextFit(msg, 140, Y + 34, 1090, msg.startsWith("[") ? "Gray" : "Black");
+				DrawTextFit(msg, 210, Y + 34, 1020, msg.startsWith("[") ? "Gray" : "Black");
 				MainCanvas.beginPath();
 				MainCanvas.rect(1270, Y, 320, 64);
 				MainCanvas.stroke();
@@ -131,7 +137,11 @@ export class GuiLog extends GuiSubscreen {
 
 				if (this.allowDeletion) {
 					MainCanvas.textAlign = "center";
-					DrawButton(1630, Y, 64, 64, "X", "White");
+					DrawButton(1630, Y, 64, 64, "X", "White", "", "Delete log entry");
+				}
+
+				if (MouseIn(125, Y, 64, 64)) {
+					DrawButtonHover(125, Y, 64, 64, e[1] === LogAccessLevel.protected ? "Protected visibility" : "Normal visibility");
 				}
 			}
 

@@ -65,11 +65,12 @@ export function init() {
 	InfoBeep(`BCX loaded! Version: ${VERSION}`);
 }
 
-export function unload() {
+export function unload(): boolean {
 	const { BondageClubTools } = detectOtherMods();
 
 	if (BondageClubTools) {
-		throw new Error("BCX: Unload not supported when BondageClubTools are present");
+		console.error("BCX: Unload not supported when BondageClubTools are present");
+		return false;
 	}
 
 	unload_patches();
@@ -80,4 +81,5 @@ export function unload() {
 
 	delete window.BCX_Loaded;
 	console.log("BCX: Unloaded.");
+	return true;
 }

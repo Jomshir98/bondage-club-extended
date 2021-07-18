@@ -357,18 +357,21 @@ window.BCX_Loaded = false;
         ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
         ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
         ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
-        ModuleCategory[ModuleCategory["Misc"] = 3] = "Misc";
+        ModuleCategory[ModuleCategory["Curses"] = 3] = "Curses";
+        ModuleCategory[ModuleCategory["Misc"] = 4] = "Misc";
     })(ModuleCategory || (ModuleCategory = {}));
     const MODULE_NAMES = {
         [ModuleCategory.Basic]: "Basic",
         [ModuleCategory.Authority]: "Authority",
         [ModuleCategory.Log]: "Behaviour Log",
+        [ModuleCategory.Curses]: "Curses",
         [ModuleCategory.Misc]: "Miscellaneous"
     };
     const MODULE_ICONS = {
         [ModuleCategory.Basic]: "Icons/General.png",
         [ModuleCategory.Authority]: "Icons/Security.png",
         [ModuleCategory.Log]: "Icons/Title.png",
+        [ModuleCategory.Curses]: "Icons/Struggle.png",
         [ModuleCategory.Misc]: "Icons/Random.png"
     };
     let moduleInitPhase = 0 /* construct */;
@@ -458,7 +461,8 @@ window.BCX_Loaded = false;
     function unload() {
         const { BondageClubTools } = detectOtherMods();
         if (BondageClubTools) {
-            throw new Error("BCX: Unload not supported when BondageClubTools are present");
+            console.error("BCX: Unload not supported when BondageClubTools are present");
+            return false;
         }
         unload_patches();
         unload_modules();
@@ -466,6 +470,7 @@ window.BCX_Loaded = false;
         clearCaches();
         delete window.BCX_Loaded;
         console.log("BCX: Unloaded.");
+        return true;
     }
 
     const hiddenMessageHandlers = new Map();
@@ -687,6 +692,280 @@ window.BCX_Loaded = false;
         }
         run() {
             modStorageSync();
+        }
+    }
+
+    const CURSES_CHECK_INTERVAL = 2000;
+    const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
+    function curseItem(Group, curseProperty, character) {
+        if (!AssetGroup.some(g => g.Name === Group) || typeof curseProperty !== "boolean" || !modStorage.cursedItems) {
+            console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
+            return false;
+        }
+        if (character) {
+            const existingCurse = modStorage.cursedItems[Group];
+            if (existingCurse) {
+                if (!checkPermissionAccess(curseProperty ? "curses_curse" : "curses_lift", character)) {
+                    return false;
+                }
+            }
+            else if (!checkPermissionAccess("curses_curse", character)) {
+                return false;
+            }
+        }
+        const currentItem = InventoryGet(Player, Group);
+        if (currentItem) {
+            const newCurse = modStorage.cursedItems[Group] = {
+                Name: currentItem.Asset.Name,
+                curseProperty
+            };
+            if (currentItem.Color && currentItem.Color !== "Default") {
+                newCurse.Color = JSON.parse(JSON.stringify(currentItem.Color));
+            }
+            if (currentItem.Difficulty) {
+                newCurse.Difficulty = currentItem.Difficulty;
+            }
+            if (currentItem.Property && Object.keys(currentItem.Property).filter(i => !CURSE_IGNORED_PROPERTIES.includes(i)).length !== 0) {
+                newCurse.Property = JSON.parse(JSON.stringify(currentItem.Property));
+                if (newCurse.Property) {
+                    for (const key of CURSE_IGNORED_PROPERTIES) {
+                        delete newCurse.Property[key];
+                    }
+                }
+            }
+        }
+        else {
+            modStorage.cursedItems[Group] = null;
+        }
+        modStorageSync();
+        return true;
+    }
+    function curseLift(Group, character) {
+        if (character && !checkPermissionAccess("curses_lift", character))
+            return false;
+        if (modStorage.cursedItems && modStorage.cursedItems[Group] !== undefined) {
+            delete modStorage.cursedItems[Group];
+            modStorageSync();
+            return true;
+        }
+        return false;
+    }
+    function curseGetInfo(character) {
+        var _a;
+        const res = {
+            allowCurse: checkPermissionAccess("curses_curse", character),
+            allowLift: checkPermissionAccess("curses_lift", character),
+            curses: {}
+        };
+        for (const [group, info] of Object.entries((_a = modStorage.cursedItems) !== null && _a !== void 0 ? _a : {})) {
+            res.curses[group] = info === null ? null : {
+                Name: info.Name,
+                curseProperties: info.curseProperty
+            };
+        }
+        return res;
+    }
+    class ModuleCurses extends BaseModule {
+        constructor() {
+            super(...arguments);
+            this.timer = null;
+        }
+        init() {
+            registerPermission("curses_curse", {
+                name: "Allow cursing objects or the body",
+                category: ModuleCategory.Curses,
+                self: false,
+                min: AccessLevel.mistress
+            });
+            registerPermission("curses_lift", {
+                name: "Allow lifting curses",
+                category: ModuleCategory.Curses,
+                self: false,
+                min: AccessLevel.mistress
+            });
+            registerPermission("curses_color", {
+                name: "Allow changing colors of cursed objects",
+                category: ModuleCategory.Curses,
+                self: true,
+                min: AccessLevel.mistress
+            });
+            queryHandlers.curseGetInfo = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, curseGetInfo(character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.curseItem = (sender, resolve, data) => {
+                const character = getChatroomCharacter(sender);
+                if (character && isObject(data) && typeof data.Group === "string" && typeof data.curseProperties === "boolean") {
+                    resolve(true, curseItem(data.Group, data.curseProperties, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.curseLift = (sender, resolve, data) => {
+                const character = getChatroomCharacter(sender);
+                if (character && typeof data === "string") {
+                    resolve(true, curseLift(data, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+        }
+        load() {
+            if (!isObject(modStorage.cursedItems)) {
+                modStorage.cursedItems = {};
+            }
+            else {
+                for (const [group, info] of Object.entries(modStorage.cursedItems)) {
+                    if (!AssetGroup.some(g => g.Name === group)) {
+                        console.warn(`BCX: Unknown cursed group ${group}, removing it`, info);
+                        delete modStorage.cursedItems[group];
+                        continue;
+                    }
+                    if (info === null)
+                        continue;
+                    if (!isObject(info) ||
+                        typeof info.Name !== "string" ||
+                        typeof info.curseProperty !== "boolean") {
+                        console.error(`BCX: Bad data for cursed item in group ${group}, removing it`, info);
+                        delete modStorage.cursedItems[group];
+                        continue;
+                    }
+                    if (AssetGet("Female3DCG", group, info.Name) == null) {
+                        console.warn(`BCX: Unknown cursed item ${group}:${info.Name}, removing it`, info);
+                        delete modStorage.cursedItems[group];
+                        continue;
+                    }
+                }
+            }
+        }
+        run() {
+            this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
+        }
+        unload() {
+            if (this.timer !== null) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+        }
+        cursesTick() {
+            var _a, _b, _c, _d;
+            if (!ServerIsConnected || !modStorage.cursedItems)
+                return;
+            const lastState = JSON.stringify(modStorage.cursedItems);
+            for (const [group, curse] of Object.entries(modStorage.cursedItems)) {
+                if (curse === null) {
+                    const current = InventoryGet(Player, group);
+                    if (current) {
+                        InventoryRemove(Player, group, false);
+                        CharacterRefresh(Player, true);
+                        ChatRoomCharacterUpdate(Player);
+                        ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the item turns into dust`);
+                        break;
+                    }
+                    continue;
+                }
+                const asset = AssetGet("Female3DCG", group, curse.Name);
+                if (!asset) {
+                    console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
+                    continue;
+                }
+                let changeType = "";
+                const CHANGE_TEXTS = {
+                    add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears`,
+                    swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,
+                    update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item`,
+                    color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back`
+                };
+                let currentItem = InventoryGet(Player, group);
+                if (currentItem && currentItem.Asset.Name !== curse.Name) {
+                    InventoryRemove(Player, group, false);
+                    changeType = "swap";
+                    currentItem = null;
+                }
+                if (!currentItem) {
+                    currentItem = {
+                        Asset: asset,
+                        Color: curse.Color != null ? JSON.parse(JSON.stringify(curse.Color)) : "Default",
+                        Property: curse.Property != null ? JSON.parse(JSON.stringify(curse.Property)) : {},
+                        Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
+                    };
+                    Player.Appearance.push(currentItem);
+                    if (!changeType)
+                        changeType = "add";
+                }
+                const itemProperty = currentItem.Property = ((_a = currentItem.Property) !== null && _a !== void 0 ? _a : {});
+                let curseProperty = (_b = curse.Property) !== null && _b !== void 0 ? _b : {};
+                if (curse.curseProperty) {
+                    for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
+                        if (CURSE_IGNORED_PROPERTIES.includes(key)) {
+                            if (curseProperty[key] !== undefined) {
+                                delete curseProperty[key];
+                            }
+                            continue;
+                        }
+                        if (curseProperty[key] === undefined) {
+                            if (itemProperty[key] !== undefined) {
+                                delete itemProperty[key];
+                                if (!changeType)
+                                    changeType = "update";
+                            }
+                        }
+                        else if (typeof curseProperty[key] !== typeof itemProperty[key] ||
+                            JSON.stringify(curseProperty[key]) !== JSON.stringify(itemProperty[key])) {
+                            itemProperty[key] = JSON.parse(JSON.stringify(curseProperty[key]));
+                            if (!changeType)
+                                changeType = "update";
+                        }
+                    }
+                }
+                else {
+                    curseProperty = JSON.parse(JSON.stringify(itemProperty));
+                }
+                if (Object.keys(curseProperty).length === 0) {
+                    delete curse.Property;
+                }
+                else {
+                    curse.Property = curseProperty;
+                }
+                if (JSON.stringify((_c = currentItem.Color) !== null && _c !== void 0 ? _c : "Default") !== JSON.stringify((_d = curse.Color) !== null && _d !== void 0 ? _d : "Default")) {
+                    if (curse.Color === undefined || curse.Color === "Default") {
+                        delete currentItem.Color;
+                    }
+                    else {
+                        currentItem.Color = JSON.parse(JSON.stringify(curse.Color));
+                    }
+                    if (!changeType)
+                        changeType = "color";
+                }
+                if (changeType) {
+                    CharacterRefresh(Player, true);
+                    ChatRoomCharacterUpdate(Player);
+                    if (CHANGE_TEXTS[changeType]) {
+                        ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
+                    }
+                    else {
+                        console.error(`BCX: No chat message for curse action ${changeType}`);
+                    }
+                    break;
+                }
+            }
+            if (JSON.stringify(modStorage.cursedItems) !== lastState) {
+                modStorageSync();
+            }
+        }
+        // TODO: dev functions
+        curseGroup(Group, curseProperty, character) {
+            return curseItem(Group, curseProperty, character);
+        }
+        uncurseGroup(Group, character) {
+            return curseLift(Group, character);
         }
     }
 
@@ -1217,6 +1496,36 @@ window.BCX_Loaded = false;
                 return data;
             });
         }
+        curseGetInfo() {
+            return sendQuery("curseGetInfo", undefined, this.MemberNumber).then(data => {
+                if (!isObject(data) ||
+                    typeof data.allowCurse !== "boolean" ||
+                    typeof data.allowLift !== "boolean" ||
+                    !isObject(data.curses) ||
+                    Object.values(data.curses).some(v => !isObject(v) ||
+                        typeof v.Name !== "string" ||
+                        typeof v.curseProperties !== "boolean")) {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        curseItem(Group, curseProperties) {
+            return sendQuery("curseItem", { Group, curseProperties }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        curseLift(Group) {
+            return sendQuery("curseLift", Group, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
         hasAccessToPlayer() {
             return ServerChatRoomGetAllowItem(this.Character, Player);
         }
@@ -1285,6 +1594,15 @@ window.BCX_Loaded = false;
         }
         logGetAllowedActions() {
             return Promise.resolve(logGetAllowedActions(this));
+        }
+        curseGetInfo() {
+            return Promise.resolve(curseGetInfo(this));
+        }
+        curseItem(Group, curseProperties) {
+            return Promise.resolve(curseItem(Group, curseProperties, this));
+        }
+        curseLift(Group) {
+            return Promise.resolve(curseLift(Group, this));
         }
     }
     const currentRoomCharacters = [];
@@ -3907,6 +4225,92 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    const GROUP_NAME_OVERRIDES = {
+        "ItemNeckAccessories": "Collar Addon",
+        "ItemNeckRestraints": "Collar Restraint",
+        "ItemNipplesPiercings": "Nipple Piercing",
+        "ItemHood": "Hood",
+        "ItemMisc": "Miscellaneous",
+        "ItemDevices": "Devices",
+        "ItemHoodAddon": "Hood Addon",
+        "ItemAddon": "General Addon",
+        "ItemFeet": "Upper Leg",
+        "ItemLegs": "Lower Leg",
+        "ItemBoots": "Feet",
+        "ItemMouth": "Mouth (1)",
+        "ItemMouth2": "Mouth (2)",
+        "ItemMouth3": "Mouth (3)"
+    };
+    class GuiCurses extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
+        Load() {
+            // On screen load
+        }
+        Run() {
+            // On each frame
+            var _a, _b, _c, _d;
+            // items
+            MainCanvas.beginPath();
+            MainCanvas.rect(105, 165, 830, 64);
+            MainCanvas.fillStyle = "#eeeeee";
+            MainCanvas.fill();
+            DrawText(`Items`, 120, 165 + 34, "Black");
+            const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
+            MainCanvas.textAlign = "center";
+            for (let i = 0; i < AssetGroupItems.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupItems[i];
+                const currentItem = InventoryGet(this.character.Character, group.Name);
+                const groupDescription = developmentMode ? group.Name : ((_a = GROUP_NAME_OVERRIDES[group.Name]) !== null && _a !== void 0 ? _a : group.Description);
+                // TODO: Actual data
+                const itemIsCursed = ((_b = modStorage.cursedItems) === null || _b === void 0 ? void 0 : _b[group.Name]) != null;
+                DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, groupDescription, itemIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", itemIsCursed);
+            }
+            // clothing
+            MainCanvas.textAlign = "left";
+            MainCanvas.beginPath();
+            MainCanvas.rect(950, 165, 830, 64);
+            MainCanvas.fillStyle = "#eeeeee";
+            MainCanvas.fill();
+            DrawText(`Clothing`, 965, 165 + 34, "Black");
+            const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
+            MainCanvas.textAlign = "center";
+            for (let i = 0; i < AssetGroupClothings.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupClothings[i];
+                const currentItem = InventoryGet(this.character.Character, group.Name);
+                const groupDescription = developmentMode ? group.Name : ((_c = GROUP_NAME_OVERRIDES[group.Name]) !== null && _c !== void 0 ? _c : group.Description);
+                // TODO: Actual data
+                const clothingIsCursed = ((_d = modStorage.cursedItems) === null || _d === void 0 ? void 0 : _d[group.Name]) != null;
+                DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, groupDescription, clothingIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", clothingIsCursed);
+            }
+            //Body
+            // TODO: Actual data
+            const bodyIsCursed = false;
+            DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "Grey" : "White", undefined, "Size, skin color, eyes, etc.", bodyIsCursed);
+            MainCanvas.textAlign = "left";
+            DrawText(`- Curses: Place a new curse on ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+        }
+        Click() {
+            // On click
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+        }
+        Exit() {
+            module_gui.currentSubscreen = new GuiMainMenu(this.character);
+        }
+        Unload() {
+            // On screen unload
+        }
+    }
+
     class GuiMisc extends GuiSubscreen {
         constructor(character) {
             super();
@@ -3956,6 +4360,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             module: ModuleCategory.Log,
             onclick: (C) => {
                 module_gui.currentSubscreen = new GuiLog(C);
+            }
+        },
+        {
+            module: ModuleCategory.Curses,
+            onclick: (C) => {
+                module_gui.currentSubscreen = new GuiCurses(C);
             }
         },
         {
@@ -4174,6 +4584,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     const module_clubUtils = registerModule(new ModuleClubUtils());
     const module_commands = registerModule(new ModuleCommands());
     const module_console = registerModule(new ModuleConsole());
+    const module_curses = registerModule(new ModuleCurses());
     const module_gui = registerModule(new ModuleGUI());
     const module_log = registerModule(new ModuleLog());
     const module_messaging = registerModule(new ModuleMessaging());

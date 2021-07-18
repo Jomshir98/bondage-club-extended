@@ -75,6 +75,7 @@ declare var ServerBeep: {
 	Message?: string;
 };
 declare var ServerSocket: import("socket.io-client").Socket;
+declare var ServerIsConnected: boolean;
 declare var ServerAccountUpdate: any;
 declare function ServerPlayerIsInChatRoom(): boolean;
 declare function ServerSend(Message: string, Data: any): void;
@@ -87,12 +88,13 @@ declare function ServerChatRoomGetAllowItem(Source: Character, Target: Character
 declare var Asset: Asset[];
 declare var AssetGroup: AssetGroup[];
 declare function AssetLoadDescription(Family: string): void;
+declare function AssetGet(Family: string, Group: string, Name: string): Asset | null;
 
 // Wardrobe.js
 declare function WardrobeAssetBundle(A: Item): ItemBundle;
 
 // Inventory.js
-declare function InventoryGet(C: Character, AssetGroup: string): Item;
+declare function InventoryGet(C: Character, AssetGroup: string): Item | null;
 declare function InventoryRemove(C: Character, AssetGroup: string, Refresh?: boolean): void;
 
 // Mouse.js
@@ -101,6 +103,9 @@ declare function MouseIn(Left: number, Top: number, Width: number, Height: numbe
 // Login.js
 declare function LoginMistressItems(): void;
 declare function LoginStableItems(): void;
+
+// Validation.js
+declare const ValidationModifiableProperties: string[];
 
 // Screens/Character/InformationSheet/InformationSheet.js
 declare var InformationSheetSelection: Character | null;

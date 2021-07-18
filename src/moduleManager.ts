@@ -21,6 +21,7 @@ export enum ModuleCategory {
 	Basic,
 	Authority,
 	Log,
+	Curses,
 	Misc
 }
 
@@ -28,6 +29,7 @@ export const MODULE_NAMES: Record<ModuleCategory, string> = {
 	[ModuleCategory.Basic]: "Basic",
 	[ModuleCategory.Authority]: "Authority",
 	[ModuleCategory.Log]: "Behaviour Log",
+	[ModuleCategory.Curses]: "Curses",
 	[ModuleCategory.Misc]: "Miscellaneous"
 };
 
@@ -35,6 +37,7 @@ export const MODULE_ICONS: Record<ModuleCategory, string> = {
 	[ModuleCategory.Basic]: "Icons/General.png",
 	[ModuleCategory.Authority]: "Icons/Security.png",
 	[ModuleCategory.Log]: "Icons/Title.png",
+	[ModuleCategory.Curses]: "Icons/Struggle.png",
 	[ModuleCategory.Misc]: "Icons/Random.png"
 };
 

@@ -24,6 +24,9 @@ type BCX_Permissions =
 	| "log_delete"
 	| "log_praise"
 	| "log_leaveMessage"
+	| "curses_curse"
+	| "curses_lift"
+	| "curses_color"
 	| "misc_test";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
@@ -47,6 +50,14 @@ type BCX_LogCategory =
 	| "hadOrgasm"
 	| "permissionChange";
 
+interface CursedItemInfo {
+	Name: string;
+	curseProperty: boolean;
+	Color?: string | string[];
+	Difficulty?: number;
+	Property?: ItemProperties;
+}
+
 interface ModStorage {
 	permissions: PermissionsBundle;
 	owners: number[];
@@ -54,4 +65,8 @@ interface ModStorage {
 	log: import("./modules/log").LogEntry[];
 	logConfig: import("./modules/log").LogConfig;
 	typingIndicatorEnable: boolean;
+	/**
+	 * Maps item group to a cursed item, if there is any, otherwise undefined. Null if the group is cursed to be empty
+	 */
+	cursedItems: Record<string, CursedItemInfo | null>;
 }

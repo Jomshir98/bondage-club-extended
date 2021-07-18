@@ -4,6 +4,7 @@ import { module_gui } from "../modules";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
+import { GuiCurses } from "./curses_add";
 import { GuiMisc } from "./misc";
 import { GuiSubscreen } from "./subscreen";
 
@@ -24,6 +25,12 @@ const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) 
 		module: ModuleCategory.Log,
 		onclick: (C) => {
 			module_gui.currentSubscreen = new GuiLog(C);
+		}
+	},
+	{
+		module: ModuleCategory.Curses,
+		onclick: (C) => {
+			module_gui.currentSubscreen = new GuiCurses(C);
 		}
 	},
 	{

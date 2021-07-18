@@ -51,6 +51,15 @@ type BCX_logAllowedActions = {
 	leaveMessage: boolean;
 };
 
+type BCX_curseInfo = {
+	allowCurse: boolean;
+	allowLift: boolean;
+	curses: Record<string, {
+		Name: string;
+		curseProperties: boolean;
+	} | null>;
+};
+
 type BCX_queries = {
 	permissions: [undefined, PermissionsBundle];
 	myAccessLevel: [undefined, import("./modules/authority").AccessLevel];
@@ -85,4 +94,13 @@ type BCX_queries = {
 		boolean
 	];
 	logGetAllowedActions: [undefined, BCX_logAllowedActions];
+	curseGetInfo: [undefined, BCX_curseInfo];
+	curseItem: [
+		{
+			Group: string;
+			curseProperties: boolean;
+		},
+		boolean
+	];
+	curseLift: [string, boolean];
 };

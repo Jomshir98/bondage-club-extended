@@ -1,5 +1,6 @@
 import { VERSION } from "./config";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
+import { curseGetInfo, curseItem, curseLift } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { modStorage } from "./modules/storage";
@@ -210,6 +211,42 @@ export class ChatroomCharacter {
 		});
 	}
 
+	curseGetInfo(): Promise<BCX_curseInfo> {
+		return sendQuery("curseGetInfo", undefined, this.MemberNumber).then(data => {
+			if (!isObject(data) ||
+				typeof data.allowCurse !== "boolean" ||
+				typeof data.allowLift !== "boolean" ||
+				!isObject(data.curses) ||
+				Object.values(data.curses).some(v =>
+					!isObject(v) ||
+					typeof v.Name !== "string" ||
+					typeof v.curseProperties !== "boolean"
+				)
+			) {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	curseItem(Group: string, curseProperties: boolean): Promise<boolean> {
+		return sendQuery("curseItem", { Group, curseProperties }, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
+	curseLift(Group: string): Promise<boolean> {
+		return sendQuery("curseLift", Group, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
 	hasAccessToPlayer(): boolean {
 		return ServerChatRoomGetAllowItem(this.Character, Player);
 	}
@@ -292,6 +329,18 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override logGetAllowedActions(): Promise<BCX_logAllowedActions> {
 		return Promise.resolve(logGetAllowedActions(this));
+	}
+
+	override curseGetInfo(): Promise<BCX_curseInfo> {
+		return Promise.resolve(curseGetInfo(this));
+	}
+
+	override curseItem(Group: string, curseProperties: boolean): Promise<boolean> {
+		return Promise.resolve(curseItem(Group, curseProperties, this));
+	}
+
+	override curseLift(Group: string): Promise<boolean> {
+		return Promise.resolve(curseLift(Group, this));
 	}
 }
 

@@ -1,3 +1,26 @@
+import { developmentMode } from "./modules/console";
+
+const GROUP_NAME_OVERRIDES: Record<string, string> = {
+	"ItemNeckAccessories": "Collar Addon",
+	"ItemNeckRestraints": "Collar Restraint",
+	"ItemNipplesPiercings": "Nipple Piercing",
+	"ItemHood": "Hood",
+	"ItemMisc": "Miscellaneous",
+	"ItemDevices": "Devices",
+	"ItemHoodAddon": "Hood Addon",
+	"ItemAddon": "General Addon",
+	"ItemFeet": "Upper Leg",
+	"ItemLegs": "Lower Leg",
+	"ItemBoots": "Feet",
+	"ItemMouth": "Mouth (1)",
+	"ItemMouth2": "Mouth (2)",
+	"ItemMouth3": "Mouth (3)"
+};
+
+export function getVisibleGroupName(group: AssetGroup): string {
+	return developmentMode ? group.Name : (GROUP_NAME_OVERRIDES[group.Name] ?? group.Description);
+}
+
 export function InfoBeep(msg: string) {
 	console.log(`BCX msg: ${msg}`);
 	ServerBeep = {

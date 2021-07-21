@@ -212,7 +212,9 @@ const logConfigDefaults: LogConfig = {
 	enteredPublicRoom: LogAccessLevel.none,
 	enteredPrivateRoom: LogAccessLevel.none,
 	hadOrgasm: LogAccessLevel.none,
-	permissionChange: LogAccessLevel.protected
+	permissionChange: LogAccessLevel.protected,
+	curseChange: LogAccessLevel.normal,
+	curseTrigger: LogAccessLevel.none
 };
 
 export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
@@ -223,7 +225,9 @@ export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	enteredPublicRoom: "Log which public rooms are entered",
 	enteredPrivateRoom: "Log which private rooms are entered",
 	hadOrgasm: "Log each single orgasm",
-	permissionChange: "Log changes in permission settings"
+	permissionChange: "Log changes in permission settings",
+	curseChange: "Log each application or removal of curses",
+	curseTrigger: "Log every time a triggered curse reapplies an item"
 };
 
 export const LOG_LEVEL_NAMES: Record<LogAccessLevel, string> = {

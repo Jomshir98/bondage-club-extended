@@ -1,18 +1,26 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { BaseModule, ModuleCategory } from "../moduleManager";
 import { arrayUnique, isObject } from "../utils";
-import { ChatRoomActionMessage } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { queryHandlers } from "./messaging";
 import { modStorage, modStorageSync } from "./storage";
+import { LogEntryType, logMessage } from "./log";
 
 const CURSES_CHECK_INTERVAL = 2000;
 
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 
 export function curseItem(Group: string, curseProperty: boolean, character: ChatroomCharacter | null): boolean {
-	if (!AssetGroup.some(g => g.Name === Group) || typeof curseProperty !== "boolean" || !modStorage.cursedItems) {
+	const group = AssetGroup.find(g => g.Name === Group);
+
+	if (!group || typeof curseProperty !== "boolean" || !modStorage.cursedItems) {
 		console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
+		return false;
+	}
+
+	if (group.Category === "Appearance" && !group.Clothing) {
+		console.warn(`BCX: Attempt to curse body`, Group);
 		return false;
 	}
 
@@ -48,8 +56,20 @@ export function curseItem(Group: string, curseProperty: boolean, character: Chat
 				}
 			}
 		}
+		if (character) {
+			logMessage("curseChange", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
+			if (!character.isPlayer()) {
+				ChatRoomSendLocal(`${character} cursed the ${currentItem.Asset.Description} on you`);
+			}
+		}
 	} else {
 		modStorage.cursedItems[Group] = null;
+		if (character) {
+			logMessage("curseChange", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
+			if (!character.isPlayer()) {
+				ChatRoomSendLocal(`${character} put a curse on you, forcing part of your body to stay exposed (${getVisibleGroupName(group)})`);
+			}
+		}
 	}
 
 	modStorageSync();
@@ -61,6 +81,21 @@ export function curseLift(Group: string, character: ChatroomCharacter | null): b
 		return false;
 
 	if (modStorage.cursedItems && modStorage.cursedItems[Group] !== undefined) {
+		const group = AssetGroup.find(g => g.Name === Group);
+		if (character && group) {
+			const itemName = modStorage.cursedItems[Group] && AssetGet(Player.AssetFamily, Group, modStorage.cursedItems[Group]!.Name)?.Description;
+			if (itemName) {
+				logMessage("curseChange", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
+				if (!character.isPlayer()) {
+					ChatRoomSendLocal(`${character} lifted the curse on your ${itemName}`);
+				}
+			} else {
+				logMessage("curseChange", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s body part (${getVisibleGroupName(group)})`);
+				if (!character.isPlayer()) {
+					ChatRoomSendLocal(`${character} lifted the curse on part of your body (${getVisibleGroupName(group)})`);
+				}
+			}
+		}
 		delete modStorage.cursedItems[Group];
 		modStorageSync();
 		return true;
@@ -191,7 +226,8 @@ export class ModuleCurses extends BaseModule {
 					InventoryRemove(Player, group, false);
 					CharacterRefresh(Player, true);
 					ChatRoomCharacterUpdate(Player);
-					ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the item turns into dust`);
+					ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
+					logMessage("curseTrigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
 					break;
 				}
 				continue;
@@ -210,6 +246,12 @@ export class ModuleCurses extends BaseModule {
 				swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,
 				update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item`,
 				color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back`
+			};
+			const CHANGE_LOGS: Record<string, string> = {
+				add: `The curse on ${Player.Name}'s ${asset.Description} made the item reappear`,
+				swap: `The curse on ${Player.Name}'s ${asset.Description} prevented replacing the item`,
+				update: `The curse on ${Player.Name}'s ${asset.Description} reverted all changes to the item`,
+				color: `The curse on ${Player.Name}'s ${asset.Description} reverted the color of the item`
 			};
 
 			let currentItem = InventoryGet(Player, group);
@@ -279,6 +321,7 @@ export class ModuleCurses extends BaseModule {
 				ChatRoomCharacterUpdate(Player);
 				if (CHANGE_TEXTS[changeType]) {
 					ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
+					logMessage("curseTrigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
 				} else {
 					console.error(`BCX: No chat message for curse action ${changeType}`);
 				}
@@ -289,14 +332,5 @@ export class ModuleCurses extends BaseModule {
 		if (JSON.stringify(modStorage.cursedItems) !== lastState) {
 			modStorageSync();
 		}
-	}
-
-	// TODO: dev functions
-	public curseGroup(Group: string, curseProperty: boolean, character: ChatroomCharacter | null): boolean {
-		return curseItem(Group, curseProperty, character);
-	}
-
-	public uncurseGroup(Group: string, character: ChatroomCharacter | null): boolean {
-		return curseLift(Group, character);
 	}
 }

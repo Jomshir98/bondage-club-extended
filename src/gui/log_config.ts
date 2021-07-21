@@ -1,9 +1,9 @@
 import { ChatroomCharacter } from "../characters";
-import { module_gui } from "../modules";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
 import { LogAccessLevel, LogConfig, LOG_CONFIG_NAMES, LOG_LEVEL_NAMES } from "../modules/log";
 import { GuiLog } from "./log";
+import { setSubscreen } from "../modules/gui";
 
 type ConfigListItem = (
 	{
@@ -161,7 +161,7 @@ export class GuiLogConfig extends GuiSubscreen {
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
-		if (MouseIn(1815, 190, 90, 90)) return module_gui.currentSubscreen = new GuiLog(this.character);
+		if (MouseIn(1815, 190, 90, 90)) return setSubscreen(new GuiLog(this.character));
 
 		if (this.config !== null) {
 
@@ -192,7 +192,7 @@ export class GuiLogConfig extends GuiSubscreen {
 			// Clear log button
 			if (MouseIn(1525, 690, 380, 64) && this.allowDelete) {
 				this.character.logClear().then(() => {
-					module_gui.currentSubscreen = new GuiLog(this.character);
+					setSubscreen(new GuiLog(this.character));
 				});
 				return;
 			}
@@ -214,7 +214,7 @@ export class GuiLogConfig extends GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+		setSubscreen(new GuiMainMenu(this.character));
 	}
 
 	Unload() {

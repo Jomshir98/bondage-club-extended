@@ -1,5 +1,5 @@
 import { ChatroomCharacter } from "../characters";
-import { module_gui } from "../modules";
+import { setSubscreen } from "../modules/gui";
 import { modStorage, modStorageSync } from "../modules/storage";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
@@ -44,6 +44,6 @@ export class GuiMisc extends GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+		setSubscreen(new GuiMainMenu(this.character));
 	}
 }

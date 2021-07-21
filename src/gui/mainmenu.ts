@@ -1,42 +1,42 @@
 import { ChatroomCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
-import { module_gui } from "../modules";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
 import { GuiCurses } from "./curses_add";
 import { GuiMisc } from "./misc";
 import { GuiSubscreen } from "./subscreen";
+import { setSubscreen } from "../modules/gui";
 
 const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
 		module: ModuleCategory.Basic,
 		onclick: (C) => {
-			module_gui.currentSubscreen = new GuiGlobal(C);
+			setSubscreen(new GuiGlobal(C));
 		}
 	},
 	{
 		module: ModuleCategory.Authority,
 		onclick: (C) => {
-			module_gui.currentSubscreen = new GuiAuthorityPermissions(C);
+			setSubscreen(new GuiAuthorityPermissions(C));
 		}
 	},
 	{
 		module: ModuleCategory.Log,
 		onclick: (C) => {
-			module_gui.currentSubscreen = new GuiLog(C);
+			setSubscreen(new GuiLog(C));
 		}
 	},
 	{
 		module: ModuleCategory.Curses,
 		onclick: (C) => {
-			module_gui.currentSubscreen = new GuiCurses(C);
+			setSubscreen(new GuiCurses(C));
 		}
 	},
 	{
 		module: ModuleCategory.Misc,
 		onclick: (C) => {
-			module_gui.currentSubscreen = new GuiMisc(C);
+			setSubscreen(new GuiMisc(C));
 		}
 	}
 ];

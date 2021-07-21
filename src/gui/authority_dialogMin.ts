@@ -1,8 +1,8 @@
 import { ChatroomCharacter } from "../characters";
-import { module_gui } from "../modules";
 import { GuiSubscreen } from "./subscreen";
 import { AccessLevel, getPermissionMinDisplayText, PermissionInfo } from "../modules/authority";
 import { capitalizeFirstLetter } from "../utils";
+import { setSubscreen } from "../modules/gui";
 
 
 export class GuiAuthorityDialogMin extends GuiSubscreen {
@@ -94,7 +94,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = this.back;
+		setSubscreen(this.back);
 	}
 
 	onChange() {

@@ -1,7 +1,7 @@
 import { ChatroomCharacter } from "../characters";
-import { module_gui } from "../modules";
 import { GuiSubscreen } from "./subscreen";
 import { PermissionInfo } from "../modules/authority";
+import { setSubscreen } from "../modules/gui";
 
 export class GuiAuthorityDialogSelf extends GuiSubscreen {
 
@@ -43,7 +43,7 @@ export class GuiAuthorityDialogSelf extends GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = this.back;
+		setSubscreen(this.back);
 	}
 
 	onChange() {

@@ -6,7 +6,20 @@ import { hookFunction, patchFunction } from "../patching";
 import { icon_BCX } from "../resources";
 import { changeHandlers } from "./messaging";
 
+export function getCurrentSubscreen(): GuiSubscreen | null {
+	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
+}
+
+export function setSubscreen(subscreen: GuiSubscreen | null): void {
+	if (!ModuleGUI.instance) {
+		throw new Error("Attempt to set subscreen before init");
+	}
+	ModuleGUI.instance.currentSubscreen = subscreen;
+}
+
 export class ModuleGUI extends BaseModule {
+	static instance: ModuleGUI | null = null;
+
 	private _currentSubscreen: GuiSubscreen | null = null;
 
 	get currentSubscreen(): GuiSubscreen | null {
@@ -21,6 +34,14 @@ export class ModuleGUI extends BaseModule {
 		if (this._currentSubscreen) {
 			this._currentSubscreen.Load();
 		}
+	}
+
+	constructor() {
+		super();
+		if (ModuleGUI.instance) {
+			throw new Error("Duplicate initialization");
+		}
+		ModuleGUI.instance = this;
 	}
 
 	getInformationSheetCharacter(): ChatroomCharacter | null {

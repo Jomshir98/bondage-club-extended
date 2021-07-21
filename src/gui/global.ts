@@ -1,5 +1,5 @@
 import { ChatroomCharacter } from "../characters";
-import { module_gui } from "../modules";
+import { setSubscreen } from "../modules/gui";
 import { GuiGlobalDialogClearData } from "./global_dialogClearData";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
@@ -36,12 +36,12 @@ export class GuiGlobal extends GuiSubscreen {
 			return;
 
 		if (MouseIn(1605, 800, 300, 90)) {
-			module_gui.currentSubscreen = new GuiGlobalDialogClearData(this);
+			setSubscreen(new GuiGlobalDialogClearData(this));
 			return;
 		}
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+		setSubscreen(new GuiMainMenu(this.character));
 	}
 }

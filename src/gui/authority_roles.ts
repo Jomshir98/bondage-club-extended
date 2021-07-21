@@ -1,10 +1,10 @@
 import { ChatroomCharacter } from "../characters";
-import { module_gui } from "../modules";
 import { GuiSubscreen } from "./subscreen";
 import { AccessLevel } from "../modules/authority";
 import { capitalizeFirstLetter } from "../utils";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiAuthorityPermissions } from "./authority_permissions";
+import { setSubscreen } from "../modules/gui";
 
 const PER_PAGE_COUNT = 6;
 
@@ -245,11 +245,11 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+		setSubscreen(new GuiMainMenu(this.character));
 	}
 
 	Back() {
-		module_gui.currentSubscreen = new GuiAuthorityPermissions(this.character);
+		setSubscreen(new GuiAuthorityPermissions(this.character));
 	}
 
 	Unload() {

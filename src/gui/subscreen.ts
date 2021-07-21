@@ -1,8 +1,8 @@
-import { module_gui } from "../modules";
+import { getCurrentSubscreen, setSubscreen } from "../modules/gui";
 
 export abstract class GuiSubscreen {
 	get active(): boolean {
-		return module_gui.currentSubscreen === this;
+		return getCurrentSubscreen() === this;
 	}
 
 	Load() {
@@ -18,7 +18,7 @@ export abstract class GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = null;
+		setSubscreen(null);
 	}
 
 	Unload() {

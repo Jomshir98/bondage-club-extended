@@ -1,6 +1,5 @@
 import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
-import { module_gui } from "../modules";
 import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, getPermissionMinDisplayText, PermissionData, PermissionInfo } from "../modules/authority";
 import { icon_OwnerList } from "../resources";
 import { DrawImageEx } from "../utilsClub";
@@ -9,6 +8,7 @@ import { GuiSubscreen } from "./subscreen";
 import { GuiAuthorityRoles } from "./authority_roles";
 import { GuiAuthorityDialogMin } from "./authority_dialogMin";
 import { GuiAuthorityDialogSelf } from "./authority_dialogSelf";
+import { setSubscreen } from "../modules/gui";
 
 type PermListItem = (
 	{
@@ -223,7 +223,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
 		// Owner list
-		if (MouseIn(1815, 190, 90, 90)) return module_gui.currentSubscreen = new GuiAuthorityRoles(this.character);
+		if (MouseIn(1815, 190, 90, 90)) return setSubscreen(new GuiAuthorityRoles(this.character));
 
 		if (this.permissionData !== null) {
 
@@ -256,7 +256,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 							)
 						) {
 							// If Player couldn't switch back on, show warning instead
-							module_gui.currentSubscreen = new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this);
+							setSubscreen(new GuiAuthorityDialogSelf(this.character, e.permission, e.permissionInfo, this));
 						} else {
 							this.character.setPermission(e.permission, "self", !e.permissionInfo.self);
 						}
@@ -267,14 +267,14 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						const access_editMin = this.permissionData.authority_edit_min ?
 							checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
 							false;
-						module_gui.currentSubscreen = new GuiAuthorityDialogMin(
+						setSubscreen(new GuiAuthorityDialogMin(
 							this.character,
 							e.permission,
 							e.permissionInfo,
 							this.myAccessLevel,
 							!access_editMin || !checkPermisionAccesData(e.permissionInfo, this.myAccessLevel),
 							this
-						);
+						));
 						return;
 					}
 				}
@@ -297,7 +297,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+		setSubscreen(new GuiMainMenu(this.character));
 	}
 
 	Unload() {

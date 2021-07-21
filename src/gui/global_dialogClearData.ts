@@ -1,4 +1,4 @@
-import { module_gui } from "../modules";
+import { setSubscreen } from "../modules/gui";
 import { clearAllData } from "../modules/storage";
 import { GuiSubscreen } from "./subscreen";
 
@@ -60,6 +60,6 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 
 	Exit() {
 		if (this.allowedConfirmTime === null) return;
-		module_gui.currentSubscreen = this.back;
+		setSubscreen(this.back);
 	}
 }

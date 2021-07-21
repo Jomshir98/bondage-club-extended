@@ -1,10 +1,10 @@
 import { ChatroomCharacter } from "../characters";
-import { module_gui } from "../modules";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
 import { LogAccessLevel, LogEntry, logMessageRender } from "../modules/log";
 import { GuiLogConfig } from "./log_config";
 import { DrawImageEx } from "../utilsClub";
+import { setSubscreen } from "../modules/gui";
 
 const PER_PAGE_COUNT = 5;
 
@@ -186,7 +186,7 @@ export class GuiLog extends GuiSubscreen {
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
-		if (MouseIn(1815, 190, 90, 90) && this.allowConfiguration) return module_gui.currentSubscreen = new GuiLogConfig(this.character);
+		if (MouseIn(1815, 190, 90, 90) && this.allowConfiguration) return setSubscreen(new GuiLogConfig(this.character));
 
 		if (this.logData !== null) {
 
@@ -255,7 +255,7 @@ export class GuiLog extends GuiSubscreen {
 	}
 
 	Exit() {
-		module_gui.currentSubscreen = new GuiMainMenu(this.character);
+		setSubscreen(new GuiMainMenu(this.character));
 	}
 
 	Unload() {

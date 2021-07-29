@@ -4,6 +4,7 @@ import { hookFunction } from "../patching";
 import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "../utils";
 import { BaseModule } from "../moduleManager";
+import { firstTimeInit } from "./storage";
 
 interface ICommandInfo {
 	description: string | null;
@@ -250,7 +251,7 @@ export class ModuleCommands extends BaseModule {
 	load() {
 		hookFunction("ChatRoomSendChat", 10, (args, next) => {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
-			if (chat) {
+			if (chat && !firstTimeInit) {
 				const msg = chat.value.trim();
 				if (msg.startsWith("..")) {
 					chat.value = msg.substr(1);
@@ -267,7 +268,7 @@ export class ModuleCommands extends BaseModule {
 		hookFunction("ChatRoomKeyDown", 10, (args, next) => {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			// Tab for command completion
-			if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..")) {
+			if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..") && !firstTimeInit) {
 				const e = args[0] as KeyboardEvent ?? event;
 				e?.preventDefault();
 

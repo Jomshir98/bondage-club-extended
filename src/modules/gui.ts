@@ -1,10 +1,12 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { GuiMainMenu } from "../gui/mainmenu";
 import { GuiSubscreen } from "../gui/subscreen";
+import { GuiWelcomeSelection } from "../gui/welcome";
 import { BaseModule } from "../moduleManager";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_BCX } from "../resources";
 import { changeHandlers } from "./messaging";
+import { firstTimeInit } from "./storage";
 
 export function getCurrentSubscreen(): GuiSubscreen | null {
 	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
@@ -75,7 +77,16 @@ export class ModuleGUI extends BaseModule {
 
 			next(args);
 			const C = this.getInformationSheetCharacter();
-			if (C && C.BCXVersion !== null) {
+			if (firstTimeInit) {
+				if (C && C.isPlayer()) {
+					DrawButton(1815, 685, 90, 90, "", "White", icon_BCX);
+					MainCanvas.beginPath();
+					MainCanvas.rect(1300, 685, 500, 90);
+					MainCanvas.fillStyle = "Black";
+					MainCanvas.fill();
+					DrawText(`You can find BCX here ►`, 1550, 685 + 45, "White");
+				}
+			} else if (C && C.BCXVersion !== null) {
 				DrawButton(1815, 685, 90, 90, "", "White", icon_BCX, "BCX");
 			}
 		});
@@ -86,8 +97,15 @@ export class ModuleGUI extends BaseModule {
 			}
 
 			const C = this.getInformationSheetCharacter();
-			if (C && C.BCXVersion !== null && MouseIn(1815, 685, 90, 90)) {
-				this.currentSubscreen = new GuiMainMenu(C);
+			if (MouseIn(1815, 685, 90, 90)) {
+				if (firstTimeInit) {
+					if (C && C.isPlayer()) {
+						ServerBeep = {};
+						this.currentSubscreen = new GuiWelcomeSelection();
+					}
+				} else if (C && C.BCXVersion !== null && MouseIn(1815, 685, 90, 90)) {
+					this.currentSubscreen = new GuiMainMenu(C);
+				}
 			} else {
 				return next(args);
 			}

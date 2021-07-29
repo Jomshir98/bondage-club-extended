@@ -21,10 +21,10 @@ export function getVisibleGroupName(group: AssetGroup): string {
 	return developmentMode ? group.Name : (GROUP_NAME_OVERRIDES[group.Name] ?? group.Description);
 }
 
-export function InfoBeep(msg: string) {
+export function InfoBeep(msg: string, timer: number = 3000) {
 	console.log(`BCX msg: ${msg}`);
 	ServerBeep = {
-		Timer: Date.now() + 3000,
+		Timer: Date.now() + timer,
 		Message: msg
 	};
 }

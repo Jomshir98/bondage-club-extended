@@ -2,6 +2,7 @@ import { getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
 import { hookFunction } from "../patching";
 import { isObject, uuidv4 } from "../utils";
+import { firstTimeInit } from "./storage";
 
 export const hiddenMessageHandlers: Map<keyof BCX_messages, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();
@@ -18,7 +19,7 @@ export const queryHandlers: {
 export const changeHandlers: ((source: number) => void)[] = [];
 
 export function sendHiddenMessage<T extends keyof BCX_messages>(type: T, message: BCX_messages[T], Target: number | null = null) {
-	if (!ServerPlayerIsInChatRoom())
+	if (!ServerPlayerIsInChatRoom() || firstTimeInit)
 		return;
 	ServerSend("ChatRoomChat", {
 		Content: "BCXMsg",
@@ -48,6 +49,10 @@ interface IPendingQuery {
 const pendingQueries: Map<string, IPendingQuery> = new Map();
 
 export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_queries[T][0], target: number, timeout: number = 10_000): Promise<BCX_queries[T][1]> {
+	if (firstTimeInit) {
+		return Promise.reject("Unavailable during init");
+	}
+
 	return new Promise((resolve, reject) => {
 		const id = uuidv4();
 		const info: IPendingQuery = {
@@ -154,7 +159,7 @@ export class ModuleMessaging extends BaseModule {
 			const data = args[0];
 
 			if (data?.Type === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
-				if (data.Sender === Player.MemberNumber)
+				if (data.Sender === Player.MemberNumber || firstTimeInit)
 					return;
 				if (!isObject(data.Dictionary)) {
 					console.warn("BCX: Hidden message no Dictionary", data);

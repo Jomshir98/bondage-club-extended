@@ -1,15 +1,24 @@
 import { VERSION_CHECK_BOT } from "../config";
 import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
 import { isObject } from "../utils";
+import { announceSelf } from "./chatroom";
 import { sendHiddenBeep } from "./messaging";
 
 export let modStorage: Partial<ModStorage> = {};
 let deletionPending = false;
+export let firstTimeInit: boolean = false;
+
+export function finalizeFirstTimeInit() {
+	firstTimeInit = false;
+	modStorageSync();
+	console.log("BCX: First time init finalized");
+	announceSelf(true);
+}
 
 export function modStorageSync() {
 	if (moduleInitPhase !== ModuleInitPhase.ready && moduleInitPhase !== ModuleInitPhase.destroy)
 		return;
-	if (deletionPending)
+	if (deletionPending || firstTimeInit)
 		return;
 	if (!Player.OnlineSettings) {
 		console.error("BCX: Player OnlineSettings not defined during storage sync!");
@@ -54,6 +63,7 @@ export class ModuleStorage extends BaseModule {
 			}
 		} else {
 			console.log("BCX: First time init");
+			firstTimeInit = true;
 		}
 	}
 

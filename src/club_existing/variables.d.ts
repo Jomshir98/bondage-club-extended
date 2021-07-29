@@ -24,6 +24,7 @@ declare const Player: PlayerCharacter;
 declare var CurrentScreen: string;
 declare var KeyPress: number | string;
 declare var CurrentScreenFunctions: ScreenFunctions;
+declare const CommonGetFont: MemoizedFunction<(size: number) => string>;
 
 // Character.js
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
@@ -56,8 +57,11 @@ declare function DrawButton(Left: number, Top: number, Width: number, Height: nu
 declare function DrawCheckbox(Left: number, Top: number, Width: number, Height: number, Text: string, IsChecked: boolean, Disabled?: boolean, TextColor?: string, CheckImage?: string): void;
 declare function DrawText(Text: string, X: number, Y: number, Color: string, BackColor?: string): void;
 declare function DrawTextFit(Text: string, X: number, Y: number, Width: number, Color: string, BackColor?: string): void;
+declare function DrawTextWrap(Text: string, X: number, Y: number, Width: number, Height: number, ForeColor: string, BackColor?: string, MaxLine?: number): void;
 declare function DrawBackNextButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, BackText?: () => string, NextText?: () => string, Disabled?: boolean, ArrowWidth?: number): void;
 declare function DrawButtonHover(Left: number, Top: number, Width: number, Height: number, HoveringText: string): void;
+declare function DrawEmptyRect(Left: number, Top: number, Width: number, Height: number, Color: string, Thickness?: number): void;
+declare function DrawRect(Left: number, Top: number, Width: number, Height: number, Color: string): void;
 
 // Cheat.js
 declare function CheatImport(): void;

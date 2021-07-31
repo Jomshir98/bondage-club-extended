@@ -125,6 +125,10 @@ window.BCX_Loaded = false;
     }
     /* eslint-enable no-bitwise */
     const clipboardAvailable = Boolean(navigator.clipboard);
+    /** Clamp number between two values */
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
 
     const patchedFunctions = new Map();
     let unloaded = false;
@@ -620,6 +624,41 @@ BS7XNtOVBiyJByJuEAmzVeY4A87EO3e+QHv76+c9YWZl/cmePSs4dMjUAX0MLBNCa4n7CDyYtS3X
 NfCSEJo/oepKooFMCM3LuW/ke4wOwOWqprPzNbzez2hvbzCLYS8Bb8tMImXkImA7sX/UXE+yS5BJ
 lKuAfTFA7AIuJ8VlFtB+HojvOPeLhyEhC4BuE4gTwK0MMVkr0+8+iBDwDkNQRsh6Uh/IAcDKEJVR
 wEZ5jWSISxqG341cCPlrAHWh2Oue6aRJAAAAAElFTkSuQmCC`.replaceAll("\n", "");
+    const icon_BCX_chatroom = `data:image/png;base64,
+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
+rkJggg==
+`.replaceAll("\n", "");
     const icon_BCX = `data:image/png;base64,
 iVBORw0KGgoAAAANSUhEUgAAAFYAAABWCAQAAAD/X6l8AAAABGdBTUEAALGOfPtRkwAAACBjSFJN
 AAB6JQAAgIMAAPn/AACA6QAAdTAAAOpgAAA6mAAAF2+SX8VGAAAUPUlEQVR42rTbeZRdVbUu8N8+
@@ -908,12 +947,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     var _a;
                     const [C, Zoom, CharX, CharY] = args;
                     const Char = getChatroomCharacter(C.MemberNumber);
-                    const Friend = ((_a = Player.FriendList) !== null && _a !== void 0 ? _a : []).includes(C.MemberNumber);
-                    if (Char === null || Char === void 0 ? void 0 : Char.BCXVersion) {
-                        DrawImageEx(icon_PurpleHeart, CharX + 375 * Zoom, CharY, {
+                    const Friend = C.ID === 0 || ((_a = Player.FriendList) !== null && _a !== void 0 ? _a : []).includes(C.MemberNumber);
+                    if ((Char === null || Char === void 0 ? void 0 : Char.BCXVersion) && ChatRoomHideIconState === 0) {
+                        DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
                             Width: 50 * Zoom,
                             Height: 50 * Zoom,
-                            Alpha: C.ID === 0 || Friend ? 1 : 0.5
+                            Alpha: Friend ? 1 : 0.5
                         });
                     }
                     else {
@@ -930,15 +969,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     next(args);
                     const [C, CharX, CharY, Zoom] = args;
                     const Char = getChatroomCharacter(C.MemberNumber);
-                    const Friend = ((_a = Player.FriendList) !== null && _a !== void 0 ? _a : []).includes(C.MemberNumber);
-                    if (Char === null || Char === void 0 ? void 0 : Char.BCXVersion) {
-                        DrawImageEx(icon_PurpleHeart, CharX + 375 * Zoom, CharY, {
+                    const Friend = C.ID === 0 || ((_a = Player.FriendList) !== null && _a !== void 0 ? _a : []).includes(C.MemberNumber);
+                    if ((Char === null || Char === void 0 ? void 0 : Char.BCXVersion) && ChatRoomHideIconState === 0) {
+                        DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
                             Width: 50 * Zoom,
                             Height: 50 * Zoom,
-                            Alpha: C.ID === 0 || Friend ? 1 : 0.5
+                            Alpha: Friend ? 1 : 0.5
                         });
                     }
-                    else if (Friend) {
+                    else if (Friend && ChatRoomHideIconState === 0) {
                         DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {
                             Width: 50 * Zoom,
                             Height: 50 * Zoom
@@ -1256,7 +1295,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         enteredPrivateRoom: LogAccessLevel.none,
         hadOrgasm: LogAccessLevel.none,
         permissionChange: LogAccessLevel.protected,
-        curseChange: LogAccessLevel.normal,
+        curseChange: LogAccessLevel.none,
         curseTrigger: LogAccessLevel.none
     };
     const LOG_CONFIG_NAMES = {
@@ -1838,7 +1877,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
     function curseItem(Group, curseProperty, character) {
         const group = AssetGroup.find(g => g.Name === Group);
-        if (!group || typeof curseProperty !== "boolean" || !modStorage.cursedItems) {
+        if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null) || !modStorage.cursedItems) {
             console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
             return false;
         }
@@ -1849,6 +1888,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (character) {
             const existingCurse = modStorage.cursedItems[Group];
             if (existingCurse) {
+                if (curseProperty === null) {
+                    return false;
+                }
                 if (!checkPermissionAccess(curseProperty ? "curses_curse" : "curses_lift", character)) {
                     return false;
                 }
@@ -1859,6 +1901,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         const currentItem = InventoryGet(Player, Group);
         if (currentItem) {
+            if (curseProperty === null) {
+                const Asset = currentItem.Asset;
+                if (Asset.Extended && Asset.Archetype === "typed") {
+                    curseProperty = true;
+                }
+                else {
+                    curseProperty = false;
+                }
+            }
             const newCurse = modStorage.cursedItems[Group] = {
                 Name: currentItem.Asset.Name,
                 curseProperty
@@ -1894,6 +1945,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
         }
         modStorageSync();
+        notifyOfChange();
         return true;
     }
     function curseLift(Group, character) {
@@ -1919,6 +1971,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             delete modStorage.cursedItems[Group];
             modStorageSync();
+            notifyOfChange();
             return true;
         }
         return false;
@@ -1973,7 +2026,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             };
             queryHandlers.curseItem = (sender, resolve, data) => {
                 const character = getChatroomCharacter(sender);
-                if (character && isObject(data) && typeof data.Group === "string" && typeof data.curseProperties === "boolean") {
+                if (character && isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
                     resolve(true, curseItem(data.Group, data.curseProperties, character));
                 }
                 else {
@@ -2322,9 +2375,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     typeof data.allowCurse !== "boolean" ||
                     typeof data.allowLift !== "boolean" ||
                     !isObject(data.curses) ||
-                    Object.values(data.curses).some(v => !isObject(v) ||
-                        typeof v.Name !== "string" ||
-                        typeof v.curseProperties !== "boolean")) {
+                    Object.values(data.curses).some(v => v !== null &&
+                        (!isObject(v) ||
+                            typeof v.Name !== "string" ||
+                            typeof v.curseProperties !== "boolean"))) {
                     throw new Error("Bad data");
                 }
                 return data;
@@ -3238,7 +3292,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT$3 = 6;
+    const PER_PAGE_COUNT$4 = 6;
     class GuiAuthorityRoles extends GuiSubscreen {
         constructor(character) {
             super();
@@ -3322,7 +3376,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     name: ((_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(i[0])) || i[1] || null
                 });
             }));
-            const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+            const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$4);
             if (this.page < 0) {
                 this.page = Math.max(totalPages - 1, 0);
             }
@@ -3342,8 +3396,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.fillStyle = "Black";
             MainCanvas.fill();
             if (this.roleData) {
-                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
-                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$4; off++) {
+                    const i = this.page * PER_PAGE_COUNT$4 + off;
                     if (i >= this.roleList.length)
                         break;
                     const e = this.roleList[i];
@@ -3373,7 +3427,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawButton(1008, 815, 210, 64, "Add mistress", "white");
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$4);
                 DrawBackNextButton(1317, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
             }
             else if (this.failed) {
@@ -3403,8 +3457,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (MouseIn(1815, 190, 90, 90))
                 return this.Back();
             if (this.roleData) {
-                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
-                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$4; off++) {
+                    const i = this.page * PER_PAGE_COUNT$4 + off;
                     if (i >= this.roleList.length)
                         break;
                     const e = this.roleList[i];
@@ -3428,7 +3482,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     return;
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$4);
                 if (MouseIn(1317, 800, 150, 90)) {
                     this.page--;
                     if (this.page < 0) {
@@ -3558,7 +3612,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT$2 = 6;
+    const PER_PAGE_COUNT$3 = 6;
     class GuiAuthorityPermissions extends GuiSubscreen {
         constructor(character) {
             super();
@@ -3659,7 +3713,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     });
                 }
             }
-            const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$2);
+            const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$3);
             if (this.page < 0) {
                 this.page = Math.max(totalPages - 1, 0);
             }
@@ -3686,8 +3740,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawButton(870, 182, 64, 64, "X", "White");
                 }
                 MainCanvas.textAlign = "left";
-                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
-                    const i = this.page * PER_PAGE_COUNT$2 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
+                    const i = this.page * PER_PAGE_COUNT$3 + off;
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
@@ -3717,7 +3771,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
                 // Pagination
-                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT$2));
+                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT$3));
                 MainCanvas.textAlign = "center";
                 DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
             }
@@ -3748,8 +3802,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     elem.value = "";
                     this.rebuildList();
                 }
-                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
-                    const i = this.page * PER_PAGE_COUNT$2 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
+                    const i = this.page * PER_PAGE_COUNT$3 + off;
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
@@ -3784,7 +3838,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$2);
+                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$3);
                 if (MouseIn(1605, 800, 150, 90)) {
                     this.page--;
                     if (this.page < 0) {
@@ -3887,7 +3941,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT$1 = 6;
+    const PER_PAGE_COUNT$2 = 6;
     class GuiLogConfig extends GuiSubscreen {
         constructor(character) {
             super();
@@ -3952,7 +4006,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             }
             this.configList.sort((a, b) => a.name.localeCompare(b.name));
-            const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$1);
+            const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$2);
             if (this.page < 0) {
                 this.page = Math.max(totalPages - 1, 0);
             }
@@ -3972,8 +4026,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawButton(870, 182, 64, 64, "X", "White");
                 }
                 MainCanvas.textAlign = "left";
-                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
-                    const i = this.page * PER_PAGE_COUNT$1 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
+                    const i = this.page * PER_PAGE_COUNT$2 + off;
                     if (i >= this.configList.length)
                         break;
                     const e = this.configList[i];
@@ -3987,7 +4041,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     MainCanvas.textAlign = "left";
                 }
                 // Pagination
-                const totalPages = Math.max(1, Math.ceil(this.configList.length / PER_PAGE_COUNT$1));
+                const totalPages = Math.max(1, Math.ceil(this.configList.length / PER_PAGE_COUNT$2));
                 MainCanvas.textAlign = "center";
                 DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
             }
@@ -4020,8 +4074,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     elem.value = "";
                     this.rebuildList();
                 }
-                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
-                    const i = this.page * PER_PAGE_COUNT$1 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$2; off++) {
+                    const i = this.page * PER_PAGE_COUNT$2 + off;
                     if (i >= this.configList.length)
                         break;
                     const e = this.configList[i];
@@ -4043,7 +4097,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     return;
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$1);
+                const totalPages = Math.ceil(this.configList.length / PER_PAGE_COUNT$2);
                 if (MouseIn(1605, 800, 150, 90)) {
                     this.page--;
                     if (this.page < 0) {
@@ -4066,7 +4120,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT = 5;
+    const PER_PAGE_COUNT$1 = 5;
     class GuiLog extends GuiSubscreen {
         constructor(character) {
             super();
@@ -4138,7 +4192,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const msg = logMessageRender(e).toLocaleLowerCase();
                 return filter.every(f => msg.includes(f));
             });
-            const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+            const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT$1);
             if (this.page < 0) {
                 this.page = Math.max(totalPages - 1, 0);
             }
@@ -4157,8 +4211,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     MainCanvas.textAlign = "center";
                     DrawButton(870, 182, 64, 64, "X", "White");
                 }
-                for (let off = 0; off < PER_PAGE_COUNT; off++) {
-                    const i = this.page * PER_PAGE_COUNT + off;
+                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
+                    const i = this.page * PER_PAGE_COUNT$1 + off;
                     if (i >= this.logEntries.length)
                         break;
                     const e = this.logEntries[i];
@@ -4205,7 +4259,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawButton(1400, 815, 150, 64, "Scold", "White");
                 }
                 // Pagination
-                const totalPages = Math.max(1, Math.ceil(this.logEntries.length / PER_PAGE_COUNT));
+                const totalPages = Math.max(1, Math.ceil(this.logEntries.length / PER_PAGE_COUNT$1));
                 DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
             }
             else if (this.failed) {
@@ -4234,8 +4288,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     elem.value = "";
                     this.refreshScreen();
                 }
-                for (let off = 0; off < PER_PAGE_COUNT; off++) {
-                    const i = this.page * PER_PAGE_COUNT + off;
+                for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
+                    const i = this.page * PER_PAGE_COUNT$1 + off;
                     if (i >= this.logEntries.length)
                         break;
                     const e = this.logEntries[i];
@@ -4271,7 +4325,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     return;
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
+                const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT$1);
                 if (MouseIn(1605, 800, 150, 90)) {
                     this.page--;
                     if (this.page < 0) {
@@ -4295,18 +4349,41 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    class GuiCurses extends GuiSubscreen {
+    class GuiCursesAdd extends GuiSubscreen {
         constructor(character) {
             super();
+            this.curseData = null;
+            this.failed = false;
             this.character = character;
         }
         Load() {
-            // On screen load
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.curseData = null;
+            this.character.curseGetInfo().then(res => {
+                this.curseData = res;
+            }, err => {
+                console.error(`BCX: Failed to get permission info for ${this.character}`, err);
+                this.failed = true;
+            });
         }
         Run() {
-            // On each frame
-            var _a, _b;
+            MainCanvas.textAlign = "left";
+            DrawText(`- Curses: Place a new curse on ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+            if (this.curseData === null) {
+                DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                return;
+            }
             // items
+            MainCanvas.textAlign = "left";
             MainCanvas.beginPath();
             MainCanvas.rect(105, 165, 830, 64);
             MainCanvas.fillStyle = "#cccccc";
@@ -4322,8 +4399,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const column = Math.floor(i / 10);
                 const group = AssetGroupItems[i];
                 const currentItem = InventoryGet(this.character.Character, group.Name);
-                // TODO: Actual data
-                const itemIsCursed = ((_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[group.Name]) != null;
+                const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
                 DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), itemIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", itemIsCursed);
             }
             // clothing
@@ -4343,29 +4419,201 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const column = Math.floor(i / 10);
                 const group = AssetGroupClothings[i];
                 const currentItem = InventoryGet(this.character.Character, group.Name);
-                // TODO: Actual data
-                const clothingIsCursed = ((_b = modStorage.cursedItems) === null || _b === void 0 ? void 0 : _b[group.Name]) != null;
+                const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
                 DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), clothingIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", clothingIsCursed);
             }
             //Body
             // TODO: Actual data
             // const bodyIsCursed = false;
             // DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "Grey" : "White", undefined, "Size, skin color, eyes, etc.", bodyIsCursed);
-            MainCanvas.textAlign = "left";
-            DrawText(`- Curses: Place a new curse on ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            MainCanvas.textAlign = "center";
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
         }
         Click() {
-            // On click
             if (MouseIn(1815, 75, 90, 90))
                 return this.Exit();
+            if (this.curseData === null)
+                return;
+            // items
+            const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
+            for (let i = 0; i < AssetGroupItems.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupItems[i];
+                const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
+                if (MouseIn(106 + 281 * column, 240 + 69 * row, 265, 54) && !itemIsCursed) {
+                    this.character.curseItem(group.Name, null);
+                    return;
+                }
+            }
+            // clothing
+            const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
+            for (let i = 0; i < AssetGroupClothings.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupClothings[i];
+                const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
+                if (MouseIn(951 + 281 * column, 240 + 69 * row, 265, 54) && !clothingIsCursed) {
+                    this.character.curseItem(group.Name, null);
+                    return;
+                }
+            }
+        }
+        Exit() {
+            setSubscreen(new GuiCurses(this.character));
+        }
+    }
+
+    const PER_COLUMN_COUNT = 7;
+    const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
+    class GuiCurses extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.curseEntries = [];
+            this.curseData = null;
+            this.failed = false;
+            this.page = 0;
+            this.character = character;
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.curseData = null;
+            this.rebuildList();
+            this.character.curseGetInfo().then(res => {
+                this.curseData = res;
+                this.rebuildList();
+            }, err => {
+                console.error(`BCX: Failed to get curse info for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        rebuildList() {
+            var _a;
+            if (!this.active)
+                return;
+            this.curseEntries = [];
+            if (this.curseData === null)
+                return;
+            for (const [k, v] of Object.entries(this.curseData.curses)) {
+                const group = AssetGroup.find(g => g.Name === k);
+                if (!group) {
+                    console.warn(`BCX: Unknown group ${k}`);
+                    continue;
+                }
+                if (v === null) {
+                    this.curseEntries.push({
+                        group: k,
+                        // TODO: Name of curse for empty group
+                        name: `Empty: ${getVisibleGroupName(group)}`,
+                        empty: true
+                    });
+                }
+                else {
+                    const item = AssetGet(this.character.Character.AssetFamily, k, v.Name);
+                    this.curseEntries.push({
+                        group: k,
+                        // TODO: Name of curse for cursed item
+                        name: `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.Name} (${getVisibleGroupName(group)})`,
+                        empty: false,
+                        propertiesCursed: v.curseProperties
+                    });
+                }
+            }
+            this.page = clamp(this.page, 0, Math.ceil(this.curseEntries.length / PER_PAGE_COUNT));
+        }
+        Run() {
+            MainCanvas.textAlign = "left";
+            DrawText(`- Curses: All active curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            if (this.curseData === null) {
+                MainCanvas.textAlign = "center";
+                DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                return;
+            }
+            for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                const i = this.page * PER_PAGE_COUNT + off;
+                if (i >= this.curseEntries.length)
+                    break;
+                const e = this.curseEntries[i];
+                const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
+                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 850;
+                MainCanvas.textAlign = "left";
+                DrawButton(X, Y, 440, 60, "", "White");
+                DrawTextFit(e.name, X + 10, Y + 30, 430, "Black");
+                MainCanvas.beginPath();
+                MainCanvas.rect(X + 470, Y, 150, 60);
+                MainCanvas.stroke();
+                MainCanvas.textAlign = "center";
+                DrawTextFit("∞", X + 545, Y + 30, 150, "Gray", "Black");
+                if (!e.empty) {
+                    const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
+                    DrawButton(X + 650, Y, 60, 60, e.propertiesCursed ? "C" : "", allowPropertyChange ? "White" : "Gray", "", "Toggle cursing item config", !allowPropertyChange);
+                }
+                if (this.curseData.allowLift) {
+                    DrawButton(X + 740, Y, 60, 60, "X", "White", "", "Lift curse");
+                }
+            }
+            // Column separator
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(950, 160);
+            MainCanvas.lineTo(950, 780);
+            MainCanvas.stroke();
+            MainCanvas.textAlign = "center";
+            if (this.curseData.allowCurse) {
+                DrawButton(120, 820, 400, 90, "Add new curse", "White", "", "Place new curse on body, items or clothes");
+            }
+            // Pagination
+            const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
+            DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (this.curseData === null)
+                return;
+            for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                const i = this.page * PER_PAGE_COUNT + off;
+                if (i >= this.curseEntries.length)
+                    break;
+                const e = this.curseEntries[i];
+                const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
+                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 800;
+                const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
+                if (!e.empty && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
+                    this.character.curseItem(e.group, !e.propertiesCursed);
+                    return;
+                }
+                if (this.curseData.allowLift && MouseIn(X + 740, Y, 60, 60)) {
+                    this.character.curseLift(e.group);
+                    return;
+                }
+            }
+            if (this.curseData.allowCurse && MouseIn(120, 820, 400, 90)) {
+                return setSubscreen(new GuiCursesAdd(this.character));
+            }
+            // Pagination
+            const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
+            if (MouseIn(1605, 800, 150, 90)) {
+                this.page--;
+                if (this.page < 0) {
+                    this.page = Math.max(totalPages - 1, 0);
+                }
+            }
+            else if (MouseIn(1755, 800, 150, 90)) {
+                this.page++;
+                if (this.page >= totalPages) {
+                    this.page = 0;
+                }
+            }
         }
         Exit() {
             setSubscreen(new GuiMainMenu(this.character));
-        }
-        Unload() {
-            // On screen unload
         }
     }
 
@@ -4497,31 +4745,31 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         Run() {
             MainCanvas.textAlign = "center";
             DrawText(`- Welcome to Bondage Club Extended (BCX) -`, 1000, 100, "Black", "Gray");
-            DrawText(`Please choose a template, which sets your default experience, permissions and configuration.`, 1000, 150, "Black");
-            DrawText(`Note: You can change the defaults, but changing to another template is not possible without resetting BCX fully.`, 1000, 200, "FireBrick");
+            DrawText(`Please choose a preset, which sets your default experience, permissions and configuration.`, 1000, 150, "Black");
+            DrawText(`Note: You can change the defaults, but changing to another preset is not possible without resetting BCX fully.`, 1000, 200, "FireBrick");
             const width = 400;
             const texts = ["Dominant", "Switch/Exploring", "Submissive", "Slave"];
             const images = ["Icons/Management.png", "Icons/Swap.png", "Icons/Kneel.png", icon_OwnerList];
-            const descriptionDominant = `This template is for dominants who\n` +
+            const descriptionDominant = `This preset is for dominants who\n` +
                 `never intend to submit. Therefore,\n` +
                 `most modules are not loaded at\n` +
                 `start. That said, you can still use\n` +
                 `the BCX graphical user interface\n` +
                 `on other BCX users to use actions,\n` +
                 `you have permission for, on them,\n` +
-                `same as with all other templates.`;
-            const descriptionSwitch = `This template is for switches who\n` +
+                `same as with all other presets.`;
+            const descriptionSwitch = `This preset is for switches who\n` +
                 `are sometimes dominant and\n` +
                 `sometimes submissive, enabling\n` +
                 `them to explore BCX slowly, while\n` +
                 `having full control over all of its\n` +
                 `settings and features.`;
-            const descriptionSubmissive = `This template is for submissives,\n` +
+            const descriptionSubmissive = `This preset is for submissives,\n` +
                 `who want to give some of their\n` +
                 `control to selected dominants and\n` +
                 `lovers, giving only them authority\n` +
                 `over some of BCX's settings.`;
-            const descriptionSlave = `This template is a much more\n` +
+            const descriptionSlave = `This preset is a much more\n` +
                 `extreme submissive experience,\n` +
                 `not leaving much control over the\n` +
                 `settings and permissions to you,\n` +

@@ -14,25 +14,25 @@ export class GuiWelcomeSelection extends GuiSubscreen {
 		MainCanvas.textAlign = "center";
 
 		DrawText(`- Welcome to Bondage Club Extended (BCX) -`, 1000, 100, "Black", "Gray");
-		DrawText(`Please choose a template, which sets your default experience, permissions and configuration.`, 1000, 150, "Black");
-		DrawText(`Note: You can change the defaults, but changing to another template is not possible without resetting BCX fully.`, 1000, 200, "FireBrick");
+		DrawText(`Please choose a preset, which sets your default experience, permissions and configuration.`, 1000, 150, "Black");
+		DrawText(`Note: You can change the defaults, but changing to another preset is not possible without resetting BCX fully.`, 1000, 200, "FireBrick");
 
 		const width = 400;
 		const texts = ["Dominant", "Switch/Exploring", "Submissive", "Slave"];
 		const images = ["Icons/Management.png", "Icons/Swap.png", "Icons/Kneel.png", icon_OwnerList];
 
 		const descriptionDominant =
-			`This template is for dominants who\n` +
+			`This preset is for dominants who\n` +
 			`never intend to submit. Therefore,\n` +
 			`most modules are not loaded at\n` +
 			`start. That said, you can still use\n` +
 			`the BCX graphical user interface\n` +
 			`on other BCX users to use actions,\n` +
 			`you have permission for, on them,\n` +
-			`same as with all other templates.`;
+			`same as with all other presets.`;
 
 		const descriptionSwitch =
-			`This template is for switches who\n` +
+			`This preset is for switches who\n` +
 			`are sometimes dominant and\n` +
 			`sometimes submissive, enabling\n` +
 			`them to explore BCX slowly, while\n` +
@@ -40,14 +40,14 @@ export class GuiWelcomeSelection extends GuiSubscreen {
 			`settings and features.`;
 
 		const descriptionSubmissive =
-			`This template is for submissives,\n` +
+			`This preset is for submissives,\n` +
 			`who want to give some of their\n` +
 			`control to selected dominants and\n` +
 			`lovers, giving only them authority\n` +
 			`over some of BCX's settings.`;
 
 		const descriptionSlave =
-			`This template is a much more\n` +
+			`This preset is a much more\n` +
 			`extreme submissive experience,\n` +
 			`not leaving much control over the\n` +
 			`settings and permissions to you,\n` +

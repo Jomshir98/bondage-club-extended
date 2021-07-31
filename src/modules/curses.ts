@@ -3,7 +3,7 @@ import { BaseModule, ModuleCategory } from "../moduleManager";
 import { arrayUnique, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
-import { queryHandlers } from "./messaging";
+import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorage, modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 
@@ -11,10 +11,10 @@ const CURSES_CHECK_INTERVAL = 2000;
 
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 
-export function curseItem(Group: string, curseProperty: boolean, character: ChatroomCharacter | null): boolean {
+export function curseItem(Group: string, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {
 	const group = AssetGroup.find(g => g.Name === Group);
 
-	if (!group || typeof curseProperty !== "boolean" || !modStorage.cursedItems) {
+	if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null) || !modStorage.cursedItems) {
 		console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
 		return false;
 	}
@@ -27,6 +27,9 @@ export function curseItem(Group: string, curseProperty: boolean, character: Chat
 	if (character) {
 		const existingCurse = modStorage.cursedItems[Group];
 		if (existingCurse) {
+			if (curseProperty === null) {
+				return false;
+			}
 			if (!checkPermissionAccess(curseProperty ? "curses_curse" : "curses_lift", character)) {
 				return false;
 			}
@@ -38,6 +41,16 @@ export function curseItem(Group: string, curseProperty: boolean, character: Chat
 	const currentItem = InventoryGet(Player, Group);
 
 	if (currentItem) {
+
+		if (curseProperty === null) {
+			const Asset = currentItem.Asset;
+			if (Asset.Extended && Asset.Archetype === "typed") {
+				curseProperty = true;
+			} else {
+				curseProperty = false;
+			}
+		}
+
 		const newCurse: CursedItemInfo = modStorage.cursedItems[Group] = {
 			Name: currentItem.Asset.Name,
 			curseProperty
@@ -73,6 +86,7 @@ export function curseItem(Group: string, curseProperty: boolean, character: Chat
 	}
 
 	modStorageSync();
+	notifyOfChange();
 	return true;
 }
 
@@ -98,6 +112,7 @@ export function curseLift(Group: string, character: ChatroomCharacter | null): b
 		}
 		delete modStorage.cursedItems[Group];
 		modStorageSync();
+		notifyOfChange();
 		return true;
 	}
 	return false;
@@ -153,7 +168,7 @@ export class ModuleCurses extends BaseModule {
 		};
 		queryHandlers.curseItem = (sender, resolve, data) => {
 			const character = getChatroomCharacter(sender);
-			if (character && isObject(data) && typeof data.Group === "string" && typeof data.curseProperties === "boolean") {
+			if (character && isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
 				resolve(true, curseItem(data.Group, data.curseProperties, character));
 			} else {
 				resolve(false);

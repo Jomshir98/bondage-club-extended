@@ -218,9 +218,12 @@ export class ChatroomCharacter {
 				typeof data.allowLift !== "boolean" ||
 				!isObject(data.curses) ||
 				Object.values(data.curses).some(v =>
-					!isObject(v) ||
-					typeof v.Name !== "string" ||
-					typeof v.curseProperties !== "boolean"
+					v !== null &&
+					(
+						!isObject(v) ||
+						typeof v.Name !== "string" ||
+						typeof v.curseProperties !== "boolean"
+					)
 				)
 			) {
 				throw new Error("Bad data");
@@ -229,7 +232,7 @@ export class ChatroomCharacter {
 		});
 	}
 
-	curseItem(Group: string, curseProperties: boolean): Promise<boolean> {
+	curseItem(Group: string, curseProperties: boolean | null): Promise<boolean> {
 		return sendQuery("curseItem", { Group, curseProperties }, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				throw new Error("Bad data");
@@ -312,7 +315,7 @@ export class PlayerCharacter extends ChatroomCharacter {
 		if (!modStorage.logConfig) {
 			return Promise.reject("Not initialized");
 		}
-		return Promise.resolve({...modStorage.logConfig});
+		return Promise.resolve({ ...modStorage.logConfig });
 	}
 
 	override setLogConfig(category: BCX_LogCategory, target: LogAccessLevel): Promise<boolean> {

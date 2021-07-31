@@ -65,3 +65,8 @@ export function uuidv4() {
 /* eslint-enable no-bitwise */
 
 export const clipboardAvailable = Boolean(navigator.clipboard);
+
+/** Clamp number between two values */
+export function clamp(value: number, min: number, max: number) {
+	return Math.min(Math.max(value, min), max);
+}

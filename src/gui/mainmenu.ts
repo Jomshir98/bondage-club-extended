@@ -3,7 +3,7 @@ import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
-import { GuiCurses } from "./curses_add";
+import { GuiCurses } from "./curses";
 import { GuiMisc } from "./misc";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";

@@ -213,7 +213,7 @@ const logConfigDefaults: LogConfig = {
 	enteredPrivateRoom: LogAccessLevel.none,
 	hadOrgasm: LogAccessLevel.none,
 	permissionChange: LogAccessLevel.protected,
-	curseChange: LogAccessLevel.normal,
+	curseChange: LogAccessLevel.none,
 	curseTrigger: LogAccessLevel.none
 };
 

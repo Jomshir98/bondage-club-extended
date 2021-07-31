@@ -1,13 +1,15 @@
 import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
-import { modStorage } from "../modules/storage";
 import { getVisibleGroupName } from "../utilsClub";
-import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
+import { GuiCurses } from "./curses";
 
-export class GuiCurses extends GuiSubscreen {
+export class GuiCursesAdd extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
+
+	private curseData: BCX_curseInfo | null = null;
+	private failed: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -15,13 +17,38 @@ export class GuiCurses extends GuiSubscreen {
 	}
 
 	Load() {
-		// On screen load
+		this.requestData();
+	}
+
+	onChange(sender: number) {
+		if (sender === this.character.MemberNumber) {
+			this.requestData();
+		}
+	}
+
+	private requestData() {
+		this.curseData = null;
+		this.character.curseGetInfo().then(res => {
+			this.curseData = res;
+		}, err => {
+			console.error(`BCX: Failed to get permission info for ${this.character}`, err);
+			this.failed = true;
+		});
 	}
 
 	Run() {
-		// On each frame
+		MainCanvas.textAlign = "left";
+		DrawText(`- Curses: Place a new curse on ${this.character.Name} -`, 125, 125, "Black", "Gray");
+		MainCanvas.textAlign = "center";
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+
+		if (this.curseData === null) {
+			DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+			return;
+		}
 
 		// items
+		MainCanvas.textAlign = "left";
 		MainCanvas.beginPath();
 		MainCanvas.rect(105, 165, 830, 64);
 		MainCanvas.fillStyle = "#cccccc";
@@ -40,9 +67,7 @@ export class GuiCurses extends GuiSubscreen {
 
 			const currentItem = InventoryGet(this.character.Character, group.Name);
 
-			// TODO: Actual data
-			const itemIsCursed = modStorage.cursedItems?.[group.Name] != null;
-
+			const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
 
 			DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), itemIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", itemIsCursed);
 		}
@@ -68,9 +93,7 @@ export class GuiCurses extends GuiSubscreen {
 
 			const currentItem = InventoryGet(this.character.Character, group.Name);
 
-			// TODO: Actual data
-			const clothingIsCursed = modStorage.cursedItems?.[group.Name] != null;
-
+			const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
 
 			DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), clothingIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", clothingIsCursed);
 		}
@@ -80,25 +103,48 @@ export class GuiCurses extends GuiSubscreen {
 
 		// const bodyIsCursed = false;
 		// DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "Grey" : "White", undefined, "Size, skin color, eyes, etc.", bodyIsCursed);
-
-		MainCanvas.textAlign = "left";
-		DrawText(`- Curses: Place a new curse on ${this.character.Name} -`, 125, 125, "Black", "Gray");
-		MainCanvas.textAlign = "center";
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
 	}
 
 	Click() {
-		// On click
-
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
+		if (this.curseData === null)
+			return;
+
+		// items
+
+		const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
+		for (let i = 0; i < AssetGroupItems.length; i++) {
+			const row = i % 10;
+			const column = Math.floor(i / 10);
+			const group = AssetGroupItems[i];
+
+			const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
+
+			if (MouseIn(106 + 281 * column, 240 + 69 * row, 265, 54) && !itemIsCursed) {
+				this.character.curseItem(group.Name, null);
+				return;
+			}
+		}
+
+		// clothing
+
+		const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
+		for (let i = 0; i < AssetGroupClothings.length; i++) {
+			const row = i % 10;
+			const column = Math.floor(i / 10);
+			const group = AssetGroupClothings[i];
+
+			const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
+
+			if (MouseIn(951 + 281 * column, 240 + 69 * row, 265, 54) && !clothingIsCursed) {
+				this.character.curseItem(group.Name, null);
+				return;
+			}
+		}
 	}
 
 	Exit() {
-		setSubscreen(new GuiMainMenu(this.character));
-	}
-
-	Unload() {
-		// On screen unload
+		setSubscreen(new GuiCurses(this.character));
 	}
 }

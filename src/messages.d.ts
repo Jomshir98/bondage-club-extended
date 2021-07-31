@@ -98,7 +98,7 @@ type BCX_queries = {
 	curseItem: [
 		{
 			Group: string;
-			curseProperties: boolean;
+			curseProperties: boolean | null;
 		},
 		boolean
 	];

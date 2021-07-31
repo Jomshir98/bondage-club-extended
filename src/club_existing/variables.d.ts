@@ -69,6 +69,7 @@ declare function CheatImport(): void;
 // Chatroom.js
 declare var ChatRoomCharacter: Character[];
 declare var ChatRoomTargetMemberNumber: number | null;
+declare var ChatRoomHideIconState: number;
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomCharacterUpdate(C: Character): void;
 declare function ChatRoomMessage(data: any): void;

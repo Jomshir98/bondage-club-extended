@@ -158,7 +158,7 @@ export class GuiCurses extends GuiSubscreen {
 			const e = this.curseEntries[i];
 
 			const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
-			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 800;
+			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 850;
 
 			const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
 

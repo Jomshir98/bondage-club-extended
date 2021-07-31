@@ -3,7 +3,7 @@ import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "../moduleManager";
 import { hookFunction, patchFunction } from "../patching";
-import { icon_Emote, icon_PurpleHeart, icon_Typing } from "../resources";
+import { icon_Emote, icon_PurpleHeart, icon_Typing, icon_BCX_chatroom } from "../resources";
 import { getChatroomCharacter } from "../characters";
 import { modStorage } from "./storage";
 
@@ -151,12 +151,12 @@ export class ModuleChatroom extends BaseModule {
 			hookFunction("ChatRoomDrawFriendList", 0, (args, next) => {
 				const [C, Zoom, CharX, CharY] = args as [Character, number, number, number];
 				const Char = getChatroomCharacter(C.MemberNumber!);
-				const Friend = (Player.FriendList ?? []).includes(C.MemberNumber!);
+				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
 				if (Char?.BCXVersion) {
-					DrawImageEx(icon_PurpleHeart, CharX + 375 * Zoom, CharY, {
+					DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
-						Alpha: C.ID === 0 || Friend ? 1 : 0.5
+						Alpha: Friend ? 1 : 0.5
 					});
 				} else {
 					next(args);
@@ -172,12 +172,12 @@ export class ModuleChatroom extends BaseModule {
 
 				const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
 				const Char = getChatroomCharacter(C.MemberNumber!);
-				const Friend = (Player.FriendList ?? []).includes(C.MemberNumber!);
+				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
 				if (Char?.BCXVersion) {
-					DrawImageEx(icon_PurpleHeart, CharX + 375 * Zoom, CharY, {
+					DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
-						Alpha: C.ID === 0 || Friend ? 1 : 0.5
+						Alpha: Friend ? 1 : 0.5
 					});
 				} else if (Friend) {
 					DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {

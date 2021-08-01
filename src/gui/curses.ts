@@ -4,7 +4,7 @@ import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
 import { GuiCursesAdd } from "./curses_add";
 import { clamp } from "../utils";
-import { getVisibleGroupName } from "../utilsClub";
+import { getVisibleGroupName, DrawImageEx } from "../utilsClub";
 
 const PER_COLUMN_COUNT = 7;
 const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
@@ -13,6 +13,7 @@ interface CurseEntry {
 	name: string;
 	group: string;
 	empty: boolean;
+	type: string;
 	propertiesCursed?: boolean;
 }
 
@@ -70,17 +71,17 @@ export class GuiCurses extends GuiSubscreen {
 			if (v === null) {
 				this.curseEntries.push({
 					group: k,
-					// TODO: Name of curse for empty group
-					name: `Empty: ${getVisibleGroupName(group)}`,
-					empty: true
+					name: `Blocked: ${getVisibleGroupName(group)}`,
+					empty: true,
+					type: group.Clothing ? "clothing" : "item"
 				});
 			} else {
 				const item = AssetGet(this.character.Character.AssetFamily, k, v.Name);
 				this.curseEntries.push({
 					group: k,
-					// TODO: Name of curse for cursed item
 					name: `${item?.Description ?? v.Name} (${getVisibleGroupName(group)})`,
 					empty: false,
+					type: group.Clothing ? "clothing" : "item",
 					propertiesCursed: v.curseProperties
 				});
 			}
@@ -107,23 +108,37 @@ export class GuiCurses extends GuiSubscreen {
 			const e = this.curseEntries[i];
 
 			const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
-			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 850;
+			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
 
+			// curse description
 			MainCanvas.textAlign = "left";
-			DrawButton(X, Y, 440, 60, "", "White");
-			DrawTextFit(e.name, X + 10, Y + 30, 430, "Black");
 			MainCanvas.beginPath();
-			MainCanvas.rect(X + 470, Y, 150, 60);
+			MainCanvas.rect(X, Y, 440, 60);
 			MainCanvas.stroke();
-			MainCanvas.textAlign = "center";
-			DrawTextFit("∞", X + 545, Y + 30, 150, "Gray", "Black");
+			DrawImageEx(e.type === "clothing" ? "Icons/Dress.png" : "Assets/Female3DCG/ItemArms/Preview/NylonRope.png", X + 6, Y + 6, {
+				Height: 50,
+				Width: 50
+			});
+			DrawTextFit(e.name, X + 65, Y + 30, 375, "Black");
 
+			// timer info
+			MainCanvas.textAlign = "center";
+			DrawButton(X + 470, Y, 150, 60, "∞", "White", "", "Permanent curse");
+
+			// item settings curse
 			if (!e.empty) {
 				const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
 
-				DrawButton(X + 650, Y, 60, 60, e.propertiesCursed ? "C" : "", allowPropertyChange ? "White" : "Gray", "", "Toggle cursing item config", !allowPropertyChange);
+				DrawButton(X + 650, Y, 60, 60, "",
+					allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "Gray", "",
+					e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
+				DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 655, Y + 5, {
+					Height: 50,
+					Width: 50
+				});
 			}
 
+			// remove curse
 			if (this.curseData.allowLift) {
 				DrawButton(X + 740, Y, 60, 60, "X", "White", "", "Lift curse");
 			}
@@ -131,8 +146,8 @@ export class GuiCurses extends GuiSubscreen {
 
 		// Column separator
 		MainCanvas.beginPath();
-		MainCanvas.moveTo(950, 160);
-		MainCanvas.lineTo(950, 780);
+		MainCanvas.moveTo(954, 160);
+		MainCanvas.lineTo(954, 780);
 		MainCanvas.stroke();
 
 		MainCanvas.textAlign = "center";
@@ -158,7 +173,7 @@ export class GuiCurses extends GuiSubscreen {
 			const e = this.curseEntries[i];
 
 			const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
-			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 850;
+			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
 
 			const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
 

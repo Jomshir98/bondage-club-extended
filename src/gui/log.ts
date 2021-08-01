@@ -133,7 +133,7 @@ export class GuiLog extends GuiSubscreen {
 				MainCanvas.beginPath();
 				MainCanvas.rect(1270, Y, 320, 64);
 				MainCanvas.stroke();
-				DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Gray", "Black");
+				DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Black", "");
 
 				if (this.allowDeletion) {
 					MainCanvas.textAlign = "center";

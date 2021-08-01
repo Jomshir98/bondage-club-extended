@@ -38,7 +38,7 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 	Run() {
 		MainCanvas.textAlign = "left";
-		DrawText(`- Curses: Place a new curse on ${this.character.Name} -`, 125, 125, "Black", "Gray");
+		DrawText(`- Curses: Place new curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
 

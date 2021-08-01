@@ -4229,7 +4229,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     MainCanvas.beginPath();
                     MainCanvas.rect(1270, Y, 320, 64);
                     MainCanvas.stroke();
-                    DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Gray", "Black");
+                    DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Black", "");
                     if (this.allowDeletion) {
                         MainCanvas.textAlign = "center";
                         DrawButton(1630, Y, 64, 64, "X", "White", "", "Delete log entry");
@@ -4375,7 +4375,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         Run() {
             MainCanvas.textAlign = "left";
-            DrawText(`- Curses: Place a new curse on ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            DrawText(`- Curses: Place new curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
             MainCanvas.textAlign = "center";
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
             if (this.curseData === null) {
@@ -4508,18 +4508,18 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 if (v === null) {
                     this.curseEntries.push({
                         group: k,
-                        // TODO: Name of curse for empty group
-                        name: `Empty: ${getVisibleGroupName(group)}`,
-                        empty: true
+                        name: `Blocked: ${getVisibleGroupName(group)}`,
+                        empty: true,
+                        type: group.Clothing ? "clothing" : "item"
                     });
                 }
                 else {
                     const item = AssetGet(this.character.Character.AssetFamily, k, v.Name);
                     this.curseEntries.push({
                         group: k,
-                        // TODO: Name of curse for cursed item
                         name: `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.Name} (${getVisibleGroupName(group)})`,
                         empty: false,
+                        type: group.Clothing ? "clothing" : "item",
                         propertiesCursed: v.curseProperties
                     });
                 }
@@ -4542,27 +4542,38 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     break;
                 const e = this.curseEntries[i];
                 const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
-                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 850;
+                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
+                // curse description
                 MainCanvas.textAlign = "left";
-                DrawButton(X, Y, 440, 60, "", "White");
-                DrawTextFit(e.name, X + 10, Y + 30, 430, "Black");
                 MainCanvas.beginPath();
-                MainCanvas.rect(X + 470, Y, 150, 60);
+                MainCanvas.rect(X, Y, 440, 60);
                 MainCanvas.stroke();
+                DrawImageEx(e.type === "clothing" ? "Icons/Dress.png" : "Assets/Female3DCG/ItemArms/Preview/NylonRope.png", X + 6, Y + 6, {
+                    Height: 50,
+                    Width: 50
+                });
+                DrawTextFit(e.name, X + 65, Y + 30, 375, "Black");
+                // timer info
                 MainCanvas.textAlign = "center";
-                DrawTextFit("∞", X + 545, Y + 30, 150, "Gray", "Black");
+                DrawButton(X + 470, Y, 150, 60, "∞", "White", "", "Permanent curse");
+                // item settings curse
                 if (!e.empty) {
                     const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
-                    DrawButton(X + 650, Y, 60, 60, e.propertiesCursed ? "C" : "", allowPropertyChange ? "White" : "Gray", "", "Toggle cursing item config", !allowPropertyChange);
+                    DrawButton(X + 650, Y, 60, 60, "", allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "Gray", "", e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
+                    DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 655, Y + 5, {
+                        Height: 50,
+                        Width: 50
+                    });
                 }
+                // remove curse
                 if (this.curseData.allowLift) {
                     DrawButton(X + 740, Y, 60, 60, "X", "White", "", "Lift curse");
                 }
             }
             // Column separator
             MainCanvas.beginPath();
-            MainCanvas.moveTo(950, 160);
-            MainCanvas.lineTo(950, 780);
+            MainCanvas.moveTo(954, 160);
+            MainCanvas.lineTo(954, 780);
             MainCanvas.stroke();
             MainCanvas.textAlign = "center";
             if (this.curseData.allowCurse) {
@@ -4583,7 +4594,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     break;
                 const e = this.curseEntries[i];
                 const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
-                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 850;
+                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
                 const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
                 if (!e.empty && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
                     this.character.curseItem(e.group, !e.propertiesCursed);

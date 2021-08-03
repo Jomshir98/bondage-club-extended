@@ -40,23 +40,28 @@ export function init() {
 
 	if (BondageClubTools) {
 		console.warn("BCX: Bondage Club Tools detected!");
-		const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
-		const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
-		console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
-		ServerSocket.off("ChatRoomMessage");
-		ServerSocket.on("ChatRoomMessage", data => {
-			if (data?.Type !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
-				ChatRoomMessageForwarder!(data);
-			}
-			return ChatRoomMessage(data);
-		});
-		ServerSocket.off("AccountBeep");
-		ServerSocket.on("AccountBeep", data => {
-			if (typeof data?.BeepType !== "string" || !data.BeepType.startsWith("Jmod:")) {
-				AccountBeepForwarder!(data);
-			}
-			return ServerAccountBeep(data);
-		});
+		if ((window as any).BCX_BondageClubToolsPatch === true) {
+			console.info("BCX: Bondage Club Tools already patched, skip!");
+		} else {
+			(window as any).BCX_BondageClubToolsPatch = true;
+			const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
+			const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
+			console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
+			ServerSocket.off("ChatRoomMessage");
+			ServerSocket.on("ChatRoomMessage", data => {
+				if (data?.Type !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
+					ChatRoomMessageForwarder!(data);
+				}
+				return ChatRoomMessage(data);
+			});
+			ServerSocket.off("AccountBeep");
+			ServerSocket.on("AccountBeep", data => {
+				if (typeof data?.BeepType !== "string" || !data.BeepType.startsWith("Jmod:")) {
+					AccountBeepForwarder!(data);
+				}
+				return ServerAccountBeep(data);
+			});
+		}
 	}
 
 	//#endregion
@@ -65,14 +70,7 @@ export function init() {
 	InfoBeep(`BCX loaded! Version: ${VERSION}`);
 }
 
-export function unload(): boolean {
-	const { BondageClubTools } = detectOtherMods();
-
-	if (BondageClubTools) {
-		console.error("BCX: Unload not supported when BondageClubTools are present");
-		return false;
-	}
-
+export function unload(): true {
 	unload_patches();
 	unload_modules();
 

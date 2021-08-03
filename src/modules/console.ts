@@ -5,6 +5,7 @@ import { InvisibilityEarbuds } from "./clubUtils";
 import { BaseModule } from "../moduleManager";
 import { unload } from "../main";
 import { modStorage } from "./storage";
+import { sendQuery } from "./messaging";
 
 export let allowMode: boolean = false;
 export let developmentMode: boolean = false;
@@ -103,6 +104,22 @@ class ConsoleInterface {
 			return "Development mode required";
 		}
 		return modStorage;
+	}
+
+	devSendQuery(target: number, query: string, data: any): boolean {
+		if (!developmentMode || typeof target !== "number" || typeof query !== "string")
+			return false;
+
+		sendQuery(query as keyof BCX_queries, data, target).then(
+			result => {
+				console.info(`Query ${query} to ${target} resolved:`, result);
+			},
+			error => {
+				console.warn(`Query ${query} to ${target} failed:`, error);
+			}
+		);
+
+		return true;
 	}
 }
 

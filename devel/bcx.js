@@ -197,13 +197,27 @@ window.BCX_Loaded = false;
         // eslint-disable-next-line no-eval
         info.final = eval(`(${fn_str})`);
     }
-    function hookFunction(target, priority, hook) {
+    function hookFunction(target, priority, hook, module = null) {
         const data = initPatchableFunction(target);
+        if (data.hooks.some(h => h.hook === hook)) {
+            console.error(`BCX: Duplicate hook for "${target}"`, hook);
+            return;
+        }
         data.hooks.push({
             hook,
-            priority
+            priority,
+            module
         });
         data.hooks.sort((a, b) => b.priority - a.priority);
+    }
+    function removeHooksByModule(target, module) {
+        const data = initPatchableFunction(target);
+        for (let i = data.hooks.length - 1; i >= 0; i--) {
+            if (data.hooks[i].module === module) {
+                data.hooks.splice(i, 1);
+            }
+        }
+        return true;
     }
     function patchFunction(target, patches) {
         const data = initPatchableFunction(target);
@@ -234,6 +248,9 @@ window.BCX_Loaded = false;
         unload() {
             // Empty
         }
+        reload() {
+            // Empty
+        }
     }
     var ModuleCategory;
     (function (ModuleCategory) {
@@ -241,7 +258,7 @@ window.BCX_Loaded = false;
         ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
         ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
         ModuleCategory[ModuleCategory["Curses"] = 3] = "Curses";
-        ModuleCategory[ModuleCategory["Misc"] = 4] = "Misc";
+        ModuleCategory[ModuleCategory["Misc"] = 99] = "Misc";
     })(ModuleCategory || (ModuleCategory = {}));
     const MODULE_NAMES = {
         [ModuleCategory.Basic]: "Basic",
@@ -257,6 +274,10 @@ window.BCX_Loaded = false;
         [ModuleCategory.Curses]: "Icons/Struggle.png",
         [ModuleCategory.Misc]: "Icons/Random.png"
     };
+    const TOGGLEABLE_MODULES = [
+        ModuleCategory.Log,
+        ModuleCategory.Curses
+    ];
     let moduleInitPhase = 0 /* construct */;
     const modules = [];
     function registerModule(module) {
@@ -286,6 +307,16 @@ window.BCX_Loaded = false;
         for (const m of modules) {
             m.unload();
         }
+    }
+    function reload_modules() {
+        if (moduleInitPhase !== 3 /* ready */) {
+            console.error("BCX: Attempt to reload modules, while not ready");
+            return false;
+        }
+        for (const m of modules) {
+            m.reload();
+        }
+        return true;
     }
 
     function j_WardrobeExportSelectionClothes(includeBinds = false) {
@@ -1121,6 +1152,66 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    var Preset;
+    (function (Preset) {
+        Preset[Preset["dominant"] = 0] = "dominant";
+        Preset[Preset["switch"] = 1] = "switch";
+        Preset[Preset["submissive"] = 2] = "submissive";
+        Preset[Preset["slave"] = 3] = "slave";
+    })(Preset || (Preset = {}));
+    const PRESET_DISABLED_MODULES = {
+        [Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses],
+        [Preset.switch]: [],
+        [Preset.submissive]: [],
+        [Preset.slave]: []
+    };
+    function applyPreset(preset) {
+        modStorage.preset = preset;
+        setDisabledModules(PRESET_DISABLED_MODULES[preset]);
+        finalizeFirstTimeInit();
+    }
+    function setDisabledModules(modules) {
+        if (!Array.isArray(modStorage.disabledModules)) {
+            console.error("BCX: Attempt to set disabled modules before initializetion");
+            return false;
+        }
+        modules = arrayUnique(modules.filter(i => TOGGLEABLE_MODULES.includes(i)));
+        if (CommonArraysEqual(modules, modStorage.disabledModules))
+            return true;
+        modStorage.disabledModules = modules;
+        if (reload_modules()) {
+            modStorageSync();
+            notifyOfChange();
+            return true;
+        }
+        return false;
+    }
+    function moduleIsEnabled(module) {
+        if (!TOGGLEABLE_MODULES.includes(module))
+            return true;
+        return Array.isArray(modStorage.disabledModules) ? !modStorage.disabledModules.includes(module) : true;
+    }
+    class ModulePresets extends BaseModule {
+        load() {
+            if (typeof modStorage.preset !== "number" || Preset[modStorage.preset] === undefined) {
+                modStorage.preset = Preset.switch;
+            }
+            if (!Array.isArray(modStorage.disabledModules)) {
+                modStorage.disabledModules = [];
+            }
+            else {
+                modStorage.disabledModules = modStorage.disabledModules.filter(i => TOGGLEABLE_MODULES.includes(i));
+            }
+        }
+        run() {
+            if (firstTimeInit) {
+                setTimeout(() => {
+                    InfoBeep(`Please visit your profile to finish BCX setup`, Infinity);
+                }, 2000);
+            }
+        }
+    }
+
     const LOG_ENTRIES_LIMIT = 256;
     var LogEntryType;
     (function (LogEntryType) {
@@ -1136,6 +1227,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     })(LogAccessLevel || (LogAccessLevel = {}));
     function logMessage(category, type, data) {
         var _a;
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return;
         const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category];
         if (access === undefined) {
             throw new Error(`Attempt to log message with unknown category "${category}"`);
@@ -1145,6 +1238,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
     function logMessageAdd(access, type, data) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return;
         if (!modStorage.log) {
             throw new Error("Mod storage log not initialized");
         }
@@ -1159,6 +1254,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
     function logMessageDelete(time, character) {
         var _a;
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
         if (character && !checkPermissionAccess("log_delete", character)) {
             return false;
         }
@@ -1189,6 +1286,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
     function logConfigSet(category, accessLevel, character) {
         var _a;
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
         if (character && !checkPermissionAccess("log_configure", character)) {
             return false;
         }
@@ -1212,6 +1311,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         return true;
     }
     function logClear(character) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
         if (character && !checkPermissionAccess("log_delete", character)) {
             return false;
         }
@@ -1220,6 +1321,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         return true;
     }
     function getVisibleLogEntries(character) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return [];
         if (!modStorage.log) {
             throw new Error("Mod storage log not initialized");
         }
@@ -1251,7 +1354,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
         };
     }
+    function logGetConfig() {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return {};
+        if (!modStorage.logConfig) {
+            throw new Error("Mod storage log not initialized");
+        }
+        return { ...modStorage.logConfig };
+    }
     function logPraise(value, message, character) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
         if (![-1, 0, 1].includes(value)) {
             throw new Error("Invalid value");
         }
@@ -1374,8 +1487,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             };
             queryHandlers.logConfigGet = (sender, resolve) => {
                 const character = getChatroomCharacter(sender);
-                if (character && checkPermissionAccess("log_configure", character) && modStorage.logConfig) {
-                    resolve(true, { ...modStorage.logConfig });
+                if (character && checkPermissionAccess("log_configure", character)) {
+                    resolve(true, logGetConfig());
                 }
                 else {
                     resolve(false);
@@ -1431,6 +1544,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             };
         }
         load() {
+            if (!moduleIsEnabled(ModuleCategory.Log)) {
+                delete modStorage.log;
+                delete modStorage.logConfig;
+                removeHooksByModule("ActivityOrgasmStart", ModuleCategory.Log);
+                removeHooksByModule("ChatRoomSync", ModuleCategory.Log);
+                return;
+            }
             if (!Array.isArray(modStorage.log)) {
                 logClear(null);
             }
@@ -1465,7 +1585,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
                 }
                 return next(args);
-            });
+            }, ModuleCategory.Log);
             hookFunction("ChatRoomSync", 0, (args, next) => {
                 const data = args[0];
                 if (data.Private) {
@@ -1475,7 +1595,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     logMessage("enteredPublicRoom", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
                 }
                 return next(args);
-            });
+            }, ModuleCategory.Log);
+        }
+        reload() {
+            this.load();
         }
     }
 
@@ -1528,6 +1651,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         if (!character.hasAccessToPlayer())
             return false;
+        if (!moduleIsEnabled(permData.category))
+            return false;
         return checkPermisionAccesData(permData, getCharacterAccessLevel(character));
     }
     function checkPermisionAccesData(permData, accessLevel) {
@@ -1539,6 +1664,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     function permissionsMakeBundle() {
         const res = {};
         for (const [k, v] of permissions.entries()) {
+            if (!moduleIsEnabled(v.category))
+                continue;
             res[k] = [v.self, v.min];
         }
         return res;
@@ -1562,6 +1689,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (!permData) {
             throw new Error(`Attempt to edit unknown permission "${permission}"`);
         }
+        if (!moduleIsEnabled(permData.category))
+            return false;
         self = self || permData.min === AccessLevel.self;
         if (permData.self === self)
             return true;
@@ -1591,6 +1720,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (!permData) {
             throw new Error(`Attempt to edit unknown permission "${permission}"`);
         }
+        if (!moduleIsEnabled(permData.category))
+            return false;
         if (permData.min === min)
             return true;
         if (characterToCheck) {
@@ -1637,6 +1768,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     function getPlayerPermissionSettings() {
         const res = {};
         for (const [k, v] of permissions.entries()) {
+            if (!moduleIsEnabled(v.category))
+                continue;
             res[k] = { ...v };
         }
         return res;
@@ -1871,11 +2004,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 modStorage.mistresses = modStorage.mistresses.filter(test);
             }
         }
+        reload() {
+            this.load();
+        }
     }
 
     const CURSES_CHECK_INTERVAL = 2000;
     const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
     function curseItem(Group, curseProperty, character) {
+        if (!moduleIsEnabled(ModuleCategory.Curses))
+            return false;
         const group = AssetGroup.find(g => g.Name === Group);
         if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null) || !modStorage.cursedItems) {
             console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
@@ -1950,6 +2088,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
     function curseLift(Group, character) {
         var _a;
+        if (!moduleIsEnabled(ModuleCategory.Curses))
+            return false;
         if (character && !checkPermissionAccess("curses_lift", character))
             return false;
         if (modStorage.cursedItems && modStorage.cursedItems[Group] !== undefined) {
@@ -2044,6 +2184,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             };
         }
         load() {
+            if (!moduleIsEnabled(ModuleCategory.Curses)) {
+                delete modStorage.cursedItems;
+                return;
+            }
             if (!isObject(modStorage.cursedItems)) {
                 modStorage.cursedItems = {};
             }
@@ -2072,6 +2216,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
         }
         run() {
+            if (!moduleIsEnabled(ModuleCategory.Curses))
+                return;
             this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
         }
         unload() {
@@ -2079,6 +2225,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 clearInterval(this.timer);
                 this.timer = null;
             }
+        }
+        reload() {
+            this.unload();
+            this.load();
+            this.run();
         }
         cursesTick() {
             var _a, _b, _c, _d;
@@ -2320,7 +2471,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     throw new Error("Bad data");
                 }
                 for (const k of Object.keys(data)) {
-                    if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[k]) === undefined || LogAccessLevel[data[k]] === undefined) {
+                    if (data[k] == null || ((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[k]) === undefined || LogAccessLevel[data[k]] === undefined) {
                         delete data[k];
                     }
                 }
@@ -2452,10 +2603,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return Promise.resolve(logMessageDelete(time, this));
         }
         getLogConfig() {
-            if (!modStorage.logConfig) {
-                return Promise.reject("Not initialized");
-            }
-            return Promise.resolve({ ...modStorage.logConfig });
+            return Promise.resolve(logGetConfig());
         }
         setLogConfig(category, target) {
             return Promise.resolve(logConfigSet(category, target, this));
@@ -2931,34 +3079,35 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         const { BondageClubTools } = detectOtherMods();
         if (BondageClubTools) {
             console.warn("BCX: Bondage Club Tools detected!");
-            const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
-            const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
-            console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
-            ServerSocket.off("ChatRoomMessage");
-            ServerSocket.on("ChatRoomMessage", data => {
-                if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
-                    ChatRoomMessageForwarder(data);
-                }
-                return ChatRoomMessage(data);
-            });
-            ServerSocket.off("AccountBeep");
-            ServerSocket.on("AccountBeep", data => {
-                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
-                    AccountBeepForwarder(data);
-                }
-                return ServerAccountBeep(data);
-            });
+            if (window.BCX_BondageClubToolsPatch === true) {
+                console.info("BCX: Bondage Club Tools already patched, skip!");
+            }
+            else {
+                window.BCX_BondageClubToolsPatch = true;
+                const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
+                const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
+                console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
+                ServerSocket.off("ChatRoomMessage");
+                ServerSocket.on("ChatRoomMessage", data => {
+                    if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
+                        ChatRoomMessageForwarder(data);
+                    }
+                    return ChatRoomMessage(data);
+                });
+                ServerSocket.off("AccountBeep");
+                ServerSocket.on("AccountBeep", data => {
+                    if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
+                        AccountBeepForwarder(data);
+                    }
+                    return ServerAccountBeep(data);
+                });
+            }
         }
         //#endregion
         window.BCX_Loaded = true;
         InfoBeep(`BCX loaded! Version: ${VERSION}`);
     }
     function unload() {
-        const { BondageClubTools } = detectOtherMods();
-        if (BondageClubTools) {
-            console.error("BCX: Unload not supported when BondageClubTools are present");
-            return false;
-        }
         unload_patches();
         unload_modules();
         // clear some caches
@@ -3056,6 +3205,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return "Development mode required";
             }
             return modStorage;
+        }
+        devSendQuery(target, query, data) {
+            if (!developmentMode || typeof target !== "number" || typeof query !== "string")
+                return false;
+            sendQuery(query, data, target).then(result => {
+                console.info(`Query ${query} to ${target} resolved:`, result);
+            }, error => {
+                console.warn(`Query ${query} to ${target} failed:`, error);
+            });
+            return true;
         }
     }
     const consoleInterface = Object.freeze(new ConsoleInterface());
@@ -3910,6 +4069,71 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    class GuiGlobalModuleToggling extends GuiSubscreen {
+        constructor() {
+            super(...arguments);
+            this.enabledModules = new Set();
+            this.changed = false;
+        }
+        Load() {
+            this.enabledModules.clear();
+            for (const m of TOGGLEABLE_MODULES.filter(i => moduleIsEnabled(i))) {
+                this.enabledModules.add(m);
+            }
+            this.changed = false;
+        }
+        Run() {
+            MainCanvas.textAlign = "left";
+            DrawText(`- Global: Enable/Disable BCX's modules -`, 125, 125, "Black", "Gray");
+            DrawText(`Warning: Disabling a module will reset all its settings and stored data!`, 125, 180, "FireBrick");
+            for (let i = 0; i < TOGGLEABLE_MODULES.length; i++) {
+                const module = TOGGLEABLE_MODULES[i];
+                const PX = Math.floor(i / 5);
+                const PY = i % 5;
+                DrawCheckbox(150 + 500 * PX, 240 + 110 * PY, 64, 64, "", this.enabledModules.has(module));
+                DrawImageEx(MODULE_ICONS[module], 280 + 500 * PX, 240 + 110 * PY, {
+                    Height: 64,
+                    Width: 64
+                });
+                DrawText(MODULE_NAMES[module], 370 + 500 * PX, 240 + 32 + 110 * PY, "Black");
+            }
+            MainCanvas.textAlign = "center";
+            DrawButton(300, 800, 200, 80, "Confirm", this.changed ? "White" : "Gray", undefined, undefined, !this.changed);
+            DrawButton(1520, 800, 200, 80, "Cancel", "White");
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            for (let i = 0; i < TOGGLEABLE_MODULES.length; i++) {
+                const module = TOGGLEABLE_MODULES[i];
+                const PX = Math.floor(i / 5);
+                const PY = i % 5;
+                if (MouseIn(150 + 500 * PX, 240 + 110 * PY, 64, 64)) {
+                    if (this.enabledModules.has(module)) {
+                        this.enabledModules.delete(module);
+                    }
+                    else {
+                        this.enabledModules.add(module);
+                    }
+                    this.changed = true;
+                    return;
+                }
+            }
+            if (MouseIn(300, 800, 200, 80) && this.changed) {
+                if (setDisabledModules(TOGGLEABLE_MODULES.filter(i => !this.enabledModules.has(i)))) {
+                    this.Exit();
+                }
+                return;
+            }
+            if (MouseIn(1520, 800, 200, 80)) {
+                return this.Exit();
+            }
+        }
+        Exit() {
+            setSubscreen(new GuiGlobal(getPlayerCharacter()));
+        }
+    }
+
     class GuiGlobal extends GuiSubscreen {
         constructor(character) {
             super();
@@ -3924,6 +4148,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 DrawText(`Global configuration is not possible on others`, 1000, 500, "Black");
                 return;
             }
+            DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
             DrawButton(1605, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
         }
         Click() {
@@ -3931,6 +4156,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return this.Exit();
             if (!this.character.isPlayer())
                 return;
+            if (MouseIn(120, 200, 400, 90)) {
+                setSubscreen(new GuiGlobalModuleToggling());
+                return;
+            }
             if (MouseIn(1605, 800, 300, 90)) {
                 setSubscreen(new GuiGlobalDialogClearData(this));
                 return;
@@ -4718,32 +4947,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90)) {
                     return e.onclick(this.character);
                 }
-            }
-        }
-    }
-
-    var Preset;
-    (function (Preset) {
-        Preset[Preset["dominant"] = 0] = "dominant";
-        Preset[Preset["switch"] = 1] = "switch";
-        Preset[Preset["submissive"] = 2] = "submissive";
-        Preset[Preset["slave"] = 3] = "slave";
-    })(Preset || (Preset = {}));
-    function applyPreset(preset) {
-        modStorage.preset = preset;
-        finalizeFirstTimeInit();
-    }
-    class ModulePresets extends BaseModule {
-        load() {
-            if (typeof modStorage.preset !== "number" || Preset[modStorage.preset] === undefined) {
-                modStorage.preset = Preset.switch;
-            }
-        }
-        run() {
-            if (firstTimeInit) {
-                setTimeout(() => {
-                    InfoBeep(`Please visit your profile to finish BCX setup`, Infinity);
-                }, 2000);
             }
         }
     }

@@ -2,6 +2,7 @@ import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { GuiGlobalDialogClearData } from "./global_dialogClearData";
 import { GuiMainMenu } from "./mainmenu";
+import { GuiGlobalModuleToggling } from "./global_moduleToggling";
 import { GuiSubscreen } from "./subscreen";
 
 export class GuiGlobal extends GuiSubscreen {
@@ -26,6 +27,8 @@ export class GuiGlobal extends GuiSubscreen {
 			return;
 		}
 
+		DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
+
 		DrawButton(1605, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
 	}
 
@@ -34,6 +37,11 @@ export class GuiGlobal extends GuiSubscreen {
 
 		if (!this.character.isPlayer())
 			return;
+
+		if (MouseIn(120, 200, 400, 90)) {
+			setSubscreen(new GuiGlobalModuleToggling());
+			return;
+		}
 
 		if (MouseIn(1605, 800, 300, 90)) {
 			setSubscreen(new GuiGlobalDialogClearData(this));

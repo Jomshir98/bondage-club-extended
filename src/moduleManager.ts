@@ -15,14 +15,18 @@ export abstract class BaseModule {
 	unload() {
 		// Empty
 	}
+
+	reload() {
+		// Empty
+	}
 }
 
 export enum ModuleCategory {
-	Basic,
-	Authority,
-	Log,
-	Curses,
-	Misc
+	Basic = 0,
+	Authority = 1,
+	Log = 2,
+	Curses = 3,
+	Misc = 99
 }
 
 export const MODULE_NAMES: Record<ModuleCategory, string> = {
@@ -40,6 +44,11 @@ export const MODULE_ICONS: Record<ModuleCategory, string> = {
 	[ModuleCategory.Curses]: "Icons/Struggle.png",
 	[ModuleCategory.Misc]: "Icons/Random.png"
 };
+
+export const TOGGLEABLE_MODULES: readonly ModuleCategory[] = [
+	ModuleCategory.Log,
+	ModuleCategory.Curses
+];
 
 export const enum ModuleInitPhase {
 	construct,
@@ -81,4 +90,15 @@ export function unload_modules() {
 	for (const m of modules) {
 		m.unload();
 	}
+}
+
+export function reload_modules(): boolean {
+	if (moduleInitPhase !== ModuleInitPhase.ready) {
+		console.error("BCX: Attempt to reload modules, while not ready");
+		return false;
+	}
+	for (const m of modules) {
+		m.reload();
+	}
+	return true;
 }

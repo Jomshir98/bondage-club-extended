@@ -6,6 +6,7 @@ import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
 import { ChatRoomSendLocal } from "../utilsClub";
+import { moduleIsEnabled } from "./presets";
 
 export enum AccessLevel {
 	self = 0,
@@ -60,6 +61,8 @@ export function checkPermissionAccess(permission: BCX_Permissions, character: Ch
 	}
 	if (!character.hasAccessToPlayer())
 		return false;
+	if (!moduleIsEnabled(permData.category))
+		return false;
 	return checkPermisionAccesData(permData, getCharacterAccessLevel(character));
 }
 
@@ -73,6 +76,8 @@ export function checkPermisionAccesData(permData: PermissionInfo, accessLevel: A
 function permissionsMakeBundle(): PermissionsBundle {
 	const res: PermissionsBundle = {};
 	for (const [k, v] of permissions.entries()) {
+		if (!moduleIsEnabled(v.category))
+			continue;
 		res[k] = [v.self, v.min];
 	}
 	return res;
@@ -99,6 +104,9 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 	if (!permData) {
 		throw new Error(`Attempt to edit unknown permission "${permission}"`);
 	}
+
+	if (!moduleIsEnabled(permData.category))
+		return false;
 
 	self = self || permData.min === AccessLevel.self;
 
@@ -135,6 +143,9 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 	if (!permData) {
 		throw new Error(`Attempt to edit unknown permission "${permission}"`);
 	}
+
+	if (!moduleIsEnabled(permData.category))
+		return false;
 
 	if (permData.min === min) return true;
 
@@ -190,6 +201,8 @@ function permissionsSync() {
 export function getPlayerPermissionSettings(): PermissionData {
 	const res: PermissionData = {};
 	for (const [k, v] of permissions.entries()) {
+		if (!moduleIsEnabled(v.category))
+			continue;
 		res[k] = { ...v };
 	}
 	return res;
@@ -445,5 +458,9 @@ export class ModuleAuthority extends BaseModule {
 		} else {
 			modStorage.mistresses = modStorage.mistresses.filter(test);
 		}
+	}
+
+	reload() {
+		this.load();
 	}
 }

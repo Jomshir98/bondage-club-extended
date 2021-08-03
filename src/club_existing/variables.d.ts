@@ -25,6 +25,7 @@ declare var CurrentScreen: string;
 declare var KeyPress: number | string;
 declare var CurrentScreenFunctions: ScreenFunctions;
 declare const CommonGetFont: MemoizedFunction<(size: number) => string>;
+declare function CommonArraysEqual(a1: any[], a2: any[]): boolean;
 
 // Character.js
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;

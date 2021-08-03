@@ -1,4 +1,5 @@
 import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
+import { ModuleCategory } from "./moduleManager";
 import { crc32 } from "./utils";
 import { detectOtherMods } from "./utilsClub";
 
@@ -10,6 +11,7 @@ interface IpatchedFunctionData {
 	hooks: {
 		hook: PatchHook;
 		priority: number;
+		module: ModuleCategory | null;
 	}[];
 	patches: Record<string, string>;
 }
@@ -29,7 +31,7 @@ function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 		const callNextHook = (nextargs: any[]) => {
 			if (hookIndex < hooks.length) {
 				hookIndex++;
-				return hooks[hookIndex-1].hook(nextargs, callNextHook);
+				return hooks[hookIndex - 1].hook(nextargs, callNextHook);
 			} else {
 				return data.final(...args);
 			}
@@ -48,7 +50,7 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 
 		const { NMod } = detectOtherMods();
 
-		const expectedHashes = ( NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[target] ?? [];
+		const expectedHashes = (NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[target] ?? [];
 
 		if (typeof original !== "function") {
 			throw new Error(`BCX: Function ${target} to be patched not found`);
@@ -89,13 +91,32 @@ function applyPatches(info: IpatchedFunctionData) {
 	info.final = eval(`(${fn_str})`);
 }
 
-export function hookFunction(target: string, priority: number, hook: PatchHook): void {
+export function hookFunction(target: string, priority: number, hook: PatchHook, module: ModuleCategory | null = null): void {
 	const data = initPatchableFunction(target);
+
+	if (data.hooks.some(h => h.hook === hook)) {
+		console.error(`BCX: Duplicate hook for "${target}"`, hook);
+		return;
+	}
+
 	data.hooks.push({
 		hook,
-		priority
+		priority,
+		module
 	});
 	data.hooks.sort((a, b) => b.priority - a.priority);
+}
+
+export function removeHooksByModule(target: string, module: ModuleCategory): boolean {
+	const data = initPatchableFunction(target);
+
+	for (let i = data.hooks.length - 1; i >= 0; i--) {
+		if (data.hooks[i].module === module) {
+			data.hooks.splice(i, 1);
+		}
+	}
+
+	return true;
 }
 
 export function patchFunction(target: string, patches: Record<string, string>): void {

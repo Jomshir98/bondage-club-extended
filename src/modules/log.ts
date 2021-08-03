@@ -1,10 +1,11 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { BaseModule, ModuleCategory } from "../moduleManager";
-import { hookFunction } from "../patching";
+import { hookFunction, removeHooksByModule } from "../patching";
 import { isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
+import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
 
 export const LOG_ENTRIES_LIMIT = 256;
@@ -37,9 +38,12 @@ export type LogEntryTypeData = {
  */
 export type LogEntry<Type extends LogEntryType = LogEntryType> = [number, LogAccessLevel, Type, LogEntryTypeData[Type]];
 
-export type LogConfig = Record<BCX_LogCategory, LogAccessLevel>;
+export type LogConfig = Partial<Record<BCX_LogCategory, LogAccessLevel>>;
 
 export function logMessage<Type extends LogEntryType>(category: BCX_LogCategory, type: Type, data: LogEntryTypeData[Type]) {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return;
+
 	const access = modStorage.logConfig?.[category];
 	if (access === undefined) {
 		throw new Error(`Attempt to log message with unknown category "${category}"`);
@@ -50,6 +54,9 @@ export function logMessage<Type extends LogEntryType>(category: BCX_LogCategory,
 }
 
 function logMessageAdd<Type extends LogEntryType>(access: LogAccessLevel, type: Type, data: LogEntryTypeData[Type]) {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return;
+
 	if (!modStorage.log) {
 		throw new Error("Mod storage log not initialized");
 	}
@@ -64,6 +71,9 @@ function logMessageAdd<Type extends LogEntryType>(access: LogAccessLevel, type: 
 }
 
 export function logMessageDelete(time: number, character: ChatroomCharacter | null): boolean {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return false;
+
 	if (character && !checkPermissionAccess("log_delete", character)) {
 		return false;
 	}
@@ -94,6 +104,9 @@ export function logMessageDelete(time: number, character: ChatroomCharacter | nu
 }
 
 export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLevel, character: ChatroomCharacter | null): boolean {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return false;
+
 	if (character && !checkPermissionAccess("log_configure", character)) {
 		return false;
 	}
@@ -108,7 +121,7 @@ export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLe
 
 	if (character) {
 		const msg = `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
-			`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`;
+			`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]!]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`;
 		logMessage("logConfigChange", LogEntryType.plaintext, msg);
 		if (!character.isPlayer()) {
 			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
@@ -122,6 +135,9 @@ export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLe
 }
 
 export function logClear(character: ChatroomCharacter | null): boolean {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return false;
+
 	if (character && !checkPermissionAccess("log_delete", character)) {
 		return false;
 	}
@@ -133,9 +149,13 @@ export function logClear(character: ChatroomCharacter | null): boolean {
 }
 
 export function getVisibleLogEntries(character: ChatroomCharacter): LogEntry[] {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return [];
+
 	if (!modStorage.log) {
 		throw new Error("Mod storage log not initialized");
 	}
+
 	const allow: Record<LogAccessLevel, boolean> = {
 		[LogAccessLevel.none]: character.isPlayer(),
 		[LogAccessLevel.normal]: checkPermissionAccess("log_view_normal", character),
@@ -166,7 +186,21 @@ export function logGetAllowedActions(character: ChatroomCharacter): BCX_logAllow
 	};
 }
 
+export function logGetConfig(): LogConfig {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return {};
+
+	if (!modStorage.logConfig) {
+		throw new Error("Mod storage log not initialized");
+	}
+
+	return { ...modStorage.logConfig };
+}
+
 export function logPraise(value: -1 | 0 | 1, message: string | null, character: ChatroomCharacter): boolean {
+	if (!moduleIsEnabled(ModuleCategory.Log))
+		return false;
+
 	if (![-1, 0, 1].includes(value)) {
 		throw new Error("Invalid value");
 	}
@@ -294,8 +328,8 @@ export class ModuleLog extends BaseModule {
 		};
 		queryHandlers.logConfigGet = (sender, resolve) => {
 			const character = getChatroomCharacter(sender);
-			if (character && checkPermissionAccess("log_configure", character) && modStorage.logConfig) {
-				resolve(true, {...modStorage.logConfig});
+			if (character && checkPermissionAccess("log_configure", character)) {
+				resolve(true, logGetConfig());
 			} else {
 				resolve(false);
 			}
@@ -349,6 +383,14 @@ export class ModuleLog extends BaseModule {
 	}
 
 	load() {
+		if (!moduleIsEnabled(ModuleCategory.Log)) {
+			delete modStorage.log;
+			delete modStorage.logConfig;
+			removeHooksByModule("ActivityOrgasmStart", ModuleCategory.Log);
+			removeHooksByModule("ChatRoomSync", ModuleCategory.Log);
+			return;
+		}
+
 		if (!Array.isArray(modStorage.log)) {
 			logClear(null);
 		} else if (!modStorage.log.every(e =>
@@ -363,7 +405,7 @@ export class ModuleLog extends BaseModule {
 		}
 
 		if (!modStorage.logConfig) {
-			modStorage.logConfig = {...logConfigDefaults};
+			modStorage.logConfig = { ...logConfigDefaults };
 		} else {
 			for (const k of Object.keys(modStorage.logConfig) as BCX_LogCategory[]) {
 				if (logConfigDefaults[k] === undefined) {
@@ -385,7 +427,7 @@ export class ModuleLog extends BaseModule {
 				logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
 			}
 			return next(args);
-		});
+		}, ModuleCategory.Log);
 
 		hookFunction("ChatRoomSync", 0, (args, next) => {
 			const data = args[0];
@@ -395,6 +437,10 @@ export class ModuleLog extends BaseModule {
 				logMessage("enteredPublicRoom", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
 			}
 			return next(args);
-		});
+		}, ModuleCategory.Log);
+	}
+
+	reload() {
+		this.load();
 	}
 }

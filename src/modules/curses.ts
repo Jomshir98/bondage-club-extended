@@ -6,12 +6,16 @@ import { AccessLevel, checkPermissionAccess, registerPermission } from "./author
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorage, modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
+import { moduleIsEnabled } from "./presets";
 
 const CURSES_CHECK_INTERVAL = 2000;
 
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 
 export function curseItem(Group: string, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {
+	if (!moduleIsEnabled(ModuleCategory.Curses))
+		return false;
+
 	const group = AssetGroup.find(g => g.Name === Group);
 
 	if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null) || !modStorage.cursedItems) {
@@ -91,6 +95,9 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 }
 
 export function curseLift(Group: string, character: ChatroomCharacter | null): boolean {
+	if (!moduleIsEnabled(ModuleCategory.Curses))
+		return false;
+
 	if (character && !checkPermissionAccess("curses_lift", character))
 		return false;
 
@@ -185,6 +192,11 @@ export class ModuleCurses extends BaseModule {
 	}
 
 	load() {
+		if (!moduleIsEnabled(ModuleCategory.Curses)) {
+			delete modStorage.cursedItems;
+			return;
+		}
+
 		if (!isObject(modStorage.cursedItems)) {
 			modStorage.cursedItems = {};
 		} else {
@@ -217,6 +229,9 @@ export class ModuleCurses extends BaseModule {
 	}
 
 	run() {
+		if(!moduleIsEnabled(ModuleCategory.Curses))
+			return;
+
 		this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
 	}
 
@@ -225,6 +240,12 @@ export class ModuleCurses extends BaseModule {
 			clearInterval(this.timer);
 			this.timer = null;
 		}
+	}
+
+	reload() {
+		this.unload();
+		this.load();
+		this.run();
 	}
 
 	private cursesTick() {

@@ -1,7 +1,7 @@
 import { VERSION } from "./config";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
 import { curseGetInfo, curseItem, curseLift } from "./modules/curses";
-import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logMessageDelete, logPraise } from "./modules/log";
+import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { modStorage } from "./modules/storage";
 import { isObject } from "./utils";
@@ -156,7 +156,7 @@ export class ChatroomCharacter {
 				throw new Error("Bad data");
 			}
 			for (const k of Object.keys(data) as BCX_LogCategory[]) {
-				if (modStorage.logConfig?.[k] === undefined || LogAccessLevel[data[k]] === undefined) {
+				if (data[k] == null || modStorage.logConfig?.[k] === undefined || LogAccessLevel[data[k]!] === undefined) {
 					delete data[k];
 				}
 			}
@@ -312,10 +312,7 @@ export class PlayerCharacter extends ChatroomCharacter {
 	}
 
 	override getLogConfig(): Promise<LogConfig> {
-		if (!modStorage.logConfig) {
-			return Promise.reject("Not initialized");
-		}
-		return Promise.resolve({ ...modStorage.logConfig });
+		return Promise.resolve(logGetConfig());
 	}
 
 	override setLogConfig(category: BCX_LogCategory, target: LogAccessLevel): Promise<boolean> {

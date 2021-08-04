@@ -8,6 +8,7 @@ import { modStorage, modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
+import { hookFunction } from "../patching";
 
 const CURSES_CHECK_INTERVAL = 2000;
 
@@ -210,6 +211,30 @@ export class ModuleCurses extends BaseModule {
 			return;
 		}
 
+		hookFunction("ValidationResolveModifyDiff", 0, (args, next) => {
+			const params = args[2] as AppearanceUpdateParameters;
+			const result = next(args) as ItemDiffResolution;
+
+			if (result.item) {
+				const curse = modStorage.cursedItems?.[result.item.Asset.Group.Name];
+				const character = getChatroomCharacter(params.sourceMemberNumber);
+				if (curse &&
+					!CommonColorsEqual(curse.Color ?? "Default", result.item.Color ?? "Default") &&
+					character &&
+					checkPermissionAccess("curses_color", character)
+				) {
+					if (result.item.Color && result.item.Color !== "Default") {
+						curse.Color = JSON.parse(JSON.stringify(result.item.Color));
+					} else {
+						delete curse.Color;
+					}
+					modStorageSync();
+				}
+			}
+
+			return result;
+		}, ModuleCategory.Curses);
+
 		if (!isObject(modStorage.cursedItems)) {
 			modStorage.cursedItems = {};
 		} else {
@@ -242,7 +267,7 @@ export class ModuleCurses extends BaseModule {
 	}
 
 	run() {
-		if(!moduleIsEnabled(ModuleCategory.Curses))
+		if (!moduleIsEnabled(ModuleCategory.Curses))
 			return;
 
 		this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
@@ -356,7 +381,7 @@ export class ModuleCurses extends BaseModule {
 				curse.Property = curseProperty;
 			}
 
-			if (JSON.stringify(currentItem.Color ?? "Default") !== JSON.stringify(curse.Color ?? "Default")) {
+			if (!CommonColorsEqual(curse.Color ?? "Default", currentItem.Color ?? "Default")) {
 				if (curse.Color === undefined || curse.Color === "Default") {
 					delete currentItem.Color;
 				} else {

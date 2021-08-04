@@ -1,5 +1,5 @@
 import { ChatroomCharacter } from "../characters";
-import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../constants";
+import { ModuleCategory, MODULE_ICONS, MODULE_NAMES, TOGGLEABLE_MODULES } from "../constants";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
@@ -45,9 +45,23 @@ export class GuiMainMenu extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
 
+	private disabledModules: readonly ModuleCategory[] = TOGGLEABLE_MODULES;
+
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+	}
+
+	Load() {
+		this.character.getDisabledModules().then(data => {
+			this.disabledModules = data;
+		});
+	}
+
+	onChange(source: number) {
+		if (source === this.character.MemberNumber) {
+			this.Load();
+		}
 	}
 
 	Run() {
@@ -58,7 +72,11 @@ export class GuiMainMenu extends GuiSubscreen {
 			const e = MAIN_MENU_ITEMS[i];
 			const PX = Math.floor(i / 7);
 			const PY = i % 7;
-			DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", "White", MODULE_ICONS[e.module]);
+
+			const isDisabled = this.disabledModules.includes(e.module);
+
+			DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", isDisabled ? "#ddd" : "White", MODULE_ICONS[e.module],
+				isDisabled ? "Module is deactivated" : "", isDisabled);
 			DrawTextFit(MODULE_NAMES[e.module], 250 + 420 * PX, 205 + 110 * PY, 310, "Black");
 		}
 	}
@@ -70,7 +88,7 @@ export class GuiMainMenu extends GuiSubscreen {
 			const e = MAIN_MENU_ITEMS[i];
 			const PX = Math.floor(i / 7);
 			const PY = i % 7;
-			if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90)) {
+			if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90) && !this.disabledModules.includes(e.module)) {
 				return e.onclick(this.character);
 			}
 		}

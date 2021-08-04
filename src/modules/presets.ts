@@ -47,6 +47,10 @@ export function setDisabledModules(modules: ModuleCategory[]): boolean {
 	return false;
 }
 
+export function getDisabledModules(): ModuleCategory[] {
+	return Array.isArray(modStorage.disabledModules) ? modStorage.disabledModules.slice() : [];
+}
+
 export function moduleIsEnabled(module: ModuleCategory): boolean {
 	if (!TOGGLEABLE_MODULES.includes(module))
 		return true;

@@ -1,8 +1,10 @@
 import { VERSION } from "./config";
+import { ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
 import { curseGetInfo, curseItem, curseLift } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
+import { getDisabledModules } from "./modules/presets";
 import { modStorage } from "./modules/storage";
 import { isObject } from "./utils";
 
@@ -35,6 +37,16 @@ export class ChatroomCharacter {
 			this.BCXVersion = VERSION;
 		}
 		console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
+	}
+
+	getDisabledModules(): Promise<ModuleCategory[]> {
+		return sendQuery("disabledModules", undefined, this.MemberNumber).then(data => {
+			if (!Array.isArray(data)) {
+				throw new Error("Bad data");
+			}
+
+			return data.filter(i => TOGGLEABLE_MODULES.includes(i));
+		});
 	}
 
 	getPermissions(): Promise<PermissionData> {
@@ -265,6 +277,10 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override isPlayer(): this is PlayerCharacter {
 		return true;
+	}
+
+	override getDisabledModules(): Promise<ModuleCategory[]> {
+		return Promise.resolve(getDisabledModules());
 	}
 
 	override getPermissions(): Promise<PermissionData> {

@@ -1,6 +1,6 @@
 import { setSubscreen } from "../modules/gui";
 import { GuiSubscreen } from "./subscreen";
-import { ModuleCategory, MODULE_ICONS, MODULE_NAMES, TOGGLEABLE_MODULES } from "../moduleManager";
+import { ModuleCategory, MODULE_ICONS, MODULE_NAMES, TOGGLEABLE_MODULES } from "../constants";
 import { DrawImageEx } from "../utilsClub";
 import { moduleIsEnabled, setDisabledModules } from "../modules/presets";
 import { GuiGlobal } from "./global";

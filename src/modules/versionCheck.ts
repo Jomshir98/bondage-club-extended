@@ -1,6 +1,6 @@
 import { VERSION, VERSION_CHECK_BOT } from "../config";
 import { hiddenBeepHandlers, sendHiddenBeep } from "./messaging";
-import { BaseModule } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { isObject } from "../utils";
 
 let nextCheckTimer: number | null = null;

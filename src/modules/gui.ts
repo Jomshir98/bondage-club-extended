@@ -2,7 +2,7 @@ import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { GuiMainMenu } from "../gui/mainmenu";
 import { GuiSubscreen } from "../gui/subscreen";
 import { GuiWelcomeSelection } from "../gui/welcome";
-import { BaseModule } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_BCX } from "../resources";
 import { changeHandlers } from "./messaging";

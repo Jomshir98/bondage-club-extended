@@ -1,7 +1,7 @@
 import { detectOtherMods, DrawImageEx } from "../utilsClub";
 import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
-import { BaseModule } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_Emote, icon_PurpleHeart, icon_Typing, icon_BCX_chatroom } from "../resources";
 import { getChatroomCharacter } from "../characters";

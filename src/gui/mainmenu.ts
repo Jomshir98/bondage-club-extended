@@ -1,5 +1,5 @@
 import { ChatroomCharacter } from "../characters";
-import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
+import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../constants";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";

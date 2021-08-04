@@ -1,5 +1,3 @@
-import { developmentMode } from "./modules/console";
-
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
 	"ItemNeckRestraints": "Collar Restraint",
@@ -16,6 +14,46 @@ const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemMouth2": "Mouth (2)",
 	"ItemMouth3": "Mouth (3)"
 };
+
+export let allowMode: boolean = false;
+export let developmentMode: boolean = false;
+
+export function setAllowMode(allow: boolean): boolean {
+	if (allow) {
+		console.warn("Cheats enabled; please be careful not to break things");
+	} else {
+		if (!setDevelopmentMode(false))
+			return false;
+		console.info("Cheats disabled");
+	}
+	allowMode = allow;
+	return true;
+}
+
+export function setDevelopmentMode(devel: boolean): boolean {
+	if (devel) {
+		if (!setAllowMode(true)) {
+			console.info("To use developer mode, cheats must be enabled first!");
+			return false;
+		}
+		AssetGroup.forEach(G => G.Description = G.Name);
+		Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
+		BackgroundSelectionAll.forEach(B => {
+			B.Description = B.Name;
+			B.Low = B.Description.toLowerCase();
+		});
+		console.warn("Developer mode enabled");
+	} else {
+		AssetLoadDescription("Female3DCG");
+		BackgroundSelectionAll.forEach(B => {
+			B.Description = DialogFindPlayer(B.Name);
+			B.Low = B.Description.toLowerCase();
+		});
+		console.info("Developer mode disabled");
+	}
+	developmentMode = devel;
+	return true;
+}
 
 export function getVisibleGroupName(group: AssetGroup): string {
 	return developmentMode ? group.Name : (GROUP_NAME_OVERRIDES[group.Name] ?? group.Description);

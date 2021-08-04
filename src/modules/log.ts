@@ -1,5 +1,5 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
-import { BaseModule, ModuleCategory } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { hookFunction, removeHooksByModule } from "../patching";
 import { isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
@@ -7,6 +7,7 @@ import { AccessLevel, checkPermissionAccess, registerPermission } from "./author
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
+import { ModuleCategory, Preset } from "../constants";
 
 export const LOG_ENTRIES_LIMIT = 256;
 
@@ -255,7 +256,7 @@ export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	logConfigChange: "Log changes in logging configuration",
 	logDeleted: "Log deleted log entries",
 	praise: "Log praising or scolding behavior",
-	userNote: "Ability to attach notes",
+	userNote: "Ability to see attached notes",
 	enteredPublicRoom: "Log which public rooms are entered",
 	enteredPrivateRoom: "Log which private rooms are entered",
 	hadOrgasm: "Log each single orgasm",
@@ -276,38 +277,62 @@ export class ModuleLog extends BaseModule {
 		registerPermission("log_view_normal", {
 			name: "Allow to see normal log entries",
 			category: ModuleCategory.Log,
-			self: true,
-			min: AccessLevel.public
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.mistress],
+				[Preset.switch]: [true, AccessLevel.mistress],
+				[Preset.submissive]: [true, AccessLevel.friend],
+				[Preset.slave]: [true, AccessLevel.public]
+			}
 		});
 		registerPermission("log_view_protected", {
 			name: "Allow to see protected log entries",
 			category: ModuleCategory.Log,
-			self: true,
-			min: AccessLevel.mistress
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.lover],
+				[Preset.switch]: [true, AccessLevel.lover],
+				[Preset.submissive]: [true, AccessLevel.mistress],
+				[Preset.slave]: [true, AccessLevel.mistress]
+			}
 		});
 		registerPermission("log_configure", {
 			name: "Allow to configure what is logged",
 			category: ModuleCategory.Log,
-			self: true,
-			min: AccessLevel.self
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.owner],
+				[Preset.slave]: [false, AccessLevel.owner]
+			}
 		});
 		registerPermission("log_delete", {
 			name: "Allow deleting log entries",
 			category: ModuleCategory.Log,
-			self: true,
-			min: AccessLevel.self
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.owner],
+				[Preset.slave]: [false, AccessLevel.owner]
+			}
 		});
 		registerPermission("log_praise", {
 			name: "Allow to praise or scold",
 			category: ModuleCategory.Log,
-			self: false,
-			min: AccessLevel.public
+			defaults: {
+				[Preset.dominant]: [false, AccessLevel.friend],
+				[Preset.switch]: [false, AccessLevel.friend],
+				[Preset.submissive]: [false, AccessLevel.public],
+				[Preset.slave]: [false, AccessLevel.public]
+			}
 		});
 		registerPermission("log_leaveMessage", {
 			name: "Allow to attach notes to the body",
 			category: ModuleCategory.Log,
-			self: false,
-			min: AccessLevel.mistress
+			defaults: {
+				[Preset.dominant]: [false, AccessLevel.mistress],
+				[Preset.switch]: [false, AccessLevel.mistress],
+				[Preset.submissive]: [false, AccessLevel.friend],
+				[Preset.slave]: [false, AccessLevel.public]
+			}
 		});
 
 		queryHandlers.logData = (sender, resolve) => {

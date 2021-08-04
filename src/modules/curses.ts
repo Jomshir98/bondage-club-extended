@@ -1,5 +1,5 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
-import { BaseModule, ModuleCategory } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { arrayUnique, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
@@ -7,6 +7,7 @@ import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorage, modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
+import { ModuleCategory, Preset } from "../constants";
 
 const CURSES_CHECK_INTERVAL = 2000;
 
@@ -149,20 +150,32 @@ export class ModuleCurses extends BaseModule {
 		registerPermission("curses_curse", {
 			name: "Allow cursing objects or the body",
 			category: ModuleCategory.Curses,
-			self: false,
-			min: AccessLevel.mistress
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.lover],
+				[Preset.switch]: [true, AccessLevel.lover],
+				[Preset.submissive]: [false, AccessLevel.mistress],
+				[Preset.slave]: [false, AccessLevel.mistress]
+			}
 		});
 		registerPermission("curses_lift", {
 			name: "Allow lifting curses",
 			category: ModuleCategory.Curses,
-			self: false,
-			min: AccessLevel.mistress
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.lover],
+				[Preset.switch]: [true, AccessLevel.lover],
+				[Preset.submissive]: [false, AccessLevel.mistress],
+				[Preset.slave]: [false, AccessLevel.mistress]
+			}
 		});
 		registerPermission("curses_color", {
 			name: "Allow changing colors of cursed objects",
 			category: ModuleCategory.Curses,
-			self: true,
-			min: AccessLevel.mistress
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.lover],
+				[Preset.switch]: [true, AccessLevel.lover],
+				[Preset.submissive]: [true, AccessLevel.mistress],
+				[Preset.slave]: [false, AccessLevel.mistress]
+			}
 		});
 
 		queryHandlers.curseGetInfo = (sender, resolve) => {

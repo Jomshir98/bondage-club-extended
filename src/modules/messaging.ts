@@ -1,8 +1,10 @@
 import { getChatroomCharacter, getPlayerCharacter } from "../characters";
-import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
+import { moduleInitPhase } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
 import { isObject, uuidv4 } from "../utils";
 import { firstTimeInit } from "./storage";
+import { ModuleInitPhase } from "../constants";
 
 export const hiddenMessageHandlers: Map<keyof BCX_messages, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();

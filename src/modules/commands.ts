@@ -3,7 +3,7 @@ import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { hookFunction } from "../patching";
 import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "../utils";
-import { BaseModule } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { firstTimeInit } from "./storage";
 
 interface ICommandInfo {

@@ -61,8 +61,8 @@ interface CursedItemInfo {
 }
 
 interface ModStorage {
-	preset: import("./modules/presets").Preset;
-	disabledModules: import("./moduleManager").ModuleCategory[];
+	preset: import("./constants").Preset;
+	disabledModules: import("./constants").ModuleCategory[];
 	permissions: PermissionsBundle;
 	owners: number[];
 	mistresses: number[];

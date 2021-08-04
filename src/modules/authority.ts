@@ -1,5 +1,5 @@
-import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
-import { ModuleCategory } from "../moduleManager";
+import { moduleInitPhase } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { capitalizeFirstLetter, isObject } from "../utils";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
@@ -7,6 +7,7 @@ import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
 import { ChatRoomSendLocal } from "../utilsClub";
 import { moduleIsEnabled } from "./presets";
+import { ModuleCategory, ModuleInitPhase, Preset } from "../constants";
 
 export enum AccessLevel {
 	self = 0,
@@ -19,9 +20,15 @@ export enum AccessLevel {
 	public = 7
 }
 
-export interface PermissionInfo {
-	name: string;
-	category: ModuleCategory;
+export interface PermissionSetup {
+	readonly name: string;
+	readonly category: ModuleCategory;
+	readonly defaults: {
+		readonly [p in Preset]: readonly [boolean, AccessLevel];
+	}
+}
+
+export interface PermissionInfo extends PermissionSetup {
 	self: boolean;
 	min: AccessLevel;
 }
@@ -30,14 +37,23 @@ export type PermissionData = Partial<Record<BCX_Permissions, PermissionInfo>>;
 
 const permissions: Map<BCX_Permissions, PermissionInfo> = new Map();
 
-export function registerPermission(name: BCX_Permissions, data: PermissionInfo) {
+export function registerPermission(name: BCX_Permissions, data: PermissionSetup) {
 	if (moduleInitPhase !== ModuleInitPhase.init) {
 		throw new Error("Permissions can be registered only during init");
 	}
 	if (permissions.has(name)) {
 		throw new Error(`Permission "${name}" already defined!`);
 	}
-	permissions.set(name, data);
+	for (const [k, v] of Object.entries(data.defaults)) {
+		if (v[1] === AccessLevel.self && !v[0]) {
+			console.error(`BCX: register permission "${name}": default for ${k} has invalid self value`);
+		}
+	}
+	permissions.set(name, {
+		...data,
+		self: data.defaults[Preset.switch][0],
+		min: data.defaults[Preset.switch][1]
+	});
 }
 
 export function getCharacterAccessLevel(character: ChatroomCharacter): AccessLevel {
@@ -88,8 +104,7 @@ export function getPermissionDataFromBundle(bundle: PermissionsBundle): Permissi
 	for (const [k, v] of permissions.entries()) {
 		if (bundle[k]) {
 			res[k] = {
-				category: v.category,
-				name: v.name,
+				...v,
 				self: bundle[k][0],
 				min: bundle[k][1]
 			};
@@ -290,44 +305,72 @@ export class ModuleAuthority extends BaseModule {
 		registerPermission("authority_grant_self", {
 			name: "Allow granting self access",
 			category: ModuleCategory.Authority,
-			self: true,
-			min: AccessLevel.self
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [false, AccessLevel.owner],
+				[Preset.slave]: [false, AccessLevel.owner]
+			}
 		});
 		registerPermission("authority_revoke_self", {
 			name: "Allow forbidding self access",
 			category: ModuleCategory.Authority,
-			self: true,
-			min: AccessLevel.self
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.self],
+				[Preset.slave]: [false, AccessLevel.owner]
+			}
 		});
 		registerPermission("authority_edit_min", {
 			name: "Allow minimal access modification",
 			category: ModuleCategory.Authority,
-			self: true,
-			min: AccessLevel.self
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.self],
+				[Preset.slave]: [false, AccessLevel.owner]
+			}
 		});
 		registerPermission("authority_mistress_add", {
 			name: "Allow granting Mistress status",
 			category: ModuleCategory.Authority,
-			self: true,
-			min: AccessLevel.mistress
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.lover],
+				[Preset.slave]: [true, AccessLevel.mistress]
+			}
 		});
 		registerPermission("authority_mistress_remove", {
 			name: "Allow revoking Mistress status",
 			category: ModuleCategory.Authority,
-			self: true,
-			min: AccessLevel.lover
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [false, AccessLevel.lover],
+				[Preset.slave]: [false, AccessLevel.lover]
+			}
 		});
 		registerPermission("authority_owner_add", {
 			name: "Allow granting Owner status",
 			category: ModuleCategory.Authority,
-			self: true,
-			min: AccessLevel.owner
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.clubowner],
+				[Preset.slave]: [true, AccessLevel.owner]
+			}
 		});
 		registerPermission("authority_owner_remove", {
 			name: "Allow revoking Owner status",
 			category: ModuleCategory.Authority,
-			self: true,
-			min: AccessLevel.clubowner
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [false, AccessLevel.clubowner],
+				[Preset.slave]: [false, AccessLevel.clubowner]
+			}
 		});
 
 		queryHandlers.permissions = (sender, resolve) => {
@@ -423,7 +466,21 @@ export class ModuleAuthority extends BaseModule {
 		};
 	}
 
-	load() {
+	private setDefultPermissionsForPreset(preset: Preset) {
+		for (const permission of permissions.values()) {
+			permission.self = permission.defaults[preset][0];
+			permission.min = permission.defaults[preset][1];
+		}
+	}
+
+	applyPreset(preset: Preset) {
+		this.setDefultPermissionsForPreset(preset);
+		modStorage.permissions = permissionsMakeBundle();
+	}
+
+	load(preset: Preset) {
+		this.setDefultPermissionsForPreset(preset);
+
 		if (isObject(modStorage.permissions)) {
 			for (const [k, v] of Object.entries(modStorage.permissions)) {
 				const perm = permissions.get(k as BCX_Permissions);
@@ -460,7 +517,7 @@ export class ModuleAuthority extends BaseModule {
 		}
 	}
 
-	reload() {
-		this.load();
+	reload(preset: Preset) {
+		this.load(preset);
 	}
 }

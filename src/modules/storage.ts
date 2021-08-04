@@ -1,8 +1,10 @@
 import { VERSION_CHECK_BOT } from "../config";
-import { BaseModule, ModuleInitPhase, moduleInitPhase } from "../moduleManager";
+import { moduleInitPhase } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { isObject } from "../utils";
 import { announceSelf } from "./chatroom";
 import { sendHiddenBeep } from "./messaging";
+import { ModuleInitPhase } from "../constants";
 
 export let modStorage: Partial<ModStorage> = {};
 let deletionPending = false;

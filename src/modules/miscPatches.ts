@@ -1,20 +1,9 @@
-import { detectOtherMods } from "../utilsClub";
-import { allowMode } from "./console";
-import { BaseModule, ModuleCategory } from "../moduleManager";
+import { allowMode, detectOtherMods } from "../utilsClub";
+import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
-import { AccessLevel, registerPermission } from "./authority";
 
 export class ModuleMiscPatches extends BaseModule {
 	private o_Player_CanChange: (typeof Player.CanChange) | null = null;
-
-	init() {
-		registerPermission("misc_test", {
-			name: "Some permission to test things",
-			category: ModuleCategory.Misc,
-			min: AccessLevel.public,
-			self: false
-		});
-	}
 
 	load() {
 		hookFunction("AsylumEntranceCanWander", 0, () => true);

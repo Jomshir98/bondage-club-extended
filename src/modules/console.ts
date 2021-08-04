@@ -1,14 +1,12 @@
-import { detectOtherMods } from "../utilsClub";
+import { allowMode, detectOtherMods, developmentMode, setAllowMode, setDevelopmentMode } from "../utilsClub";
 import { hookFunction, patchFunction } from "../patching";
 import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } from "./wardrobe";
 import { InvisibilityEarbuds } from "./clubUtils";
-import { BaseModule } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { unload } from "../main";
 import { modStorage } from "./storage";
 import { sendQuery } from "./messaging";
 
-export let allowMode: boolean = false;
-export let developmentMode: boolean = false;
 export let antigarble = 0;
 
 class ConsoleInterface {
@@ -25,14 +23,7 @@ class ConsoleInterface {
 		if (allow === undefined) {
 			allow = !allowMode;
 		}
-		allowMode = allow;
-		if (allow) {
-			console.warn("Cheats enabled; please be careful not to break things");
-		} else {
-			this.Devel(false);
-			console.info("Cheats disabled");
-		}
-		return true;
+		return setAllowMode(allow);
 	}
 
 	get isDevel(): boolean {
@@ -48,28 +39,7 @@ class ConsoleInterface {
 		if (devel === undefined) {
 			devel = !developmentMode;
 		}
-		if (devel) {
-			if (!this.AllowCheats(true)) {
-				console.info("To use developer mode, cheats must be enabled first!");
-				return false;
-			}
-			AssetGroup.forEach(G => G.Description = G.Name);
-			Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
-			BackgroundSelectionAll.forEach(B => {
-				B.Description = B.Name;
-				B.Low = B.Description.toLowerCase();
-			});
-			console.warn("Developer mode enabled");
-		} else {
-			AssetLoadDescription("Female3DCG");
-			BackgroundSelectionAll.forEach(B => {
-				B.Description = DialogFindPlayer(B.Name);
-				B.Low = B.Description.toLowerCase();
-			});
-			console.info("Developer mode disabled");
-		}
-		developmentMode = devel;
-		return true;
+		return setDevelopmentMode(devel);
 	}
 
 	get antigarble(): number {

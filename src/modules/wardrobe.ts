@@ -1,6 +1,5 @@
-import { detectOtherMods, isBind, isCloth } from "../utilsClub";
-import { allowMode } from "./console";
-import { BaseModule } from "../moduleManager";
+import { allowMode, detectOtherMods, isBind, isCloth } from "../utilsClub";
+import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
 import { clipboardAvailable } from "../utils";
 

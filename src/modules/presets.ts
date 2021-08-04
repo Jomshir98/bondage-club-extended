@@ -1,15 +1,10 @@
-import { BaseModule, ModuleCategory, reload_modules, TOGGLEABLE_MODULES } from "../moduleManager";
+import { modules_applyPreset, reload_modules } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { arrayUnique } from "../utils";
 import { InfoBeep } from "../utilsClub";
 import { notifyOfChange } from "./messaging";
 import { finalizeFirstTimeInit, firstTimeInit, modStorage, modStorageSync } from "./storage";
-
-export enum Preset {
-	dominant = 0,
-	switch = 1,
-	submissive = 2,
-	slave = 3
-}
+import { ModuleCategory, Preset, TOGGLEABLE_MODULES } from "../constants";
 
 const PRESET_DISABLED_MODULES: Record<Preset, ModuleCategory[]> = {
 	[Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses],
@@ -18,8 +13,13 @@ const PRESET_DISABLED_MODULES: Record<Preset, ModuleCategory[]> = {
 	[Preset.slave]: []
 };
 
+export function getCurrentPreset(): Preset {
+	return modStorage.preset ?? Preset.switch;
+}
+
 export function applyPreset(preset: Preset) {
 	modStorage.preset = preset;
+	modules_applyPreset(preset);
 	setDisabledModules(PRESET_DISABLED_MODULES[preset]);
 
 	finalizeFirstTimeInit();

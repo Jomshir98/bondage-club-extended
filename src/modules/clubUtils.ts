@@ -1,5 +1,5 @@
 import { Command_selectCharacter, Command_selectCharacterAutocomplete, Command_selectWornItem, Command_selectWornItemAutocomplete, registerCommandParsed } from "./commands";
-import { BaseModule } from "../moduleManager";
+import { BaseModule } from "./_BaseModule";
 import { ChatRoomSendLocal } from "../utilsClub";
 
 export function InvisibilityEarbuds() {

@@ -1,5 +1,5 @@
 import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
-import { ModuleCategory } from "./moduleManager";
+import { ModuleCategory } from "./constants";
 import { crc32 } from "./utils";
 import { detectOtherMods } from "./utilsClub";
 

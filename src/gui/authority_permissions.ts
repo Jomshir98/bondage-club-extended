@@ -1,5 +1,5 @@
 import { ChatroomCharacter, getPlayerCharacter } from "../characters";
-import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../moduleManager";
+import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../constants";
 import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, getPermissionMinDisplayText, PermissionData, PermissionInfo } from "../modules/authority";
 import { icon_OwnerList } from "../resources";
 import { DrawImageEx } from "../utilsClub";

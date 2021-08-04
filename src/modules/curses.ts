@@ -11,6 +11,9 @@ import { ModuleCategory, Preset } from "../constants";
 import { hookFunction } from "../patching";
 
 const CURSES_CHECK_INTERVAL = 2000;
+const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
+const CURSES_ANTILOOP_THRESHOLD = 10;
+const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 
@@ -146,6 +149,9 @@ export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
 
 export class ModuleCurses extends BaseModule {
 	private timer: number | null = null;
+	private resetTimer: number | null = null;
+	private triggerCounts: Map<string, number> = new Map();
+	private suspendedUntil: number | null = null;
 
 	init() {
 		registerPermission("curses_curse", {
@@ -271,12 +277,19 @@ export class ModuleCurses extends BaseModule {
 			return;
 
 		this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
+		this.resetTimer = setInterval(() => {
+			this.triggerCounts.clear();
+		}, CURSES_ANTILOOP_RESET_INTERVAL);
 	}
 
 	unload() {
 		if (this.timer !== null) {
 			clearInterval(this.timer);
 			this.timer = null;
+		}
+		if (this.resetTimer !== null) {
+			clearInterval(this.resetTimer);
+			this.resetTimer = null;
 		}
 	}
 
@@ -289,6 +302,16 @@ export class ModuleCurses extends BaseModule {
 	private cursesTick() {
 		if (!ServerIsConnected || !modStorage.cursedItems)
 			return;
+
+		if (this.suspendedUntil !== null) {
+			if (Date.now() >= this.suspendedUntil) {
+				this.suspendedUntil = null;
+				this.triggerCounts.clear();
+				ChatRoomActionMessage(`The dormant curse on ${Player.Name}'s body wakes up again.`);
+			} else {
+				return;
+			}
+		}
 
 		const lastState = JSON.stringify(modStorage.cursedItems);
 
@@ -399,6 +422,15 @@ export class ModuleCurses extends BaseModule {
 				} else {
 					console.error(`BCX: No chat message for curse action ${changeType}`);
 				}
+
+				const counter = (this.triggerCounts.get(group) ?? 0) + 1;
+				this.triggerCounts.set(group, counter);
+
+				if (counter >= CURSES_ANTILOOP_THRESHOLD) {
+					ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
+					this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
+				}
+
 				break;
 			}
 		}

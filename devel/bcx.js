@@ -12,6 +12,186 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
+    const GROUP_NAME_OVERRIDES = {
+        "ItemNeckAccessories": "Collar Addon",
+        "ItemNeckRestraints": "Collar Restraint",
+        "ItemNipplesPiercings": "Nipple Piercing",
+        "ItemHood": "Hood",
+        "ItemMisc": "Miscellaneous",
+        "ItemDevices": "Devices",
+        "ItemHoodAddon": "Hood Addon",
+        "ItemAddon": "General Addon",
+        "ItemFeet": "Upper Leg",
+        "ItemLegs": "Lower Leg",
+        "ItemBoots": "Feet",
+        "ItemMouth": "Mouth (1)",
+        "ItemMouth2": "Mouth (2)",
+        "ItemMouth3": "Mouth (3)"
+    };
+    let allowMode = false;
+    let developmentMode = false;
+    function setAllowMode(allow) {
+        if (allow) {
+            console.warn("Cheats enabled; please be careful not to break things");
+        }
+        else {
+            if (!setDevelopmentMode(false))
+                return false;
+            console.info("Cheats disabled");
+        }
+        allowMode = allow;
+        return true;
+    }
+    function setDevelopmentMode(devel) {
+        if (devel) {
+            if (!setAllowMode(true)) {
+                console.info("To use developer mode, cheats must be enabled first!");
+                return false;
+            }
+            AssetGroup.forEach(G => G.Description = G.Name);
+            Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
+            BackgroundSelectionAll.forEach(B => {
+                B.Description = B.Name;
+                B.Low = B.Description.toLowerCase();
+            });
+            console.warn("Developer mode enabled");
+        }
+        else {
+            AssetLoadDescription("Female3DCG");
+            BackgroundSelectionAll.forEach(B => {
+                B.Description = DialogFindPlayer(B.Name);
+                B.Low = B.Description.toLowerCase();
+            });
+            console.info("Developer mode disabled");
+        }
+        developmentMode = devel;
+        return true;
+    }
+    function getVisibleGroupName(group) {
+        var _a;
+        return developmentMode ? group.Name : ((_a = GROUP_NAME_OVERRIDES[group.Name]) !== null && _a !== void 0 ? _a : group.Description);
+    }
+    function InfoBeep(msg, timer = 3000) {
+        console.log(`BCX msg: ${msg}`);
+        ServerBeep = {
+            Timer: Date.now() + timer,
+            Message: msg
+        };
+    }
+    function ChatRoomActionMessage(msg) {
+        if (!msg)
+            return;
+        ServerSend("ChatRoomChat", {
+            Content: "Beep",
+            Type: "Action",
+            Dictionary: [
+                { Tag: "Beep", Text: "msg" },
+                { Tag: "Biep", Text: "msg" },
+                { Tag: "Sonner", Text: "msg" },
+                { Tag: "msg", Text: msg }
+            ]
+        });
+    }
+    function ChatRoomSendLocal(msg, timeout, sender) {
+        var _a, _b;
+        // Adds the message and scrolls down unless the user has scrolled up
+        const div = document.createElement("div");
+        div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
+        div.setAttribute("data-time", ChatRoomCurrentTime());
+        div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
+        div.style.background = "#6e6eff54";
+        if (typeof msg === 'string')
+            div.innerText = msg;
+        else
+            div.appendChild(msg);
+        if (timeout)
+            setTimeout(() => div.remove(), timeout);
+        // Returns the focus on the chat box
+        const Refocus = ((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.id) === "InputChat";
+        const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
+        const ChatLog = document.getElementById("TextAreaChatLog");
+        if (ChatLog != null) {
+            ChatLog.appendChild(div);
+            if (ShouldScrollDown)
+                ElementScrollToEnd("TextAreaChatLog");
+            if (Refocus)
+                ElementFocus("InputChat");
+        }
+    }
+    function detectOtherMods() {
+        const w = window;
+        return {
+            NMod: typeof w.ChatRoomDrawFriendList === "function",
+            BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
+        };
+    }
+    /**
+     * Draws an image on canvas, applying all options
+     * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
+     * @param {number} X - Position of the image on the X axis
+     * @param {number} Y - Position of the image on the Y axis
+     * @param {object} [options] - any extra options, optional
+     * @param {CanvasRenderingContext2D} [options.Canvas] - Canvas on which to draw the image, defaults to `MainCanvas`
+     * @param {number} [options.Alpha] - transparency between 0-1
+     * @param {[number, number, number, number]} [options.SourcePos] - Area in original image to draw in format `[left, top, width, height]`
+     * @param {number} [options.Width] - Width of the drawn image, defaults to width of original image
+     * @param {number} [options.Height] - Height of the drawn image, defaults to height of original image
+     * @param {boolean} [options.Invert=false] - If image should be flipped vertically
+     * @param {boolean} [options.Mirror=false] - If image should be flipped horizontally
+     * @param {number} [options.Zoom=1] - Zoom factor
+     * @returns {boolean} - whether the image was complete or not
+     */
+    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 } = {}) {
+        if (typeof Source === "string") {
+            Source = DrawGetImage(Source);
+            if (!Source.complete)
+                return false;
+            if (!Source.naturalWidth)
+                return true;
+        }
+        const sizeChanged = Width != null || Height != null;
+        if (Width == null) {
+            Width = SourcePos ? SourcePos[2] : Source.width;
+        }
+        if (Height == null) {
+            Height = SourcePos ? SourcePos[3] : Source.height;
+        }
+        Canvas.save();
+        Canvas.globalCompositeOperation = "source-over";
+        Canvas.globalAlpha = Alpha;
+        Canvas.translate(X, Y);
+        if (Zoom !== 1) {
+            Canvas.scale(Zoom, Zoom);
+        }
+        if (Invert) {
+            Canvas.transform(1, 0, 0, -1, 0, Height);
+        }
+        if (Mirror) {
+            Canvas.transform(-1, 0, 0, 1, Width, 0);
+        }
+        if (SourcePos) {
+            Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
+        }
+        else if (sizeChanged) {
+            Canvas.drawImage(Source, 0, 0, Width, Height);
+        }
+        else {
+            Canvas.drawImage(Source, 0, 0);
+        }
+        Canvas.restore();
+        return true;
+    }
+    function isCloth(item, allowCosplay = false) {
+        const asset = item.Asset ? item.Asset : item;
+        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
+    }
+    function isBind(item) {
+        const asset = item.Asset ? item.Asset : item;
+        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
+            return false;
+        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
+    }
+
     const VERSION = "0.2.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
@@ -239,7 +419,7 @@ window.BCX_Loaded = false;
         init() {
             // Empty
         }
-        load() {
+        load(preset) {
             // Empty
         }
         run() {
@@ -248,354 +428,11 @@ window.BCX_Loaded = false;
         unload() {
             // Empty
         }
-        reload() {
+        reload(preset) {
             // Empty
         }
-    }
-    var ModuleCategory;
-    (function (ModuleCategory) {
-        ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
-        ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
-        ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
-        ModuleCategory[ModuleCategory["Curses"] = 3] = "Curses";
-        ModuleCategory[ModuleCategory["Misc"] = 99] = "Misc";
-    })(ModuleCategory || (ModuleCategory = {}));
-    const MODULE_NAMES = {
-        [ModuleCategory.Basic]: "Basic",
-        [ModuleCategory.Authority]: "Authority",
-        [ModuleCategory.Log]: "Behaviour Log",
-        [ModuleCategory.Curses]: "Curses",
-        [ModuleCategory.Misc]: "Miscellaneous"
-    };
-    const MODULE_ICONS = {
-        [ModuleCategory.Basic]: "Icons/General.png",
-        [ModuleCategory.Authority]: "Icons/Security.png",
-        [ModuleCategory.Log]: "Icons/Title.png",
-        [ModuleCategory.Curses]: "Icons/Struggle.png",
-        [ModuleCategory.Misc]: "Icons/Random.png"
-    };
-    const TOGGLEABLE_MODULES = [
-        ModuleCategory.Log,
-        ModuleCategory.Curses
-    ];
-    let moduleInitPhase = 0 /* construct */;
-    const modules = [];
-    function registerModule(module) {
-        if (moduleInitPhase !== 0 /* construct */) {
-            throw new Error("Modules can be registered only before initialization");
-        }
-        modules.push(module);
-        console.debug(`BCX: Registered module ${module.constructor.name}`);
-        return module;
-    }
-    function init_modules() {
-        moduleInitPhase = 1 /* init */;
-        for (const m of modules) {
-            m.init();
-        }
-        moduleInitPhase = 2 /* load */;
-        for (const m of modules) {
-            m.load();
-        }
-        moduleInitPhase = 3 /* ready */;
-        for (const m of modules) {
-            m.run();
-        }
-    }
-    function unload_modules() {
-        moduleInitPhase = 4 /* destroy */;
-        for (const m of modules) {
-            m.unload();
-        }
-    }
-    function reload_modules() {
-        if (moduleInitPhase !== 3 /* ready */) {
-            console.error("BCX: Attempt to reload modules, while not ready");
-            return false;
-        }
-        for (const m of modules) {
-            m.reload();
-        }
-        return true;
-    }
-
-    function j_WardrobeExportSelectionClothes(includeBinds = false) {
-        if (!CharacterAppearanceSelection)
-            return "";
-        const save = CharacterAppearanceSelection.Appearance
-            .filter(a => isCloth(a, true) || (includeBinds && isBind(a)))
-            .map(WardrobeAssetBundle);
-        return LZString.compressToBase64(JSON.stringify(save));
-    }
-    function j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
-        if (typeof data !== "string" || data.length < 1)
-            return "No data";
-        try {
-            if (data[0] !== "[") {
-                const decompressed = LZString.decompressFromBase64(data);
-                if (!decompressed)
-                    return "Bad data";
-                data = decompressed;
-            }
-            data = JSON.parse(data);
-            if (!Array.isArray(data))
-                return "Bad data";
-        }
-        catch (error) {
-            console.warn(error);
-            return "Bad data";
-        }
-        const C = CharacterAppearanceSelection;
-        if (!C) {
-            return "No character";
-        }
-        if (includeBinds && !force && C.Appearance.some(a => { var _a, _b; return isBind(a) && ((_b = (_a = a.Property) === null || _a === void 0 ? void 0 : _a.Effect) === null || _b === void 0 ? void 0 : _b.includes("Lock")); })) {
-            return "Character is bound";
-        }
-        const Allow = (a) => isCloth(a, CharacterAppearanceSelection.ID === 0) || (includeBinds && isBind(a));
-        C.Appearance = C.Appearance.filter(a => !Allow(a));
-        for (const cloth of data) {
-            if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group))
-                continue;
-            const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
-            if (A != null) {
-                CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
-                const item = InventoryGet(C, cloth.Group);
-                if (cloth.Property && item) {
-                    if (item.Property == null)
-                        item.Property = {};
-                    Object.assign(item.Property, cloth.Property);
-                }
-            }
-            else {
-                console.warn(`Clothing not found: `, cloth);
-            }
-        }
-        CharacterRefresh(C);
-        return true;
-    }
-    let j_WardrobeIncludeBinds = false;
-    function PasteListener(ev) {
-        if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
-            ev.preventDefault();
-            ev.stopImmediatePropagation();
-            const data = (ev.clipboardData || window.clipboardData).getData("text");
-            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
-        }
-    }
-    class ModuleWardrobe extends BaseModule {
-        load() {
-            const { NMod } = detectOtherMods();
-            hookFunction("AppearanceRun", 0, (args, next) => {
-                next(args);
-                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-                    const Y = NMod ? 265 : 125;
-                    DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
-                    DrawButton(1534, Y, 207, 50, "Export", "White", "");
-                    DrawButton(1768, Y, 207, 50, "Import", "White", "");
-                }
-            });
-            hookFunction("AppearanceClick", 0, (args, next) => {
-                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-                    const Y = NMod ? 265 : 125;
-                    // Restraints toggle
-                    if (MouseIn(1457, Y, 50, 50)) {
-                        j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
-                    }
-                    // Export
-                    if (MouseIn(1534, Y, 207, 50)) {
-                        setTimeout(async () => {
-                            await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
-                            CharacterAppearanceWardrobeText = "Copied to clipboard!";
-                        }, 0);
-                        return;
-                    }
-                    // Import
-                    if (MouseIn(1768, Y, 207, 50)) {
-                        setTimeout(async () => {
-                            if (typeof navigator.clipboard.readText !== "function") {
-                                CharacterAppearanceWardrobeText = "Please press Ctrl+V";
-                                return;
-                            }
-                            const data = await navigator.clipboard.readText();
-                            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-                            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
-                        }, 0);
-                        return;
-                    }
-                }
-                next(args);
-            });
-            document.addEventListener("paste", PasteListener);
-        }
-        unload() {
-            document.removeEventListener("paste", PasteListener);
-        }
-    }
-
-    const hiddenMessageHandlers = new Map();
-    const hiddenBeepHandlers = new Map();
-    const queryHandlers = {};
-    const changeHandlers = [];
-    function sendHiddenMessage(type, message, Target = null) {
-        if (!ServerPlayerIsInChatRoom() || firstTimeInit)
-            return;
-        ServerSend("ChatRoomChat", {
-            Content: "BCXMsg",
-            Type: "Hidden",
-            Target,
-            Dictionary: { type, message }
-        });
-    }
-    function sendHiddenBeep(type, message, target, asLeashBeep = false) {
-        ServerSend("AccountBeep", {
-            MemberNumber: target,
-            BeepType: asLeashBeep ? "Leash" : "BCX",
-            Message: {
-                BCX: { type, message }
-            }
-        });
-    }
-    const pendingQueries = new Map();
-    function sendQuery(type, data, target, timeout = 10000) {
-        if (firstTimeInit) {
-            return Promise.reject("Unavailable during init");
-        }
-        return new Promise((resolve, reject) => {
-            const id = uuidv4();
-            const info = {
-                target,
-                resolve,
-                reject,
-                timeout: setTimeout(() => {
-                    console.warn("BCX: Query timed out", target, type);
-                    pendingQueries.delete(id);
-                    reject("Timed out");
-                }, timeout)
-            };
-            pendingQueries.set(id, info);
-            sendHiddenMessage("query", {
-                id,
-                query: type,
-                data
-            }, target);
-        });
-    }
-    hiddenMessageHandlers.set("query", (sender, message) => {
-        if (!isObject(message) ||
-            typeof message.id !== "string" ||
-            typeof message.query !== "string") {
-            console.warn(`BCX: Invalid query`, sender, message);
-            return;
-        }
-        const character = getChatroomCharacter(sender);
-        if (character && !character.hasAccessToPlayer()) {
-            return sendHiddenMessage("queryAnswer", {
-                id: message.id,
-                ok: false
-            });
-        }
-        const handler = queryHandlers[message.query];
-        if (!handler) {
-            console.warn("BCX: Query no handler", sender, message);
-            return sendHiddenMessage("queryAnswer", {
-                id: message.id,
-                ok: false
-            });
-        }
-        handler(sender, (ok, data) => {
-            sendHiddenMessage("queryAnswer", {
-                id: message.id,
-                ok,
-                data
-            }, sender);
-        }, message.data);
-    });
-    hiddenMessageHandlers.set("queryAnswer", (sender, message) => {
-        if (!isObject(message) ||
-            typeof message.id !== "string" ||
-            typeof message.ok !== "boolean") {
-            console.warn(`BCX: Invalid queryAnswer`, sender, message);
-            return;
-        }
-        const info = pendingQueries.get(message.id);
-        if (!info) {
-            console.warn(`BCX: Response to unknown query`, sender, message);
-            return;
-        }
-        if (info.target !== info.target) {
-            console.warn(`BCX: Response to query not from target`, sender, message, info);
-            return;
-        }
-        clearTimeout(info.timeout);
-        pendingQueries.delete(message.id);
-        if (message.ok) {
-            info.resolve(message.data);
-        }
-        else {
-            info.reject(message.data);
-        }
-    });
-    hiddenMessageHandlers.set("somethingChanged", (sender) => {
-        changeHandlers.forEach(h => h(sender));
-    });
-    function notifyOfChange() {
-        if (moduleInitPhase !== 3 /* ready */)
-            return;
-        sendHiddenMessage("somethingChanged", undefined);
-        const player = getPlayerCharacter().MemberNumber;
-        changeHandlers.forEach(h => h(player));
-    }
-    class ModuleMessaging extends BaseModule {
-        load() {
-            hookFunction("ChatRoomMessage", 10, (args, next) => {
-                const data = args[0];
-                if ((data === null || data === void 0 ? void 0 : data.Type) === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
-                    if (data.Sender === Player.MemberNumber || firstTimeInit)
-                        return;
-                    if (!isObject(data.Dictionary)) {
-                        console.warn("BCX: Hidden message no Dictionary", data);
-                        return;
-                    }
-                    const { type, message } = data.Dictionary;
-                    if (typeof type === "string") {
-                        const handler = hiddenMessageHandlers.get(type);
-                        if (handler === undefined) {
-                            console.warn("BCX: Hidden message no handler", data.Sender, type, message);
-                        }
-                        else {
-                            handler(data.Sender, message);
-                        }
-                    }
-                    return;
-                }
-                return next(args);
-            });
-            hookFunction("ServerAccountBeep", 10, (args, next) => {
-                var _a;
-                const data = args[0];
-                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
-                    const { type, message } = data.Message.BCX;
-                    if (typeof type === "string") {
-                        const handler = hiddenBeepHandlers.get(type);
-                        if (handler === undefined) {
-                            console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
-                        }
-                        else {
-                            handler(data.MemberNumber, message);
-                        }
-                    }
-                    return;
-                }
-                else {
-                    return next(args);
-                }
-            });
-        }
-        unload() {
-            hiddenBeepHandlers.clear();
-            hiddenMessageHandlers.clear();
+        applyPreset(preset) {
+            // Empty
         }
     }
 
@@ -1159,58 +996,32 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         Preset[Preset["submissive"] = 2] = "submissive";
         Preset[Preset["slave"] = 3] = "slave";
     })(Preset || (Preset = {}));
-    const PRESET_DISABLED_MODULES = {
-        [Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses],
-        [Preset.switch]: [],
-        [Preset.submissive]: [],
-        [Preset.slave]: []
+    var ModuleCategory;
+    (function (ModuleCategory) {
+        ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
+        ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
+        ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
+        ModuleCategory[ModuleCategory["Curses"] = 3] = "Curses";
+        ModuleCategory[ModuleCategory["Misc"] = 99] = "Misc";
+    })(ModuleCategory || (ModuleCategory = {}));
+    const MODULE_NAMES = {
+        [ModuleCategory.Basic]: "Basic",
+        [ModuleCategory.Authority]: "Authority",
+        [ModuleCategory.Log]: "Behaviour Log",
+        [ModuleCategory.Curses]: "Curses",
+        [ModuleCategory.Misc]: "Miscellaneous"
     };
-    function applyPreset(preset) {
-        modStorage.preset = preset;
-        setDisabledModules(PRESET_DISABLED_MODULES[preset]);
-        finalizeFirstTimeInit();
-    }
-    function setDisabledModules(modules) {
-        if (!Array.isArray(modStorage.disabledModules)) {
-            console.error("BCX: Attempt to set disabled modules before initializetion");
-            return false;
-        }
-        modules = arrayUnique(modules.filter(i => TOGGLEABLE_MODULES.includes(i)));
-        if (CommonArraysEqual(modules, modStorage.disabledModules))
-            return true;
-        modStorage.disabledModules = modules;
-        if (reload_modules()) {
-            modStorageSync();
-            notifyOfChange();
-            return true;
-        }
-        return false;
-    }
-    function moduleIsEnabled(module) {
-        if (!TOGGLEABLE_MODULES.includes(module))
-            return true;
-        return Array.isArray(modStorage.disabledModules) ? !modStorage.disabledModules.includes(module) : true;
-    }
-    class ModulePresets extends BaseModule {
-        load() {
-            if (typeof modStorage.preset !== "number" || Preset[modStorage.preset] === undefined) {
-                modStorage.preset = Preset.switch;
-            }
-            if (!Array.isArray(modStorage.disabledModules)) {
-                modStorage.disabledModules = [];
-            }
-            else {
-                modStorage.disabledModules = modStorage.disabledModules.filter(i => TOGGLEABLE_MODULES.includes(i));
-            }
-        }
-        run() {
-            if (firstTimeInit) {
-                setTimeout(() => {
-                    InfoBeep(`Please visit your profile to finish BCX setup`, Infinity);
-                }, 2000);
-            }
-        }
-    }
+    const MODULE_ICONS = {
+        [ModuleCategory.Basic]: "Icons/General.png",
+        [ModuleCategory.Authority]: "Icons/Security.png",
+        [ModuleCategory.Log]: "Icons/Title.png",
+        [ModuleCategory.Curses]: "Icons/Struggle.png",
+        [ModuleCategory.Misc]: "Icons/Random.png"
+    };
+    const TOGGLEABLE_MODULES = [
+        ModuleCategory.Log,
+        ModuleCategory.Curses
+    ];
 
     const LOG_ENTRIES_LIMIT = 256;
     var LogEntryType;
@@ -1415,7 +1226,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         logConfigChange: "Log changes in logging configuration",
         logDeleted: "Log deleted log entries",
         praise: "Log praising or scolding behavior",
-        userNote: "Ability to attach notes",
+        userNote: "Ability to see attached notes",
         enteredPublicRoom: "Log which public rooms are entered",
         enteredPrivateRoom: "Log which private rooms are entered",
         hadOrgasm: "Log each single orgasm",
@@ -1434,38 +1245,62 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             registerPermission("log_view_normal", {
                 name: "Allow to see normal log entries",
                 category: ModuleCategory.Log,
-                self: true,
-                min: AccessLevel.public
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.mistress],
+                    [Preset.switch]: [true, AccessLevel.mistress],
+                    [Preset.submissive]: [true, AccessLevel.friend],
+                    [Preset.slave]: [true, AccessLevel.public]
+                }
             });
             registerPermission("log_view_protected", {
                 name: "Allow to see protected log entries",
                 category: ModuleCategory.Log,
-                self: true,
-                min: AccessLevel.mistress
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.lover],
+                    [Preset.switch]: [true, AccessLevel.lover],
+                    [Preset.submissive]: [true, AccessLevel.mistress],
+                    [Preset.slave]: [true, AccessLevel.mistress]
+                }
             });
             registerPermission("log_configure", {
                 name: "Allow to configure what is logged",
                 category: ModuleCategory.Log,
-                self: true,
-                min: AccessLevel.self
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.owner],
+                    [Preset.slave]: [false, AccessLevel.owner]
+                }
             });
             registerPermission("log_delete", {
                 name: "Allow deleting log entries",
                 category: ModuleCategory.Log,
-                self: true,
-                min: AccessLevel.self
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.owner],
+                    [Preset.slave]: [false, AccessLevel.owner]
+                }
             });
             registerPermission("log_praise", {
                 name: "Allow to praise or scold",
                 category: ModuleCategory.Log,
-                self: false,
-                min: AccessLevel.public
+                defaults: {
+                    [Preset.dominant]: [false, AccessLevel.friend],
+                    [Preset.switch]: [false, AccessLevel.friend],
+                    [Preset.submissive]: [false, AccessLevel.public],
+                    [Preset.slave]: [false, AccessLevel.public]
+                }
             });
             registerPermission("log_leaveMessage", {
                 name: "Allow to attach notes to the body",
                 category: ModuleCategory.Log,
-                self: false,
-                min: AccessLevel.mistress
+                defaults: {
+                    [Preset.dominant]: [false, AccessLevel.mistress],
+                    [Preset.switch]: [false, AccessLevel.mistress],
+                    [Preset.submissive]: [false, AccessLevel.friend],
+                    [Preset.slave]: [false, AccessLevel.public]
+                }
             });
             queryHandlers.logData = (sender, resolve) => {
                 const character = getChatroomCharacter(sender);
@@ -1621,7 +1456,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (permissions.has(name)) {
             throw new Error(`Permission "${name}" already defined!`);
         }
-        permissions.set(name, data);
+        for (const [k, v] of Object.entries(data.defaults)) {
+            if (v[1] === AccessLevel.self && !v[0]) {
+                console.error(`BCX: register permission "${name}": default for ${k} has invalid self value`);
+            }
+        }
+        permissions.set(name, {
+            ...data,
+            self: data.defaults[Preset.switch][0],
+            min: data.defaults[Preset.switch][1]
+        });
     }
     function getCharacterAccessLevel(character) {
         var _a, _b, _c;
@@ -1675,8 +1519,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         for (const [k, v] of permissions.entries()) {
             if (bundle[k]) {
                 res[k] = {
-                    category: v.category,
-                    name: v.name,
+                    ...v,
                     self: bundle[k][0],
                     min: bundle[k][1]
                 };
@@ -1841,44 +1684,72 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             registerPermission("authority_grant_self", {
                 name: "Allow granting self access",
                 category: ModuleCategory.Authority,
-                self: true,
-                min: AccessLevel.self
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [false, AccessLevel.owner],
+                    [Preset.slave]: [false, AccessLevel.owner]
+                }
             });
             registerPermission("authority_revoke_self", {
                 name: "Allow forbidding self access",
                 category: ModuleCategory.Authority,
-                self: true,
-                min: AccessLevel.self
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.self],
+                    [Preset.slave]: [false, AccessLevel.owner]
+                }
             });
             registerPermission("authority_edit_min", {
                 name: "Allow minimal access modification",
                 category: ModuleCategory.Authority,
-                self: true,
-                min: AccessLevel.self
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.self],
+                    [Preset.slave]: [false, AccessLevel.owner]
+                }
             });
             registerPermission("authority_mistress_add", {
                 name: "Allow granting Mistress status",
                 category: ModuleCategory.Authority,
-                self: true,
-                min: AccessLevel.mistress
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.lover],
+                    [Preset.slave]: [true, AccessLevel.mistress]
+                }
             });
             registerPermission("authority_mistress_remove", {
                 name: "Allow revoking Mistress status",
                 category: ModuleCategory.Authority,
-                self: true,
-                min: AccessLevel.lover
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [false, AccessLevel.lover],
+                    [Preset.slave]: [false, AccessLevel.lover]
+                }
             });
             registerPermission("authority_owner_add", {
                 name: "Allow granting Owner status",
                 category: ModuleCategory.Authority,
-                self: true,
-                min: AccessLevel.owner
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.clubowner],
+                    [Preset.slave]: [true, AccessLevel.owner]
+                }
             });
             registerPermission("authority_owner_remove", {
                 name: "Allow revoking Owner status",
                 category: ModuleCategory.Authority,
-                self: true,
-                min: AccessLevel.clubowner
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [false, AccessLevel.clubowner],
+                    [Preset.slave]: [false, AccessLevel.clubowner]
+                }
             });
             queryHandlers.permissions = (sender, resolve) => {
                 resolve(true, permissionsMakeBundle());
@@ -1964,7 +1835,18 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 resolve(true, editRole(data.type, data.action, data.target, character));
             };
         }
-        load() {
+        setDefultPermissionsForPreset(preset) {
+            for (const permission of permissions.values()) {
+                permission.self = permission.defaults[preset][0];
+                permission.min = permission.defaults[preset][1];
+            }
+        }
+        applyPreset(preset) {
+            this.setDefultPermissionsForPreset(preset);
+            modStorage.permissions = permissionsMakeBundle();
+        }
+        load(preset) {
+            this.setDefultPermissionsForPreset(preset);
             if (isObject(modStorage.permissions)) {
                 for (const [k, v] of Object.entries(modStorage.permissions)) {
                     const perm = permissions.get(k);
@@ -2004,8 +1886,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 modStorage.mistresses = modStorage.mistresses.filter(test);
             }
         }
-        reload() {
-            this.load();
+        reload(preset) {
+            this.load(preset);
         }
     }
 
@@ -2140,20 +2022,32 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             registerPermission("curses_curse", {
                 name: "Allow cursing objects or the body",
                 category: ModuleCategory.Curses,
-                self: false,
-                min: AccessLevel.mistress
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.lover],
+                    [Preset.switch]: [true, AccessLevel.lover],
+                    [Preset.submissive]: [false, AccessLevel.mistress],
+                    [Preset.slave]: [false, AccessLevel.mistress]
+                }
             });
             registerPermission("curses_lift", {
                 name: "Allow lifting curses",
                 category: ModuleCategory.Curses,
-                self: false,
-                min: AccessLevel.mistress
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.lover],
+                    [Preset.switch]: [true, AccessLevel.lover],
+                    [Preset.submissive]: [false, AccessLevel.mistress],
+                    [Preset.slave]: [false, AccessLevel.mistress]
+                }
             });
             registerPermission("curses_color", {
                 name: "Allow changing colors of cursed objects",
                 category: ModuleCategory.Curses,
-                self: true,
-                min: AccessLevel.mistress
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.lover],
+                    [Preset.switch]: [true, AccessLevel.lover],
+                    [Preset.submissive]: [true, AccessLevel.mistress],
+                    [Preset.slave]: [false, AccessLevel.mistress]
+                }
             });
             queryHandlers.curseGetInfo = (sender, resolve) => {
                 const character = getChatroomCharacter(sender);
@@ -2667,764 +2561,169 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         return character;
     }
 
-    const commands = new Map();
-    function registerCommand(name, description, callback, autocomplete = null) {
-        name = name.toLocaleLowerCase();
-        if (commands.has(name)) {
-            throw new Error(`Command "${name}" already registered!`);
-        }
-        commands.set(name, {
-            parse: false,
-            callback,
-            autocomplete,
-            description
+    const hiddenMessageHandlers = new Map();
+    const hiddenBeepHandlers = new Map();
+    const queryHandlers = {};
+    const changeHandlers = [];
+    function sendHiddenMessage(type, message, Target = null) {
+        if (!ServerPlayerIsInChatRoom() || firstTimeInit)
+            return;
+        ServerSend("ChatRoomChat", {
+            Content: "BCXMsg",
+            Type: "Hidden",
+            Target,
+            Dictionary: { type, message }
         });
     }
-    function aliasCommand(originalName, alias) {
-        originalName = originalName.toLocaleLowerCase();
-        alias = alias.toLocaleLowerCase();
-        const original = commands.get(originalName);
-        if (!original) {
-            throw new Error(`Command "${originalName}" to alias not found`);
-        }
-        if (original.parse) {
-            commands.set(alias, {
-                parse: true,
-                description: null,
-                callback: original.callback,
-                autocomplete: original.autocomplete
-            });
-        }
-        else {
-            commands.set(alias, {
-                parse: false,
-                description: null,
-                callback: original.callback,
-                autocomplete: original.autocomplete
-            });
-        }
-    }
-    function registerCommandParsed(name, description, callback, autocomplete = null) {
-        name = name.toLocaleLowerCase();
-        if (commands.has(name)) {
-            throw new Error(`Command "${name}" already registered!`);
-        }
-        commands.set(name, {
-            parse: true,
-            callback,
-            autocomplete,
-            description
+    function sendHiddenBeep(type, message, target, asLeashBeep = false) {
+        ServerSend("AccountBeep", {
+            MemberNumber: target,
+            BeepType: asLeashBeep ? "Leash" : "BCX",
+            Message: {
+                BCX: { type, message }
+            }
         });
     }
-    function CommandParse(msg) {
-        msg = msg.trimStart();
-        const commandMatch = /^(\S+)(?:\s|$)(.*)$/.exec(msg);
-        if (!commandMatch) {
-            return ["", ""];
+    const pendingQueries = new Map();
+    function sendQuery(type, data, target, timeout = 10000) {
+        if (firstTimeInit) {
+            return Promise.reject("Unavailable during init");
         }
-        return [(commandMatch[1] || "").toLocaleLowerCase(), commandMatch[2]];
+        return new Promise((resolve, reject) => {
+            const id = uuidv4();
+            const info = {
+                target,
+                resolve,
+                reject,
+                timeout: setTimeout(() => {
+                    console.warn("BCX: Query timed out", target, type);
+                    pendingQueries.delete(id);
+                    reject("Timed out");
+                }, timeout)
+            };
+            pendingQueries.set(id, info);
+            sendHiddenMessage("query", {
+                id,
+                query: type,
+                data
+            }, target);
+        });
     }
-    function CommandParseArguments(args) {
-        return [...args.matchAll(/".*?(?:"|$)|'.*?(?:'|$)|[^ ]+/g)]
-            .map(a => a[0])
-            .map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
-    }
-    function CommandHasEmptyArgument(args) {
-        const argv = CommandParseArguments(args);
-        return argv.length === 0 || !args.endsWith(argv[argv.length - 1]);
-    }
-    function CommandQuoteArgument(arg) {
-        if (arg.startsWith(`"`)) {
-            return `'${arg}'`;
+    hiddenMessageHandlers.set("query", (sender, message) => {
+        if (!isObject(message) ||
+            typeof message.id !== "string" ||
+            typeof message.query !== "string") {
+            console.warn(`BCX: Invalid query`, sender, message);
+            return;
         }
-        else if (arg.startsWith(`'`)) {
-            return `"${arg}"`;
+        const character = getChatroomCharacter(sender);
+        if (character && !character.hasAccessToPlayer()) {
+            return sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok: false
+            });
         }
-        else if (arg.includes(" ")) {
-            return arg.includes('"') ? `'${arg}'` : `"${arg}"`;
+        const handler = queryHandlers[message.query];
+        if (!handler) {
+            console.warn("BCX: Query no handler", sender, message);
+            return sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok: false
+            });
         }
-        return arg;
-    }
-    function RunCommand(msg) {
-        const [command, args] = CommandParse(msg);
-        const commandInfo = commands.get(command);
-        if (!commandInfo) {
-            // Command not found
-            ChatRoomSendLocal(`Unknown command "${command}"\n` +
-                `To see list of valid commands whisper '!help'`, 15000);
-            return false;
+        handler(sender, (ok, data) => {
+            sendHiddenMessage("queryAnswer", {
+                id: message.id,
+                ok,
+                data
+            }, sender);
+        }, message.data);
+    });
+    hiddenMessageHandlers.set("queryAnswer", (sender, message) => {
+        if (!isObject(message) ||
+            typeof message.id !== "string" ||
+            typeof message.ok !== "boolean") {
+            console.warn(`BCX: Invalid queryAnswer`, sender, message);
+            return;
         }
-        if (commandInfo.parse) {
-            return commandInfo.callback(CommandParseArguments(args));
+        const info = pendingQueries.get(message.id);
+        if (!info) {
+            console.warn(`BCX: Response to unknown query`, sender, message);
+            return;
+        }
+        if (info.target !== info.target) {
+            console.warn(`BCX: Response to query not from target`, sender, message, info);
+            return;
+        }
+        clearTimeout(info.timeout);
+        pendingQueries.delete(message.id);
+        if (message.ok) {
+            info.resolve(message.data);
         }
         else {
-            return commandInfo.callback(args);
+            info.reject(message.data);
         }
+    });
+    hiddenMessageHandlers.set("somethingChanged", (sender) => {
+        changeHandlers.forEach(h => h(sender));
+    });
+    function notifyOfChange() {
+        if (moduleInitPhase !== 3 /* ready */)
+            return;
+        sendHiddenMessage("somethingChanged", undefined);
+        const player = getPlayerCharacter().MemberNumber;
+        changeHandlers.forEach(h => h(player));
     }
-    function CommandAutocomplete(msg) {
-        msg = msg.trimStart();
-        const [command, args] = CommandParse(msg);
-        if (msg.length === command.length) {
-            const prefixes = Array.from(commands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
-            if (prefixes.length === 0)
-                return msg;
-            const best = longestCommonPrefix(prefixes);
-            if (best === msg) {
-                ChatRoomSendLocal(prefixes.slice().sort().join("\n"), 10000);
-            }
-            return best;
-        }
-        const commandInfo = commands.get(command);
-        if (commandInfo && commandInfo.autocomplete) {
-            if (commandInfo.parse) {
-                const argv = CommandParseArguments(args);
-                if (CommandHasEmptyArgument(args)) {
-                    argv.push("");
-                }
-                const lastOptions = commandInfo.autocomplete(argv);
-                if (lastOptions.length > 0) {
-                    const best = longestCommonPrefix(lastOptions);
-                    if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
-                        ChatRoomSendLocal(lastOptions.slice().sort().join("\n"), 10000);
-                    }
-                    argv[argv.length - 1] = best;
-                }
-                return `${command} ` +
-                    argv.map(CommandQuoteArgument).join(" ") +
-                    (lastOptions.length === 1 ? " " : "");
-            }
-            else {
-                const possibleArgs = commandInfo.autocomplete(args);
-                if (possibleArgs.length === 0) {
-                    return msg;
-                }
-                const best = longestCommonPrefix(possibleArgs);
-                if (possibleArgs.length > 1 && best === args) {
-                    ChatRoomSendLocal(possibleArgs.slice().sort().join("\n"), 10000);
-                }
-                return `${command} ${best}`;
-            }
-        }
-        return "";
-    }
-    function Command_selectCharacter(selector) {
-        const characters = getAllCharactersInRoom();
-        if (/^[0-9]+$/.test(selector)) {
-            const MemberNumber = Number.parseInt(selector, 10);
-            const target = characters.find(c => c.MemberNumber === MemberNumber);
-            if (!target) {
-                return `Player #${MemberNumber} not found in the room.`;
-            }
-            return target;
-        }
-        let targets = characters.filter(c => c.Name === selector);
-        if (targets.length === 0)
-            targets = characters.filter(c => c.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 1) {
-            return targets[0];
-        }
-        else if (targets.length === 0) {
-            return `Player "${selector}" not found in the room.`;
-        }
-        else {
-            return `Multiple players match "${selector}". Please use Member Number instead.`;
-        }
-    }
-    function Command_selectCharacterAutocomplete(selector) {
-        const characters = getAllCharactersInRoom();
-        if (/^[0-9]+$/.test(selector)) {
-            return characters.map(c => { var _a; return (_a = c.MemberNumber) === null || _a === void 0 ? void 0 : _a.toString(10); }).filter(n => n != null && n.startsWith(selector));
-        }
-        return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
-    }
-    function Command_selectWornItem(character, selector) {
-        const items = character.Character.Appearance.filter(isBind);
-        let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 0)
-            targets = items.filter(A => A.Asset.Group.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 0)
-            targets = items.filter(A => A.Asset.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 0)
-            targets = items.filter(A => A.Asset.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 1) {
-            return targets[0];
-        }
-        else if (targets.length === 0) {
-            return `Item "${selector}" not found on character ${character}.`;
-        }
-        else {
-            return `Multiple items match, please use group name instead. (eg. arms)`;
-        }
-    }
-    function Command_selectWornItemAutocomplete(character, selector) {
-        const items = character.Character.Appearance.filter(isBind);
-        let possible = arrayUnique(items.map(A => A.Asset.Group.Description)
-            .concat(items.map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
-        if (possible.length === 0) {
-            possible = arrayUnique(items.map(A => A.Asset.Group.Name)
-                .concat(items.map(A => A.Asset.Name))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
-        }
-        return possible;
-    }
-    class ModuleCommands extends BaseModule {
+    class ModuleMessaging extends BaseModule {
         load() {
-            hookFunction("ChatRoomSendChat", 10, (args, next) => {
-                const chat = document.getElementById("InputChat");
-                if (chat && !firstTimeInit) {
-                    const msg = chat.value.trim();
-                    if (msg.startsWith("..")) {
-                        chat.value = msg.substr(1);
-                    }
-                    else if (msg.startsWith(".")) {
-                        if (RunCommand(msg.substr(1))) {
-                            chat.value = "";
-                        }
+            hookFunction("ChatRoomMessage", 10, (args, next) => {
+                const data = args[0];
+                if ((data === null || data === void 0 ? void 0 : data.Type) === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
+                    if (data.Sender === Player.MemberNumber || firstTimeInit)
+                        return;
+                    if (!isObject(data.Dictionary)) {
+                        console.warn("BCX: Hidden message no Dictionary", data);
                         return;
                     }
+                    const { type, message } = data.Dictionary;
+                    if (typeof type === "string") {
+                        const handler = hiddenMessageHandlers.get(type);
+                        if (handler === undefined) {
+                            console.warn("BCX: Hidden message no handler", data.Sender, type, message);
+                        }
+                        else {
+                            handler(data.Sender, message);
+                        }
+                    }
+                    return;
                 }
                 return next(args);
             });
-            hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+            hookFunction("ServerAccountBeep", 10, (args, next) => {
                 var _a;
-                const chat = document.getElementById("InputChat");
-                // Tab for command completion
-                if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..") && !firstTimeInit) {
-                    const e = (_a = args[0]) !== null && _a !== void 0 ? _a : event;
-                    e === null || e === void 0 ? void 0 : e.preventDefault();
-                    chat.value = "." + CommandAutocomplete(chat.value.substr(1));
+                const data = args[0];
+                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
+                    const { type, message } = data.Message.BCX;
+                    if (typeof type === "string") {
+                        const handler = hiddenBeepHandlers.get(type);
+                        if (handler === undefined) {
+                            console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
+                        }
+                        else {
+                            handler(data.MemberNumber, message);
+                        }
+                    }
+                    return;
                 }
                 else {
                     return next(args);
                 }
             });
-            registerCommand("help", "- display this help [alias: . ]", () => {
-                ChatRoomSendLocal(`Available commands:\n` +
-                    Array.from(commands.entries())
-                        .filter(c => c[1].description !== null)
-                        .map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
-                        .sort()
-                        .join("\n"));
-                return true;
-            });
-            aliasCommand("help", "");
-            registerCommand("action", "- send custom (action) [alias: .a ]", (msg) => {
-                ChatRoomActionMessage(msg);
-                return true;
-            });
-            aliasCommand("action", "a");
-            const ANTIGARBLE_LEVELS = {
-                "0": 0,
-                "1": 1,
-                "2": 2,
-                "normal": 0,
-                "both": 1,
-                "ungarbled": 2
-            };
-            const ANTIGARBLE_LEVEL_NAMES = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
-            registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
-                const val = ANTIGARBLE_LEVELS[value || ""];
-                if (val !== undefined) {
-                    consoleInterface.antigarble = val;
-                    ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
-                    return true;
-                }
-                else {
-                    ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
-                    return false;
-                }
-            }, value => {
-                return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
-            });
         }
         unload() {
-            commands.clear();
+            hiddenBeepHandlers.clear();
+            hiddenMessageHandlers.clear();
         }
-    }
-
-    function InvisibilityEarbuds() {
-        var _a;
-        if (((_a = InventoryGet(Player, "ItemEars")) === null || _a === void 0 ? void 0 : _a.Asset.Name) === "BluetoothEarbuds") {
-            InventoryRemove(Player, "ItemEars");
-        }
-        else {
-            const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
-            if (!asset)
-                return;
-            Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
-            Player.Appearance.push({
-                Asset: asset,
-                Color: "Default",
-                Difficulty: -100,
-                Property: {
-                    Type: "Light",
-                    Effect: [],
-                    Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
-                }
-            });
-            CharacterRefresh(Player);
-        }
-        ChatRoomCharacterUpdate(Player);
-    }
-    class ModuleClubUtils extends BaseModule {
-        load() {
-            registerCommandParsed("colour", "<source> <item> <target> - Copies color of certain item from source character to target character", (argv) => {
-                if (argv.length !== 3) {
-                    ChatRoomSendLocal(`Expected three arguments: <source> <item> <target>`);
-                    return false;
-                }
-                const source = Command_selectCharacter(argv[0]);
-                if (typeof source === "string") {
-                    ChatRoomSendLocal(source);
-                    return false;
-                }
-                const target = Command_selectCharacter(argv[2]);
-                if (typeof target === "string") {
-                    ChatRoomSendLocal(target);
-                    return false;
-                }
-                const item = Command_selectWornItem(source, argv[1]);
-                if (typeof item === "string") {
-                    ChatRoomSendLocal(item);
-                    return false;
-                }
-                const targetItem = target.Character.Appearance.find(A => A.Asset === item.Asset);
-                if (!targetItem) {
-                    ChatRoomSendLocal(`Target must be wearing the same item`);
-                    return false;
-                }
-                targetItem.Color = Array.isArray(item.Color) ? item.Color.slice() : item.Color;
-                CharacterRefresh(target.Character);
-                ChatRoomCharacterUpdate(target.Character);
-                return true;
-            }, (argv) => {
-                if (argv.length === 1) {
-                    return Command_selectCharacterAutocomplete(argv[0]);
-                }
-                else if (argv.length === 2) {
-                    const source = Command_selectCharacter(argv[0]);
-                    if (typeof source !== "string") {
-                        return Command_selectWornItemAutocomplete(source, argv[1]);
-                    }
-                }
-                else if (argv.length === 3) {
-                    return Command_selectCharacterAutocomplete(argv[2]);
-                }
-                return [];
-            });
-            registerCommandParsed("allowactivities", "<character> <item> - Modifies item to not block activities", (argv) => {
-                if (argv.length !== 2) {
-                    ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);
-                    return false;
-                }
-                const char = Command_selectCharacter(argv[0]);
-                if (typeof char === "string") {
-                    ChatRoomSendLocal(char);
-                    return false;
-                }
-                const item = Command_selectWornItem(char, argv[1]);
-                if (typeof item === "string") {
-                    ChatRoomSendLocal(item);
-                    return false;
-                }
-                if (!item.Property) {
-                    item.Property = {};
-                }
-                item.Property.AllowActivityOn = AssetGroup.map(A => A.Name);
-                CharacterRefresh(char.Character);
-                ChatRoomCharacterUpdate(char.Character);
-                return true;
-            }, (argv) => {
-                if (argv.length === 1) {
-                    return Command_selectCharacterAutocomplete(argv[0]);
-                }
-                else if (argv.length === 2) {
-                    const source = Command_selectCharacter(argv[0]);
-                    if (typeof source !== "string") {
-                        return Command_selectWornItemAutocomplete(source, argv[1]);
-                    }
-                }
-                return [];
-            });
-        }
-    }
-
-    function loginInit(C) {
-        if (window.BCX_Loaded)
-            return;
-        init();
-    }
-    function clearCaches() {
-        if (typeof DrawRunMap !== "undefined") {
-            DrawRunMap.clear();
-            DrawScreen = "";
-        }
-        if (typeof CurrentScreenFunctions !== "undefined") {
-            const w = window;
-            CurrentScreenFunctions = {
-                Run: w[`${CurrentScreen}Run`],
-                Click: w[`${CurrentScreen}Click`],
-                Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
-                Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
-                Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
-                KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
-                Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined
-            };
-        }
-    }
-    function init() {
-        init_modules();
-        // Loading into already loaded club - clear some caches
-        clearCaches();
-        //#region Other mod compatability
-        const { BondageClubTools } = detectOtherMods();
-        if (BondageClubTools) {
-            console.warn("BCX: Bondage Club Tools detected!");
-            if (window.BCX_BondageClubToolsPatch === true) {
-                console.info("BCX: Bondage Club Tools already patched, skip!");
-            }
-            else {
-                window.BCX_BondageClubToolsPatch = true;
-                const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
-                const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
-                console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
-                ServerSocket.off("ChatRoomMessage");
-                ServerSocket.on("ChatRoomMessage", data => {
-                    if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
-                        ChatRoomMessageForwarder(data);
-                    }
-                    return ChatRoomMessage(data);
-                });
-                ServerSocket.off("AccountBeep");
-                ServerSocket.on("AccountBeep", data => {
-                    if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
-                        AccountBeepForwarder(data);
-                    }
-                    return ServerAccountBeep(data);
-                });
-            }
-        }
-        //#endregion
-        window.BCX_Loaded = true;
-        InfoBeep(`BCX loaded! Version: ${VERSION}`);
-    }
-    function unload() {
-        unload_patches();
-        unload_modules();
-        // clear some caches
-        clearCaches();
-        delete window.BCX_Loaded;
-        console.log("BCX: Unloaded.");
-        return true;
-    }
-
-    let allowMode = false;
-    let developmentMode = false;
-    let antigarble = 0;
-    class ConsoleInterface {
-        get isAllow() {
-            return allowMode;
-        }
-        AllowCheats(allow) {
-            if (typeof allow !== "boolean" && allow !== undefined) {
-                return false;
-            }
-            if (allowMode === allow)
-                return true;
-            if (allow === undefined) {
-                allow = !allowMode;
-            }
-            allowMode = allow;
-            if (allow) {
-                console.warn("Cheats enabled; please be careful not to break things");
-            }
-            else {
-                this.Devel(false);
-                console.info("Cheats disabled");
-            }
-            return true;
-        }
-        get isDevel() {
-            return developmentMode;
-        }
-        Devel(devel) {
-            if (typeof devel !== "boolean" && devel !== undefined) {
-                return false;
-            }
-            if (developmentMode === devel)
-                return true;
-            if (devel === undefined) {
-                devel = !developmentMode;
-            }
-            if (devel) {
-                if (!this.AllowCheats(true)) {
-                    console.info("To use developer mode, cheats must be enabled first!");
-                    return false;
-                }
-                AssetGroup.forEach(G => G.Description = G.Name);
-                Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
-                BackgroundSelectionAll.forEach(B => {
-                    B.Description = B.Name;
-                    B.Low = B.Description.toLowerCase();
-                });
-                console.warn("Developer mode enabled");
-            }
-            else {
-                AssetLoadDescription("Female3DCG");
-                BackgroundSelectionAll.forEach(B => {
-                    B.Description = DialogFindPlayer(B.Name);
-                    B.Low = B.Description.toLowerCase();
-                });
-                console.info("Developer mode disabled");
-            }
-            developmentMode = devel;
-            return true;
-        }
-        get antigarble() {
-            return antigarble;
-        }
-        set antigarble(value) {
-            if (![0, 1, 2].includes(value)) {
-                throw new Error("Bad antigarble value, expected 0/1/2");
-            }
-            antigarble = value;
-        }
-        j_WardrobeExportSelectionClothes(includeBinds = false) {
-            return j_WardrobeExportSelectionClothes(includeBinds);
-        }
-        j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
-            return j_WardrobeImportSelectionClothes(data, includeBinds, force);
-        }
-        ToggleInvisibilityEarbuds() {
-            return InvisibilityEarbuds();
-        }
-        Unload() {
-            return unload();
-        }
-        get storage() {
-            if (!developmentMode) {
-                return "Development mode required";
-            }
-            return modStorage;
-        }
-        devSendQuery(target, query, data) {
-            if (!developmentMode || typeof target !== "number" || typeof query !== "string")
-                return false;
-            sendQuery(query, data, target).then(result => {
-                console.info(`Query ${query} to ${target} resolved:`, result);
-            }, error => {
-                console.warn(`Query ${query} to ${target} failed:`, error);
-            });
-            return true;
-        }
-    }
-    const consoleInterface = Object.freeze(new ConsoleInterface());
-    class ModuleConsole extends BaseModule {
-        load() {
-            window.bcx = consoleInterface;
-            const { NMod } = detectOtherMods();
-            patchFunction("ChatRoomMessage", NMod ? {
-                "A.DynamicDescription(Source).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(Source).toLowerCase() )`,
-                "G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
-            } : {
-                "Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? Asset[A].Description : Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase() )`,
-                "AssetGroup[A].Description.toLowerCase()": `( bcx.isDevel ? AssetGroup[A].Description : AssetGroup[A].Description.toLowerCase() )`
-            });
-            patchFunction("ExtendedItemDraw", {
-                "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
-            });
-            hookFunction("DialogDrawItemMenu", 0, (args, next) => {
-                var _a;
-                if (developmentMode) {
-                    DialogTextDefault = ((_a = args[0].FocusGroup) === null || _a === void 0 ? void 0 : _a.Description) || "";
-                }
-                return next(args);
-            });
-            patchFunction("DialogDrawPoseMenu", {
-                '"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`
-            });
-            hookFunction("DialogDrawExpressionMenu", 0, (args, next) => {
-                next(args);
-                if (developmentMode) {
-                    for (let I = 0; I < DialogFacialExpressions.length; I++) {
-                        const FE = DialogFacialExpressions[I];
-                        const OffsetY = 185 + 100 * I;
-                        if (MouseIn(20, OffsetY, 90, 90)) {
-                            DrawText(JSON.stringify(FE.Group), 300, 950, "White");
-                        }
-                        if (I === DialogFacialExpressionsSelected) {
-                            for (let j = 0; j < FE.ExpressionList.length; j++) {
-                                const EOffsetX = 155 + 100 * (j % 3);
-                                const EOffsetY = 185 + 100 * Math.floor(j / 3);
-                                if (MouseIn(EOffsetX, EOffsetY, 90, 90)) {
-                                    DrawText(JSON.stringify(FE.ExpressionList[j]), 300, 950, "White");
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            DialogSelfMenuOptions.forEach(opt => {
-                if (opt.Name === "Pose") {
-                    opt.IsAvailable = () => true;
-                    opt.Draw = function () { return DialogDrawPoseMenu(); };
-                }
-                else if (opt.Name === "Expression") {
-                    opt.Draw = function () { return DialogDrawExpressionMenu(); };
-                }
-            });
-            hookFunction("SpeechGarble", 0, (args, next) => {
-                if (antigarble === 2)
-                    return args[1];
-                let res = next(args);
-                if (typeof res === "string" && res !== args[1] && antigarble === 1)
-                    res += ` <> ${args[1]}`;
-                return res;
-            });
-        }
-        unload() {
-            delete window.bcx;
-        }
-    }
-
-    const GROUP_NAME_OVERRIDES = {
-        "ItemNeckAccessories": "Collar Addon",
-        "ItemNeckRestraints": "Collar Restraint",
-        "ItemNipplesPiercings": "Nipple Piercing",
-        "ItemHood": "Hood",
-        "ItemMisc": "Miscellaneous",
-        "ItemDevices": "Devices",
-        "ItemHoodAddon": "Hood Addon",
-        "ItemAddon": "General Addon",
-        "ItemFeet": "Upper Leg",
-        "ItemLegs": "Lower Leg",
-        "ItemBoots": "Feet",
-        "ItemMouth": "Mouth (1)",
-        "ItemMouth2": "Mouth (2)",
-        "ItemMouth3": "Mouth (3)"
-    };
-    function getVisibleGroupName(group) {
-        var _a;
-        return developmentMode ? group.Name : ((_a = GROUP_NAME_OVERRIDES[group.Name]) !== null && _a !== void 0 ? _a : group.Description);
-    }
-    function InfoBeep(msg, timer = 3000) {
-        console.log(`BCX msg: ${msg}`);
-        ServerBeep = {
-            Timer: Date.now() + timer,
-            Message: msg
-        };
-    }
-    function ChatRoomActionMessage(msg) {
-        if (!msg)
-            return;
-        ServerSend("ChatRoomChat", {
-            Content: "Beep",
-            Type: "Action",
-            Dictionary: [
-                { Tag: "Beep", Text: "msg" },
-                { Tag: "Biep", Text: "msg" },
-                { Tag: "Sonner", Text: "msg" },
-                { Tag: "msg", Text: msg }
-            ]
-        });
-    }
-    function ChatRoomSendLocal(msg, timeout, sender) {
-        var _a, _b;
-        // Adds the message and scrolls down unless the user has scrolled up
-        const div = document.createElement("div");
-        div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
-        div.setAttribute("data-time", ChatRoomCurrentTime());
-        div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
-        div.style.background = "#6e6eff54";
-        if (typeof msg === 'string')
-            div.innerText = msg;
-        else
-            div.appendChild(msg);
-        if (timeout)
-            setTimeout(() => div.remove(), timeout);
-        // Returns the focus on the chat box
-        const Refocus = ((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.id) === "InputChat";
-        const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
-        const ChatLog = document.getElementById("TextAreaChatLog");
-        if (ChatLog != null) {
-            ChatLog.appendChild(div);
-            if (ShouldScrollDown)
-                ElementScrollToEnd("TextAreaChatLog");
-            if (Refocus)
-                ElementFocus("InputChat");
-        }
-    }
-    function detectOtherMods() {
-        const w = window;
-        return {
-            NMod: typeof w.ChatRoomDrawFriendList === "function",
-            BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
-        };
-    }
-    /**
-     * Draws an image on canvas, applying all options
-     * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
-     * @param {number} X - Position of the image on the X axis
-     * @param {number} Y - Position of the image on the Y axis
-     * @param {object} [options] - any extra options, optional
-     * @param {CanvasRenderingContext2D} [options.Canvas] - Canvas on which to draw the image, defaults to `MainCanvas`
-     * @param {number} [options.Alpha] - transparency between 0-1
-     * @param {[number, number, number, number]} [options.SourcePos] - Area in original image to draw in format `[left, top, width, height]`
-     * @param {number} [options.Width] - Width of the drawn image, defaults to width of original image
-     * @param {number} [options.Height] - Height of the drawn image, defaults to height of original image
-     * @param {boolean} [options.Invert=false] - If image should be flipped vertically
-     * @param {boolean} [options.Mirror=false] - If image should be flipped horizontally
-     * @param {number} [options.Zoom=1] - Zoom factor
-     * @returns {boolean} - whether the image was complete or not
-     */
-    function DrawImageEx(Source, X, Y, { Canvas = MainCanvas, Alpha = 1, SourcePos, Width, Height, Invert = false, Mirror = false, Zoom = 1 } = {}) {
-        if (typeof Source === "string") {
-            Source = DrawGetImage(Source);
-            if (!Source.complete)
-                return false;
-            if (!Source.naturalWidth)
-                return true;
-        }
-        const sizeChanged = Width != null || Height != null;
-        if (Width == null) {
-            Width = SourcePos ? SourcePos[2] : Source.width;
-        }
-        if (Height == null) {
-            Height = SourcePos ? SourcePos[3] : Source.height;
-        }
-        Canvas.save();
-        Canvas.globalCompositeOperation = "source-over";
-        Canvas.globalAlpha = Alpha;
-        Canvas.translate(X, Y);
-        if (Zoom !== 1) {
-            Canvas.scale(Zoom, Zoom);
-        }
-        if (Invert) {
-            Canvas.transform(1, 0, 0, -1, 0, Height);
-        }
-        if (Mirror) {
-            Canvas.transform(-1, 0, 0, 1, Width, 0);
-        }
-        if (SourcePos) {
-            Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
-        }
-        else if (sizeChanged) {
-            Canvas.drawImage(Source, 0, 0, Width, Height);
-        }
-        else {
-            Canvas.drawImage(Source, 0, 0);
-        }
-        Canvas.restore();
-        return true;
-    }
-    function isCloth(item, allowCosplay = false) {
-        const asset = item.Asset ? item.Asset : item;
-        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
-    }
-    function isBind(item) {
-        const asset = item.Asset ? item.Asset : item;
-        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
-            return false;
-        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
     }
 
     class GuiSubscreen {
@@ -5145,18 +4444,823 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
     ModuleGUI.instance = null;
 
+    const PRESET_DISABLED_MODULES = {
+        [Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses],
+        [Preset.switch]: [],
+        [Preset.submissive]: [],
+        [Preset.slave]: []
+    };
+    function getCurrentPreset() {
+        var _a;
+        return (_a = modStorage.preset) !== null && _a !== void 0 ? _a : Preset.switch;
+    }
+    function applyPreset(preset) {
+        modStorage.preset = preset;
+        modules_applyPreset(preset);
+        setDisabledModules(PRESET_DISABLED_MODULES[preset]);
+        finalizeFirstTimeInit();
+    }
+    function setDisabledModules(modules) {
+        if (!Array.isArray(modStorage.disabledModules)) {
+            console.error("BCX: Attempt to set disabled modules before initializetion");
+            return false;
+        }
+        modules = arrayUnique(modules.filter(i => TOGGLEABLE_MODULES.includes(i)));
+        if (CommonArraysEqual(modules, modStorage.disabledModules))
+            return true;
+        modStorage.disabledModules = modules;
+        if (reload_modules()) {
+            modStorageSync();
+            notifyOfChange();
+            return true;
+        }
+        return false;
+    }
+    function moduleIsEnabled(module) {
+        if (!TOGGLEABLE_MODULES.includes(module))
+            return true;
+        return Array.isArray(modStorage.disabledModules) ? !modStorage.disabledModules.includes(module) : true;
+    }
+    class ModulePresets extends BaseModule {
+        load() {
+            if (typeof modStorage.preset !== "number" || Preset[modStorage.preset] === undefined) {
+                modStorage.preset = Preset.switch;
+            }
+            if (!Array.isArray(modStorage.disabledModules)) {
+                modStorage.disabledModules = [];
+            }
+            else {
+                modStorage.disabledModules = modStorage.disabledModules.filter(i => TOGGLEABLE_MODULES.includes(i));
+            }
+        }
+        run() {
+            if (firstTimeInit) {
+                setTimeout(() => {
+                    if (firstTimeInit && getCurrentSubscreen() === null) {
+                        InfoBeep(`Please visit your profile to finish BCX setup`, Infinity);
+                    }
+                }, 2000);
+            }
+        }
+    }
+
+    let moduleInitPhase = 0 /* construct */;
+    const modules = [];
+    function registerModule(module) {
+        if (moduleInitPhase !== 0 /* construct */) {
+            throw new Error("Modules can be registered only before initialization");
+        }
+        modules.push(module);
+        console.debug(`BCX: Registered module ${module.constructor.name}`);
+        return module;
+    }
+    function init_modules() {
+        moduleInitPhase = 1 /* init */;
+        for (const m of modules) {
+            m.init();
+        }
+        moduleInitPhase = 2 /* load */;
+        for (const m of modules) {
+            m.load(getCurrentPreset());
+        }
+        moduleInitPhase = 3 /* ready */;
+        for (const m of modules) {
+            m.run();
+        }
+    }
+    function unload_modules() {
+        moduleInitPhase = 4 /* destroy */;
+        for (const m of modules) {
+            m.unload();
+        }
+    }
+    function reload_modules() {
+        if (moduleInitPhase !== 3 /* ready */) {
+            console.error("BCX: Attempt to reload modules, while not ready");
+            return false;
+        }
+        for (const m of modules) {
+            m.reload(getCurrentPreset());
+        }
+        return true;
+    }
+    function modules_applyPreset(preset) {
+        if (moduleInitPhase !== 3 /* ready */) {
+            console.error("BCX: Attempt to apply preset to modules, while not ready");
+            return false;
+        }
+        for (const m of modules) {
+            m.applyPreset(preset);
+        }
+        return true;
+    }
+
+    function loginInit(C) {
+        if (window.BCX_Loaded)
+            return;
+        init();
+    }
+    function clearCaches() {
+        if (typeof DrawRunMap !== "undefined") {
+            DrawRunMap.clear();
+            DrawScreen = "";
+        }
+        if (typeof CurrentScreenFunctions !== "undefined") {
+            const w = window;
+            CurrentScreenFunctions = {
+                Run: w[`${CurrentScreen}Run`],
+                Click: w[`${CurrentScreen}Click`],
+                Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
+                Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
+                Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
+                KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
+                Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined
+            };
+        }
+    }
+    function init() {
+        init_modules();
+        // Loading into already loaded club - clear some caches
+        clearCaches();
+        //#region Other mod compatability
+        const { BondageClubTools } = detectOtherMods();
+        if (BondageClubTools) {
+            console.warn("BCX: Bondage Club Tools detected!");
+            if (window.BCX_BondageClubToolsPatch === true) {
+                console.info("BCX: Bondage Club Tools already patched, skip!");
+            }
+            else {
+                window.BCX_BondageClubToolsPatch = true;
+                const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
+                const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
+                console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
+                ServerSocket.off("ChatRoomMessage");
+                ServerSocket.on("ChatRoomMessage", data => {
+                    if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
+                        ChatRoomMessageForwarder(data);
+                    }
+                    return ChatRoomMessage(data);
+                });
+                ServerSocket.off("AccountBeep");
+                ServerSocket.on("AccountBeep", data => {
+                    if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
+                        AccountBeepForwarder(data);
+                    }
+                    return ServerAccountBeep(data);
+                });
+            }
+        }
+        //#endregion
+        window.BCX_Loaded = true;
+        InfoBeep(`BCX loaded! Version: ${VERSION}`);
+    }
+    function unload() {
+        unload_patches();
+        unload_modules();
+        // clear some caches
+        clearCaches();
+        delete window.BCX_Loaded;
+        console.log("BCX: Unloaded.");
+        return true;
+    }
+
+    function j_WardrobeExportSelectionClothes(includeBinds = false) {
+        if (!CharacterAppearanceSelection)
+            return "";
+        const save = CharacterAppearanceSelection.Appearance
+            .filter(a => isCloth(a, true) || (includeBinds && isBind(a)))
+            .map(WardrobeAssetBundle);
+        return LZString.compressToBase64(JSON.stringify(save));
+    }
+    function j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
+        if (typeof data !== "string" || data.length < 1)
+            return "No data";
+        try {
+            if (data[0] !== "[") {
+                const decompressed = LZString.decompressFromBase64(data);
+                if (!decompressed)
+                    return "Bad data";
+                data = decompressed;
+            }
+            data = JSON.parse(data);
+            if (!Array.isArray(data))
+                return "Bad data";
+        }
+        catch (error) {
+            console.warn(error);
+            return "Bad data";
+        }
+        const C = CharacterAppearanceSelection;
+        if (!C) {
+            return "No character";
+        }
+        if (includeBinds && !force && C.Appearance.some(a => { var _a, _b; return isBind(a) && ((_b = (_a = a.Property) === null || _a === void 0 ? void 0 : _a.Effect) === null || _b === void 0 ? void 0 : _b.includes("Lock")); })) {
+            return "Character is bound";
+        }
+        const Allow = (a) => isCloth(a, CharacterAppearanceSelection.ID === 0) || (includeBinds && isBind(a));
+        C.Appearance = C.Appearance.filter(a => !Allow(a));
+        for (const cloth of data) {
+            if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group))
+                continue;
+            const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
+            if (A != null) {
+                CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
+                const item = InventoryGet(C, cloth.Group);
+                if (cloth.Property && item) {
+                    if (item.Property == null)
+                        item.Property = {};
+                    Object.assign(item.Property, cloth.Property);
+                }
+            }
+            else {
+                console.warn(`Clothing not found: `, cloth);
+            }
+        }
+        CharacterRefresh(C);
+        return true;
+    }
+    let j_WardrobeIncludeBinds = false;
+    function PasteListener(ev) {
+        if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+            const data = (ev.clipboardData || window.clipboardData).getData("text");
+            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+        }
+    }
+    class ModuleWardrobe extends BaseModule {
+        load() {
+            const { NMod } = detectOtherMods();
+            hookFunction("AppearanceRun", 0, (args, next) => {
+                next(args);
+                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                    const Y = NMod ? 265 : 125;
+                    DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
+                    DrawButton(1534, Y, 207, 50, "Export", "White", "");
+                    DrawButton(1768, Y, 207, 50, "Import", "White", "");
+                }
+            });
+            hookFunction("AppearanceClick", 0, (args, next) => {
+                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                    const Y = NMod ? 265 : 125;
+                    // Restraints toggle
+                    if (MouseIn(1457, Y, 50, 50)) {
+                        j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+                    }
+                    // Export
+                    if (MouseIn(1534, Y, 207, 50)) {
+                        setTimeout(async () => {
+                            await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
+                            CharacterAppearanceWardrobeText = "Copied to clipboard!";
+                        }, 0);
+                        return;
+                    }
+                    // Import
+                    if (MouseIn(1768, Y, 207, 50)) {
+                        setTimeout(async () => {
+                            if (typeof navigator.clipboard.readText !== "function") {
+                                CharacterAppearanceWardrobeText = "Please press Ctrl+V";
+                                return;
+                            }
+                            const data = await navigator.clipboard.readText();
+                            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+                            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+                        }, 0);
+                        return;
+                    }
+                }
+                next(args);
+            });
+            document.addEventListener("paste", PasteListener);
+        }
+        unload() {
+            document.removeEventListener("paste", PasteListener);
+        }
+    }
+
+    let antigarble = 0;
+    class ConsoleInterface {
+        get isAllow() {
+            return allowMode;
+        }
+        AllowCheats(allow) {
+            if (typeof allow !== "boolean" && allow !== undefined) {
+                return false;
+            }
+            if (allowMode === allow)
+                return true;
+            if (allow === undefined) {
+                allow = !allowMode;
+            }
+            return setAllowMode(allow);
+        }
+        get isDevel() {
+            return developmentMode;
+        }
+        Devel(devel) {
+            if (typeof devel !== "boolean" && devel !== undefined) {
+                return false;
+            }
+            if (developmentMode === devel)
+                return true;
+            if (devel === undefined) {
+                devel = !developmentMode;
+            }
+            return setDevelopmentMode(devel);
+        }
+        get antigarble() {
+            return antigarble;
+        }
+        set antigarble(value) {
+            if (![0, 1, 2].includes(value)) {
+                throw new Error("Bad antigarble value, expected 0/1/2");
+            }
+            antigarble = value;
+        }
+        j_WardrobeExportSelectionClothes(includeBinds = false) {
+            return j_WardrobeExportSelectionClothes(includeBinds);
+        }
+        j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
+            return j_WardrobeImportSelectionClothes(data, includeBinds, force);
+        }
+        ToggleInvisibilityEarbuds() {
+            return InvisibilityEarbuds();
+        }
+        Unload() {
+            return unload();
+        }
+        get storage() {
+            if (!developmentMode) {
+                return "Development mode required";
+            }
+            return modStorage;
+        }
+        devSendQuery(target, query, data) {
+            if (!developmentMode || typeof target !== "number" || typeof query !== "string")
+                return false;
+            sendQuery(query, data, target).then(result => {
+                console.info(`Query ${query} to ${target} resolved:`, result);
+            }, error => {
+                console.warn(`Query ${query} to ${target} failed:`, error);
+            });
+            return true;
+        }
+    }
+    const consoleInterface = Object.freeze(new ConsoleInterface());
+    class ModuleConsole extends BaseModule {
+        load() {
+            window.bcx = consoleInterface;
+            const { NMod } = detectOtherMods();
+            patchFunction("ChatRoomMessage", NMod ? {
+                "A.DynamicDescription(Source).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(Source).toLowerCase() )`,
+                "G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
+            } : {
+                "Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? Asset[A].Description : Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase() )`,
+                "AssetGroup[A].Description.toLowerCase()": `( bcx.isDevel ? AssetGroup[A].Description : AssetGroup[A].Description.toLowerCase() )`
+            });
+            patchFunction("ExtendedItemDraw", {
+                "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
+            });
+            hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+                var _a;
+                if (developmentMode) {
+                    DialogTextDefault = ((_a = args[0].FocusGroup) === null || _a === void 0 ? void 0 : _a.Description) || "";
+                }
+                return next(args);
+            });
+            patchFunction("DialogDrawPoseMenu", {
+                '"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`
+            });
+            hookFunction("DialogDrawExpressionMenu", 0, (args, next) => {
+                next(args);
+                if (developmentMode) {
+                    for (let I = 0; I < DialogFacialExpressions.length; I++) {
+                        const FE = DialogFacialExpressions[I];
+                        const OffsetY = 185 + 100 * I;
+                        if (MouseIn(20, OffsetY, 90, 90)) {
+                            DrawText(JSON.stringify(FE.Group), 300, 950, "White");
+                        }
+                        if (I === DialogFacialExpressionsSelected) {
+                            for (let j = 0; j < FE.ExpressionList.length; j++) {
+                                const EOffsetX = 155 + 100 * (j % 3);
+                                const EOffsetY = 185 + 100 * Math.floor(j / 3);
+                                if (MouseIn(EOffsetX, EOffsetY, 90, 90)) {
+                                    DrawText(JSON.stringify(FE.ExpressionList[j]), 300, 950, "White");
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            DialogSelfMenuOptions.forEach(opt => {
+                if (opt.Name === "Pose") {
+                    opt.IsAvailable = () => true;
+                    opt.Draw = function () { return DialogDrawPoseMenu(); };
+                }
+                else if (opt.Name === "Expression") {
+                    opt.Draw = function () { return DialogDrawExpressionMenu(); };
+                }
+            });
+            hookFunction("SpeechGarble", 0, (args, next) => {
+                if (antigarble === 2)
+                    return args[1];
+                let res = next(args);
+                if (typeof res === "string" && res !== args[1] && antigarble === 1)
+                    res += ` <> ${args[1]}`;
+                return res;
+            });
+        }
+        unload() {
+            delete window.bcx;
+        }
+    }
+
+    const commands = new Map();
+    function registerCommand(name, description, callback, autocomplete = null) {
+        name = name.toLocaleLowerCase();
+        if (commands.has(name)) {
+            throw new Error(`Command "${name}" already registered!`);
+        }
+        commands.set(name, {
+            parse: false,
+            callback,
+            autocomplete,
+            description
+        });
+    }
+    function aliasCommand(originalName, alias) {
+        originalName = originalName.toLocaleLowerCase();
+        alias = alias.toLocaleLowerCase();
+        const original = commands.get(originalName);
+        if (!original) {
+            throw new Error(`Command "${originalName}" to alias not found`);
+        }
+        if (original.parse) {
+            commands.set(alias, {
+                parse: true,
+                description: null,
+                callback: original.callback,
+                autocomplete: original.autocomplete
+            });
+        }
+        else {
+            commands.set(alias, {
+                parse: false,
+                description: null,
+                callback: original.callback,
+                autocomplete: original.autocomplete
+            });
+        }
+    }
+    function registerCommandParsed(name, description, callback, autocomplete = null) {
+        name = name.toLocaleLowerCase();
+        if (commands.has(name)) {
+            throw new Error(`Command "${name}" already registered!`);
+        }
+        commands.set(name, {
+            parse: true,
+            callback,
+            autocomplete,
+            description
+        });
+    }
+    function CommandParse(msg) {
+        msg = msg.trimStart();
+        const commandMatch = /^(\S+)(?:\s|$)(.*)$/.exec(msg);
+        if (!commandMatch) {
+            return ["", ""];
+        }
+        return [(commandMatch[1] || "").toLocaleLowerCase(), commandMatch[2]];
+    }
+    function CommandParseArguments(args) {
+        return [...args.matchAll(/".*?(?:"|$)|'.*?(?:'|$)|[^ ]+/g)]
+            .map(a => a[0])
+            .map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
+    }
+    function CommandHasEmptyArgument(args) {
+        const argv = CommandParseArguments(args);
+        return argv.length === 0 || !args.endsWith(argv[argv.length - 1]);
+    }
+    function CommandQuoteArgument(arg) {
+        if (arg.startsWith(`"`)) {
+            return `'${arg}'`;
+        }
+        else if (arg.startsWith(`'`)) {
+            return `"${arg}"`;
+        }
+        else if (arg.includes(" ")) {
+            return arg.includes('"') ? `'${arg}'` : `"${arg}"`;
+        }
+        return arg;
+    }
+    function RunCommand(msg) {
+        const [command, args] = CommandParse(msg);
+        const commandInfo = commands.get(command);
+        if (!commandInfo) {
+            // Command not found
+            ChatRoomSendLocal(`Unknown command "${command}"\n` +
+                `To see list of valid commands whisper '!help'`, 15000);
+            return false;
+        }
+        if (commandInfo.parse) {
+            return commandInfo.callback(CommandParseArguments(args));
+        }
+        else {
+            return commandInfo.callback(args);
+        }
+    }
+    function CommandAutocomplete(msg) {
+        msg = msg.trimStart();
+        const [command, args] = CommandParse(msg);
+        if (msg.length === command.length) {
+            const prefixes = Array.from(commands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
+            if (prefixes.length === 0)
+                return msg;
+            const best = longestCommonPrefix(prefixes);
+            if (best === msg) {
+                ChatRoomSendLocal(prefixes.slice().sort().join("\n"), 10000);
+            }
+            return best;
+        }
+        const commandInfo = commands.get(command);
+        if (commandInfo && commandInfo.autocomplete) {
+            if (commandInfo.parse) {
+                const argv = CommandParseArguments(args);
+                if (CommandHasEmptyArgument(args)) {
+                    argv.push("");
+                }
+                const lastOptions = commandInfo.autocomplete(argv);
+                if (lastOptions.length > 0) {
+                    const best = longestCommonPrefix(lastOptions);
+                    if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
+                        ChatRoomSendLocal(lastOptions.slice().sort().join("\n"), 10000);
+                    }
+                    argv[argv.length - 1] = best;
+                }
+                return `${command} ` +
+                    argv.map(CommandQuoteArgument).join(" ") +
+                    (lastOptions.length === 1 ? " " : "");
+            }
+            else {
+                const possibleArgs = commandInfo.autocomplete(args);
+                if (possibleArgs.length === 0) {
+                    return msg;
+                }
+                const best = longestCommonPrefix(possibleArgs);
+                if (possibleArgs.length > 1 && best === args) {
+                    ChatRoomSendLocal(possibleArgs.slice().sort().join("\n"), 10000);
+                }
+                return `${command} ${best}`;
+            }
+        }
+        return "";
+    }
+    function Command_selectCharacter(selector) {
+        const characters = getAllCharactersInRoom();
+        if (/^[0-9]+$/.test(selector)) {
+            const MemberNumber = Number.parseInt(selector, 10);
+            const target = characters.find(c => c.MemberNumber === MemberNumber);
+            if (!target) {
+                return `Player #${MemberNumber} not found in the room.`;
+            }
+            return target;
+        }
+        let targets = characters.filter(c => c.Name === selector);
+        if (targets.length === 0)
+            targets = characters.filter(c => c.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 1) {
+            return targets[0];
+        }
+        else if (targets.length === 0) {
+            return `Player "${selector}" not found in the room.`;
+        }
+        else {
+            return `Multiple players match "${selector}". Please use Member Number instead.`;
+        }
+    }
+    function Command_selectCharacterAutocomplete(selector) {
+        const characters = getAllCharactersInRoom();
+        if (/^[0-9]+$/.test(selector)) {
+            return characters.map(c => { var _a; return (_a = c.MemberNumber) === null || _a === void 0 ? void 0 : _a.toString(10); }).filter(n => n != null && n.startsWith(selector));
+        }
+        return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+    }
+    function Command_selectWornItem(character, selector) {
+        const items = character.Character.Appearance.filter(isBind);
+        let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 0)
+            targets = items.filter(A => A.Asset.Group.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 0)
+            targets = items.filter(A => A.Asset.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 0)
+            targets = items.filter(A => A.Asset.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 1) {
+            return targets[0];
+        }
+        else if (targets.length === 0) {
+            return `Item "${selector}" not found on character ${character}.`;
+        }
+        else {
+            return `Multiple items match, please use group name instead. (eg. arms)`;
+        }
+    }
+    function Command_selectWornItemAutocomplete(character, selector) {
+        const items = character.Character.Appearance.filter(isBind);
+        let possible = arrayUnique(items.map(A => A.Asset.Group.Description)
+            .concat(items.map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+        if (possible.length === 0) {
+            possible = arrayUnique(items.map(A => A.Asset.Group.Name)
+                .concat(items.map(A => A.Asset.Name))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+        }
+        return possible;
+    }
+    class ModuleCommands extends BaseModule {
+        load() {
+            hookFunction("ChatRoomSendChat", 10, (args, next) => {
+                const chat = document.getElementById("InputChat");
+                if (chat && !firstTimeInit) {
+                    const msg = chat.value.trim();
+                    if (msg.startsWith("..")) {
+                        chat.value = msg.substr(1);
+                    }
+                    else if (msg.startsWith(".")) {
+                        if (RunCommand(msg.substr(1))) {
+                            chat.value = "";
+                        }
+                        return;
+                    }
+                }
+                return next(args);
+            });
+            hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+                var _a;
+                const chat = document.getElementById("InputChat");
+                // Tab for command completion
+                if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..") && !firstTimeInit) {
+                    const e = (_a = args[0]) !== null && _a !== void 0 ? _a : event;
+                    e === null || e === void 0 ? void 0 : e.preventDefault();
+                    chat.value = "." + CommandAutocomplete(chat.value.substr(1));
+                }
+                else {
+                    return next(args);
+                }
+            });
+            registerCommand("help", "- display this help [alias: . ]", () => {
+                ChatRoomSendLocal(`Available commands:\n` +
+                    Array.from(commands.entries())
+                        .filter(c => c[1].description !== null)
+                        .map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
+                        .sort()
+                        .join("\n"));
+                return true;
+            });
+            aliasCommand("help", "");
+            registerCommand("action", "- send custom (action) [alias: .a ]", (msg) => {
+                ChatRoomActionMessage(msg);
+                return true;
+            });
+            aliasCommand("action", "a");
+            const ANTIGARBLE_LEVELS = {
+                "0": 0,
+                "1": 1,
+                "2": 2,
+                "normal": 0,
+                "both": 1,
+                "ungarbled": 2
+            };
+            const ANTIGARBLE_LEVEL_NAMES = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
+            registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
+                const val = ANTIGARBLE_LEVELS[value || ""];
+                if (val !== undefined) {
+                    consoleInterface.antigarble = val;
+                    ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
+                    return true;
+                }
+                else {
+                    ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
+                    return false;
+                }
+            }, value => {
+                return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
+            });
+        }
+        unload() {
+            commands.clear();
+        }
+    }
+
+    function InvisibilityEarbuds() {
+        var _a;
+        if (((_a = InventoryGet(Player, "ItemEars")) === null || _a === void 0 ? void 0 : _a.Asset.Name) === "BluetoothEarbuds") {
+            InventoryRemove(Player, "ItemEars");
+        }
+        else {
+            const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
+            if (!asset)
+                return;
+            Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
+            Player.Appearance.push({
+                Asset: asset,
+                Color: "Default",
+                Difficulty: -100,
+                Property: {
+                    Type: "Light",
+                    Effect: [],
+                    Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
+                }
+            });
+            CharacterRefresh(Player);
+        }
+        ChatRoomCharacterUpdate(Player);
+    }
+    class ModuleClubUtils extends BaseModule {
+        load() {
+            registerCommandParsed("colour", "<source> <item> <target> - Copies color of certain item from source character to target character", (argv) => {
+                if (argv.length !== 3) {
+                    ChatRoomSendLocal(`Expected three arguments: <source> <item> <target>`);
+                    return false;
+                }
+                const source = Command_selectCharacter(argv[0]);
+                if (typeof source === "string") {
+                    ChatRoomSendLocal(source);
+                    return false;
+                }
+                const target = Command_selectCharacter(argv[2]);
+                if (typeof target === "string") {
+                    ChatRoomSendLocal(target);
+                    return false;
+                }
+                const item = Command_selectWornItem(source, argv[1]);
+                if (typeof item === "string") {
+                    ChatRoomSendLocal(item);
+                    return false;
+                }
+                const targetItem = target.Character.Appearance.find(A => A.Asset === item.Asset);
+                if (!targetItem) {
+                    ChatRoomSendLocal(`Target must be wearing the same item`);
+                    return false;
+                }
+                targetItem.Color = Array.isArray(item.Color) ? item.Color.slice() : item.Color;
+                CharacterRefresh(target.Character);
+                ChatRoomCharacterUpdate(target.Character);
+                return true;
+            }, (argv) => {
+                if (argv.length === 1) {
+                    return Command_selectCharacterAutocomplete(argv[0]);
+                }
+                else if (argv.length === 2) {
+                    const source = Command_selectCharacter(argv[0]);
+                    if (typeof source !== "string") {
+                        return Command_selectWornItemAutocomplete(source, argv[1]);
+                    }
+                }
+                else if (argv.length === 3) {
+                    return Command_selectCharacterAutocomplete(argv[2]);
+                }
+                return [];
+            });
+            registerCommandParsed("allowactivities", "<character> <item> - Modifies item to not block activities", (argv) => {
+                if (argv.length !== 2) {
+                    ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);
+                    return false;
+                }
+                const char = Command_selectCharacter(argv[0]);
+                if (typeof char === "string") {
+                    ChatRoomSendLocal(char);
+                    return false;
+                }
+                const item = Command_selectWornItem(char, argv[1]);
+                if (typeof item === "string") {
+                    ChatRoomSendLocal(item);
+                    return false;
+                }
+                if (!item.Property) {
+                    item.Property = {};
+                }
+                item.Property.AllowActivityOn = AssetGroup.map(A => A.Name);
+                CharacterRefresh(char.Character);
+                ChatRoomCharacterUpdate(char.Character);
+                return true;
+            }, (argv) => {
+                if (argv.length === 1) {
+                    return Command_selectCharacterAutocomplete(argv[0]);
+                }
+                else if (argv.length === 2) {
+                    const source = Command_selectCharacter(argv[0]);
+                    if (typeof source !== "string") {
+                        return Command_selectWornItemAutocomplete(source, argv[1]);
+                    }
+                }
+                return [];
+            });
+        }
+    }
+
     class ModuleMiscPatches extends BaseModule {
         constructor() {
             super(...arguments);
             this.o_Player_CanChange = null;
-        }
-        init() {
-            registerPermission("misc_test", {
-                name: "Some permission to test things",
-                category: ModuleCategory.Misc,
-                min: AccessLevel.public,
-                self: false
-            });
         }
         load() {
             hookFunction("AsylumEntranceCanWander", 0, () => true);

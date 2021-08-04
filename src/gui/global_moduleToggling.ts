@@ -39,7 +39,7 @@ export class GuiGlobalModuleToggling extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 
-		DrawButton(300, 800, 200, 80, "Confirm", this.changed ? "White" : "Gray", undefined, undefined, !this.changed);
+		DrawButton(300, 800, 200, 80, "Confirm", this.changed ? "White" : "#ddd", undefined, undefined, !this.changed);
 
 		DrawButton(1520, 800, 200, 80, "Cancel", "White");
 	}

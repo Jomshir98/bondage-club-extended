@@ -69,7 +69,9 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 			const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
 
-			DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), itemIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", itemIsCursed);
+			DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
+				itemIsCursed ? "#ccc" : (currentItem ? "Gold" : "White"), undefined,
+				itemIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing"), itemIsCursed);
 		}
 
 		// clothing
@@ -95,14 +97,17 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 			const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
 
-			DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), clothingIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", clothingIsCursed);
+			DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
+				clothingIsCursed ? "#ccc" : (currentItem ? "Gold" : "White"), undefined,
+				clothingIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing"), clothingIsCursed);
 		}
 
 		//Body
 		// TODO: Actual data
 
 		// const bodyIsCursed = false;
-		// DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "Grey" : "White", undefined, "Size, skin color, eyes, etc.", bodyIsCursed);
+		// DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "#ccc" : "White", undefined,
+		//	bodyIsCursed ? "Already cursed" : "Size, skin color, eyes, etc.", bodyIsCursed);
 	}
 
 	Click() {

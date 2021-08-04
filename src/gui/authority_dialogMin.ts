@@ -44,7 +44,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 
 		if (this.myAccessLevel === AccessLevel.self) {
 			const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
-			DrawButton(1000-110, 460, 220, 72, getPermissionMinDisplayText(AccessLevel.self, this.character), this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+			DrawButton(1000-110, 460, 220, 72, getPermissionMinDisplayText(AccessLevel.self, this.character), this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#ddd", undefined, undefined, !available);
 		}
 
 		for (let i = 1; i < 8; i++) {
@@ -52,7 +52,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 			const available =
 				(this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
 				!this.noAccess && this.myAccessLevel <= i;
-			DrawButton(-15 + 230 * i, 577, 190, 72, getPermissionMinDisplayText(i, this.character), current ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+			DrawButton(-15 + 230 * i, 577, 190, 72, getPermissionMinDisplayText(i, this.character), current ? "Cyan" : available ? "White" : "#ddd", undefined, undefined, !available);
 			if (i < 7)
 				DrawText(">", 196 + 230 * i, 577 + 36, "Black");
 		}

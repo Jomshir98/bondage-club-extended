@@ -191,10 +191,10 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					DrawButton(200, Y, 1000, 64, "", "White");
 					DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
 					// Self checkbox
-					DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#eee", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
+					DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#ddd", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
 					// Min access
 					MainCanvas.textAlign = "center";
-					DrawButton(1370, Y, 170, 64, getPermissionMinDisplayText(e.permissionInfo.min, this.character), e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
+					DrawButton(1370, Y, 170, 64, getPermissionMinDisplayText(e.permissionInfo.min, this.character), e.editMin ? "White" : "#ddd", undefined, undefined, !e.editMin);
 					MainCanvas.textAlign = "left";
 				}
 			}

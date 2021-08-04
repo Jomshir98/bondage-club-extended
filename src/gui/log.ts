@@ -44,7 +44,7 @@ export class GuiLog extends GuiSubscreen {
 		]).then(res => {
 			this.logData = res[0];
 			this.allowDeletion = res[1].delete;
-			this.allowConfiguration = res[1].configure;
+			this.allowConfiguration = res[1].configure || this.character.isPlayer();
 			this.allowPraise = res[1].praise;
 			this.allowLeaveMessage = res[1].leaveMessage;
 			this.refreshScreen();

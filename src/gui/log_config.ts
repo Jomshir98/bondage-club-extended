@@ -22,6 +22,7 @@ export class GuiLogConfig extends GuiSubscreen {
 	private failed: boolean = false;
 	private configList: ConfigListItem[] = [];
 	private allowDelete: boolean = false;
+	private allowConfigure: boolean = false;
 	private page: number = 0;
 
 	constructor(character: ChatroomCharacter) {
@@ -44,10 +45,12 @@ export class GuiLogConfig extends GuiSubscreen {
 		this.rebuildList();
 		Promise.all([
 			this.character.getLogConfig(),
-			this.character.getPermissionAccess("log_delete")
+			this.character.getPermissionAccess("log_delete"),
+			this.character.getPermissionAccess("log_configure")
 		]).then(res => {
 			this.config = res[0];
 			this.allowDelete = res[1];
+			this.allowConfigure = res[2];
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get log config for ${this.character}`, err);
@@ -127,10 +130,14 @@ export class GuiLogConfig extends GuiSubscreen {
 				DrawTextFit(e.name, 140, Y + 34, 1060, "Black");
 				// Config access
 				MainCanvas.textAlign = "center";
-				DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "",
-					() => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access-1) as LogAccessLevel] : ""),
-					() => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access+1) as LogAccessLevel] : "")
-				);
+				if (this.allowConfigure) {
+					DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "",
+						() => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access - 1) as LogAccessLevel] : ""),
+						() => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access + 1) as LogAccessLevel] : "")
+					);
+				} else {
+					DrawButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "#ccc", undefined, undefined, true);
+				}
 				MainCanvas.textAlign = "left";
 			}
 
@@ -179,11 +186,11 @@ export class GuiLogConfig extends GuiSubscreen {
 
 				const Y = 290 + off * 100;
 
-				if (e.access > 0 && MouseIn(1270, Y, 85, 64)) {
-					this.character.setLogConfig(e.category, (e.access-1) as LogAccessLevel);
+				if (e.access > 0 && MouseIn(1270, Y, 85, 64) && this.allowConfigure) {
+					this.character.setLogConfig(e.category, (e.access - 1) as LogAccessLevel);
 					return;
-				} else if (e.access < 2 && MouseIn(1355, Y, 85, 64)) {
-					this.character.setLogConfig(e.category, (e.access+1) as LogAccessLevel);
+				} else if (e.access < 2 && MouseIn(1355, Y, 85, 64) && this.allowConfigure) {
+					this.character.setLogConfig(e.category, (e.access + 1) as LogAccessLevel);
 					return;
 				}
 

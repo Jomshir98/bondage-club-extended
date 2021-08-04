@@ -28,7 +28,8 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8"],
 	LoginStableItems: ["EA93FBF7"],
 	ServerAccountBeep: ["2D918B69"],
-	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"]
+	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
+	ValidationResolveModifyDiff: ["C2FE52D3"]
 };
 
 export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
@@ -57,5 +58,6 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	LoginResponse: ["67294772"],
 	LoginStableItems: ["C3F50DD1"],
 	ServerAccountBeep: ["A6DFD3B9"],
-	SpeechGarble: ["9D669F73"]
+	SpeechGarble: ["9D669F73"],
+	ValidationResolveModifyDiff: ["C2FE52D3"]
 };

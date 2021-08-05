@@ -2,7 +2,7 @@ import { modules_applyPreset, reload_modules } from "../moduleManager";
 import { BaseModule } from "./_BaseModule";
 import { arrayUnique } from "../utils";
 import { InfoBeep } from "../utilsClub";
-import { notifyOfChange } from "./messaging";
+import { notifyOfChange, queryHandlers } from "./messaging";
 import { finalizeFirstTimeInit, firstTimeInit, modStorage, modStorageSync } from "./storage";
 import { ModuleCategory, Preset, TOGGLEABLE_MODULES } from "../constants";
 import { getCurrentSubscreen } from "./gui";
@@ -59,6 +59,12 @@ export function moduleIsEnabled(module: ModuleCategory): boolean {
 }
 
 export class ModulePresets extends BaseModule {
+	init() {
+		queryHandlers.disabledModules = (sender, resolve) => {
+			return resolve(true, getDisabledModules());
+		};
+	}
+
 	load() {
 		if (typeof modStorage.preset !== "number" || Preset[modStorage.preset] === undefined) {
 			modStorage.preset = Preset.switch;

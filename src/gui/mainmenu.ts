@@ -53,8 +53,11 @@ export class GuiMainMenu extends GuiSubscreen {
 	}
 
 	Load() {
-		this.character.getDisabledModules().then(data => {
+		this.character.getDisabledModules(5_000).then(data => {
 			this.disabledModules = data;
+		}).catch(e => {
+			this.disabledModules = [];
+			console.error(`BCX: error getting disabled modules`, e);
 		});
 	}
 

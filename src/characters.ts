@@ -39,8 +39,8 @@ export class ChatroomCharacter {
 		console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
 	}
 
-	getDisabledModules(): Promise<ModuleCategory[]> {
-		return sendQuery("disabledModules", undefined, this.MemberNumber).then(data => {
+	getDisabledModules(timeout?: number): Promise<ModuleCategory[]> {
+		return sendQuery("disabledModules", undefined, this.MemberNumber, timeout).then(data => {
 			if (!Array.isArray(data)) {
 				throw new Error("Bad data");
 			}

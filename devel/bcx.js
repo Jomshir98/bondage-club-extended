@@ -192,7 +192,7 @@ window.BCX_Loaded = false;
         return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
     }
 
-    const VERSION = "0.2.1";
+    const VERSION = "0.3.0";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -207,6 +207,7 @@ window.BCX_Loaded = false;
         ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6"],
         ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D"],
         ChatRoomSync: ["B67D8226"],
+        CheatFactor: ["594CFC45"],
         CheatImport: ["412422CC", "26C67608"],
         DialogDrawExpressionMenu: ["EEFB3D22"],
         DialogDrawItemMenu: ["7B1D71E9", "0199F25B", "D832A940"],
@@ -219,8 +220,10 @@ window.BCX_Loaded = false;
         LoginMistressItems: ["B58EF410"],
         LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8"],
         LoginStableItems: ["EA93FBF7"],
+        PrivateRansomStart: ["0E968EDD"],
         ServerAccountBeep: ["2D918B69"],
-        SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"]
+        SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
+        ValidationResolveModifyDiff: ["C2FE52D3"]
     };
     const FUNCTION_HASHES_NMOD = {
         ActivityOrgasmStart: ["1F7E8FF9"],
@@ -235,6 +238,7 @@ window.BCX_Loaded = false;
         ChatRoomMessage: ["477574F9"],
         ChatRoomSendChat: ["385B9E9C"],
         ChatRoomSync: ["2590802E"],
+        CheatFactor: ["594CFC45"],
         CheatImport: ["1ECB0CC4"],
         DialogDrawExpressionMenu: ["EEFB3D22"],
         DialogDrawItemMenu: ["05301080"],
@@ -247,8 +251,10 @@ window.BCX_Loaded = false;
         LoginMistressItems: ["984A6AD9"],
         LoginResponse: ["67294772"],
         LoginStableItems: ["C3F50DD1"],
+        PrivateRansomStart: ["0E968EDD"],
         ServerAccountBeep: ["A6DFD3B9"],
-        SpeechGarble: ["9D669F73"]
+        SpeechGarble: ["9D669F73"],
+        ValidationResolveModifyDiff: ["C2FE52D3"]
     };
 
     const encoder = new TextEncoder();
@@ -435,6 +441,45 @@ window.BCX_Loaded = false;
             // Empty
         }
     }
+
+    var Preset;
+    (function (Preset) {
+        Preset[Preset["dominant"] = 0] = "dominant";
+        Preset[Preset["switch"] = 1] = "switch";
+        Preset[Preset["submissive"] = 2] = "submissive";
+        Preset[Preset["slave"] = 3] = "slave";
+    })(Preset || (Preset = {}));
+    var ModuleCategory;
+    (function (ModuleCategory) {
+        ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
+        ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
+        ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
+        ModuleCategory[ModuleCategory["Curses"] = 3] = "Curses";
+        ModuleCategory[ModuleCategory["Misc"] = 99] = "Misc";
+    })(ModuleCategory || (ModuleCategory = {}));
+    const MODULE_NAMES = {
+        [ModuleCategory.Basic]: "Basic",
+        [ModuleCategory.Authority]: "Authority",
+        [ModuleCategory.Log]: "Behaviour Log",
+        [ModuleCategory.Curses]: "Curses",
+        [ModuleCategory.Misc]: "Miscellaneous"
+    };
+    const MODULE_ICONS = {
+        [ModuleCategory.Basic]: "Icons/General.png",
+        [ModuleCategory.Authority]: "Icons/Security.png",
+        [ModuleCategory.Log]: "Icons/Title.png",
+        [ModuleCategory.Curses]: "Icons/Struggle.png",
+        [ModuleCategory.Misc]: "Icons/Random.png"
+    };
+    const TOGGLEABLE_MODULES = [
+        ModuleCategory.Log,
+        ModuleCategory.Curses
+    ];
+    var MiscCheat;
+    (function (MiscCheat) {
+        MiscCheat[MiscCheat["BlockRandomKidnap"] = 0] = "BlockRandomKidnap";
+        MiscCheat[MiscCheat["CantLoseMistress"] = 1] = "CantLoseMistress";
+    })(MiscCheat || (MiscCheat = {}));
 
     const icon_Emote = `data:image/png;base64,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`;
     const icon_Typing = `data:image/png;base64,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`;
@@ -988,40 +1033,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             modStorageSync();
         }
     }
-
-    var Preset;
-    (function (Preset) {
-        Preset[Preset["dominant"] = 0] = "dominant";
-        Preset[Preset["switch"] = 1] = "switch";
-        Preset[Preset["submissive"] = 2] = "submissive";
-        Preset[Preset["slave"] = 3] = "slave";
-    })(Preset || (Preset = {}));
-    var ModuleCategory;
-    (function (ModuleCategory) {
-        ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
-        ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
-        ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
-        ModuleCategory[ModuleCategory["Curses"] = 3] = "Curses";
-        ModuleCategory[ModuleCategory["Misc"] = 99] = "Misc";
-    })(ModuleCategory || (ModuleCategory = {}));
-    const MODULE_NAMES = {
-        [ModuleCategory.Basic]: "Basic",
-        [ModuleCategory.Authority]: "Authority",
-        [ModuleCategory.Log]: "Behaviour Log",
-        [ModuleCategory.Curses]: "Curses",
-        [ModuleCategory.Misc]: "Miscellaneous"
-    };
-    const MODULE_ICONS = {
-        [ModuleCategory.Basic]: "Icons/General.png",
-        [ModuleCategory.Authority]: "Icons/Security.png",
-        [ModuleCategory.Log]: "Icons/Title.png",
-        [ModuleCategory.Curses]: "Icons/Struggle.png",
-        [ModuleCategory.Misc]: "Icons/Random.png"
-    };
-    const TOGGLEABLE_MODULES = [
-        ModuleCategory.Log,
-        ModuleCategory.Curses
-    ];
 
     const LOG_ENTRIES_LIMIT = 256;
     var LogEntryType;
@@ -1892,7 +1903,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
 
     const CURSES_CHECK_INTERVAL = 2000;
+    const CURSES_ANTILOOP_RESET_INTERVAL = 60000;
+    const CURSES_ANTILOOP_THRESHOLD = 10;
+    const CURSES_ANTILOOP_SUSPEND_TIME = 600000;
     const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
+    const CURSE_IGNORED_EFFECTS = ["Lock"];
     function curseItem(Group, curseProperty, character) {
         if (!moduleIsEnabled(ModuleCategory.Curses))
             return false;
@@ -2017,6 +2032,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         constructor() {
             super(...arguments);
             this.timer = null;
+            this.resetTimer = null;
+            this.triggerCounts = new Map();
+            this.suspendedUntil = null;
         }
         init() {
             registerPermission("curses_curse", {
@@ -2082,6 +2100,28 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 delete modStorage.cursedItems;
                 return;
             }
+            hookFunction("ValidationResolveModifyDiff", 0, (args, next) => {
+                var _a, _b, _c;
+                const params = args[2];
+                const result = next(args);
+                if (result.item) {
+                    const curse = (_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[result.item.Asset.Group.Name];
+                    const character = getChatroomCharacter(params.sourceMemberNumber);
+                    if (curse &&
+                        !CommonColorsEqual((_b = curse.Color) !== null && _b !== void 0 ? _b : "Default", (_c = result.item.Color) !== null && _c !== void 0 ? _c : "Default") &&
+                        character &&
+                        checkPermissionAccess("curses_color", character)) {
+                        if (result.item.Color && result.item.Color !== "Default") {
+                            curse.Color = JSON.parse(JSON.stringify(result.item.Color));
+                        }
+                        else {
+                            delete curse.Color;
+                        }
+                        modStorageSync();
+                    }
+                }
+                return result;
+            }, ModuleCategory.Curses);
             if (!isObject(modStorage.cursedItems)) {
                 modStorage.cursedItems = {};
             }
@@ -2113,11 +2153,18 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (!moduleIsEnabled(ModuleCategory.Curses))
                 return;
             this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
+            this.resetTimer = setInterval(() => {
+                this.triggerCounts.clear();
+            }, CURSES_ANTILOOP_RESET_INTERVAL);
         }
         unload() {
             if (this.timer !== null) {
                 clearInterval(this.timer);
                 this.timer = null;
+            }
+            if (this.resetTimer !== null) {
+                clearInterval(this.resetTimer);
+                this.resetTimer = null;
             }
         }
         reload() {
@@ -2126,9 +2173,19 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.run();
         }
         cursesTick() {
-            var _a, _b, _c, _d;
+            var _a, _b, _c, _d, _e;
             if (!ServerIsConnected || !modStorage.cursedItems)
                 return;
+            if (this.suspendedUntil !== null) {
+                if (Date.now() >= this.suspendedUntil) {
+                    this.suspendedUntil = null;
+                    this.triggerCounts.clear();
+                    ChatRoomActionMessage(`The dormant curse on ${Player.Name}'s body wakes up again.`);
+                }
+                else {
+                    return;
+                }
+            }
             const lastState = JSON.stringify(modStorage.cursedItems);
             for (const [group, curse] of Object.entries(modStorage.cursedItems)) {
                 if (curse === null) {
@@ -2182,6 +2239,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 let curseProperty = (_b = curse.Property) !== null && _b !== void 0 ? _b : {};
                 if (curse.curseProperty) {
                     for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
+                        if (key === "Effect")
+                            continue;
                         if (CURSE_IGNORED_PROPERTIES.includes(key)) {
                             if (curseProperty[key] !== undefined) {
                                 delete curseProperty[key];
@@ -2202,6 +2261,18 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                                 changeType = "update";
                         }
                     }
+                    const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
+                    const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+                    const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+                    if (!CommonArraysEqual(itemEffects, curseEffects)) {
+                        itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
+                    }
+                    else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
+                        curseProperty.Effect = itemProperty.Effect.slice();
+                    }
+                    else {
+                        delete curseProperty.Effect;
+                    }
                 }
                 else {
                     curseProperty = JSON.parse(JSON.stringify(itemProperty));
@@ -2212,7 +2283,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 else {
                     curse.Property = curseProperty;
                 }
-                if (JSON.stringify((_c = currentItem.Color) !== null && _c !== void 0 ? _c : "Default") !== JSON.stringify((_d = curse.Color) !== null && _d !== void 0 ? _d : "Default")) {
+                if (!CommonColorsEqual((_c = curse.Color) !== null && _c !== void 0 ? _c : "Default", (_d = currentItem.Color) !== null && _d !== void 0 ? _d : "Default")) {
                     if (curse.Color === undefined || curse.Color === "Default") {
                         delete currentItem.Color;
                     }
@@ -2231,6 +2302,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                     else {
                         console.error(`BCX: No chat message for curse action ${changeType}`);
+                    }
+                    const counter = ((_e = this.triggerCounts.get(group)) !== null && _e !== void 0 ? _e : 0) + 1;
+                    this.triggerCounts.set(group, counter);
+                    if (counter >= CURSES_ANTILOOP_THRESHOLD) {
+                        ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
+                        this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
                     }
                     break;
                 }
@@ -2264,6 +2341,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         toString() {
             return `${this.Name} (${this.MemberNumber})`;
+        }
+        getDisabledModules() {
+            return sendQuery("disabledModules", undefined, this.MemberNumber).then(data => {
+                if (!Array.isArray(data)) {
+                    throw new Error("Bad data");
+                }
+                return data.filter(i => TOGGLEABLE_MODULES.includes(i));
+            });
         }
         getPermissions() {
             return sendQuery("permissions", undefined, this.MemberNumber).then(data => {
@@ -2460,6 +2545,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         isPlayer() {
             return true;
+        }
+        getDisabledModules() {
+            return Promise.resolve(getDisabledModules());
         }
         getPermissions() {
             return Promise.resolve(getPlayerPermissionSettings());
@@ -2988,13 +3076,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             DrawText("All roles to the left of the selected one will also automatically get access.", 1000, 385, "Black");
             if (this.myAccessLevel === AccessLevel.self) {
                 const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
-                DrawButton(1000 - 110, 460, 220, 72, getPermissionMinDisplayText(AccessLevel.self, this.character), this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+                DrawButton(1000 - 110, 460, 220, 72, getPermissionMinDisplayText(AccessLevel.self, this.character), this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#ddd", undefined, undefined, !available);
             }
             for (let i = 1; i < 8; i++) {
                 const current = this.selectedLevel === i;
                 const available = (this.myAccessLevel === AccessLevel.self && this.permissionData.min <= i && i <= AccessLevel.owner) ||
                     !this.noAccess && this.myAccessLevel <= i;
-                DrawButton(-15 + 230 * i, 577, 190, 72, getPermissionMinDisplayText(i, this.character), current ? "Cyan" : available ? "White" : "#eee", undefined, undefined, !available);
+                DrawButton(-15 + 230 * i, 577, 190, 72, getPermissionMinDisplayText(i, this.character), current ? "Cyan" : available ? "White" : "#ddd", undefined, undefined, !available);
                 if (i < 7)
                     DrawText(">", 196 + 230 * i, 577 + 36, "Black");
             }
@@ -3221,10 +3309,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         DrawButton(200, Y, 1000, 64, "", "White");
                         DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
                         // Self checkbox
-                        DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#eee", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
+                        DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#ddd", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);
                         // Min access
                         MainCanvas.textAlign = "center";
-                        DrawButton(1370, Y, 170, 64, getPermissionMinDisplayText(e.permissionInfo.min, this.character), e.editMin ? "White" : "#eee", undefined, undefined, !e.editMin);
+                        DrawButton(1370, Y, 170, 64, getPermissionMinDisplayText(e.permissionInfo.min, this.character), e.editMin ? "White" : "#ddd", undefined, undefined, !e.editMin);
                         MainCanvas.textAlign = "left";
                     }
                 }
@@ -3342,7 +3430,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             const now = Date.now();
             if (now < this.allowedConfirmTime) {
-                DrawButton(300, 720, 200, 80, `Confirm (${Math.floor((this.allowedConfirmTime - now) / 1000)})`, "Gray", undefined, undefined, true);
+                DrawButton(300, 720, 200, 80, `Confirm (${Math.floor((this.allowedConfirmTime - now) / 1000)})`, "#ddd", undefined, undefined, true);
             }
             else {
                 DrawButton(300, 720, 200, 80, "Confirm", "White");
@@ -3397,7 +3485,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 DrawText(MODULE_NAMES[module], 370 + 500 * PX, 240 + 32 + 110 * PY, "Black");
             }
             MainCanvas.textAlign = "center";
-            DrawButton(300, 800, 200, 80, "Confirm", this.changed ? "White" : "Gray", undefined, undefined, !this.changed);
+            DrawButton(300, 800, 200, 80, "Confirm", this.changed ? "White" : "#ddd", undefined, undefined, !this.changed);
             DrawButton(1520, 800, 200, 80, "Cancel", "White");
         }
         Click() {
@@ -3477,6 +3565,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.failed = false;
             this.configList = [];
             this.allowDelete = false;
+            this.allowConfigure = false;
             this.page = 0;
             this.character = character;
         }
@@ -3493,10 +3582,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.rebuildList();
             Promise.all([
                 this.character.getLogConfig(),
-                this.character.getPermissionAccess("log_delete")
+                this.character.getPermissionAccess("log_delete"),
+                this.character.getPermissionAccess("log_configure")
             ]).then(res => {
                 this.config = res[0];
                 this.allowDelete = res[1];
+                this.allowConfigure = res[2];
                 this.rebuildList();
             }, err => {
                 console.error(`BCX: Failed to get log config for ${this.character}`, err);
@@ -3565,7 +3656,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawTextFit(e.name, 140, Y + 34, 1060, "Black");
                     // Config access
                     MainCanvas.textAlign = "center";
-                    DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access + 1)] : ""));
+                    if (this.allowConfigure) {
+                        DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "", () => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access - 1)] : ""), () => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access + 1)] : ""));
+                    }
+                    else {
+                        DrawButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "#ccc", undefined, undefined, true);
+                    }
                     MainCanvas.textAlign = "left";
                 }
                 // Pagination
@@ -3608,11 +3704,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         break;
                     const e = this.configList[i];
                     const Y = 290 + off * 100;
-                    if (e.access > 0 && MouseIn(1270, Y, 85, 64)) {
+                    if (e.access > 0 && MouseIn(1270, Y, 85, 64) && this.allowConfigure) {
                         this.character.setLogConfig(e.category, (e.access - 1));
                         return;
                     }
-                    else if (e.access < 2 && MouseIn(1355, Y, 85, 64)) {
+                    else if (e.access < 2 && MouseIn(1355, Y, 85, 64) && this.allowConfigure) {
                         this.character.setLogConfig(e.category, (e.access + 1));
                         return;
                     }
@@ -3679,7 +3775,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             ]).then(res => {
                 this.logData = res[0];
                 this.allowDeletion = res[1].delete;
-                this.allowConfiguration = res[1].configure;
+                this.allowConfiguration = res[1].configure || this.character.isPlayer();
                 this.allowPraise = res[1].praise;
                 this.allowLeaveMessage = res[1].leaveMessage;
                 this.refreshScreen();
@@ -3802,7 +3898,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             DrawText(`- Behaviour Log: About ${this.character.Name} -`, 125, 125, "Black", "Gray");
             MainCanvas.textAlign = "center";
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-            DrawButton(1815, 190, 90, 90, "", this.allowConfiguration ? "White" : "#eee", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
+            DrawButton(1815, 190, 90, 90, "", this.allowConfiguration ? "White" : "#ddd", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -3928,7 +4024,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const group = AssetGroupItems[i];
                 const currentItem = InventoryGet(this.character.Character, group.Name);
                 const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
-                DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), itemIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", itemIsCursed);
+                DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), itemIsCursed ? "#ccc" : (currentItem ? "Gold" : "White"), undefined, itemIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing"), itemIsCursed);
             }
             // clothing
             MainCanvas.textAlign = "left";
@@ -3948,12 +4044,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const group = AssetGroupClothings[i];
                 const currentItem = InventoryGet(this.character.Character, group.Name);
                 const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
-                DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), clothingIsCursed ? "Grey" : (currentItem ? "Gold" : "White"), undefined, currentItem ? currentItem.Asset.Description : "Nothing", clothingIsCursed);
+                DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), clothingIsCursed ? "#ccc" : (currentItem ? "Gold" : "White"), undefined, clothingIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing"), clothingIsCursed);
             }
             //Body
             // TODO: Actual data
             // const bodyIsCursed = false;
-            // DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "Grey" : "White", undefined, "Size, skin color, eyes, etc.", bodyIsCursed);
+            // DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "#ccc" : "White", undefined,
+            //	bodyIsCursed ? "Already cursed" : "Size, skin color, eyes, etc.", bodyIsCursed);
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -4104,9 +4201,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.lineTo(954, 780);
             MainCanvas.stroke();
             MainCanvas.textAlign = "center";
-            if (this.curseData.allowCurse) {
-                DrawButton(120, 820, 400, 90, "Add new curse", "White", "", "Place new curse on body, items or clothes");
-            }
+            DrawButton(120, 820, 400, 90, "Add new curse", this.curseData.allowCurse ? "White" : "#ddd", "", this.curseData.allowCurse ? "Place new curse on body, items or clothes" : "You have no permission to use this", !this.curseData.allowCurse);
             // Pagination
             const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
             DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
@@ -4156,6 +4251,81 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    function cheatIsEnabled(cheat) {
+        return Array.isArray(modStorage.cheats) && modStorage.cheats.includes(cheat);
+    }
+    function cheatSetEnabled(cheat, enabled) {
+        if (!Array.isArray(modStorage.cheats)) {
+            console.error(`BCX: Attempt to set cheat, while not initalized`);
+            return;
+        }
+        if (enabled) {
+            if (!modStorage.cheats.includes(cheat)) {
+                modStorage.cheats.push(cheat);
+            }
+        }
+        else {
+            modStorage.cheats = modStorage.cheats.filter(c => c !== cheat);
+        }
+        modStorageSync();
+    }
+    function cheatToggle(cheat) {
+        cheatSetEnabled(cheat, !cheatIsEnabled(cheat));
+    }
+    class ModuleMiscPatches extends BaseModule {
+        constructor() {
+            super(...arguments);
+            this.o_Player_CanChange = null;
+        }
+        load() {
+            if (!Array.isArray(modStorage.cheats)) {
+                modStorage.cheats = [];
+            }
+            else {
+                modStorage.cheats = modStorage.cheats.filter(c => MiscCheat[c] !== undefined);
+            }
+            hookFunction("AsylumEntranceCanWander", 0, () => true);
+            hookFunction("ElementIsScrolledToEnd", 0, (args) => {
+                const element = document.getElementById(args[0]);
+                return element != null && element.scrollHeight - element.scrollTop - element.clientHeight <= 1;
+            });
+            hookFunction("CheatFactor", 1, (args, next) => {
+                const [CheatName, Factor] = args;
+                if (CheatName === "CantLoseMistress" && cheatIsEnabled(MiscCheat.CantLoseMistress)) {
+                    return Factor;
+                }
+                else if (CheatName === "BlockRandomKidnap" && cheatIsEnabled(MiscCheat.BlockRandomKidnap)) {
+                    return Factor;
+                }
+                return next(args);
+            });
+            hookFunction("PrivateRansomStart", 0, (args, next) => {
+                if (cheatIsEnabled(MiscCheat.BlockRandomKidnap))
+                    return false;
+                return next(args);
+            });
+            const { NMod } = detectOtherMods();
+            if (!NMod) {
+                patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
+                patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
+            }
+            // Cheats
+            this.o_Player_CanChange = Player.CanChange;
+            Player.CanChange = () => { var _a; return allowMode || !!((_a = this.o_Player_CanChange) === null || _a === void 0 ? void 0 : _a.call(Player)); };
+            hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
+        }
+        run() {
+            LoginMistressItems();
+            LoginStableItems();
+            ServerPlayerInventorySync();
+        }
+        unload() {
+            if (this.o_Player_CanChange) {
+                Player.CanChange = this.o_Player_CanChange;
+            }
+        }
+    }
+
     class GuiMisc extends GuiSubscreen {
         constructor(character) {
             super();
@@ -4172,6 +4342,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             MainCanvas.textAlign = "left";
             DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
+            DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent kidnappings", cheatIsEnabled(MiscCheat.BlockRandomKidnap));
+            DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status", cheatIsEnabled(MiscCheat.CantLoseMistress));
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -4181,6 +4353,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (MouseIn(125, 200, 64, 64)) {
                 modStorage.typingIndicatorEnable = !modStorage.typingIndicatorEnable;
                 modStorageSync();
+            }
+            if (MouseIn(125, 300, 64, 64)) {
+                cheatToggle(MiscCheat.BlockRandomKidnap);
+            }
+            if (MouseIn(125, 400, 64, 64)) {
+                cheatToggle(MiscCheat.CantLoseMistress);
             }
         }
         Exit() {
@@ -4223,7 +4401,18 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     class GuiMainMenu extends GuiSubscreen {
         constructor(character) {
             super();
+            this.disabledModules = TOGGLEABLE_MODULES;
             this.character = character;
+        }
+        Load() {
+            this.character.getDisabledModules().then(data => {
+                this.disabledModules = data;
+            });
+        }
+        onChange(source) {
+            if (source === this.character.MemberNumber) {
+                this.Load();
+            }
         }
         Run() {
             DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
@@ -4232,7 +4421,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const e = MAIN_MENU_ITEMS[i];
                 const PX = Math.floor(i / 7);
                 const PY = i % 7;
-                DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", "White", MODULE_ICONS[e.module]);
+                const isDisabled = this.disabledModules.includes(e.module);
+                DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", isDisabled ? "#ddd" : "White", MODULE_ICONS[e.module], isDisabled ? "Module is deactivated" : "", isDisabled);
                 DrawTextFit(MODULE_NAMES[e.module], 250 + 420 * PX, 205 + 110 * PY, 310, "Black");
             }
         }
@@ -4243,7 +4433,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const e = MAIN_MENU_ITEMS[i];
                 const PX = Math.floor(i / 7);
                 const PY = i % 7;
-                if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90)) {
+                if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90) && !this.disabledModules.includes(e.module)) {
                     return e.onclick(this.character);
                 }
             }
@@ -4475,6 +4665,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return true;
         }
         return false;
+    }
+    function getDisabledModules() {
+        return Array.isArray(modStorage.disabledModules) ? modStorage.disabledModules.slice() : [];
     }
     function moduleIsEnabled(module) {
         if (!TOGGLEABLE_MODULES.includes(module))
@@ -5254,41 +5447,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 return [];
             });
-        }
-    }
-
-    class ModuleMiscPatches extends BaseModule {
-        constructor() {
-            super(...arguments);
-            this.o_Player_CanChange = null;
-        }
-        load() {
-            hookFunction("AsylumEntranceCanWander", 0, () => true);
-            patchFunction("CheatImport", { "MainCanvas == null": "true" });
-            hookFunction("ElementIsScrolledToEnd", 0, (args) => {
-                const element = document.getElementById(args[0]);
-                return element != null && element.scrollHeight - element.scrollTop - element.clientHeight <= 1;
-            });
-            const { NMod } = detectOtherMods();
-            if (!NMod) {
-                patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
-                patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
-            }
-            // Cheats
-            this.o_Player_CanChange = Player.CanChange;
-            Player.CanChange = () => { var _a; return allowMode || !!((_a = this.o_Player_CanChange) === null || _a === void 0 ? void 0 : _a.call(Player)); };
-            hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
-        }
-        run() {
-            CheatImport();
-            LoginMistressItems();
-            LoginStableItems();
-            ServerPlayerInventorySync();
-        }
-        unload() {
-            if (this.o_Player_CanChange) {
-                Player.CanChange = this.o_Player_CanChange;
-            }
         }
     }
 

@@ -16,6 +16,7 @@ const CURSES_ANTILOOP_THRESHOLD = 10;
 const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
+const CURSE_IGNORED_EFFECTS = ["Lock"];
 
 export function curseItem(Group: string, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
@@ -375,6 +376,9 @@ export class ModuleCurses extends BaseModule {
 
 			if (curse.curseProperty) {
 				for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
+					if (key === "Effect")
+						continue;
+
 					if (CURSE_IGNORED_PROPERTIES.includes(key)) {
 						if (curseProperty[key] !== undefined) {
 							delete curseProperty[key];
@@ -393,6 +397,16 @@ export class ModuleCurses extends BaseModule {
 						itemProperty[key] = JSON.parse(JSON.stringify(curseProperty[key]));
 						if (!changeType) changeType = "update";
 					}
+				}
+				const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
+				const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+				const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+				if (!CommonArraysEqual(itemEffects, curseEffects)) {
+					itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
+				} else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
+					curseProperty.Effect = itemProperty.Effect.slice();
+				} else {
+					delete curseProperty.Effect;
 				}
 			} else {
 				curseProperty = JSON.parse(JSON.stringify(itemProperty));

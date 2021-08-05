@@ -1,5 +1,7 @@
 import { ChatroomCharacter } from "../characters";
+import { MiscCheat } from "../constants";
 import { setSubscreen } from "../modules/gui";
+import { cheatIsEnabled, cheatToggle } from "../modules/miscPatches";
 import { modStorage, modStorageSync } from "../modules/storage";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
@@ -29,6 +31,8 @@ export class GuiMisc extends GuiSubscreen {
 		MainCanvas.textAlign = "left";
 
 		DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
+		DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent kidnappings", cheatIsEnabled(MiscCheat.BlockRandomKidnap));
+		DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status", cheatIsEnabled(MiscCheat.CantLoseMistress));
 	}
 
 	Click() {
@@ -40,6 +44,14 @@ export class GuiMisc extends GuiSubscreen {
 		if (MouseIn(125, 200, 64, 64)) {
 			modStorage.typingIndicatorEnable = !modStorage.typingIndicatorEnable;
 			modStorageSync();
+		}
+
+		if (MouseIn(125, 300, 64, 64)) {
+			cheatToggle(MiscCheat.BlockRandomKidnap);
+		}
+
+		if (MouseIn(125, 400, 64, 64)) {
+			cheatToggle(MiscCheat.CantLoseMistress);
 		}
 	}
 

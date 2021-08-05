@@ -41,3 +41,8 @@ export const enum ModuleInitPhase {
 	ready,
 	destroy
 }
+
+export enum MiscCheat {
+	BlockRandomKidnap = 0,
+	CantLoseMistress = 1
+}

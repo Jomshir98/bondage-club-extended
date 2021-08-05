@@ -15,6 +15,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6"],
 	ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D"],
 	ChatRoomSync: ["B67D8226"],
+	CheatFactor: ["594CFC45"],
 	CheatImport: ["412422CC", "26C67608"],
 	DialogDrawExpressionMenu: ["EEFB3D22"],
 	DialogDrawItemMenu: ["7B1D71E9", "0199F25B", "D832A940"],
@@ -27,6 +28,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	LoginMistressItems: ["B58EF410"],
 	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8"],
 	LoginStableItems: ["EA93FBF7"],
+	PrivateRansomStart: ["0E968EDD"],
 	ServerAccountBeep: ["2D918B69"],
 	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
 	ValidationResolveModifyDiff: ["C2FE52D3"]
@@ -45,6 +47,7 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	ChatRoomMessage: ["477574F9"],
 	ChatRoomSendChat: ["385B9E9C"],
 	ChatRoomSync: ["2590802E"],
+	CheatFactor: ["594CFC45"],
 	CheatImport: ["1ECB0CC4"],
 	DialogDrawExpressionMenu: ["EEFB3D22"],
 	DialogDrawItemMenu: ["05301080"],
@@ -57,6 +60,7 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	LoginMistressItems: ["984A6AD9"],
 	LoginResponse: ["67294772"],
 	LoginStableItems: ["C3F50DD1"],
+	PrivateRansomStart: ["0E968EDD"],
 	ServerAccountBeep: ["A6DFD3B9"],
 	SpeechGarble: ["9D669F73"],
 	ValidationResolveModifyDiff: ["C2FE52D3"]

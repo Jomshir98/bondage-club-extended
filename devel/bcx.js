@@ -2104,7 +2104,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 var _a, _b, _c;
                 const params = args[2];
                 const result = next(args);
-                if (result.item) {
+                if (params.C.ID === 0 && result.item) {
                     const curse = (_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[result.item.Asset.Group.Name];
                     const character = getChatroomCharacter(params.sourceMemberNumber);
                     if (curse &&
@@ -4184,7 +4184,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 // item settings curse
                 if (!e.empty) {
                     const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
-                    DrawButton(X + 650, Y, 60, 60, "", allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "Gray", "", e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
+                    DrawButton(X + 650, Y, 60, 60, "", allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "#ddd", "", e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
                     DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 655, Y + 5, {
                         Height: 50,
                         Width: 50

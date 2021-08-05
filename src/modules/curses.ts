@@ -222,7 +222,7 @@ export class ModuleCurses extends BaseModule {
 			const params = args[2] as AppearanceUpdateParameters;
 			const result = next(args) as ItemDiffResolution;
 
-			if (result.item) {
+			if (params.C.ID === 0 && result.item) {
 				const curse = modStorage.cursedItems?.[result.item.Asset.Group.Name];
 				const character = getChatroomCharacter(params.sourceMemberNumber);
 				if (curse &&

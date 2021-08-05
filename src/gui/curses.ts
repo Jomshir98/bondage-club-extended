@@ -130,7 +130,7 @@ export class GuiCurses extends GuiSubscreen {
 				const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
 
 				DrawButton(X + 650, Y, 60, 60, "",
-					allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "Gray", "",
+					allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "#ddd", "",
 					e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
 				DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 655, Y + 5, {
 					Height: 50,

@@ -2342,8 +2342,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         toString() {
             return `${this.Name} (${this.MemberNumber})`;
         }
-        getDisabledModules() {
-            return sendQuery("disabledModules", undefined, this.MemberNumber).then(data => {
+        getDisabledModules(timeout) {
+            return sendQuery("disabledModules", undefined, this.MemberNumber, timeout).then(data => {
                 if (!Array.isArray(data)) {
                     throw new Error("Bad data");
                 }
@@ -4405,8 +4405,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.character = character;
         }
         Load() {
-            this.character.getDisabledModules().then(data => {
+            this.character.getDisabledModules(5000).then(data => {
                 this.disabledModules = data;
+            }).catch(e => {
+                this.disabledModules = [];
+                console.error(`BCX: error getting disabled modules`, e);
             });
         }
         onChange(source) {
@@ -4675,6 +4678,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         return Array.isArray(modStorage.disabledModules) ? !modStorage.disabledModules.includes(module) : true;
     }
     class ModulePresets extends BaseModule {
+        init() {
+            queryHandlers.disabledModules = (sender, resolve) => {
+                return resolve(true, getDisabledModules());
+            };
+        }
         load() {
             if (typeof modStorage.preset !== "number" || Preset[modStorage.preset] === undefined) {
                 modStorage.preset = Preset.switch;

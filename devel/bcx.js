@@ -451,21 +451,21 @@ window.BCX_Loaded = false;
     })(Preset || (Preset = {}));
     var ModuleCategory;
     (function (ModuleCategory) {
-        ModuleCategory[ModuleCategory["Basic"] = 0] = "Basic";
+        ModuleCategory[ModuleCategory["Global"] = 0] = "Global";
         ModuleCategory[ModuleCategory["Authority"] = 1] = "Authority";
         ModuleCategory[ModuleCategory["Log"] = 2] = "Log";
         ModuleCategory[ModuleCategory["Curses"] = 3] = "Curses";
         ModuleCategory[ModuleCategory["Misc"] = 99] = "Misc";
     })(ModuleCategory || (ModuleCategory = {}));
     const MODULE_NAMES = {
-        [ModuleCategory.Basic]: "Basic",
+        [ModuleCategory.Global]: "Global",
         [ModuleCategory.Authority]: "Authority",
         [ModuleCategory.Log]: "Behaviour Log",
         [ModuleCategory.Curses]: "Curses",
         [ModuleCategory.Misc]: "Miscellaneous"
     };
     const MODULE_ICONS = {
-        [ModuleCategory.Basic]: "Icons/General.png",
+        [ModuleCategory.Global]: "Icons/General.png",
         [ModuleCategory.Authority]: "Icons/Security.png",
         [ModuleCategory.Log]: "Icons/Title.png",
         [ModuleCategory.Curses]: "Icons/Struggle.png",
@@ -4368,7 +4368,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
 
     const MAIN_MENU_ITEMS = [
         {
-            module: ModuleCategory.Basic,
+            module: ModuleCategory.Global,
             onclick: (C) => {
                 setSubscreen(new GuiGlobal(C));
             }

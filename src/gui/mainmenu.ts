@@ -10,7 +10,7 @@ import { setSubscreen } from "../modules/gui";
 
 const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
-		module: ModuleCategory.Basic,
+		module: ModuleCategory.Global,
 		onclick: (C) => {
 			setSubscreen(new GuiGlobal(C));
 		}

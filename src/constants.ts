@@ -6,7 +6,7 @@ export enum Preset {
 }
 
 export enum ModuleCategory {
-	Basic = 0,
+	Global = 0,
 	Authority = 1,
 	Log = 2,
 	Curses = 3,
@@ -14,7 +14,7 @@ export enum ModuleCategory {
 }
 
 export const MODULE_NAMES: Record<ModuleCategory, string> = {
-	[ModuleCategory.Basic]: "Basic",
+	[ModuleCategory.Global]: "Global",
 	[ModuleCategory.Authority]: "Authority",
 	[ModuleCategory.Log]: "Behaviour Log",
 	[ModuleCategory.Curses]: "Curses",
@@ -22,7 +22,7 @@ export const MODULE_NAMES: Record<ModuleCategory, string> = {
 };
 
 export const MODULE_ICONS: Record<ModuleCategory, string> = {
-	[ModuleCategory.Basic]: "Icons/General.png",
+	[ModuleCategory.Global]: "Icons/General.png",
 	[ModuleCategory.Authority]: "Icons/Security.png",
 	[ModuleCategory.Log]: "Icons/Title.png",
 	[ModuleCategory.Curses]: "Icons/Struggle.png",

@@ -5,7 +5,7 @@ import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
-import { ChatRoomSendLocal } from "../utilsClub";
+import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, ModuleInitPhase, Preset } from "../constants";
 
@@ -275,6 +275,17 @@ export function editRole(role: "owner" | "mistress", action: "add" | "remove", t
 		role === "mistress" && action === "remove" && !modStorage.mistresses.includes(target)
 	) {
 		return true;
+	}
+
+	if (character) {
+		const targetDescriptor = character.MemberNumber === target ? "herself" : `${getCharacterName(target, "[unknown name]")} (${target})`;
+		const msg = action === "add" ?
+			`${character} added ${targetDescriptor} as ${role}.` :
+			`${character} removed ${targetDescriptor} from ${role} role.`;
+		logMessage("ownershipChangesBCX", LogEntryType.plaintext, msg);
+		if (!character.isPlayer()) {
+			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+		}
 	}
 
 	const ownerIndex = modStorage.owners.indexOf(target);

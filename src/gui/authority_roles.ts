@@ -5,6 +5,7 @@ import { capitalizeFirstLetter } from "../utils";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { setSubscreen } from "../modules/gui";
+import { getCharacterName } from "../utilsClub";
 
 const PER_PAGE_COUNT = 6;
 
@@ -98,12 +99,12 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 		this.roleList = this.roleData.owners.map((i): RoleListItem => ({
 			type: "Owner",
 			memberNumber: i[0],
-			name: Player.FriendNames?.get(i[0]) || i[1] || null
+			name: getCharacterName(i[0], i[1] || null)
 		}));
 		this.roleList.push(...this.roleData.mistresses.map((i): RoleListItem => ({
 			type: "Mistress",
 			memberNumber: i[0],
-			name: Player.FriendNames?.get(i[0]) || i[1] || null
+			name: getCharacterName(i[0], i[1] || null)
 		})));
 
 		const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);

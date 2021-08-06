@@ -249,7 +249,8 @@ const logConfigDefaults: LogConfig = {
 	hadOrgasm: LogAccessLevel.none,
 	permissionChange: LogAccessLevel.protected,
 	curseChange: LogAccessLevel.none,
-	curseTrigger: LogAccessLevel.none
+	curseTrigger: LogAccessLevel.none,
+	ownershipChangesBCX: LogAccessLevel.normal
 };
 
 export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
@@ -262,7 +263,8 @@ export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	hadOrgasm: "Log each single orgasm",
 	permissionChange: "Log changes in permission settings",
 	curseChange: "Log each application or removal of curses",
-	curseTrigger: "Log every time a triggered curse reapplies an item"
+	curseTrigger: "Log every time a triggered curse reapplies an item",
+	ownershipChangesBCX: "Log getting or losing a BCX owner/mistress"
 };
 
 export const LOG_LEVEL_NAMES: Record<LogAccessLevel, string> = {

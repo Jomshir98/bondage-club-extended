@@ -209,3 +209,15 @@ export function isBind(item: Item | Asset): boolean {
 	if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay) return false;
 	return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
 }
+
+export function getCharacterName(memberNumber: number, defaultText: string): string;
+export function getCharacterName(memberNumber: number, defaultText: string | null): string | null;
+export function getCharacterName(memberNumber: number, defaultText: string | null = null): string | null {
+	const character = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
+	if (character)
+		return character.Name;
+	const friendName = Player.FriendNames?.get(memberNumber);
+	if (friendName)
+		return friendName;
+	return defaultText;
+}

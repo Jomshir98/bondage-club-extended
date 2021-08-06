@@ -191,8 +191,18 @@ window.BCX_Loaded = false;
             return false;
         return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
     }
+    function getCharacterName(memberNumber, defaultText = null) {
+        var _a;
+        const character = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
+        if (character)
+            return character.Name;
+        const friendName = (_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(memberNumber);
+        if (friendName)
+            return friendName;
+        return defaultText;
+    }
 
-    const VERSION = "0.3.0";
+    const VERSION = "0.3.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -220,6 +230,7 @@ window.BCX_Loaded = false;
         LoginMistressItems: ["B58EF410"],
         LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8"],
         LoginStableItems: ["EA93FBF7"],
+        MainHallWalk: ["E52553C4"],
         PrivateRansomStart: ["0E968EDD"],
         ServerAccountBeep: ["2D918B69"],
         SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
@@ -251,6 +262,7 @@ window.BCX_Loaded = false;
         LoginMistressItems: ["984A6AD9"],
         LoginResponse: ["67294772"],
         LoginStableItems: ["C3F50DD1"],
+        MainHallWalk: ["E52553C4"],
         PrivateRansomStart: ["0E968EDD"],
         ServerAccountBeep: ["A6DFD3B9"],
         SpeechGarble: ["9D669F73"],
@@ -477,7 +489,7 @@ window.BCX_Loaded = false;
     ];
     var MiscCheat;
     (function (MiscCheat) {
-        MiscCheat[MiscCheat["BlockRandomKidnap"] = 0] = "BlockRandomKidnap";
+        MiscCheat[MiscCheat["BlockRandomEvents"] = 0] = "BlockRandomEvents";
         MiscCheat[MiscCheat["CantLoseMistress"] = 1] = "CantLoseMistress";
     })(MiscCheat || (MiscCheat = {}));
 
@@ -1231,7 +1243,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         hadOrgasm: LogAccessLevel.none,
         permissionChange: LogAccessLevel.protected,
         curseChange: LogAccessLevel.none,
-        curseTrigger: LogAccessLevel.none
+        curseTrigger: LogAccessLevel.none,
+        ownershipChangesBCX: LogAccessLevel.normal
     };
     const LOG_CONFIG_NAMES = {
         logConfigChange: "Log changes in logging configuration",
@@ -1243,7 +1256,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         hadOrgasm: "Log each single orgasm",
         permissionChange: "Log changes in permission settings",
         curseChange: "Log each application or removal of curses",
-        curseTrigger: "Log every time a triggered curse reapplies an item"
+        curseTrigger: "Log every time a triggered curse reapplies an item",
+        ownershipChangesBCX: "Log getting or losing a BCX owner/mistress"
     };
     const LOG_LEVEL_NAMES = {
         [LogAccessLevel.everyone]: "[ERROR]",
@@ -1669,6 +1683,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (role === "owner" && action === "remove" && !modStorage.owners.includes(target) ||
             role === "mistress" && action === "remove" && !modStorage.mistresses.includes(target)) {
             return true;
+        }
+        if (character) {
+            const targetDescriptor = character.MemberNumber === target ? "herself" : `${getCharacterName(target, "[unknown name]")} (${target})`;
+            const msg = action === "add" ?
+                `${character} added ${targetDescriptor} as ${role}.` :
+                `${character} removed ${targetDescriptor} from ${role} role.`;
+            logMessage("ownershipChangesBCX", LogEntryType.plaintext, msg);
+            if (!character.isPlayer()) {
+                ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+            }
         }
         const ownerIndex = modStorage.owners.indexOf(target);
         if (ownerIndex >= 0) {
@@ -2906,22 +2930,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             else if (showInput && !Input) {
                 Input = ElementCreateInput("BCX_RoleAdd", "text", "", "6");
             }
-            this.roleList = this.roleData.owners.map((i) => {
-                var _a;
-                return ({
-                    type: "Owner",
-                    memberNumber: i[0],
-                    name: ((_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(i[0])) || i[1] || null
-                });
-            });
-            this.roleList.push(...this.roleData.mistresses.map((i) => {
-                var _a;
-                return ({
-                    type: "Mistress",
-                    memberNumber: i[0],
-                    name: ((_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(i[0])) || i[1] || null
-                });
+            this.roleList = this.roleData.owners.map((i) => ({
+                type: "Owner",
+                memberNumber: i[0],
+                name: getCharacterName(i[0], i[1] || null)
             }));
+            this.roleList.push(...this.roleData.mistresses.map((i) => ({
+                type: "Mistress",
+                memberNumber: i[0],
+                name: getCharacterName(i[0], i[1] || null)
+            })));
             const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$4);
             if (this.page < 0) {
                 this.page = Math.max(totalPages - 1, 0);
@@ -4294,14 +4312,20 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 if (CheatName === "CantLoseMistress" && cheatIsEnabled(MiscCheat.CantLoseMistress)) {
                     return Factor;
                 }
-                else if (CheatName === "BlockRandomKidnap" && cheatIsEnabled(MiscCheat.BlockRandomKidnap)) {
+                else if (CheatName === "BlockRandomKidnap" && cheatIsEnabled(MiscCheat.BlockRandomEvents)) {
                     return Factor;
                 }
                 return next(args);
             });
             hookFunction("PrivateRansomStart", 0, (args, next) => {
-                if (cheatIsEnabled(MiscCheat.BlockRandomKidnap))
+                if (cheatIsEnabled(MiscCheat.BlockRandomEvents))
                     return false;
+                return next(args);
+            });
+            hookFunction("MainHallWalk", 0, (args, next) => {
+                if (cheatIsEnabled(MiscCheat.BlockRandomEvents)) {
+                    MainHallRandomEventOdds = 0;
+                }
                 return next(args);
             });
             const { NMod } = detectOtherMods();
@@ -4342,7 +4366,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             MainCanvas.textAlign = "left";
             DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
-            DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent kidnappings", cheatIsEnabled(MiscCheat.BlockRandomKidnap));
+            DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
             DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status", cheatIsEnabled(MiscCheat.CantLoseMistress));
         }
         Click() {
@@ -4355,7 +4379,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 modStorageSync();
             }
             if (MouseIn(125, 300, 64, 64)) {
-                cheatToggle(MiscCheat.BlockRandomKidnap);
+                cheatToggle(MiscCheat.BlockRandomEvents);
             }
             if (MouseIn(125, 400, 64, 64)) {
                 cheatToggle(MiscCheat.CantLoseMistress);

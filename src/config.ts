@@ -1,4 +1,4 @@
-export const VERSION = "0.3.0";
+export const VERSION = "0.3.1";
 
 export const VERSION_CHECK_BOT: number = 37685;
 

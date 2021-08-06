@@ -50,7 +50,7 @@ export class ModuleMiscPatches extends BaseModule {
 
 			if (CheatName === "CantLoseMistress" && cheatIsEnabled(MiscCheat.CantLoseMistress)) {
 				return Factor;
-			} else if (CheatName === "BlockRandomKidnap" && cheatIsEnabled(MiscCheat.BlockRandomKidnap)) {
+			} else if (CheatName === "BlockRandomKidnap" && cheatIsEnabled(MiscCheat.BlockRandomEvents)) {
 				return Factor;
 			}
 
@@ -58,8 +58,16 @@ export class ModuleMiscPatches extends BaseModule {
 		});
 
 		hookFunction("PrivateRansomStart", 0, (args, next) => {
-			if (cheatIsEnabled(MiscCheat.BlockRandomKidnap))
+			if (cheatIsEnabled(MiscCheat.BlockRandomEvents))
 				return false;
+
+			return next(args);
+		});
+
+		hookFunction("MainHallWalk", 0, (args, next) => {
+			if (cheatIsEnabled(MiscCheat.BlockRandomEvents)) {
+				MainHallRandomEventOdds = 0;
+			}
 
 			return next(args);
 		});

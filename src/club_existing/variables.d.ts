@@ -116,3 +116,6 @@ declare const ValidationModifiableProperties: string[];
 
 // Screens/Character/InformationSheet/InformationSheet.js
 declare var InformationSheetSelection: Character | null;
+
+// Screens/Room/MainHall/MainHall.js
+declare var MainHallRandomEventOdds: number;

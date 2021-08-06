@@ -31,7 +31,7 @@ export class GuiMisc extends GuiSubscreen {
 		MainCanvas.textAlign = "left";
 
 		DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
-		DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent kidnappings", cheatIsEnabled(MiscCheat.BlockRandomKidnap));
+		DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
 		DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status", cheatIsEnabled(MiscCheat.CantLoseMistress));
 	}
 
@@ -47,7 +47,7 @@ export class GuiMisc extends GuiSubscreen {
 		}
 
 		if (MouseIn(125, 300, 64, 64)) {
-			cheatToggle(MiscCheat.BlockRandomKidnap);
+			cheatToggle(MiscCheat.BlockRandomEvents);
 		}
 
 		if (MouseIn(125, 400, 64, 64)) {

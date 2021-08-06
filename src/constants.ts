@@ -43,6 +43,6 @@ export const enum ModuleInitPhase {
 }
 
 export enum MiscCheat {
-	BlockRandomKidnap = 0,
+	BlockRandomEvents = 0,
 	CantLoseMistress = 1
 }

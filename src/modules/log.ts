@@ -182,7 +182,7 @@ export function logGetAllowedActions(character: ChatroomCharacter): BCX_logAllow
 	return {
 		configure: checkPermissionAccess("log_configure", character),
 		delete: checkPermissionAccess("log_delete", character),
-		leaveMessage: checkPermissionAccess("log_leaveMessage", character) && !!(modStorage.logConfig?.userNote),
+		leaveMessage: checkPermissionAccess("log_add_note", character) && !!(modStorage.logConfig?.userNote),
 		praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
 	};
 }
@@ -326,7 +326,7 @@ export class ModuleLog extends BaseModule {
 				[Preset.slave]: [false, AccessLevel.public]
 			}
 		});
-		registerPermission("log_leaveMessage", {
+		registerPermission("log_add_note", {
 			name: "Allow to attach notes to the body",
 			category: ModuleCategory.Log,
 			defaults: {

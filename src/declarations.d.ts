@@ -23,7 +23,7 @@ type BCX_Permissions =
 	| "log_configure"
 	| "log_delete"
 	| "log_praise"
-	| "log_leaveMessage"
+	| "log_add_note"
 	| "curses_curse"
 	| "curses_lift"
 	| "curses_color"

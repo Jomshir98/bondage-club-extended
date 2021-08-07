@@ -1,13 +1,14 @@
 import { moduleInitPhase } from "../moduleManager";
 import { BaseModule } from "./_BaseModule";
 import { capitalizeFirstLetter, isObject } from "../utils";
-import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
 import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { moduleIsEnabled } from "./presets";
-import { ModuleCategory, ModuleInitPhase, Preset } from "../constants";
+import { ModuleCategory, ModuleInitPhase, MODULE_NAMES, Preset } from "../constants";
+import { COMMAND_GENERIC_ERROR, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber, registerWhisperCommand } from "./commands";
 
 export enum AccessLevel {
 	self = 0,
@@ -231,7 +232,7 @@ export function getPermissionMinDisplayText(minAccess: AccessLevel, character?: 
 }
 
 export function getPlayerRoleData(character: ChatroomCharacter): PermissionRoleBundle {
-	const loadNames = (memberNumber: number): [number, string] => [memberNumber, Player.FriendNames?.get(memberNumber) ?? ""];
+	const loadNames = (memberNumber: number): [number, string] => [memberNumber, getCharacterName(memberNumber, "")];
 
 	return {
 		mistresses: (modStorage.mistresses ?? []).map(loadNames),
@@ -475,6 +476,157 @@ export class ModuleAuthority extends BaseModule {
 
 			resolve(true, editRole(data.type, data.action, data.target, character));
 		};
+
+		registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
+			const subcommand = (argv[0] || "").toLocaleLowerCase();
+			if (subcommand === "list") {
+				const accessLevel = getCharacterAccessLevel(sender);
+				if (accessLevel > AccessLevel.mistress) {
+					return respond(COMMAND_GENERIC_ERROR);
+				}
+				const data = getPlayerRoleData(sender);
+				let res = "Full list:";
+				for (const owner of data.owners) {
+					res += `\nOwner ${owner[1] || "[unknown name]"} (${owner[0]})`;
+				}
+				for (const mistress of data.mistresses) {
+					res += `\nMistress ${mistress[1] || "[unknown name]"} (${mistress[0]})`;
+				}
+				respond(res);
+			} else if (subcommand === "owner" || subcommand === "mistress") {
+				const subcommand2 = (argv[1] || "").toLocaleLowerCase();
+				if (subcommand2 !== "add" && subcommand2 !== "remove") {
+					return respond(`Expected either 'add' or 'remove', got '${subcommand2}'`);
+				}
+				if (!argv[2]) {
+					return respond(`Missing required argument: target`);
+				}
+				const target = Command_selectCharacterMemberNumber(argv[2], true);
+				if (typeof target === "string") {
+					return respond(target);
+				}
+				respond(editRole(subcommand, subcommand2, target, sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
+			} else {
+				respond(`!role usage:\n` +
+					`!role list - List all current owners/mistresses\n` +
+					`!role owner <add/remove> <target> - Add or remove owner\n` +
+					`!role mistress <add/remove> <target> - Add or remove mistress`
+				);
+			}
+		}, (argv, sender) => {
+			if (argv.length <= 1) {
+				const c = argv[0].toLocaleLowerCase();
+				return ["list", "owner", "mistress"].filter(i => i.startsWith(c));
+			}
+			const subcommand = argv[0].toLocaleLowerCase();
+			if (subcommand === "owner" || subcommand === "mistress") {
+				if (argv.length === 2) {
+					const c = argv[1].toLocaleLowerCase();
+					return ["add", "remove"].filter(i => i.startsWith(c));
+				}
+				const subcommand2 = argv[1].toLocaleLowerCase();
+				if (subcommand2 === "add" || subcommand2 === "remove") {
+					return Command_selectCharacterAutocomplete(argv[2]);
+				}
+			}
+
+			return [];
+		});
+
+		registerWhisperCommand("permission", "- Manage permissions", (argv, sender, respond) => {
+			const subcommand = (argv[0] || "").toLocaleLowerCase();
+			const permissionsList = getPlayerPermissionSettings();
+			if (subcommand === "list") {
+				const categories: Map<ModuleCategory, PermissionData> = new Map();
+				let hasAny = false;
+				const filter = argv.slice(1).map(v => v.toLocaleLowerCase());
+				for (const [k, v] of Object.entries(permissionsList)) {
+					if (filter.some(i =>
+						!MODULE_NAMES[v.category].toLocaleLowerCase().includes(i) &&
+						!v.name.toLocaleLowerCase().includes(i) &&
+						!k.toLocaleLowerCase().includes(i)
+					)) continue;
+					let permdata = categories.get(v.category);
+					if (!permdata) {
+						categories.set(v.category, permdata = {});
+					}
+					hasAny = true;
+					permdata[k as BCX_Permissions] = v;
+				}
+				if (!hasAny) {
+					return respond("No permission matches the filter!");
+				}
+				for (const [category, data] of Array.from(categories.entries()).sort((a, b) => a[0] - b[0])) {
+					let result = `List of ${MODULE_NAMES[category]} module permissions:`;
+					for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+						result += `\n${k}:\n  ${v.name} - ${v.self ? "self" : "not self"}, ${getPermissionMinDisplayText(v.min, getPlayerCharacter())}`;
+					}
+					respond(result);
+					result = "";
+				}
+			} else if (permissionsList[subcommand as BCX_Permissions] !== undefined) {
+				const subcommand2 = (argv[1] || "").toLocaleLowerCase();
+				let subcommand3 = (argv[2] || "").toLocaleLowerCase();
+				if (subcommand2 === "") {
+					const v = permissionsList[subcommand as BCX_Permissions]!;
+					respond(`${subcommand}:\n  ${v.name} - ${v.self ? "self" : "not self"}, ${getPermissionMinDisplayText(v.min, getPlayerCharacter())}`);
+				} else if (subcommand2 === "selfaccess") {
+					if (subcommand3 === "yes" || subcommand3 === "no") {
+						respond(setPermissionSelfAccess(subcommand as BCX_Permissions, subcommand3 === "yes", sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
+					} else {
+						respond(`Expected 'selfaccess yes' or 'selfaccess no'`);
+					}
+				} else if (subcommand2 === "lowestaccess") {
+					if (subcommand3 === Player.Name.toLocaleLowerCase()) {
+						subcommand3 = "self";
+					}
+					const level = (AccessLevel as any)[subcommand3] as AccessLevel;
+					if (typeof level === "number") {
+						respond(setPermissionMinAccess(subcommand as BCX_Permissions, level, sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
+					} else {
+						respond(`Unknown AccessLevel '${subcommand3}';\n`+
+						`expected one of: ${Player.Name}, clubowner, owner, lover, mistress, whitelist, friend, public`);
+					}
+				} else {
+					respond(`Unknown setting '${subcommand2}'; expected 'selfaccess' or 'lowestaccess'`);
+				}
+			} else if (subcommand !== "help") {
+				respond(`Unknown permission '${subcommand}'.\n` +
+					`To get list of permissions use '!permission list'`
+				);
+			} else {
+				respond(`!permission usage:\n` +
+					`!permission list [filter] - List all permissions and their current settings\n` +
+					`!permission <name> selfaccess <yes|no> - Gives ${Player.Name} permission or revokes it\n` +
+					`!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the selected permission`
+				);
+			}
+		}, (argv, sender) => {
+			const permissionNames = Object.keys(getPlayerPermissionSettings());
+			if (argv.length <= 1) {
+				const c = argv[0].toLocaleLowerCase();
+				return ["list", ...permissionNames].filter(i => i.startsWith(c));
+			}
+
+			const subcommand = argv[0].toLocaleLowerCase();
+
+			if (permissionNames.includes(subcommand)) {
+				const subcommand2 = argv[1].toLocaleLowerCase();
+				const subcommand3 = (argv[2] || "").toLocaleLowerCase();
+				if (argv.length === 2) {
+					return ["selfaccess", "lowestaccess"].filter(i => i.startsWith(subcommand2));
+				} else if (argv.length === 3) {
+					if (subcommand2 === "selfaccess") {
+						return ["yes", "no"].filter(i => i.startsWith(subcommand3));
+					} else if (subcommand2 === "lowestaccess") {
+						return [Player.Name.toLocaleLowerCase(), "self", "clubowner", "owner", "lover", "mistress", "whitelist", "friend", "public"]
+							.filter(i => i.startsWith(subcommand3));
+					}
+				}
+			}
+
+			return [];
+		});
 	}
 
 	private setDefultPermissionsForPreset(preset: Preset) {

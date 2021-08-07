@@ -68,7 +68,6 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	private rebuildList() {
 		if (!this.active) return;
 
-		const categories: Map<ModuleCategory, PermissionData> = new Map();
 		this.permList = [];
 		let Input = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
 		if (this.permissionData === null) {
@@ -98,6 +97,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			false;
 		const isPlayer = this.myAccessLevel === AccessLevel.self;
 
+		const categories: Map<ModuleCategory, PermissionData> = new Map();
 		for (const [k, v] of Object.entries(this.permissionData)) {
 			let permdata = categories.get(v.category);
 			if (filter.some(i =>

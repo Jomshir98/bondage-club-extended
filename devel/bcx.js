@@ -202,7 +202,7 @@ window.BCX_Loaded = false;
         return defaultText;
     }
 
-    const VERSION = "0.3.1";
+    const VERSION = "0.3.2";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -978,14 +978,45 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         });
     }
 
+    var StorageLocations;
+    (function (StorageLocations) {
+        StorageLocations[StorageLocations["OnlineSettings"] = 0] = "OnlineSettings";
+        StorageLocations[StorageLocations["LocalStorage"] = 1] = "LocalStorage";
+    })(StorageLocations || (StorageLocations = {}));
     let modStorage = {};
     let deletionPending = false;
     let firstTimeInit = false;
+    let modStorageLocation = StorageLocations.OnlineSettings;
     function finalizeFirstTimeInit() {
         firstTimeInit = false;
         modStorageSync();
         console.log("BCX: First time init finalized");
         announceSelf(true);
+    }
+    function getLocalStorageName() {
+        return `BCX_${Player.MemberNumber}`;
+    }
+    function storageClearData() {
+        delete Player.OnlineSettings.BCX;
+        localStorage.removeItem(getLocalStorageName());
+        if (typeof ServerAccountUpdate !== "undefined") {
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
+        }
+        else {
+            console.debug("BCX: Old sync method");
+            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+        }
+    }
+    function switchStorageLocation(location) {
+        if (location !== StorageLocations.LocalStorage && location !== StorageLocations.OnlineSettings) {
+            throw new Error(`Unknown storage location`);
+        }
+        if (modStorageLocation === location)
+            return;
+        console.info(`BCX: Switching storage location to: ${StorageLocations[location]}`);
+        modStorageLocation = location;
+        storageClearData();
+        modStorageSync();
     }
     function modStorageSync() {
         if (moduleInitPhase !== 3 /* ready */ && moduleInitPhase !== 4 /* destroy */)
@@ -996,25 +1027,27 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             console.error("BCX: Player OnlineSettings not defined during storage sync!");
             return;
         }
-        Player.OnlineSettings.BCX = LZString.compressToBase64(JSON.stringify(modStorage));
-        if (typeof ServerAccountUpdate !== "undefined") {
-            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+        const serializedData = LZString.compressToBase64(JSON.stringify(modStorage));
+        if (modStorageLocation === StorageLocations.OnlineSettings) {
+            Player.OnlineSettings.BCX = serializedData;
+            if (typeof ServerAccountUpdate !== "undefined") {
+                ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+            }
+            else {
+                console.debug("BCX: Old sync method");
+                ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+            }
+        }
+        else if (modStorageLocation === StorageLocations.LocalStorage) {
+            localStorage.setItem(getLocalStorageName(), serializedData);
         }
         else {
-            console.debug("BCX: Old sync method");
-            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+            throw new Error(`Unknown StorageLocation`);
         }
     }
     function clearAllData() {
         deletionPending = true;
-        delete Player.OnlineSettings.BCX;
-        if (typeof ServerAccountUpdate !== "undefined") {
-            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
-        }
-        else {
-            console.debug("BCX: Old sync method");
-            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-        }
+        storageClearData();
         sendHiddenBeep("clearData", true, VERSION_CHECK_BOT, true);
         setTimeout(() => {
             window.location.reload();
@@ -1023,7 +1056,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     class ModuleStorage extends BaseModule {
         init() {
             var _a;
-            const saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+            let saved = null;
+            saved = localStorage.getItem(getLocalStorageName());
+            if (typeof saved === "string") {
+                console.info(`BCX: Detected storage location: local storage`);
+                modStorageLocation = StorageLocations.LocalStorage;
+            }
+            if (!saved) {
+                saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+                modStorageLocation = StorageLocations.OnlineSettings;
+            }
             if (typeof saved === "string") {
                 try {
                     const storage = JSON.parse(LZString.decompressFromBase64(saved));
@@ -1184,7 +1226,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         return {
             configure: checkPermissionAccess("log_configure", character),
             delete: checkPermissionAccess("log_delete", character),
-            leaveMessage: checkPermissionAccess("log_leaveMessage", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.userNote),
+            leaveMessage: checkPermissionAccess("log_add_note", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.userNote),
             praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
         };
     }
@@ -1237,7 +1279,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         logConfigChange: LogAccessLevel.protected,
         logDeleted: LogAccessLevel.normal,
         praise: LogAccessLevel.normal,
-        userNote: LogAccessLevel.protected,
+        userNote: LogAccessLevel.normal,
         enteredPublicRoom: LogAccessLevel.none,
         enteredPrivateRoom: LogAccessLevel.none,
         hadOrgasm: LogAccessLevel.none,
@@ -1317,7 +1359,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     [Preset.slave]: [false, AccessLevel.public]
                 }
             });
-            registerPermission("log_leaveMessage", {
+            registerPermission("log_add_note", {
                 name: "Allow to attach notes to the body",
                 category: ModuleCategory.Log,
                 defaults: {
@@ -1459,6 +1501,821 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         reload() {
             this.load();
+        }
+    }
+
+    function j_WardrobeExportSelectionClothes(includeBinds = false) {
+        if (!CharacterAppearanceSelection)
+            return "";
+        const save = CharacterAppearanceSelection.Appearance
+            .filter(a => isCloth(a, true) || (includeBinds && isBind(a)))
+            .map(WardrobeAssetBundle);
+        return LZString.compressToBase64(JSON.stringify(save));
+    }
+    function j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
+        if (typeof data !== "string" || data.length < 1)
+            return "No data";
+        try {
+            if (data[0] !== "[") {
+                const decompressed = LZString.decompressFromBase64(data);
+                if (!decompressed)
+                    return "Bad data";
+                data = decompressed;
+            }
+            data = JSON.parse(data);
+            if (!Array.isArray(data))
+                return "Bad data";
+        }
+        catch (error) {
+            console.warn(error);
+            return "Bad data";
+        }
+        const C = CharacterAppearanceSelection;
+        if (!C) {
+            return "No character";
+        }
+        if (includeBinds && !force && C.Appearance.some(a => { var _a, _b; return isBind(a) && ((_b = (_a = a.Property) === null || _a === void 0 ? void 0 : _a.Effect) === null || _b === void 0 ? void 0 : _b.includes("Lock")); })) {
+            return "Character is bound";
+        }
+        const Allow = (a) => isCloth(a, CharacterAppearanceSelection.ID === 0) || (includeBinds && isBind(a));
+        C.Appearance = C.Appearance.filter(a => !Allow(a));
+        for (const cloth of data) {
+            if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group))
+                continue;
+            const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
+            if (A != null) {
+                CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
+                const item = InventoryGet(C, cloth.Group);
+                if (cloth.Property && item) {
+                    if (item.Property == null)
+                        item.Property = {};
+                    Object.assign(item.Property, cloth.Property);
+                }
+            }
+            else {
+                console.warn(`Clothing not found: `, cloth);
+            }
+        }
+        CharacterRefresh(C);
+        return true;
+    }
+    let j_WardrobeIncludeBinds = false;
+    function PasteListener(ev) {
+        if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+            const data = (ev.clipboardData || window.clipboardData).getData("text");
+            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+        }
+    }
+    class ModuleWardrobe extends BaseModule {
+        load() {
+            const { NMod } = detectOtherMods();
+            hookFunction("AppearanceRun", 0, (args, next) => {
+                next(args);
+                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                    const Y = NMod ? 265 : 125;
+                    DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
+                    DrawButton(1534, Y, 207, 50, "Export", "White", "");
+                    DrawButton(1768, Y, 207, 50, "Import", "White", "");
+                }
+            });
+            hookFunction("AppearanceClick", 0, (args, next) => {
+                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                    const Y = NMod ? 265 : 125;
+                    // Restraints toggle
+                    if (MouseIn(1457, Y, 50, 50)) {
+                        j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+                    }
+                    // Export
+                    if (MouseIn(1534, Y, 207, 50)) {
+                        setTimeout(async () => {
+                            await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
+                            CharacterAppearanceWardrobeText = "Copied to clipboard!";
+                        }, 0);
+                        return;
+                    }
+                    // Import
+                    if (MouseIn(1768, Y, 207, 50)) {
+                        setTimeout(async () => {
+                            if (typeof navigator.clipboard.readText !== "function") {
+                                CharacterAppearanceWardrobeText = "Please press Ctrl+V";
+                                return;
+                            }
+                            const data = await navigator.clipboard.readText();
+                            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+                            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+                        }, 0);
+                        return;
+                    }
+                }
+                next(args);
+            });
+            document.addEventListener("paste", PasteListener);
+        }
+        unload() {
+            document.removeEventListener("paste", PasteListener);
+        }
+    }
+
+    function InvisibilityEarbuds() {
+        var _a;
+        if (((_a = InventoryGet(Player, "ItemEars")) === null || _a === void 0 ? void 0 : _a.Asset.Name) === "BluetoothEarbuds") {
+            InventoryRemove(Player, "ItemEars");
+        }
+        else {
+            const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
+            if (!asset)
+                return;
+            Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
+            Player.Appearance.push({
+                Asset: asset,
+                Color: "Default",
+                Difficulty: -100,
+                Property: {
+                    Type: "Light",
+                    Effect: [],
+                    Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
+                }
+            });
+            CharacterRefresh(Player);
+        }
+        ChatRoomCharacterUpdate(Player);
+    }
+    class ModuleClubUtils extends BaseModule {
+        load() {
+            registerCommandParsed("colour", "<source> <item> <target> - Copies color of certain item from source character to target character", (argv) => {
+                if (argv.length !== 3) {
+                    ChatRoomSendLocal(`Expected three arguments: <source> <item> <target>`);
+                    return false;
+                }
+                const source = Command_selectCharacter(argv[0]);
+                if (typeof source === "string") {
+                    ChatRoomSendLocal(source);
+                    return false;
+                }
+                const target = Command_selectCharacter(argv[2]);
+                if (typeof target === "string") {
+                    ChatRoomSendLocal(target);
+                    return false;
+                }
+                const item = Command_selectWornItem(source, argv[1]);
+                if (typeof item === "string") {
+                    ChatRoomSendLocal(item);
+                    return false;
+                }
+                const targetItem = target.Character.Appearance.find(A => A.Asset === item.Asset);
+                if (!targetItem) {
+                    ChatRoomSendLocal(`Target must be wearing the same item`);
+                    return false;
+                }
+                targetItem.Color = Array.isArray(item.Color) ? item.Color.slice() : item.Color;
+                CharacterRefresh(target.Character);
+                ChatRoomCharacterUpdate(target.Character);
+                return true;
+            }, (argv) => {
+                if (argv.length === 1) {
+                    return Command_selectCharacterAutocomplete(argv[0]);
+                }
+                else if (argv.length === 2) {
+                    const source = Command_selectCharacter(argv[0]);
+                    if (typeof source !== "string") {
+                        return Command_selectWornItemAutocomplete(source, argv[1]);
+                    }
+                }
+                else if (argv.length === 3) {
+                    return Command_selectCharacterAutocomplete(argv[2]);
+                }
+                return [];
+            });
+            registerCommandParsed("allowactivities", "<character> <item> - Modifies item to not block activities", (argv) => {
+                if (argv.length !== 2) {
+                    ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);
+                    return false;
+                }
+                const char = Command_selectCharacter(argv[0]);
+                if (typeof char === "string") {
+                    ChatRoomSendLocal(char);
+                    return false;
+                }
+                const item = Command_selectWornItem(char, argv[1]);
+                if (typeof item === "string") {
+                    ChatRoomSendLocal(item);
+                    return false;
+                }
+                if (!item.Property) {
+                    item.Property = {};
+                }
+                item.Property.AllowActivityOn = AssetGroup.map(A => A.Name);
+                CharacterRefresh(char.Character);
+                ChatRoomCharacterUpdate(char.Character);
+                return true;
+            }, (argv) => {
+                if (argv.length === 1) {
+                    return Command_selectCharacterAutocomplete(argv[0]);
+                }
+                else if (argv.length === 2) {
+                    const source = Command_selectCharacter(argv[0]);
+                    if (typeof source !== "string") {
+                        return Command_selectWornItemAutocomplete(source, argv[1]);
+                    }
+                }
+                return [];
+            });
+        }
+    }
+
+    let antigarble = 0;
+    class ConsoleInterface {
+        get isAllow() {
+            return allowMode;
+        }
+        AllowCheats(allow) {
+            if (typeof allow !== "boolean" && allow !== undefined) {
+                return false;
+            }
+            if (allowMode === allow)
+                return true;
+            if (allow === undefined) {
+                allow = !allowMode;
+            }
+            return setAllowMode(allow);
+        }
+        get isDevel() {
+            return developmentMode;
+        }
+        Devel(devel) {
+            if (typeof devel !== "boolean" && devel !== undefined) {
+                return false;
+            }
+            if (developmentMode === devel)
+                return true;
+            if (devel === undefined) {
+                devel = !developmentMode;
+            }
+            return setDevelopmentMode(devel);
+        }
+        get antigarble() {
+            return antigarble;
+        }
+        set antigarble(value) {
+            if (![0, 1, 2].includes(value)) {
+                throw new Error("Bad antigarble value, expected 0/1/2");
+            }
+            antigarble = value;
+        }
+        j_WardrobeExportSelectionClothes(includeBinds = false) {
+            return j_WardrobeExportSelectionClothes(includeBinds);
+        }
+        j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
+            return j_WardrobeImportSelectionClothes(data, includeBinds, force);
+        }
+        ToggleInvisibilityEarbuds() {
+            return InvisibilityEarbuds();
+        }
+        Unload() {
+            return unload();
+        }
+        get storage() {
+            if (!developmentMode) {
+                return "Development mode required";
+            }
+            return modStorage;
+        }
+        devSendQuery(target, query, data) {
+            if (!developmentMode || typeof target !== "number" || typeof query !== "string")
+                return false;
+            sendQuery(query, data, target).then(result => {
+                console.info(`Query ${query} to ${target} resolved:`, result);
+            }, error => {
+                console.warn(`Query ${query} to ${target} failed:`, error);
+            });
+            return true;
+        }
+        switchStorageLocation(location) {
+            if (typeof location !== "number")
+                return false;
+            switchStorageLocation(location);
+            return true;
+        }
+    }
+    const consoleInterface = Object.freeze(new ConsoleInterface());
+    class ModuleConsole extends BaseModule {
+        load() {
+            window.bcx = consoleInterface;
+            const { NMod } = detectOtherMods();
+            patchFunction("ChatRoomMessage", NMod ? {
+                "A.DynamicDescription(Source).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(Source).toLowerCase() )`,
+                "G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
+            } : {
+                "Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? Asset[A].Description : Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase() )`,
+                "AssetGroup[A].Description.toLowerCase()": `( bcx.isDevel ? AssetGroup[A].Description : AssetGroup[A].Description.toLowerCase() )`
+            });
+            patchFunction("ExtendedItemDraw", {
+                "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
+            });
+            hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+                var _a;
+                if (developmentMode) {
+                    DialogTextDefault = ((_a = args[0].FocusGroup) === null || _a === void 0 ? void 0 : _a.Description) || "";
+                }
+                return next(args);
+            });
+            patchFunction("DialogDrawPoseMenu", {
+                '"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`
+            });
+            hookFunction("DialogDrawExpressionMenu", 0, (args, next) => {
+                next(args);
+                if (developmentMode) {
+                    for (let I = 0; I < DialogFacialExpressions.length; I++) {
+                        const FE = DialogFacialExpressions[I];
+                        const OffsetY = 185 + 100 * I;
+                        if (MouseIn(20, OffsetY, 90, 90)) {
+                            DrawText(JSON.stringify(FE.Group), 300, 950, "White");
+                        }
+                        if (I === DialogFacialExpressionsSelected) {
+                            for (let j = 0; j < FE.ExpressionList.length; j++) {
+                                const EOffsetX = 155 + 100 * (j % 3);
+                                const EOffsetY = 185 + 100 * Math.floor(j / 3);
+                                if (MouseIn(EOffsetX, EOffsetY, 90, 90)) {
+                                    DrawText(JSON.stringify(FE.ExpressionList[j]), 300, 950, "White");
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            DialogSelfMenuOptions.forEach(opt => {
+                if (opt.Name === "Pose") {
+                    opt.IsAvailable = () => true;
+                    opt.Draw = function () { return DialogDrawPoseMenu(); };
+                }
+                else if (opt.Name === "Expression") {
+                    opt.Draw = function () { return DialogDrawExpressionMenu(); };
+                }
+            });
+            hookFunction("SpeechGarble", 0, (args, next) => {
+                if (antigarble === 2)
+                    return args[1];
+                let res = next(args);
+                if (typeof res === "string" && res !== args[1] && antigarble === 1)
+                    res += ` <> ${args[1]}`;
+                return res;
+            });
+        }
+        unload() {
+            delete window.bcx;
+        }
+    }
+
+    const COMMAND_GENERIC_ERROR = `The command failed to execute, likely because you are lacking the permission to give it.`;
+    const commands = new Map();
+    const whisperCommands = new Map();
+    function registerCommand(name, description, callback, autocomplete = null) {
+        name = name.toLocaleLowerCase();
+        if (commands.has(name)) {
+            throw new Error(`Command "${name}" already registered!`);
+        }
+        commands.set(name, {
+            parse: false,
+            callback,
+            autocomplete,
+            description
+        });
+    }
+    function aliasCommand(originalName, alias) {
+        originalName = originalName.toLocaleLowerCase();
+        alias = alias.toLocaleLowerCase();
+        const original = commands.get(originalName);
+        if (!original) {
+            throw new Error(`Command "${originalName}" to alias not found`);
+        }
+        if (original.parse) {
+            commands.set(alias, {
+                parse: true,
+                description: null,
+                callback: original.callback,
+                autocomplete: original.autocomplete
+            });
+        }
+        else {
+            commands.set(alias, {
+                parse: false,
+                description: null,
+                callback: original.callback,
+                autocomplete: original.autocomplete
+            });
+        }
+    }
+    function registerCommandParsed(name, description, callback, autocomplete = null) {
+        name = name.toLocaleLowerCase();
+        if (commands.has(name)) {
+            throw new Error(`Command "${name}" already registered!`);
+        }
+        commands.set(name, {
+            parse: true,
+            callback,
+            autocomplete,
+            description
+        });
+    }
+    function registerWhisperCommand(name, description, callback, autocomplete = null, registerNormal = true) {
+        name = name.toLocaleLowerCase();
+        if (registerNormal) {
+            registerCommandParsed(name, description, (argv) => { callback(argv, getPlayerCharacter(), (msg) => ChatRoomSendLocal(msg)); return true; }, autocomplete ? (argv) => autocomplete(argv, getPlayerCharacter()) : null);
+        }
+        if (whisperCommands.has(name)) {
+            throw new Error(`Command "${name}" already registered!`);
+        }
+        whisperCommands.set(name, {
+            callback,
+            autocomplete,
+            description
+        });
+    }
+    function CommandParse(msg) {
+        msg = msg.trimStart();
+        const commandMatch = /^(\S+)(?:\s|$)(.*)$/.exec(msg);
+        if (!commandMatch) {
+            return ["", ""];
+        }
+        return [(commandMatch[1] || "").toLocaleLowerCase(), commandMatch[2]];
+    }
+    function CommandParseArguments(args) {
+        return [...args.matchAll(/".*?(?:"|$)|'.*?(?:'|$)|[^ ]+/g)]
+            .map(a => a[0])
+            .map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
+    }
+    function CommandHasEmptyArgument(args) {
+        const argv = CommandParseArguments(args);
+        return argv.length === 0 || !args.endsWith(argv[argv.length - 1]);
+    }
+    function CommandQuoteArgument(arg) {
+        if (arg.startsWith(`"`)) {
+            return `'${arg}'`;
+        }
+        else if (arg.startsWith(`'`)) {
+            return `"${arg}"`;
+        }
+        else if (arg.includes(" ")) {
+            return arg.includes('"') ? `'${arg}'` : `"${arg}"`;
+        }
+        return arg;
+    }
+    function RunCommand(msg) {
+        const [command, args] = CommandParse(msg);
+        const commandInfo = commands.get(command);
+        if (!commandInfo) {
+            // Command not found
+            ChatRoomSendLocal(`Unknown command "${command}"\n` +
+                `To see list of valid commands use '.help'`, 15000);
+            return false;
+        }
+        if (commandInfo.parse) {
+            return commandInfo.callback(CommandParseArguments(args));
+        }
+        else {
+            return commandInfo.callback(args);
+        }
+    }
+    function RunWhisperCommand(msg, sender, respond) {
+        const [command, args] = CommandParse(msg);
+        const commandInfo = whisperCommands.get(command);
+        if (!commandInfo) {
+            // Command not found
+            respond(`Unknown command "${command}"\n` +
+                `To see list of valid commands whisper '!help'`);
+            return;
+        }
+        return commandInfo.callback(CommandParseArguments(args), sender, respond);
+    }
+    function CommandAutocomplete(msg) {
+        msg = msg.trimStart();
+        const [command, args] = CommandParse(msg);
+        if (msg.length === command.length) {
+            const prefixes = Array.from(commands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
+            if (prefixes.length === 0)
+                return msg;
+            const best = longestCommonPrefix(prefixes);
+            if (best === msg) {
+                ChatRoomSendLocal("[autocomplete hint]\n" + prefixes.slice().sort().join("\n"), 10000);
+            }
+            return best;
+        }
+        const commandInfo = commands.get(command);
+        if (commandInfo && commandInfo.autocomplete) {
+            if (commandInfo.parse) {
+                const argv = CommandParseArguments(args);
+                if (CommandHasEmptyArgument(args)) {
+                    argv.push("");
+                }
+                const lastOptions = commandInfo.autocomplete(argv);
+                if (lastOptions.length > 0) {
+                    const best = longestCommonPrefix(lastOptions);
+                    if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
+                        ChatRoomSendLocal("[autocomplete hint]\n" + lastOptions.slice().sort().join("\n"), 10000);
+                    }
+                    argv[argv.length - 1] = best;
+                }
+                return `${command} ` +
+                    argv.map(CommandQuoteArgument).join(" ") +
+                    (lastOptions.length === 1 ? " " : "");
+            }
+            else {
+                const possibleArgs = commandInfo.autocomplete(args);
+                if (possibleArgs.length === 0) {
+                    return msg;
+                }
+                const best = longestCommonPrefix(possibleArgs);
+                if (possibleArgs.length > 1 && best === args) {
+                    ChatRoomSendLocal("[autocomplete hint]\n" + possibleArgs.slice().sort().join("\n"), 10000);
+                }
+                return `${command} ${best}`;
+            }
+        }
+        return "";
+    }
+    function WhisperCommandAutocomplete(msg, sender) {
+        msg = msg.trimStart();
+        const [command, args] = CommandParse(msg);
+        if (msg.length === command.length) {
+            const prefixes = Array.from(whisperCommands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
+            if (prefixes.length === 0)
+                return [msg, null];
+            const best = longestCommonPrefix(prefixes);
+            return [best, best === msg ? prefixes.slice().sort() : null];
+        }
+        const commandInfo = whisperCommands.get(command);
+        if (commandInfo && commandInfo.autocomplete) {
+            const argv = CommandParseArguments(args);
+            if (CommandHasEmptyArgument(args)) {
+                argv.push("");
+            }
+            const lastOptions = commandInfo.autocomplete(argv, sender);
+            let opts = null;
+            if (lastOptions.length > 0) {
+                const best = longestCommonPrefix(lastOptions);
+                if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
+                    opts = lastOptions.slice().sort();
+                }
+                argv[argv.length - 1] = best;
+            }
+            return [`${command} ` +
+                    argv.map(CommandQuoteArgument).join(" ") +
+                    (lastOptions.length === 1 ? " " : ""), opts];
+        }
+        return [msg, null];
+    }
+    function Command_selectCharacter(selector) {
+        const characters = getAllCharactersInRoom();
+        if (/^[0-9]+$/.test(selector)) {
+            const MemberNumber = Number.parseInt(selector, 10);
+            const target = characters.find(c => c.MemberNumber === MemberNumber);
+            if (!target) {
+                return `Player #${MemberNumber} not found in the room.`;
+            }
+            return target;
+        }
+        let targets = characters.filter(c => c.Name === selector);
+        if (targets.length === 0)
+            targets = characters.filter(c => c.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 1) {
+            return targets[0];
+        }
+        else if (targets.length === 0) {
+            return `Player "${selector}" not found in the room.`;
+        }
+        else {
+            return `Multiple players match "${selector}". Please use Member Number instead.`;
+        }
+    }
+    function Command_selectCharacterMemberNumber(selector, allowNotPresent = true) {
+        const character = Command_selectCharacter(selector);
+        if (typeof character === "string" && allowNotPresent && /^[0-9]+$/.test(selector)) {
+            return Number.parseInt(selector, 10);
+        }
+        return typeof character === "string" ? character : character.MemberNumber;
+    }
+    function Command_selectCharacterAutocomplete(selector) {
+        const characters = getAllCharactersInRoom();
+        if (/^[0-9]+$/.test(selector)) {
+            return characters.map(c => { var _a; return (_a = c.MemberNumber) === null || _a === void 0 ? void 0 : _a.toString(10); }).filter(n => n != null && n.startsWith(selector));
+        }
+        return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+    }
+    function Command_selectWornItem(character, selector) {
+        const items = character.Character.Appearance.filter(isBind);
+        let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 0)
+            targets = items.filter(A => getVisibleGroupName(A.Asset.Group).toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 0)
+            targets = items.filter(A => A.Asset.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 0)
+            targets = items.filter(A => A.Asset.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 1) {
+            return targets[0];
+        }
+        else if (targets.length === 0) {
+            return `Item "${selector}" not found on character ${character}.`;
+        }
+        else {
+            return `Multiple items match, please use group name instead. (eg. arms)`;
+        }
+    }
+    function Command_selectWornItemAutocomplete(character, selector) {
+        const items = character.Character.Appearance.filter(isBind);
+        let possible = arrayUnique(items.map(A => getVisibleGroupName(A.Asset.Group))
+            .concat(items.map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+        if (possible.length === 0) {
+            possible = arrayUnique(items.map(A => A.Asset.Group.Name)
+                .concat(items.map(A => A.Asset.Name))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+        }
+        return possible;
+    }
+    function Command_selectGroup(selector, character) {
+        let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length === 0)
+            targets = AssetGroup.filter(G => getVisibleGroupName(G).toLocaleLowerCase() === selector.toLocaleLowerCase());
+        if (targets.length > 1) {
+            return `Multiple groups match "${selector}", please report this as a bug.`;
+        }
+        else if (targets.length === 1) {
+            return targets[0];
+        }
+        else if (character) {
+            const item = Command_selectWornItem(character, selector);
+            return typeof item === "string" ? item : item.Asset.Group;
+        }
+        else {
+            return `Unknown group "${selector}".`;
+        }
+    }
+    function Command_selectGroupAutocomplete(selector, character) {
+        const items = character ? character.Character.Appearance : [];
+        let possible = arrayUnique(AssetGroup.map(G => getVisibleGroupName(G))
+            .concat(items.map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+        if (possible.length === 0) {
+            possible = arrayUnique(AssetGroup.map(G => G.Name)
+                .concat(items.map(A => A.Asset.Name))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+        }
+        return possible;
+    }
+    class ModuleCommands extends BaseModule {
+        load() {
+            hookFunction("ChatRoomSendChat", 10, (args, next) => {
+                const chat = document.getElementById("InputChat");
+                if (chat && !firstTimeInit) {
+                    const msg = chat.value.trim();
+                    if (msg.startsWith("..")) {
+                        chat.value = msg.substr(1);
+                    }
+                    else if (msg.startsWith(".")) {
+                        if (RunCommand(msg.substr(1))) {
+                            chat.value = "";
+                        }
+                        return;
+                    }
+                }
+                return next(args);
+            });
+            hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+                var _a, _b;
+                const chat = document.getElementById("InputChat");
+                // Tab for command completion
+                if (KeyPress === 9 &&
+                    chat &&
+                    chat.value.startsWith(".") &&
+                    !chat.value.startsWith("..") &&
+                    !firstTimeInit) {
+                    const e = (_a = args[0]) !== null && _a !== void 0 ? _a : event;
+                    e === null || e === void 0 ? void 0 : e.preventDefault();
+                    chat.value = "." + CommandAutocomplete(chat.value.substr(1));
+                }
+                else if (KeyPress === 9 &&
+                    ChatRoomTargetMemberNumber != null &&
+                    chat &&
+                    chat.value.startsWith("!") &&
+                    !chat.value.startsWith("!!") &&
+                    !firstTimeInit) {
+                    const currentValue = chat.value;
+                    const currentTarget = ChatRoomTargetMemberNumber;
+                    const e = (_b = args[0]) !== null && _b !== void 0 ? _b : event;
+                    e === null || e === void 0 ? void 0 : e.preventDefault();
+                    sendQuery("commandHint", currentValue, currentTarget).then(result => {
+                        if (chat.value !== currentValue || ChatRoomTargetMemberNumber !== currentTarget)
+                            return;
+                        if (!Array.isArray(result) ||
+                            result.length !== 2 ||
+                            typeof result[0] !== "string" ||
+                            (result[1] !== null &&
+                                (!Array.isArray(result[1]) ||
+                                    result[1].some(i => typeof i !== "string")))) {
+                            throw new Error("Bad data");
+                        }
+                        chat.value = result[0];
+                        if (result[1]) {
+                            ChatRoomSendLocal(`[remote autocomplete hint]\n` + result[1].join('\n'), 10000, currentTarget);
+                        }
+                    }, () => { });
+                }
+                else {
+                    return next(args);
+                }
+            });
+            hookFunction("ChatRoomMessage", 9, (args, next) => {
+                const data = args[0];
+                const sender = typeof data.Sender === "number" && getChatroomCharacter(data.Sender);
+                if ((data === null || data === void 0 ? void 0 : data.Type) === "Whisper" &&
+                    typeof data.Content === "string" &&
+                    data.Content.startsWith("!") &&
+                    !data.Content.startsWith("!!") &&
+                    sender &&
+                    sender.hasAccessToPlayer()) {
+                    if (data.Sender === Player.MemberNumber || firstTimeInit)
+                        return next(args);
+                    console.debug(`BCX: Console command from ${sender}: ${data.Content}`);
+                    RunWhisperCommand(data.Content.substr(1), sender, (msg) => {
+                        ServerSend("ChatRoomChat", {
+                            Content: `[BCX]\n${msg}`,
+                            Type: "Whisper",
+                            Target: sender.MemberNumber
+                        });
+                    });
+                    return;
+                }
+                return next(args);
+            });
+            queryHandlers.commandHint = (sender, resolve, data) => {
+                if (typeof data !== "string" || !data.startsWith("!") || data.startsWith("!!")) {
+                    return resolve(false);
+                }
+                const character = getChatroomCharacter(sender);
+                if (!character) {
+                    return resolve(false);
+                }
+                const result = WhisperCommandAutocomplete(data.substr(1), character);
+                result[0] = '!' + result[0];
+                resolve(true, result);
+            };
+            registerCommand("help", "- display this help [alias: . ]", () => {
+                ChatRoomSendLocal(`Available commands:\n` +
+                    Array.from(commands.entries())
+                        .filter(c => c[1].description !== null)
+                        .map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
+                        .sort()
+                        .join("\n"));
+                return true;
+            });
+            aliasCommand("help", "");
+            registerCommand("action", "- send custom (action) [alias: .a ]", (msg) => {
+                ChatRoomActionMessage(msg);
+                return true;
+            });
+            aliasCommand("action", "a");
+            registerWhisperCommand("help", "- display this help", (argv, sender, respond) => {
+                respond(`Available commands:\n` +
+                    Array.from(whisperCommands.entries())
+                        .filter(c => c[1].description !== null)
+                        .map(c => `!${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
+                        .sort()
+                        .join("\n"));
+                return true;
+            }, null, false);
+            registerWhisperCommand("hi", "- Make the character say hi", (argv, sender, respond) => {
+                ServerSend("ChatRoomChat", {
+                    Content: `Hi ${sender.Name}!`,
+                    Type: "Chat",
+                    Target: sender.MemberNumber
+                });
+                return true;
+            });
+            const ANTIGARBLE_LEVELS = {
+                "0": 0,
+                "1": 1,
+                "2": 2,
+                "normal": 0,
+                "both": 1,
+                "ungarbled": 2
+            };
+            const ANTIGARBLE_LEVEL_NAMES = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
+            registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
+                const val = ANTIGARBLE_LEVELS[value || ""];
+                if (val !== undefined) {
+                    consoleInterface.antigarble = val;
+                    ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
+                    return true;
+                }
+                else {
+                    ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
+                    return false;
+                }
+            }, value => {
+                return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
+            });
+        }
+        unload() {
+            commands.clear();
         }
     }
 
@@ -1650,7 +2507,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
     function getPlayerRoleData(character) {
         var _a, _b;
-        const loadNames = (memberNumber) => { var _a, _b; return [memberNumber, (_b = (_a = Player.FriendNames) === null || _a === void 0 ? void 0 : _a.get(memberNumber)) !== null && _b !== void 0 ? _b : ""]; };
+        const loadNames = (memberNumber) => [memberNumber, getCharacterName(memberNumber, "")];
         return {
             mistresses: ((_a = modStorage.mistresses) !== null && _a !== void 0 ? _a : []).map(loadNames),
             owners: ((_b = modStorage.owners) !== null && _b !== void 0 ? _b : []).map(loadNames),
@@ -1869,6 +2726,159 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 resolve(true, editRole(data.type, data.action, data.target, character));
             };
+            registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
+                const subcommand = (argv[0] || "").toLocaleLowerCase();
+                if (subcommand === "list") {
+                    const accessLevel = getCharacterAccessLevel(sender);
+                    if (accessLevel > AccessLevel.mistress) {
+                        return respond(COMMAND_GENERIC_ERROR);
+                    }
+                    const data = getPlayerRoleData(sender);
+                    let res = "Full list:";
+                    for (const owner of data.owners) {
+                        res += `\nOwner ${owner[1] || "[unknown name]"} (${owner[0]})`;
+                    }
+                    for (const mistress of data.mistresses) {
+                        res += `\nMistress ${mistress[1] || "[unknown name]"} (${mistress[0]})`;
+                    }
+                    respond(res);
+                }
+                else if (subcommand === "owner" || subcommand === "mistress") {
+                    const subcommand2 = (argv[1] || "").toLocaleLowerCase();
+                    if (subcommand2 !== "add" && subcommand2 !== "remove") {
+                        return respond(`Expected either 'add' or 'remove', got '${subcommand2}'`);
+                    }
+                    if (!argv[2]) {
+                        return respond(`Missing required argument: target`);
+                    }
+                    const target = Command_selectCharacterMemberNumber(argv[2], true);
+                    if (typeof target === "string") {
+                        return respond(target);
+                    }
+                    respond(editRole(subcommand, subcommand2, target, sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
+                }
+                else {
+                    respond(`!role usage:\n` +
+                        `!role list - List all current owners/mistresses\n` +
+                        `!role owner <add/remove> <target> - Add or remove owner\n` +
+                        `!role mistress <add/remove> <target> - Add or remove mistress`);
+                }
+            }, (argv, sender) => {
+                if (argv.length <= 1) {
+                    const c = argv[0].toLocaleLowerCase();
+                    return ["list", "owner", "mistress"].filter(i => i.startsWith(c));
+                }
+                const subcommand = argv[0].toLocaleLowerCase();
+                if (subcommand === "owner" || subcommand === "mistress") {
+                    if (argv.length === 2) {
+                        const c = argv[1].toLocaleLowerCase();
+                        return ["add", "remove"].filter(i => i.startsWith(c));
+                    }
+                    const subcommand2 = argv[1].toLocaleLowerCase();
+                    if (subcommand2 === "add" || subcommand2 === "remove") {
+                        return Command_selectCharacterAutocomplete(argv[2]);
+                    }
+                }
+                return [];
+            });
+            registerWhisperCommand("permission", "- Manage permissions", (argv, sender, respond) => {
+                const subcommand = (argv[0] || "").toLocaleLowerCase();
+                const permissionsList = getPlayerPermissionSettings();
+                if (subcommand === "list") {
+                    const categories = new Map();
+                    let hasAny = false;
+                    const filter = argv.slice(1).map(v => v.toLocaleLowerCase());
+                    for (const [k, v] of Object.entries(permissionsList)) {
+                        if (filter.some(i => !MODULE_NAMES[v.category].toLocaleLowerCase().includes(i) &&
+                            !v.name.toLocaleLowerCase().includes(i) &&
+                            !k.toLocaleLowerCase().includes(i)))
+                            continue;
+                        let permdata = categories.get(v.category);
+                        if (!permdata) {
+                            categories.set(v.category, permdata = {});
+                        }
+                        hasAny = true;
+                        permdata[k] = v;
+                    }
+                    if (!hasAny) {
+                        return respond("No permission matches the filter!");
+                    }
+                    for (const [category, data] of Array.from(categories.entries()).sort((a, b) => a[0] - b[0])) {
+                        let result = `List of ${MODULE_NAMES[category]} module permissions:`;
+                        for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+                            result += `\n${k}:\n  ${v.name} - ${v.self ? "self" : "not self"}, ${getPermissionMinDisplayText(v.min, getPlayerCharacter())}`;
+                        }
+                        respond(result);
+                        result = "";
+                    }
+                }
+                else if (permissionsList[subcommand] !== undefined) {
+                    const subcommand2 = (argv[1] || "").toLocaleLowerCase();
+                    let subcommand3 = (argv[2] || "").toLocaleLowerCase();
+                    if (subcommand2 === "") {
+                        const v = permissionsList[subcommand];
+                        respond(`${subcommand}:\n  ${v.name} - ${v.self ? "self" : "not self"}, ${getPermissionMinDisplayText(v.min, getPlayerCharacter())}`);
+                    }
+                    else if (subcommand2 === "selfaccess") {
+                        if (subcommand3 === "yes" || subcommand3 === "no") {
+                            respond(setPermissionSelfAccess(subcommand, subcommand3 === "yes", sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
+                        }
+                        else {
+                            respond(`Expected 'selfaccess yes' or 'selfaccess no'`);
+                        }
+                    }
+                    else if (subcommand2 === "lowestaccess") {
+                        if (subcommand3 === Player.Name.toLocaleLowerCase()) {
+                            subcommand3 = "self";
+                        }
+                        const level = AccessLevel[subcommand3];
+                        if (typeof level === "number") {
+                            respond(setPermissionMinAccess(subcommand, level, sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
+                        }
+                        else {
+                            respond(`Unknown AccessLevel '${subcommand3}';\n` +
+                                `expected one of: ${Player.Name}, clubowner, owner, lover, mistress, whitelist, friend, public`);
+                        }
+                    }
+                    else {
+                        respond(`Unknown setting '${subcommand2}'; expected 'selfaccess' or 'lowestaccess'`);
+                    }
+                }
+                else if (subcommand !== "help") {
+                    respond(`Unknown permission '${subcommand}'.\n` +
+                        `To get list of permissions use '!permission list'`);
+                }
+                else {
+                    respond(`!permission usage:\n` +
+                        `!permission list [filter] - List all permissions and their current settings\n` +
+                        `!permission <name> selfaccess <yes|no> - Gives ${Player.Name} permission or revokes it\n` +
+                        `!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the selected permission`);
+                }
+            }, (argv, sender) => {
+                const permissionNames = Object.keys(getPlayerPermissionSettings());
+                if (argv.length <= 1) {
+                    const c = argv[0].toLocaleLowerCase();
+                    return ["list", ...permissionNames].filter(i => i.startsWith(c));
+                }
+                const subcommand = argv[0].toLocaleLowerCase();
+                if (permissionNames.includes(subcommand)) {
+                    const subcommand2 = argv[1].toLocaleLowerCase();
+                    const subcommand3 = (argv[2] || "").toLocaleLowerCase();
+                    if (argv.length === 2) {
+                        return ["selfaccess", "lowestaccess"].filter(i => i.startsWith(subcommand2));
+                    }
+                    else if (argv.length === 3) {
+                        if (subcommand2 === "selfaccess") {
+                            return ["yes", "no"].filter(i => i.startsWith(subcommand3));
+                        }
+                        else if (subcommand2 === "lowestaccess") {
+                            return [Player.Name.toLocaleLowerCase(), "self", "clubowner", "owner", "lover", "mistress", "whitelist", "friend", "public"]
+                                .filter(i => i.startsWith(subcommand3));
+                        }
+                    }
+                }
+                return [];
+            });
         }
         setDefultPermissionsForPreset(preset) {
             for (const permission of permissions.values()) {
@@ -3213,7 +4223,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         rebuildList() {
             if (!this.active)
                 return;
-            const categories = new Map();
             this.permList = [];
             let Input = document.getElementById("BCX_PermissionsFilter");
             if (this.permissionData === null) {
@@ -3239,6 +4248,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
                 false;
             const isPlayer = this.myAccessLevel === AccessLevel.self;
+            const categories = new Map();
             for (const [k, v] of Object.entries(this.permissionData)) {
                 let permdata = categories.get(v.category);
                 if (filter.some(i => !MODULE_NAMES[v.category].toLocaleLowerCase().includes(i) &&
@@ -4847,639 +5857,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         delete window.BCX_Loaded;
         console.log("BCX: Unloaded.");
         return true;
-    }
-
-    function j_WardrobeExportSelectionClothes(includeBinds = false) {
-        if (!CharacterAppearanceSelection)
-            return "";
-        const save = CharacterAppearanceSelection.Appearance
-            .filter(a => isCloth(a, true) || (includeBinds && isBind(a)))
-            .map(WardrobeAssetBundle);
-        return LZString.compressToBase64(JSON.stringify(save));
-    }
-    function j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
-        if (typeof data !== "string" || data.length < 1)
-            return "No data";
-        try {
-            if (data[0] !== "[") {
-                const decompressed = LZString.decompressFromBase64(data);
-                if (!decompressed)
-                    return "Bad data";
-                data = decompressed;
-            }
-            data = JSON.parse(data);
-            if (!Array.isArray(data))
-                return "Bad data";
-        }
-        catch (error) {
-            console.warn(error);
-            return "Bad data";
-        }
-        const C = CharacterAppearanceSelection;
-        if (!C) {
-            return "No character";
-        }
-        if (includeBinds && !force && C.Appearance.some(a => { var _a, _b; return isBind(a) && ((_b = (_a = a.Property) === null || _a === void 0 ? void 0 : _a.Effect) === null || _b === void 0 ? void 0 : _b.includes("Lock")); })) {
-            return "Character is bound";
-        }
-        const Allow = (a) => isCloth(a, CharacterAppearanceSelection.ID === 0) || (includeBinds && isBind(a));
-        C.Appearance = C.Appearance.filter(a => !Allow(a));
-        for (const cloth of data) {
-            if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group))
-                continue;
-            const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
-            if (A != null) {
-                CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
-                const item = InventoryGet(C, cloth.Group);
-                if (cloth.Property && item) {
-                    if (item.Property == null)
-                        item.Property = {};
-                    Object.assign(item.Property, cloth.Property);
-                }
-            }
-            else {
-                console.warn(`Clothing not found: `, cloth);
-            }
-        }
-        CharacterRefresh(C);
-        return true;
-    }
-    let j_WardrobeIncludeBinds = false;
-    function PasteListener(ev) {
-        if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
-            ev.preventDefault();
-            ev.stopImmediatePropagation();
-            const data = (ev.clipboardData || window.clipboardData).getData("text");
-            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
-        }
-    }
-    class ModuleWardrobe extends BaseModule {
-        load() {
-            const { NMod } = detectOtherMods();
-            hookFunction("AppearanceRun", 0, (args, next) => {
-                next(args);
-                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-                    const Y = NMod ? 265 : 125;
-                    DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
-                    DrawButton(1534, Y, 207, 50, "Export", "White", "");
-                    DrawButton(1768, Y, 207, 50, "Import", "White", "");
-                }
-            });
-            hookFunction("AppearanceClick", 0, (args, next) => {
-                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-                    const Y = NMod ? 265 : 125;
-                    // Restraints toggle
-                    if (MouseIn(1457, Y, 50, 50)) {
-                        j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
-                    }
-                    // Export
-                    if (MouseIn(1534, Y, 207, 50)) {
-                        setTimeout(async () => {
-                            await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
-                            CharacterAppearanceWardrobeText = "Copied to clipboard!";
-                        }, 0);
-                        return;
-                    }
-                    // Import
-                    if (MouseIn(1768, Y, 207, 50)) {
-                        setTimeout(async () => {
-                            if (typeof navigator.clipboard.readText !== "function") {
-                                CharacterAppearanceWardrobeText = "Please press Ctrl+V";
-                                return;
-                            }
-                            const data = await navigator.clipboard.readText();
-                            const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-                            CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
-                        }, 0);
-                        return;
-                    }
-                }
-                next(args);
-            });
-            document.addEventListener("paste", PasteListener);
-        }
-        unload() {
-            document.removeEventListener("paste", PasteListener);
-        }
-    }
-
-    let antigarble = 0;
-    class ConsoleInterface {
-        get isAllow() {
-            return allowMode;
-        }
-        AllowCheats(allow) {
-            if (typeof allow !== "boolean" && allow !== undefined) {
-                return false;
-            }
-            if (allowMode === allow)
-                return true;
-            if (allow === undefined) {
-                allow = !allowMode;
-            }
-            return setAllowMode(allow);
-        }
-        get isDevel() {
-            return developmentMode;
-        }
-        Devel(devel) {
-            if (typeof devel !== "boolean" && devel !== undefined) {
-                return false;
-            }
-            if (developmentMode === devel)
-                return true;
-            if (devel === undefined) {
-                devel = !developmentMode;
-            }
-            return setDevelopmentMode(devel);
-        }
-        get antigarble() {
-            return antigarble;
-        }
-        set antigarble(value) {
-            if (![0, 1, 2].includes(value)) {
-                throw new Error("Bad antigarble value, expected 0/1/2");
-            }
-            antigarble = value;
-        }
-        j_WardrobeExportSelectionClothes(includeBinds = false) {
-            return j_WardrobeExportSelectionClothes(includeBinds);
-        }
-        j_WardrobeImportSelectionClothes(data, includeBinds, force = false) {
-            return j_WardrobeImportSelectionClothes(data, includeBinds, force);
-        }
-        ToggleInvisibilityEarbuds() {
-            return InvisibilityEarbuds();
-        }
-        Unload() {
-            return unload();
-        }
-        get storage() {
-            if (!developmentMode) {
-                return "Development mode required";
-            }
-            return modStorage;
-        }
-        devSendQuery(target, query, data) {
-            if (!developmentMode || typeof target !== "number" || typeof query !== "string")
-                return false;
-            sendQuery(query, data, target).then(result => {
-                console.info(`Query ${query} to ${target} resolved:`, result);
-            }, error => {
-                console.warn(`Query ${query} to ${target} failed:`, error);
-            });
-            return true;
-        }
-    }
-    const consoleInterface = Object.freeze(new ConsoleInterface());
-    class ModuleConsole extends BaseModule {
-        load() {
-            window.bcx = consoleInterface;
-            const { NMod } = detectOtherMods();
-            patchFunction("ChatRoomMessage", NMod ? {
-                "A.DynamicDescription(Source).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(Source).toLowerCase() )`,
-                "G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
-            } : {
-                "Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? Asset[A].Description : Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase() )`,
-                "AssetGroup[A].Description.toLowerCase()": `( bcx.isDevel ? AssetGroup[A].Description : AssetGroup[A].Description.toLowerCase() )`
-            });
-            patchFunction("ExtendedItemDraw", {
-                "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
-            });
-            hookFunction("DialogDrawItemMenu", 0, (args, next) => {
-                var _a;
-                if (developmentMode) {
-                    DialogTextDefault = ((_a = args[0].FocusGroup) === null || _a === void 0 ? void 0 : _a.Description) || "";
-                }
-                return next(args);
-            });
-            patchFunction("DialogDrawPoseMenu", {
-                '"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`
-            });
-            hookFunction("DialogDrawExpressionMenu", 0, (args, next) => {
-                next(args);
-                if (developmentMode) {
-                    for (let I = 0; I < DialogFacialExpressions.length; I++) {
-                        const FE = DialogFacialExpressions[I];
-                        const OffsetY = 185 + 100 * I;
-                        if (MouseIn(20, OffsetY, 90, 90)) {
-                            DrawText(JSON.stringify(FE.Group), 300, 950, "White");
-                        }
-                        if (I === DialogFacialExpressionsSelected) {
-                            for (let j = 0; j < FE.ExpressionList.length; j++) {
-                                const EOffsetX = 155 + 100 * (j % 3);
-                                const EOffsetY = 185 + 100 * Math.floor(j / 3);
-                                if (MouseIn(EOffsetX, EOffsetY, 90, 90)) {
-                                    DrawText(JSON.stringify(FE.ExpressionList[j]), 300, 950, "White");
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            DialogSelfMenuOptions.forEach(opt => {
-                if (opt.Name === "Pose") {
-                    opt.IsAvailable = () => true;
-                    opt.Draw = function () { return DialogDrawPoseMenu(); };
-                }
-                else if (opt.Name === "Expression") {
-                    opt.Draw = function () { return DialogDrawExpressionMenu(); };
-                }
-            });
-            hookFunction("SpeechGarble", 0, (args, next) => {
-                if (antigarble === 2)
-                    return args[1];
-                let res = next(args);
-                if (typeof res === "string" && res !== args[1] && antigarble === 1)
-                    res += ` <> ${args[1]}`;
-                return res;
-            });
-        }
-        unload() {
-            delete window.bcx;
-        }
-    }
-
-    const commands = new Map();
-    function registerCommand(name, description, callback, autocomplete = null) {
-        name = name.toLocaleLowerCase();
-        if (commands.has(name)) {
-            throw new Error(`Command "${name}" already registered!`);
-        }
-        commands.set(name, {
-            parse: false,
-            callback,
-            autocomplete,
-            description
-        });
-    }
-    function aliasCommand(originalName, alias) {
-        originalName = originalName.toLocaleLowerCase();
-        alias = alias.toLocaleLowerCase();
-        const original = commands.get(originalName);
-        if (!original) {
-            throw new Error(`Command "${originalName}" to alias not found`);
-        }
-        if (original.parse) {
-            commands.set(alias, {
-                parse: true,
-                description: null,
-                callback: original.callback,
-                autocomplete: original.autocomplete
-            });
-        }
-        else {
-            commands.set(alias, {
-                parse: false,
-                description: null,
-                callback: original.callback,
-                autocomplete: original.autocomplete
-            });
-        }
-    }
-    function registerCommandParsed(name, description, callback, autocomplete = null) {
-        name = name.toLocaleLowerCase();
-        if (commands.has(name)) {
-            throw new Error(`Command "${name}" already registered!`);
-        }
-        commands.set(name, {
-            parse: true,
-            callback,
-            autocomplete,
-            description
-        });
-    }
-    function CommandParse(msg) {
-        msg = msg.trimStart();
-        const commandMatch = /^(\S+)(?:\s|$)(.*)$/.exec(msg);
-        if (!commandMatch) {
-            return ["", ""];
-        }
-        return [(commandMatch[1] || "").toLocaleLowerCase(), commandMatch[2]];
-    }
-    function CommandParseArguments(args) {
-        return [...args.matchAll(/".*?(?:"|$)|'.*?(?:'|$)|[^ ]+/g)]
-            .map(a => a[0])
-            .map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
-    }
-    function CommandHasEmptyArgument(args) {
-        const argv = CommandParseArguments(args);
-        return argv.length === 0 || !args.endsWith(argv[argv.length - 1]);
-    }
-    function CommandQuoteArgument(arg) {
-        if (arg.startsWith(`"`)) {
-            return `'${arg}'`;
-        }
-        else if (arg.startsWith(`'`)) {
-            return `"${arg}"`;
-        }
-        else if (arg.includes(" ")) {
-            return arg.includes('"') ? `'${arg}'` : `"${arg}"`;
-        }
-        return arg;
-    }
-    function RunCommand(msg) {
-        const [command, args] = CommandParse(msg);
-        const commandInfo = commands.get(command);
-        if (!commandInfo) {
-            // Command not found
-            ChatRoomSendLocal(`Unknown command "${command}"\n` +
-                `To see list of valid commands whisper '!help'`, 15000);
-            return false;
-        }
-        if (commandInfo.parse) {
-            return commandInfo.callback(CommandParseArguments(args));
-        }
-        else {
-            return commandInfo.callback(args);
-        }
-    }
-    function CommandAutocomplete(msg) {
-        msg = msg.trimStart();
-        const [command, args] = CommandParse(msg);
-        if (msg.length === command.length) {
-            const prefixes = Array.from(commands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
-            if (prefixes.length === 0)
-                return msg;
-            const best = longestCommonPrefix(prefixes);
-            if (best === msg) {
-                ChatRoomSendLocal(prefixes.slice().sort().join("\n"), 10000);
-            }
-            return best;
-        }
-        const commandInfo = commands.get(command);
-        if (commandInfo && commandInfo.autocomplete) {
-            if (commandInfo.parse) {
-                const argv = CommandParseArguments(args);
-                if (CommandHasEmptyArgument(args)) {
-                    argv.push("");
-                }
-                const lastOptions = commandInfo.autocomplete(argv);
-                if (lastOptions.length > 0) {
-                    const best = longestCommonPrefix(lastOptions);
-                    if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
-                        ChatRoomSendLocal(lastOptions.slice().sort().join("\n"), 10000);
-                    }
-                    argv[argv.length - 1] = best;
-                }
-                return `${command} ` +
-                    argv.map(CommandQuoteArgument).join(" ") +
-                    (lastOptions.length === 1 ? " " : "");
-            }
-            else {
-                const possibleArgs = commandInfo.autocomplete(args);
-                if (possibleArgs.length === 0) {
-                    return msg;
-                }
-                const best = longestCommonPrefix(possibleArgs);
-                if (possibleArgs.length > 1 && best === args) {
-                    ChatRoomSendLocal(possibleArgs.slice().sort().join("\n"), 10000);
-                }
-                return `${command} ${best}`;
-            }
-        }
-        return "";
-    }
-    function Command_selectCharacter(selector) {
-        const characters = getAllCharactersInRoom();
-        if (/^[0-9]+$/.test(selector)) {
-            const MemberNumber = Number.parseInt(selector, 10);
-            const target = characters.find(c => c.MemberNumber === MemberNumber);
-            if (!target) {
-                return `Player #${MemberNumber} not found in the room.`;
-            }
-            return target;
-        }
-        let targets = characters.filter(c => c.Name === selector);
-        if (targets.length === 0)
-            targets = characters.filter(c => c.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 1) {
-            return targets[0];
-        }
-        else if (targets.length === 0) {
-            return `Player "${selector}" not found in the room.`;
-        }
-        else {
-            return `Multiple players match "${selector}". Please use Member Number instead.`;
-        }
-    }
-    function Command_selectCharacterAutocomplete(selector) {
-        const characters = getAllCharactersInRoom();
-        if (/^[0-9]+$/.test(selector)) {
-            return characters.map(c => { var _a; return (_a = c.MemberNumber) === null || _a === void 0 ? void 0 : _a.toString(10); }).filter(n => n != null && n.startsWith(selector));
-        }
-        return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
-    }
-    function Command_selectWornItem(character, selector) {
-        const items = character.Character.Appearance.filter(isBind);
-        let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 0)
-            targets = items.filter(A => A.Asset.Group.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 0)
-            targets = items.filter(A => A.Asset.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 0)
-            targets = items.filter(A => A.Asset.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
-        if (targets.length === 1) {
-            return targets[0];
-        }
-        else if (targets.length === 0) {
-            return `Item "${selector}" not found on character ${character}.`;
-        }
-        else {
-            return `Multiple items match, please use group name instead. (eg. arms)`;
-        }
-    }
-    function Command_selectWornItemAutocomplete(character, selector) {
-        const items = character.Character.Appearance.filter(isBind);
-        let possible = arrayUnique(items.map(A => A.Asset.Group.Description)
-            .concat(items.map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
-        if (possible.length === 0) {
-            possible = arrayUnique(items.map(A => A.Asset.Group.Name)
-                .concat(items.map(A => A.Asset.Name))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
-        }
-        return possible;
-    }
-    class ModuleCommands extends BaseModule {
-        load() {
-            hookFunction("ChatRoomSendChat", 10, (args, next) => {
-                const chat = document.getElementById("InputChat");
-                if (chat && !firstTimeInit) {
-                    const msg = chat.value.trim();
-                    if (msg.startsWith("..")) {
-                        chat.value = msg.substr(1);
-                    }
-                    else if (msg.startsWith(".")) {
-                        if (RunCommand(msg.substr(1))) {
-                            chat.value = "";
-                        }
-                        return;
-                    }
-                }
-                return next(args);
-            });
-            hookFunction("ChatRoomKeyDown", 10, (args, next) => {
-                var _a;
-                const chat = document.getElementById("InputChat");
-                // Tab for command completion
-                if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..") && !firstTimeInit) {
-                    const e = (_a = args[0]) !== null && _a !== void 0 ? _a : event;
-                    e === null || e === void 0 ? void 0 : e.preventDefault();
-                    chat.value = "." + CommandAutocomplete(chat.value.substr(1));
-                }
-                else {
-                    return next(args);
-                }
-            });
-            registerCommand("help", "- display this help [alias: . ]", () => {
-                ChatRoomSendLocal(`Available commands:\n` +
-                    Array.from(commands.entries())
-                        .filter(c => c[1].description !== null)
-                        .map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
-                        .sort()
-                        .join("\n"));
-                return true;
-            });
-            aliasCommand("help", "");
-            registerCommand("action", "- send custom (action) [alias: .a ]", (msg) => {
-                ChatRoomActionMessage(msg);
-                return true;
-            });
-            aliasCommand("action", "a");
-            const ANTIGARBLE_LEVELS = {
-                "0": 0,
-                "1": 1,
-                "2": 2,
-                "normal": 0,
-                "both": 1,
-                "ungarbled": 2
-            };
-            const ANTIGARBLE_LEVEL_NAMES = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
-            registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
-                const val = ANTIGARBLE_LEVELS[value || ""];
-                if (val !== undefined) {
-                    consoleInterface.antigarble = val;
-                    ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
-                    return true;
-                }
-                else {
-                    ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
-                    return false;
-                }
-            }, value => {
-                return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
-            });
-        }
-        unload() {
-            commands.clear();
-        }
-    }
-
-    function InvisibilityEarbuds() {
-        var _a;
-        if (((_a = InventoryGet(Player, "ItemEars")) === null || _a === void 0 ? void 0 : _a.Asset.Name) === "BluetoothEarbuds") {
-            InventoryRemove(Player, "ItemEars");
-        }
-        else {
-            const asset = Asset.find(A => A.Name === "BluetoothEarbuds");
-            if (!asset)
-                return;
-            Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
-            Player.Appearance.push({
-                Asset: asset,
-                Color: "Default",
-                Difficulty: -100,
-                Property: {
-                    Type: "Light",
-                    Effect: [],
-                    Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars")
-                }
-            });
-            CharacterRefresh(Player);
-        }
-        ChatRoomCharacterUpdate(Player);
-    }
-    class ModuleClubUtils extends BaseModule {
-        load() {
-            registerCommandParsed("colour", "<source> <item> <target> - Copies color of certain item from source character to target character", (argv) => {
-                if (argv.length !== 3) {
-                    ChatRoomSendLocal(`Expected three arguments: <source> <item> <target>`);
-                    return false;
-                }
-                const source = Command_selectCharacter(argv[0]);
-                if (typeof source === "string") {
-                    ChatRoomSendLocal(source);
-                    return false;
-                }
-                const target = Command_selectCharacter(argv[2]);
-                if (typeof target === "string") {
-                    ChatRoomSendLocal(target);
-                    return false;
-                }
-                const item = Command_selectWornItem(source, argv[1]);
-                if (typeof item === "string") {
-                    ChatRoomSendLocal(item);
-                    return false;
-                }
-                const targetItem = target.Character.Appearance.find(A => A.Asset === item.Asset);
-                if (!targetItem) {
-                    ChatRoomSendLocal(`Target must be wearing the same item`);
-                    return false;
-                }
-                targetItem.Color = Array.isArray(item.Color) ? item.Color.slice() : item.Color;
-                CharacterRefresh(target.Character);
-                ChatRoomCharacterUpdate(target.Character);
-                return true;
-            }, (argv) => {
-                if (argv.length === 1) {
-                    return Command_selectCharacterAutocomplete(argv[0]);
-                }
-                else if (argv.length === 2) {
-                    const source = Command_selectCharacter(argv[0]);
-                    if (typeof source !== "string") {
-                        return Command_selectWornItemAutocomplete(source, argv[1]);
-                    }
-                }
-                else if (argv.length === 3) {
-                    return Command_selectCharacterAutocomplete(argv[2]);
-                }
-                return [];
-            });
-            registerCommandParsed("allowactivities", "<character> <item> - Modifies item to not block activities", (argv) => {
-                if (argv.length !== 2) {
-                    ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);
-                    return false;
-                }
-                const char = Command_selectCharacter(argv[0]);
-                if (typeof char === "string") {
-                    ChatRoomSendLocal(char);
-                    return false;
-                }
-                const item = Command_selectWornItem(char, argv[1]);
-                if (typeof item === "string") {
-                    ChatRoomSendLocal(item);
-                    return false;
-                }
-                if (!item.Property) {
-                    item.Property = {};
-                }
-                item.Property.AllowActivityOn = AssetGroup.map(A => A.Name);
-                CharacterRefresh(char.Character);
-                ChatRoomCharacterUpdate(char.Character);
-                return true;
-            }, (argv) => {
-                if (argv.length === 1) {
-                    return Command_selectCharacterAutocomplete(argv[0]);
-                }
-                else if (argv.length === 2) {
-                    const source = Command_selectCharacter(argv[0]);
-                    if (typeof source !== "string") {
-                        return Command_selectWornItemAutocomplete(source, argv[1]);
-                    }
-                }
-                return [];
-            });
-        }
     }
 
     let nextCheckTimer = null;

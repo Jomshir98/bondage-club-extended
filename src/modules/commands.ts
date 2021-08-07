@@ -1,10 +1,11 @@
-import { ChatRoomActionMessage, ChatRoomSendLocal, isBind } from "../utilsClub";
-import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName, isBind } from "../utilsClub";
+import { ChatroomCharacter, getAllCharactersInRoom, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { hookFunction } from "../patching";
 import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "../utils";
 import { BaseModule } from "./_BaseModule";
 import { firstTimeInit } from "./storage";
+import { queryHandlers, sendQuery } from "./messaging";
 
 interface ICommandInfo {
 	description: string | null;
@@ -14,6 +15,9 @@ type CommandHandlerRaw = (args: string) => boolean;
 type CommandHandlerParsed = (argv: string[]) => boolean;
 type CommandAutocompleterRaw = (args: string) => string[];
 type CommandAutocompleterParsed = (argv: string[]) => string[];
+
+type WhisperCommandHandler = (argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void) => void;
+type WhisperCommandAutocompleter = (argv: string[], sender: ChatroomCharacter) => string[];
 
 interface ICommandRaw extends ICommandInfo {
 	parse: false;
@@ -27,7 +31,16 @@ interface ICommandParsed extends ICommandInfo {
 	autocomplete: CommandAutocompleterParsed | null;
 }
 
+interface IWhisperCommand extends ICommandInfo {
+	callback: WhisperCommandHandler;
+	autocomplete: WhisperCommandAutocompleter | null;
+}
+
+export const COMMAND_GENERIC_ERROR = `The command failed to execute, likely because you are lacking the permission to give it.`;
+
 const commands: Map<string, ICommandRaw | ICommandParsed> = new Map();
+const whisperCommands: Map<string, IWhisperCommand> = new Map();
+
 
 export function registerCommand(name: string, description: string | null, callback: CommandHandlerRaw, autocomplete: CommandAutocompleterRaw | null = null) {
 	name = name.toLocaleLowerCase();
@@ -66,13 +79,44 @@ export function aliasCommand(originalName: string, alias: string): void {
 	}
 }
 
-export function registerCommandParsed(name: string, description: string | null, callback: CommandHandlerParsed, autocomplete: CommandAutocompleterParsed | null = null) {
+export function registerCommandParsed(
+	name: string,
+	description: string | null,
+	callback: CommandHandlerParsed,
+	autocomplete: CommandAutocompleterParsed | null = null
+) {
 	name = name.toLocaleLowerCase();
 	if (commands.has(name)) {
 		throw new Error(`Command "${name}" already registered!`);
 	}
 	commands.set(name, {
 		parse: true,
+		callback,
+		autocomplete,
+		description
+	});
+}
+
+export function registerWhisperCommand(
+	name: string,
+	description: string | null,
+	callback: WhisperCommandHandler,
+	autocomplete: WhisperCommandAutocompleter | null = null,
+	registerNormal: boolean = true
+) {
+	name = name.toLocaleLowerCase();
+	if (registerNormal) {
+		registerCommandParsed(
+			name,
+			description,
+			(argv) => { callback(argv, getPlayerCharacter(), (msg) => ChatRoomSendLocal(msg)); return true; },
+			autocomplete ? (argv) => autocomplete(argv, getPlayerCharacter()) : null
+		);
+	}
+	if (whisperCommands.has(name)) {
+		throw new Error(`Command "${name}" already registered!`);
+	}
+	whisperCommands.set(name, {
 		callback,
 		autocomplete,
 		description
@@ -118,7 +162,7 @@ function RunCommand(msg: string): boolean {
 		// Command not found
 		ChatRoomSendLocal(
 			`Unknown command "${command}"\n` +
-			`To see list of valid commands whisper '!help'`,
+			`To see list of valid commands use '.help'`,
 			15000
 		);
 		return false;
@@ -128,6 +172,21 @@ function RunCommand(msg: string): boolean {
 	} else {
 		return commandInfo.callback(args);
 	}
+}
+
+function RunWhisperCommand(msg: string, sender: ChatroomCharacter, respond: (msg: string) => void): void {
+	const [command, args] = CommandParse(msg);
+
+	const commandInfo = whisperCommands.get(command);
+	if (!commandInfo) {
+		// Command not found
+		respond(
+			`Unknown command "${command}"\n` +
+			`To see list of valid commands whisper '!help'`
+		);
+		return;
+	}
+	return commandInfo.callback(CommandParseArguments(args), sender, respond);
 }
 
 function CommandAutocomplete(msg: string): string {
@@ -140,7 +199,7 @@ function CommandAutocomplete(msg: string): string {
 			return msg;
 		const best = longestCommonPrefix(prefixes);
 		if (best === msg) {
-			ChatRoomSendLocal(prefixes.slice().sort().join("\n"), 10_000);
+			ChatRoomSendLocal("[autocomplete hint]\n" + prefixes.slice().sort().join("\n"), 10_000);
 		}
 		return best;
 	}
@@ -156,7 +215,7 @@ function CommandAutocomplete(msg: string): string {
 			if (lastOptions.length > 0) {
 				const best = longestCommonPrefix(lastOptions);
 				if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
-					ChatRoomSendLocal(lastOptions.slice().sort().join("\n"), 10_000);
+					ChatRoomSendLocal("[autocomplete hint]\n" + lastOptions.slice().sort().join("\n"), 10_000);
 				}
 				argv[argv.length - 1] = best;
 			}
@@ -170,13 +229,48 @@ function CommandAutocomplete(msg: string): string {
 			}
 			const best = longestCommonPrefix(possibleArgs);
 			if (possibleArgs.length > 1 && best === args) {
-				ChatRoomSendLocal(possibleArgs.slice().sort().join("\n"), 10_000);
+				ChatRoomSendLocal("[autocomplete hint]\n" + possibleArgs.slice().sort().join("\n"), 10_000);
 			}
 			return `${command} ${best}`;
 		}
 	}
 
 	return "";
+}
+
+function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [string, string[] | null] {
+	msg = msg.trimStart();
+	const [command, args] = CommandParse(msg);
+
+	if (msg.length === command.length) {
+		const prefixes = Array.from(whisperCommands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
+		if (prefixes.length === 0)
+			return [msg, null];
+		const best = longestCommonPrefix(prefixes);
+		return [best, best === msg ? prefixes.slice().sort() : null];
+	}
+
+	const commandInfo = whisperCommands.get(command);
+	if (commandInfo && commandInfo.autocomplete) {
+		const argv = CommandParseArguments(args);
+		if (CommandHasEmptyArgument(args)) {
+			argv.push("");
+		}
+		const lastOptions = commandInfo.autocomplete(argv, sender);
+		let opts: string[] | null = null;
+		if (lastOptions.length > 0) {
+			const best = longestCommonPrefix(lastOptions);
+			if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
+				opts = lastOptions.slice().sort();
+			}
+			argv[argv.length - 1] = best;
+		}
+		return [`${command} ` +
+			argv.map(CommandQuoteArgument).join(" ") +
+			(lastOptions.length === 1 ? " " : ""), opts];
+	}
+
+	return [msg, null];
 }
 
 export function Command_selectCharacter(selector: string): ChatroomCharacter | string {
@@ -202,6 +296,14 @@ export function Command_selectCharacter(selector: string): ChatroomCharacter | s
 	}
 }
 
+export function Command_selectCharacterMemberNumber(selector: string, allowNotPresent: boolean = true): number | string {
+	const character = Command_selectCharacter(selector);
+	if (typeof character === "string" && allowNotPresent && /^[0-9]+$/.test(selector)) {
+		return Number.parseInt(selector, 10);
+	}
+	return typeof character === "string" ? character : character.MemberNumber;
+}
+
 export function Command_selectCharacterAutocomplete(selector: string): string[] {
 	const characters = getAllCharactersInRoom();
 	if (/^[0-9]+$/.test(selector)) {
@@ -214,7 +316,7 @@ export function Command_selectWornItem(character: ChatroomCharacter, selector: s
 	const items = character.Character.Appearance.filter(isBind);
 	let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
 	if (targets.length === 0)
-		targets = items.filter(A => A.Asset.Group.Description.toLocaleLowerCase() === selector.toLocaleLowerCase());
+		targets = items.filter(A => getVisibleGroupName(A.Asset.Group).toLocaleLowerCase() === selector.toLocaleLowerCase());
 	if (targets.length === 0)
 		targets = items.filter(A => A.Asset.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
 	if (targets.length === 0)
@@ -233,13 +335,48 @@ export function Command_selectWornItemAutocomplete(character: ChatroomCharacter,
 	const items = character.Character.Appearance.filter(isBind);
 
 	let possible = arrayUnique(
-		items.map(A => A.Asset.Group.Description)
+		items.map(A => getVisibleGroupName(A.Asset.Group))
 			.concat(items.map(A => A.Asset.Description))
 	).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 
 	if (possible.length === 0) {
 		possible = arrayUnique(
 			items.map(A => A.Asset.Group.Name)
+				.concat(items.map(A => A.Asset.Name))
+		).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+	}
+
+	return possible;
+}
+
+export function Command_selectGroup(selector: string, character: ChatroomCharacter | null): AssetGroup | string {
+	let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+	if (targets.length === 0)
+		targets = AssetGroup.filter(G => getVisibleGroupName(G).toLocaleLowerCase() === selector.toLocaleLowerCase());
+
+	if (targets.length > 1) {
+		return `Multiple groups match "${selector}", please report this as a bug.`;
+	} else if (targets.length === 1) {
+		return targets[0];
+	} else if (character) {
+		const item = Command_selectWornItem(character, selector);
+		return typeof item === "string" ? item : item.Asset.Group;
+	} else {
+		return `Unknown group "${selector}".`;
+	}
+}
+
+export function Command_selectGroupAutocomplete(selector: string, character: ChatroomCharacter | null): string[] {
+	const items = character ? character.Character.Appearance : [];
+
+	let possible = arrayUnique(
+		AssetGroup.map(G => getVisibleGroupName(G))
+			.concat(items.map(A => A.Asset.Description))
+	).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+
+	if (possible.length === 0) {
+		possible = arrayUnique(
+			AssetGroup.map(G => G.Name)
 				.concat(items.map(A => A.Asset.Name))
 		).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 	}
@@ -268,15 +405,97 @@ export class ModuleCommands extends BaseModule {
 		hookFunction("ChatRoomKeyDown", 10, (args, next) => {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			// Tab for command completion
-			if (KeyPress === 9 && chat && chat.value.startsWith(".") && !chat.value.startsWith("..") && !firstTimeInit) {
+			if (
+				KeyPress === 9 &&
+				chat &&
+				chat.value.startsWith(".") &&
+				!chat.value.startsWith("..") &&
+				!firstTimeInit
+			) {
 				const e = args[0] as KeyboardEvent ?? event;
 				e?.preventDefault();
 
 				chat.value = "." + CommandAutocomplete(chat.value.substr(1));
+			} else if (
+				KeyPress === 9 &&
+				ChatRoomTargetMemberNumber != null &&
+				chat &&
+				chat.value.startsWith("!") &&
+				!chat.value.startsWith("!!") &&
+				!firstTimeInit
+			) {
+				const currentValue = chat.value;
+				const currentTarget = ChatRoomTargetMemberNumber;
+				const e = args[0] as KeyboardEvent ?? event;
+				e?.preventDefault();
+
+				sendQuery("commandHint", currentValue, currentTarget).then(result => {
+					if (chat.value !== currentValue || ChatRoomTargetMemberNumber !== currentTarget)
+						return;
+					if (!Array.isArray(result) ||
+						result.length !== 2 ||
+						typeof result[0] !== "string" ||
+						(
+							result[1] !== null &&
+							(
+								!Array.isArray(result[1]) ||
+								result[1].some(i => typeof i !== "string")
+							)
+						)
+					) {
+						throw new Error("Bad data");
+					}
+					chat.value = result[0];
+					if (result[1]) {
+						ChatRoomSendLocal(`[remote autocomplete hint]\n` + result[1].join('\n'), 10_000, currentTarget);
+					}
+				}, () => { /* NOOP */ });
 			} else {
 				return next(args);
 			}
 		});
+
+		hookFunction("ChatRoomMessage", 9, (args, next) => {
+			const data = args[0];
+
+			const sender = typeof data.Sender === "number" && getChatroomCharacter(data.Sender);
+			if (data?.Type === "Whisper" &&
+				typeof data.Content === "string" &&
+				data.Content.startsWith("!") &&
+				!data.Content.startsWith("!!") &&
+				sender &&
+				sender.hasAccessToPlayer()
+			) {
+				if (data.Sender === Player.MemberNumber || firstTimeInit)
+					return next(args);
+				console.debug(`BCX: Console command from ${sender}: ${data.Content}`);
+				RunWhisperCommand(data.Content.substr(1), sender, (msg) => {
+					ServerSend("ChatRoomChat", {
+						Content: `[BCX]\n${msg}`,
+						Type: "Whisper",
+						Target: sender.MemberNumber
+					});
+				});
+				return;
+			}
+
+			return next(args);
+		});
+
+		queryHandlers.commandHint = (sender, resolve, data) => {
+			if (typeof data !== "string" || !data.startsWith("!") || data.startsWith("!!")) {
+				return resolve(false);
+			}
+
+			const character = getChatroomCharacter(sender);
+			if (!character) {
+				return resolve(false);
+			}
+
+			const result = WhisperCommandAutocomplete(data.substr(1), character);
+			result[0] = '!' + result[0];
+			resolve(true, result);
+		};
 
 		registerCommand("help", "- display this help [alias: . ]", () => {
 			ChatRoomSendLocal(
@@ -296,6 +515,27 @@ export class ModuleCommands extends BaseModule {
 			return true;
 		});
 		aliasCommand("action", "a");
+
+		registerWhisperCommand("help", "- display this help", (argv, sender, respond) => {
+			respond(
+				`Available commands:\n` +
+				Array.from(whisperCommands.entries())
+					.filter(c => c[1].description !== null)
+					.map(c => `!${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
+					.sort()
+					.join("\n")
+			);
+			return true;
+		}, null, false);
+
+		registerWhisperCommand("hi", "- Make the character say hi", (argv, sender, respond) => {
+			ServerSend("ChatRoomChat", {
+				Content: `Hi ${sender.Name}!`,
+				Type: "Chat",
+				Target: sender.MemberNumber
+			});
+			return true;
+		});
 
 		const ANTIGARBLE_LEVELS: Record<string, number> = {
 			"0": 0,

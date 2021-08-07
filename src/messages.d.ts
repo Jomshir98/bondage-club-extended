@@ -62,6 +62,7 @@ type BCX_curseInfo = {
 
 type BCX_queries = {
 	disabledModules: [undefined, import("./constants").ModuleCategory[]];
+	commandHint: [string, [string, string[] | null]];
 	permissions: [undefined, PermissionsBundle];
 	myAccessLevel: [undefined, import("./modules/authority").AccessLevel];
 	editPermission: [{

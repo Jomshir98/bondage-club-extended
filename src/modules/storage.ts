@@ -6,15 +6,49 @@ import { announceSelf } from "./chatroom";
 import { sendHiddenBeep } from "./messaging";
 import { ModuleInitPhase } from "../constants";
 
+export enum StorageLocations {
+	OnlineSettings = 0,
+	LocalStorage = 1
+}
+
 export let modStorage: Partial<ModStorage> = {};
 let deletionPending = false;
 export let firstTimeInit: boolean = false;
+export let modStorageLocation: StorageLocations = StorageLocations.OnlineSettings;
 
 export function finalizeFirstTimeInit() {
 	firstTimeInit = false;
 	modStorageSync();
 	console.log("BCX: First time init finalized");
 	announceSelf(true);
+}
+
+function getLocalStorageName(): string {
+	return `BCX_${Player.MemberNumber}`;
+}
+
+function storageClearData() {
+	delete (Player.OnlineSettings as any).BCX;
+	localStorage.removeItem(getLocalStorageName());
+
+	if (typeof ServerAccountUpdate !== "undefined") {
+		ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
+	} else {
+		console.debug("BCX: Old sync method");
+		ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+	}
+}
+
+export function switchStorageLocation(location: StorageLocations) {
+	if (location !== StorageLocations.LocalStorage && location !== StorageLocations.OnlineSettings) {
+		throw new Error(`Unknown storage location`);
+	}
+	if (modStorageLocation === location)
+		return;
+	console.info(`BCX: Switching storage location to: ${StorageLocations[location]}`);
+	modStorageLocation = location;
+	storageClearData();
+	modStorageSync();
 }
 
 export function modStorageSync() {
@@ -26,24 +60,29 @@ export function modStorageSync() {
 		console.error("BCX: Player OnlineSettings not defined during storage sync!");
 		return;
 	}
-	(Player.OnlineSettings as any).BCX = LZString.compressToBase64(JSON.stringify(modStorage));
-	if (typeof ServerAccountUpdate !== "undefined") {
-		ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+
+	const serializedData = LZString.compressToBase64(JSON.stringify(modStorage));
+
+	if (modStorageLocation === StorageLocations.OnlineSettings) {
+		(Player.OnlineSettings as any).BCX = serializedData;
+		if (typeof ServerAccountUpdate !== "undefined") {
+			ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
+		} else {
+			console.debug("BCX: Old sync method");
+			ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+		}
+	} else if (modStorageLocation === StorageLocations.LocalStorage) {
+		localStorage.setItem(getLocalStorageName(), serializedData);
 	} else {
-		console.debug("BCX: Old sync method");
-		ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
+		throw new Error(`Unknown StorageLocation`);
 	}
 }
 
 export function clearAllData() {
 	deletionPending = true;
-	delete (Player.OnlineSettings as any).BCX;
-	if (typeof ServerAccountUpdate !== "undefined") {
-		ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
-	} else {
-		console.debug("BCX: Old sync method");
-		ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-	}
+
+	storageClearData();
+
 	sendHiddenBeep("clearData", true, VERSION_CHECK_BOT, true);
 	setTimeout(() => {
 		window.location.reload();
@@ -52,7 +91,19 @@ export function clearAllData() {
 
 export class ModuleStorage extends BaseModule {
 	init() {
-		const saved = (Player.OnlineSettings as any)?.BCX;
+		let saved: any = null;
+
+		saved = localStorage.getItem(getLocalStorageName());
+		if (typeof saved === "string") {
+			console.info(`BCX: Detected storage location: local storage`);
+			modStorageLocation = StorageLocations.LocalStorage;
+		}
+
+		if (!saved) {
+			saved = (Player.OnlineSettings as any)?.BCX;
+			modStorageLocation = StorageLocations.OnlineSettings;
+		}
+
 		if (typeof saved === "string") {
 			try {
 				const storage = JSON.parse(LZString.decompressFromBase64(saved)!);

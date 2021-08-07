@@ -4,7 +4,7 @@ import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } fr
 import { InvisibilityEarbuds } from "./clubUtils";
 import { BaseModule } from "./_BaseModule";
 import { unload } from "../main";
-import { modStorage } from "./storage";
+import { modStorage, switchStorageLocation } from "./storage";
 import { sendQuery } from "./messaging";
 
 export let antigarble = 0;
@@ -89,6 +89,13 @@ class ConsoleInterface {
 			}
 		);
 
+		return true;
+	}
+
+	switchStorageLocation(location: number): boolean {
+		if (typeof location !== "number")
+			return false;
+		switchStorageLocation(location);
 		return true;
 	}
 }

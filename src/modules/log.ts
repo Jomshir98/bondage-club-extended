@@ -243,7 +243,7 @@ const logConfigDefaults: LogConfig = {
 	logConfigChange: LogAccessLevel.protected,
 	logDeleted: LogAccessLevel.normal,
 	praise: LogAccessLevel.normal,
-	userNote: LogAccessLevel.protected,
+	userNote: LogAccessLevel.normal,
 	enteredPublicRoom: LogAccessLevel.none,
 	enteredPrivateRoom: LogAccessLevel.none,
 	hadOrgasm: LogAccessLevel.none,

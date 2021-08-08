@@ -80,7 +80,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 			}
 		}
 		if (character) {
-			logMessage("curseChange", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
+			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
 			if (!character.isPlayer()) {
 				ChatRoomSendLocal(`${character} cursed the ${currentItem.Asset.Description} on you`);
 			}
@@ -88,7 +88,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 	} else {
 		modStorage.cursedItems[Group] = null;
 		if (character) {
-			logMessage("curseChange", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
+			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
 			if (!character.isPlayer()) {
 				ChatRoomSendLocal(`${character} put a curse on you, forcing part of your body to stay exposed (${getVisibleGroupName(group)})`);
 			}
@@ -112,12 +112,12 @@ export function curseLift(Group: string, character: ChatroomCharacter | null): b
 		if (character && group) {
 			const itemName = modStorage.cursedItems[Group] && AssetGet(Player.AssetFamily, Group, modStorage.cursedItems[Group]!.Name)?.Description;
 			if (itemName) {
-				logMessage("curseChange", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
+				logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
 				if (!character.isPlayer()) {
 					ChatRoomSendLocal(`${character} lifted the curse on your ${itemName}`);
 				}
 			} else {
-				logMessage("curseChange", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s body part (${getVisibleGroupName(group)})`);
+				logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s body part (${getVisibleGroupName(group)})`);
 				if (!character.isPlayer()) {
 					ChatRoomSendLocal(`${character} lifted the curse on part of your body (${getVisibleGroupName(group)})`);
 				}
@@ -325,7 +325,7 @@ export class ModuleCurses extends BaseModule {
 					CharacterRefresh(Player, true);
 					ChatRoomCharacterUpdate(Player);
 					ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
-					logMessage("curseTrigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
+					logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
 					break;
 				}
 				continue;
@@ -432,7 +432,7 @@ export class ModuleCurses extends BaseModule {
 				ChatRoomCharacterUpdate(Player);
 				if (CHANGE_TEXTS[changeType]) {
 					ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
-					logMessage("curseTrigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
+					logMessage("curse_trigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
 				} else {
 					console.error(`BCX: No chat message for curse action ${changeType}`);
 				}

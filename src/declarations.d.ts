@@ -41,17 +41,17 @@ interface PermissionRoleBundle {
 }
 
 type BCX_LogCategory =
-	| "permissionChange"
-	| "logConfigChange"
-	| "logDeleted"
+	| "permission_change"
+	| "log_config_change"
+	| "log_deleted"
 	| "praise"
-	| "userNote"
-	| "curseChange"
-	| "curseTrigger"
-	| "hadOrgasm"
-	| "enteredPublicRoom"
-	| "enteredPrivateRoom"
-	| "ownershipChangesBCX";
+	| "user_note"
+	| "curse_change"
+	| "curse_trigger"
+	| "had_orgasm"
+	| "entered_public_room"
+	| "entered_private_room"
+	| "authority_roles_change";
 
 interface CursedItemInfo {
 	Name: string;

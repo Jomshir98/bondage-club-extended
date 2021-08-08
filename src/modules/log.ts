@@ -79,9 +79,9 @@ export function logMessageDelete(time: number, character: ChatroomCharacter | nu
 		return false;
 	}
 
-	const access = modStorage.logConfig?.logDeleted;
+	const access = modStorage.logConfig?.log_deleted;
 	if (access === undefined) {
-		throw new Error("logDeleted category not found");
+		throw new Error("log_deleted category not found");
 	}
 	if (!modStorage.log) {
 		throw new Error("Mod storage log not initialized");
@@ -123,7 +123,7 @@ export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLe
 	if (character) {
 		const msg = `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
 			`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]!]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`;
-		logMessage("logConfigChange", LogEntryType.plaintext, msg);
+		logMessage("log_config_change", LogEntryType.plaintext, msg);
 		if (!character.isPlayer()) {
 			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
 		}
@@ -182,7 +182,7 @@ export function logGetAllowedActions(character: ChatroomCharacter): BCX_logAllow
 	return {
 		configure: checkPermissionAccess("log_configure", character),
 		delete: checkPermissionAccess("log_delete", character),
-		leaveMessage: checkPermissionAccess("log_add_note", character) && !!(modStorage.logConfig?.userNote),
+		leaveMessage: checkPermissionAccess("log_add_note", character) && !!(modStorage.logConfig?.user_note),
 		praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
 	};
 }
@@ -222,49 +222,49 @@ export function logPraise(value: -1 | 0 | 1, message: string | null, character: 
 
 	if (value > 0) {
 		if (message) {
-			logMessage("userNote", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+			logMessage("user_note", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
 		} else {
 			logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
 		}
 	} else if (value < 0) {
 		if (message) {
-			logMessage("userNote", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+			logMessage("user_note", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
 		} else {
 			logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
 		}
 	} else if (message) {
-		logMessage("userNote", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+		logMessage("user_note", LogEntryType.plaintext, `${character} attached a note: ${message}`);
 	}
 
 	return true;
 }
 
 const logConfigDefaults: LogConfig = {
-	logConfigChange: LogAccessLevel.protected,
-	logDeleted: LogAccessLevel.normal,
+	log_config_change: LogAccessLevel.protected,
+	log_deleted: LogAccessLevel.normal,
 	praise: LogAccessLevel.normal,
-	userNote: LogAccessLevel.normal,
-	enteredPublicRoom: LogAccessLevel.none,
-	enteredPrivateRoom: LogAccessLevel.none,
-	hadOrgasm: LogAccessLevel.none,
-	permissionChange: LogAccessLevel.protected,
-	curseChange: LogAccessLevel.none,
-	curseTrigger: LogAccessLevel.none,
-	ownershipChangesBCX: LogAccessLevel.normal
+	user_note: LogAccessLevel.normal,
+	entered_public_room: LogAccessLevel.none,
+	entered_private_room: LogAccessLevel.none,
+	had_orgasm: LogAccessLevel.none,
+	permission_change: LogAccessLevel.protected,
+	curse_change: LogAccessLevel.none,
+	curse_trigger: LogAccessLevel.none,
+	authority_roles_change: LogAccessLevel.protected
 };
 
 export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
-	logConfigChange: "Log changes in logging configuration",
-	logDeleted: "Log deleted log entries",
+	log_config_change: "Log changes in logging configuration",
+	log_deleted: "Log deleted log entries",
 	praise: "Log praising or scolding behavior",
-	userNote: "Ability to see attached notes",
-	enteredPublicRoom: "Log which public rooms are entered",
-	enteredPrivateRoom: "Log which private rooms are entered",
-	hadOrgasm: "Log each single orgasm",
-	permissionChange: "Log changes in permission settings",
-	curseChange: "Log each application or removal of curses",
-	curseTrigger: "Log every time a triggered curse reapplies an item",
-	ownershipChangesBCX: "Log getting or losing a BCX owner/mistress"
+	user_note: "Ability to see attached notes",
+	entered_public_room: "Log which public rooms are entered",
+	entered_private_room: "Log which private rooms are entered",
+	had_orgasm: "Log each single orgasm",
+	permission_change: "Log changes in permission settings",
+	curse_change: "Log each application or removal of curses",
+	curse_trigger: "Log every time a triggered curse reapplies an item",
+	authority_roles_change: "Log getting or losing a BCX owner/mistress"
 };
 
 export const LOG_LEVEL_NAMES: Record<LogAccessLevel, string> = {
@@ -434,7 +434,25 @@ export class ModuleLog extends BaseModule {
 		if (!modStorage.logConfig) {
 			modStorage.logConfig = { ...logConfigDefaults };
 		} else {
+			const transitionDictionary: Record<string, BCX_LogCategory> = {
+				permissionChange: "permission_change",
+				logConfigChange: "log_config_change",
+				logDeleted: "log_deleted",
+				userNote: "user_note",
+				curseChange: "curse_change",
+				curseTrigger: "curse_trigger",
+				hadOrgasm: "had_orgasm",
+				enteredPublicRoom: "entered_public_room",
+				enteredPrivateRoom: "entered_private_room",
+				ownershipChangesBCX: "authority_roles_change"
+			};
 			for (const k of Object.keys(modStorage.logConfig) as BCX_LogCategory[]) {
+				if (transitionDictionary[k] !== undefined) {
+					console.info(`BCX: Updating log config name "${k}"->"${transitionDictionary[k]}"`);
+					modStorage.logConfig[transitionDictionary[k]] = modStorage.logConfig[k];
+					delete modStorage.logConfig[k];
+					continue;
+				}
 				if (logConfigDefaults[k] === undefined) {
 					console.info(`BCX: Removing unknown log config category "${k}"`);
 					delete modStorage.logConfig[k];
@@ -451,7 +469,7 @@ export class ModuleLog extends BaseModule {
 		hookFunction("ActivityOrgasmStart", 0, (args, next) => {
 			const C = args[0] as Character;
 			if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
-				logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+				logMessage("had_orgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
 			}
 			return next(args);
 		}, ModuleCategory.Log);
@@ -459,9 +477,9 @@ export class ModuleLog extends BaseModule {
 		hookFunction("ChatRoomSync", 0, (args, next) => {
 			const data = args[0];
 			if (data.Private) {
-				logMessage("enteredPrivateRoom", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
+				logMessage("entered_private_room", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
 			} else {
-				logMessage("enteredPublicRoom", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
+				logMessage("entered_public_room", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
 			}
 			return next(args);
 		}, ModuleCategory.Log);

@@ -141,7 +141,7 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 		const msg = `${characterToCheck} ` +
 			(self ? `gave ${characterToCheck.isPlayer() ? "herself" : Player.Name}` : `removed ${characterToCheck?.isPlayer() ? "her" : Player.Name + "'s"}`) +
 			` control over permission "${permData.name}"`;
-		logMessage("permissionChange", LogEntryType.plaintext, msg);
+		logMessage("permission_change", LogEntryType.plaintext, msg);
 		if (!characterToCheck.isPlayer()) {
 			ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
 		}
@@ -193,7 +193,7 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 	if (characterToCheck) {
 		const msg = `${characterToCheck} changed permission "${permData.name}" from ` +
 			`"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`;
-		logMessage("permissionChange", LogEntryType.plaintext, msg);
+		logMessage("permission_change", LogEntryType.plaintext, msg);
 		if (!characterToCheck.isPlayer()) {
 			ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
 		}
@@ -283,7 +283,7 @@ export function editRole(role: "owner" | "mistress", action: "add" | "remove", t
 		const msg = action === "add" ?
 			`${character} added ${targetDescriptor} as ${role}.` :
 			`${character} removed ${targetDescriptor} from ${role} role.`;
-		logMessage("ownershipChangesBCX", LogEntryType.plaintext, msg);
+		logMessage("authority_roles_change", LogEntryType.plaintext, msg);
 		if (!character.isPlayer()) {
 			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
 		}

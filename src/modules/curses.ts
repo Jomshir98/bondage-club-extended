@@ -1,4 +1,4 @@
-import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { arrayUnique, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName } from "../utilsClub";
@@ -9,6 +9,7 @@ import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction } from "../patching";
+import { COMMAND_GENERIC_ERROR, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 
 const CURSES_CHECK_INTERVAL = 2000;
 const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
@@ -210,6 +211,140 @@ export class ModuleCurses extends BaseModule {
 				resolve(false);
 			}
 		};
+
+		registerWhisperCommand("curses", "- Manage curses", (argv, sender, respond) => {
+			if (!moduleIsEnabled(ModuleCategory.Curses)) {
+				return respond(`Curses module is disabled.`);
+			}
+			const subcommand = (argv[0] || "").toLocaleLowerCase();
+			const cursesInfo = curseGetInfo(sender).curses;
+			if (subcommand === "list") {
+				let result = "Current curses:";
+				for (const [k, v] of Object.entries(cursesInfo)) {
+					const group = AssetGroup.find(g => g.Name === k);
+					if (!group) {
+						console.warn(`BCX: Unknown group ${k}`);
+						continue;
+					}
+
+					result += `\n[${group.Clothing ? "Clothing" : "Item"}] `;
+
+					if (v === null) {
+						result += `Blocked: ${getVisibleGroupName(group)}`;
+					} else {
+						const item = AssetGet(Player.AssetFamily, k, v.Name);
+						result += `${item?.Description ?? v.Name} (${getVisibleGroupName(group)})`;
+					}
+				}
+				respond(result);
+			} else if (subcommand === "listgroups") {
+				const listgroup = (argv[1] || "").toLocaleLowerCase();
+				if (listgroup === "items") {
+					let result = `List of item groups:`;
+					const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
+					for (const group of AssetGroupItems) {
+						const currentItem = InventoryGet(Player, group.Name);
+						const itemIsCursed = cursesInfo[group.Name] !== undefined;
+
+						result += `\n${getVisibleGroupName(group)}: ${currentItem ? currentItem.Asset.Description : "[Nothing]"}`;
+						if (itemIsCursed) {
+							result += ` [cursed]`;
+						}
+					}
+					respond(result);
+				} else if (listgroup === "clothes") {
+					let result = `List of clothes groups:`;
+					const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
+					for (const group of AssetGroupClothings) {
+						const currentItem = InventoryGet(Player, group.Name);
+						const clothingIsCursed = cursesInfo[group.Name] !== undefined;
+
+						result += `\n${getVisibleGroupName(group)}: ${currentItem ? currentItem.Asset.Description : "[Nothing]"}`;
+						if (clothingIsCursed) {
+							result += ` [cursed]`;
+						}
+					}
+					respond(result);
+				} else {
+					respond(`Expected one of:\n` +
+						`!curses listgroups items\n` +
+						`!curses listgroups clothes`
+					);
+				}
+			} else if (subcommand === "curse") {
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				if (typeof group === "string") {
+					return respond(group);
+				}
+				if (cursesInfo[group.Name] !== undefined) {
+					return respond(`This group or item is already cursed`);
+				}
+				respond(curseItem(group.Name, null, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else if (subcommand === "lift") {
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				if (typeof group === "string") {
+					return respond(group);
+				}
+				if (cursesInfo[group.Name] === undefined) {
+					return respond(`This group or item is not cursed`);
+				}
+				respond(curseLift(group.Name, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else if (subcommand === "settings") {
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				if (typeof group === "string") {
+					return respond(group);
+				}
+				if (cursesInfo[group.Name] === undefined) {
+					return respond(`This group or item is not cursed`);
+				}
+				const target = (argv[2] || "").toLocaleLowerCase();
+				if (target !== "yes" && target !== "no") {
+					return respond(`Expected yes or no`);
+				}
+				respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else {
+				respond(`!curses usage:\n` +
+					`!curses list - List all active curses and related info\n` +
+					`!curses listgroups <items|clothes> - Lists all possible item and/or clothing slots\n` +
+					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
+					`!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
+					`!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`
+				);
+			}
+		}, (argv, sender) => {
+			if (!moduleIsEnabled(ModuleCategory.Curses)) {
+				return [];
+			}
+			if (argv.length <= 1) {
+				const c = argv[0].toLocaleLowerCase();
+				return ["list", "listgroups", "curse", "lift", "settings"].filter(i => i.startsWith(c));
+			}
+
+			const subcommand = argv[0].toLocaleLowerCase();
+			const cursesInfo = curseGetInfo(sender).curses;
+
+			if (subcommand === "listgroups") {
+				if (argv.length === 2) {
+					return ["items", "clothes"].filter(i => i.startsWith(argv[1].toLocaleLowerCase()));
+				}
+			} else if (subcommand === "curse") {
+				if (argv.length === 2) {
+					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				}
+			} else if (subcommand === "lift") {
+				if (argv.length === 2) {
+					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
+				}
+			} else if (subcommand === "settings") {
+				if (argv.length === 2) {
+					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
+				} else if (argv.length === 3) {
+					return ["yes", "no"].filter(i => i.startsWith(argv[2].toLocaleLowerCase()));
+				}
+			}
+
+			return [];
+		});
 	}
 
 	load() {

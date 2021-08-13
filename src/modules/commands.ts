@@ -312,8 +312,8 @@ export function Command_selectCharacterAutocomplete(selector: string): string[] 
 	return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 }
 
-export function Command_selectWornItem(character: ChatroomCharacter, selector: string): Item | string {
-	const items = character.Character.Appearance.filter(isBind);
+export function Command_selectWornItem(character: ChatroomCharacter, selector: string, filter: (item: Item) => boolean = isBind): Item | string {
+	const items = character.Character.Appearance.filter(filter);
 	let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
 	if (targets.length === 0)
 		targets = items.filter(A => getVisibleGroupName(A.Asset.Group).toLocaleLowerCase() === selector.toLocaleLowerCase());
@@ -331,8 +331,8 @@ export function Command_selectWornItem(character: ChatroomCharacter, selector: s
 	}
 }
 
-export function Command_selectWornItemAutocomplete(character: ChatroomCharacter, selector: string): string[] {
-	const items = character.Character.Appearance.filter(isBind);
+export function Command_selectWornItemAutocomplete(character: ChatroomCharacter, selector: string, filter: (item: Item) => boolean = isBind): string[] {
+	const items = character.Character.Appearance.filter(filter);
 
 	let possible = arrayUnique(
 		items.map(A => getVisibleGroupName(A.Asset.Group))
@@ -349,35 +349,47 @@ export function Command_selectWornItemAutocomplete(character: ChatroomCharacter,
 	return possible;
 }
 
-export function Command_selectGroup(selector: string, character: ChatroomCharacter | null): AssetGroup | string {
-	let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+export function Command_selectGroup(selector: string, character: ChatroomCharacter | null, filter?: (group: AssetGroup) => boolean): AssetGroup | string {
+	let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase() && (!filter || filter(G)));
 	if (targets.length === 0)
-		targets = AssetGroup.filter(G => getVisibleGroupName(G).toLocaleLowerCase() === selector.toLocaleLowerCase());
+		targets = AssetGroup.filter(G => getVisibleGroupName(G).toLocaleLowerCase() === selector.toLocaleLowerCase() && (!filter || filter(G)));
 
 	if (targets.length > 1) {
 		return `Multiple groups match "${selector}", please report this as a bug.`;
 	} else if (targets.length === 1) {
 		return targets[0];
 	} else if (character) {
-		const item = Command_selectWornItem(character, selector);
+		const item = Command_selectWornItem(character, selector, i => (!filter || filter(i.Asset.Group)));
 		return typeof item === "string" ? item : item.Asset.Group;
 	} else {
 		return `Unknown group "${selector}".`;
 	}
 }
 
-export function Command_selectGroupAutocomplete(selector: string, character: ChatroomCharacter | null): string[] {
+export function Command_selectGroupAutocomplete(selector: string, character: ChatroomCharacter | null, filter?: (group: AssetGroup) => boolean): string[] {
 	const items = character ? character.Character.Appearance : [];
 
 	let possible = arrayUnique(
-		AssetGroup.map(G => getVisibleGroupName(G))
-			.concat(items.map(A => A.Asset.Description))
+		AssetGroup
+			.filter(G => !filter || filter(G))
+			.map(G => getVisibleGroupName(G))
+			.concat(
+				items
+					.filter(A => !filter || filter(A.Asset.Group))
+					.map(A => A.Asset.Description)
+			)
 	).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 
 	if (possible.length === 0) {
 		possible = arrayUnique(
-			AssetGroup.map(G => G.Name)
-				.concat(items.map(A => A.Asset.Name))
+			AssetGroup
+				.filter(G => !filter || filter(G))
+				.map(G => G.Name)
+				.concat(
+					items
+						.filter(A => !filter || filter(A.Asset.Group))
+						.map(A => A.Asset.Name)
+				)
 		).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 	}
 

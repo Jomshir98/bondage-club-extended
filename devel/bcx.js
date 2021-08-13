@@ -1135,9 +1135,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (character && !checkPermissionAccess("log_delete", character)) {
             return false;
         }
-        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.logDeleted;
+        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.log_deleted;
         if (access === undefined) {
-            throw new Error("logDeleted category not found");
+            throw new Error("log_deleted category not found");
         }
         if (!modStorage.log) {
             throw new Error("Mod storage log not initialized");
@@ -1176,7 +1176,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (character) {
             const msg = `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
                 `from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`;
-            logMessage("logConfigChange", LogEntryType.plaintext, msg);
+            logMessage("log_config_change", LogEntryType.plaintext, msg);
             if (!character.isPlayer()) {
                 ChatRoomSendLocal(msg, undefined, character.MemberNumber);
             }
@@ -1226,7 +1226,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         return {
             configure: checkPermissionAccess("log_configure", character),
             delete: checkPermissionAccess("log_delete", character),
-            leaveMessage: checkPermissionAccess("log_add_note", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.userNote),
+            leaveMessage: checkPermissionAccess("log_add_note", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.user_note),
             praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
         };
     }
@@ -1256,7 +1256,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         if (value > 0) {
             if (message) {
-                logMessage("userNote", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+                logMessage("user_note", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
             }
             else {
                 logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
@@ -1264,42 +1264,42 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         else if (value < 0) {
             if (message) {
-                logMessage("userNote", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+                logMessage("user_note", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
             }
             else {
                 logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
             }
         }
         else if (message) {
-            logMessage("userNote", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+            logMessage("user_note", LogEntryType.plaintext, `${character} attached a note: ${message}`);
         }
         return true;
     }
     const logConfigDefaults = {
-        logConfigChange: LogAccessLevel.protected,
-        logDeleted: LogAccessLevel.normal,
+        log_config_change: LogAccessLevel.protected,
+        log_deleted: LogAccessLevel.normal,
         praise: LogAccessLevel.normal,
-        userNote: LogAccessLevel.normal,
-        enteredPublicRoom: LogAccessLevel.none,
-        enteredPrivateRoom: LogAccessLevel.none,
-        hadOrgasm: LogAccessLevel.none,
-        permissionChange: LogAccessLevel.protected,
-        curseChange: LogAccessLevel.none,
-        curseTrigger: LogAccessLevel.none,
-        ownershipChangesBCX: LogAccessLevel.normal
+        user_note: LogAccessLevel.normal,
+        entered_public_room: LogAccessLevel.none,
+        entered_private_room: LogAccessLevel.none,
+        had_orgasm: LogAccessLevel.none,
+        permission_change: LogAccessLevel.protected,
+        curse_change: LogAccessLevel.none,
+        curse_trigger: LogAccessLevel.none,
+        authority_roles_change: LogAccessLevel.protected
     };
     const LOG_CONFIG_NAMES = {
-        logConfigChange: "Log changes in logging configuration",
-        logDeleted: "Log deleted log entries",
+        log_config_change: "Log changes in logging configuration",
+        log_deleted: "Log deleted log entries",
         praise: "Log praising or scolding behavior",
-        userNote: "Ability to see attached notes",
-        enteredPublicRoom: "Log which public rooms are entered",
-        enteredPrivateRoom: "Log which private rooms are entered",
-        hadOrgasm: "Log each single orgasm",
-        permissionChange: "Log changes in permission settings",
-        curseChange: "Log each application or removal of curses",
-        curseTrigger: "Log every time a triggered curse reapplies an item",
-        ownershipChangesBCX: "Log getting or losing a BCX owner/mistress"
+        user_note: "Ability to see attached notes",
+        entered_public_room: "Log which public rooms are entered",
+        entered_private_room: "Log which private rooms are entered",
+        had_orgasm: "Log each single orgasm",
+        permission_change: "Log changes in permission settings",
+        curse_change: "Log each application or removal of curses",
+        curse_trigger: "Log every time a triggered curse reapplies an item",
+        authority_roles_change: "Log getting or losing a BCX owner/mistress"
     };
     const LOG_LEVEL_NAMES = {
         [LogAccessLevel.everyone]: "[ERROR]",
@@ -1468,7 +1468,25 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 modStorage.logConfig = { ...logConfigDefaults };
             }
             else {
+                const transitionDictionary = {
+                    permissionChange: "permission_change",
+                    logConfigChange: "log_config_change",
+                    logDeleted: "log_deleted",
+                    userNote: "user_note",
+                    curseChange: "curse_change",
+                    curseTrigger: "curse_trigger",
+                    hadOrgasm: "had_orgasm",
+                    enteredPublicRoom: "entered_public_room",
+                    enteredPrivateRoom: "entered_private_room",
+                    ownershipChangesBCX: "authority_roles_change"
+                };
                 for (const k of Object.keys(modStorage.logConfig)) {
+                    if (transitionDictionary[k] !== undefined) {
+                        console.info(`BCX: Updating log config name "${k}"->"${transitionDictionary[k]}"`);
+                        modStorage.logConfig[transitionDictionary[k]] = modStorage.logConfig[k];
+                        delete modStorage.logConfig[k];
+                        continue;
+                    }
                     if (logConfigDefaults[k] === undefined) {
                         console.info(`BCX: Removing unknown log config category "${k}"`);
                         delete modStorage.logConfig[k];
@@ -1484,17 +1502,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             hookFunction("ActivityOrgasmStart", 0, (args, next) => {
                 const C = args[0];
                 if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
-                    logMessage("hadOrgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+                    logMessage("had_orgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
                 }
                 return next(args);
             }, ModuleCategory.Log);
             hookFunction("ChatRoomSync", 0, (args, next) => {
                 const data = args[0];
                 if (data.Private) {
-                    logMessage("enteredPrivateRoom", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
+                    logMessage("entered_private_room", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
                 }
                 else {
-                    logMessage("enteredPublicRoom", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
+                    logMessage("entered_public_room", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
                 }
                 return next(args);
             }, ModuleCategory.Log);
@@ -2104,8 +2122,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
     }
-    function Command_selectWornItem(character, selector) {
-        const items = character.Character.Appearance.filter(isBind);
+    function Command_selectWornItem(character, selector, filter = isBind) {
+        const items = character.Character.Appearance.filter(filter);
         let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
         if (targets.length === 0)
             targets = items.filter(A => getVisibleGroupName(A.Asset.Group).toLocaleLowerCase() === selector.toLocaleLowerCase());
@@ -2123,8 +2141,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return `Multiple items match, please use group name instead. (eg. arms)`;
         }
     }
-    function Command_selectWornItemAutocomplete(character, selector) {
-        const items = character.Character.Appearance.filter(isBind);
+    function Command_selectWornItemAutocomplete(character, selector, filter = isBind) {
+        const items = character.Character.Appearance.filter(filter);
         let possible = arrayUnique(items.map(A => getVisibleGroupName(A.Asset.Group))
             .concat(items.map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
         if (possible.length === 0) {
@@ -2133,10 +2151,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         return possible;
     }
-    function Command_selectGroup(selector, character) {
-        let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+    function Command_selectGroup(selector, character, filter) {
+        let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase() && (!filter || filter(G)));
         if (targets.length === 0)
-            targets = AssetGroup.filter(G => getVisibleGroupName(G).toLocaleLowerCase() === selector.toLocaleLowerCase());
+            targets = AssetGroup.filter(G => getVisibleGroupName(G).toLocaleLowerCase() === selector.toLocaleLowerCase() && (!filter || filter(G)));
         if (targets.length > 1) {
             return `Multiple groups match "${selector}", please report this as a bug.`;
         }
@@ -2144,20 +2162,28 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return targets[0];
         }
         else if (character) {
-            const item = Command_selectWornItem(character, selector);
+            const item = Command_selectWornItem(character, selector, i => (!filter || filter(i.Asset.Group)));
             return typeof item === "string" ? item : item.Asset.Group;
         }
         else {
             return `Unknown group "${selector}".`;
         }
     }
-    function Command_selectGroupAutocomplete(selector, character) {
+    function Command_selectGroupAutocomplete(selector, character, filter) {
         const items = character ? character.Character.Appearance : [];
-        let possible = arrayUnique(AssetGroup.map(G => getVisibleGroupName(G))
-            .concat(items.map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+        let possible = arrayUnique(AssetGroup
+            .filter(G => !filter || filter(G))
+            .map(G => getVisibleGroupName(G))
+            .concat(items
+            .filter(A => !filter || filter(A.Asset.Group))
+            .map(A => A.Asset.Description))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
         if (possible.length === 0) {
-            possible = arrayUnique(AssetGroup.map(G => G.Name)
-                .concat(items.map(A => A.Asset.Name))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+            possible = arrayUnique(AssetGroup
+                .filter(G => !filter || filter(G))
+                .map(G => G.Name)
+                .concat(items
+                .filter(A => !filter || filter(A.Asset.Group))
+                .map(A => A.Asset.Name))).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
         }
         return possible;
     }
@@ -2430,7 +2456,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             const msg = `${characterToCheck} ` +
                 (self ? `gave ${characterToCheck.isPlayer() ? "herself" : Player.Name}` : `removed ${(characterToCheck === null || characterToCheck === void 0 ? void 0 : characterToCheck.isPlayer()) ? "her" : Player.Name + "'s"}`) +
                 ` control over permission "${permData.name}"`;
-            logMessage("permissionChange", LogEntryType.plaintext, msg);
+            logMessage("permission_change", LogEntryType.plaintext, msg);
             if (!characterToCheck.isPlayer()) {
                 ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
             }
@@ -2473,7 +2499,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (characterToCheck) {
             const msg = `${characterToCheck} changed permission "${permData.name}" from ` +
                 `"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`;
-            logMessage("permissionChange", LogEntryType.plaintext, msg);
+            logMessage("permission_change", LogEntryType.plaintext, msg);
             if (!characterToCheck.isPlayer()) {
                 ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
             }
@@ -2546,7 +2572,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             const msg = action === "add" ?
                 `${character} added ${targetDescriptor} as ${role}.` :
                 `${character} removed ${targetDescriptor} from ${role} role.`;
-            logMessage("ownershipChangesBCX", LogEntryType.plaintext, msg);
+            logMessage("authority_roles_change", LogEntryType.plaintext, msg);
             if (!character.isPlayer()) {
                 ChatRoomSendLocal(msg, undefined, character.MemberNumber);
             }
@@ -2760,8 +2786,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 else {
                     respond(`!role usage:\n` +
                         `!role list - List all current owners/mistresses\n` +
-                        `!role owner <add/remove> <target> - Add or remove owner\n` +
-                        `!role mistress <add/remove> <target> - Add or remove mistress`);
+                        `!role owner <add/remove> <target> - Add or remove target as owner\n` +
+                        `!role mistress <add/remove> <target> - Add or remove target as mistress`);
                 }
             }, (argv, sender) => {
                 if (argv.length <= 1) {
@@ -2851,8 +2877,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 else {
                     respond(`!permission usage:\n` +
                         `!permission list [filter] - List all permissions and their current settings\n` +
-                        `!permission <name> selfaccess <yes|no> - Gives ${Player.Name} permission or revokes it\n` +
-                        `!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the selected permission`);
+                        `!permission <name> selfaccess <yes|no> - Gives or revokes ${Player.Name}'s access to permission <name>\n` +
+                        `!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the permission <name>`);
                 }
             }, (argv, sender) => {
                 const permissionNames = Object.keys(getPlayerPermissionSettings());
@@ -2891,10 +2917,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             modStorage.permissions = permissionsMakeBundle();
         }
         load(preset) {
+            var _a;
             this.setDefultPermissionsForPreset(preset);
             if (isObject(modStorage.permissions)) {
+                const transitionDictionary = {
+                    log_leaveMessage: "log_add_note"
+                };
                 for (const [k, v] of Object.entries(modStorage.permissions)) {
-                    const perm = permissions.get(k);
+                    if (transitionDictionary[k] !== undefined) {
+                        console.info(`BCX: Updating permission name "${k}"->"${transitionDictionary[k]}"`);
+                    }
+                    const perm = permissions.get(((_a = transitionDictionary[k]) !== null && _a !== void 0 ? _a : k));
                     if (!Array.isArray(v) || typeof v[0] !== "boolean" || typeof v[1] !== "number") {
                         console.warn(`BCX: Storage: bad permission ${k}`);
                     }
@@ -2998,7 +3031,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             }
             if (character) {
-                logMessage("curseChange", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
+                logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
                 if (!character.isPlayer()) {
                     ChatRoomSendLocal(`${character} cursed the ${currentItem.Asset.Description} on you`);
                 }
@@ -3007,7 +3040,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         else {
             modStorage.cursedItems[Group] = null;
             if (character) {
-                logMessage("curseChange", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
+                logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
                 if (!character.isPlayer()) {
                     ChatRoomSendLocal(`${character} put a curse on you, forcing part of your body to stay exposed (${getVisibleGroupName(group)})`);
                 }
@@ -3028,13 +3061,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (character && group) {
                 const itemName = modStorage.cursedItems[Group] && ((_a = AssetGet(Player.AssetFamily, Group, modStorage.cursedItems[Group].Name)) === null || _a === void 0 ? void 0 : _a.Description);
                 if (itemName) {
-                    logMessage("curseChange", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
+                    logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
                     if (!character.isPlayer()) {
                         ChatRoomSendLocal(`${character} lifted the curse on your ${itemName}`);
                     }
                 }
                 else {
-                    logMessage("curseChange", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s body part (${getVisibleGroupName(group)})`);
+                    logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s body part (${getVisibleGroupName(group)})`);
                     if (!character.isPlayer()) {
                         ChatRoomSendLocal(`${character} lifted the curse on part of your body (${getVisibleGroupName(group)})`);
                     }
@@ -3128,6 +3161,143 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     resolve(false);
                 }
             };
+            registerWhisperCommand("curses", "- Manage curses", (argv, sender, respond) => {
+                var _a;
+                if (!moduleIsEnabled(ModuleCategory.Curses)) {
+                    return respond(`Curses module is disabled.`);
+                }
+                const subcommand = (argv[0] || "").toLocaleLowerCase();
+                const cursesInfo = curseGetInfo(sender).curses;
+                if (subcommand === "list") {
+                    let result = "Current curses:";
+                    for (const [k, v] of Object.entries(cursesInfo)) {
+                        const group = AssetGroup.find(g => g.Name === k);
+                        if (!group) {
+                            console.warn(`BCX: Unknown group ${k}`);
+                            continue;
+                        }
+                        result += `\n[${group.Clothing ? "Clothing" : "Item"}] `;
+                        if (v === null) {
+                            result += `Blocked: ${getVisibleGroupName(group)}`;
+                        }
+                        else {
+                            const item = AssetGet(Player.AssetFamily, k, v.Name);
+                            result += `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.Name} (${getVisibleGroupName(group)})`;
+                        }
+                    }
+                    respond(result);
+                }
+                else if (subcommand === "listgroups") {
+                    const listgroup = (argv[1] || "").toLocaleLowerCase();
+                    if (listgroup === "items") {
+                        let result = `List of item groups:`;
+                        const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
+                        for (const group of AssetGroupItems) {
+                            const currentItem = InventoryGet(Player, group.Name);
+                            const itemIsCursed = cursesInfo[group.Name] !== undefined;
+                            result += `\n${getVisibleGroupName(group)}: ${currentItem ? currentItem.Asset.Description : "[Nothing]"}`;
+                            if (itemIsCursed) {
+                                result += ` [cursed]`;
+                            }
+                        }
+                        respond(result);
+                    }
+                    else if (listgroup === "clothes") {
+                        let result = `List of clothes groups:`;
+                        const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
+                        for (const group of AssetGroupClothings) {
+                            const currentItem = InventoryGet(Player, group.Name);
+                            const clothingIsCursed = cursesInfo[group.Name] !== undefined;
+                            result += `\n${getVisibleGroupName(group)}: ${currentItem ? currentItem.Asset.Description : "[Nothing]"}`;
+                            if (clothingIsCursed) {
+                                result += ` [cursed]`;
+                            }
+                        }
+                        respond(result);
+                    }
+                    else {
+                        respond(`Expected one of:\n` +
+                            `!curses listgroups items\n` +
+                            `!curses listgroups clothes`);
+                    }
+                }
+                else if (subcommand === "curse") {
+                    const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+                    if (typeof group === "string") {
+                        return respond(group);
+                    }
+                    if (cursesInfo[group.Name] !== undefined) {
+                        return respond(`This group or item is already cursed`);
+                    }
+                    respond(curseItem(group.Name, null, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                }
+                else if (subcommand === "lift") {
+                    const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+                    if (typeof group === "string") {
+                        return respond(group);
+                    }
+                    if (cursesInfo[group.Name] === undefined) {
+                        return respond(`This group or item is not cursed`);
+                    }
+                    respond(curseLift(group.Name, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                }
+                else if (subcommand === "settings") {
+                    const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+                    if (typeof group === "string") {
+                        return respond(group);
+                    }
+                    if (cursesInfo[group.Name] === undefined) {
+                        return respond(`This group or item is not cursed`);
+                    }
+                    const target = (argv[2] || "").toLocaleLowerCase();
+                    if (target !== "yes" && target !== "no") {
+                        return respond(`Expected yes or no`);
+                    }
+                    respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                }
+                else {
+                    respond(`!curses usage:\n` +
+                        `!curses list - List all active curses and related info\n` +
+                        `!curses listgroups <items|clothes> - Lists all possible item and/or clothing slots\n` +
+                        `!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
+                        `!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
+                        `!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`);
+                }
+            }, (argv, sender) => {
+                if (!moduleIsEnabled(ModuleCategory.Curses)) {
+                    return [];
+                }
+                if (argv.length <= 1) {
+                    const c = argv[0].toLocaleLowerCase();
+                    return ["list", "listgroups", "curse", "lift", "settings"].filter(i => i.startsWith(c));
+                }
+                const subcommand = argv[0].toLocaleLowerCase();
+                const cursesInfo = curseGetInfo(sender).curses;
+                if (subcommand === "listgroups") {
+                    if (argv.length === 2) {
+                        return ["items", "clothes"].filter(i => i.startsWith(argv[1].toLocaleLowerCase()));
+                    }
+                }
+                else if (subcommand === "curse") {
+                    if (argv.length === 2) {
+                        return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+                    }
+                }
+                else if (subcommand === "lift") {
+                    if (argv.length === 2) {
+                        return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
+                    }
+                }
+                else if (subcommand === "settings") {
+                    if (argv.length === 2) {
+                        return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
+                    }
+                    else if (argv.length === 3) {
+                        return ["yes", "no"].filter(i => i.startsWith(argv[2].toLocaleLowerCase()));
+                    }
+                }
+                return [];
+            });
         }
         load() {
             if (!moduleIsEnabled(ModuleCategory.Curses)) {
@@ -3229,7 +3399,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         CharacterRefresh(Player, true);
                         ChatRoomCharacterUpdate(Player);
                         ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
-                        logMessage("curseTrigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
+                        logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
                         break;
                     }
                     continue;
@@ -3332,7 +3502,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     ChatRoomCharacterUpdate(Player);
                     if (CHANGE_TEXTS[changeType]) {
                         ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
-                        logMessage("curseTrigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
+                        logMessage("curse_trigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
                     }
                     else {
                         console.error(`BCX: No chat message for curse action ${changeType}`);
@@ -4882,8 +5052,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     MainCanvas.rect(1270, Y, 320, 64);
                     MainCanvas.stroke();
                     DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Black", "");
+                    MainCanvas.textAlign = "center";
                     if (this.allowDeletion) {
-                        MainCanvas.textAlign = "center";
                         DrawButton(1630, Y, 64, 64, "X", "White", "", "Delete log entry");
                     }
                     if (MouseIn(125, Y, 64, 64)) {

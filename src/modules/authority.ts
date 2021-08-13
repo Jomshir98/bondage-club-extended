@@ -645,8 +645,14 @@ export class ModuleAuthority extends BaseModule {
 		this.setDefultPermissionsForPreset(preset);
 
 		if (isObject(modStorage.permissions)) {
+			const transitionDictionary: Record<string, BCX_Permissions> = {
+				log_leaveMessage: "log_add_note"
+			};
 			for (const [k, v] of Object.entries(modStorage.permissions)) {
-				const perm = permissions.get(k as BCX_Permissions);
+				if (transitionDictionary[k] !== undefined) {
+					console.info(`BCX: Updating permission name "${k}"->"${transitionDictionary[k]}"`);
+				}
+				const perm = permissions.get((transitionDictionary[k] ?? k) as BCX_Permissions);
 				if (!Array.isArray(v) || typeof v[0] !== "boolean" || typeof v[1] !== "number") {
 					console.warn(`BCX: Storage: bad permission ${k}`);
 				} else if (AccessLevel[v[1]] === undefined) {

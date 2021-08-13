@@ -134,9 +134,9 @@ export class GuiLog extends GuiSubscreen {
 				MainCanvas.rect(1270, Y, 320, 64);
 				MainCanvas.stroke();
 				DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Black", "");
+				MainCanvas.textAlign = "center";
 
 				if (this.allowDeletion) {
-					MainCanvas.textAlign = "center";
 					DrawButton(1630, Y, 64, 64, "X", "White", "", "Delete log entry");
 				}
 

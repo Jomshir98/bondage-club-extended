@@ -509,8 +509,8 @@ export class ModuleAuthority extends BaseModule {
 			} else {
 				respond(`!role usage:\n` +
 					`!role list - List all current owners/mistresses\n` +
-					`!role owner <add/remove> <target> - Add or remove owner\n` +
-					`!role mistress <add/remove> <target> - Add or remove mistress`
+					`!role owner <add/remove> <target> - Add or remove target as owner\n` +
+					`!role mistress <add/remove> <target> - Add or remove target as mistress`
 				);
 			}
 		}, (argv, sender) => {
@@ -597,8 +597,8 @@ export class ModuleAuthority extends BaseModule {
 			} else {
 				respond(`!permission usage:\n` +
 					`!permission list [filter] - List all permissions and their current settings\n` +
-					`!permission <name> selfaccess <yes|no> - Gives ${Player.Name} permission or revokes it\n` +
-					`!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the selected permission`
+					`!permission <name> selfaccess <yes|no> - Gives or revokes ${Player.Name}'s access to permission <name>\n` +
+					`!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the permission <name>`
 				);
 			}
 		}, (argv, sender) => {

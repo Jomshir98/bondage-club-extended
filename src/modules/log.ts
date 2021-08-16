@@ -1,13 +1,14 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, removeHooksByModule } from "../patching";
-import { isObject } from "../utils";
+import { clamp, isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
 import { ModuleCategory, Preset } from "../constants";
+import { COMMAND_GENERIC_ERROR, registerWhisperCommand } from "./commands";
 
 export const LOG_ENTRIES_LIMIT = 256;
 
@@ -407,6 +408,95 @@ export class ModuleLog extends BaseModule {
 				resolve(false);
 			}
 		};
+
+		registerWhisperCommand("log", "- Manage the behaviour log", (argv, sender, respond) => {
+			const subcommand = (argv[0] || "").toLocaleLowerCase();
+			if (subcommand === "list") {
+				const logEntries = getVisibleLogEntries(sender);
+				const totalPages = Math.ceil(logEntries.length / 5);
+				const page = clamp(Number.parseInt(argv[1] || "", 10) || 1, 1, totalPages);
+				let result = `Page ${page} / ${totalPages}:`;
+				for (let i = 5 * (page - 1); i < Math.min(5 * page, logEntries.length); i++) {
+					const entry = logEntries[i];
+					const time = new Date(entry[0]);
+					result += `\n[${time.toUTCString()}] (${entry[0]})\n  ${logMessageRender(entry)}`;
+				}
+				respond(result);
+			} else if (subcommand === "delete") {
+				if (!/^[0-9]+$/.test(argv[1] || "")) {
+					return respond(`Expected number as timestamp.`);
+				}
+				const timestamp = Number.parseInt(argv[1], 10);
+				if (!getVisibleLogEntries(sender).some(logentry => logentry[0] === timestamp)) {
+					return respond(`No such log entry found`);
+				}
+				respond(logMessageDelete(timestamp, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else if (subcommand === "config") {
+				if (!checkPermissionAccess("log_configure", sender)) {
+					return respond(COMMAND_GENERIC_ERROR);
+				}
+
+				const category = argv[1] || "";
+				const config = logGetConfig();
+
+				if (!category) {
+					let result = "Current log config:";
+					for (const [k, v] of Object.entries(config) as [BCX_LogCategory, LogAccessLevel][]) {
+						if (LOG_CONFIG_NAMES[k] !== undefined &&
+							LOG_LEVEL_NAMES[v] !== undefined
+						) {
+							result += `\n[${k}]\n  ${LOG_CONFIG_NAMES[k]}: ${LOG_LEVEL_NAMES[v]}`;
+						}
+					}
+					return respond(result);
+				} else if (LOG_CONFIG_NAMES[category as BCX_LogCategory] === undefined) {
+					return respond(`Unknown category "${category}".`);
+				} else {
+					const level = (argv[2] || "").toLocaleLowerCase();
+					if (level !== "yes" && level !== "protected" && level !== "no") {
+						return respond(`Expected level to be one of:\nno, protected, yes`);
+					}
+					return respond(
+						logConfigSet(
+							category as BCX_LogCategory,
+							level === "yes" ? LogAccessLevel.normal : level === "protected" ? LogAccessLevel.protected : LogAccessLevel.none,
+							sender
+						) ? `Ok.` : COMMAND_GENERIC_ERROR);
+				}
+			} else {
+				respond(`!log usage:\n` +
+					`!log list [page] - List all visible logs\n` +
+					`!log delete <timestamp> - Deletes the log with the given <timestamp> (the number in parentheses in list)\n` +
+					`!log config - Shows the current logging settings for ${Player.Name}\n` +
+					`!log config <category> <no|protected|yes> - Sets visibility of the given config <category>`
+				);
+			}
+		}, (argv, sender) => {
+			if (argv.length <= 1) {
+				const c = argv[0].toLocaleLowerCase();
+				return ["list", "delete", "config"].filter(i => i.startsWith(c));
+			}
+
+			const subcommand = argv[0].toLocaleLowerCase();
+
+			if (subcommand === "delete") {
+				if (argv.length === 2) {
+					return getVisibleLogEntries(sender).map(logentry => logentry[0].toString()).filter(i => i.startsWith(argv[1]));
+				}
+			} else if (subcommand === "config") {
+				if (!checkPermissionAccess("log_configure", sender)) {
+					return [];
+				}
+
+				if (argv.length === 2) {
+					return Object.keys(logGetConfig()).concat("").filter(i => i.startsWith(argv[1].toLocaleLowerCase()));
+				} else if (argv.length === 3) {
+					return ["no", "protected", "yes"].filter(i => i.startsWith(argv[2].toLocaleLowerCase()));
+				}
+			}
+
+			return [];
+		});
 	}
 
 	load() {

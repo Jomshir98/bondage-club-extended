@@ -206,16 +206,16 @@ window.BCX_Loaded = false;
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
-        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43"],
-        AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA"],
+        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31"],
+        AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
         AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
         ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],
-        ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED"],
+        ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED", "C49AA2C1"],
         ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383"],
         ChatRoomDrawCharacterOverlay: ["D58A9AD3"],
-        ChatRoomKeyDown: ["5FD37EC9", "111B6F0C"],
-        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6"],
-        ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D"],
+        ChatRoomKeyDown: ["5FD37EC9", "111B6F0C", "33C77F12"],
+        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77"],
+        ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
         ChatRoomSync: ["B67D8226"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["412422CC", "26C67608"],
@@ -228,7 +228,7 @@ window.BCX_Loaded = false;
         InformationSheetExit: ["75521907"],
         InformationSheetRun: ["58B7879C", "A8A56ACA"],
         LoginMistressItems: ["B58EF410"],
-        LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8"],
+        LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547"],
         LoginStableItems: ["EA93FBF7"],
         MainHallWalk: ["E52553C4"],
         PrivateRansomStart: ["0E968EDD"],
@@ -245,8 +245,8 @@ window.BCX_Loaded = false;
         ChatRoomClearAllElements: ["904C924D"],
         ChatRoomCreateElement: ["76299AEC"],
         ChatRoomDrawFriendList: ["327DA1B8"],
-        ChatRoomKeyDown: ["9C7E973D"],
-        ChatRoomMessage: ["477574F9"],
+        ChatRoomKeyDown: ["977EC709"],
+        ChatRoomMessage: ["8186C1DB"],
         ChatRoomSendChat: ["385B9E9C"],
         ChatRoomSync: ["2590802E"],
         CheatFactor: ["594CFC45"],
@@ -260,7 +260,7 @@ window.BCX_Loaded = false;
         InformationSheetExit: ["75521907"],
         InformationSheetRun: ["19872251"],
         LoginMistressItems: ["984A6AD9"],
-        LoginResponse: ["67294772"],
+        LoginResponse: ["0EA3347D"],
         LoginStableItems: ["C3F50DD1"],
         MainHallWalk: ["E52553C4"],
         PrivateRansomStart: ["0E968EDD"],
@@ -1782,6 +1782,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     !firstTimeInit) {
                     const e = (_a = args[0]) !== null && _a !== void 0 ? _a : event;
                     e === null || e === void 0 ? void 0 : e.preventDefault();
+                    e === null || e === void 0 ? void 0 : e.stopImmediatePropagation();
                     chat.value = "." + CommandAutocomplete(chat.value.substr(1));
                 }
                 else if (KeyPress === 9 &&
@@ -1794,6 +1795,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     const currentTarget = ChatRoomTargetMemberNumber;
                     const e = (_b = args[0]) !== null && _b !== void 0 ? _b : event;
                     e === null || e === void 0 ? void 0 : e.preventDefault();
+                    e === null || e === void 0 ? void 0 : e.stopImmediatePropagation();
                     sendQuery("commandHint", currentValue, currentTarget).then(result => {
                         if (chat.value !== currentValue || ChatRoomTargetMemberNumber !== currentTarget)
                             return;
@@ -3057,6 +3059,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     const CURSES_ANTILOOP_SUSPEND_TIME = 600000;
     const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
     const CURSE_IGNORED_EFFECTS = ["Lock"];
+    function curseAllowItemCurseProperty(asset) {
+        var _a, _b, _c, _d;
+        return !!(asset.Extended ||
+            ((_a = asset.Effect) === null || _a === void 0 ? void 0 : _a.includes("Egged")) ||
+            ((_b = asset.AllowEffect) === null || _b === void 0 ? void 0 : _b.includes("Egged")) ||
+            ((_c = asset.Effect) === null || _c === void 0 ? void 0 : _c.includes("UseRemote")) ||
+            ((_d = asset.AllowEffect) === null || _d === void 0 ? void 0 : _d.includes("UseRemote")));
+    }
+    function curseDefaultItemCurseProperty(asset) {
+        return curseAllowItemCurseProperty(asset) && asset.Extended && asset.Archetype === "typed";
+    }
     function curseItem(Group, curseProperty, character) {
         if (!moduleIsEnabled(ModuleCategory.Curses))
             return false;
@@ -3086,13 +3099,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         const currentItem = InventoryGet(Player, Group);
         if (currentItem) {
             if (curseProperty === null) {
-                const Asset = currentItem.Asset;
-                if (Asset.Extended && Asset.Archetype === "typed") {
-                    curseProperty = true;
-                }
-                else {
-                    curseProperty = false;
-                }
+                curseProperty = curseDefaultItemCurseProperty(currentItem.Asset);
+            }
+            if (!curseAllowItemCurseProperty(currentItem.Asset) && curseProperty) {
+                console.warn(`BCX: Attempt to curse properties of item ${currentItem.Asset.Group.Name}:${currentItem.Asset.Name}, while not allowed`);
+                curseProperty = false;
             }
             const newCurse = modStorage.cursedItems[Group] = {
                 Name: currentItem.Asset.Name,
@@ -3334,6 +3345,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     const target = (argv[2] || "").toLocaleLowerCase();
                     if (target !== "yes" && target !== "no") {
                         return respond(`Expected yes or no`);
+                    }
+                    if (cursesInfo[group.Name] == null) {
+                        return respond(`Empty groups cannot have settings cursed`);
+                    }
+                    const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name].Name);
+                    if (asset && target === "yes" && !curseAllowItemCurseProperty(asset)) {
+                        return respond(`This item cannot have settings cursed`);
                     }
                     respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
                 }
@@ -5425,7 +5443,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         name: `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.Name} (${getVisibleGroupName(group)})`,
                         empty: false,
                         type: group.Clothing ? "clothing" : "item",
-                        propertiesCursed: v.curseProperties
+                        propertiesCursed: v.curseProperties,
+                        propertiesCursedShow: v.curseProperties || !item || curseAllowItemCurseProperty(item)
                     });
                 }
             }
@@ -5462,7 +5481,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 MainCanvas.textAlign = "center";
                 DrawButton(X + 470, Y, 150, 60, "∞", "White", "", "Permanent curse");
                 // item settings curse
-                if (!e.empty) {
+                if (!e.empty && e.propertiesCursedShow) {
                     const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
                     DrawButton(X + 650, Y, 60, 60, "", allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "#ddd", "", e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
                     DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 655, Y + 5, {
@@ -5499,7 +5518,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
                 const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
                 const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
-                if (!e.empty && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
+                if (!e.empty && e.propertiesCursedShow && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
                     this.character.curseItem(e.group, !e.propertiesCursed);
                     return;
                 }

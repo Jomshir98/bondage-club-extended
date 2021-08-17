@@ -19,6 +19,20 @@ const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 const CURSE_IGNORED_EFFECTS = ["Lock"];
 
+export function curseAllowItemCurseProperty(asset: Asset): boolean {
+	return !!(
+		asset.Extended ||
+		asset.Effect?.includes("Egged") ||
+		asset.AllowEffect?.includes("Egged") ||
+		asset.Effect?.includes("UseRemote") ||
+		asset.AllowEffect?.includes("UseRemote")
+	);
+}
+
+export function curseDefaultItemCurseProperty(asset: Asset): boolean {
+	return curseAllowItemCurseProperty(asset) && asset.Extended && asset.Archetype === "typed";
+}
+
 export function curseItem(Group: string, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
@@ -54,12 +68,12 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 	if (currentItem) {
 
 		if (curseProperty === null) {
-			const Asset = currentItem.Asset;
-			if (Asset.Extended && Asset.Archetype === "typed") {
-				curseProperty = true;
-			} else {
-				curseProperty = false;
-			}
+			curseProperty = curseDefaultItemCurseProperty(currentItem.Asset);
+		}
+
+		if (!curseAllowItemCurseProperty(currentItem.Asset) && curseProperty) {
+			console.warn(`BCX: Attempt to curse properties of item ${currentItem.Asset.Group.Name}:${currentItem.Asset.Name}, while not allowed`);
+			curseProperty = false;
 		}
 
 		const newCurse: CursedItemInfo = modStorage.cursedItems[Group] = {
@@ -300,6 +314,13 @@ export class ModuleCurses extends BaseModule {
 				const target = (argv[2] || "").toLocaleLowerCase();
 				if (target !== "yes" && target !== "no") {
 					return respond(`Expected yes or no`);
+				}
+				if (cursesInfo[group.Name] == null) {
+					return respond(`Empty groups cannot have settings cursed`);
+				}
+				const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name]!.Name);
+				if (asset && target === "yes" && !curseAllowItemCurseProperty(asset)) {
+					return respond(`This item cannot have settings cursed`);
 				}
 				respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {

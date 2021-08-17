@@ -5,6 +5,7 @@ import { GuiSubscreen } from "./subscreen";
 import { GuiCursesAdd } from "./curses_add";
 import { clamp } from "../utils";
 import { getVisibleGroupName, DrawImageEx } from "../utilsClub";
+import { curseAllowItemCurseProperty } from "../modules/curses";
 
 const PER_COLUMN_COUNT = 7;
 const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
@@ -15,6 +16,7 @@ interface CurseEntry {
 	empty: boolean;
 	type: string;
 	propertiesCursed?: boolean;
+	propertiesCursedShow?: boolean;
 }
 
 export class GuiCurses extends GuiSubscreen {
@@ -82,7 +84,8 @@ export class GuiCurses extends GuiSubscreen {
 					name: `${item?.Description ?? v.Name} (${getVisibleGroupName(group)})`,
 					empty: false,
 					type: group.Clothing ? "clothing" : "item",
-					propertiesCursed: v.curseProperties
+					propertiesCursed: v.curseProperties,
+					propertiesCursedShow: v.curseProperties || !item || curseAllowItemCurseProperty(item)
 				});
 			}
 		}
@@ -126,7 +129,7 @@ export class GuiCurses extends GuiSubscreen {
 			DrawButton(X + 470, Y, 150, 60, "∞", "White", "", "Permanent curse");
 
 			// item settings curse
-			if (!e.empty) {
+			if (!e.empty && e.propertiesCursedShow) {
 				const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
 
 				DrawButton(X + 650, Y, 60, 60, "",
@@ -176,7 +179,7 @@ export class GuiCurses extends GuiSubscreen {
 
 			const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
 
-			if (!e.empty && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
+			if (!e.empty && e.propertiesCursedShow && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
 				this.character.curseItem(e.group, !e.propertiesCursed);
 				return;
 			}

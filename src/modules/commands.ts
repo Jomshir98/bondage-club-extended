@@ -426,6 +426,7 @@ export class ModuleCommands extends BaseModule {
 			) {
 				const e = args[0] as KeyboardEvent ?? event;
 				e?.preventDefault();
+				e?.stopImmediatePropagation();
 
 				chat.value = "." + CommandAutocomplete(chat.value.substr(1));
 			} else if (
@@ -440,6 +441,7 @@ export class ModuleCommands extends BaseModule {
 				const currentTarget = ChatRoomTargetMemberNumber;
 				const e = args[0] as KeyboardEvent ?? event;
 				e?.preventDefault();
+				e?.stopImmediatePropagation();
 
 				sendQuery("commandHint", currentValue, currentTarget).then(result => {
 					if (chat.value !== currentValue || ChatRoomTargetMemberNumber !== currentTarget)

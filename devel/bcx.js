@@ -244,6 +244,7 @@ window.BCX_Loaded = false;
         ChatRoomCanLeave: ["7EDA9A86"],
         ChatRoomClearAllElements: ["904C924D"],
         ChatRoomCreateElement: ["76299AEC"],
+        ChatRoomDrawCharacterOverlay: ["1D912EBC"],
         ChatRoomDrawFriendList: ["327DA1B8"],
         ChatRoomKeyDown: ["977EC709"],
         ChatRoomMessage: ["8186C1DB"],
@@ -758,6 +759,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.InputTimeout = null;
             this.Status = this.StatusTypes.None;
         }
+        GetCharacterStatus(C) {
+            return C.ID === 0 ? ChatroomSM.Status : C.Status;
+        }
         SetInputElement(elem) {
             if (this.InputElement !== elem) {
                 this.InputElement = elem;
@@ -884,6 +888,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         next(args);
                     }
                 });
+                patchFunction("ChatRoomDrawCharacterOverlay", {
+                    'switch (C.Status)': 'switch (null)'
+                });
             }
             else {
                 patchFunction("ChatRoomDrawCharacterOverlay", {
@@ -908,33 +915,37 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                             Height: 50 * Zoom
                         });
                     }
-                    switch (C.ID === 0 ? ChatroomSM.Status : C.Status) {
-                        case ChatroomSM.StatusTypes.Typing:
-                            DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-                                Width: 50 * Zoom,
-                                Height: 50 * Zoom
-                            });
-                            break;
-                        case ChatroomSM.StatusTypes.Whisper:
-                            DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-                                Width: 50 * Zoom,
-                                Height: 50 * Zoom,
-                                Alpha: 0.5
-                            });
-                            break;
-                        case ChatroomSM.StatusTypes.Emote:
-                            DrawImageEx(icon_Emote, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-                                Width: 50 * Zoom,
-                                Height: 50 * Zoom
-                            });
-                            break;
-                    }
                 });
                 hookFunction("ChatRoomCreateElement", 0, (args, next) => {
                     next(args);
                     ChatroomSM.SetInputElement(document.getElementById("InputChat"));
                 });
             }
+            hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
+                next(args);
+                const [C, CharX, CharY, Zoom] = args;
+                switch (ChatroomSM.GetCharacterStatus(C)) {
+                    case ChatroomSM.StatusTypes.Typing:
+                        DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+                            Width: 50 * Zoom,
+                            Height: 50 * Zoom
+                        });
+                        break;
+                    case ChatroomSM.StatusTypes.Whisper:
+                        DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+                            Width: 50 * Zoom,
+                            Height: 50 * Zoom,
+                            Alpha: 0.5
+                        });
+                        break;
+                    case ChatroomSM.StatusTypes.Emote:
+                        DrawImageEx(icon_Emote, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+                            Width: 50 * Zoom,
+                            Height: 50 * Zoom
+                        });
+                        break;
+                }
+            });
             hookFunction("ChatRoomSendChat", 0, (args, next) => {
                 next(args);
                 ChatroomSM.InputEnd();

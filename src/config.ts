@@ -43,6 +43,7 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	ChatRoomCanLeave: ["7EDA9A86"],
 	ChatRoomClearAllElements: ["904C924D"],
 	ChatRoomCreateElement: ["76299AEC"],
+	ChatRoomDrawCharacterOverlay: ["1D912EBC"],
 	ChatRoomDrawFriendList: ["327DA1B8"],
 	ChatRoomKeyDown: ["977EC709"],
 	ChatRoomMessage: ["8186C1DB"],

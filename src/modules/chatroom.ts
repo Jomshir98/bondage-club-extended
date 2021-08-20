@@ -30,6 +30,10 @@ class ChatRoomStatusManager {
 		this.Status = this.StatusTypes.None;
 	}
 
+	GetCharacterStatus(C: Character): string | undefined {
+		return C.ID === 0 ? ChatroomSM.Status : C.Status;
+	}
+
 	SetInputElement(elem: HTMLTextAreaElement | null) {
 		if (this.InputElement !== elem) {
 			this.InputElement = elem;
@@ -162,6 +166,10 @@ export class ModuleChatroom extends BaseModule {
 					next(args);
 				}
 			});
+
+			patchFunction("ChatRoomDrawCharacterOverlay", {
+				'switch (C.Status)': 'switch (null)'
+			});
 		} else {
 			patchFunction("ChatRoomDrawCharacterOverlay", {
 				'DrawImageResize("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom);': ""
@@ -185,28 +193,6 @@ export class ModuleChatroom extends BaseModule {
 						Height: 50 * Zoom
 					});
 				}
-
-				switch (C.ID === 0 ? ChatroomSM.Status : C.Status) {
-					case ChatroomSM.StatusTypes.Typing:
-						DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-							Width: 50 * Zoom,
-							Height: 50 * Zoom
-						});
-						break;
-					case ChatroomSM.StatusTypes.Whisper:
-						DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-							Width: 50 * Zoom,
-							Height: 50 * Zoom,
-							Alpha: 0.5
-						});
-						break;
-					case ChatroomSM.StatusTypes.Emote:
-						DrawImageEx(icon_Emote, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-							Width: 50 * Zoom,
-							Height: 50 * Zoom
-						});
-						break;
-				}
 			});
 
 			hookFunction("ChatRoomCreateElement", 0, (args, next) => {
@@ -214,6 +200,33 @@ export class ModuleChatroom extends BaseModule {
 				ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
 			});
 		}
+
+		hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
+			next(args);
+
+			const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
+			switch (ChatroomSM.GetCharacterStatus(C)) {
+				case ChatroomSM.StatusTypes.Typing:
+					DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom
+					});
+					break;
+				case ChatroomSM.StatusTypes.Whisper:
+					DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom,
+						Alpha: 0.5
+					});
+					break;
+				case ChatroomSM.StatusTypes.Emote:
+					DrawImageEx(icon_Emote, CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom
+					});
+					break;
+			}
+		});
 
 		hookFunction("ChatRoomSendChat", 0, (args, next) => {
 			next(args);

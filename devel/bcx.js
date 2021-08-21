@@ -116,7 +116,9 @@ window.BCX_Loaded = false;
                 ElementScrollToEnd("TextAreaChatLog");
             if (Refocus)
                 ElementFocus("InputChat");
+            return div;
         }
+        return null;
     }
     function detectOtherMods() {
         const w = window;
@@ -213,6 +215,7 @@ window.BCX_Loaded = false;
         ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED", "C49AA2C1"],
         ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383"],
         ChatRoomDrawCharacterOverlay: ["D58A9AD3"],
+        ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomKeyDown: ["5FD37EC9", "111B6F0C", "33C77F12"],
         ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77"],
         ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
@@ -245,6 +248,7 @@ window.BCX_Loaded = false;
         ChatRoomClearAllElements: ["904C924D"],
         ChatRoomCreateElement: ["76299AEC"],
         ChatRoomDrawCharacterOverlay: ["1D912EBC"],
+        ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomDrawFriendList: ["327DA1B8"],
         ChatRoomKeyDown: ["977EC709"],
         ChatRoomMessage: ["8186C1DB"],
@@ -999,7 +1003,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     let firstTimeInit = false;
     let modStorageLocation = StorageLocations.OnlineSettings;
     function finalizeFirstTimeInit() {
+        if (!firstTimeInit)
+            return;
         firstTimeInit = false;
+        modStorage.chatShouldDisplayFirstTimeHelp = true;
         modStorageSync();
         console.log("BCX: First time init finalized");
         announceSelf(true);
@@ -1467,6 +1474,25 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     const COMMAND_GENERIC_ERROR = `The command failed to execute, likely because you are lacking the permission to give it.`;
     const commands = new Map();
     const whisperCommands = new Map();
+    let firstTimeHelp = null;
+    function CommandsShowFirstTimeHelp() {
+        if (!firstTimeHelp && modStorage.chatShouldDisplayFirstTimeHelp) {
+            firstTimeHelp = ChatRoomSendLocal(`BCX also provides helpful chat commands.\n` +
+                `All commands start with a dot ( . )\n` +
+                `The commands also support auto-completion: While writing a command, press 'Tab' to try automatically completing the currently typed word.\n` +
+                `Other club members can also use commands of your BCX, without needing BCX themselves. They will get a list of all commands they have permission using by whispering '!help' ( ! instead of . ) to you.\n` +
+                `Note: Messages colored like this text can only be seen by you and no one else.\n` +
+                `\n` +
+                `To dismiss this message, write '.he' and press 'Tab' to complete it to '.help', which will show you list of available commands.`);
+        }
+    }
+    function CommandsCompleteFirstTimeHelp() {
+        delete modStorage.chatShouldDisplayFirstTimeHelp;
+        if (firstTimeHelp) {
+            firstTimeHelp.remove();
+            firstTimeHelp = null;
+        }
+    }
     function registerCommand(name, description, callback, autocomplete = null) {
         name = name.toLocaleLowerCase();
         if (commands.has(name)) {
@@ -1766,6 +1792,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     }
     class ModuleCommands extends BaseModule {
         load() {
+            hookFunction("ChatRoomFirstTimeHelp", 0, (args, next) => {
+                next(args);
+                CommandsShowFirstTimeHelp();
+            });
+            hookFunction("ChatRoomClearAllElements", 1, (args, next) => {
+                firstTimeHelp = null;
+                return next(args);
+            });
             hookFunction("ChatRoomSendChat", 10, (args, next) => {
                 const chat = document.getElementById("InputChat");
                 if (chat && !firstTimeInit) {
@@ -1864,6 +1898,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 resolve(true, result);
             };
             registerCommand("help", "- display this help [alias: . ]", () => {
+                CommandsCompleteFirstTimeHelp();
                 ChatRoomSendLocal(`Available commands:\n` +
                     Array.from(commands.entries())
                         .filter(c => c[1].description !== null)
@@ -1887,14 +1922,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         .join("\n"));
                 return true;
             }, null, false);
-            registerWhisperCommand("hi", "- Make the character say hi", (argv, sender, respond) => {
-                ServerSend("ChatRoomChat", {
-                    Content: `Hi ${sender.Name}!`,
-                    Type: "Chat",
-                    Target: sender.MemberNumber
-                });
-                return true;
-            });
             const ANTIGARBLE_LEVELS = {
                 "0": 0,
                 "1": 1,

@@ -542,15 +542,6 @@ export class ModuleCommands extends BaseModule {
 			return true;
 		}, null, false);
 
-		registerWhisperCommand("hi", "- Make the character say hi", (argv, sender, respond) => {
-			ServerSend("ChatRoomChat", {
-				Content: `Hi ${sender.Name}!`,
-				Type: "Chat",
-				Target: sender.MemberNumber
-			});
-			return true;
-		});
-
 		const ANTIGARBLE_LEVELS: Record<string, number> = {
 			"0": 0,
 			"1": 1,

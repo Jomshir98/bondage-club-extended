@@ -81,7 +81,7 @@ export function ChatRoomActionMessage(msg: string) {
 	});
 }
 
-export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?: number) {
+export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?: number): HTMLDivElement | null {
 	// Adds the message and scrolls down unless the user has scrolled up
 	const div = document.createElement("div");
 	div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
@@ -104,7 +104,9 @@ export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?:
 		ChatLog.appendChild(div);
 		if (ShouldScrollDown) ElementScrollToEnd("TextAreaChatLog");
 		if (Refocus) ElementFocus("InputChat");
+		return div;
 	}
+	return null;
 }
 
 export function detectOtherMods() {

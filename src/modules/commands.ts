@@ -4,7 +4,7 @@ import { hookFunction } from "../patching";
 import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "../utils";
 import { BaseModule } from "./_BaseModule";
-import { firstTimeInit } from "./storage";
+import { firstTimeInit, modStorage } from "./storage";
 import { queryHandlers, sendQuery } from "./messaging";
 
 interface ICommandInfo {
@@ -41,6 +41,29 @@ export const COMMAND_GENERIC_ERROR = `The command failed to execute, likely beca
 const commands: Map<string, ICommandRaw | ICommandParsed> = new Map();
 const whisperCommands: Map<string, IWhisperCommand> = new Map();
 
+let firstTimeHelp: HTMLDivElement | null = null;
+
+export function CommandsShowFirstTimeHelp() {
+	if (!firstTimeHelp && modStorage.chatShouldDisplayFirstTimeHelp) {
+		firstTimeHelp = ChatRoomSendLocal(
+			`BCX also provides helpful chat commands.\n` +
+			`All commands start with a dot ( . )\n` +
+			`The commands also support auto-completion: While writing a command, press 'Tab' to try automatically completing the currently typed word.\n` +
+			`Other club members can also use commands of your BCX, without needing BCX themselves. They will get a list of all commands they have permission using by whispering '!help' ( ! instead of . ) to you.\n` +
+			`Note: Messages colored like this text can only be seen by you and no one else.\n` +
+			`\n` +
+			`To dismiss this message, write '.he' and press 'Tab' to complete it to '.help', which will show you list of available commands.`
+		);
+	}
+}
+
+function CommandsCompleteFirstTimeHelp() {
+	delete modStorage.chatShouldDisplayFirstTimeHelp;
+	if (firstTimeHelp) {
+		firstTimeHelp.remove();
+		firstTimeHelp = null;
+	}
+}
 
 export function registerCommand(name: string, description: string | null, callback: CommandHandlerRaw, autocomplete: CommandAutocompleterRaw | null = null) {
 	name = name.toLocaleLowerCase();
@@ -398,6 +421,16 @@ export function Command_selectGroupAutocomplete(selector: string, character: Cha
 
 export class ModuleCommands extends BaseModule {
 	load() {
+		hookFunction("ChatRoomFirstTimeHelp", 0, (args, next) => {
+			next(args);
+			CommandsShowFirstTimeHelp();
+		});
+
+		hookFunction("ChatRoomClearAllElements", 1, (args, next) => {
+			firstTimeHelp = null;
+			return next(args);
+		});
+
 		hookFunction("ChatRoomSendChat", 10, (args, next) => {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			if (chat && !firstTimeInit) {
@@ -512,6 +545,7 @@ export class ModuleCommands extends BaseModule {
 		};
 
 		registerCommand("help", "- display this help [alias: . ]", () => {
+			CommandsCompleteFirstTimeHelp();
 			ChatRoomSendLocal(
 				`Available commands:\n` +
 				Array.from(commands.entries())

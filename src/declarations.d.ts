@@ -63,6 +63,7 @@ interface CursedItemInfo {
 
 interface ModStorage {
 	preset: import("./constants").Preset;
+	chatShouldDisplayFirstTimeHelp?: true;
 	cheats: import("./constants").MiscCheat[];
 	disabledModules: import("./constants").ModuleCategory[];
 	permissions: PermissionsBundle;

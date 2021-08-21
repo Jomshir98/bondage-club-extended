@@ -17,7 +17,10 @@ export let firstTimeInit: boolean = false;
 export let modStorageLocation: StorageLocations = StorageLocations.OnlineSettings;
 
 export function finalizeFirstTimeInit() {
+	if (!firstTimeInit)
+		return;
 	firstTimeInit = false;
+	modStorage.chatShouldDisplayFirstTimeHelp = true;
 	modStorageSync();
 	console.log("BCX: First time init finalized");
 	announceSelf(true);

@@ -755,12 +755,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 Typing: "Typing",
                 Emote: "Emote",
                 Whisper: "Whisper",
+                DMS: "DMS",
                 // NMod
                 Action: "Action",
                 Afk: 'Afk'
             };
             this.InputElement = null;
             this.InputTimeout = null;
+            this.DMS = false;
             this.Status = this.StatusTypes.None;
         }
         GetCharacterStatus(C) {
@@ -778,6 +780,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         SetStatus(type, target = null) {
             if (!modStorage.typingIndicatorEnable) {
                 type = this.StatusTypes.None;
+            }
+            if (this.DMS) {
+                type = this.StatusTypes.DMS;
             }
             if (type !== this.Status) {
                 if (target !== null && this.Status === this.StatusTypes.Whisper) {
@@ -824,7 +829,25 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.SetStatus(this.StatusTypes.None);
         }
         unload() {
+            this.DMS = false;
             this.InputEnd();
+        }
+    }
+    function DMSKeydown(ev) {
+        if (ev.altKey && ev.code === "NumpadEnter") {
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+            if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+            }
+            ChatroomSM.DMS = true;
+            ChatroomSM.SetStatus(ChatroomSM.StatusTypes.DMS);
+        }
+    }
+    function DMSKeyup(ev) {
+        if (ChatroomSM.DMS && (ev.key === "Alt" || ev.code === "NumpadEnter")) {
+            ChatroomSM.DMS = false;
+            ChatroomSM.SetStatus(ChatroomSM.StatusTypes.None);
         }
     }
     let ChatroomSM;
@@ -948,8 +971,17 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                             Height: 50 * Zoom
                         });
                         break;
+                    case ChatroomSM.StatusTypes.DMS:
+                        DrawRect(CharX + 380 * Zoom, CharY + 53 * Zoom, 40 * Zoom, 40 * Zoom, "White");
+                        DrawImageEx("Icons/Import.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+                            Width: 50 * Zoom,
+                            Height: 50 * Zoom
+                        });
+                        break;
                 }
             });
+            window.addEventListener("keydown", DMSKeydown);
+            window.addEventListener("keyup", DMSKeyup);
             hookFunction("ChatRoomSendChat", 0, (args, next) => {
                 next(args);
                 ChatroomSM.InputEnd();
@@ -984,6 +1016,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             ServerSocket.off("ChatRoomMessageSync", queryAnnounce);
             sendHiddenMessage("goodbye", undefined);
+            window.removeEventListener("keydown", DMSKeydown);
+            window.removeEventListener("keyup", DMSKeyup);
         }
     }
     function announceSelf(request = false) {

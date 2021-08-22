@@ -15,6 +15,7 @@ class ChatRoomStatusManager {
 		Typing: "Typing",
 		Emote: "Emote",
 		Whisper: "Whisper",
+		DMS: "DMS",
 		// NMod
 		Action: "Action",
 		Afk: 'Afk'
@@ -25,6 +26,8 @@ class ChatRoomStatusManager {
 	private InputTimeout: number | null = null;
 
 	Status: string;
+
+	DMS: boolean = false;
 
 	constructor() {
 		this.Status = this.StatusTypes.None;
@@ -47,6 +50,9 @@ class ChatRoomStatusManager {
 	SetStatus(type: string, target: number | null = null) {
 		if (!modStorage.typingIndicatorEnable) {
 			type = this.StatusTypes.None;
+		}
+		if (this.DMS) {
+			type = this.StatusTypes.DMS;
 		}
 		if (type !== this.Status) {
 			if (target !== null && this.Status === this.StatusTypes.Whisper) {
@@ -91,7 +97,27 @@ class ChatRoomStatusManager {
 	}
 
 	unload() {
+		this.DMS = false;
 		this.InputEnd();
+	}
+}
+
+function DMSKeydown(ev: KeyboardEvent) {
+	if (ev.altKey && ev.code === "NumpadEnter") {
+		ev.preventDefault();
+		ev.stopImmediatePropagation();
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
+		ChatroomSM.DMS = true;
+		ChatroomSM.SetStatus(ChatroomSM.StatusTypes.DMS);
+	}
+}
+
+function DMSKeyup(ev: KeyboardEvent) {
+	if (ChatroomSM.DMS && (ev.key === "Alt" || ev.code === "NumpadEnter")) {
+		ChatroomSM.DMS = false;
+		ChatroomSM.SetStatus(ChatroomSM.StatusTypes.None);
 	}
 }
 
@@ -225,8 +251,18 @@ export class ModuleChatroom extends BaseModule {
 						Height: 50 * Zoom
 					});
 					break;
+				case ChatroomSM.StatusTypes.DMS:
+					DrawRect(CharX + 380 * Zoom, CharY + 53 * Zoom, 40 * Zoom, 40 * Zoom, "White");
+					DrawImageEx("Icons/Import.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom
+					});
+					break;
 			}
 		});
+
+		window.addEventListener("keydown", DMSKeydown);
+		window.addEventListener("keyup", DMSKeyup);
 
 		hookFunction("ChatRoomSendChat", 0, (args, next) => {
 			next(args);
@@ -267,6 +303,9 @@ export class ModuleChatroom extends BaseModule {
 		}
 		ServerSocket.off("ChatRoomMessageSync", queryAnnounce);
 		sendHiddenMessage("goodbye", undefined);
+
+		window.removeEventListener("keydown", DMSKeydown);
+		window.removeEventListener("keyup", DMSKeyup);
 	}
 }
 

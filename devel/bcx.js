@@ -2840,6 +2840,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     [Preset.slave]: [false, AccessLevel.clubowner]
                 }
             });
+            registerPermission("authority_view_roles", {
+                name: "Allow viewing list of owners/mistresses",
+                category: ModuleCategory.Authority,
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.mistress],
+                    [Preset.submissive]: [true, AccessLevel.whitelist],
+                    [Preset.slave]: [true, AccessLevel.public]
+                }
+            });
             queryHandlers.permissions = (sender, resolve) => {
                 resolve(true, permissionsMakeBundle());
             };
@@ -2902,8 +2912,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     console.warn(`BCX: rolesData query from ${sender}; not found in room`);
                     return resolve(false);
                 }
-                const accessLevel = getCharacterAccessLevel(character);
-                if (accessLevel > AccessLevel.mistress) {
+                if (!checkPermissionAccess("authority_view_roles", character)) {
                     return resolve(false);
                 }
                 resolve(true, getPlayerRoleData(character));
@@ -2926,8 +2935,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
                 const subcommand = (argv[0] || "").toLocaleLowerCase();
                 if (subcommand === "list") {
-                    const accessLevel = getCharacterAccessLevel(sender);
-                    if (accessLevel > AccessLevel.mistress) {
+                    if (!checkPermissionAccess("authority_view_roles", sender)) {
                         return respond(COMMAND_GENERIC_ERROR);
                     }
                     const data = getPlayerRoleData(sender);

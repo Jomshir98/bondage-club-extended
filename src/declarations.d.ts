@@ -18,6 +18,7 @@ type BCX_Permissions =
 	| "authority_mistress_remove"
 	| "authority_owner_add"
 	| "authority_owner_remove"
+	| "authority_view_roles"
 	| "log_view_normal"
 	| "log_view_protected"
 	| "log_configure"

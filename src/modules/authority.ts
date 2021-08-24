@@ -384,6 +384,16 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.slave]: [false, AccessLevel.clubowner]
 			}
 		});
+		registerPermission("authority_view_roles", {
+			name: "Allow viewing list of owners/mistresses",
+			category: ModuleCategory.Authority,
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.mistress],
+				[Preset.submissive]: [true, AccessLevel.whitelist],
+				[Preset.slave]: [true, AccessLevel.public]
+			}
+		});
 
 		queryHandlers.permissions = (sender, resolve) => {
 			resolve(true, permissionsMakeBundle());
@@ -450,8 +460,7 @@ export class ModuleAuthority extends BaseModule {
 				return resolve(false);
 			}
 
-			const accessLevel = getCharacterAccessLevel(character);
-			if (accessLevel > AccessLevel.mistress) {
+			if (!checkPermissionAccess("authority_view_roles", character)) {
 				return resolve(false);
 			}
 
@@ -480,8 +489,7 @@ export class ModuleAuthority extends BaseModule {
 		registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
 			if (subcommand === "list") {
-				const accessLevel = getCharacterAccessLevel(sender);
-				if (accessLevel > AccessLevel.mistress) {
+				if (!checkPermissionAccess("authority_view_roles", sender)) {
 					return respond(COMMAND_GENERIC_ERROR);
 				}
 				const data = getPlayerRoleData(sender);

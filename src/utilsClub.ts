@@ -223,3 +223,19 @@ export function getCharacterName(memberNumber: number, defaultText: string | nul
 		return friendName;
 	return defaultText;
 }
+
+export function itemColorsEquals(color1: null | undefined | string | string[], color2: null | undefined | string | string[]): boolean {
+	if (color1 == null) {
+		color1 = "Default";
+	} else if (Array.isArray(color1) && color1.length === 1) {
+		color1 = color1[0];
+	}
+
+	if (color2 == null) {
+		color2 = "Default";
+	} else if (Array.isArray(color2) && color2.length === 1) {
+		color2 = color2[0];
+	}
+
+	return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
+}

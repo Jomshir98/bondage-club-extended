@@ -30,6 +30,7 @@ declare function CommonArraysEqual(a1: any[], a2: any[]): boolean;
 
 // Character.js
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
+declare function CharacterLoadCanvas(C: Character): void;
 
 // Element.js
 declare function ElementIsScrolledToEnd(ID: string): boolean;
@@ -119,3 +120,10 @@ declare var InformationSheetSelection: Character | null;
 
 // Screens/Room/MainHall/MainHall.js
 declare var MainHallRandomEventOdds: number;
+
+// Screens/Character/ItemColor/ItemColor.js
+declare let ItemColorCharacter: Character | null;
+declare let ItemColorItem: Item | null;
+declare let ItemColorState: any;
+declare let ItemColorPickerIndices: any[];
+declare function ItemColorOnPickerChange(color: any): void;

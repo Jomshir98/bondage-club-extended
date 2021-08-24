@@ -1,7 +1,7 @@
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { arrayUnique, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorage, modStorageSync } from "./storage";
@@ -382,7 +382,7 @@ export class ModuleCurses extends BaseModule {
 				const curse = modStorage.cursedItems?.[result.item.Asset.Group.Name];
 				const character = getChatroomCharacter(params.sourceMemberNumber);
 				if (curse &&
-					!CommonColorsEqual(curse.Color ?? "Default", result.item.Color ?? "Default") &&
+					!itemColorsEquals(curse.Color, result.item.Color) &&
 					character &&
 					checkPermissionAccess("curses_color", character)
 				) {
@@ -397,6 +397,38 @@ export class ModuleCurses extends BaseModule {
 
 			return result;
 		}, ModuleCategory.Curses);
+
+		hookFunction("ColorPickerDraw", 0, (args, next) => {
+			const Callback = args[5];
+			if (Callback === ItemColorOnPickerChange) {
+				args[5] = (color: any) => {
+					if (ItemColorCharacter === Player && ItemColorItem) {
+						// Original code
+						const newColors = ItemColorState.colors.slice();
+						ItemColorPickerIndices.forEach(i => newColors[i] = color);
+						ItemColorItem.Color = newColors;
+						CharacterLoadCanvas(ItemColorCharacter);
+						// Curse color change code
+						const curse = modStorage.cursedItems?.[ItemColorItem.Asset.Group.Name];
+						if (curse &&
+							!itemColorsEquals(curse.Color, ItemColorItem.Color) &&
+							checkPermissionAccess("curses_color", getPlayerCharacter())
+						) {
+							if (ItemColorItem.Color && ItemColorItem.Color !== "Default") {
+								curse.Color = JSON.parse(JSON.stringify(ItemColorItem.Color));
+							} else {
+								delete curse.Color;
+							}
+							console.debug("Picker curse color change trigger");
+							modStorageSync();
+						}
+					} else {
+						Callback(color);
+					}
+				};
+			}
+			return next(args);
+		});
 
 		if (!isObject(modStorage.cursedItems)) {
 			modStorage.cursedItems = {};
@@ -574,7 +606,7 @@ export class ModuleCurses extends BaseModule {
 				curse.Property = curseProperty;
 			}
 
-			if (!CommonColorsEqual(curse.Color ?? "Default", currentItem.Color ?? "Default")) {
+			if (!itemColorsEquals(curse.Color, currentItem.Color)) {
 				if (curse.Color === undefined || curse.Color === "Default") {
 					delete currentItem.Color;
 				} else {

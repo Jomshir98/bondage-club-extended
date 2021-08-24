@@ -203,6 +203,21 @@ window.BCX_Loaded = false;
             return friendName;
         return defaultText;
     }
+    function itemColorsEquals(color1, color2) {
+        if (color1 == null) {
+            color1 = "Default";
+        }
+        else if (Array.isArray(color1) && color1.length === 1) {
+            color1 = color1[0];
+        }
+        if (color2 == null) {
+            color2 = "Default";
+        }
+        else if (Array.isArray(color2) && color2.length === 1) {
+            color2 = color2[0];
+        }
+        return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
+    }
 
     const VERSION = "0.3.2";
     const VERSION_CHECK_BOT = 37685;
@@ -3477,14 +3492,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return;
             }
             hookFunction("ValidationResolveModifyDiff", 0, (args, next) => {
-                var _a, _b, _c;
+                var _a;
                 const params = args[2];
                 const result = next(args);
                 if (params.C.ID === 0 && result.item) {
                     const curse = (_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[result.item.Asset.Group.Name];
                     const character = getChatroomCharacter(params.sourceMemberNumber);
                     if (curse &&
-                        !CommonColorsEqual((_b = curse.Color) !== null && _b !== void 0 ? _b : "Default", (_c = result.item.Color) !== null && _c !== void 0 ? _c : "Default") &&
+                        !itemColorsEquals(curse.Color, result.item.Color) &&
                         character &&
                         checkPermissionAccess("curses_color", character)) {
                         if (result.item.Color && result.item.Color !== "Default") {
@@ -3498,6 +3513,39 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 return result;
             }, ModuleCategory.Curses);
+            hookFunction("ColorPickerDraw", 0, (args, next) => {
+                const Callback = args[5];
+                if (Callback === ItemColorOnPickerChange) {
+                    args[5] = (color) => {
+                        var _a;
+                        if (ItemColorCharacter === Player && ItemColorItem) {
+                            // Original code
+                            const newColors = ItemColorState.colors.slice();
+                            ItemColorPickerIndices.forEach(i => newColors[i] = color);
+                            ItemColorItem.Color = newColors;
+                            CharacterLoadCanvas(ItemColorCharacter);
+                            // Curse color change code
+                            const curse = (_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[ItemColorItem.Asset.Group.Name];
+                            if (curse &&
+                                !itemColorsEquals(curse.Color, ItemColorItem.Color) &&
+                                checkPermissionAccess("curses_color", getPlayerCharacter())) {
+                                if (ItemColorItem.Color && ItemColorItem.Color !== "Default") {
+                                    curse.Color = JSON.parse(JSON.stringify(ItemColorItem.Color));
+                                }
+                                else {
+                                    delete curse.Color;
+                                }
+                                console.debug("Picker curse color change trigger");
+                                modStorageSync();
+                            }
+                        }
+                        else {
+                            Callback(color);
+                        }
+                    };
+                }
+                return next(args);
+            });
             if (!isObject(modStorage.cursedItems)) {
                 modStorage.cursedItems = {};
             }
@@ -3549,7 +3597,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.run();
         }
         cursesTick() {
-            var _a, _b, _c, _d, _e;
+            var _a, _b, _c;
             if (!ServerIsConnected || !modStorage.cursedItems)
                 return;
             if (this.suspendedUntil !== null) {
@@ -3659,7 +3707,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 else {
                     curse.Property = curseProperty;
                 }
-                if (!CommonColorsEqual((_c = curse.Color) !== null && _c !== void 0 ? _c : "Default", (_d = currentItem.Color) !== null && _d !== void 0 ? _d : "Default")) {
+                if (!itemColorsEquals(curse.Color, currentItem.Color)) {
                     if (curse.Color === undefined || curse.Color === "Default") {
                         delete currentItem.Color;
                     }
@@ -3679,7 +3727,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     else {
                         console.error(`BCX: No chat message for curse action ${changeType}`);
                     }
-                    const counter = ((_e = this.triggerCounts.get(group)) !== null && _e !== void 0 ? _e : 0) + 1;
+                    const counter = ((_c = this.triggerCounts.get(group)) !== null && _c !== void 0 ? _c : 0) + 1;
                     this.triggerCounts.set(group, counter);
                     if (counter >= CURSES_ANTILOOP_THRESHOLD) {
                         ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");

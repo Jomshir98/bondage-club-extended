@@ -3238,6 +3238,36 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         notifyOfChange();
         return true;
     }
+    function curseBatch(mode, includingEmpty, character) {
+        var _a;
+        if (character && !checkPermissionAccess("curses_curse", character))
+            return false;
+        let assetGroups;
+        if (mode === "items") {
+            assetGroups = AssetGroup.filter(i => i.Category === "Item" && (includingEmpty || InventoryGet(Player, i.Name)));
+        }
+        else if (mode === "clothes") {
+            assetGroups = AssetGroup.filter(i => i.Category === "Appearance" && i.Clothing && (includingEmpty || InventoryGet(Player, i.Name)));
+        }
+        else {
+            console.error(`BCX: Attempt to curse in invalid mode`, mode);
+            return false;
+        }
+        if (character) {
+            logMessage("curse_change", LogEntryType.plaintext, `${character} cursed all of ${Player.Name}'s ` +
+                `${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : "clothing"} slots`);
+            if (!character.isPlayer()) {
+                ChatRoomSendLocal(`${character} cursed all of your ${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : "clothing"} slots`);
+            }
+        }
+        for (const group of assetGroups) {
+            if ((_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[group.Name])
+                continue;
+            if (!curseItem(group.Name, null, null))
+                return false;
+        }
+        return true;
+    }
     function curseLift(Group, character) {
         var _a;
         if (!moduleIsEnabled(ModuleCategory.Curses))
@@ -3344,6 +3374,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const character = getChatroomCharacter(sender);
                 if (character && typeof data === "string") {
                     resolve(true, curseLift(data, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.curseBatch = (sender, resolve, data) => {
+                const character = getChatroomCharacter(sender);
+                if (character && isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
+                    resolve(true, curseBatch(data.mode, data.includingEmpty, character));
                 }
                 else {
                     resolve(false);
@@ -3962,6 +4001,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return data;
             });
         }
+        curseBatch(mode, includingEmpty) {
+            return sendQuery("curseBatch", { mode, includingEmpty }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
         hasAccessToPlayer() {
             return ServerChatRoomGetAllowItem(this.Character, Player);
         }
@@ -4039,6 +4086,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         curseLift(Group) {
             return Promise.resolve(curseLift(Group, this));
+        }
+        curseBatch(mode, includingEmpty) {
+            return Promise.resolve(curseBatch(mode, includingEmpty, this));
         }
     }
     const currentRoomCharacters = [];
@@ -5440,9 +5490,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.fill();
             DrawText(`Items`, 120, 165 + 34, "Black");
             MainCanvas.textAlign = "center";
-            // TODO: Put back in when logic is ready
-            // DrawButton(440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
-            // DrawButton(720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
+            DrawButton(440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
+            DrawButton(720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
             const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
             for (let i = 0; i < AssetGroupItems.length; i++) {
                 const row = i % 10;
@@ -5460,9 +5509,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.fill();
             DrawText(`Clothing`, 965, 165 + 34, "Black");
             MainCanvas.textAlign = "center";
-            // TODO: Put back in when logic is ready
-            // DrawButton(1285, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all clothes on the body at once");
-            // DrawButton(1565, 173, 200, 48, "Curse all", "White", undefined, "Curse all clothing slots at once");
+            DrawButton(1285, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all clothes on the body at once");
+            DrawButton(1565, 173, 200, 48, "Curse all", "White", undefined, "Curse all clothing slots at once");
             const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
             for (let i = 0; i < AssetGroupClothings.length; i++) {
                 const row = i % 10;
@@ -5495,6 +5543,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     return;
                 }
             }
+            if (MouseIn(440, 173, 265, 48)) {
+                this.character.curseBatch("items", false);
+                return;
+            }
+            if (MouseIn(720, 173, 200, 48)) {
+                this.character.curseBatch("items", true);
+                return;
+            }
             // clothing
             const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
             for (let i = 0; i < AssetGroupClothings.length; i++) {
@@ -5506,6 +5562,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     this.character.curseItem(group.Name, null);
                     return;
                 }
+            }
+            if (MouseIn(1285, 173, 265, 48)) {
+                this.character.curseBatch("clothes", false);
+                return;
+            }
+            if (MouseIn(1565, 173, 200, 48)) {
+                this.character.curseBatch("clothes", true);
+                return;
             }
         }
         Exit() {

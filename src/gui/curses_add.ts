@@ -55,9 +55,9 @@ export class GuiCursesAdd extends GuiSubscreen {
 		MainCanvas.fill();
 		DrawText(`Items`, 120, 165 + 34, "Black");
 		MainCanvas.textAlign = "center";
-		// TODO: Put back in when logic is ready
-		// DrawButton(440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
-		// DrawButton(720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
+
+		DrawButton(440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
+		DrawButton(720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
 
 		const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
 		for (let i = 0; i < AssetGroupItems.length; i++) {
@@ -83,9 +83,8 @@ export class GuiCursesAdd extends GuiSubscreen {
 		DrawText(`Clothing`, 965, 165 + 34, "Black");
 		MainCanvas.textAlign = "center";
 
-		// TODO: Put back in when logic is ready
-		// DrawButton(1285, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all clothes on the body at once");
-		// DrawButton(1565, 173, 200, 48, "Curse all", "White", undefined, "Curse all clothing slots at once");
+		DrawButton(1285, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all clothes on the body at once");
+		DrawButton(1565, 173, 200, 48, "Curse all", "White", undefined, "Curse all clothing slots at once");
 
 		const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
 		for (let i = 0; i < AssetGroupClothings.length; i++) {
@@ -132,6 +131,16 @@ export class GuiCursesAdd extends GuiSubscreen {
 			}
 		}
 
+		if (MouseIn(440, 173, 265, 48)) {
+			this.character.curseBatch("items", false);
+			return;
+		}
+
+		if (MouseIn(720, 173, 200, 48)) {
+			this.character.curseBatch("items", true);
+			return;
+		}
+
 		// clothing
 
 		const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
@@ -146,6 +155,16 @@ export class GuiCursesAdd extends GuiSubscreen {
 				this.character.curseItem(group.Name, null);
 				return;
 			}
+		}
+
+		if (MouseIn(1285, 173, 265, 48)) {
+			this.character.curseBatch("clothes", false);
+			return;
+		}
+
+		if (MouseIn(1565, 173, 200, 48)) {
+			this.character.curseBatch("clothes", true);
+			return;
 		}
 	}
 

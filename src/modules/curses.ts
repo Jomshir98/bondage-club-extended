@@ -115,6 +115,37 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 	return true;
 }
 
+export function curseBatch(mode: "items" | "clothes", includingEmpty: boolean, character: ChatroomCharacter | null): boolean {
+	if (character && !checkPermissionAccess("curses_curse", character))
+		return false;
+
+	let assetGroups: AssetGroup[];
+	if (mode === "items") {
+		assetGroups = AssetGroup.filter(i => i.Category === "Item" && (includingEmpty || InventoryGet(Player, i.Name)));
+	} else if (mode === "clothes") {
+		assetGroups = AssetGroup.filter(i => i.Category === "Appearance" && i.Clothing && (includingEmpty || InventoryGet(Player, i.Name)));
+	} else {
+		console.error(`BCX: Attempt to curse in invalid mode`, mode);
+		return false;
+	}
+
+	if (character) {
+		logMessage("curse_change", LogEntryType.plaintext, `${character} cursed all of ${Player.Name}'s ` +
+			`${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : "clothing"} slots`);
+		if (!character.isPlayer()) {
+			ChatRoomSendLocal(`${character} cursed all of your ${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : "clothing"} slots`);
+		}
+	}
+
+	for (const group of assetGroups) {
+		if (modStorage.cursedItems?.[group.Name])
+			continue;
+		if (!curseItem(group.Name, null, null))
+			return false;
+	}
+	return true;
+}
+
 export function curseLift(Group: string, character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
@@ -221,6 +252,14 @@ export class ModuleCurses extends BaseModule {
 			const character = getChatroomCharacter(sender);
 			if (character && typeof data === "string") {
 				resolve(true, curseLift(data, character));
+			} else {
+				resolve(false);
+			}
+		};
+		queryHandlers.curseBatch = (sender, resolve, data) => {
+			const character = getChatroomCharacter(sender);
+			if (character && isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
+				resolve(true, curseBatch(data.mode, data.includingEmpty, character));
 			} else {
 				resolve(false);
 			}

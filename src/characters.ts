@@ -1,7 +1,7 @@
 import { VERSION } from "./config";
 import { ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
-import { curseGetInfo, curseItem, curseLift } from "./modules/curses";
+import { curseGetInfo, curseItem, curseLift, curseBatch } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { getDisabledModules } from "./modules/presets";
@@ -262,6 +262,15 @@ export class ChatroomCharacter {
 		});
 	}
 
+	curseBatch(mode: "items" | "clothes", includingEmpty: boolean): Promise<boolean> {
+		return sendQuery("curseBatch", { mode, includingEmpty }, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
 	hasAccessToPlayer(): boolean {
 		return ServerChatRoomGetAllowItem(this.Character, Player);
 	}
@@ -357,6 +366,10 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override curseLift(Group: string): Promise<boolean> {
 		return Promise.resolve(curseLift(Group, this));
+	}
+
+	override curseBatch(mode: "items" | "clothes", includingEmpty: boolean): Promise<boolean> {
+		return Promise.resolve(curseBatch(mode, includingEmpty, this));
 	}
 }
 

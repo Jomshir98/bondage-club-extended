@@ -11,17 +11,23 @@ This has several advantages: There is no longer any need to install a browser ad
 BCX is a complete remake of Jomshir98's previous [JMod](https://github.com/jomshir98/testing) which was basically all about testing features Jomshir developed for the bondage club, before they were even part of any BETAs, such as BEEPs with messages attached or icon-based room movement.
 
 The extension is very modular and highly customizable. The following modules are planned:
-1. Basic - the base configuration of the extension, including managing permissions for other players (e.g. dommes)
-2. Behavior Logging - a record book for breaking any rules or other events of interest for yourself or the player's dommes
-3. Nicknaming Yourself - giving you a nickname that everyone in the club will see in the chat, profile, etc.
-4. Nicknaming Others - everything on showing you other players only with a nickname set by you or others
-5. Curses - cursing an item slot so a restraint or clothing stays on or off very securely
-6. Actions - one time actions such as forcing you into a pose
-7. Restrictions - toggleable conditions, e.g. forcing you continuously into a certain pose
-8. Rules - your dommes can create and set rules for you that will be monitored by the extension
-9. Speech - any actions, restrictions and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk
-10. Punishment - automatic punishments can be set by the dommes for breaking any of your rules
-11. Miscellaneous - other nifty features such as wardrobe outfit import/export (incl. restraints), bound wardrobe access, or a chat typing indicator on other BCX users
+| Module name      | Description                                                                                                      | Development status                                     |
+|------------------|------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
+| Basic            | The base configuration of the extension, including managing permissions for other players                        | Done                                                   |
+| Behavior Logging | A record book for breaking any rules or other events of interest for yourself or the player's dommes             | Done; More events will be added based on other modules |
+| Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned                                                |
+| Curses           | Cursing an item slot so a restraint or clothing stays on or off very securely                                    | Done; More features being worked on                    |
+| Actions          | One time actions such as forcing you into a pose                                                                 | Planned                                                |
+| Restrictions     | Toggleable conditions, e.g. forcing you continuously into a certain pose                                         | Being worked on                                        |
+| Rules            | Your dommes can create and set rules for you that will be monitored by the extension                             | Planned                                                |
+| Speech           | Any actions, restrictions and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk | Planned                                                |
+| Punishment       | Automatic punishments can be set by the dommes for breaking any of your rules                                    | Planned (low priority)                                 |
+| Miscellaneous    | Other nifty features.                                                                                            | Random features get added here randomly.               |
+
+### Miscellaneous module currently includes:
+- Wardrobe outfit import/export (incl. restraints)
+- Chat typing indicator visible by BCX users
+- Cheats to prevent loosing of Mistress status and to prevent random kidnappings, including private NPC ransom
 
 # Running the script
 
@@ -34,4 +40,4 @@ Associated Discord server:
 
 [![Discord image](https://discordapp.com/api/guilds/842082194209112074/widget.png?style=banner1)](https://discord.gg/SHJMjEh9VH)
 
-**THIS PAGE WAS LAST EDITED ON 05-06-2021**
+**THIS PAGE WAS LAST EDITED ON 26-08-2021**

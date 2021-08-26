@@ -100,6 +100,7 @@ window.BCX_Loaded = false;
         div.setAttribute("data-time", ChatRoomCurrentTime());
         div.setAttribute('data-sender', `${(_a = sender !== null && sender !== void 0 ? sender : Player.MemberNumber) !== null && _a !== void 0 ? _a : 0}`);
         div.style.background = "#6e6eff54";
+        div.style.margin = "0.15em 0";
         if (typeof msg === 'string')
             div.innerText = msg;
         else
@@ -219,7 +220,7 @@ window.BCX_Loaded = false;
         return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
     }
 
-    const VERSION = "0.3.2";
+    const VERSION = "0.4.0";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -3298,6 +3299,25 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         return false;
     }
+    function curseLiftAll(character) {
+        if (!moduleIsEnabled(ModuleCategory.Curses))
+            return false;
+        if (character && !checkPermissionAccess("curses_lift", character))
+            return false;
+        if (modStorage.cursedItems) {
+            if (character) {
+                logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
+                if (!character.isPlayer()) {
+                    ChatRoomSendLocal(`${character} lifted all curses on you`);
+                }
+            }
+            modStorage.cursedItems = {};
+            modStorageSync();
+            notifyOfChange();
+            return true;
+        }
+        return false;
+    }
     function curseGetInfo(character) {
         var _a;
         const res = {
@@ -3383,6 +3403,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const character = getChatroomCharacter(sender);
                 if (character && isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
                     resolve(true, curseBatch(data.mode, data.includingEmpty, character));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.curseLiftAll = (sender, resolve) => {
+                const character = getChatroomCharacter(sender);
+                if (character) {
+                    resolve(true, curseLiftAll(character));
                 }
                 else {
                     resolve(false);
@@ -4009,6 +4038,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return data;
             });
         }
+        curseLiftAll() {
+            return sendQuery("curseLiftAll", undefined, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
         hasAccessToPlayer() {
             return ServerChatRoomGetAllowItem(this.Character, Player);
         }
@@ -4089,6 +4126,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         curseBatch(mode, includingEmpty) {
             return Promise.resolve(curseBatch(mode, includingEmpty, this));
+        }
+        curseLiftAll() {
+            return Promise.resolve(curseLiftAll(this));
         }
     }
     const currentRoomCharacters = [];
@@ -5692,7 +5732,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.lineTo(954, 780);
             MainCanvas.stroke();
             MainCanvas.textAlign = "center";
-            DrawButton(120, 820, 400, 90, "Add new curse", this.curseData.allowCurse ? "White" : "#ddd", "", this.curseData.allowCurse ? "Place new curse on body, items or clothes" : "You have no permission to use this", !this.curseData.allowCurse);
+            DrawButton(120, 820, 400, 90, "Add new curse", this.curseData.allowCurse ? "White" : "#ddd", "", this.curseData.allowCurse ? "Place new curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowCurse);
+            DrawButton(750, 820, 400, 90, "Lift all curses", this.curseData.allowLift ? "White" : "#ddd", "", this.curseData.allowLift ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowLift);
             // Pagination
             const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
             DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
@@ -5721,6 +5762,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             if (this.curseData.allowCurse && MouseIn(120, 820, 400, 90)) {
                 return setSubscreen(new GuiCursesAdd(this.character));
+            }
+            if (this.curseData.allowLift && MouseIn(750, 820, 400, 90)) {
+                this.character.curseLiftAll();
+                return;
             }
             // Pagination
             const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);

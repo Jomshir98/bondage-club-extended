@@ -156,7 +156,10 @@ export class GuiCurses extends GuiSubscreen {
 		MainCanvas.textAlign = "center";
 
 		DrawButton(120, 820, 400, 90, "Add new curse", this.curseData.allowCurse ? "White" : "#ddd", "",
-			this.curseData.allowCurse ? "Place new curse on body, items or clothes" : "You have no permission to use this", !this.curseData.allowCurse);
+			this.curseData.allowCurse ? "Place new curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowCurse);
+
+		DrawButton(750, 820, 400, 90, "Lift all curses", this.curseData.allowLift ? "White" : "#ddd", "",
+			this.curseData.allowLift ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowLift);
 
 		// Pagination
 		const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
@@ -193,6 +196,11 @@ export class GuiCurses extends GuiSubscreen {
 
 		if (this.curseData.allowCurse && MouseIn(120, 820, 400, 90)) {
 			return setSubscreen(new GuiCursesAdd(this.character));
+		}
+
+		if (this.curseData.allowLift && MouseIn(750, 820, 400, 90)) {
+			this.character.curseLiftAll();
+			return;
 		}
 
 		// Pagination

@@ -177,6 +177,28 @@ export function curseLift(Group: string, character: ChatroomCharacter | null): b
 	return false;
 }
 
+export function curseLiftAll(character: ChatroomCharacter | null): boolean {
+	if (!moduleIsEnabled(ModuleCategory.Curses))
+		return false;
+
+	if (character && !checkPermissionAccess("curses_lift", character))
+		return false;
+
+	if (modStorage.cursedItems) {
+		if (character) {
+			logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
+			if (!character.isPlayer()) {
+				ChatRoomSendLocal(`${character} lifted all curses on you`);
+			}
+		}
+		modStorage.cursedItems = {};
+		modStorageSync();
+		notifyOfChange();
+		return true;
+	}
+	return false;
+}
+
 export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
 	const res: BCX_curseInfo = {
 		allowCurse: checkPermissionAccess("curses_curse", character),
@@ -260,6 +282,14 @@ export class ModuleCurses extends BaseModule {
 			const character = getChatroomCharacter(sender);
 			if (character && isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
 				resolve(true, curseBatch(data.mode, data.includingEmpty, character));
+			} else {
+				resolve(false);
+			}
+		};
+		queryHandlers.curseLiftAll = (sender, resolve) => {
+			const character = getChatroomCharacter(sender);
+			if (character) {
+				resolve(true, curseLiftAll(character));
 			} else {
 				resolve(false);
 			}

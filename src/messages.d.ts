@@ -105,6 +105,7 @@ type BCX_queries = {
 		boolean
 	];
 	curseLift: [string, boolean];
+	curseLiftAll: [undefined, boolean];
 	curseBatch: [
 		{
 			mode: "items" | "clothes";

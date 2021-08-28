@@ -4,6 +4,8 @@ import { hookFunction, patchFunction } from "../patching";
 import { MiscCheat } from "../constants";
 import { modStorage, modStorageSync } from "./storage";
 
+export const cheatChangeHooks: Partial<Record<MiscCheat, (enabled: boolean) => void>> = {};
+
 export function cheatIsEnabled(cheat: MiscCheat): boolean {
 	return Array.isArray(modStorage.cheats) && modStorage.cheats.includes(cheat);
 }
@@ -21,12 +23,18 @@ export function cheatSetEnabled(cheat: MiscCheat, enabled: boolean) {
 	} else {
 		modStorage.cheats = modStorage.cheats.filter(c => c !== cheat);
 	}
+	if (cheatChangeHooks[cheat]) {
+		cheatChangeHooks[cheat]!(enabled);
+	}
 	modStorageSync();
 }
 
 export function cheatToggle(cheat: MiscCheat) {
 	cheatSetEnabled(cheat, !cheatIsEnabled(cheat));
 }
+
+const MISTRESS_CHEAT_ONLY_ITEMS = ["MistressPadlock", "MistressPadlockKey", "MistressTimerPadlock"];
+const PANDORA_CHEAT_ONLY_ITEMS = ["PandoraPadlock", "PandoraPadlockKey"];
 
 export class ModuleMiscPatches extends BaseModule {
 	private o_Player_CanChange: (typeof Player.CanChange) | null = null;
@@ -76,8 +84,39 @@ export class ModuleMiscPatches extends BaseModule {
 
 		if (!NMod) {
 			patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
+			hookFunction("LoginMistressItems", 0, (args, next) => {
+				next(args);
+				if (!cheatIsEnabled(MiscCheat.GiveMistressKey) && !LogQuery("ClubMistress", "Management")) {
+					for (const item of MISTRESS_CHEAT_ONLY_ITEMS) {
+						InventoryDelete(Player, item, "ItemMisc", false);
+					}
+				}
+			});
+			cheatChangeHooks[MiscCheat.GiveMistressKey] = () => {
+				LoginMistressItems();
+				ServerPlayerInventorySync();
+			};
+
 			patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
 		}
+
+		cheatChangeHooks[MiscCheat.GivePandoraKey] = enabled => {
+			for (const item of PANDORA_CHEAT_ONLY_ITEMS) {
+				if (enabled) {
+					InventoryAdd(Player, item, "ItemMisc", false);
+				} else {
+					InventoryDelete(Player, item, "ItemMisc", false);
+				}
+			}
+			ServerPlayerInventorySync();
+		};
+
+		hookFunction("InfiltrationStealItems", 0, (args, next) => {
+			next(args);
+			if (cheatIsEnabled(MiscCheat.GivePandoraKey)) {
+				cheatChangeHooks[MiscCheat.GivePandoraKey]!(true);
+			}
+		});
 
 		// Cheats
 
@@ -90,6 +129,9 @@ export class ModuleMiscPatches extends BaseModule {
 	run() {
 		LoginMistressItems();
 		LoginStableItems();
+		if (cheatIsEnabled(MiscCheat.GivePandoraKey)) {
+			cheatChangeHooks[MiscCheat.GivePandoraKey]!(true);
+		}
 		ServerPlayerInventorySync();
 	}
 

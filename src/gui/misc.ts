@@ -33,6 +33,8 @@ export class GuiMisc extends GuiSubscreen {
 		DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
 		DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
 		DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status", cheatIsEnabled(MiscCheat.CantLoseMistress));
+		DrawCheckbox(125, 500, 64, 64, "Cheat: Give yourself the mistress padlock and its key", cheatIsEnabled(MiscCheat.GiveMistressKey));
+		DrawCheckbox(125, 600, 64, 64, "Cheat: Give yourself the pandora padlock and its key", cheatIsEnabled(MiscCheat.GivePandoraKey));
 	}
 
 	Click() {
@@ -52,6 +54,14 @@ export class GuiMisc extends GuiSubscreen {
 
 		if (MouseIn(125, 400, 64, 64)) {
 			cheatToggle(MiscCheat.CantLoseMistress);
+		}
+
+		if (MouseIn(125, 500, 64, 64)) {
+			cheatToggle(MiscCheat.GiveMistressKey);
+		}
+
+		if (MouseIn(125, 600, 64, 64)) {
+			cheatToggle(MiscCheat.GivePandoraKey);
 		}
 	}
 

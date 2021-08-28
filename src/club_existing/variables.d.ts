@@ -102,8 +102,13 @@ declare function AssetGet(Family: string, Group: string, Name: string): Asset | 
 declare function WardrobeAssetBundle(A: Item): ItemBundle;
 
 // Inventory.js
+declare function InventoryAdd(C: Character, NewItemName: string, NewItemGroup: string, Push?: boolean): void;
+declare function InventoryDelete(C: Character, DelItemName: string, DelItemGroup: string, Push?: boolean): void;
 declare function InventoryGet(C: Character, AssetGroup: string): Item | null;
 declare function InventoryRemove(C: Character, AssetGroup: string, Refresh?: boolean): void;
+
+// GameLog.js
+declare function LogQuery(QueryLogName: string, QueryLogGroup: string): boolean;
 
 // Mouse.js
 declare function MouseIn(Left: number, Top: number, Width: number, Height: number): boolean;

@@ -7,8 +7,11 @@ import { GuiCurses } from "./curses";
 import { GuiMisc } from "./misc";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";
+import { VERSION } from "../config";
+import { icon_ExternalLink } from "../resources";
+import { DrawImageEx } from "../utilsClub";
 
-const MAIN_MENU_ITEMS: {module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
+const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
 		module: ModuleCategory.Global,
 		onclick: (C) => {
@@ -82,10 +85,21 @@ export class GuiMainMenu extends GuiSubscreen {
 				isDisabled ? "Module is deactivated" : "", isDisabled);
 			DrawTextFit(MODULE_NAMES[e.module], 250 + 420 * PX, 205 + 110 * PY, 310, "Black");
 		}
+
+		MainCanvas.textAlign = "center";
+		DrawText(`Your BCX version: ${VERSION}`, 1450 + 400/2, 765, "Black", "");
+		DrawButton(1450, 800, 400, 90, "", "White", "", "Open changelog on GitHub");
+		DrawText(`View changelog`, 1450 + 350/2, 845, "Black", "");
+		DrawImageEx(icon_ExternalLink, 1770, 830, { Width: 30, Height: 30 });
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
+
+		// Changelog
+		if (MouseIn(1450, 800, 400, 90)) {
+			window.open("https://github.com/Jomshir98/bondage-club-extended/blob/stable/CHANGELOG.md", "_blank");
+		}
 
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];

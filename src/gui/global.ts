@@ -29,7 +29,7 @@ export class GuiGlobal extends GuiSubscreen {
 
 		DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
 
-		DrawButton(1605, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
+		DrawButton(1525, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
 	}
 
 	Click() {
@@ -43,7 +43,7 @@ export class GuiGlobal extends GuiSubscreen {
 			return;
 		}
 
-		if (MouseIn(1605, 800, 300, 90)) {
+		if (MouseIn(1525, 800, 300, 90)) {
 			setSubscreen(new GuiGlobalDialogClearData(this));
 			return;
 		}

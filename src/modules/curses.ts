@@ -9,7 +9,7 @@ import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction } from "../patching";
-import { COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
+import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 
 const CURSES_CHECK_INTERVAL = 2000;
 const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
@@ -349,10 +349,10 @@ export class ModuleCurses extends BaseModule {
 					}
 					respond(result);
 				} else {
-					respond(`Expected one of:\n` +
+					respond(Command_fixExclamationMark(sender, `Expected one of:\n` +
 						`!curses listgroups items\n` +
 						`!curses listgroups clothes`
-					);
+					));
 				}
 			} else if (subcommand === "curse") {
 				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
@@ -368,10 +368,10 @@ export class ModuleCurses extends BaseModule {
 				if (group === "items" || group === "clothes") {
 					return respond(curseBatch(group, subcommand === "curseall", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 				}
-				respond(`Expected one of:\n` +
+				respond(Command_fixExclamationMark(sender, `Expected one of:\n` +
 					`!curses ${subcommand} items\n` +
 					`!curses ${subcommand} clothes`
-				);
+				));
 			} else if (subcommand === "lift") {
 				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
 				if (typeof group === "string") {
@@ -404,7 +404,7 @@ export class ModuleCurses extends BaseModule {
 				}
 				respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
-				respond(`!curses usage:\n` +
+				respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
 					`!curses list - List all active curses and related info\n` +
 					`!curses listgroups <items|clothes> - Lists all possible item and/or clothing slots\n` +
 					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
@@ -413,7 +413,7 @@ export class ModuleCurses extends BaseModule {
 					`!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
 					`!curses liftall - Lifts (removes) all curses\n` +
 					`!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`
-				);
+				));
 			}
 		}, (argv, sender) => {
 			if (!moduleIsEnabled(ModuleCategory.Curses)) {

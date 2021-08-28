@@ -8,7 +8,7 @@ import { LogEntryType, logMessage } from "./log";
 import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, ModuleInitPhase, MODULE_NAMES, Preset } from "../constants";
-import { COMMAND_GENERIC_ERROR, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber, registerWhisperCommand } from "./commands";
+import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber, registerWhisperCommand } from "./commands";
 
 export enum AccessLevel {
 	self = 0,
@@ -515,11 +515,11 @@ export class ModuleAuthority extends BaseModule {
 				}
 				respond(editRole(subcommand, subcommand2, target, sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
 			} else {
-				respond(`!role usage:\n` +
+				respond(Command_fixExclamationMark(sender, `!role usage:\n` +
 					`!role list - List all current owners/mistresses\n` +
 					`!role owner <add/remove> <target> - Add or remove target as owner\n` +
 					`!role mistress <add/remove> <target> - Add or remove target as mistress`
-				);
+				));
 			}
 		}, (argv, sender) => {
 			if (argv.length <= 1) {
@@ -600,14 +600,14 @@ export class ModuleAuthority extends BaseModule {
 				}
 			} else if (subcommand !== "help") {
 				respond(`Unknown permission '${subcommand}'.\n` +
-					`To get list of permissions use '!permission list'`
+					`To get list of permissions use '${sender.isPlayer() ? "." : "!"}permission list'`
 				);
 			} else {
-				respond(`!permission usage:\n` +
+				respond(Command_fixExclamationMark(sender, `!permission usage:\n` +
 					`!permission list [filter] - List all permissions and their current settings\n` +
 					`!permission <name> selfaccess <yes|no> - Gives or revokes ${Player.Name}'s access to permission <name>\n` +
 					`!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the permission <name>`
-				);
+				));
 			}
 		}, (argv, sender) => {
 			const permissionNames = Object.keys(getPlayerPermissionSettings());

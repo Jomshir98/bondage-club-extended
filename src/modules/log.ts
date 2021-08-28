@@ -8,7 +8,7 @@ import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
 import { ModuleCategory, Preset } from "../constants";
-import { COMMAND_GENERIC_ERROR, registerWhisperCommand } from "./commands";
+import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, registerWhisperCommand } from "./commands";
 
 export const LOG_ENTRIES_LIMIT = 256;
 
@@ -464,12 +464,12 @@ export class ModuleLog extends BaseModule {
 						) ? `Ok.` : COMMAND_GENERIC_ERROR);
 				}
 			} else {
-				respond(`!log usage:\n` +
+				respond(Command_fixExclamationMark(sender, `!log usage:\n` +
 					`!log list [page] - List all visible logs\n` +
 					`!log delete <timestamp> - Deletes the log with the given <timestamp> (the number in parentheses in list)\n` +
 					`!log config - Shows the current logging settings for ${Player.Name}\n` +
 					`!log config <category> <no|protected|yes> - Sets visibility of the given config <category>`
-				);
+				));
 			}
 		}, (argv, sender) => {
 			if (argv.length <= 1) {

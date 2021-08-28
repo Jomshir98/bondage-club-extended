@@ -296,6 +296,10 @@ function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [st
 	return [msg, null];
 }
 
+export function Command_fixExclamationMark(sender: ChatroomCharacter, text: string): string {
+	return sender.isPlayer() ? text.replace(/^!/gm, ".") : text;
+}
+
 export function Command_pickAutocomplete(selector: string, options: string[]): string[] {
 	selector = selector.toLocaleLowerCase();
 	return options.filter(o => o.startsWith(selector));

@@ -1551,7 +1551,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
     function CommandsCompleteFirstTimeHelp() {
-        delete modStorage.chatShouldDisplayFirstTimeHelp;
+        if (modStorage.chatShouldDisplayFirstTimeHelp !== undefined) {
+            delete modStorage.chatShouldDisplayFirstTimeHelp;
+            modStorageSync();
+        }
         if (firstTimeHelp) {
             firstTimeHelp.remove();
             firstTimeHelp = null;

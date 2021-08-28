@@ -4,7 +4,7 @@ import { hookFunction } from "../patching";
 import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "../utils";
 import { BaseModule } from "./_BaseModule";
-import { firstTimeInit, modStorage } from "./storage";
+import { firstTimeInit, modStorage, modStorageSync } from "./storage";
 import { queryHandlers, sendQuery } from "./messaging";
 
 interface ICommandInfo {
@@ -58,7 +58,10 @@ export function CommandsShowFirstTimeHelp() {
 }
 
 function CommandsCompleteFirstTimeHelp() {
-	delete modStorage.chatShouldDisplayFirstTimeHelp;
+	if (modStorage.chatShouldDisplayFirstTimeHelp !== undefined) {
+		delete modStorage.chatShouldDisplayFirstTimeHelp;
+		modStorageSync();
+	}
 	if (firstTimeHelp) {
 		firstTimeHelp.remove();
 		firstTimeHelp = null;

@@ -9,7 +9,7 @@ import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction } from "../patching";
-import { COMMAND_GENERIC_ERROR, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
+import { COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 
 const CURSES_CHECK_INTERVAL = 2000;
 const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
@@ -363,6 +363,15 @@ export class ModuleCurses extends BaseModule {
 					return respond(`This group or item is already cursed`);
 				}
 				respond(curseItem(group.Name, null, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else if (subcommand === "curseworn" || subcommand === "curseall") {
+				const group = (argv[1] || "").toLocaleLowerCase();
+				if (group === "items" || group === "clothes") {
+					return respond(curseBatch(group, subcommand === "curseall", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+				}
+				respond(`Expected one of:\n` +
+					`!curses ${subcommand} items\n` +
+					`!curses ${subcommand} clothes`
+				);
 			} else if (subcommand === "lift") {
 				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
 				if (typeof group === "string") {
@@ -372,6 +381,8 @@ export class ModuleCurses extends BaseModule {
 					return respond(`This group or item is not cursed`);
 				}
 				respond(curseLift(group.Name, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else if (subcommand === "liftall") {
+				respond(curseLiftAll(sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else if (subcommand === "settings") {
 				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
 				if (typeof group === "string") {
@@ -397,7 +408,10 @@ export class ModuleCurses extends BaseModule {
 					`!curses list - List all active curses and related info\n` +
 					`!curses listgroups <items|clothes> - Lists all possible item and/or clothing slots\n` +
 					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
+					`!curses curseworn <items|clothes> - Place a curse on all currenty worn items/clothes\n` +
+					`!curses curseall <items|clothes> - Place a curse on all item/clothe slots, both used and empty\n` +
 					`!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
+					`!curses liftall - Lifts (removes) all curses\n` +
 					`!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`
 				);
 			}
@@ -406,8 +420,7 @@ export class ModuleCurses extends BaseModule {
 				return [];
 			}
 			if (argv.length <= 1) {
-				const c = argv[0].toLocaleLowerCase();
-				return ["list", "listgroups", "curse", "lift", "settings"].filter(i => i.startsWith(c));
+				return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "settings"]);
 			}
 
 			const subcommand = argv[0].toLocaleLowerCase();
@@ -415,11 +428,15 @@ export class ModuleCurses extends BaseModule {
 
 			if (subcommand === "listgroups") {
 				if (argv.length === 2) {
-					return ["items", "clothes"].filter(i => i.startsWith(argv[1].toLocaleLowerCase()));
+					return Command_pickAutocomplete(argv[1], ["items", "clothes"]);
 				}
 			} else if (subcommand === "curse") {
 				if (argv.length === 2) {
 					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				}
+			} else if (subcommand === "curseworn" || subcommand === "curseall") {
+				if (argv.length === 2) {
+					return Command_pickAutocomplete(argv[1], ["items", "clothes"]);
 				}
 			} else if (subcommand === "lift") {
 				if (argv.length === 2) {
@@ -429,7 +446,7 @@ export class ModuleCurses extends BaseModule {
 				if (argv.length === 2) {
 					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
 				} else if (argv.length === 3) {
-					return ["yes", "no"].filter(i => i.startsWith(argv[2].toLocaleLowerCase()));
+					return Command_pickAutocomplete(argv[2], ["yes", "no"]);
 				}
 			}
 

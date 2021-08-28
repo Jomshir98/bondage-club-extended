@@ -296,6 +296,11 @@ function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [st
 	return [msg, null];
 }
 
+export function Command_pickAutocomplete(selector: string, options: string[]): string[] {
+	selector = selector.toLocaleLowerCase();
+	return options.filter(o => o.startsWith(selector));
+}
+
 export function Command_selectCharacter(selector: string): ChatroomCharacter | string {
 	const characters = getAllCharactersInRoom();
 	if (/^[0-9]+$/.test(selector)) {

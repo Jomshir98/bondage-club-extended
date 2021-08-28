@@ -220,7 +220,7 @@ window.BCX_Loaded = false;
         return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
     }
 
-    const VERSION = "0.4.0";
+    const VERSION = "0.4.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -238,11 +238,13 @@ window.BCX_Loaded = false;
         ChatRoomSync: ["B67D8226"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["412422CC", "26C67608"],
+        ColorPickerDraw: ["D1E82FB3"],
         DialogDrawExpressionMenu: ["EEFB3D22"],
         DialogDrawItemMenu: ["7B1D71E9", "0199F25B", "D832A940"],
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD"],
+        InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
         InformationSheetRun: ["58B7879C", "A8A56ACA"],
@@ -272,11 +274,13 @@ window.BCX_Loaded = false;
         ChatRoomSync: ["2590802E"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["1ECB0CC4"],
+        ColorPickerDraw: ["FF93AF2E"],
         DialogDrawExpressionMenu: ["EEFB3D22"],
         DialogDrawItemMenu: ["05301080"],
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["455F5FDD"],
+        InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
         InformationSheetRun: ["19872251"],
@@ -512,8 +516,18 @@ window.BCX_Loaded = false;
     (function (MiscCheat) {
         MiscCheat[MiscCheat["BlockRandomEvents"] = 0] = "BlockRandomEvents";
         MiscCheat[MiscCheat["CantLoseMistress"] = 1] = "CantLoseMistress";
+        MiscCheat[MiscCheat["GiveMistressKey"] = 2] = "GiveMistressKey";
+        MiscCheat[MiscCheat["GivePandoraKey"] = 3] = "GivePandoraKey";
     })(MiscCheat || (MiscCheat = {}));
 
+    const icon_ExternalLink = `data:image/svg+xml;base64,
+PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
+Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAg
+MCAyMCAyMCI+DQogIDx0aXRsZT4NCiAgICBleHRlcm5hbCBsaW5rDQogIDwvdGl0bGU+DQogIDxw
+YXRoIGQ9Ik0xNyAxN0gzVjNoNVYxSDNhMiAyIDAgMCAwLTIgMnYxNGEyIDIgMCAwIDAgMiAyaDE0
+YTIgMiAwIDAgMCAyLTJ2LTVoLTJ6Ii8+DQogIDxwYXRoIGQ9Ik0xOSAxaC04bDMuMjkgMy4yOS01
+LjczIDUuNzMgMS40MiAxLjQyIDUuNzMtNS43M0wxOSA5VjF6Ii8+DQo8L3N2Zz4NCg==
+`.replaceAll("\n", "");
     const icon_Emote = `data:image/png;base64,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`;
     const icon_Typing = `data:image/png;base64,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`;
     const icon_NewMessage = `data:image/png;base64,
@@ -949,7 +963,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
                             Width: 50 * Zoom,
                             Height: 50 * Zoom,
-                            Alpha: Friend ? 1 : 0.5
+                            Alpha: Friend ? 1 : 0.7
                         });
                     }
                     else if (Friend && ChatRoomHideIconState === 0) {
@@ -1738,6 +1752,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         return [msg, null];
     }
+    function Command_fixExclamationMark(sender, text) {
+        return sender.isPlayer() ? text.replace(/^!/gm, ".") : text;
+    }
+    function Command_pickAutocomplete(selector, options) {
+        selector = selector.toLocaleLowerCase();
+        return options.filter(o => o.startsWith(selector));
+    }
     function Command_selectCharacter(selector) {
         const characters = getAllCharactersInRoom();
         if (/^[0-9]+$/.test(selector)) {
@@ -2409,11 +2430,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
                 else {
-                    respond(`!log usage:\n` +
+                    respond(Command_fixExclamationMark(sender, `!log usage:\n` +
                         `!log list [page] - List all visible logs\n` +
                         `!log delete <timestamp> - Deletes the log with the given <timestamp> (the number in parentheses in list)\n` +
                         `!log config - Shows the current logging settings for ${Player.Name}\n` +
-                        `!log config <category> <no|protected|yes> - Sets visibility of the given config <category>`);
+                        `!log config <category> <no|protected|yes> - Sets visibility of the given config <category>`));
                 }
             }, (argv, sender) => {
                 if (argv.length <= 1) {
@@ -2964,10 +2985,10 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     respond(editRole(subcommand, subcommand2, target, sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
                 }
                 else {
-                    respond(`!role usage:\n` +
+                    respond(Command_fixExclamationMark(sender, `!role usage:\n` +
                         `!role list - List all current owners/mistresses\n` +
                         `!role owner <add/remove> <target> - Add or remove target as owner\n` +
-                        `!role mistress <add/remove> <target> - Add or remove target as mistress`);
+                        `!role mistress <add/remove> <target> - Add or remove target as mistress`));
                 }
             }, (argv, sender) => {
                 if (argv.length <= 1) {
@@ -3052,13 +3073,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 else if (subcommand !== "help") {
                     respond(`Unknown permission '${subcommand}'.\n` +
-                        `To get list of permissions use '!permission list'`);
+                        `To get list of permissions use '${sender.isPlayer() ? "." : "!"}permission list'`);
                 }
                 else {
-                    respond(`!permission usage:\n` +
+                    respond(Command_fixExclamationMark(sender, `!permission usage:\n` +
                         `!permission list [filter] - List all permissions and their current settings\n` +
                         `!permission <name> selfaccess <yes|no> - Gives or revokes ${Player.Name}'s access to permission <name>\n` +
-                        `!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the permission <name>`);
+                        `!permission <name> lowestaccess <${Player.Name}|clubowner|owner|lover|mistress|whitelist|friend|public> - Sets the lowest permitted role for the permission <name>`));
                 }
             }, (argv, sender) => {
                 const permissionNames = Object.keys(getPlayerPermissionSettings());
@@ -3472,9 +3493,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         respond(result);
                     }
                     else {
-                        respond(`Expected one of:\n` +
+                        respond(Command_fixExclamationMark(sender, `Expected one of:\n` +
                             `!curses listgroups items\n` +
-                            `!curses listgroups clothes`);
+                            `!curses listgroups clothes`));
                     }
                 }
                 else if (subcommand === "curse") {
@@ -3487,6 +3508,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                     respond(curseItem(group.Name, null, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
                 }
+                else if (subcommand === "curseworn" || subcommand === "curseall") {
+                    const group = (argv[1] || "").toLocaleLowerCase();
+                    if (group === "items" || group === "clothes") {
+                        return respond(curseBatch(group, subcommand === "curseall", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                    }
+                    respond(Command_fixExclamationMark(sender, `Expected one of:\n` +
+                        `!curses ${subcommand} items\n` +
+                        `!curses ${subcommand} clothes`));
+                }
                 else if (subcommand === "lift") {
                     const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
                     if (typeof group === "string") {
@@ -3496,6 +3526,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         return respond(`This group or item is not cursed`);
                     }
                     respond(curseLift(group.Name, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                }
+                else if (subcommand === "liftall") {
+                    respond(curseLiftAll(sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
                 }
                 else if (subcommand === "settings") {
                     const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
@@ -3519,31 +3552,38 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
                 }
                 else {
-                    respond(`!curses usage:\n` +
+                    respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
                         `!curses list - List all active curses and related info\n` +
                         `!curses listgroups <items|clothes> - Lists all possible item and/or clothing slots\n` +
                         `!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
+                        `!curses curseworn <items|clothes> - Place a curse on all currenty worn items/clothes\n` +
+                        `!curses curseall <items|clothes> - Place a curse on all item/clothe slots, both used and empty\n` +
                         `!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
-                        `!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`);
+                        `!curses liftall - Lifts (removes) all curses\n` +
+                        `!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`));
                 }
             }, (argv, sender) => {
                 if (!moduleIsEnabled(ModuleCategory.Curses)) {
                     return [];
                 }
                 if (argv.length <= 1) {
-                    const c = argv[0].toLocaleLowerCase();
-                    return ["list", "listgroups", "curse", "lift", "settings"].filter(i => i.startsWith(c));
+                    return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "settings"]);
                 }
                 const subcommand = argv[0].toLocaleLowerCase();
                 const cursesInfo = curseGetInfo(sender).curses;
                 if (subcommand === "listgroups") {
                     if (argv.length === 2) {
-                        return ["items", "clothes"].filter(i => i.startsWith(argv[1].toLocaleLowerCase()));
+                        return Command_pickAutocomplete(argv[1], ["items", "clothes"]);
                     }
                 }
                 else if (subcommand === "curse") {
                     if (argv.length === 2) {
                         return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+                    }
+                }
+                else if (subcommand === "curseworn" || subcommand === "curseall") {
+                    if (argv.length === 2) {
+                        return Command_pickAutocomplete(argv[1], ["items", "clothes"]);
                     }
                 }
                 else if (subcommand === "lift") {
@@ -3556,7 +3596,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
                     }
                     else if (argv.length === 3) {
-                        return ["yes", "no"].filter(i => i.startsWith(argv[2].toLocaleLowerCase()));
+                        return Command_pickAutocomplete(argv[2], ["yes", "no"]);
                     }
                 }
                 return [];
@@ -5052,7 +5092,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return;
             }
             DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
-            DrawButton(1605, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
+            DrawButton(1525, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -5063,7 +5103,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 setSubscreen(new GuiGlobalModuleToggling());
                 return;
             }
-            if (MouseIn(1605, 800, 300, 90)) {
+            if (MouseIn(1525, 800, 300, 90)) {
                 setSubscreen(new GuiGlobalDialogClearData(this));
                 return;
             }
@@ -5787,6 +5827,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    const cheatChangeHooks = {};
     function cheatIsEnabled(cheat) {
         return Array.isArray(modStorage.cheats) && modStorage.cheats.includes(cheat);
     }
@@ -5803,11 +5844,16 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         else {
             modStorage.cheats = modStorage.cheats.filter(c => c !== cheat);
         }
+        if (cheatChangeHooks[cheat]) {
+            cheatChangeHooks[cheat](enabled);
+        }
         modStorageSync();
     }
     function cheatToggle(cheat) {
         cheatSetEnabled(cheat, !cheatIsEnabled(cheat));
     }
+    const MISTRESS_CHEAT_ONLY_ITEMS = ["MistressPadlock", "MistressPadlockKey", "MistressTimerPadlock"];
+    const PANDORA_CHEAT_ONLY_ITEMS = ["PandoraPadlock", "PandoraPadlockKey"];
     class ModuleMiscPatches extends BaseModule {
         constructor() {
             super(...arguments);
@@ -5849,8 +5895,37 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             const { NMod } = detectOtherMods();
             if (!NMod) {
                 patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
+                hookFunction("LoginMistressItems", 0, (args, next) => {
+                    next(args);
+                    if (!cheatIsEnabled(MiscCheat.GiveMistressKey) && !LogQuery("ClubMistress", "Management")) {
+                        for (const item of MISTRESS_CHEAT_ONLY_ITEMS) {
+                            InventoryDelete(Player, item, "ItemMisc", false);
+                        }
+                    }
+                });
+                cheatChangeHooks[MiscCheat.GiveMistressKey] = () => {
+                    LoginMistressItems();
+                    ServerPlayerInventorySync();
+                };
                 patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
             }
+            cheatChangeHooks[MiscCheat.GivePandoraKey] = enabled => {
+                for (const item of PANDORA_CHEAT_ONLY_ITEMS) {
+                    if (enabled) {
+                        InventoryAdd(Player, item, "ItemMisc", false);
+                    }
+                    else {
+                        InventoryDelete(Player, item, "ItemMisc", false);
+                    }
+                }
+                ServerPlayerInventorySync();
+            };
+            hookFunction("InfiltrationStealItems", 0, (args, next) => {
+                next(args);
+                if (cheatIsEnabled(MiscCheat.GivePandoraKey)) {
+                    cheatChangeHooks[MiscCheat.GivePandoraKey](true);
+                }
+            });
             // Cheats
             this.o_Player_CanChange = Player.CanChange;
             Player.CanChange = () => { var _a; return allowMode || !!((_a = this.o_Player_CanChange) === null || _a === void 0 ? void 0 : _a.call(Player)); };
@@ -5859,6 +5934,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         run() {
             LoginMistressItems();
             LoginStableItems();
+            if (cheatIsEnabled(MiscCheat.GivePandoraKey)) {
+                cheatChangeHooks[MiscCheat.GivePandoraKey](true);
+            }
             ServerPlayerInventorySync();
         }
         unload() {
@@ -5886,6 +5964,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
             DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
             DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status", cheatIsEnabled(MiscCheat.CantLoseMistress));
+            DrawCheckbox(125, 500, 64, 64, "Cheat: Give yourself the mistress padlock and its key", cheatIsEnabled(MiscCheat.GiveMistressKey));
+            DrawCheckbox(125, 600, 64, 64, "Cheat: Give yourself the pandora padlock and its key", cheatIsEnabled(MiscCheat.GivePandoraKey));
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -5901,6 +5981,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             if (MouseIn(125, 400, 64, 64)) {
                 cheatToggle(MiscCheat.CantLoseMistress);
+            }
+            if (MouseIn(125, 500, 64, 64)) {
+                cheatToggle(MiscCheat.GiveMistressKey);
+            }
+            if (MouseIn(125, 600, 64, 64)) {
+                cheatToggle(MiscCheat.GivePandoraKey);
             }
         }
         Exit() {
@@ -5970,10 +6056,19 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", isDisabled ? "#ddd" : "White", MODULE_ICONS[e.module], isDisabled ? "Module is deactivated" : "", isDisabled);
                 DrawTextFit(MODULE_NAMES[e.module], 250 + 420 * PX, 205 + 110 * PY, 310, "Black");
             }
+            MainCanvas.textAlign = "center";
+            DrawText(`Your BCX version: ${VERSION}`, 1450 + 400 / 2, 765, "Black", "");
+            DrawButton(1450, 800, 400, 90, "", "White", "", "Open changelog on GitHub");
+            DrawText(`View changelog`, 1450 + 350 / 2, 845, "Black", "");
+            DrawImageEx(icon_ExternalLink, 1770, 830, { Width: 30, Height: 30 });
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
                 return this.Exit();
+            // Changelog
+            if (MouseIn(1450, 800, 400, 90)) {
+                window.open("https://github.com/Jomshir98/bondage-club-extended/blob/stable/CHANGELOG.md", "_blank");
+            }
             for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
                 const e = MAIN_MENU_ITEMS[i];
                 const PX = Math.floor(i / 7);

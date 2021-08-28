@@ -211,7 +211,7 @@ export class ModuleChatroom extends BaseModule {
 					DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
-						Alpha: Friend ? 1 : 0.5
+						Alpha: Friend ? 1 : 0.7
 					});
 				} else if (Friend && ChatRoomHideIconState === 0) {
 					DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {

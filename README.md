@@ -15,19 +15,18 @@ The extension is very modular and highly customizable. The following modules are
 |------------------|------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
 | Basic            | The base configuration of the extension, including managing permissions for other players                        | Done                                                   |
 | Behavior Logging | A record book for breaking any rules or other events of interest for yourself or the player's dommes             | Done; More events will be added based on other modules |
-| Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned                                                |
+| Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned (low priority)                                 |
 | Curses           | Cursing an item slot so a restraint or clothing stays on or off very securely                                    | Done; More features being worked on                    |
-| Actions          | One time actions such as forcing you into a pose                                                                 | Planned                                                |
-| Restrictions     | Toggleable conditions, e.g. forcing you continuously into a certain pose                                         | Being worked on                                        |
-| Rules            | Your dommes can create and set rules for you that will be monitored by the extension                             | Planned                                                |
-| Speech           | Any actions, restrictions and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk | Planned                                                |
+| Commands         | One time actions such as forcing you into a pose                                                                 | Planned                                                |
+| Rules            | Toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage                     | Being worked on                                        |
+| Speech           | Any commands and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk              | Planned                                                |
 | Punishment       | Automatic punishments can be set by the dommes for breaking any of your rules                                    | Planned (low priority)                                 |
 | Miscellaneous    | Other nifty features.                                                                                            | Random features get added here randomly.               |
 
 ### Miscellaneous module currently includes:
 - Wardrobe outfit import/export (incl. restraints)
 - Chat typing indicator visible by BCX users
-- Cheats to prevent loosing of Mistress status and to prevent random kidnappings, including private NPC ransom
+- Cheats to give special locks/keys, prevent loosing of Mistress status and to prevent random kidnappings, including private NPC ransom
 
 # Running the script
 
@@ -40,4 +39,4 @@ Associated Discord server:
 
 [![Discord image](https://discordapp.com/api/guilds/842082194209112074/widget.png?style=banner1)](https://discord.gg/SHJMjEh9VH)
 
-**THIS PAGE WAS LAST EDITED ON 26-08-2021**
+**THIS PAGE WAS LAST EDITED ON 29-08-2021**

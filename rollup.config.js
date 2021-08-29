@@ -4,6 +4,8 @@ import typescript from "@rollup/plugin-typescript";
 import progress from "rollup-plugin-progress";
 import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
+import resolve from "@rollup/plugin-node-resolve";
+
 
 /** @type {import("rollup").RollupOptions} */
 const config = {
@@ -27,6 +29,7 @@ window.BCX_Loaded = false;
 	treeshake: false,
 	plugins: [
 		progress({ clearLine: true }),
+		resolve(),
 		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
 		copy({
 			targets: [{ src: 'static/*', dest: 'dist' }]

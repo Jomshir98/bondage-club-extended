@@ -62,6 +62,43 @@ interface CursedItemInfo {
 	Property?: ItemProperties;
 }
 
+interface ConditionsCategoryKeys {
+	curses: string;
+	rules: string;
+}
+
+type ConditionsCategories = keyof ConditionsCategoryKeys;
+
+interface ConditionsCategorySpecificData {
+	curses: CursedItemInfo | null;
+	rules: null;
+}
+
+interface ConditionsCategoryPublicData {
+	curses: {
+		Name: string;
+		curseProperties: boolean;
+	} | null;
+	rules: null;
+}
+
+interface ConditionsConditionData<category extends ConditionsCategories = ConditionsCategories> {
+	active: boolean;
+	data: ConditionsCategorySpecificData[category];
+}
+
+interface ConditionsConditionPublicData<category extends ConditionsCategories = ConditionsCategories> {
+	active: boolean;
+	data: ConditionsCategoryPublicData[category];
+}
+
+type ConditionsCategoryRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionData<category>>;
+type ConditionsCategoryPublicRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionPublicData<category>>;
+
+type ConditionsStorage = Partial<{
+	[category in ConditionsCategories]: ConditionsCategoryRecord<category>;
+}>;
+
 interface ModStorage {
 	preset: import("./constants").Preset;
 	chatShouldDisplayFirstTimeHelp?: true;
@@ -75,6 +112,8 @@ interface ModStorage {
 	typingIndicatorEnable: boolean;
 	/**
 	 * Maps item group to a cursed item, if there is any, otherwise undefined. Null if the group is cursed to be empty
+	 * @deprecated
 	 */
 	cursedItems: Record<string, CursedItemInfo | null>;
+	conditions: ConditionsStorage;
 }

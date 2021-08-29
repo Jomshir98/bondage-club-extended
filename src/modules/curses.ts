@@ -4,14 +4,17 @@ import { arrayUnique, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
-import { modStorage, modStorageSync } from "./storage";
+import { modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
+import { ConditionsGetCategoryData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsSetCondition } from "./conditions";
 
-const CURSES_CHECK_INTERVAL = 2000;
+import cloneDeep from "lodash-es/cloneDeep";
+import isEqual from "lodash-es/isEqual";
+
 const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
 const CURSES_ANTILOOP_THRESHOLD = 10;
 const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
@@ -39,7 +42,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 
 	const group = AssetGroup.find(g => g.Name === Group);
 
-	if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null) || !modStorage.cursedItems) {
+	if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null)) {
 		console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
 		return false;
 	}
@@ -50,7 +53,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 	}
 
 	if (character) {
-		const existingCurse = modStorage.cursedItems[Group];
+		const existingCurse = ConditionsGetCondition("curses", Group);
 		if (existingCurse) {
 			if (curseProperty === null) {
 				return false;
@@ -76,24 +79,28 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 			curseProperty = false;
 		}
 
-		const newCurse: CursedItemInfo = modStorage.cursedItems[Group] = {
+		const newCurse: CursedItemInfo = {
 			Name: currentItem.Asset.Name,
 			curseProperty
 		};
 		if (currentItem.Color && currentItem.Color !== "Default") {
-			newCurse.Color = JSON.parse(JSON.stringify(currentItem.Color));
+			newCurse.Color = cloneDeep(currentItem.Color);
 		}
 		if (currentItem.Difficulty) {
 			newCurse.Difficulty = currentItem.Difficulty;
 		}
 		if (currentItem.Property && Object.keys(currentItem.Property).filter(i => !CURSE_IGNORED_PROPERTIES.includes(i)).length !== 0) {
-			newCurse.Property = JSON.parse(JSON.stringify(currentItem.Property));
+			newCurse.Property = cloneDeep(currentItem.Property);
 			if (newCurse.Property) {
 				for (const key of CURSE_IGNORED_PROPERTIES) {
 					delete newCurse.Property[key];
 				}
 			}
 		}
+		ConditionsSetCondition("curses", Group, {
+			active: true,
+			data: newCurse
+		});
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
 			if (!character.isPlayer()) {
@@ -101,7 +108,10 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 			}
 		}
 	} else {
-		modStorage.cursedItems[Group] = null;
+		ConditionsSetCondition("curses", Group, {
+			active: true,
+			data: null
+		});
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
 			if (!character.isPlayer()) {
@@ -138,7 +148,7 @@ export function curseBatch(mode: "items" | "clothes", includingEmpty: boolean, c
 	}
 
 	for (const group of assetGroups) {
-		if (modStorage.cursedItems?.[group.Name])
+		if (ConditionsGetCondition("curses", group.Name))
 			continue;
 		if (!curseItem(group.Name, null, null))
 			return false;
@@ -153,10 +163,11 @@ export function curseLift(Group: string, character: ChatroomCharacter | null): b
 	if (character && !checkPermissionAccess("curses_lift", character))
 		return false;
 
-	if (modStorage.cursedItems && modStorage.cursedItems[Group] !== undefined) {
+	const curse = ConditionsGetCondition("curses", Group);
+	if (curse) {
 		const group = AssetGroup.find(g => g.Name === Group);
 		if (character && group) {
-			const itemName = modStorage.cursedItems[Group] && AssetGet(Player.AssetFamily, Group, modStorage.cursedItems[Group]!.Name)?.Description;
+			const itemName = curse.data && AssetGet(Player.AssetFamily, Group, curse.data.Name)?.Description;
 			if (itemName) {
 				logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
 				if (!character.isPlayer()) {
@@ -169,9 +180,7 @@ export function curseLift(Group: string, character: ChatroomCharacter | null): b
 				}
 			}
 		}
-		delete modStorage.cursedItems[Group];
-		modStorageSync();
-		notifyOfChange();
+		ConditionsRemoveCondition("curses", Group);
 		return true;
 	}
 	return false;
@@ -184,19 +193,14 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 	if (character && !checkPermissionAccess("curses_lift", character))
 		return false;
 
-	if (modStorage.cursedItems) {
-		if (character) {
-			logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
-			if (!character.isPlayer()) {
-				ChatRoomSendLocal(`${character} lifted all curses on you`);
-			}
+	if (character) {
+		logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
+		if (!character.isPlayer()) {
+			ChatRoomSendLocal(`${character} lifted all curses on you`);
 		}
-		modStorage.cursedItems = {};
-		modStorageSync();
-		notifyOfChange();
-		return true;
 	}
-	return false;
+	ConditionsRemoveCondition("curses", Object.keys(ConditionsGetCategoryData("curses")));
+	return true;
 }
 
 export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
@@ -206,10 +210,10 @@ export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
 		curses: {}
 	};
 
-	for (const [group, info] of Object.entries(modStorage.cursedItems ?? {})) {
-		res.curses[group] = info === null ? null : {
-			Name: info.Name,
-			curseProperties: info.curseProperty
+	for (const [group, info] of Object.entries(ConditionsGetCategoryData("curses"))) {
+		res.curses[group] = info.data === null ? null : {
+			Name: info.data.Name,
+			curseProperties: info.data.curseProperty
 		};
 	}
 
@@ -217,7 +221,6 @@ export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
 }
 
 export class ModuleCurses extends BaseModule {
-	private timer: number | null = null;
 	private resetTimer: number | null = null;
 	private triggerCounts: Map<string, number> = new Map();
 	private suspendedUntil: number | null = null;
@@ -452,11 +455,53 @@ export class ModuleCurses extends BaseModule {
 
 			return [];
 		});
+
+		ConditionsRegisterCategory("curses", {
+			category: ModuleCategory.Curses,
+			loadValidateCondition: (group, data) => {
+				const info = data.data;
+				if (!AssetGroup.some(g => g.Name === group)) {
+					console.warn(`BCX: Unknown cursed group ${group}, removing it`, info);
+					return false;
+				}
+
+				if (info === null)
+					return true;
+
+				if (!isObject(info) ||
+					typeof info.Name !== "string" ||
+					typeof info.curseProperty !== "boolean"
+				) {
+					console.error(`BCX: Bad data for cursed item in group ${group}, removing it`, info);
+					return false;
+				}
+
+				if (AssetGet("Female3DCG", group, info.Name) == null) {
+					console.warn(`BCX: Unknown cursed item ${group}:${info.Name}, removing it`, info);
+					return false;
+				}
+				return true;
+			},
+			tickHandler: this.curseTick.bind(this),
+			makePublicData: (group, data) => {
+				if (data.data === null) {
+					return null;
+				}
+				return {
+					Name: data.data.Name,
+					curseProperties: data.data.curseProperty
+				};
+			},
+			validatePublicData: (group, data) =>
+				data === null ||
+				isObject(data) &&
+				typeof data.Name === "string" &&
+				typeof data.curseProperties === "boolean"
+		});
 	}
 
 	load() {
 		if (!moduleIsEnabled(ModuleCategory.Curses)) {
-			delete modStorage.cursedItems;
 			return;
 		}
 
@@ -465,7 +510,8 @@ export class ModuleCurses extends BaseModule {
 			const result = next(args) as ItemDiffResolution;
 
 			if (params.C.ID === 0 && result.item) {
-				const curse = modStorage.cursedItems?.[result.item.Asset.Group.Name];
+				const condition = ConditionsGetCondition("curses", result.item.Asset.Group.Name);
+				const curse = condition?.data;
 				const character = getChatroomCharacter(params.sourceMemberNumber);
 				if (curse &&
 					!itemColorsEquals(curse.Color, result.item.Color) &&
@@ -473,7 +519,7 @@ export class ModuleCurses extends BaseModule {
 					checkPermissionAccess("curses_color", character)
 				) {
 					if (result.item.Color && result.item.Color !== "Default") {
-						curse.Color = JSON.parse(JSON.stringify(result.item.Color));
+						curse.Color = cloneDeep(result.item.Color);
 					} else {
 						delete curse.Color;
 					}
@@ -495,13 +541,14 @@ export class ModuleCurses extends BaseModule {
 						ItemColorItem.Color = newColors;
 						CharacterLoadCanvas(ItemColorCharacter);
 						// Curse color change code
-						const curse = modStorage.cursedItems?.[ItemColorItem.Asset.Group.Name];
+						const condition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
+						const curse = condition?.data;
 						if (curse &&
 							!itemColorsEquals(curse.Color, ItemColorItem.Color) &&
 							checkPermissionAccess("curses_color", getPlayerCharacter())
 						) {
 							if (ItemColorItem.Color && ItemColorItem.Color !== "Default") {
-								curse.Color = JSON.parse(JSON.stringify(ItemColorItem.Color));
+								curse.Color = cloneDeep(ItemColorItem.Color);
 							} else {
 								delete curse.Color;
 							}
@@ -515,53 +562,18 @@ export class ModuleCurses extends BaseModule {
 			}
 			return next(args);
 		});
-
-		if (!isObject(modStorage.cursedItems)) {
-			modStorage.cursedItems = {};
-		} else {
-			for (const [group, info] of Object.entries(modStorage.cursedItems)) {
-				if (!AssetGroup.some(g => g.Name === group)) {
-					console.warn(`BCX: Unknown cursed group ${group}, removing it`, info);
-					delete modStorage.cursedItems[group];
-					continue;
-				}
-
-				if (info === null)
-					continue;
-
-				if (!isObject(info) ||
-					typeof info.Name !== "string" ||
-					typeof info.curseProperty !== "boolean"
-				) {
-					console.error(`BCX: Bad data for cursed item in group ${group}, removing it`, info);
-					delete modStorage.cursedItems[group];
-					continue;
-				}
-
-				if (AssetGet("Female3DCG", group, info.Name) == null) {
-					console.warn(`BCX: Unknown cursed item ${group}:${info.Name}, removing it`, info);
-					delete modStorage.cursedItems[group];
-					continue;
-				}
-			}
-		}
 	}
 
 	run() {
 		if (!moduleIsEnabled(ModuleCategory.Curses))
 			return;
 
-		this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
 		this.resetTimer = setInterval(() => {
 			this.triggerCounts.clear();
 		}, CURSES_ANTILOOP_RESET_INTERVAL);
 	}
 
 	unload() {
-		if (this.timer !== null) {
-			clearInterval(this.timer);
-			this.timer = null;
-		}
 		if (this.resetTimer !== null) {
 			clearInterval(this.resetTimer);
 			this.resetTimer = null;
@@ -574,10 +586,7 @@ export class ModuleCurses extends BaseModule {
 		this.run();
 	}
 
-	private cursesTick() {
-		if (!ServerIsConnected || !modStorage.cursedItems)
-			return;
-
+	curseTick(group: string, condition: ConditionsConditionData<"curses">): void {
 		if (this.suspendedUntil !== null) {
 			if (Date.now() >= this.suspendedUntil) {
 				this.suspendedUntil = null;
@@ -588,146 +597,142 @@ export class ModuleCurses extends BaseModule {
 			}
 		}
 
-		const lastState = JSON.stringify(modStorage.cursedItems);
+		const curse = condition.data;
 
-		for (const [group, curse] of Object.entries(modStorage.cursedItems)) {
-
-			if (curse === null) {
-				const current = InventoryGet(Player, group);
-				if (current) {
-					InventoryRemove(Player, group, false);
-					CharacterRefresh(Player, true);
-					ChatRoomCharacterUpdate(Player);
-					ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
-					logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
-					break;
-				}
-				continue;
-			}
-
-
-			const asset = AssetGet("Female3DCG", group, curse.Name);
-			if (!asset) {
-				console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
-				continue;
-			}
-
-			let changeType: "" | "add" | "swap" | "update" | "color" = "";
-			const CHANGE_TEXTS: Record<string, string> = {
-				add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears`,
-				swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,
-				update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item`,
-				color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back`
-			};
-			const CHANGE_LOGS: Record<string, string> = {
-				add: `The curse on ${Player.Name}'s ${asset.Description} made the item reappear`,
-				swap: `The curse on ${Player.Name}'s ${asset.Description} prevented replacing the item`,
-				update: `The curse on ${Player.Name}'s ${asset.Description} reverted all changes to the item`,
-				color: `The curse on ${Player.Name}'s ${asset.Description} reverted the color of the item`
-			};
-
-			let currentItem = InventoryGet(Player, group);
-
-			if (currentItem && currentItem.Asset.Name !== curse.Name) {
+		if (curse === null) {
+			const current = InventoryGet(Player, group);
+			if (current) {
 				InventoryRemove(Player, group, false);
-				changeType = "swap";
-				currentItem = null;
+				CharacterRefresh(Player, true);
+				ChatRoomCharacterUpdate(Player);
+				ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
+				logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
+				return;
 			}
+			return;
+		}
 
-			if (!currentItem) {
-				currentItem = {
-					Asset: asset,
-					Color: curse.Color != null ? JSON.parse(JSON.stringify(curse.Color)) : "Default",
-					Property: curse.Property != null ? JSON.parse(JSON.stringify(curse.Property)) : {},
-					Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
-				};
-				Player.Appearance.push(currentItem);
-				if (!changeType) changeType = "add";
-			}
 
-			const itemProperty = currentItem.Property = (currentItem.Property ?? {});
-			let curseProperty = curse.Property ?? {};
+		const asset = AssetGet("Female3DCG", group, curse.Name);
+		if (!asset) {
+			console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
+			return;
+		}
 
-			if (curse.curseProperty) {
-				for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
-					if (key === "Effect")
-						continue;
+		type change = "add" | "swap" | "update" | "color";
+		let changeType: "" | change  = "";
+		const CHANGE_TEXTS: Record<change, string> = {
+			add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears`,
+			swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,
+			update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item`,
+			color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back`
+		};
+		const CHANGE_LOGS: Record<change, string> = {
+			add: `The curse on ${Player.Name}'s ${asset.Description} made the item reappear`,
+			swap: `The curse on ${Player.Name}'s ${asset.Description} prevented replacing the item`,
+			update: `The curse on ${Player.Name}'s ${asset.Description} reverted all changes to the item`,
+			color: `The curse on ${Player.Name}'s ${asset.Description} reverted the color of the item`
+		};
 
-					if (CURSE_IGNORED_PROPERTIES.includes(key)) {
-						if (curseProperty[key] !== undefined) {
-							delete curseProperty[key];
-						}
-						continue;
+		let currentItem = InventoryGet(Player, group);
+
+		if (currentItem && currentItem.Asset.Name !== curse.Name) {
+			InventoryRemove(Player, group, false);
+			changeType = "swap";
+			currentItem = null;
+		}
+
+		if (!currentItem) {
+			currentItem = {
+				Asset: asset,
+				Color: curse.Color != null ? cloneDeep(curse.Color) : "Default",
+				Property: curse.Property != null ? cloneDeep(curse.Property) : {},
+				Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
+			};
+			Player.Appearance.push(currentItem);
+			if (!changeType) changeType = "add";
+		}
+
+		const itemProperty = currentItem.Property = (currentItem.Property ?? {});
+		let curseProperty = curse.Property ?? {};
+
+		if (curse.curseProperty) {
+			for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
+				if (key === "Effect")
+					continue;
+
+				if (CURSE_IGNORED_PROPERTIES.includes(key)) {
+					if (curseProperty[key] !== undefined) {
+						delete curseProperty[key];
 					}
+					continue;
+				}
 
-					if (curseProperty[key] === undefined) {
-						if (itemProperty[key] !== undefined) {
-							delete itemProperty[key];
-							if (!changeType) changeType = "update";
-						}
-					} else if (typeof curseProperty[key] !== typeof itemProperty[key] ||
-						JSON.stringify(curseProperty[key]) !== JSON.stringify(itemProperty[key])
-					) {
-						itemProperty[key] = JSON.parse(JSON.stringify(curseProperty[key]));
+				if (curseProperty[key] === undefined) {
+					if (itemProperty[key] !== undefined) {
+						delete itemProperty[key];
 						if (!changeType) changeType = "update";
 					}
+				} else if (typeof curseProperty[key] !== typeof itemProperty[key] ||
+					!isEqual(curseProperty[key], itemProperty[key])
+				) {
+					itemProperty[key] = cloneDeep(curseProperty[key]);
+					if (!changeType) changeType = "update";
 				}
-				const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
-				const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
-				const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
-				if (!CommonArraysEqual(itemEffects, curseEffects)) {
-					itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
-				} else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
-					curseProperty.Effect = itemProperty.Effect.slice();
-				} else {
-					delete curseProperty.Effect;
-				}
+			}
+			const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
+			const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+			const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+			if (!CommonArraysEqual(itemEffects, curseEffects)) {
+				itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
+			} else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
+				curseProperty.Effect = itemProperty.Effect.slice();
 			} else {
-				curseProperty = JSON.parse(JSON.stringify(itemProperty));
+				delete curseProperty.Effect;
+			}
+		} else {
+			if (!isEqual(curseProperty, itemProperty)) {
+				curseProperty = cloneDeep(itemProperty);
 				for (const key of CURSE_IGNORED_PROPERTIES) {
 					delete curseProperty[key];
 				}
 			}
-
-			if (Object.keys(curseProperty).length === 0) {
-				delete curse.Property;
-			} else {
-				curse.Property = curseProperty;
-			}
-
-			if (!itemColorsEquals(curse.Color, currentItem.Color)) {
-				if (curse.Color === undefined || curse.Color === "Default") {
-					delete currentItem.Color;
-				} else {
-					currentItem.Color = JSON.parse(JSON.stringify(curse.Color));
-				}
-				if (!changeType) changeType = "color";
-			}
-
-			if (changeType) {
-				CharacterRefresh(Player, true);
-				ChatRoomCharacterUpdate(Player);
-				if (CHANGE_TEXTS[changeType]) {
-					ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
-					logMessage("curse_trigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
-				} else {
-					console.error(`BCX: No chat message for curse action ${changeType}`);
-				}
-
-				const counter = (this.triggerCounts.get(group) ?? 0) + 1;
-				this.triggerCounts.set(group, counter);
-
-				if (counter >= CURSES_ANTILOOP_THRESHOLD) {
-					ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
-					this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
-				}
-
-				break;
-			}
 		}
 
-		if (JSON.stringify(modStorage.cursedItems) !== lastState) {
-			modStorageSync();
+		if (Object.keys(curseProperty).length === 0) {
+			if (curse.Property !== undefined) {
+				delete curse.Property;
+			}
+		} else if (!isEqual(curse.Property, curseProperty)) {
+			curse.Property = curseProperty;
+		}
+
+		if (!itemColorsEquals(curse.Color, currentItem.Color)) {
+			if (curse.Color === undefined || curse.Color === "Default") {
+				delete currentItem.Color;
+			} else {
+				currentItem.Color = cloneDeep(curse.Color);
+			}
+			if (!changeType) changeType = "color";
+		}
+
+		if (changeType) {
+			CharacterRefresh(Player, true);
+			ChatRoomCharacterUpdate(Player);
+			if (CHANGE_TEXTS[changeType]) {
+				ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
+				logMessage("curse_trigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
+			} else {
+				console.error(`BCX: No chat message for curse action ${changeType}`);
+			}
+
+			const counter = (this.triggerCounts.get(group) ?? 0) + 1;
+			this.triggerCounts.set(group, counter);
+
+			if (counter >= CURSES_ANTILOOP_THRESHOLD) {
+				ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
+				this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
+			}
 		}
 	}
 }

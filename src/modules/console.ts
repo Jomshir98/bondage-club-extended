@@ -6,6 +6,7 @@ import { BaseModule } from "./_BaseModule";
 import { unload } from "../main";
 import { modStorage, switchStorageLocation } from "./storage";
 import { sendQuery } from "./messaging";
+import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 
 export let antigarble = 0;
 
@@ -74,6 +75,16 @@ class ConsoleInterface {
 			return "Development mode required";
 		}
 		return modStorage;
+	}
+
+	devGetCharacter(target?: number): ChatroomCharacter | null | false {
+		if (!developmentMode || (target !== undefined && typeof target !== "number"))
+			return false;
+
+		if (target === undefined) {
+			return getPlayerCharacter();
+		}
+		return getChatroomCharacter(target);
 	}
 
 	devSendQuery(target: number, query: string, data: any): boolean {

@@ -16,8 +16,8 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	category: ModuleCategory;
 	loadValidateCondition(key: string, data: ConditionsConditionData<C>): boolean;
 	tickHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): void;
-	makePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): ConditionsCategoryPublicData[C];
-	validatePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsCategoryPublicData[C]): boolean;
+	makePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): ConditionsCategorySpecificPublicData[C];
+	validatePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificPublicData[C]): boolean;
 }
 
 const conditionHandlers: Map<ConditionsCategories, ConditionsHandler<ConditionsCategories>> = new Map();

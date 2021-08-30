@@ -74,7 +74,7 @@ interface ConditionsCategorySpecificData {
 	rules: null;
 }
 
-interface ConditionsCategoryPublicData {
+interface ConditionsCategorySpecificPublicData {
 	curses: {
 		Name: string;
 		curseProperties: boolean;
@@ -89,7 +89,7 @@ interface ConditionsConditionData<category extends ConditionsCategories = Condit
 
 interface ConditionsConditionPublicData<category extends ConditionsCategories = ConditionsCategories> {
 	active: boolean;
-	data: ConditionsCategoryPublicData[category];
+	data: ConditionsCategorySpecificPublicData[category];
 }
 
 type ConditionsCategoryRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionData<category>>;

@@ -183,6 +183,12 @@ export class ModuleConsole extends BaseModule {
 		});
 	}
 
+	run() {
+		if ((window as any).BCX_Devel) {
+			setDevelopmentMode(true);
+		}
+	}
+
 	unload() {
 		delete (window as any).bcx;
 	}

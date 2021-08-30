@@ -7,6 +7,7 @@ import { hookFunction, patchFunction } from "../patching";
 import { icon_BCX } from "../resources";
 import { changeHandlers } from "./messaging";
 import { firstTimeInit } from "./storage";
+import { developmentMode } from "../utilsClub";
 
 export function getCurrentSubscreen(): GuiSubscreen | null {
 	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
@@ -72,6 +73,27 @@ export class ModuleGUI extends BaseModule {
 				MainCanvas.textAlign = "left";
 				this._currentSubscreen.Run();
 				MainCanvas.textAlign = "center";
+
+				if (developmentMode) {
+					if (MouseX > 0 || MouseY > 0) {
+						MainCanvas.save();
+						MainCanvas.lineWidth = 1;
+						MainCanvas.strokeStyle = "red";
+						MainCanvas.beginPath();
+						MainCanvas.moveTo(0, MouseY);
+						MainCanvas.lineTo(2000, MouseY);
+						MainCanvas.moveTo(MouseX, 0);
+						MainCanvas.lineTo(MouseX, 1000);
+						MainCanvas.stroke();
+						MainCanvas.fillStyle = "black";
+						MainCanvas.strokeStyle = "white";
+						MainCanvas.fillRect(0, 950, 250, 50);
+						MainCanvas.strokeRect(0, 950, 250, 50);
+						DrawText(`X: ${MouseX} Y: ${MouseY}`, 125, 975, "white");
+						MainCanvas.restore();
+					}
+				}
+
 				return;
 			}
 

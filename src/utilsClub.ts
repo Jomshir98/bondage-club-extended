@@ -36,6 +36,7 @@ export function setDevelopmentMode(devel: boolean): boolean {
 			console.info("To use developer mode, cheats must be enabled first!");
 			return false;
 		}
+		(window as any).BCX_Devel = true;
 		AssetGroup.forEach(G => G.Description = G.Name);
 		Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
 		BackgroundSelectionAll.forEach(B => {
@@ -44,6 +45,7 @@ export function setDevelopmentMode(devel: boolean): boolean {
 		});
 		console.warn("Developer mode enabled");
 	} else {
+		delete (window as any).BCX_Devel;
 		AssetLoadDescription("Female3DCG");
 		BackgroundSelectionAll.forEach(B => {
 			B.Description = DialogFindPlayer(B.Name);

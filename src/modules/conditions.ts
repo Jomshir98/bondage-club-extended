@@ -32,26 +32,33 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 	conditionHandlers.set(category, handler);
 }
 
-export function ConditionsGetCategoryData<C extends ConditionsCategories>(category: C): Readonly<ConditionsCategoryRecord<C>> {
+export function ConditionsGetCategoryData<C extends ConditionsCategories>(category: C): ConditionsCategoryData<C> {
 	if (!conditionHandlers.has(category)) {
 		throw new Error(`Attempt to get unknown conditions category data ${category}`);
 	}
-	return (modStorage.conditions?.[category] ?? {}) as ConditionsCategoryRecord<C>;
+	const data = modStorage.conditions?.[category];
+	if (!data) {
+		throw new Error(`Attempt to get data for uninitialized category ${category}`);
+	}
+	return data as ConditionsCategoryData<C>;
 }
 
-export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C): ConditionsCategoryPublicRecord<C> {
-	const res: ConditionsCategoryPublicRecord<ConditionsCategories> = {};
+export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C): ConditionsCategoryPublicData<C> {
+	const res: ConditionsCategoryPublicData<ConditionsCategories> = {
+		conditions: {}
+	};
 	const handler = conditionHandlers.get(category);
 	if (!handler) {
 		throw new Error(`No handler for conditions category ${category}`);
 	}
-	for (const [condition, conditionData] of Object.entries(ConditionsGetCategoryData<ConditionsCategories>(category))) {
-		res[condition] = {
+	const data = ConditionsGetCategoryData<ConditionsCategories>(category);
+	for (const [condition, conditionData] of Object.entries(data.conditions)) {
+		res.conditions[condition] = {
 			active: conditionData.active,
 			data: handler.makePublicData(condition, conditionData)
 		};
 	}
-	return res as ConditionsCategoryPublicRecord<C>;
+	return res as ConditionsCategoryPublicData<C>;
 }
 
 export function ConditionsValidatePublicData<C extends ConditionsCategories>(category: C, condition: string, data: ConditionsConditionPublicData): boolean {
@@ -64,7 +71,7 @@ export function ConditionsValidatePublicData<C extends ConditionsCategories>(cat
 }
 
 export function ConditionsGetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C]): ConditionsConditionData<C> | undefined {
-	return ConditionsGetCategoryData(category)[condition];
+	return ConditionsGetCategoryData(category).conditions[condition];
 }
 
 export function ConditionsSetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>) {
@@ -74,25 +81,21 @@ export function ConditionsSetCondition<C extends ConditionsCategories>(category:
 	}
 	if (!moduleIsEnabled(handler.category))
 		return;
-	if (!modStorage.conditions) {
-		throw new Error(`Attempt to set conditions while not initialized`);
-	}
-	let categoryData: ConditionsCategoryRecord<ConditionsCategories> | undefined = modStorage.conditions[category];
-	if (!categoryData) {
-		categoryData = modStorage.conditions[category] = {};
-	}
-	categoryData[condition] = data;
+	const categoryData = ConditionsGetCategoryData(category);
+	categoryData.conditions[condition] = data;
+	modStorageSync();
+	notifyOfChange();
 }
 
 export function ConditionsRemoveCondition<C extends ConditionsCategories>(category: C, conditions: ConditionsCategoryKeys[C] | ConditionsCategoryKeys[C][]): boolean {
 	if (!Array.isArray(conditions)) {
 		conditions = [conditions];
 	}
-	const categoryData: ConditionsCategoryRecord<ConditionsCategories> | undefined = modStorage.conditions?.[category];
+	const categoryData = ConditionsGetCategoryData(category);
 	let changed = false;
 	for (const condition of conditions) {
-		if (categoryData?.[condition]) {
-			delete categoryData[condition];
+		if (categoryData.conditions[condition]) {
+			delete categoryData.conditions[condition];
 			changed = true;
 		}
 	}
@@ -105,7 +108,7 @@ export function ConditionsRemoveCondition<C extends ConditionsCategories>(catego
 
 export function ConditionsSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean): boolean {
 	const categoryData = ConditionsGetCategoryData(category);
-	const conditionData = categoryData[condition];
+	const conditionData = categoryData.conditions[condition];
 	if (conditionData) {
 		// TODO: Check permissions
 		if (conditionData.active !== active) {
@@ -127,9 +130,11 @@ export class ModuleConditions extends BaseModule {
 
 		// cursedItems migration
 		if (modStorage.cursedItems) {
-			const curses: ConditionsCategoryRecord<"curses"> = modStorage.conditions.curses = {};
+			const curses: ConditionsCategoryData<"curses"> = modStorage.conditions.curses = {
+				conditions: {}
+			};
 			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
-				curses[group] = {
+				curses.conditions[group] = {
 					active: true,
 					data
 				};
@@ -145,15 +150,15 @@ export class ModuleConditions extends BaseModule {
 				continue;
 			}
 			const data = modStorage.conditions[key];
-			if (!isObject(data)) {
+			if (!isObject(data) || !isObject(data.conditions)) {
 				console.warn(`BCX: Removing category ${key} with invalid data`);
 				delete modStorage.conditions[key];
 				continue;
 			}
 
-			for (const [condition, conditiondata] of Object.entries(data)) {
+			for (const [condition, conditiondata] of Object.entries(data.conditions)) {
 				if (!handler.loadValidateCondition(condition, conditiondata)) {
-					delete data[condition];
+					delete data.conditions[condition];
 				}
 			}
 		}
@@ -161,7 +166,9 @@ export class ModuleConditions extends BaseModule {
 		for (const [key, handler] of conditionHandlers.entries()) {
 			if (moduleIsEnabled(handler.category) && !isObject(modStorage.conditions[key])) {
 				console.debug(`BCX: Adding missing conditions category ${key}`);
-				modStorage.conditions[key] = {};
+				modStorage.conditions[key] = {
+					conditions: {}
+				};
 			}
 		}
 

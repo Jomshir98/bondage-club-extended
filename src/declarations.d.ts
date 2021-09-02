@@ -95,8 +95,16 @@ interface ConditionsConditionPublicData<category extends ConditionsCategories = 
 type ConditionsCategoryRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionData<category>>;
 type ConditionsCategoryPublicRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionPublicData<category>>;
 
+interface ConditionsCategoryData<category extends ConditionsCategories = ConditionsCategories> {
+	conditions: Record<string, ConditionsConditionData<category>>;
+}
+
+interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> {
+	conditions: ConditionsCategoryPublicRecord<category>;
+}
+
 type ConditionsStorage = Partial<{
-	[category in ConditionsCategories]: ConditionsCategoryRecord<category>;
+	[category in ConditionsCategories]: ConditionsCategoryData<category>;
 }>;
 
 interface ModStorage {

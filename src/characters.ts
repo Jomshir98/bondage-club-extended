@@ -281,14 +281,14 @@ export class ChatroomCharacter {
 		});
 	}
 
-	conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicRecord<C>> {
+	conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
-			if (!isObject(data) || !Object.entries(data).every(
+			if (!isObject(data) || !isObject(data.conditions) || !Object.entries(data.conditions).every(
 				([condition, conditionData]) => ConditionsValidatePublicData(category, condition, conditionData)
 			)) {
 				throw new Error("Bad data");
 			}
-			return data as ConditionsCategoryPublicRecord<C>;
+			return data as ConditionsCategoryPublicData<C>;
 		});
 	}
 
@@ -406,7 +406,7 @@ export class PlayerCharacter extends ChatroomCharacter {
 		return Promise.resolve(curseLiftAll(this));
 	}
 
-	override conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicRecord<C>> {
+	override conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return Promise.resolve(ConditionsGetCategoryPublicData(category));
 	}
 

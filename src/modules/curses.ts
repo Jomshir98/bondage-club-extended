@@ -199,7 +199,7 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 			ChatRoomSendLocal(`${character} lifted all curses on you`);
 		}
 	}
-	ConditionsRemoveCondition("curses", Object.keys(ConditionsGetCategoryData("curses")));
+	ConditionsRemoveCondition("curses", Object.keys(ConditionsGetCategoryData("curses").conditions));
 	return true;
 }
 
@@ -210,7 +210,7 @@ export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
 		curses: {}
 	};
 
-	for (const [group, info] of Object.entries(ConditionsGetCategoryData("curses"))) {
+	for (const [group, info] of Object.entries(ConditionsGetCategoryData("curses").conditions)) {
 		res.curses[group] = info.data === null ? null : {
 			Name: info.data.Name,
 			curseProperties: info.data.curseProperty

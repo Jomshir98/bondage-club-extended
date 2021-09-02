@@ -113,7 +113,7 @@ type BCX_queries = {
 		},
 		boolean
 	];
-	conditionsGet: [ConditionsCategories, ConditionsCategoryPublicRecord<ConditionsCategories>];
+	conditionsGet: [ConditionsCategories, ConditionsCategoryPublicData<ConditionsCategories>];
 	conditionSetActive: [{
 		category: ConditionsCategories,
 		condition: string,

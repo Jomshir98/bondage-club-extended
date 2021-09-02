@@ -1,7 +1,7 @@
 import { VERSION } from "./config";
-import { ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
+import { ConditionsLimit, ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
-import { ConditionsGetCategoryPublicData, ConditionsSetActive, ConditionsValidatePublicData } from "./modules/conditions";
+import { ConditionsGetCategoryPublicData, ConditionsSetActive, ConditionsSetLimit, ConditionsValidatePublicData } from "./modules/conditions";
 import { curseGetInfo, curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
@@ -301,6 +301,15 @@ export class ChatroomCharacter {
 		});
 	}
 
+	conditionSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit): Promise<boolean> {
+		return sendQuery("conditionSetLimit", { category, condition, limit }, this.MemberNumber).then(data => {
+			if (typeof data !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return data;
+		});
+	}
+
 	hasAccessToPlayer(): boolean {
 		return ServerChatRoomGetAllowItem(this.Character, Player);
 	}
@@ -412,6 +421,10 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override conditionSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean): Promise<boolean> {
 		return Promise.resolve(ConditionsSetActive(category, condition, active));
+	}
+
+	override conditionSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit): Promise<boolean> {
+		return Promise.resolve(ConditionsSetLimit(category, condition, limit, this));
 	}
 }
 

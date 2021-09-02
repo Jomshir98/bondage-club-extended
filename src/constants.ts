@@ -48,3 +48,9 @@ export enum MiscCheat {
 	GiveMistressKey = 2,
 	GivePandoraKey = 3
 }
+
+export enum ConditionsLimit {
+	normal = 0,
+	limited = 1,
+	blocked = 2
+}

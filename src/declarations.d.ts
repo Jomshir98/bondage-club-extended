@@ -97,10 +97,14 @@ type ConditionsCategoryPublicRecord<category extends ConditionsCategories = Cond
 
 interface ConditionsCategoryData<category extends ConditionsCategories = ConditionsCategories> {
 	conditions: Record<string, ConditionsConditionData<category>>;
+	/** List of limited/blocked conditions; defaults to normal */
+	limits: { [P in ConditionsCategoryKeys[category]]?: import("./constants").ConditionsLimit };
 }
 
 interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> {
 	conditions: ConditionsCategoryPublicRecord<category>;
+	/** List of limited/blocked conditions; defaults to normal */
+	limits: { [P in ConditionsCategoryKeys[category]]?: import("./constants").ConditionsLimit };
 }
 
 type ConditionsStorage = Partial<{

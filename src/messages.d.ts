@@ -115,8 +115,13 @@ type BCX_queries = {
 	];
 	conditionsGet: [ConditionsCategories, ConditionsCategoryPublicData<ConditionsCategories>];
 	conditionSetActive: [{
-		category: ConditionsCategories,
-		condition: string,
-		active: boolean
+		category: ConditionsCategories;
+		condition: string;
+		active: boolean;
+	}, boolean];
+	conditionSetLimit: [{
+		category: ConditionsCategories;
+		condition: string;
+		limit: import("./constants").ConditionsLimit;
 	}, boolean];
 };

@@ -1,4 +1,4 @@
-import { ModuleCategory, ModuleInitPhase } from "../constants";
+import { ConditionsLimit, ModuleCategory, ModuleInitPhase } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
 import { isObject } from "../utils";
 import { notifyOfChange, queryHandlers } from "./messaging";
@@ -8,12 +8,18 @@ import { BaseModule } from "./_BaseModule";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
-import { getChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { checkPermissionAccess } from "./authority";
 
 const CONDITIONS_CHECK_INTERVAL = 2_000;
 
 export interface ConditionsHandler<C extends ConditionsCategories> {
 	category: ModuleCategory;
+	permission_normal: BCX_Permissions;
+	permission_limited: BCX_Permissions;
+	permission_configure: BCX_Permissions;
+	permission_changeLimits: BCX_Permissions;
+	loadValidateConditionKey(key: string): boolean;
 	loadValidateCondition(key: string, data: ConditionsConditionData<C>): boolean;
 	tickHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): void;
 	makePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): ConditionsCategorySpecificPublicData[C];
@@ -44,14 +50,15 @@ export function ConditionsGetCategoryData<C extends ConditionsCategories>(catego
 }
 
 export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C): ConditionsCategoryPublicData<C> {
-	const res: ConditionsCategoryPublicData<ConditionsCategories> = {
-		conditions: {}
-	};
 	const handler = conditionHandlers.get(category);
 	if (!handler) {
 		throw new Error(`No handler for conditions category ${category}`);
 	}
 	const data = ConditionsGetCategoryData<ConditionsCategories>(category);
+	const res: ConditionsCategoryPublicData<ConditionsCategories> = {
+		conditions: {},
+		limits: cloneDeep(data.limits)
+	};
 	for (const [condition, conditionData] of Object.entries(data.conditions)) {
 		res.conditions[condition] = {
 			active: conditionData.active,
@@ -113,11 +120,42 @@ export function ConditionsSetActive<C extends ConditionsCategories>(category: C,
 		// TODO: Check permissions
 		if (conditionData.active !== active) {
 			conditionData.active = active;
+			notifyOfChange();
 			modStorageSync();
 		}
 		return true;
 	}
 	return false;
+}
+
+export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit, character: ChatroomCharacter | null): boolean {
+	const handler = conditionHandlers.get(category);
+	if (!handler) {
+		throw new Error(`Attempt to set limit for unknown conditions category ${category}`);
+	}
+	if (!moduleIsEnabled(handler.category))
+		return false;
+	if (!handler.loadValidateConditionKey(condition)) {
+		console.warn(`Attempt to set invalid condition limit ${category}:${condition}`);
+		return false;
+	}
+	const data = ConditionsGetCategoryData(category);
+	if (character && !checkPermissionAccess(handler.permission_changeLimits, character)) {
+		return false;
+	}
+	if ((data.limits[condition] ?? ConditionsLimit.normal) === limit)
+		return true;
+	if (limit === ConditionsLimit.normal) {
+		delete data.limits[condition];
+	} else {
+		data.limits[condition] = limit;
+	}
+	if (character) {
+		// TODO: log
+	}
+	notifyOfChange();
+	modStorageSync();
+	return true;
 }
 
 export class ModuleConditions extends BaseModule {
@@ -131,7 +169,8 @@ export class ModuleConditions extends BaseModule {
 		// cursedItems migration
 		if (modStorage.cursedItems) {
 			const curses: ConditionsCategoryData<"curses"> = modStorage.conditions.curses = {
-				conditions: {}
+				conditions: {},
+				limits: {}
 			};
 			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
 				curses.conditions[group] = {
@@ -156,8 +195,28 @@ export class ModuleConditions extends BaseModule {
 				continue;
 			}
 
+			if (!isObject(data.limits)) {
+				console.warn(`BCX: Resetting category ${key} limits with invalid data`);
+				data.limits = {};
+			}
+			for (const [condition, limitValue] of Object.entries(data.limits)) {
+				if (!handler.loadValidateConditionKey(condition)) {
+					console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
+					delete data.limits[condition];
+				} else if (typeof limitValue !== "number" ||
+					limitValue === ConditionsLimit.normal ||
+					ConditionsLimit[limitValue] === undefined
+				) {
+					console.warn(`BCX: Unknown condition ${key}:${condition} limit value, removing it`, limitValue);
+					delete data.limits[condition];
+				}
+			}
+
 			for (const [condition, conditiondata] of Object.entries(data.conditions)) {
-				if (!handler.loadValidateCondition(condition, conditiondata)) {
+				if (!handler.loadValidateConditionKey(condition)) {
+					console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
+					delete data.conditions[condition];
+				} else if (!handler.loadValidateCondition(condition, conditiondata)) {
 					delete data.conditions[condition];
 				}
 			}
@@ -167,7 +226,8 @@ export class ModuleConditions extends BaseModule {
 			if (moduleIsEnabled(handler.category) && !isObject(modStorage.conditions[key])) {
 				console.debug(`BCX: Adding missing conditions category ${key}`);
 				modStorage.conditions[key] = {
-					conditions: {}
+					conditions: {},
+					limits: {}
 				};
 			}
 		}
@@ -190,6 +250,22 @@ export class ModuleConditions extends BaseModule {
 				typeof data.active === "boolean"
 			) {
 				resolve(true, ConditionsSetActive(data.category, data.condition, data.active));
+			} else {
+				resolve(false);
+			}
+		};
+
+		queryHandlers.conditionSetLimit = (sender, resolve, data) => {
+			const character = getChatroomCharacter(sender);
+			if (character &&
+				isObject(data) &&
+				typeof data.category === "string" &&
+				conditionHandlers.has(data.category) &&
+				typeof data.condition === "string" &&
+				typeof data.limit === "number" &&
+				ConditionsLimit[data.limit] !== undefined
+			) {
+				resolve(true, ConditionsSetLimit(data.category, data.condition, data.limit, character));
 			} else {
 				resolve(false);
 			}

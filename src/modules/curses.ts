@@ -458,12 +458,14 @@ export class ModuleCurses extends BaseModule {
 
 		ConditionsRegisterCategory("curses", {
 			category: ModuleCategory.Curses,
+			// TODO
+			permission_normal: "curses_curse",
+			permission_limited: "curses_curse",
+			permission_configure: "curses_curse",
+			permission_changeLimits: "curses_curse",
+			loadValidateConditionKey: (group) => AssetGroup.some(g => g.Name === group),
 			loadValidateCondition: (group, data) => {
 				const info = data.data;
-				if (!AssetGroup.some(g => g.Name === group)) {
-					console.warn(`BCX: Unknown cursed group ${group}, removing it`, info);
-					return false;
-				}
 
 				if (info === null)
 					return true;

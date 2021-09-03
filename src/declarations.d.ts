@@ -25,8 +25,10 @@ type BCX_Permissions =
 	| "log_delete"
 	| "log_praise"
 	| "log_add_note"
-	| "curses_curse"
-	| "curses_lift"
+	| "curses_normal"
+	| "curses_limited"
+	| "curses_global_configuration"
+	| "curses_change_limits"
 	| "curses_color"
 	| "misc_test";
 
@@ -102,6 +104,10 @@ interface ConditionsCategoryData<category extends ConditionsCategories = Conditi
 }
 
 interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> {
+	access_normal: boolean;
+	access_limited: boolean;
+	access_configure: boolean;
+	access_changeLimits: boolean;
 	conditions: ConditionsCategoryPublicRecord<category>;
 	/** List of limited/blocked conditions; defaults to normal */
 	limits: { [P in ConditionsCategoryKeys[category]]?: import("./constants").ConditionsLimit };

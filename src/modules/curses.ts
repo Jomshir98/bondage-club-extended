@@ -10,7 +10,7 @@ import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
-import { ConditionsGetCategoryData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsSetCondition } from "./conditions";
+import { ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsSetCondition } from "./conditions";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -52,18 +52,8 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 		return false;
 	}
 
-	if (character) {
-		const existingCurse = ConditionsGetCondition("curses", Group);
-		if (existingCurse) {
-			if (curseProperty === null) {
-				return false;
-			}
-			if (!checkPermissionAccess(curseProperty ? "curses_curse" : "curses_lift", character)) {
-				return false;
-			}
-		} else if (!checkPermissionAccess("curses_curse", character)) {
-			return false;
-		}
+	if (character && !ConditionsCheckAccess("curses", Group, character)) {
+		return false;
 	}
 
 	const currentItem = InventoryGet(Player, Group);
@@ -71,6 +61,8 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 	if (currentItem) {
 
 		if (curseProperty === null) {
+			if (ConditionsGetCondition("curses", Group))
+				return true;
 			curseProperty = curseDefaultItemCurseProperty(currentItem.Asset);
 		}
 
@@ -126,7 +118,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 }
 
 export function curseBatch(mode: "items" | "clothes", includingEmpty: boolean, character: ChatroomCharacter | null): boolean {
-	if (character && !checkPermissionAccess("curses_curse", character))
+	if (character && !checkPermissionAccess("curses_normal", character) && !checkPermissionAccess("curses_limited", character))
 		return false;
 
 	let assetGroups: AssetGroup[];
@@ -150,6 +142,8 @@ export function curseBatch(mode: "items" | "clothes", includingEmpty: boolean, c
 	for (const group of assetGroups) {
 		if (ConditionsGetCondition("curses", group.Name))
 			continue;
+		if (character && !ConditionsCheckAccess("curses", group.Name, character))
+			continue;
 		if (!curseItem(group.Name, null, null))
 			return false;
 	}
@@ -160,7 +154,7 @@ export function curseLift(Group: string, character: ChatroomCharacter | null): b
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
-	if (character && !checkPermissionAccess("curses_lift", character))
+	if (character && !ConditionsCheckAccess("curses", Group, character))
 		return false;
 
 	const curse = ConditionsGetCondition("curses", Group);
@@ -190,7 +184,7 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
-	if (character && !checkPermissionAccess("curses_lift", character))
+	if (character && (!checkPermissionAccess("curses_normal", character) || !checkPermissionAccess("curses_limited", character)))
 		return false;
 
 	if (character) {
@@ -203,10 +197,11 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 	return true;
 }
 
+// TODO: Remove
 export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
 	const res: BCX_curseInfo = {
-		allowCurse: checkPermissionAccess("curses_curse", character),
-		allowLift: checkPermissionAccess("curses_lift", character),
+		allowCurse: checkPermissionAccess("curses_normal", character),
+		allowLift: checkPermissionAccess("curses_normal", character),
 		curses: {}
 	};
 
@@ -226,8 +221,8 @@ export class ModuleCurses extends BaseModule {
 	private suspendedUntil: number | null = null;
 
 	init() {
-		registerPermission("curses_curse", {
-			name: "Allow cursing objects or the body",
+		registerPermission("curses_normal", {
+			name: "Allows handling curses of non-limited object slots",
 			category: ModuleCategory.Curses,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.lover],
@@ -236,14 +231,34 @@ export class ModuleCurses extends BaseModule {
 				[Preset.slave]: [false, AccessLevel.mistress]
 			}
 		});
-		registerPermission("curses_lift", {
-			name: "Allow lifting curses",
+		registerPermission("curses_limited", {
+			name: "Allows handling curses of limited object slots",
 			category: ModuleCategory.Curses,
 			defaults: {
-				[Preset.dominant]: [true, AccessLevel.lover],
-				[Preset.switch]: [true, AccessLevel.lover],
-				[Preset.submissive]: [false, AccessLevel.mistress],
-				[Preset.slave]: [false, AccessLevel.mistress]
+				[Preset.dominant]: [true, AccessLevel.owner],
+				[Preset.switch]: [true, AccessLevel.owner],
+				[Preset.submissive]: [false, AccessLevel.lover],
+				[Preset.slave]: [false, AccessLevel.lover]
+			}
+		});
+		registerPermission("curses_global_configuration", {
+			name: "Allows editing the global default condition configuration",
+			category: ModuleCategory.Curses,
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.owner],
+				[Preset.switch]: [true, AccessLevel.owner],
+				[Preset.submissive]: [false, AccessLevel.lover],
+				[Preset.slave]: [false, AccessLevel.lover]
+			}
+		});
+		registerPermission("curses_change_limits", {
+			name: "Allows to limit/block individual curse object slots",
+			category: ModuleCategory.Curses,
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.self],
+				[Preset.slave]: [false, AccessLevel.owner]
 			}
 		});
 		registerPermission("curses_color", {
@@ -458,11 +473,10 @@ export class ModuleCurses extends BaseModule {
 
 		ConditionsRegisterCategory("curses", {
 			category: ModuleCategory.Curses,
-			// TODO
-			permission_normal: "curses_curse",
-			permission_limited: "curses_curse",
-			permission_configure: "curses_curse",
-			permission_changeLimits: "curses_curse",
+			permission_normal: "curses_normal",
+			permission_limited: "curses_limited",
+			permission_configure: "curses_global_configuration",
+			permission_changeLimits: "curses_change_limits",
 			loadValidateConditionKey: (group) => AssetGroup.some(g => g.Name === group),
 			loadValidateCondition: (group, data) => {
 				const info = data.data;

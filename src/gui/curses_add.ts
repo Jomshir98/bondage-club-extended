@@ -32,6 +32,9 @@ export class GuiCursesAdd extends GuiSubscreen {
 		this.curseData = null;
 		this.character.conditionsGetByCategory("curses").then(res => {
 			this.curseData = res;
+			if (!this.curseData.access_changeLimits) {
+				this.permissionMode = false;
+			}
 		}, err => {
 			console.error(`BCX: Failed to get permission info for ${this.character}`, err);
 			this.failed = true;
@@ -44,13 +47,19 @@ export class GuiCursesAdd extends GuiSubscreen {
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
 
-		DrawButton(1815, 190, 90, 90, "", "White", this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png",
-			this.permissionMode ? "Leave permission mode" : "Edit curse slot permissions");
-
 		if (this.curseData === null) {
 			DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
 			return;
 		}
+
+		DrawButton(1815, 190, 90, 90, "",
+			this.curseData.access_changeLimits ? "White" : "#ddd",
+			this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png",
+			this.curseData.access_changeLimits ?
+				(this.permissionMode ? "Leave permission mode" : "Edit curse slot permissions") :
+				"You have no permission to change limits",
+			!this.curseData.access_changeLimits
+		);
 
 		// items
 		MainCanvas.textAlign = "left";
@@ -76,19 +85,24 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 			const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
 			const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
+			const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
 			let color: string;
 			let text: string;
 			if (this.permissionMode) {
 				color = ["#ccfece", "#fefc53", "red"][accessLevel];
 				text = ["Normal", "Limited", "Blocked"][accessLevel];
 			} else {
-				color = itemIsCursed ? "#ccc" : (currentItem ? "Gold" : "White");
-				text = itemIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing");
+				color = itemIsCursed ? "#88c" :
+					!allowCurse ? "#ccc" :
+					(currentItem ? "Gold" : "White");
+				text = itemIsCursed ? "Already cursed" :
+					!allowCurse ? "You have no permission to curse this" :
+					(currentItem ? currentItem.Asset.Description : "Nothing");
 			}
 
 			DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
 				color, undefined,
-				text, itemIsCursed || this.permissionMode);
+				text, itemIsCursed || !allowCurse || this.permissionMode);
 		}
 
 		// clothing
@@ -139,15 +153,15 @@ export class GuiCursesAdd extends GuiSubscreen {
 		// permission mode legend
 		if (this.permissionMode) {
 			MainCanvas.fillStyle = "#ccfece";
-			MainCanvas.fillRect(1284, 75, 146, 64);
+			MainCanvas.fillRect(1284, 75, 166, 64);
 			MainCanvas.fillStyle = "#fefc53";
-			MainCanvas.fillRect(1284 + 1 * 146, 75, 186, 64);
+			MainCanvas.fillRect(1284 + 1 * 166, 75, 166, 64);
 			MainCanvas.fillStyle = "red";
 			MainCanvas.fillRect(1284 + 2 * 166, 75, 165, 64);
 
 			MainCanvas.textAlign = "center";
-			DrawText(`Normal`, 1284 + 146 / 2, 75 + 34, "Black");
-			DrawText(`Limited`, 1284 + 1 * 146 + 186 / 2, 75 + 34, "Black");
+			DrawText(`Normal`, 1284 + 166 / 2, 75 + 34, "Black");
+			DrawText(`Limited`, 1284 + 1 * 166 + 166 / 2, 75 + 34, "Black");
 			DrawText(`Blocked`, 1284 + 2 * 166 + 166 / 2, 75 + 34, "Black");
 		}
 	}
@@ -160,7 +174,7 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 		// Permission mode
 		if (MouseIn(1815, 190, 90, 90)) {
-			this.permissionMode = !this.permissionMode;
+			this.permissionMode = this.curseData.access_changeLimits && !this.permissionMode;
 			return;
 		}
 

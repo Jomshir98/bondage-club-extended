@@ -38,6 +38,14 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 	conditionHandlers.set(category, handler);
 }
 
+export function ConditionsGetCategoryHandler<C extends ConditionsCategories>(category: C): ConditionsHandler<C> {
+	const handler = conditionHandlers.get(category);
+	if (!handler) {
+		throw new Error(`No handler for conditions category ${category}`);
+	}
+	return handler as ConditionsHandler<C>;
+}
+
 export function ConditionsGetCategoryData<C extends ConditionsCategories>(category: C): ConditionsCategoryData<C> {
 	if (!conditionHandlers.has(category)) {
 		throw new Error(`Attempt to get unknown conditions category data ${category}`);
@@ -49,13 +57,14 @@ export function ConditionsGetCategoryData<C extends ConditionsCategories>(catego
 	return data as ConditionsCategoryData<C>;
 }
 
-export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C): ConditionsCategoryPublicData<C> {
-	const handler = conditionHandlers.get(category);
-	if (!handler) {
-		throw new Error(`No handler for conditions category ${category}`);
-	}
+export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C, requester: ChatroomCharacter): ConditionsCategoryPublicData<C> {
+	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	const data = ConditionsGetCategoryData<ConditionsCategories>(category);
 	const res: ConditionsCategoryPublicData<ConditionsCategories> = {
+		access_normal: checkPermissionAccess(handler.permission_normal, requester),
+		access_limited: checkPermissionAccess(handler.permission_limited, requester),
+		access_configure: checkPermissionAccess(handler.permission_configure, requester),
+		access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
 		conditions: {},
 		limits: cloneDeep(data.limits)
 	};
@@ -82,16 +91,29 @@ export function ConditionsGetCondition<C extends ConditionsCategories>(category:
 }
 
 export function ConditionsSetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>) {
-	const handler = conditionHandlers.get(category);
-	if (!handler) {
-		throw new Error(`Attempt to get unknown conditions category data ${category}`);
-	}
+	const handler = ConditionsGetCategoryHandler(category);
 	if (!moduleIsEnabled(handler.category))
 		return;
 	const categoryData = ConditionsGetCategoryData(category);
 	categoryData.conditions[condition] = data;
 	modStorageSync();
 	notifyOfChange();
+}
+
+export function ConditionsGetConditionLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C]): ConditionsLimit {
+	const handler = ConditionsGetCategoryHandler(category);
+	if (!moduleIsEnabled(handler.category))
+		return ConditionsLimit.blocked;
+	const data = ConditionsGetCategoryData(category);
+	return data.limits[condition] ?? ConditionsLimit.normal;
+}
+
+export function ConditionsCheckAccess<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], character: ChatroomCharacter): boolean {
+	const limit = ConditionsGetConditionLimit(category, condition);
+	if (limit === ConditionsLimit.blocked)
+		return false;
+	const handler = ConditionsGetCategoryHandler(category);
+	return checkPermissionAccess(limit === ConditionsLimit.limited ? handler.permission_limited : handler.permission_normal, character);
 }
 
 export function ConditionsRemoveCondition<C extends ConditionsCategories>(category: C, conditions: ConditionsCategoryKeys[C] | ConditionsCategoryKeys[C][]): boolean {
@@ -113,13 +135,17 @@ export function ConditionsRemoveCondition<C extends ConditionsCategories>(catego
 	return changed;
 }
 
-export function ConditionsSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean): boolean {
+export function ConditionsSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean, character: ChatroomCharacter | null): boolean {
 	const categoryData = ConditionsGetCategoryData(category);
 	const conditionData = categoryData.conditions[condition];
 	if (conditionData) {
-		// TODO: Check permissions
+		if (character && !ConditionsCheckAccess(category, condition, character))
+			return false;
 		if (conditionData.active !== active) {
 			conditionData.active = active;
+			if (character) {
+				// TODO: log
+			}
 			notifyOfChange();
 			modStorageSync();
 		}
@@ -143,6 +169,8 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 	if (character && !checkPermissionAccess(handler.permission_changeLimits, character)) {
 		return false;
 	}
+	if (data.conditions[condition] !== undefined)
+		return false;
 	if ((data.limits[condition] ?? ConditionsLimit.normal) === limit)
 		return true;
 	if (limit === ConditionsLimit.normal) {
@@ -233,8 +261,9 @@ export class ModuleConditions extends BaseModule {
 		}
 
 		queryHandlers.conditionsGet = (sender, resolve, data) => {
-			if (typeof data === "string" && conditionHandlers.has(data)) {
-				resolve(true, ConditionsGetCategoryPublicData(data));
+			const character = getChatroomCharacter(sender);
+			if (character && typeof data === "string" && conditionHandlers.has(data)) {
+				resolve(true, ConditionsGetCategoryPublicData(data, character));
 			} else {
 				resolve(false);
 			}
@@ -249,7 +278,7 @@ export class ModuleConditions extends BaseModule {
 				typeof data.condition === "string" &&
 				typeof data.active === "boolean"
 			) {
-				resolve(true, ConditionsSetActive(data.category, data.condition, data.active));
+				resolve(true, ConditionsSetActive(data.category, data.condition, data.active, character));
 			} else {
 				resolve(false);
 			}

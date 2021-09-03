@@ -283,9 +283,16 @@ export class ChatroomCharacter {
 
 	conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
-			if (!isObject(data) || !isObject(data.conditions) || !Object.entries(data.conditions).every(
-				([condition, conditionData]) => ConditionsValidatePublicData(category, condition, conditionData)
-			)) {
+			if (!isObject(data) ||
+				typeof data.access_normal !== "boolean" ||
+				typeof data.access_limited !== "boolean" ||
+				typeof data.access_configure !== "boolean" ||
+				typeof data.access_changeLimits !== "boolean" ||
+				!isObject(data.conditions) ||
+				!Object.entries(data.conditions).every(
+					([condition, conditionData]) => ConditionsValidatePublicData(category, condition, conditionData)
+				)
+			) {
 				throw new Error("Bad data");
 			}
 			return data as ConditionsCategoryPublicData<C>;
@@ -416,11 +423,11 @@ export class PlayerCharacter extends ChatroomCharacter {
 	}
 
 	override conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
-		return Promise.resolve(ConditionsGetCategoryPublicData(category));
+		return Promise.resolve(ConditionsGetCategoryPublicData(category, this));
 	}
 
 	override conditionSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean): Promise<boolean> {
-		return Promise.resolve(ConditionsSetActive(category, condition, active));
+		return Promise.resolve(ConditionsSetActive(category, condition, active, this));
 	}
 
 	override conditionSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit): Promise<boolean> {

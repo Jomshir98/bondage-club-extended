@@ -1,4 +1,4 @@
-import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { ChatroomCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, removeHooksByModule } from "../patching";
 import { clamp, isObject } from "../utils";
@@ -339,24 +339,17 @@ export class ModuleLog extends BaseModule {
 		});
 
 		queryHandlers.logData = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, getVisibleLogEntries(character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, getVisibleLogEntries(sender));
 		};
 		queryHandlers.logDelete = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character && typeof data === "number") {
-				resolve(true, logMessageDelete(data, character));
+			if (typeof data === "number") {
+				resolve(true, logMessageDelete(data, sender));
 			} else {
 				resolve(false);
 			}
 		};
 		queryHandlers.logConfigGet = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (character && checkPermissionAccess("log_configure", character)) {
+			if (checkPermissionAccess("log_configure", sender)) {
 				resolve(true, logGetConfig());
 			} else {
 				resolve(false);
@@ -370,20 +363,10 @@ export class ModuleLog extends BaseModule {
 				console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
 				return resolve(false);
 			}
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, logConfigSet(data.category, data.target, character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, logConfigSet(data.category, data.target, sender));
 		};
 		queryHandlers.logClear = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, logClear(character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, logClear(sender));
 		};
 		queryHandlers.logPraise = (sender, resolve, data) => {
 			if (!isObject(data) ||
@@ -393,20 +376,10 @@ export class ModuleLog extends BaseModule {
 				console.warn(`BCX: Bad logPraise query from ${sender}`, data);
 				return resolve(false);
 			}
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, logPraise(data.value, data.message, character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, logPraise(data.value, data.message, sender));
 		};
 		queryHandlers.logGetAllowedActions = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, logGetAllowedActions(character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, logGetAllowedActions(sender));
 		};
 
 		registerWhisperCommand("log", "- Manage the behaviour log", (argv, sender, respond) => {

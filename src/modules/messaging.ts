@@ -1,4 +1,4 @@
-import { getChatroomCharacter, getPlayerCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { moduleInitPhase } from "../moduleManager";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
@@ -15,7 +15,7 @@ export type queryResolveFunction<T extends keyof BCX_queries> = {
 };
 
 export const queryHandlers: {
-	[K in keyof BCX_queries]?: (sender: number, resolve: queryResolveFunction<K>, data: BCX_queries[K][0]) => void;
+	[K in keyof BCX_queries]?: (sender: ChatroomCharacter, resolve: queryResolveFunction<K>, data: BCX_queries[K][0]) => void;
 } = {};
 
 export const changeHandlers: ((source: number) => void)[] = [];
@@ -88,14 +88,14 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 	}
 
 	const character = getChatroomCharacter(sender);
-	if (character && !character.hasAccessToPlayer()) {
+	if (!character || !character.hasAccessToPlayer()) {
 		return sendHiddenMessage("queryAnswer", {
 			id: message.id,
 			ok: false
 		});
 	}
 
-	const handler = queryHandlers[message.query] as (sender: number, resolve: queryResolveFunction<keyof BCX_queries>, data: any) => void;
+	const handler = queryHandlers[message.query] as (sender: ChatroomCharacter, resolve: queryResolveFunction<keyof BCX_queries>, data: any) => void;
 	if (!handler) {
 		console.warn("BCX: Query no handler", sender, message);
 		return sendHiddenMessage("queryAnswer", {
@@ -104,7 +104,7 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 		});
 	}
 
-	handler(sender, (ok, data) => {
+	handler(character, (ok, data) => {
 		sendHiddenMessage("queryAnswer", {
 			id: message.id,
 			ok,

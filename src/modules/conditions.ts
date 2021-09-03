@@ -8,7 +8,7 @@ import { BaseModule } from "./_BaseModule";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
-import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { ChatroomCharacter } from "../characters";
 import { checkPermissionAccess } from "./authority";
 
 const CONDITIONS_CHECK_INTERVAL = 2_000;
@@ -261,40 +261,35 @@ export class ModuleConditions extends BaseModule {
 		}
 
 		queryHandlers.conditionsGet = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character && typeof data === "string" && conditionHandlers.has(data)) {
-				resolve(true, ConditionsGetCategoryPublicData(data, character));
+			if (typeof data === "string" && conditionHandlers.has(data)) {
+				resolve(true, ConditionsGetCategoryPublicData(data, sender));
 			} else {
 				resolve(false);
 			}
 		};
 
 		queryHandlers.conditionSetActive = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character &&
-				isObject(data) &&
+			if (isObject(data) &&
 				typeof data.category === "string" &&
 				conditionHandlers.has(data.category) &&
 				typeof data.condition === "string" &&
 				typeof data.active === "boolean"
 			) {
-				resolve(true, ConditionsSetActive(data.category, data.condition, data.active, character));
+				resolve(true, ConditionsSetActive(data.category, data.condition, data.active, sender));
 			} else {
 				resolve(false);
 			}
 		};
 
 		queryHandlers.conditionSetLimit = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character &&
-				isObject(data) &&
+			if (isObject(data) &&
 				typeof data.category === "string" &&
 				conditionHandlers.has(data.category) &&
 				typeof data.condition === "string" &&
 				typeof data.limit === "number" &&
 				ConditionsLimit[data.limit] !== undefined
 			) {
-				resolve(true, ConditionsSetLimit(data.category, data.condition, data.limit, character));
+				resolve(true, ConditionsSetLimit(data.category, data.condition, data.limit, sender));
 			} else {
 				resolve(false);
 			}

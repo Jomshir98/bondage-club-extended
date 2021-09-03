@@ -1,7 +1,7 @@
 import { moduleInitPhase } from "../moduleManager";
 import { BaseModule } from "./_BaseModule";
 import { capitalizeFirstLetter, isObject } from "../utils";
-import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
+import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
@@ -399,20 +399,14 @@ export class ModuleAuthority extends BaseModule {
 			resolve(true, permissionsMakeBundle());
 		};
 		queryHandlers.permissionAccess = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character && typeof data === "string") {
-				resolve(true, checkPermissionAccess(data, character));
+			if (typeof data === "string") {
+				resolve(true, checkPermissionAccess(data, sender));
 			} else {
 				resolve(false);
 			}
 		};
 		queryHandlers.myAccessLevel = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, getCharacterAccessLevel(character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, getCharacterAccessLevel(sender));
 		};
 		queryHandlers.editPermission = (sender, resolve, data) => {
 			if (!isObject(data) ||
@@ -425,12 +419,6 @@ export class ModuleAuthority extends BaseModule {
 				return resolve(false);
 			}
 
-			const character = getChatroomCharacter(sender);
-			if (!character) {
-				console.warn(`BCX: editPermission query from ${sender}; not found in room`, data);
-				return resolve(false);
-			}
-
 			if (!permissions.has(data.permission)) {
 				console.warn(`BCX: editPermission query from ${sender}; unknown permission`, data);
 				return resolve(false);
@@ -440,7 +428,7 @@ export class ModuleAuthority extends BaseModule {
 				if (typeof data.target !== "boolean") {
 					throw new Error("Assertion failed");
 				}
-				return resolve(true, setPermissionSelfAccess(data.permission, data.target, character));
+				return resolve(true, setPermissionSelfAccess(data.permission, data.target, sender));
 			} else {
 				if (typeof data.target !== "number") {
 					throw new Error("Assertion failed");
@@ -449,22 +437,16 @@ export class ModuleAuthority extends BaseModule {
 					console.warn(`BCX: editPermission query from ${sender}; unknown access level`, data);
 					return resolve(true, false);
 				}
-				return resolve(true, setPermissionMinAccess(data.permission, data.target, character));
+				return resolve(true, setPermissionMinAccess(data.permission, data.target, sender));
 			}
 		};
 
 		queryHandlers.rolesData = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (!character) {
-				console.warn(`BCX: rolesData query from ${sender}; not found in room`);
+			if (!checkPermissionAccess("authority_view_roles", sender)) {
 				return resolve(false);
 			}
 
-			if (!checkPermissionAccess("authority_view_roles", character)) {
-				return resolve(false);
-			}
-
-			resolve(true, getPlayerRoleData(character));
+			resolve(true, getPlayerRoleData(sender));
 		};
 
 		queryHandlers.editRole = (sender, resolve, data) => {
@@ -477,13 +459,7 @@ export class ModuleAuthority extends BaseModule {
 				return resolve(false);
 			}
 
-			const character = getChatroomCharacter(sender);
-			if (!character) {
-				console.warn(`BCX: editRole query from ${sender}; not found in room`, data);
-				return resolve(false);
-			}
-
-			resolve(true, editRole(data.type, data.action, data.target, character));
+			resolve(true, editRole(data.type, data.action, data.target, sender));
 		};
 
 		registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {

@@ -273,44 +273,31 @@ export class ModuleCurses extends BaseModule {
 		});
 
 		queryHandlers.curseGetInfo = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, curseGetInfo(character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, curseGetInfo(sender));
 		};
 		queryHandlers.curseItem = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character && isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
-				resolve(true, curseItem(data.Group, data.curseProperties, character));
+			if (isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
+				resolve(true, curseItem(data.Group, data.curseProperties, sender));
 			} else {
 				resolve(false);
 			}
 		};
 		queryHandlers.curseLift = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character && typeof data === "string") {
-				resolve(true, curseLift(data, character));
+			if (typeof data === "string") {
+				resolve(true, curseLift(data, sender));
 			} else {
 				resolve(false);
 			}
 		};
 		queryHandlers.curseBatch = (sender, resolve, data) => {
-			const character = getChatroomCharacter(sender);
-			if (character && isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
-				resolve(true, curseBatch(data.mode, data.includingEmpty, character));
+			if (isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
+				resolve(true, curseBatch(data.mode, data.includingEmpty, sender));
 			} else {
 				resolve(false);
 			}
 		};
 		queryHandlers.curseLiftAll = (sender, resolve) => {
-			const character = getChatroomCharacter(sender);
-			if (character) {
-				resolve(true, curseLiftAll(character));
-			} else {
-				resolve(false);
-			}
+			resolve(true, curseLiftAll(sender));
 		};
 
 		registerWhisperCommand("curses", "- Manage curses", (argv, sender, respond) => {

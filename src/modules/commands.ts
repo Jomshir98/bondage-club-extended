@@ -546,12 +546,7 @@ export class ModuleCommands extends BaseModule {
 				return resolve(false);
 			}
 
-			const character = getChatroomCharacter(sender);
-			if (!character) {
-				return resolve(false);
-			}
-
-			const result = WhisperCommandAutocomplete(data.substr(1), character);
+			const result = WhisperCommandAutocomplete(data.substr(1), sender);
 			result[0] = '!' + result[0];
 			resolve(true, result);
 		};

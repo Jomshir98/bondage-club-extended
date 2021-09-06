@@ -40,6 +40,7 @@ declare function ElementScrollToEnd(ID: string): void;
 declare function ElementFocus(ID: string): void;
 declare function ElementCreateInput(ID: string, Type: string, Value: string, MaxLength: string): HTMLInputElement;
 declare function ElementPosition(ElementID: string, X: number, Y: number, W: number, H?: number): void;
+declare function ElementPositionFix(ElementID: string, Font: any, X: number, Y: number, W: number, H: number): void;
 declare function ElementRemove(ID: string): void;
 
 // Dialog.js
@@ -56,6 +57,7 @@ declare function DialogDrawExpressionMenu(): void;
 declare const DrawRunMap: Map<string, () => void>;
 /** @deprecated */
 declare var DrawScreen: string;
+declare var DrawHoverElements: (() => void)[];
 declare var MainCanvas: CanvasRenderingContext2D;
 declare function DrawGetImage(Source: string): HTMLImageElement;
 declare function DrawButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, HoveringText?: string, Disabled?: boolean): void;

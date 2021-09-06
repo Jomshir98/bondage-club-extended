@@ -129,18 +129,23 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 			const clothingIsCursed = this.curseData.conditions[group.Name] !== undefined;
 			const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
+			const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
 			let color: string;
 			let text: string;
 			if (this.permissionMode) {
 				color = ["#ccfece", "#fefc53", "red"][accessLevel];
 				text = ["Normal", "Limited", "Blocked"][accessLevel];
 			} else {
-				color = clothingIsCursed ? "#ccc" : (currentItem ? "Gold" : "White");
-				text = clothingIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing");
+				color = clothingIsCursed ? "#88c" :
+					!allowCurse ? "#ccc" :
+					(currentItem ? "Gold" : "White");
+				text = clothingIsCursed ? "Already cursed" :
+					!allowCurse ? "You have no permission to curse this" :
+					(currentItem ? currentItem.Asset.Description : "Nothing");
 			}
 			DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
 				color, undefined,
-				text, clothingIsCursed || this.permissionMode);
+				text, clothingIsCursed || !allowCurse || this.permissionMode);
 		}
 
 		//Body

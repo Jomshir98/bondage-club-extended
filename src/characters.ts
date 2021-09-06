@@ -1,7 +1,7 @@
 import { VERSION } from "./config";
 import { ConditionsLimit, ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
-import { ConditionsGetCategoryPublicData, ConditionsSetActive, ConditionsSetLimit, ConditionsValidatePublicData } from "./modules/conditions";
+import { ConditionsGetCategoryPublicData, ConditionsSetActive, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
 import { curseGetInfo, curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
@@ -283,16 +283,7 @@ export class ChatroomCharacter {
 
 	conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
-			if (!isObject(data) ||
-				typeof data.access_normal !== "boolean" ||
-				typeof data.access_limited !== "boolean" ||
-				typeof data.access_configure !== "boolean" ||
-				typeof data.access_changeLimits !== "boolean" ||
-				!isObject(data.conditions) ||
-				!Object.entries(data.conditions).every(
-					([condition, conditionData]) => ConditionsValidatePublicData(category, condition, conditionData)
-				)
-			) {
+			if (!guard_ConditionsCategoryPublicData(category, data)) {
 				throw new Error("Bad data");
 			}
 			return data as ConditionsCategoryPublicData<C>;
@@ -314,6 +305,15 @@ export class ChatroomCharacter {
 				throw new Error("Bad data");
 			}
 			return data;
+		});
+	}
+
+	conditionUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>): Promise<boolean> {
+		return sendQuery("conditionUpdate", { category, condition, data }, this.MemberNumber).then(res => {
+			if (typeof res !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return res;
 		});
 	}
 
@@ -432,6 +432,10 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override conditionSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit): Promise<boolean> {
 		return Promise.resolve(ConditionsSetLimit(category, condition, limit, this));
+	}
+
+	override conditionUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>): Promise<boolean> {
+		return Promise.resolve(ConditionsUpdate(category, condition, data, this));
 	}
 }
 

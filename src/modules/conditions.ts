@@ -8,10 +8,74 @@ import { BaseModule } from "./_BaseModule";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
-import { ChatroomCharacter } from "../characters";
-import { checkPermissionAccess } from "./authority";
+import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
+import { AccessLevel, checkPermissionAccess, getCharacterAccessLevel } from "./authority";
 
 const CONDITIONS_CHECK_INTERVAL = 2_000;
+
+export function guard_ConditionsConditionRequirements(data: unknown): data is ConditionsConditionRequirements {
+	return isObject(data) &&
+		(
+			data.room === undefined ||
+			isObject(data.room) &&
+			(data.room.inverted === undefined || data.room.inverted === true) &&
+			(data.room.type === "public" || data.room.type === "private")
+		) &&
+		(
+			data.roomName === undefined ||
+			isObject(data.roomName) &&
+			(data.roomName.inverted === undefined || data.roomName.inverted === true) &&
+			typeof data.roomName.name === "string"
+		) &&
+		(
+			data.role === undefined ||
+			isObject(data.role) &&
+			(data.role.inverted === undefined || data.role.inverted === true) &&
+			typeof data.role.role === "number" &&
+			AccessLevel[data.role.role] !== undefined
+		) &&
+		(
+			data.player === undefined ||
+			isObject(data.player) &&
+			(data.player.inverted === undefined || data.player.inverted === true) &&
+			typeof data.player.memberNumber === "number"
+		);
+}
+
+export function guard_ConditionsConditionPublicData<C extends ConditionsCategories>(category: C, condition: string, data: unknown): data is ConditionsConditionPublicData<C> {
+	const d = data as ConditionsConditionPublicData;
+	const handler = conditionHandlers.get(category);
+	if (!handler)
+		return false;
+	return isObject(d) &&
+		typeof d.active === "boolean" &&
+		(d.timer === null || typeof d.timer === "number") &&
+		typeof d.timerRemove === "boolean" &&
+		(d.requirements === null || guard_ConditionsConditionRequirements(d.requirements)) &&
+		handler.validatePublicData(condition, d.data);
+}
+
+export function guard_ConditionsCategoryPublicData<C extends ConditionsCategories>(category: C, data: unknown): data is ConditionsCategoryPublicData<C> {
+	const d = data as ConditionsCategoryPublicData;
+	const handler = conditionHandlers.get(category);
+	if (!handler)
+		return false;
+	return isObject(d) &&
+		typeof d.access_normal === "boolean" &&
+		typeof d.access_limited === "boolean" &&
+		typeof d.access_configure === "boolean" &&
+		typeof d.access_changeLimits === "boolean" &&
+		typeof d.highestRoleInRoom === "number" &&
+		AccessLevel[d.highestRoleInRoom] !== undefined &&
+		isObject(d.conditions) &&
+		Object.entries(d.conditions).every(
+			([condition, conditionData]) => guard_ConditionsConditionPublicData(category, condition, conditionData)
+		) &&
+		isObject(d.limits) &&
+		Object.entries(d.limits).every(
+			([condition, limit]) => limit === undefined || typeof limit === "number" && ConditionsLimit[limit] !== undefined
+		);
+}
 
 export interface ConditionsHandler<C extends ConditionsCategories> {
 	category: ModuleCategory;
@@ -65,25 +129,27 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		access_limited: checkPermissionAccess(handler.permission_limited, requester),
 		access_configure: checkPermissionAccess(handler.permission_configure, requester),
 		access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
+		highestRoleInRoom: AccessLevel.public,
 		conditions: {},
-		limits: cloneDeep(data.limits)
+		limits: cloneDeep(data.limits),
+		requirements: cloneDeep(data.requirements)
 	};
+	for (const char of getAllCharactersInRoom()) {
+		const role = getCharacterAccessLevel(char);
+		if (role !== AccessLevel.self && role < res.highestRoleInRoom) {
+			res.highestRoleInRoom = role;
+		}
+	}
 	for (const [condition, conditionData] of Object.entries(data.conditions)) {
 		res.conditions[condition] = {
 			active: conditionData.active,
-			data: handler.makePublicData(condition, conditionData)
+			data: handler.makePublicData(condition, conditionData),
+			timer: conditionData.timer ?? null,
+			timerRemove: conditionData.timerRemove ?? false,
+			requirements: conditionData.requirements ?? null
 		};
 	}
 	return res as ConditionsCategoryPublicData<C>;
-}
-
-export function ConditionsValidatePublicData<C extends ConditionsCategories>(category: C, condition: string, data: ConditionsConditionPublicData): boolean {
-	const handler = conditionHandlers.get(category);
-	if (!handler)
-		return false;
-	return isObject(data) &&
-		typeof data.active === "boolean" &&
-		handler.validatePublicData(condition, data.data);
 }
 
 export function ConditionsGetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C]): ConditionsConditionData<C> | undefined {
@@ -186,6 +252,74 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 	return true;
 }
 
+export function ConditionsUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>, character: ChatroomCharacter | null): boolean {
+	const handler = conditionHandlers.get(category);
+	if (!handler) {
+		throw new Error(`Attempt to set limit for unknown conditions category ${category}`);
+	}
+	if (character && !ConditionsCheckAccess(category, condition, character))
+		return false;
+	const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);
+	if (!conditionData)
+		return false;
+	conditionData.active = data.active;
+	if (data.requirements) {
+		conditionData.requirements = data.requirements;
+	} else {
+		delete conditionData.requirements;
+	}
+	if (data.timer !== null) {
+		conditionData.timer = data.timer;
+	} else {
+		delete conditionData.timer;
+	}
+	if (data.timerRemove) {
+		conditionData.timerRemove = true;
+	} else {
+		delete conditionData.timerRemove;
+	}
+	// TODO: Category specific update
+	if (character) {
+		// TODO: Log
+	}
+	notifyOfChange();
+	modStorageSync();
+	return true;
+}
+
+export function ConditionsEvaluateRequirements(requirements: ConditionsConditionRequirements): boolean {
+	const inChatroom = ServerPlayerIsInChatRoom();
+	const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
+	if (requirements.room) {
+		const res = inChatroom &&
+			(requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
+		if (!(requirements.room.inverted ? !res : res))
+			return false;
+	}
+	if (requirements.roomName) {
+		const res = inChatroom &&
+			ChatRoomData &&
+			typeof ChatRoomData.Name === "string" &&
+			ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
+		if (!(requirements.roomName.inverted ? !res : res))
+			return false;
+	}
+	if (requirements.role) {
+		const res = inChatroom &&
+			getAllCharactersInRoom().some(c => !c.isPlayer() && getCharacterAccessLevel(c) <= requirements.role!.role);
+		if (!(requirements.role.inverted ? !res : res))
+			return false;
+	}
+	if (requirements.player) {
+		const res = inChatroom &&
+			getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player!.memberNumber);
+		if (!(requirements.player.inverted ? !res : res))
+			return false;
+	}
+
+	return true;
+}
+
 export class ModuleConditions extends BaseModule {
 	private timer: number | null = null;
 
@@ -198,7 +332,8 @@ export class ModuleConditions extends BaseModule {
 		if (modStorage.cursedItems) {
 			const curses: ConditionsCategoryData<"curses"> = modStorage.conditions.curses = {
 				conditions: {},
-				limits: {}
+				limits: {},
+				requirements: {}
 			};
 			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
 				curses.conditions[group] = {
@@ -240,11 +375,25 @@ export class ModuleConditions extends BaseModule {
 				}
 			}
 
-			for (const [condition, conditiondata] of Object.entries(data.conditions)) {
+			if (!guard_ConditionsConditionRequirements(data.requirements)) {
+				console.warn(`BCX: Resetting category ${key} requirements with invalid data`);
+				data.requirements = {};
+			}
+
+			for (const [condition, conditiondata] of Object.entries<ConditionsConditionData>(data.conditions)) {
 				if (!handler.loadValidateConditionKey(condition)) {
 					console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
 					delete data.conditions[condition];
 				} else if (!handler.loadValidateCondition(condition, conditiondata)) {
+					delete data.conditions[condition];
+				} else if (
+					typeof conditiondata.active !== "boolean" ||
+					conditiondata.requirements !== undefined && !guard_ConditionsConditionRequirements(conditiondata.requirements) ||
+					conditiondata.timer !== undefined && typeof conditiondata.timer !== "number" ||
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
+					conditiondata.timerRemove !== undefined && conditiondata.timerRemove !== true
+				) {
+					console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
 					delete data.conditions[condition];
 				}
 			}
@@ -255,7 +404,8 @@ export class ModuleConditions extends BaseModule {
 				console.debug(`BCX: Adding missing conditions category ${key}`);
 				modStorage.conditions[key] = {
 					conditions: {},
-					limits: {}
+					limits: {},
+					requirements: {}
 				};
 			}
 		}
@@ -294,6 +444,19 @@ export class ModuleConditions extends BaseModule {
 				resolve(false);
 			}
 		};
+
+		queryHandlers.conditionUpdate = (sender, resolve, data) => {
+			if (isObject(data) &&
+				typeof data.category === "string" &&
+				conditionHandlers.has(data.category) &&
+				typeof data.condition === "string" &&
+				guard_ConditionsConditionPublicData(data.category, data.condition, data.data)
+			) {
+				resolve(true, ConditionsUpdate(data.category, data.condition, data.data, sender));
+			} else {
+				resolve(false);
+			}
+		};
 	}
 
 	run() {
@@ -318,6 +481,7 @@ export class ModuleConditions extends BaseModule {
 			return;
 
 		let dataChanged = false;
+		const now = Date.now();
 
 		for (const [category, handler] of conditionHandlers.entries()) {
 			const categoryData = modStorage.conditions[category];
@@ -325,8 +489,22 @@ export class ModuleConditions extends BaseModule {
 			if (!moduleIsEnabled(handler.category) || !categoryData)
 				continue;
 
-			for (const [conditionName, conditionData] of Object.entries(categoryData)) {
+			for (const [conditionName, conditionData] of Object.entries<ConditionsConditionData>(categoryData.conditions)) {
+				if (conditionData.timer !== undefined && conditionData.timer <= now) {
+					if (conditionData.timerRemove) {
+						ConditionsRemoveCondition(category, conditionName);
+					} else {
+						delete conditionData.timer;
+						conditionData.active = false;
+						dataChanged = true;
+					}
+				}
+
 				if (!conditionData.active)
+					continue;
+
+				const requirements = conditionData.requirements ?? categoryData.requirements;
+				if (!ConditionsEvaluateRequirements(requirements))
 					continue;
 
 				const copy = cloneDeep(conditionData);
@@ -341,6 +519,7 @@ export class ModuleConditions extends BaseModule {
 
 		if (dataChanged) {
 			modStorageSync();
+			notifyOfChange();
 		}
 	}
 }

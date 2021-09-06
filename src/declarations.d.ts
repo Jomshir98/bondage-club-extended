@@ -84,14 +84,39 @@ interface ConditionsCategorySpecificPublicData {
 	rules: null;
 }
 
+interface ConditionsConditionRequirements {
+	room?: {
+		type: "public" | "private";
+		inverted?: true;
+	};
+	roomName?: {
+		name: string;
+		inverted?: true;
+	};
+	role?: {
+		role: import("./modules/authority").AccessLevel;
+		inverted?: true;
+	}
+	player?: {
+		memberNumber: number;
+		inverted?: true;
+	}
+}
+
 interface ConditionsConditionData<category extends ConditionsCategories = ConditionsCategories> {
 	active: boolean;
 	data: ConditionsCategorySpecificData[category];
+	timer?: number;
+	timerRemove?: true | undefined;
+	requirements?: ConditionsConditionRequirements;
 }
 
 interface ConditionsConditionPublicData<category extends ConditionsCategories = ConditionsCategories> {
 	active: boolean;
 	data: ConditionsCategorySpecificPublicData[category];
+	timer: number | null;
+	timerRemove: boolean;
+	requirements: ConditionsConditionRequirements | null;
 }
 
 type ConditionsCategoryRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionData<category>>;
@@ -101,13 +126,20 @@ interface ConditionsCategoryData<category extends ConditionsCategories = Conditi
 	conditions: Record<string, ConditionsConditionData<category>>;
 	/** List of limited/blocked conditions; defaults to normal */
 	limits: { [P in ConditionsCategoryKeys[category]]?: import("./constants").ConditionsLimit };
+	requirements: ConditionsConditionRequirements;
 }
 
-interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface ConditionsCategoryConfigurableData<category extends ConditionsCategories = ConditionsCategories> {
+	requirements: ConditionsConditionRequirements;
+}
+
+interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> extends ConditionsCategoryConfigurableData<category> {
 	access_normal: boolean;
 	access_limited: boolean;
 	access_configure: boolean;
 	access_changeLimits: boolean;
+	highestRoleInRoom: import("./modules/authority").AccessLevel;
 	conditions: ConditionsCategoryPublicRecord<category>;
 	/** List of limited/blocked conditions; defaults to normal */
 	limits: { [P in ConditionsCategoryKeys[category]]?: import("./constants").ConditionsLimit };

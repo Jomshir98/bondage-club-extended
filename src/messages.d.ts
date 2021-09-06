@@ -124,4 +124,9 @@ type BCX_queries = {
 		condition: string;
 		limit: import("./constants").ConditionsLimit;
 	}, boolean];
+	conditionUpdate: [{
+		category: ConditionsCategories;
+		condition: string;
+		data: ConditionsConditionPublicData;
+	}, boolean];
 };

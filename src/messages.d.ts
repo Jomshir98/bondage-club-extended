@@ -96,7 +96,6 @@ type BCX_queries = {
 		boolean
 	];
 	logGetAllowedActions: [undefined, BCX_logAllowedActions];
-	curseGetInfo: [undefined, BCX_curseInfo];
 	curseItem: [
 		{
 			Group: string;
@@ -114,11 +113,6 @@ type BCX_queries = {
 		boolean
 	];
 	conditionsGet: [ConditionsCategories, ConditionsCategoryPublicData<ConditionsCategories>];
-	conditionSetActive: [{
-		category: ConditionsCategories;
-		condition: string;
-		active: boolean;
-	}, boolean];
 	conditionSetLimit: [{
 		category: ConditionsCategories;
 		condition: string;

@@ -216,7 +216,7 @@ export class ModuleCurses extends BaseModule {
 
 	init() {
 		registerPermission("curses_normal", {
-			name: "Allows handling curses of non-limited object slots",
+			name: "Allows handling curses on non-limited object slots",
 			category: ModuleCategory.Curses,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.lover],
@@ -226,7 +226,7 @@ export class ModuleCurses extends BaseModule {
 			}
 		});
 		registerPermission("curses_limited", {
-			name: "Allows handling curses of limited object slots",
+			name: "Allows handling curses on limited object slots",
 			category: ModuleCategory.Curses,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.owner],
@@ -236,7 +236,7 @@ export class ModuleCurses extends BaseModule {
 			}
 		});
 		registerPermission("curses_global_configuration", {
-			name: "Allows editing the global default condition configuration",
+			name: "Allows editing the global curses configuration",
 			category: ModuleCategory.Curses,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.owner],
@@ -266,9 +266,6 @@ export class ModuleCurses extends BaseModule {
 			}
 		});
 
-		queryHandlers.curseGetInfo = (sender, resolve) => {
-			resolve(true, curseGetInfo(sender));
-		};
 		queryHandlers.curseItem = (sender, resolve, data) => {
 			if (isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
 				resolve(true, curseItem(data.Group, data.curseProperties, sender));

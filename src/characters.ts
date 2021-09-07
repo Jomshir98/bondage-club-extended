@@ -1,8 +1,8 @@
 import { VERSION } from "./config";
 import { ConditionsLimit, ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
-import { ConditionsCategoryUpdate, ConditionsGetCategoryPublicData, ConditionsSetActive, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
-import { curseGetInfo, curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
+import { ConditionsCategoryUpdate, ConditionsGetCategoryPublicData, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
+import { curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { getDisabledModules } from "./modules/presets";
@@ -224,27 +224,6 @@ export class ChatroomCharacter {
 		});
 	}
 
-	curseGetInfo(): Promise<BCX_curseInfo> {
-		return sendQuery("curseGetInfo", undefined, this.MemberNumber).then(data => {
-			if (!isObject(data) ||
-				typeof data.allowCurse !== "boolean" ||
-				typeof data.allowLift !== "boolean" ||
-				!isObject(data.curses) ||
-				Object.values(data.curses).some(v =>
-					v !== null &&
-					(
-						!isObject(v) ||
-						typeof v.Name !== "string" ||
-						typeof v.curseProperties !== "boolean"
-					)
-				)
-			) {
-				throw new Error("Bad data");
-			}
-			return data;
-		});
-	}
-
 	curseItem(Group: string, curseProperties: boolean | null): Promise<boolean> {
 		return sendQuery("curseItem", { Group, curseProperties }, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
@@ -284,15 +263,6 @@ export class ChatroomCharacter {
 	conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
 			if (!guard_ConditionsCategoryPublicData(category, data)) {
-				throw new Error("Bad data");
-			}
-			return data;
-		});
-	}
-
-	conditionSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean): Promise<boolean> {
-		return sendQuery("conditionSetActive", { category, condition, active }, this.MemberNumber).then(data => {
-			if (typeof data !== "boolean") {
 				throw new Error("Bad data");
 			}
 			return data;
@@ -411,10 +381,6 @@ export class PlayerCharacter extends ChatroomCharacter {
 		return Promise.resolve(logGetAllowedActions(this));
 	}
 
-	override curseGetInfo(): Promise<BCX_curseInfo> {
-		return Promise.resolve(curseGetInfo(this));
-	}
-
 	override curseItem(Group: string, curseProperties: boolean): Promise<boolean> {
 		return Promise.resolve(curseItem(Group, curseProperties, this));
 	}
@@ -433,10 +399,6 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return Promise.resolve(ConditionsGetCategoryPublicData(category, this));
-	}
-
-	override conditionSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean): Promise<boolean> {
-		return Promise.resolve(ConditionsSetActive(category, condition, active, this));
 	}
 
 	override conditionSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit): Promise<boolean> {

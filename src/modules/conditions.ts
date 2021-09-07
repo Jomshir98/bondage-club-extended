@@ -222,25 +222,6 @@ export function ConditionsRemoveCondition<C extends ConditionsCategories>(catego
 	return changed;
 }
 
-export function ConditionsSetActive<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], active: boolean, character: ChatroomCharacter | null): boolean {
-	const categoryData = ConditionsGetCategoryData(category);
-	const conditionData = categoryData.conditions[condition];
-	if (conditionData) {
-		if (character && !ConditionsCheckAccess(category, condition, character))
-			return false;
-		if (conditionData.active !== active) {
-			conditionData.active = active;
-			if (character) {
-				// TODO: log
-			}
-			notifyOfChange();
-			modStorageSync();
-		}
-		return true;
-	}
-	return false;
-}
-
 export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit, character: ChatroomCharacter | null): boolean {
 	const handler = conditionHandlers.get(category);
 	if (!handler) {
@@ -472,19 +453,6 @@ export class ModuleConditions extends BaseModule {
 		queryHandlers.conditionsGet = (sender, resolve, data) => {
 			if (typeof data === "string" && conditionHandlers.has(data)) {
 				resolve(true, ConditionsGetCategoryPublicData(data, sender));
-			} else {
-				resolve(false);
-			}
-		};
-
-		queryHandlers.conditionSetActive = (sender, resolve, data) => {
-			if (isObject(data) &&
-				typeof data.category === "string" &&
-				conditionHandlers.has(data.category) &&
-				typeof data.condition === "string" &&
-				typeof data.active === "boolean"
-			) {
-				resolve(true, ConditionsSetActive(data.category, data.condition, data.active, sender));
 			} else {
 				resolve(false);
 			}

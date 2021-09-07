@@ -286,7 +286,7 @@ export class ChatroomCharacter {
 			if (!guard_ConditionsCategoryPublicData(category, data)) {
 				throw new Error("Bad data");
 			}
-			return data as ConditionsCategoryPublicData<C>;
+			return data;
 		});
 	}
 

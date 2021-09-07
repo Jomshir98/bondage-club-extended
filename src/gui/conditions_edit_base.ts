@@ -3,10 +3,10 @@ import { setSubscreen } from "../modules/gui";
 import { GuiSubscreen } from "./subscreen";
 import { DrawImageEx, getCharacterName } from "../utilsClub";
 import { AccessLevel } from "../modules/authority";
-
-import cloneDeep from "lodash-es/cloneDeep";
 import { ConditionsLimit } from "../constants";
 import { capitalizeFirstLetter } from "../utils";
+
+import cloneDeep from "lodash-es/cloneDeep";
 
 export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends GuiSubscreen {
 
@@ -197,12 +197,15 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 		// on-off toggle
 		MainCanvas.textAlign = "left";
-		DrawCheckbox(125, 180, 64, 64, "This condition is active and in effect", data.active, !access);
+		DrawCheckbox(125, 180, 64, 64, `This ${this.conditionCategory.slice(0, -1)} is active and in effect`, data.active, !access);
 
 		// global-category-configuration-is-active highlighting
 		if (useGlobalCategorySetting) {
 			MainCanvas.fillStyle = "#0052A3";
-			MainCanvas.fillRect(115, 610, 84, 324);
+			MainCanvas.fillRect(120, 615, 74, 74);
+			MainCanvas.fillRect(120, 695, 74, 74);
+			MainCanvas.fillRect(120, 775, 74, 74);
+			MainCanvas.fillRect(120, 855, 74, 74);
 		}
 
 		////// status and timer area
@@ -211,7 +214,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		if (data.timer === null) {
 			statusText = "Timer disabled";
 		} else {
-			statusText = `Remaining time: `;
+			statusText = `Time left: `;
 			const seconds = Math.floor((data.timer - Date.now()) / 1000);
 			const minutes = Math.floor(seconds / 60);
 			const hours = Math.floor(minutes / 60);
@@ -229,8 +232,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 				statusText += `${seconds % 60} seconds`;
 			}
 		}
-		// Further examples of status: Inactive (66 days 13 hours 42 min) | Inactive (infinite)
-		DrawText(statusText, 530, 310, "Black");
+		DrawText(statusText, 530, 311, "Black");
 
 		if (data.timer === null) {
 			DrawButton(120, 360, 820, 160, "Enable timer", "White");
@@ -249,7 +251,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		}
 
 		////// condition factors area
-		DrawText(`Trigger condition factors (always, if all unselected):`, 130, 580, "Black", "");
+		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions (always, if all unselected):`, 130, 580, "Black", "");
 
 		// In room
 		DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
@@ -264,7 +266,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			const res = inChatroom &&
 				(requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
 			MainCanvas.fillStyle = (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(100, 620, 15, 64);
+			MainCanvas.fillRect(95, 620, 15, 64);
 		}
 
 		// In room named
@@ -281,7 +283,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 				typeof ChatRoomData.Name === "string" &&
 				ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
 			MainCanvas.fillStyle = (requirements.roomName.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(100, 700, 15, 64);
+			MainCanvas.fillRect(95, 700, 15, 64);
 		}
 
 		// In presence of role
@@ -304,7 +306,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			const inChatroom = ServerPlayerIsInChatRoom();
 			const res = inChatroom && getAllCharactersInRoom().length > 1 && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
 			MainCanvas.fillStyle = (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(100, 780, 15, 64);
+			MainCanvas.fillRect(95, 780, 15, 64);
 		}
 
 		// In presence of player
@@ -319,7 +321,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			const res = inChatroom &&
 				getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player!.memberNumber);
 			MainCanvas.fillStyle = (requirements.player.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(100, 860, 15, 64);
+			MainCanvas.fillRect(95, 860, 15, 64);
 			const input = document.getElementById("BCX_ConditionMemberNumber") as HTMLInputElement | undefined;
 			if (input && document.activeElement === input) {
 				DrawHoverElements.push(() => {
@@ -343,7 +345,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		MainCanvas.rect(1190, 830, 720, 104);
 		MainCanvas.strokeStyle = "#0052A3";
 		MainCanvas.stroke();
-		DrawCheckbox(1210, 850, 64, 64, "Set to global condition configuration", useGlobalCategorySetting, !access);
+		DrawCheckbox(1210, 850, 64, 64, `Set to global ${this.conditionCategory} configuration`, useGlobalCategorySetting, !access);
 		MainCanvas.beginPath();
 		MainCanvas.ellipse(1877 + 33, 800 + 30, 22, 22, 360, 0, 360);
 		MainCanvas.fillStyle = "#0052A3";
@@ -358,7 +360,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		if (data.timer !== null && MouseIn(125, 450, 80, 64)) DrawButtonHover(125, 450, 64, 64, `Removes ${this.conditionCategory.slice(0, -1)} instead of only deactivating it `);
 
 		// hover text for clobal configuration category toggle
-		if (MouseIn(1190, 830, 100, 104)) DrawButtonHover(1786, 854, 64, 64, `Switches this condition to the global ${this.conditionCategory} config`);
+		if (MouseIn(1190, 830, 100, 104)) DrawButtonHover(1786, 854, 64, 64, `Overwrites current trigger conditions`);
 
 		return false;
 	}

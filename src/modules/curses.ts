@@ -499,7 +499,29 @@ export class ModuleCurses extends BaseModule {
 				data === null ||
 				isObject(data) &&
 				typeof data.Name === "string" &&
-				typeof data.curseProperties === "boolean"
+				typeof data.curseProperties === "boolean",
+			updateCondition: (condition, data, updateData) => {
+				// Update cannot change cursed item
+				if (data.data?.Name !== updateData?.Name)
+					return false;
+				// Nothing to update on empty slot
+				if (!data.data || !updateData)
+					return true;
+
+				const asset = AssetGet(Player.AssetFamily, condition, data.data.Name);
+				if (!asset) {
+					console.warn(`BCX: Curse asset ${condition}:${data.data.Name} not found during update`);
+					return false;
+				}
+
+				data.data.curseProperty = updateData.curseProperties;
+				if (!curseAllowItemCurseProperty(asset) && data.data.curseProperty) {
+					console.warn(`BCX: Attempt to curse properties of item ${condition}:${data.data.Name}, while not allowed`);
+					data.data.curseProperty = false;
+				}
+
+				return true;
+			}
 		});
 	}
 
@@ -623,7 +645,7 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		type change = "add" | "swap" | "update" | "color";
-		let changeType: "" | change  = "";
+		let changeType: "" | change = "";
 		const CHANGE_TEXTS: Record<change, string> = {
 			add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears`,
 			swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,

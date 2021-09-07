@@ -262,6 +262,8 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);
 	if (!conditionData)
 		return false;
+	if (!handler.updateCondition(condition, conditionData, data.data, character))
+		return false;
 	conditionData.active = data.active;
 	if (data.requirements) {
 		conditionData.requirements = data.requirements;
@@ -278,7 +280,6 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	} else {
 		delete conditionData.timerRemove;
 	}
-	// TODO: Category specific update
 	if (character) {
 		// TODO: Log
 	}

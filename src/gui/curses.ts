@@ -6,6 +6,9 @@ import { GuiCursesAdd } from "./curses_add";
 import { clamp } from "../utils";
 import { getVisibleGroupName, DrawImageEx } from "../utilsClub";
 import { curseAllowItemCurseProperty } from "../modules/curses";
+import { GuiConditionEditCurses } from "./conditions_edit_curses";
+import { GuiConditionGlobalCurses } from "./conditions_global_curses";
+import { ConditionsLimit } from "../constants";
 
 const PER_COLUMN_COUNT = 7;
 const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
@@ -13,8 +16,9 @@ const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
 interface CurseEntry {
 	name: string;
 	group: string;
-	empty: boolean;
-	type: string;
+	access: boolean;
+	data: ConditionsConditionPublicData<"curses">;
+	type: "clothing" | "item";
 	propertiesCursed?: boolean;
 	propertiesCursedShow?: boolean;
 }
@@ -24,7 +28,7 @@ export class GuiCurses extends GuiSubscreen {
 	readonly character: ChatroomCharacter;
 
 	private curseEntries: CurseEntry[] = [];
-	private curseData: BCX_curseInfo | null = null;
+	private curseData: ConditionsCategoryPublicData<"curses"> | null = null;
 	private failed: boolean = false;
 	private page: number = 0;
 
@@ -46,7 +50,7 @@ export class GuiCurses extends GuiSubscreen {
 	private requestData() {
 		this.curseData = null;
 		this.rebuildList();
-		this.character.curseGetInfo().then(res => {
+		this.character.conditionsGetByCategory("curses").then(res => {
 			this.curseData = res;
 			this.rebuildList();
 		}, err => {
@@ -63,29 +67,33 @@ export class GuiCurses extends GuiSubscreen {
 		if (this.curseData === null)
 			return;
 
-		for (const [k, v] of Object.entries(this.curseData.curses)) {
+		for (const [k, v] of Object.entries<ConditionsConditionPublicData<"curses">>(this.curseData.conditions)) {
 			const group = AssetGroup.find(g => g.Name === k);
 			if (!group) {
 				console.warn(`BCX: Unknown group ${k}`);
 				continue;
 			}
 
-			if (v === null) {
+			const access = [this.curseData.access_normal, this.curseData.access_limited, false][this.curseData.limits[k] ?? ConditionsLimit.normal];
+
+			if (v.data === null) {
 				this.curseEntries.push({
 					group: k,
 					name: `Blocked: ${getVisibleGroupName(group)}`,
-					empty: true,
+					access,
+					data: v,
 					type: group.Clothing ? "clothing" : "item"
 				});
 			} else {
-				const item = AssetGet(this.character.Character.AssetFamily, k, v.Name);
+				const item = AssetGet(this.character.Character.AssetFamily, k, v.data.Name);
 				this.curseEntries.push({
 					group: k,
-					name: `${item?.Description ?? v.Name} (${getVisibleGroupName(group)})`,
-					empty: false,
+					name: `${item?.Description ?? v.data.Name} (${getVisibleGroupName(group)})`,
+					access,
+					data: v,
 					type: group.Clothing ? "clothing" : "item",
-					propertiesCursed: v.curseProperties,
-					propertiesCursedShow: v.curseProperties || !item || curseAllowItemCurseProperty(item)
+					propertiesCursed: v.data.curseProperties,
+					propertiesCursedShow: v.data.curseProperties || !item || curseAllowItemCurseProperty(item)
 				});
 			}
 		}
@@ -98,6 +106,12 @@ export class GuiCurses extends GuiSubscreen {
 		DrawText(`- Curses: All active curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+
+		// Column separator
+		MainCanvas.beginPath();
+		MainCanvas.moveTo(953, 160);
+		MainCanvas.lineTo(953, 780);
+		MainCanvas.stroke();
 
 		if (this.curseData === null) {
 			MainCanvas.textAlign = "center";
@@ -113,6 +127,8 @@ export class GuiCurses extends GuiSubscreen {
 			const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
 			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
 
+			const useGlobalCategorySetting = !e.data.requirements;
+
 			// curse description
 			MainCanvas.textAlign = "left";
 			MainCanvas.beginPath();
@@ -124,42 +140,77 @@ export class GuiCurses extends GuiSubscreen {
 			});
 			DrawTextFit(e.name, X + 65, Y + 30, 375, "Black");
 
-			// timer info
+			// config button info
 			MainCanvas.textAlign = "center";
-			DrawButton(X + 470, Y, 150, 60, "∞", "White", "", "Permanent curse");
-
-			// item settings curse
-			if (!e.empty && e.propertiesCursedShow) {
-				const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
-
-				DrawButton(X + 650, Y, 60, 60, "",
-					allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "#ddd", "",
-					e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
-				DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 655, Y + 5, {
-					Height: 50,
-					Width: 50
+			DrawButton(X + 470, Y, 240, 60, "", e.data.active ? "#d8fed7" : "White");
+			if (useGlobalCategorySetting) {
+				MainCanvas.beginPath();
+				MainCanvas.ellipse(X + 470 + 33, Y + 30, 22, 22, 360, 0, 360);
+				MainCanvas.fillStyle = "#0052A3";
+				MainCanvas.fill();
+			}
+			DrawImageEx("Icons/General.png", X + 480, Y + 7, {
+				Height: 46,
+				Width: 46
+			});
+			// shows time left (XXd -> XXh -> XXm -> XXs) or ∞
+			let timeLeftText: string = "n/a";
+			if (e.data.timer === null) {
+				timeLeftText = "∞";
+			} else {
+				const seconds = Math.floor((e.data.timer - Date.now()) / 1000);
+				const minutes = Math.floor(seconds / 60);
+				const hours = Math.floor(minutes / 60);
+				const days = Math.floor(hours / 24);
+				if (days > 1) {
+					timeLeftText = `${days}d`;
+				} else if (hours > 1) {
+					timeLeftText = `${hours}h`;
+				} else if (minutes > 1) {
+					timeLeftText = `${minutes}m`;
+				} else if (seconds > 0) {
+					timeLeftText = `${seconds}s`;
+				}
+			}
+			DrawText(timeLeftText, X + 570, Y + 30, "Black", "");
+			if (e.propertiesCursedShow) {
+				DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 635, Y + 10, {
+					Height: 40,
+					Width: 40,
+					Alpha: e.propertiesCursed ? 1 : 0.2
 				});
 			}
 
 			// remove curse
-			if (this.curseData.allowLift) {
+			if (e.access) {
 				DrawButton(X + 740, Y, 60, 60, "X", "White", "", "Lift curse");
 			}
-		}
 
-		// Column separator
-		MainCanvas.beginPath();
-		MainCanvas.moveTo(954, 160);
-		MainCanvas.lineTo(954, 780);
-		MainCanvas.stroke();
+			if (MouseIn(X + 470, Y, 60, 60)) DrawButtonHover(X + 470, Y, 60, 60, "Change this curse's configuration");
+			if (MouseIn(X + 531, Y, 78, 60)) DrawButtonHover(X + 531, Y, 78, 60, "Remaining duration of the curse");
+			if (MouseIn(X + 635, Y + 6, 44, 44) && e.propertiesCursedShow) DrawButtonHover(X + 635, Y + 6, 44, 44, e.propertiesCursed ? "Item configuration cursed" : "Item configuration not cursed");
+		}
 
 		MainCanvas.textAlign = "center";
 
-		DrawButton(120, 820, 400, 90, "Add new curse", this.curseData.allowCurse ? "White" : "#ddd", "",
-			this.curseData.allowCurse ? "Place new curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowCurse);
+		const access = this.curseData.access_normal || this.curseData.access_limited;
+		DrawButton(120, 820, 384, 90, "Add new curse", access ? "White" : "#ddd", "",
+		access ? "Place new curses on body, items or clothes" : "You have no permission to use this", !access);
 
-		DrawButton(750, 820, 400, 90, "Lift all curses", this.curseData.allowLift ? "White" : "#ddd", "",
-			this.curseData.allowLift ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowLift);
+		DrawButton(536, 820, 400, 90, "Lift all curses", access ? "White" : "#ddd", "",
+		access ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !access);
+
+		DrawButton(968, 820, 605, 90, "", this.curseData.access_configure ? "White" : "#ddd", "",
+			this.curseData.access_configure ? "Existing curses set to global curses config are also changed" : "You have no permission to use this", !this.curseData.access_configure);
+		DrawText(`Change global curses config`, 968 + 680/2, 865, "Black", "");
+		MainCanvas.beginPath();
+		MainCanvas.ellipse(968 + 10 + 35, 820 + 44, 34, 34, 360, 0, 360);
+		MainCanvas.fillStyle = "#0052A3";
+		MainCanvas.fill();
+		DrawImageEx("Icons/General.png", 968 + 10, 820 + 10, {
+			Height: 70,
+			Width: 70
+		});
 
 		// Pagination
 		const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
@@ -180,27 +231,30 @@ export class GuiCurses extends GuiSubscreen {
 			const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
 			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
 
-			const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
-
-			if (!e.empty && e.propertiesCursedShow && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
-				this.character.curseItem(e.group, !e.propertiesCursed);
-				return;
+			// config button info
+			if (MouseIn(X + 470, Y, 240, 60)) {
+				return setSubscreen(new GuiConditionEditCurses(this.character, e.group, this));
 			}
 
-			if (this.curseData.allowLift && MouseIn(X + 740, Y, 60, 60)) {
+			if (e.access && MouseIn(X + 740, Y, 60, 60)) {
 				this.character.curseLift(e.group);
 				return;
 			}
 
 		}
 
-		if (this.curseData.allowCurse && MouseIn(120, 820, 400, 90)) {
+		const access = this.curseData.access_normal || this.curseData.access_limited;
+		if (access && MouseIn(120, 820, 384, 90)) {
 			return setSubscreen(new GuiCursesAdd(this.character));
 		}
 
-		if (this.curseData.allowLift && MouseIn(750, 820, 400, 90)) {
+		if (access && MouseIn(536, 820, 400, 90)) {
 			this.character.curseLiftAll();
 			return;
+		}
+
+		if (this.curseData.access_configure && MouseIn(968, 820, 605, 90)) {
+			return setSubscreen(new GuiConditionGlobalCurses(this.character, this));
 		}
 
 		// Pagination

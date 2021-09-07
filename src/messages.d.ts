@@ -129,4 +129,8 @@ type BCX_queries = {
 		condition: string;
 		data: ConditionsConditionPublicData;
 	}, boolean];
+	conditionCategoryUpdate: [{
+		category: ConditionsCategories;
+		data: ConditionsCategoryConfigurableData;
+	}, boolean];
 };

@@ -89,10 +89,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 				}
 			}
 		}
-		ConditionsSetCondition("curses", Group, {
-			active: true,
-			data: newCurse
-		});
+		ConditionsSetCondition("curses", Group, newCurse);
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
 			if (!character.isPlayer()) {
@@ -100,10 +97,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 			}
 		}
 	} else {
-		ConditionsSetCondition("curses", Group, {
-			active: true,
-			data: null
-		});
+		ConditionsSetCondition("curses", Group, null);
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
 			if (!character.isPlayer()) {

@@ -1,7 +1,7 @@
 import { VERSION } from "./config";
 import { ConditionsLimit, ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
-import { ConditionsGetCategoryPublicData, ConditionsSetActive, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
+import { ConditionsCategoryUpdate, ConditionsGetCategoryPublicData, ConditionsSetActive, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
 import { curseGetInfo, curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
@@ -317,6 +317,15 @@ export class ChatroomCharacter {
 		});
 	}
 
+	conditionCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData): Promise<boolean> {
+		return sendQuery("conditionCategoryUpdate", { category, data }, this.MemberNumber).then(res => {
+			if (typeof res !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
 	hasAccessToPlayer(): boolean {
 		return ServerChatRoomGetAllowItem(this.Character, Player);
 	}
@@ -436,6 +445,10 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override conditionUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>): Promise<boolean> {
 		return Promise.resolve(ConditionsUpdate(category, condition, data, this));
+	}
+
+	conditionCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData): Promise<boolean> {
+		return Promise.resolve(ConditionsCategoryUpdate(category, data, this));
 	}
 }
 

@@ -127,14 +127,17 @@ interface ConditionsCategoryData<category extends ConditionsCategories = Conditi
 	/** List of limited/blocked conditions; defaults to normal */
 	limits: { [P in ConditionsCategoryKeys[category]]?: import("./constants").ConditionsLimit };
 	requirements: ConditionsConditionRequirements;
+	timer?: number;
+	timerRemove?: true | undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface ConditionsCategoryConfigurableData<category extends ConditionsCategories = ConditionsCategories> {
+interface ConditionsCategoryConfigurableData {
 	requirements: ConditionsConditionRequirements;
+	timer: number | null;
+	timerRemove: boolean;
 }
 
-interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> extends ConditionsCategoryConfigurableData<category> {
+interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> extends ConditionsCategoryConfigurableData {
 	access_normal: boolean;
 	access_limited: boolean;
 	access_configure: boolean;

@@ -71,6 +71,9 @@ export function guard_ConditionsCategoryPublicData<C extends ConditionsCategorie
 		Object.entries(d.conditions).every(
 			([condition, conditionData]) => guard_ConditionsConditionPublicData(category, condition, conditionData)
 		) &&
+		(d.timer === null || typeof d.timer === "number") &&
+		typeof d.timerRemove === "boolean" &&
+		guard_ConditionsConditionRequirements(d.requirements) &&
 		isObject(d.limits) &&
 		Object.entries(d.limits).every(
 			([condition, limit]) => limit === undefined || typeof limit === "number" && ConditionsLimit[limit] !== undefined
@@ -88,6 +91,12 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	tickHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): void;
 	makePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): ConditionsCategorySpecificPublicData[C];
 	validatePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificPublicData[C]): boolean;
+	updateCondition(
+		condition: ConditionsCategoryKeys[C],
+		data: ConditionsConditionData<C>,
+		updateData: ConditionsCategorySpecificPublicData[C],
+		character: ChatroomCharacter | null
+	): boolean;
 }
 
 const conditionHandlers: Map<ConditionsCategories, ConditionsHandler<ConditionsCategories>> = new Map();
@@ -131,6 +140,8 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
 		highestRoleInRoom: AccessLevel.public,
 		conditions: {},
+		timer: data.timer ?? null,
+		timerRemove: data.timerRemove ?? false,
 		limits: cloneDeep(data.limits),
 		requirements: cloneDeep(data.requirements)
 	};
@@ -156,12 +167,22 @@ export function ConditionsGetCondition<C extends ConditionsCategories>(category:
 	return ConditionsGetCategoryData(category).conditions[condition];
 }
 
-export function ConditionsSetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>) {
+export function ConditionsSetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificData[C]) {
 	const handler = ConditionsGetCategoryHandler(category);
 	if (!moduleIsEnabled(handler.category))
 		return;
 	const categoryData = ConditionsGetCategoryData(category);
-	categoryData.conditions[condition] = data;
+	const existing = categoryData.conditions[condition];
+	if (existing) {
+		existing.data = data;
+	} else {
+		categoryData.conditions[condition] = {
+			active: true,
+			timer: categoryData.timer !== undefined ? Date.now() + categoryData.timer : undefined,
+			timerRemove: categoryData.timerRemove,
+			data
+		};
+	}
 	modStorageSync();
 	notifyOfChange();
 }
@@ -288,6 +309,35 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	return true;
 }
 
+export function ConditionsCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData, character: ChatroomCharacter | null): boolean {
+	const handler = conditionHandlers.get(category);
+	if (!handler) {
+		throw new Error(`Attempt to set limit for unknown conditions category ${category}`);
+	}
+	if (character && !checkPermissionAccess(handler.permission_configure, character))
+		return false;
+	const conditionData = ConditionsGetCategoryData<ConditionsCategories>(category);
+	if (!conditionData)
+		return false;
+	conditionData.requirements = data.requirements;
+	if (data.timer !== null) {
+		conditionData.timer = data.timer;
+	} else {
+		delete conditionData.timer;
+	}
+	if (data.timerRemove) {
+		conditionData.timerRemove = true;
+	} else {
+		delete conditionData.timerRemove;
+	}
+	if (character) {
+		// TODO: Log
+	}
+	notifyOfChange();
+	modStorageSync();
+	return true;
+}
+
 export function ConditionsEvaluateRequirements(requirements: ConditionsConditionRequirements): boolean {
 	const inChatroom = ServerPlayerIsInChatRoom();
 	const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
@@ -358,7 +408,15 @@ export class ModuleConditions extends BaseModule {
 				delete modStorage.conditions[key];
 				continue;
 			}
-
+			if (data.timer !== undefined && typeof data.timer !== "number") {
+				console.warn(`BCX: Removing category ${key} invalid timer`, data.timer);
+				delete data.timer;
+			}
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
+			if (data.timerRemove !== undefined && data.timerRemove !== true) {
+				console.warn(`BCX: Removing category ${key} invalid timerRemove`, data.timerRemove);
+				delete data.timerRemove;
+			}
 			if (!isObject(data.limits)) {
 				console.warn(`BCX: Resetting category ${key} limits with invalid data`);
 				data.limits = {};
@@ -454,6 +512,21 @@ export class ModuleConditions extends BaseModule {
 				guard_ConditionsConditionPublicData(data.category, data.condition, data.data)
 			) {
 				resolve(true, ConditionsUpdate(data.category, data.condition, data.data, sender));
+			} else {
+				resolve(false);
+			}
+		};
+
+		queryHandlers.conditionCategoryUpdate = (sender, resolve, data) => {
+			if (isObject(data) &&
+				typeof data.category === "string" &&
+				conditionHandlers.has(data.category) &&
+				isObject(data.data) &&
+				(data.data.timer === null || typeof data.data.timer === "number") &&
+				typeof data.data.timerRemove === "boolean" &&
+				guard_ConditionsConditionRequirements(data.data.requirements)
+			) {
+				resolve(true, ConditionsCategoryUpdate(data.category, data.data, sender));
 			} else {
 				resolve(false);
 			}

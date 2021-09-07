@@ -3,13 +3,13 @@ import { ModuleCategory, MODULE_ICONS, MODULE_NAMES, TOGGLEABLE_MODULES } from "
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
-import { GuiCurses } from "./curses";
 import { GuiMisc } from "./misc";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";
 import { VERSION } from "../config";
 import { icon_ExternalLink } from "../resources";
 import { DrawImageEx } from "../utilsClub";
+import { GuiConditionViewCurses } from "./conditions_view_curses";
 
 const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
@@ -33,7 +33,7 @@ const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter)
 	{
 		module: ModuleCategory.Curses,
 		onclick: (C) => {
-			setSubscreen(new GuiCurses(C));
+			setSubscreen(new GuiConditionViewCurses(C));
 		}
 	},
 	{

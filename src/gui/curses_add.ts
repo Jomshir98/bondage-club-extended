@@ -2,8 +2,8 @@ import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { getVisibleGroupName } from "../utilsClub";
 import { GuiSubscreen } from "./subscreen";
-import { GuiCurses } from "./curses";
 import { ConditionsLimit } from "../constants";
+import { GuiConditionViewCurses } from "./conditions_view_curses";
 
 export class GuiCursesAdd extends GuiSubscreen {
 
@@ -247,6 +247,6 @@ export class GuiCursesAdd extends GuiSubscreen {
 	}
 
 	Exit() {
-		setSubscreen(new GuiCurses(this.character));
+		setSubscreen(new GuiConditionViewCurses(this.character));
 	}
 }

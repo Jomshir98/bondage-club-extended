@@ -684,6 +684,9 @@ export class ModuleCurses extends BaseModule {
 				}
 			} else {
 				curseProperty = JSON.parse(JSON.stringify(itemProperty));
+				for (const key of CURSE_IGNORED_PROPERTIES) {
+					delete curseProperty[key];
+				}
 			}
 
 			if (Object.keys(curseProperty).length === 0) {

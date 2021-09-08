@@ -220,7 +220,7 @@ window.BCX_Loaded = false;
         return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
     }
 
-    const VERSION = "0.4.1";
+    const VERSION = "0.4.2";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -244,6 +244,7 @@ window.BCX_Loaded = false;
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD"],
+        FriendListLoadFriendList: ["72099AC9"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
@@ -280,6 +281,7 @@ window.BCX_Loaded = false;
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["455F5FDD"],
+        FriendListLoadFriendList: ["428B288B"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
@@ -1448,6 +1450,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return "Development mode required";
             }
             return modStorage;
+        }
+        devGetCharacter(target) {
+            if (!developmentMode || (target !== undefined && typeof target !== "number"))
+                return false;
+            if (target === undefined) {
+                return getPlayerCharacter();
+            }
+            return getChatroomCharacter(target);
         }
         devSendQuery(target, query, data) {
             if (!developmentMode || typeof target !== "number" || typeof query !== "string")
@@ -5895,6 +5905,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 return next(args);
             });
+            // R71 temporary fix
+            hookFunction("FriendListLoadFriendList", 0, (args, next) => {
+                args[0].forEach((i) => { if (!i.ChatRoomName && i.Private)
+                    i.ChatRoomName = "-Private-"; });
+                next(args);
+            });
             const { NMod } = detectOtherMods();
             if (!NMod) {
                 patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
@@ -5966,7 +5982,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             MainCanvas.textAlign = "left";
             DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
             DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
-            DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status", cheatIsEnabled(MiscCheat.CantLoseMistress));
+            DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status when reputation falls below 50 dominance", cheatIsEnabled(MiscCheat.CantLoseMistress));
             DrawCheckbox(125, 500, 64, 64, "Cheat: Give yourself the mistress padlock and its key", cheatIsEnabled(MiscCheat.GiveMistressKey));
             DrawCheckbox(125, 600, 64, 64, "Cheat: Give yourself the pandora padlock and its key", cheatIsEnabled(MiscCheat.GivePandoraKey));
         }

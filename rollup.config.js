@@ -6,7 +6,6 @@ import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
 
-
 /** @type {import("rollup").RollupOptions} */
 const config = {
 	input: "src/index.ts",

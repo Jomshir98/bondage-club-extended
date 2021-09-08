@@ -1,13 +1,13 @@
 {
 	"name": "bondage-club-extended",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"repository": "git@github.com:jomshir98/bondage-club-extended.git",
 	"author": "jomshir98 <jomshir98@protonmail.com>",
 	"license": "MIT",
 	"private": true,
 	"scripts": {
 		"build": "rollup -c",
-		"serve": "rollup -c -w --watch.buildDelay 2500",
+		"serve": "rollup -c -w",
 		"test": "tsc --noEmit -p . && eslint src"
 	},
 	"dependencies": {

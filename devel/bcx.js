@@ -244,6 +244,7 @@ window.BCX_Loaded = false;
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD"],
+        FriendListLoadFriendList: ["72099AC9"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
@@ -280,6 +281,7 @@ window.BCX_Loaded = false;
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["455F5FDD"],
+        FriendListLoadFriendList: ["428B288B"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
@@ -5902,6 +5904,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     MainHallRandomEventOdds = 0;
                 }
                 return next(args);
+            });
+            // R71 temporary fix
+            hookFunction("FriendListLoadFriendList", 0, (args, next) => {
+                args[0].forEach((i) => { if (!i.ChatRoomName && i.Private)
+                    i.ChatRoomName = "-Private-"; });
+                next(args);
             });
             const { NMod } = detectOtherMods();
             if (!NMod) {

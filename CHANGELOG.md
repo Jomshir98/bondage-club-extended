@@ -1,5 +1,25 @@
 # BCX Changelog
 
+## 0.5.0
+
+**Breaking change:**
+Code behind curses changed significantly. Current curses will be migrated to new version, but current curse-related permissions won't!  
+If you edited permissions that are setting who can curse things, you may need to do so again.
+
+This update includes:
+ - Complete rewrite of code behind curses, adding new features:
+   - Trigger conditions, determining if a curse should be in effect or not
+   - Ability to mark curse slots as normal/limited/blocked
+   - Timer to automatically deactivate or remove a curse
+   - Ability to manually disable a curse without removing it
+   - Global trigger conditions configuration that applies to all curses
+   - Global timer configuration that applies to new curses
+   - Accompanying new permissions, log and chat messages as well as chat commands
+ - Chat commands are now saved in chat entry history
+
+Fixes:
+ - Curses now properly ignore things like locks, even if properties aren't cursed
+
 ## 0.4.1
 
 This update includes:

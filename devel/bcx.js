@@ -48,6 +48,7 @@ window.BCX_Loaded = false;
                 console.info("To use developer mode, cheats must be enabled first!");
                 return false;
             }
+            window.BCX_Devel = true;
             AssetGroup.forEach(G => G.Description = G.Name);
             Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
             BackgroundSelectionAll.forEach(B => {
@@ -57,6 +58,7 @@ window.BCX_Loaded = false;
             console.warn("Developer mode enabled");
         }
         else {
+            delete window.BCX_Devel;
             AssetLoadDescription("Female3DCG");
             BackgroundSelectionAll.forEach(B => {
                 B.Description = DialogFindPlayer(B.Name);
@@ -220,7 +222,7 @@ window.BCX_Loaded = false;
         return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
     }
 
-    const VERSION = "0.4.2";
+    const VERSION = "0.5.0";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -324,7 +326,7 @@ window.BCX_Loaded = false;
         return new Promise(r => setTimeout(r, ms));
     }
     /** Checks if the `obj` is an object (not null, not array) */
-    function isObject(obj) {
+    function isObject$1(obj) {
         return !!obj && typeof obj === "object" && !Array.isArray(obj);
     }
     function longestCommonPrefix(strings) {
@@ -353,6 +355,31 @@ window.BCX_Loaded = false;
     /** Clamp number between two values */
     function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
+    }
+    /** Formats time in ms into days, hours minutes and seconds */
+    function formatTimeInterval(time) {
+        let res = "";
+        if (time < 0) {
+            res = "-";
+            time *= -1;
+        }
+        const seconds = Math.floor(time / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        if (days > 0) {
+            res += `${days} days, `;
+        }
+        if (hours > 0) {
+            res += `${hours % 24} hours, `;
+        }
+        if (minutes > 0) {
+            res += `${minutes % 60} minutes, `;
+        }
+        if (seconds > 0) {
+            res += `${seconds % 60} seconds`;
+        }
+        return res;
     }
 
     const patchedFunctions = new Map();
@@ -521,6 +548,12 @@ window.BCX_Loaded = false;
         MiscCheat[MiscCheat["GiveMistressKey"] = 2] = "GiveMistressKey";
         MiscCheat[MiscCheat["GivePandoraKey"] = 3] = "GivePandoraKey";
     })(MiscCheat || (MiscCheat = {}));
+    var ConditionsLimit;
+    (function (ConditionsLimit) {
+        ConditionsLimit[ConditionsLimit["normal"] = 0] = "normal";
+        ConditionsLimit[ConditionsLimit["limited"] = 1] = "limited";
+        ConditionsLimit[ConditionsLimit["blocked"] = 2] = "blocked";
+    })(ConditionsLimit || (ConditionsLimit = {}));
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -1153,7 +1186,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (typeof saved === "string") {
                 try {
                     const storage = JSON.parse(LZString.decompressFromBase64(saved));
-                    if (!isObject(storage)) {
+                    if (!isObject$1(storage)) {
                         throw new Error("Bad data");
                     }
                     modStorage = storage;
@@ -1540,6 +1573,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return res;
             });
         }
+        run() {
+            if (window.BCX_Devel) {
+                setDevelopmentMode(true);
+            }
+        }
         unload() {
             delete window.bcx;
         }
@@ -1822,7 +1860,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             return targets[0];
         }
         else if (targets.length === 0) {
-            return `Item "${selector}" not found on character ${character}.`;
+            return `Item "${selector}" not found on character ${character}. If your item(group) consists of more than one word, please put it in quotes, such as "lower leg".`;
         }
         else {
             return `Multiple items match, please use group name instead. (eg. arms)`;
@@ -1874,6 +1912,28 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         return possible;
     }
+    function Command_parseTime(selector) {
+        const match = /^([0-9]+)([a-z]+)$/.exec(selector.toLocaleLowerCase());
+        if (!match) {
+            return `Unknown time format "${selector}", please use format 'number+unit' (e.g. 23h 30m)`;
+        }
+        const num = Number.parseInt(match[1], 10);
+        const unit = match[2];
+        if (["d", "day", "days"].includes(unit)) {
+            return num * 24 * 60 * 60 * 1000;
+        }
+        else if (["h", "hour", "hours"].includes(unit)) {
+            return num * 60 * 60 * 1000;
+        }
+        else if (["m", "min", "minute", "minutes"].includes(unit)) {
+            return num * 60 * 1000;
+        }
+        else if (["s", "sec", "second", "seconds"].includes(unit)) {
+            return num * 1000;
+        }
+        return `Unknown time unit "${unit}", please use one of:\n` +
+            `d (day), h (hour), m (minute), s (second)`;
+    }
     class ModuleCommands extends BaseModule {
         load() {
             hookFunction("ChatRoomFirstTimeHelp", 0, (args, next) => {
@@ -1893,6 +1953,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                     else if (msg.startsWith(".")) {
                         if (RunCommand(msg.substr(1))) {
+                            // Keeps the chat log in memory so it can be accessed with pageup/pagedown
+                            ChatRoomLastMessage.push(msg);
+                            ChatRoomLastMessageIndex = ChatRoomLastMessage.length;
                             chat.value = "";
                         }
                         return;
@@ -1973,11 +2036,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 if (typeof data !== "string" || !data.startsWith("!") || data.startsWith("!!")) {
                     return resolve(false);
                 }
-                const character = getChatroomCharacter(sender);
-                if (!character) {
-                    return resolve(false);
-                }
-                const result = WhisperCommandAutocomplete(data.substr(1), character);
+                const result = WhisperCommandAutocomplete(data.substr(1), sender);
                 result[0] = '!' + result[0];
                 resolve(true, result);
             };
@@ -2317,26 +2376,18 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             });
             queryHandlers.logData = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, getVisibleLogEntries(character));
-                }
-                else {
-                    resolve(false);
-                }
+                resolve(true, getVisibleLogEntries(sender));
             };
             queryHandlers.logDelete = (sender, resolve, data) => {
-                const character = getChatroomCharacter(sender);
-                if (character && typeof data === "number") {
-                    resolve(true, logMessageDelete(data, character));
+                if (typeof data === "number") {
+                    resolve(true, logMessageDelete(data, sender));
                 }
                 else {
                     resolve(false);
                 }
             };
             queryHandlers.logConfigGet = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (character && checkPermissionAccess("log_configure", character)) {
+                if (checkPermissionAccess("log_configure", sender)) {
                     resolve(true, logGetConfig());
                 }
                 else {
@@ -2344,52 +2395,28 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             };
             queryHandlers.logConfigEdit = (sender, resolve, data) => {
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     typeof data.category !== "string" ||
                     typeof data.target !== "number") {
                     console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
                     return resolve(false);
                 }
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, logConfigSet(data.category, data.target, character));
-                }
-                else {
-                    resolve(false);
-                }
+                resolve(true, logConfigSet(data.category, data.target, sender));
             };
             queryHandlers.logClear = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, logClear(character));
-                }
-                else {
-                    resolve(false);
-                }
+                resolve(true, logClear(sender));
             };
             queryHandlers.logPraise = (sender, resolve, data) => {
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     (data.message !== null && typeof data.message !== "string") ||
                     ![-1, 0, 1].includes(data.value)) {
                     console.warn(`BCX: Bad logPraise query from ${sender}`, data);
                     return resolve(false);
                 }
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, logPraise(data.value, data.message, character));
-                }
-                else {
-                    resolve(false);
-                }
+                resolve(true, logPraise(data.value, data.message, sender));
             };
             queryHandlers.logGetAllowedActions = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, logGetAllowedActions(character));
-                }
-                else {
-                    resolve(false);
-                }
+                resolve(true, logGetAllowedActions(sender));
             };
             registerWhisperCommand("log", "- Manage the behaviour log", (argv, sender, respond) => {
                 const subcommand = (argv[0] || "").toLocaleLowerCase();
@@ -2889,35 +2916,23 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 resolve(true, permissionsMakeBundle());
             };
             queryHandlers.permissionAccess = (sender, resolve, data) => {
-                const character = getChatroomCharacter(sender);
-                if (character && typeof data === "string") {
-                    resolve(true, checkPermissionAccess(data, character));
+                if (typeof data === "string") {
+                    resolve(true, checkPermissionAccess(data, sender));
                 }
                 else {
                     resolve(false);
                 }
             };
             queryHandlers.myAccessLevel = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, getCharacterAccessLevel(character));
-                }
-                else {
-                    resolve(false);
-                }
+                resolve(true, getCharacterAccessLevel(sender));
             };
             queryHandlers.editPermission = (sender, resolve, data) => {
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     typeof data.permission !== "string" ||
                     (data.edit !== "min" && data.edit !== "self") ||
                     (data.edit === "min" && typeof data.target !== "number") ||
                     (data.edit === "self" && typeof data.target !== "boolean")) {
                     console.warn(`BCX: Bad editPermission query from ${sender}`, data);
-                    return resolve(false);
-                }
-                const character = getChatroomCharacter(sender);
-                if (!character) {
-                    console.warn(`BCX: editPermission query from ${sender}; not found in room`, data);
                     return resolve(false);
                 }
                 if (!permissions.has(data.permission)) {
@@ -2928,7 +2943,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     if (typeof data.target !== "boolean") {
                         throw new Error("Assertion failed");
                     }
-                    return resolve(true, setPermissionSelfAccess(data.permission, data.target, character));
+                    return resolve(true, setPermissionSelfAccess(data.permission, data.target, sender));
                 }
                 else {
                     if (typeof data.target !== "number") {
@@ -2938,34 +2953,24 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         console.warn(`BCX: editPermission query from ${sender}; unknown access level`, data);
                         return resolve(true, false);
                     }
-                    return resolve(true, setPermissionMinAccess(data.permission, data.target, character));
+                    return resolve(true, setPermissionMinAccess(data.permission, data.target, sender));
                 }
             };
             queryHandlers.rolesData = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (!character) {
-                    console.warn(`BCX: rolesData query from ${sender}; not found in room`);
+                if (!checkPermissionAccess("authority_view_roles", sender)) {
                     return resolve(false);
                 }
-                if (!checkPermissionAccess("authority_view_roles", character)) {
-                    return resolve(false);
-                }
-                resolve(true, getPlayerRoleData(character));
+                resolve(true, getPlayerRoleData(sender));
             };
             queryHandlers.editRole = (sender, resolve, data) => {
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     data.type !== "owner" && data.type !== "mistress" ||
                     data.action !== "add" && data.action !== "remove" ||
                     typeof data.target !== "number") {
                     console.warn(`BCX: Bad editRole query from ${sender}`, data);
                     return resolve(false);
                 }
-                const character = getChatroomCharacter(sender);
-                if (!character) {
-                    console.warn(`BCX: editRole query from ${sender}; not found in room`, data);
-                    return resolve(false);
-                }
-                resolve(true, editRole(data.type, data.action, data.target, character));
+                resolve(true, editRole(data.type, data.action, data.target, sender));
             };
             registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
                 const subcommand = (argv[0] || "").toLocaleLowerCase();
@@ -3133,7 +3138,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         load(preset) {
             var _a;
             this.setDefultPermissionsForPreset(preset);
-            if (isObject(modStorage.permissions)) {
+            if (isObject$1(modStorage.permissions)) {
                 const transitionDictionary = {
                     log_leaveMessage: "log_add_note"
                 };
@@ -3183,7 +3188,3707 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const CURSES_CHECK_INTERVAL = 2000;
+    /**
+     * Removes all key-value entries from the list cache.
+     *
+     * @private
+     * @name clear
+     * @memberOf ListCache
+     */
+    function listCacheClear() {
+      this.__data__ = [];
+      this.size = 0;
+    }
+
+    /**
+     * Performs a
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * comparison between two values to determine if they are equivalent.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+     * @example
+     *
+     * var object = { 'a': 1 };
+     * var other = { 'a': 1 };
+     *
+     * _.eq(object, object);
+     * // => true
+     *
+     * _.eq(object, other);
+     * // => false
+     *
+     * _.eq('a', 'a');
+     * // => true
+     *
+     * _.eq('a', Object('a'));
+     * // => false
+     *
+     * _.eq(NaN, NaN);
+     * // => true
+     */
+    function eq(value, other) {
+      return value === other || (value !== value && other !== other);
+    }
+
+    /**
+     * Gets the index at which the `key` is found in `array` of key-value pairs.
+     *
+     * @private
+     * @param {Array} array The array to inspect.
+     * @param {*} key The key to search for.
+     * @returns {number} Returns the index of the matched value, else `-1`.
+     */
+    function assocIndexOf(array, key) {
+      var length = array.length;
+      while (length--) {
+        if (eq(array[length][0], key)) {
+          return length;
+        }
+      }
+      return -1;
+    }
+
+    /** Used for built-in method references. */
+    var arrayProto = Array.prototype;
+
+    /** Built-in value references. */
+    var splice = arrayProto.splice;
+
+    /**
+     * Removes `key` and its value from the list cache.
+     *
+     * @private
+     * @name delete
+     * @memberOf ListCache
+     * @param {string} key The key of the value to remove.
+     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+     */
+    function listCacheDelete(key) {
+      var data = this.__data__,
+          index = assocIndexOf(data, key);
+
+      if (index < 0) {
+        return false;
+      }
+      var lastIndex = data.length - 1;
+      if (index == lastIndex) {
+        data.pop();
+      } else {
+        splice.call(data, index, 1);
+      }
+      --this.size;
+      return true;
+    }
+
+    /**
+     * Gets the list cache value for `key`.
+     *
+     * @private
+     * @name get
+     * @memberOf ListCache
+     * @param {string} key The key of the value to get.
+     * @returns {*} Returns the entry value.
+     */
+    function listCacheGet(key) {
+      var data = this.__data__,
+          index = assocIndexOf(data, key);
+
+      return index < 0 ? undefined : data[index][1];
+    }
+
+    /**
+     * Checks if a list cache value for `key` exists.
+     *
+     * @private
+     * @name has
+     * @memberOf ListCache
+     * @param {string} key The key of the entry to check.
+     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+     */
+    function listCacheHas(key) {
+      return assocIndexOf(this.__data__, key) > -1;
+    }
+
+    /**
+     * Sets the list cache `key` to `value`.
+     *
+     * @private
+     * @name set
+     * @memberOf ListCache
+     * @param {string} key The key of the value to set.
+     * @param {*} value The value to set.
+     * @returns {Object} Returns the list cache instance.
+     */
+    function listCacheSet(key, value) {
+      var data = this.__data__,
+          index = assocIndexOf(data, key);
+
+      if (index < 0) {
+        ++this.size;
+        data.push([key, value]);
+      } else {
+        data[index][1] = value;
+      }
+      return this;
+    }
+
+    /**
+     * Creates an list cache object.
+     *
+     * @private
+     * @constructor
+     * @param {Array} [entries] The key-value pairs to cache.
+     */
+    function ListCache(entries) {
+      var index = -1,
+          length = entries == null ? 0 : entries.length;
+
+      this.clear();
+      while (++index < length) {
+        var entry = entries[index];
+        this.set(entry[0], entry[1]);
+      }
+    }
+
+    // Add methods to `ListCache`.
+    ListCache.prototype.clear = listCacheClear;
+    ListCache.prototype['delete'] = listCacheDelete;
+    ListCache.prototype.get = listCacheGet;
+    ListCache.prototype.has = listCacheHas;
+    ListCache.prototype.set = listCacheSet;
+
+    /**
+     * Removes all key-value entries from the stack.
+     *
+     * @private
+     * @name clear
+     * @memberOf Stack
+     */
+    function stackClear() {
+      this.__data__ = new ListCache;
+      this.size = 0;
+    }
+
+    /**
+     * Removes `key` and its value from the stack.
+     *
+     * @private
+     * @name delete
+     * @memberOf Stack
+     * @param {string} key The key of the value to remove.
+     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+     */
+    function stackDelete(key) {
+      var data = this.__data__,
+          result = data['delete'](key);
+
+      this.size = data.size;
+      return result;
+    }
+
+    /**
+     * Gets the stack value for `key`.
+     *
+     * @private
+     * @name get
+     * @memberOf Stack
+     * @param {string} key The key of the value to get.
+     * @returns {*} Returns the entry value.
+     */
+    function stackGet(key) {
+      return this.__data__.get(key);
+    }
+
+    /**
+     * Checks if a stack value for `key` exists.
+     *
+     * @private
+     * @name has
+     * @memberOf Stack
+     * @param {string} key The key of the entry to check.
+     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+     */
+    function stackHas(key) {
+      return this.__data__.has(key);
+    }
+
+    /** Detect free variable `global` from Node.js. */
+    var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+    /** Detect free variable `self`. */
+    var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+    /** Used as a reference to the global object. */
+    var root = freeGlobal || freeSelf || Function('return this')();
+
+    /** Built-in value references. */
+    var Symbol = root.Symbol;
+
+    /** Used for built-in method references. */
+    var objectProto$e = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$b = objectProto$e.hasOwnProperty;
+
+    /**
+     * Used to resolve the
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * of values.
+     */
+    var nativeObjectToString$1 = objectProto$e.toString;
+
+    /** Built-in value references. */
+    var symToStringTag$1 = Symbol ? Symbol.toStringTag : undefined;
+
+    /**
+     * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the raw `toStringTag`.
+     */
+    function getRawTag(value) {
+      var isOwn = hasOwnProperty$b.call(value, symToStringTag$1),
+          tag = value[symToStringTag$1];
+
+      try {
+        value[symToStringTag$1] = undefined;
+        var unmasked = true;
+      } catch (e) {}
+
+      var result = nativeObjectToString$1.call(value);
+      if (unmasked) {
+        if (isOwn) {
+          value[symToStringTag$1] = tag;
+        } else {
+          delete value[symToStringTag$1];
+        }
+      }
+      return result;
+    }
+
+    /** Used for built-in method references. */
+    var objectProto$d = Object.prototype;
+
+    /**
+     * Used to resolve the
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+     * of values.
+     */
+    var nativeObjectToString = objectProto$d.toString;
+
+    /**
+     * Converts `value` to a string using `Object.prototype.toString`.
+     *
+     * @private
+     * @param {*} value The value to convert.
+     * @returns {string} Returns the converted string.
+     */
+    function objectToString(value) {
+      return nativeObjectToString.call(value);
+    }
+
+    /** `Object#toString` result references. */
+    var nullTag = '[object Null]',
+        undefinedTag = '[object Undefined]';
+
+    /** Built-in value references. */
+    var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+    /**
+     * The base implementation of `getTag` without fallbacks for buggy environments.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the `toStringTag`.
+     */
+    function baseGetTag(value) {
+      if (value == null) {
+        return value === undefined ? undefinedTag : nullTag;
+      }
+      return (symToStringTag && symToStringTag in Object(value))
+        ? getRawTag(value)
+        : objectToString(value);
+    }
+
+    /**
+     * Checks if `value` is the
+     * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+     * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+     * @example
+     *
+     * _.isObject({});
+     * // => true
+     *
+     * _.isObject([1, 2, 3]);
+     * // => true
+     *
+     * _.isObject(_.noop);
+     * // => true
+     *
+     * _.isObject(null);
+     * // => false
+     */
+    function isObject(value) {
+      var type = typeof value;
+      return value != null && (type == 'object' || type == 'function');
+    }
+
+    /** `Object#toString` result references. */
+    var asyncTag = '[object AsyncFunction]',
+        funcTag$2 = '[object Function]',
+        genTag$1 = '[object GeneratorFunction]',
+        proxyTag = '[object Proxy]';
+
+    /**
+     * Checks if `value` is classified as a `Function` object.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+     * @example
+     *
+     * _.isFunction(_);
+     * // => true
+     *
+     * _.isFunction(/abc/);
+     * // => false
+     */
+    function isFunction(value) {
+      if (!isObject(value)) {
+        return false;
+      }
+      // The use of `Object#toString` avoids issues with the `typeof` operator
+      // in Safari 9 which returns 'object' for typed arrays and other constructors.
+      var tag = baseGetTag(value);
+      return tag == funcTag$2 || tag == genTag$1 || tag == asyncTag || tag == proxyTag;
+    }
+
+    /** Used to detect overreaching core-js shims. */
+    var coreJsData = root['__core-js_shared__'];
+
+    /** Used to detect methods masquerading as native. */
+    var maskSrcKey = (function() {
+      var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+      return uid ? ('Symbol(src)_1.' + uid) : '';
+    }());
+
+    /**
+     * Checks if `func` has its source masked.
+     *
+     * @private
+     * @param {Function} func The function to check.
+     * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+     */
+    function isMasked(func) {
+      return !!maskSrcKey && (maskSrcKey in func);
+    }
+
+    /** Used for built-in method references. */
+    var funcProto$1 = Function.prototype;
+
+    /** Used to resolve the decompiled source of functions. */
+    var funcToString$1 = funcProto$1.toString;
+
+    /**
+     * Converts `func` to its source code.
+     *
+     * @private
+     * @param {Function} func The function to convert.
+     * @returns {string} Returns the source code.
+     */
+    function toSource(func) {
+      if (func != null) {
+        try {
+          return funcToString$1.call(func);
+        } catch (e) {}
+        try {
+          return (func + '');
+        } catch (e) {}
+      }
+      return '';
+    }
+
+    /**
+     * Used to match `RegExp`
+     * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+     */
+    var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+
+    /** Used to detect host constructors (Safari). */
+    var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+    /** Used for built-in method references. */
+    var funcProto = Function.prototype,
+        objectProto$c = Object.prototype;
+
+    /** Used to resolve the decompiled source of functions. */
+    var funcToString = funcProto.toString;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$a = objectProto$c.hasOwnProperty;
+
+    /** Used to detect if a method is native. */
+    var reIsNative = RegExp('^' +
+      funcToString.call(hasOwnProperty$a).replace(reRegExpChar, '\\$&')
+      .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+    );
+
+    /**
+     * The base implementation of `_.isNative` without bad shim checks.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a native function,
+     *  else `false`.
+     */
+    function baseIsNative(value) {
+      if (!isObject(value) || isMasked(value)) {
+        return false;
+      }
+      var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+      return pattern.test(toSource(value));
+    }
+
+    /**
+     * Gets the value at `key` of `object`.
+     *
+     * @private
+     * @param {Object} [object] The object to query.
+     * @param {string} key The key of the property to get.
+     * @returns {*} Returns the property value.
+     */
+    function getValue(object, key) {
+      return object == null ? undefined : object[key];
+    }
+
+    /**
+     * Gets the native function at `key` of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {string} key The key of the method to get.
+     * @returns {*} Returns the function if it's native, else `undefined`.
+     */
+    function getNative(object, key) {
+      var value = getValue(object, key);
+      return baseIsNative(value) ? value : undefined;
+    }
+
+    /* Built-in method references that are verified to be native. */
+    var Map$1 = getNative(root, 'Map');
+
+    /* Built-in method references that are verified to be native. */
+    var nativeCreate = getNative(Object, 'create');
+
+    /**
+     * Removes all key-value entries from the hash.
+     *
+     * @private
+     * @name clear
+     * @memberOf Hash
+     */
+    function hashClear() {
+      this.__data__ = nativeCreate ? nativeCreate(null) : {};
+      this.size = 0;
+    }
+
+    /**
+     * Removes `key` and its value from the hash.
+     *
+     * @private
+     * @name delete
+     * @memberOf Hash
+     * @param {Object} hash The hash to modify.
+     * @param {string} key The key of the value to remove.
+     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+     */
+    function hashDelete(key) {
+      var result = this.has(key) && delete this.__data__[key];
+      this.size -= result ? 1 : 0;
+      return result;
+    }
+
+    /** Used to stand-in for `undefined` hash values. */
+    var HASH_UNDEFINED$2 = '__lodash_hash_undefined__';
+
+    /** Used for built-in method references. */
+    var objectProto$b = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$9 = objectProto$b.hasOwnProperty;
+
+    /**
+     * Gets the hash value for `key`.
+     *
+     * @private
+     * @name get
+     * @memberOf Hash
+     * @param {string} key The key of the value to get.
+     * @returns {*} Returns the entry value.
+     */
+    function hashGet(key) {
+      var data = this.__data__;
+      if (nativeCreate) {
+        var result = data[key];
+        return result === HASH_UNDEFINED$2 ? undefined : result;
+      }
+      return hasOwnProperty$9.call(data, key) ? data[key] : undefined;
+    }
+
+    /** Used for built-in method references. */
+    var objectProto$a = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$8 = objectProto$a.hasOwnProperty;
+
+    /**
+     * Checks if a hash value for `key` exists.
+     *
+     * @private
+     * @name has
+     * @memberOf Hash
+     * @param {string} key The key of the entry to check.
+     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+     */
+    function hashHas(key) {
+      var data = this.__data__;
+      return nativeCreate ? (data[key] !== undefined) : hasOwnProperty$8.call(data, key);
+    }
+
+    /** Used to stand-in for `undefined` hash values. */
+    var HASH_UNDEFINED$1 = '__lodash_hash_undefined__';
+
+    /**
+     * Sets the hash `key` to `value`.
+     *
+     * @private
+     * @name set
+     * @memberOf Hash
+     * @param {string} key The key of the value to set.
+     * @param {*} value The value to set.
+     * @returns {Object} Returns the hash instance.
+     */
+    function hashSet(key, value) {
+      var data = this.__data__;
+      this.size += this.has(key) ? 0 : 1;
+      data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED$1 : value;
+      return this;
+    }
+
+    /**
+     * Creates a hash object.
+     *
+     * @private
+     * @constructor
+     * @param {Array} [entries] The key-value pairs to cache.
+     */
+    function Hash(entries) {
+      var index = -1,
+          length = entries == null ? 0 : entries.length;
+
+      this.clear();
+      while (++index < length) {
+        var entry = entries[index];
+        this.set(entry[0], entry[1]);
+      }
+    }
+
+    // Add methods to `Hash`.
+    Hash.prototype.clear = hashClear;
+    Hash.prototype['delete'] = hashDelete;
+    Hash.prototype.get = hashGet;
+    Hash.prototype.has = hashHas;
+    Hash.prototype.set = hashSet;
+
+    /**
+     * Removes all key-value entries from the map.
+     *
+     * @private
+     * @name clear
+     * @memberOf MapCache
+     */
+    function mapCacheClear() {
+      this.size = 0;
+      this.__data__ = {
+        'hash': new Hash,
+        'map': new (Map$1 || ListCache),
+        'string': new Hash
+      };
+    }
+
+    /**
+     * Checks if `value` is suitable for use as unique object key.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
+     */
+    function isKeyable(value) {
+      var type = typeof value;
+      return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+        ? (value !== '__proto__')
+        : (value === null);
+    }
+
+    /**
+     * Gets the data for `map`.
+     *
+     * @private
+     * @param {Object} map The map to query.
+     * @param {string} key The reference key.
+     * @returns {*} Returns the map data.
+     */
+    function getMapData(map, key) {
+      var data = map.__data__;
+      return isKeyable(key)
+        ? data[typeof key == 'string' ? 'string' : 'hash']
+        : data.map;
+    }
+
+    /**
+     * Removes `key` and its value from the map.
+     *
+     * @private
+     * @name delete
+     * @memberOf MapCache
+     * @param {string} key The key of the value to remove.
+     * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+     */
+    function mapCacheDelete(key) {
+      var result = getMapData(this, key)['delete'](key);
+      this.size -= result ? 1 : 0;
+      return result;
+    }
+
+    /**
+     * Gets the map value for `key`.
+     *
+     * @private
+     * @name get
+     * @memberOf MapCache
+     * @param {string} key The key of the value to get.
+     * @returns {*} Returns the entry value.
+     */
+    function mapCacheGet(key) {
+      return getMapData(this, key).get(key);
+    }
+
+    /**
+     * Checks if a map value for `key` exists.
+     *
+     * @private
+     * @name has
+     * @memberOf MapCache
+     * @param {string} key The key of the entry to check.
+     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+     */
+    function mapCacheHas(key) {
+      return getMapData(this, key).has(key);
+    }
+
+    /**
+     * Sets the map `key` to `value`.
+     *
+     * @private
+     * @name set
+     * @memberOf MapCache
+     * @param {string} key The key of the value to set.
+     * @param {*} value The value to set.
+     * @returns {Object} Returns the map cache instance.
+     */
+    function mapCacheSet(key, value) {
+      var data = getMapData(this, key),
+          size = data.size;
+
+      data.set(key, value);
+      this.size += data.size == size ? 0 : 1;
+      return this;
+    }
+
+    /**
+     * Creates a map cache object to store key-value pairs.
+     *
+     * @private
+     * @constructor
+     * @param {Array} [entries] The key-value pairs to cache.
+     */
+    function MapCache(entries) {
+      var index = -1,
+          length = entries == null ? 0 : entries.length;
+
+      this.clear();
+      while (++index < length) {
+        var entry = entries[index];
+        this.set(entry[0], entry[1]);
+      }
+    }
+
+    // Add methods to `MapCache`.
+    MapCache.prototype.clear = mapCacheClear;
+    MapCache.prototype['delete'] = mapCacheDelete;
+    MapCache.prototype.get = mapCacheGet;
+    MapCache.prototype.has = mapCacheHas;
+    MapCache.prototype.set = mapCacheSet;
+
+    /** Used as the size to enable large array optimizations. */
+    var LARGE_ARRAY_SIZE = 200;
+
+    /**
+     * Sets the stack `key` to `value`.
+     *
+     * @private
+     * @name set
+     * @memberOf Stack
+     * @param {string} key The key of the value to set.
+     * @param {*} value The value to set.
+     * @returns {Object} Returns the stack cache instance.
+     */
+    function stackSet(key, value) {
+      var data = this.__data__;
+      if (data instanceof ListCache) {
+        var pairs = data.__data__;
+        if (!Map$1 || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
+          pairs.push([key, value]);
+          this.size = ++data.size;
+          return this;
+        }
+        data = this.__data__ = new MapCache(pairs);
+      }
+      data.set(key, value);
+      this.size = data.size;
+      return this;
+    }
+
+    /**
+     * Creates a stack cache object to store key-value pairs.
+     *
+     * @private
+     * @constructor
+     * @param {Array} [entries] The key-value pairs to cache.
+     */
+    function Stack(entries) {
+      var data = this.__data__ = new ListCache(entries);
+      this.size = data.size;
+    }
+
+    // Add methods to `Stack`.
+    Stack.prototype.clear = stackClear;
+    Stack.prototype['delete'] = stackDelete;
+    Stack.prototype.get = stackGet;
+    Stack.prototype.has = stackHas;
+    Stack.prototype.set = stackSet;
+
+    /**
+     * A specialized version of `_.forEach` for arrays without support for
+     * iteratee shorthands.
+     *
+     * @private
+     * @param {Array} [array] The array to iterate over.
+     * @param {Function} iteratee The function invoked per iteration.
+     * @returns {Array} Returns `array`.
+     */
+    function arrayEach(array, iteratee) {
+      var index = -1,
+          length = array == null ? 0 : array.length;
+
+      while (++index < length) {
+        if (iteratee(array[index], index, array) === false) {
+          break;
+        }
+      }
+      return array;
+    }
+
+    var defineProperty = (function() {
+      try {
+        var func = getNative(Object, 'defineProperty');
+        func({}, '', {});
+        return func;
+      } catch (e) {}
+    }());
+
+    /**
+     * The base implementation of `assignValue` and `assignMergeValue` without
+     * value checks.
+     *
+     * @private
+     * @param {Object} object The object to modify.
+     * @param {string} key The key of the property to assign.
+     * @param {*} value The value to assign.
+     */
+    function baseAssignValue(object, key, value) {
+      if (key == '__proto__' && defineProperty) {
+        defineProperty(object, key, {
+          'configurable': true,
+          'enumerable': true,
+          'value': value,
+          'writable': true
+        });
+      } else {
+        object[key] = value;
+      }
+    }
+
+    /** Used for built-in method references. */
+    var objectProto$9 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$7 = objectProto$9.hasOwnProperty;
+
+    /**
+     * Assigns `value` to `key` of `object` if the existing value is not equivalent
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+     * for equality comparisons.
+     *
+     * @private
+     * @param {Object} object The object to modify.
+     * @param {string} key The key of the property to assign.
+     * @param {*} value The value to assign.
+     */
+    function assignValue(object, key, value) {
+      var objValue = object[key];
+      if (!(hasOwnProperty$7.call(object, key) && eq(objValue, value)) ||
+          (value === undefined && !(key in object))) {
+        baseAssignValue(object, key, value);
+      }
+    }
+
+    /**
+     * Copies properties of `source` to `object`.
+     *
+     * @private
+     * @param {Object} source The object to copy properties from.
+     * @param {Array} props The property identifiers to copy.
+     * @param {Object} [object={}] The object to copy properties to.
+     * @param {Function} [customizer] The function to customize copied values.
+     * @returns {Object} Returns `object`.
+     */
+    function copyObject(source, props, object, customizer) {
+      var isNew = !object;
+      object || (object = {});
+
+      var index = -1,
+          length = props.length;
+
+      while (++index < length) {
+        var key = props[index];
+
+        var newValue = customizer
+          ? customizer(object[key], source[key], key, object, source)
+          : undefined;
+
+        if (newValue === undefined) {
+          newValue = source[key];
+        }
+        if (isNew) {
+          baseAssignValue(object, key, newValue);
+        } else {
+          assignValue(object, key, newValue);
+        }
+      }
+      return object;
+    }
+
+    /**
+     * The base implementation of `_.times` without support for iteratee shorthands
+     * or max array length checks.
+     *
+     * @private
+     * @param {number} n The number of times to invoke `iteratee`.
+     * @param {Function} iteratee The function invoked per iteration.
+     * @returns {Array} Returns the array of results.
+     */
+    function baseTimes(n, iteratee) {
+      var index = -1,
+          result = Array(n);
+
+      while (++index < n) {
+        result[index] = iteratee(index);
+      }
+      return result;
+    }
+
+    /**
+     * Checks if `value` is object-like. A value is object-like if it's not `null`
+     * and has a `typeof` result of "object".
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+     * @example
+     *
+     * _.isObjectLike({});
+     * // => true
+     *
+     * _.isObjectLike([1, 2, 3]);
+     * // => true
+     *
+     * _.isObjectLike(_.noop);
+     * // => false
+     *
+     * _.isObjectLike(null);
+     * // => false
+     */
+    function isObjectLike(value) {
+      return value != null && typeof value == 'object';
+    }
+
+    /** `Object#toString` result references. */
+    var argsTag$3 = '[object Arguments]';
+
+    /**
+     * The base implementation of `_.isArguments`.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+     */
+    function baseIsArguments(value) {
+      return isObjectLike(value) && baseGetTag(value) == argsTag$3;
+    }
+
+    /** Used for built-in method references. */
+    var objectProto$8 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$6 = objectProto$8.hasOwnProperty;
+
+    /** Built-in value references. */
+    var propertyIsEnumerable$1 = objectProto$8.propertyIsEnumerable;
+
+    /**
+     * Checks if `value` is likely an `arguments` object.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+     *  else `false`.
+     * @example
+     *
+     * _.isArguments(function() { return arguments; }());
+     * // => true
+     *
+     * _.isArguments([1, 2, 3]);
+     * // => false
+     */
+    var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
+      return isObjectLike(value) && hasOwnProperty$6.call(value, 'callee') &&
+        !propertyIsEnumerable$1.call(value, 'callee');
+    };
+
+    /**
+     * Checks if `value` is classified as an `Array` object.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+     * @example
+     *
+     * _.isArray([1, 2, 3]);
+     * // => true
+     *
+     * _.isArray(document.body.children);
+     * // => false
+     *
+     * _.isArray('abc');
+     * // => false
+     *
+     * _.isArray(_.noop);
+     * // => false
+     */
+    var isArray = Array.isArray;
+
+    /**
+     * This method returns `false`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {boolean} Returns `false`.
+     * @example
+     *
+     * _.times(2, _.stubFalse);
+     * // => [false, false]
+     */
+    function stubFalse() {
+      return false;
+    }
+
+    /** Detect free variable `exports`. */
+    var freeExports$2 = typeof exports == 'object' && exports && !exports.nodeType && exports;
+
+    /** Detect free variable `module`. */
+    var freeModule$2 = freeExports$2 && typeof module == 'object' && module && !module.nodeType && module;
+
+    /** Detect the popular CommonJS extension `module.exports`. */
+    var moduleExports$2 = freeModule$2 && freeModule$2.exports === freeExports$2;
+
+    /** Built-in value references. */
+    var Buffer$1 = moduleExports$2 ? root.Buffer : undefined;
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeIsBuffer = Buffer$1 ? Buffer$1.isBuffer : undefined;
+
+    /**
+     * Checks if `value` is a buffer.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.3.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
+     * @example
+     *
+     * _.isBuffer(new Buffer(2));
+     * // => true
+     *
+     * _.isBuffer(new Uint8Array(2));
+     * // => false
+     */
+    var isBuffer = nativeIsBuffer || stubFalse;
+
+    /** Used as references for various `Number` constants. */
+    var MAX_SAFE_INTEGER$1 = 9007199254740991;
+
+    /** Used to detect unsigned integer values. */
+    var reIsUint = /^(?:0|[1-9]\d*)$/;
+
+    /**
+     * Checks if `value` is a valid array-like index.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+     * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+     */
+    function isIndex(value, length) {
+      var type = typeof value;
+      length = length == null ? MAX_SAFE_INTEGER$1 : length;
+
+      return !!length &&
+        (type == 'number' ||
+          (type != 'symbol' && reIsUint.test(value))) &&
+            (value > -1 && value % 1 == 0 && value < length);
+    }
+
+    /** Used as references for various `Number` constants. */
+    var MAX_SAFE_INTEGER = 9007199254740991;
+
+    /**
+     * Checks if `value` is a valid array-like length.
+     *
+     * **Note:** This method is loosely based on
+     * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+     * @example
+     *
+     * _.isLength(3);
+     * // => true
+     *
+     * _.isLength(Number.MIN_VALUE);
+     * // => false
+     *
+     * _.isLength(Infinity);
+     * // => false
+     *
+     * _.isLength('3');
+     * // => false
+     */
+    function isLength(value) {
+      return typeof value == 'number' &&
+        value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+    }
+
+    /** `Object#toString` result references. */
+    var argsTag$2 = '[object Arguments]',
+        arrayTag$2 = '[object Array]',
+        boolTag$3 = '[object Boolean]',
+        dateTag$3 = '[object Date]',
+        errorTag$2 = '[object Error]',
+        funcTag$1 = '[object Function]',
+        mapTag$5 = '[object Map]',
+        numberTag$3 = '[object Number]',
+        objectTag$3 = '[object Object]',
+        regexpTag$3 = '[object RegExp]',
+        setTag$5 = '[object Set]',
+        stringTag$3 = '[object String]',
+        weakMapTag$2 = '[object WeakMap]';
+
+    var arrayBufferTag$3 = '[object ArrayBuffer]',
+        dataViewTag$4 = '[object DataView]',
+        float32Tag$2 = '[object Float32Array]',
+        float64Tag$2 = '[object Float64Array]',
+        int8Tag$2 = '[object Int8Array]',
+        int16Tag$2 = '[object Int16Array]',
+        int32Tag$2 = '[object Int32Array]',
+        uint8Tag$2 = '[object Uint8Array]',
+        uint8ClampedTag$2 = '[object Uint8ClampedArray]',
+        uint16Tag$2 = '[object Uint16Array]',
+        uint32Tag$2 = '[object Uint32Array]';
+
+    /** Used to identify `toStringTag` values of typed arrays. */
+    var typedArrayTags = {};
+    typedArrayTags[float32Tag$2] = typedArrayTags[float64Tag$2] =
+    typedArrayTags[int8Tag$2] = typedArrayTags[int16Tag$2] =
+    typedArrayTags[int32Tag$2] = typedArrayTags[uint8Tag$2] =
+    typedArrayTags[uint8ClampedTag$2] = typedArrayTags[uint16Tag$2] =
+    typedArrayTags[uint32Tag$2] = true;
+    typedArrayTags[argsTag$2] = typedArrayTags[arrayTag$2] =
+    typedArrayTags[arrayBufferTag$3] = typedArrayTags[boolTag$3] =
+    typedArrayTags[dataViewTag$4] = typedArrayTags[dateTag$3] =
+    typedArrayTags[errorTag$2] = typedArrayTags[funcTag$1] =
+    typedArrayTags[mapTag$5] = typedArrayTags[numberTag$3] =
+    typedArrayTags[objectTag$3] = typedArrayTags[regexpTag$3] =
+    typedArrayTags[setTag$5] = typedArrayTags[stringTag$3] =
+    typedArrayTags[weakMapTag$2] = false;
+
+    /**
+     * The base implementation of `_.isTypedArray` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
+     */
+    function baseIsTypedArray(value) {
+      return isObjectLike(value) &&
+        isLength(value.length) && !!typedArrayTags[baseGetTag(value)];
+    }
+
+    /**
+     * The base implementation of `_.unary` without support for storing metadata.
+     *
+     * @private
+     * @param {Function} func The function to cap arguments for.
+     * @returns {Function} Returns the new capped function.
+     */
+    function baseUnary(func) {
+      return function(value) {
+        return func(value);
+      };
+    }
+
+    /** Detect free variable `exports`. */
+    var freeExports$1 = typeof exports == 'object' && exports && !exports.nodeType && exports;
+
+    /** Detect free variable `module`. */
+    var freeModule$1 = freeExports$1 && typeof module == 'object' && module && !module.nodeType && module;
+
+    /** Detect the popular CommonJS extension `module.exports`. */
+    var moduleExports$1 = freeModule$1 && freeModule$1.exports === freeExports$1;
+
+    /** Detect free variable `process` from Node.js. */
+    var freeProcess = moduleExports$1 && freeGlobal.process;
+
+    /** Used to access faster Node.js helpers. */
+    var nodeUtil = (function() {
+      try {
+        // Use `util.types` for Node.js 10+.
+        var types = freeModule$1 && freeModule$1.require && freeModule$1.require('util').types;
+
+        if (types) {
+          return types;
+        }
+
+        // Legacy `process.binding('util')` for Node.js < 10.
+        return freeProcess && freeProcess.binding && freeProcess.binding('util');
+      } catch (e) {}
+    }());
+
+    /* Node.js helper references. */
+    var nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
+
+    /**
+     * Checks if `value` is classified as a typed array.
+     *
+     * @static
+     * @memberOf _
+     * @since 3.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
+     * @example
+     *
+     * _.isTypedArray(new Uint8Array);
+     * // => true
+     *
+     * _.isTypedArray([]);
+     * // => false
+     */
+    var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedArray;
+
+    /** Used for built-in method references. */
+    var objectProto$7 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$5 = objectProto$7.hasOwnProperty;
+
+    /**
+     * Creates an array of the enumerable property names of the array-like `value`.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @param {boolean} inherited Specify returning inherited property names.
+     * @returns {Array} Returns the array of property names.
+     */
+    function arrayLikeKeys(value, inherited) {
+      var isArr = isArray(value),
+          isArg = !isArr && isArguments(value),
+          isBuff = !isArr && !isArg && isBuffer(value),
+          isType = !isArr && !isArg && !isBuff && isTypedArray(value),
+          skipIndexes = isArr || isArg || isBuff || isType,
+          result = skipIndexes ? baseTimes(value.length, String) : [],
+          length = result.length;
+
+      for (var key in value) {
+        if ((inherited || hasOwnProperty$5.call(value, key)) &&
+            !(skipIndexes && (
+               // Safari 9 has enumerable `arguments.length` in strict mode.
+               key == 'length' ||
+               // Node.js 0.10 has enumerable non-index properties on buffers.
+               (isBuff && (key == 'offset' || key == 'parent')) ||
+               // PhantomJS 2 has enumerable non-index properties on typed arrays.
+               (isType && (key == 'buffer' || key == 'byteLength' || key == 'byteOffset')) ||
+               // Skip index properties.
+               isIndex(key, length)
+            ))) {
+          result.push(key);
+        }
+      }
+      return result;
+    }
+
+    /** Used for built-in method references. */
+    var objectProto$6 = Object.prototype;
+
+    /**
+     * Checks if `value` is likely a prototype object.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
+     */
+    function isPrototype(value) {
+      var Ctor = value && value.constructor,
+          proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto$6;
+
+      return value === proto;
+    }
+
+    /**
+     * Creates a unary function that invokes `func` with its argument transformed.
+     *
+     * @private
+     * @param {Function} func The function to wrap.
+     * @param {Function} transform The argument transform.
+     * @returns {Function} Returns the new function.
+     */
+    function overArg(func, transform) {
+      return function(arg) {
+        return func(transform(arg));
+      };
+    }
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeKeys = overArg(Object.keys, Object);
+
+    /** Used for built-in method references. */
+    var objectProto$5 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$4 = objectProto$5.hasOwnProperty;
+
+    /**
+     * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names.
+     */
+    function baseKeys(object) {
+      if (!isPrototype(object)) {
+        return nativeKeys(object);
+      }
+      var result = [];
+      for (var key in Object(object)) {
+        if (hasOwnProperty$4.call(object, key) && key != 'constructor') {
+          result.push(key);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Checks if `value` is array-like. A value is considered array-like if it's
+     * not a function and has a `value.length` that's an integer greater than or
+     * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+     * @example
+     *
+     * _.isArrayLike([1, 2, 3]);
+     * // => true
+     *
+     * _.isArrayLike(document.body.children);
+     * // => true
+     *
+     * _.isArrayLike('abc');
+     * // => true
+     *
+     * _.isArrayLike(_.noop);
+     * // => false
+     */
+    function isArrayLike(value) {
+      return value != null && isLength(value.length) && !isFunction(value);
+    }
+
+    /**
+     * Creates an array of the own enumerable property names of `object`.
+     *
+     * **Note:** Non-object values are coerced to objects. See the
+     * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+     * for more details.
+     *
+     * @static
+     * @since 0.1.0
+     * @memberOf _
+     * @category Object
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names.
+     * @example
+     *
+     * function Foo() {
+     *   this.a = 1;
+     *   this.b = 2;
+     * }
+     *
+     * Foo.prototype.c = 3;
+     *
+     * _.keys(new Foo);
+     * // => ['a', 'b'] (iteration order is not guaranteed)
+     *
+     * _.keys('hi');
+     * // => ['0', '1']
+     */
+    function keys(object) {
+      return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+    }
+
+    /**
+     * The base implementation of `_.assign` without support for multiple sources
+     * or `customizer` functions.
+     *
+     * @private
+     * @param {Object} object The destination object.
+     * @param {Object} source The source object.
+     * @returns {Object} Returns `object`.
+     */
+    function baseAssign(object, source) {
+      return object && copyObject(source, keys(source), object);
+    }
+
+    /**
+     * This function is like
+     * [`Object.keys`](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+     * except that it includes inherited enumerable properties.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names.
+     */
+    function nativeKeysIn(object) {
+      var result = [];
+      if (object != null) {
+        for (var key in Object(object)) {
+          result.push(key);
+        }
+      }
+      return result;
+    }
+
+    /** Used for built-in method references. */
+    var objectProto$4 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$3 = objectProto$4.hasOwnProperty;
+
+    /**
+     * The base implementation of `_.keysIn` which doesn't treat sparse arrays as dense.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names.
+     */
+    function baseKeysIn(object) {
+      if (!isObject(object)) {
+        return nativeKeysIn(object);
+      }
+      var isProto = isPrototype(object),
+          result = [];
+
+      for (var key in object) {
+        if (!(key == 'constructor' && (isProto || !hasOwnProperty$3.call(object, key)))) {
+          result.push(key);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Creates an array of the own and inherited enumerable property names of `object`.
+     *
+     * **Note:** Non-object values are coerced to objects.
+     *
+     * @static
+     * @memberOf _
+     * @since 3.0.0
+     * @category Object
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names.
+     * @example
+     *
+     * function Foo() {
+     *   this.a = 1;
+     *   this.b = 2;
+     * }
+     *
+     * Foo.prototype.c = 3;
+     *
+     * _.keysIn(new Foo);
+     * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
+     */
+    function keysIn(object) {
+      return isArrayLike(object) ? arrayLikeKeys(object, true) : baseKeysIn(object);
+    }
+
+    /**
+     * The base implementation of `_.assignIn` without support for multiple sources
+     * or `customizer` functions.
+     *
+     * @private
+     * @param {Object} object The destination object.
+     * @param {Object} source The source object.
+     * @returns {Object} Returns `object`.
+     */
+    function baseAssignIn(object, source) {
+      return object && copyObject(source, keysIn(source), object);
+    }
+
+    /** Detect free variable `exports`. */
+    var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
+
+    /** Detect free variable `module`. */
+    var freeModule = freeExports && typeof module == 'object' && module && !module.nodeType && module;
+
+    /** Detect the popular CommonJS extension `module.exports`. */
+    var moduleExports = freeModule && freeModule.exports === freeExports;
+
+    /** Built-in value references. */
+    var Buffer = moduleExports ? root.Buffer : undefined,
+        allocUnsafe = Buffer ? Buffer.allocUnsafe : undefined;
+
+    /**
+     * Creates a clone of  `buffer`.
+     *
+     * @private
+     * @param {Buffer} buffer The buffer to clone.
+     * @param {boolean} [isDeep] Specify a deep clone.
+     * @returns {Buffer} Returns the cloned buffer.
+     */
+    function cloneBuffer(buffer, isDeep) {
+      if (isDeep) {
+        return buffer.slice();
+      }
+      var length = buffer.length,
+          result = allocUnsafe ? allocUnsafe(length) : new buffer.constructor(length);
+
+      buffer.copy(result);
+      return result;
+    }
+
+    /**
+     * Copies the values of `source` to `array`.
+     *
+     * @private
+     * @param {Array} source The array to copy values from.
+     * @param {Array} [array=[]] The array to copy values to.
+     * @returns {Array} Returns `array`.
+     */
+    function copyArray(source, array) {
+      var index = -1,
+          length = source.length;
+
+      array || (array = Array(length));
+      while (++index < length) {
+        array[index] = source[index];
+      }
+      return array;
+    }
+
+    /**
+     * A specialized version of `_.filter` for arrays without support for
+     * iteratee shorthands.
+     *
+     * @private
+     * @param {Array} [array] The array to iterate over.
+     * @param {Function} predicate The function invoked per iteration.
+     * @returns {Array} Returns the new filtered array.
+     */
+    function arrayFilter(array, predicate) {
+      var index = -1,
+          length = array == null ? 0 : array.length,
+          resIndex = 0,
+          result = [];
+
+      while (++index < length) {
+        var value = array[index];
+        if (predicate(value, index, array)) {
+          result[resIndex++] = value;
+        }
+      }
+      return result;
+    }
+
+    /**
+     * This method returns a new empty array.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.13.0
+     * @category Util
+     * @returns {Array} Returns the new empty array.
+     * @example
+     *
+     * var arrays = _.times(2, _.stubArray);
+     *
+     * console.log(arrays);
+     * // => [[], []]
+     *
+     * console.log(arrays[0] === arrays[1]);
+     * // => false
+     */
+    function stubArray() {
+      return [];
+    }
+
+    /** Used for built-in method references. */
+    var objectProto$3 = Object.prototype;
+
+    /** Built-in value references. */
+    var propertyIsEnumerable = objectProto$3.propertyIsEnumerable;
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeGetSymbols$1 = Object.getOwnPropertySymbols;
+
+    /**
+     * Creates an array of the own enumerable symbols of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of symbols.
+     */
+    var getSymbols = !nativeGetSymbols$1 ? stubArray : function(object) {
+      if (object == null) {
+        return [];
+      }
+      object = Object(object);
+      return arrayFilter(nativeGetSymbols$1(object), function(symbol) {
+        return propertyIsEnumerable.call(object, symbol);
+      });
+    };
+
+    /**
+     * Copies own symbols of `source` to `object`.
+     *
+     * @private
+     * @param {Object} source The object to copy symbols from.
+     * @param {Object} [object={}] The object to copy symbols to.
+     * @returns {Object} Returns `object`.
+     */
+    function copySymbols(source, object) {
+      return copyObject(source, getSymbols(source), object);
+    }
+
+    /**
+     * Appends the elements of `values` to `array`.
+     *
+     * @private
+     * @param {Array} array The array to modify.
+     * @param {Array} values The values to append.
+     * @returns {Array} Returns `array`.
+     */
+    function arrayPush(array, values) {
+      var index = -1,
+          length = values.length,
+          offset = array.length;
+
+      while (++index < length) {
+        array[offset + index] = values[index];
+      }
+      return array;
+    }
+
+    /** Built-in value references. */
+    var getPrototype = overArg(Object.getPrototypeOf, Object);
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeGetSymbols = Object.getOwnPropertySymbols;
+
+    /**
+     * Creates an array of the own and inherited enumerable symbols of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of symbols.
+     */
+    var getSymbolsIn = !nativeGetSymbols ? stubArray : function(object) {
+      var result = [];
+      while (object) {
+        arrayPush(result, getSymbols(object));
+        object = getPrototype(object);
+      }
+      return result;
+    };
+
+    /**
+     * Copies own and inherited symbols of `source` to `object`.
+     *
+     * @private
+     * @param {Object} source The object to copy symbols from.
+     * @param {Object} [object={}] The object to copy symbols to.
+     * @returns {Object} Returns `object`.
+     */
+    function copySymbolsIn(source, object) {
+      return copyObject(source, getSymbolsIn(source), object);
+    }
+
+    /**
+     * The base implementation of `getAllKeys` and `getAllKeysIn` which uses
+     * `keysFunc` and `symbolsFunc` to get the enumerable property names and
+     * symbols of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {Function} keysFunc The function to get the keys of `object`.
+     * @param {Function} symbolsFunc The function to get the symbols of `object`.
+     * @returns {Array} Returns the array of property names and symbols.
+     */
+    function baseGetAllKeys(object, keysFunc, symbolsFunc) {
+      var result = keysFunc(object);
+      return isArray(object) ? result : arrayPush(result, symbolsFunc(object));
+    }
+
+    /**
+     * Creates an array of own enumerable property names and symbols of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names and symbols.
+     */
+    function getAllKeys(object) {
+      return baseGetAllKeys(object, keys, getSymbols);
+    }
+
+    /**
+     * Creates an array of own and inherited enumerable property names and
+     * symbols of `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names and symbols.
+     */
+    function getAllKeysIn(object) {
+      return baseGetAllKeys(object, keysIn, getSymbolsIn);
+    }
+
+    /* Built-in method references that are verified to be native. */
+    var DataView = getNative(root, 'DataView');
+
+    /* Built-in method references that are verified to be native. */
+    var Promise$1 = getNative(root, 'Promise');
+
+    /* Built-in method references that are verified to be native. */
+    var Set$1 = getNative(root, 'Set');
+
+    /* Built-in method references that are verified to be native. */
+    var WeakMap = getNative(root, 'WeakMap');
+
+    /** `Object#toString` result references. */
+    var mapTag$4 = '[object Map]',
+        objectTag$2 = '[object Object]',
+        promiseTag = '[object Promise]',
+        setTag$4 = '[object Set]',
+        weakMapTag$1 = '[object WeakMap]';
+
+    var dataViewTag$3 = '[object DataView]';
+
+    /** Used to detect maps, sets, and weakmaps. */
+    var dataViewCtorString = toSource(DataView),
+        mapCtorString = toSource(Map$1),
+        promiseCtorString = toSource(Promise$1),
+        setCtorString = toSource(Set$1),
+        weakMapCtorString = toSource(WeakMap);
+
+    /**
+     * Gets the `toStringTag` of `value`.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the `toStringTag`.
+     */
+    var getTag = baseGetTag;
+
+    // Fallback for data views, maps, sets, and weak maps in IE 11 and promises in Node.js < 6.
+    if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag$3) ||
+        (Map$1 && getTag(new Map$1) != mapTag$4) ||
+        (Promise$1 && getTag(Promise$1.resolve()) != promiseTag) ||
+        (Set$1 && getTag(new Set$1) != setTag$4) ||
+        (WeakMap && getTag(new WeakMap) != weakMapTag$1)) {
+      getTag = function(value) {
+        var result = baseGetTag(value),
+            Ctor = result == objectTag$2 ? value.constructor : undefined,
+            ctorString = Ctor ? toSource(Ctor) : '';
+
+        if (ctorString) {
+          switch (ctorString) {
+            case dataViewCtorString: return dataViewTag$3;
+            case mapCtorString: return mapTag$4;
+            case promiseCtorString: return promiseTag;
+            case setCtorString: return setTag$4;
+            case weakMapCtorString: return weakMapTag$1;
+          }
+        }
+        return result;
+      };
+    }
+
+    var getTag$1 = getTag;
+
+    /** Used for built-in method references. */
+    var objectProto$2 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$2 = objectProto$2.hasOwnProperty;
+
+    /**
+     * Initializes an array clone.
+     *
+     * @private
+     * @param {Array} array The array to clone.
+     * @returns {Array} Returns the initialized clone.
+     */
+    function initCloneArray(array) {
+      var length = array.length,
+          result = new array.constructor(length);
+
+      // Add properties assigned by `RegExp#exec`.
+      if (length && typeof array[0] == 'string' && hasOwnProperty$2.call(array, 'index')) {
+        result.index = array.index;
+        result.input = array.input;
+      }
+      return result;
+    }
+
+    /** Built-in value references. */
+    var Uint8Array$1 = root.Uint8Array;
+
+    /**
+     * Creates a clone of `arrayBuffer`.
+     *
+     * @private
+     * @param {ArrayBuffer} arrayBuffer The array buffer to clone.
+     * @returns {ArrayBuffer} Returns the cloned array buffer.
+     */
+    function cloneArrayBuffer(arrayBuffer) {
+      var result = new arrayBuffer.constructor(arrayBuffer.byteLength);
+      new Uint8Array$1(result).set(new Uint8Array$1(arrayBuffer));
+      return result;
+    }
+
+    /**
+     * Creates a clone of `dataView`.
+     *
+     * @private
+     * @param {Object} dataView The data view to clone.
+     * @param {boolean} [isDeep] Specify a deep clone.
+     * @returns {Object} Returns the cloned data view.
+     */
+    function cloneDataView(dataView, isDeep) {
+      var buffer = isDeep ? cloneArrayBuffer(dataView.buffer) : dataView.buffer;
+      return new dataView.constructor(buffer, dataView.byteOffset, dataView.byteLength);
+    }
+
+    /** Used to match `RegExp` flags from their coerced string values. */
+    var reFlags = /\w*$/;
+
+    /**
+     * Creates a clone of `regexp`.
+     *
+     * @private
+     * @param {Object} regexp The regexp to clone.
+     * @returns {Object} Returns the cloned regexp.
+     */
+    function cloneRegExp(regexp) {
+      var result = new regexp.constructor(regexp.source, reFlags.exec(regexp));
+      result.lastIndex = regexp.lastIndex;
+      return result;
+    }
+
+    /** Used to convert symbols to primitives and strings. */
+    var symbolProto$1 = Symbol ? Symbol.prototype : undefined,
+        symbolValueOf$1 = symbolProto$1 ? symbolProto$1.valueOf : undefined;
+
+    /**
+     * Creates a clone of the `symbol` object.
+     *
+     * @private
+     * @param {Object} symbol The symbol object to clone.
+     * @returns {Object} Returns the cloned symbol object.
+     */
+    function cloneSymbol(symbol) {
+      return symbolValueOf$1 ? Object(symbolValueOf$1.call(symbol)) : {};
+    }
+
+    /**
+     * Creates a clone of `typedArray`.
+     *
+     * @private
+     * @param {Object} typedArray The typed array to clone.
+     * @param {boolean} [isDeep] Specify a deep clone.
+     * @returns {Object} Returns the cloned typed array.
+     */
+    function cloneTypedArray(typedArray, isDeep) {
+      var buffer = isDeep ? cloneArrayBuffer(typedArray.buffer) : typedArray.buffer;
+      return new typedArray.constructor(buffer, typedArray.byteOffset, typedArray.length);
+    }
+
+    /** `Object#toString` result references. */
+    var boolTag$2 = '[object Boolean]',
+        dateTag$2 = '[object Date]',
+        mapTag$3 = '[object Map]',
+        numberTag$2 = '[object Number]',
+        regexpTag$2 = '[object RegExp]',
+        setTag$3 = '[object Set]',
+        stringTag$2 = '[object String]',
+        symbolTag$2 = '[object Symbol]';
+
+    var arrayBufferTag$2 = '[object ArrayBuffer]',
+        dataViewTag$2 = '[object DataView]',
+        float32Tag$1 = '[object Float32Array]',
+        float64Tag$1 = '[object Float64Array]',
+        int8Tag$1 = '[object Int8Array]',
+        int16Tag$1 = '[object Int16Array]',
+        int32Tag$1 = '[object Int32Array]',
+        uint8Tag$1 = '[object Uint8Array]',
+        uint8ClampedTag$1 = '[object Uint8ClampedArray]',
+        uint16Tag$1 = '[object Uint16Array]',
+        uint32Tag$1 = '[object Uint32Array]';
+
+    /**
+     * Initializes an object clone based on its `toStringTag`.
+     *
+     * **Note:** This function only supports cloning values with tags of
+     * `Boolean`, `Date`, `Error`, `Map`, `Number`, `RegExp`, `Set`, or `String`.
+     *
+     * @private
+     * @param {Object} object The object to clone.
+     * @param {string} tag The `toStringTag` of the object to clone.
+     * @param {boolean} [isDeep] Specify a deep clone.
+     * @returns {Object} Returns the initialized clone.
+     */
+    function initCloneByTag(object, tag, isDeep) {
+      var Ctor = object.constructor;
+      switch (tag) {
+        case arrayBufferTag$2:
+          return cloneArrayBuffer(object);
+
+        case boolTag$2:
+        case dateTag$2:
+          return new Ctor(+object);
+
+        case dataViewTag$2:
+          return cloneDataView(object, isDeep);
+
+        case float32Tag$1: case float64Tag$1:
+        case int8Tag$1: case int16Tag$1: case int32Tag$1:
+        case uint8Tag$1: case uint8ClampedTag$1: case uint16Tag$1: case uint32Tag$1:
+          return cloneTypedArray(object, isDeep);
+
+        case mapTag$3:
+          return new Ctor;
+
+        case numberTag$2:
+        case stringTag$2:
+          return new Ctor(object);
+
+        case regexpTag$2:
+          return cloneRegExp(object);
+
+        case setTag$3:
+          return new Ctor;
+
+        case symbolTag$2:
+          return cloneSymbol(object);
+      }
+    }
+
+    /** Built-in value references. */
+    var objectCreate = Object.create;
+
+    /**
+     * The base implementation of `_.create` without support for assigning
+     * properties to the created object.
+     *
+     * @private
+     * @param {Object} proto The object to inherit from.
+     * @returns {Object} Returns the new object.
+     */
+    var baseCreate = (function() {
+      function object() {}
+      return function(proto) {
+        if (!isObject(proto)) {
+          return {};
+        }
+        if (objectCreate) {
+          return objectCreate(proto);
+        }
+        object.prototype = proto;
+        var result = new object;
+        object.prototype = undefined;
+        return result;
+      };
+    }());
+
+    /**
+     * Initializes an object clone.
+     *
+     * @private
+     * @param {Object} object The object to clone.
+     * @returns {Object} Returns the initialized clone.
+     */
+    function initCloneObject(object) {
+      return (typeof object.constructor == 'function' && !isPrototype(object))
+        ? baseCreate(getPrototype(object))
+        : {};
+    }
+
+    /** `Object#toString` result references. */
+    var mapTag$2 = '[object Map]';
+
+    /**
+     * The base implementation of `_.isMap` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a map, else `false`.
+     */
+    function baseIsMap(value) {
+      return isObjectLike(value) && getTag$1(value) == mapTag$2;
+    }
+
+    /* Node.js helper references. */
+    var nodeIsMap = nodeUtil && nodeUtil.isMap;
+
+    /**
+     * Checks if `value` is classified as a `Map` object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.3.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a map, else `false`.
+     * @example
+     *
+     * _.isMap(new Map);
+     * // => true
+     *
+     * _.isMap(new WeakMap);
+     * // => false
+     */
+    var isMap = nodeIsMap ? baseUnary(nodeIsMap) : baseIsMap;
+
+    /** `Object#toString` result references. */
+    var setTag$2 = '[object Set]';
+
+    /**
+     * The base implementation of `_.isSet` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a set, else `false`.
+     */
+    function baseIsSet(value) {
+      return isObjectLike(value) && getTag$1(value) == setTag$2;
+    }
+
+    /* Node.js helper references. */
+    var nodeIsSet = nodeUtil && nodeUtil.isSet;
+
+    /**
+     * Checks if `value` is classified as a `Set` object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.3.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a set, else `false`.
+     * @example
+     *
+     * _.isSet(new Set);
+     * // => true
+     *
+     * _.isSet(new WeakSet);
+     * // => false
+     */
+    var isSet = nodeIsSet ? baseUnary(nodeIsSet) : baseIsSet;
+
+    /** Used to compose bitmasks for cloning. */
+    var CLONE_DEEP_FLAG$1 = 1,
+        CLONE_FLAT_FLAG = 2,
+        CLONE_SYMBOLS_FLAG$1 = 4;
+
+    /** `Object#toString` result references. */
+    var argsTag$1 = '[object Arguments]',
+        arrayTag$1 = '[object Array]',
+        boolTag$1 = '[object Boolean]',
+        dateTag$1 = '[object Date]',
+        errorTag$1 = '[object Error]',
+        funcTag = '[object Function]',
+        genTag = '[object GeneratorFunction]',
+        mapTag$1 = '[object Map]',
+        numberTag$1 = '[object Number]',
+        objectTag$1 = '[object Object]',
+        regexpTag$1 = '[object RegExp]',
+        setTag$1 = '[object Set]',
+        stringTag$1 = '[object String]',
+        symbolTag$1 = '[object Symbol]',
+        weakMapTag = '[object WeakMap]';
+
+    var arrayBufferTag$1 = '[object ArrayBuffer]',
+        dataViewTag$1 = '[object DataView]',
+        float32Tag = '[object Float32Array]',
+        float64Tag = '[object Float64Array]',
+        int8Tag = '[object Int8Array]',
+        int16Tag = '[object Int16Array]',
+        int32Tag = '[object Int32Array]',
+        uint8Tag = '[object Uint8Array]',
+        uint8ClampedTag = '[object Uint8ClampedArray]',
+        uint16Tag = '[object Uint16Array]',
+        uint32Tag = '[object Uint32Array]';
+
+    /** Used to identify `toStringTag` values supported by `_.clone`. */
+    var cloneableTags = {};
+    cloneableTags[argsTag$1] = cloneableTags[arrayTag$1] =
+    cloneableTags[arrayBufferTag$1] = cloneableTags[dataViewTag$1] =
+    cloneableTags[boolTag$1] = cloneableTags[dateTag$1] =
+    cloneableTags[float32Tag] = cloneableTags[float64Tag] =
+    cloneableTags[int8Tag] = cloneableTags[int16Tag] =
+    cloneableTags[int32Tag] = cloneableTags[mapTag$1] =
+    cloneableTags[numberTag$1] = cloneableTags[objectTag$1] =
+    cloneableTags[regexpTag$1] = cloneableTags[setTag$1] =
+    cloneableTags[stringTag$1] = cloneableTags[symbolTag$1] =
+    cloneableTags[uint8Tag] = cloneableTags[uint8ClampedTag] =
+    cloneableTags[uint16Tag] = cloneableTags[uint32Tag] = true;
+    cloneableTags[errorTag$1] = cloneableTags[funcTag] =
+    cloneableTags[weakMapTag] = false;
+
+    /**
+     * The base implementation of `_.clone` and `_.cloneDeep` which tracks
+     * traversed objects.
+     *
+     * @private
+     * @param {*} value The value to clone.
+     * @param {boolean} bitmask The bitmask flags.
+     *  1 - Deep clone
+     *  2 - Flatten inherited properties
+     *  4 - Clone symbols
+     * @param {Function} [customizer] The function to customize cloning.
+     * @param {string} [key] The key of `value`.
+     * @param {Object} [object] The parent object of `value`.
+     * @param {Object} [stack] Tracks traversed objects and their clone counterparts.
+     * @returns {*} Returns the cloned value.
+     */
+    function baseClone(value, bitmask, customizer, key, object, stack) {
+      var result,
+          isDeep = bitmask & CLONE_DEEP_FLAG$1,
+          isFlat = bitmask & CLONE_FLAT_FLAG,
+          isFull = bitmask & CLONE_SYMBOLS_FLAG$1;
+
+      if (customizer) {
+        result = object ? customizer(value, key, object, stack) : customizer(value);
+      }
+      if (result !== undefined) {
+        return result;
+      }
+      if (!isObject(value)) {
+        return value;
+      }
+      var isArr = isArray(value);
+      if (isArr) {
+        result = initCloneArray(value);
+        if (!isDeep) {
+          return copyArray(value, result);
+        }
+      } else {
+        var tag = getTag$1(value),
+            isFunc = tag == funcTag || tag == genTag;
+
+        if (isBuffer(value)) {
+          return cloneBuffer(value, isDeep);
+        }
+        if (tag == objectTag$1 || tag == argsTag$1 || (isFunc && !object)) {
+          result = (isFlat || isFunc) ? {} : initCloneObject(value);
+          if (!isDeep) {
+            return isFlat
+              ? copySymbolsIn(value, baseAssignIn(result, value))
+              : copySymbols(value, baseAssign(result, value));
+          }
+        } else {
+          if (!cloneableTags[tag]) {
+            return object ? value : {};
+          }
+          result = initCloneByTag(value, tag, isDeep);
+        }
+      }
+      // Check for circular references and return its corresponding clone.
+      stack || (stack = new Stack);
+      var stacked = stack.get(value);
+      if (stacked) {
+        return stacked;
+      }
+      stack.set(value, result);
+
+      if (isSet(value)) {
+        value.forEach(function(subValue) {
+          result.add(baseClone(subValue, bitmask, customizer, subValue, value, stack));
+        });
+      } else if (isMap(value)) {
+        value.forEach(function(subValue, key) {
+          result.set(key, baseClone(subValue, bitmask, customizer, key, value, stack));
+        });
+      }
+
+      var keysFunc = isFull
+        ? (isFlat ? getAllKeysIn : getAllKeys)
+        : (isFlat ? keysIn : keys);
+
+      var props = isArr ? undefined : keysFunc(value);
+      arrayEach(props || value, function(subValue, key) {
+        if (props) {
+          key = subValue;
+          subValue = value[key];
+        }
+        // Recursively populate clone (susceptible to call stack limits).
+        assignValue(result, key, baseClone(subValue, bitmask, customizer, key, value, stack));
+      });
+      return result;
+    }
+
+    /** Used to compose bitmasks for cloning. */
+    var CLONE_DEEP_FLAG = 1,
+        CLONE_SYMBOLS_FLAG = 4;
+
+    /**
+     * This method is like `_.clone` except that it recursively clones `value`.
+     *
+     * @static
+     * @memberOf _
+     * @since 1.0.0
+     * @category Lang
+     * @param {*} value The value to recursively clone.
+     * @returns {*} Returns the deep cloned value.
+     * @see _.clone
+     * @example
+     *
+     * var objects = [{ 'a': 1 }, { 'b': 2 }];
+     *
+     * var deep = _.cloneDeep(objects);
+     * console.log(deep[0] === objects[0]);
+     * // => false
+     */
+    function cloneDeep(value) {
+      return baseClone(value, CLONE_DEEP_FLAG | CLONE_SYMBOLS_FLAG);
+    }
+
+    /** Used to stand-in for `undefined` hash values. */
+    var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+    /**
+     * Adds `value` to the array cache.
+     *
+     * @private
+     * @name add
+     * @memberOf SetCache
+     * @alias push
+     * @param {*} value The value to cache.
+     * @returns {Object} Returns the cache instance.
+     */
+    function setCacheAdd(value) {
+      this.__data__.set(value, HASH_UNDEFINED);
+      return this;
+    }
+
+    /**
+     * Checks if `value` is in the array cache.
+     *
+     * @private
+     * @name has
+     * @memberOf SetCache
+     * @param {*} value The value to search for.
+     * @returns {number} Returns `true` if `value` is found, else `false`.
+     */
+    function setCacheHas(value) {
+      return this.__data__.has(value);
+    }
+
+    /**
+     *
+     * Creates an array cache object to store unique values.
+     *
+     * @private
+     * @constructor
+     * @param {Array} [values] The values to cache.
+     */
+    function SetCache(values) {
+      var index = -1,
+          length = values == null ? 0 : values.length;
+
+      this.__data__ = new MapCache;
+      while (++index < length) {
+        this.add(values[index]);
+      }
+    }
+
+    // Add methods to `SetCache`.
+    SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
+    SetCache.prototype.has = setCacheHas;
+
+    /**
+     * A specialized version of `_.some` for arrays without support for iteratee
+     * shorthands.
+     *
+     * @private
+     * @param {Array} [array] The array to iterate over.
+     * @param {Function} predicate The function invoked per iteration.
+     * @returns {boolean} Returns `true` if any element passes the predicate check,
+     *  else `false`.
+     */
+    function arraySome(array, predicate) {
+      var index = -1,
+          length = array == null ? 0 : array.length;
+
+      while (++index < length) {
+        if (predicate(array[index], index, array)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /**
+     * Checks if a `cache` value for `key` exists.
+     *
+     * @private
+     * @param {Object} cache The cache to query.
+     * @param {string} key The key of the entry to check.
+     * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+     */
+    function cacheHas(cache, key) {
+      return cache.has(key);
+    }
+
+    /** Used to compose bitmasks for value comparisons. */
+    var COMPARE_PARTIAL_FLAG$3 = 1,
+        COMPARE_UNORDERED_FLAG$1 = 2;
+
+    /**
+     * A specialized version of `baseIsEqualDeep` for arrays with support for
+     * partial deep comparisons.
+     *
+     * @private
+     * @param {Array} array The array to compare.
+     * @param {Array} other The other array to compare.
+     * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+     * @param {Function} customizer The function to customize comparisons.
+     * @param {Function} equalFunc The function to determine equivalents of values.
+     * @param {Object} stack Tracks traversed `array` and `other` objects.
+     * @returns {boolean} Returns `true` if the arrays are equivalent, else `false`.
+     */
+    function equalArrays(array, other, bitmask, customizer, equalFunc, stack) {
+      var isPartial = bitmask & COMPARE_PARTIAL_FLAG$3,
+          arrLength = array.length,
+          othLength = other.length;
+
+      if (arrLength != othLength && !(isPartial && othLength > arrLength)) {
+        return false;
+      }
+      // Check that cyclic values are equal.
+      var arrStacked = stack.get(array);
+      var othStacked = stack.get(other);
+      if (arrStacked && othStacked) {
+        return arrStacked == other && othStacked == array;
+      }
+      var index = -1,
+          result = true,
+          seen = (bitmask & COMPARE_UNORDERED_FLAG$1) ? new SetCache : undefined;
+
+      stack.set(array, other);
+      stack.set(other, array);
+
+      // Ignore non-index properties.
+      while (++index < arrLength) {
+        var arrValue = array[index],
+            othValue = other[index];
+
+        if (customizer) {
+          var compared = isPartial
+            ? customizer(othValue, arrValue, index, other, array, stack)
+            : customizer(arrValue, othValue, index, array, other, stack);
+        }
+        if (compared !== undefined) {
+          if (compared) {
+            continue;
+          }
+          result = false;
+          break;
+        }
+        // Recursively compare arrays (susceptible to call stack limits).
+        if (seen) {
+          if (!arraySome(other, function(othValue, othIndex) {
+                if (!cacheHas(seen, othIndex) &&
+                    (arrValue === othValue || equalFunc(arrValue, othValue, bitmask, customizer, stack))) {
+                  return seen.push(othIndex);
+                }
+              })) {
+            result = false;
+            break;
+          }
+        } else if (!(
+              arrValue === othValue ||
+                equalFunc(arrValue, othValue, bitmask, customizer, stack)
+            )) {
+          result = false;
+          break;
+        }
+      }
+      stack['delete'](array);
+      stack['delete'](other);
+      return result;
+    }
+
+    /**
+     * Converts `map` to its key-value pairs.
+     *
+     * @private
+     * @param {Object} map The map to convert.
+     * @returns {Array} Returns the key-value pairs.
+     */
+    function mapToArray(map) {
+      var index = -1,
+          result = Array(map.size);
+
+      map.forEach(function(value, key) {
+        result[++index] = [key, value];
+      });
+      return result;
+    }
+
+    /**
+     * Converts `set` to an array of its values.
+     *
+     * @private
+     * @param {Object} set The set to convert.
+     * @returns {Array} Returns the values.
+     */
+    function setToArray(set) {
+      var index = -1,
+          result = Array(set.size);
+
+      set.forEach(function(value) {
+        result[++index] = value;
+      });
+      return result;
+    }
+
+    /** Used to compose bitmasks for value comparisons. */
+    var COMPARE_PARTIAL_FLAG$2 = 1,
+        COMPARE_UNORDERED_FLAG = 2;
+
+    /** `Object#toString` result references. */
+    var boolTag = '[object Boolean]',
+        dateTag = '[object Date]',
+        errorTag = '[object Error]',
+        mapTag = '[object Map]',
+        numberTag = '[object Number]',
+        regexpTag = '[object RegExp]',
+        setTag = '[object Set]',
+        stringTag = '[object String]',
+        symbolTag = '[object Symbol]';
+
+    var arrayBufferTag = '[object ArrayBuffer]',
+        dataViewTag = '[object DataView]';
+
+    /** Used to convert symbols to primitives and strings. */
+    var symbolProto = Symbol ? Symbol.prototype : undefined,
+        symbolValueOf = symbolProto ? symbolProto.valueOf : undefined;
+
+    /**
+     * A specialized version of `baseIsEqualDeep` for comparing objects of
+     * the same `toStringTag`.
+     *
+     * **Note:** This function only supports comparing values with tags of
+     * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
+     *
+     * @private
+     * @param {Object} object The object to compare.
+     * @param {Object} other The other object to compare.
+     * @param {string} tag The `toStringTag` of the objects to compare.
+     * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+     * @param {Function} customizer The function to customize comparisons.
+     * @param {Function} equalFunc The function to determine equivalents of values.
+     * @param {Object} stack Tracks traversed `object` and `other` objects.
+     * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+     */
+    function equalByTag(object, other, tag, bitmask, customizer, equalFunc, stack) {
+      switch (tag) {
+        case dataViewTag:
+          if ((object.byteLength != other.byteLength) ||
+              (object.byteOffset != other.byteOffset)) {
+            return false;
+          }
+          object = object.buffer;
+          other = other.buffer;
+
+        case arrayBufferTag:
+          if ((object.byteLength != other.byteLength) ||
+              !equalFunc(new Uint8Array$1(object), new Uint8Array$1(other))) {
+            return false;
+          }
+          return true;
+
+        case boolTag:
+        case dateTag:
+        case numberTag:
+          // Coerce booleans to `1` or `0` and dates to milliseconds.
+          // Invalid dates are coerced to `NaN`.
+          return eq(+object, +other);
+
+        case errorTag:
+          return object.name == other.name && object.message == other.message;
+
+        case regexpTag:
+        case stringTag:
+          // Coerce regexes to strings and treat strings, primitives and objects,
+          // as equal. See http://www.ecma-international.org/ecma-262/7.0/#sec-regexp.prototype.tostring
+          // for more details.
+          return object == (other + '');
+
+        case mapTag:
+          var convert = mapToArray;
+
+        case setTag:
+          var isPartial = bitmask & COMPARE_PARTIAL_FLAG$2;
+          convert || (convert = setToArray);
+
+          if (object.size != other.size && !isPartial) {
+            return false;
+          }
+          // Assume cyclic values are equal.
+          var stacked = stack.get(object);
+          if (stacked) {
+            return stacked == other;
+          }
+          bitmask |= COMPARE_UNORDERED_FLAG;
+
+          // Recursively compare objects (susceptible to call stack limits).
+          stack.set(object, other);
+          var result = equalArrays(convert(object), convert(other), bitmask, customizer, equalFunc, stack);
+          stack['delete'](object);
+          return result;
+
+        case symbolTag:
+          if (symbolValueOf) {
+            return symbolValueOf.call(object) == symbolValueOf.call(other);
+          }
+      }
+      return false;
+    }
+
+    /** Used to compose bitmasks for value comparisons. */
+    var COMPARE_PARTIAL_FLAG$1 = 1;
+
+    /** Used for built-in method references. */
+    var objectProto$1 = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty$1 = objectProto$1.hasOwnProperty;
+
+    /**
+     * A specialized version of `baseIsEqualDeep` for objects with support for
+     * partial deep comparisons.
+     *
+     * @private
+     * @param {Object} object The object to compare.
+     * @param {Object} other The other object to compare.
+     * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+     * @param {Function} customizer The function to customize comparisons.
+     * @param {Function} equalFunc The function to determine equivalents of values.
+     * @param {Object} stack Tracks traversed `object` and `other` objects.
+     * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+     */
+    function equalObjects(object, other, bitmask, customizer, equalFunc, stack) {
+      var isPartial = bitmask & COMPARE_PARTIAL_FLAG$1,
+          objProps = getAllKeys(object),
+          objLength = objProps.length,
+          othProps = getAllKeys(other),
+          othLength = othProps.length;
+
+      if (objLength != othLength && !isPartial) {
+        return false;
+      }
+      var index = objLength;
+      while (index--) {
+        var key = objProps[index];
+        if (!(isPartial ? key in other : hasOwnProperty$1.call(other, key))) {
+          return false;
+        }
+      }
+      // Check that cyclic values are equal.
+      var objStacked = stack.get(object);
+      var othStacked = stack.get(other);
+      if (objStacked && othStacked) {
+        return objStacked == other && othStacked == object;
+      }
+      var result = true;
+      stack.set(object, other);
+      stack.set(other, object);
+
+      var skipCtor = isPartial;
+      while (++index < objLength) {
+        key = objProps[index];
+        var objValue = object[key],
+            othValue = other[key];
+
+        if (customizer) {
+          var compared = isPartial
+            ? customizer(othValue, objValue, key, other, object, stack)
+            : customizer(objValue, othValue, key, object, other, stack);
+        }
+        // Recursively compare objects (susceptible to call stack limits).
+        if (!(compared === undefined
+              ? (objValue === othValue || equalFunc(objValue, othValue, bitmask, customizer, stack))
+              : compared
+            )) {
+          result = false;
+          break;
+        }
+        skipCtor || (skipCtor = key == 'constructor');
+      }
+      if (result && !skipCtor) {
+        var objCtor = object.constructor,
+            othCtor = other.constructor;
+
+        // Non `Object` object instances with different constructors are not equal.
+        if (objCtor != othCtor &&
+            ('constructor' in object && 'constructor' in other) &&
+            !(typeof objCtor == 'function' && objCtor instanceof objCtor &&
+              typeof othCtor == 'function' && othCtor instanceof othCtor)) {
+          result = false;
+        }
+      }
+      stack['delete'](object);
+      stack['delete'](other);
+      return result;
+    }
+
+    /** Used to compose bitmasks for value comparisons. */
+    var COMPARE_PARTIAL_FLAG = 1;
+
+    /** `Object#toString` result references. */
+    var argsTag = '[object Arguments]',
+        arrayTag = '[object Array]',
+        objectTag = '[object Object]';
+
+    /** Used for built-in method references. */
+    var objectProto = Object.prototype;
+
+    /** Used to check objects for own properties. */
+    var hasOwnProperty = objectProto.hasOwnProperty;
+
+    /**
+     * A specialized version of `baseIsEqual` for arrays and objects which performs
+     * deep comparisons and tracks traversed objects enabling objects with circular
+     * references to be compared.
+     *
+     * @private
+     * @param {Object} object The object to compare.
+     * @param {Object} other The other object to compare.
+     * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+     * @param {Function} customizer The function to customize comparisons.
+     * @param {Function} equalFunc The function to determine equivalents of values.
+     * @param {Object} [stack] Tracks traversed `object` and `other` objects.
+     * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+     */
+    function baseIsEqualDeep(object, other, bitmask, customizer, equalFunc, stack) {
+      var objIsArr = isArray(object),
+          othIsArr = isArray(other),
+          objTag = objIsArr ? arrayTag : getTag$1(object),
+          othTag = othIsArr ? arrayTag : getTag$1(other);
+
+      objTag = objTag == argsTag ? objectTag : objTag;
+      othTag = othTag == argsTag ? objectTag : othTag;
+
+      var objIsObj = objTag == objectTag,
+          othIsObj = othTag == objectTag,
+          isSameTag = objTag == othTag;
+
+      if (isSameTag && isBuffer(object)) {
+        if (!isBuffer(other)) {
+          return false;
+        }
+        objIsArr = true;
+        objIsObj = false;
+      }
+      if (isSameTag && !objIsObj) {
+        stack || (stack = new Stack);
+        return (objIsArr || isTypedArray(object))
+          ? equalArrays(object, other, bitmask, customizer, equalFunc, stack)
+          : equalByTag(object, other, objTag, bitmask, customizer, equalFunc, stack);
+      }
+      if (!(bitmask & COMPARE_PARTIAL_FLAG)) {
+        var objIsWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
+            othIsWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
+
+        if (objIsWrapped || othIsWrapped) {
+          var objUnwrapped = objIsWrapped ? object.value() : object,
+              othUnwrapped = othIsWrapped ? other.value() : other;
+
+          stack || (stack = new Stack);
+          return equalFunc(objUnwrapped, othUnwrapped, bitmask, customizer, stack);
+        }
+      }
+      if (!isSameTag) {
+        return false;
+      }
+      stack || (stack = new Stack);
+      return equalObjects(object, other, bitmask, customizer, equalFunc, stack);
+    }
+
+    /**
+     * The base implementation of `_.isEqual` which supports partial comparisons
+     * and tracks traversed objects.
+     *
+     * @private
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @param {boolean} bitmask The bitmask flags.
+     *  1 - Unordered comparison
+     *  2 - Partial comparison
+     * @param {Function} [customizer] The function to customize comparisons.
+     * @param {Object} [stack] Tracks traversed `value` and `other` objects.
+     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+     */
+    function baseIsEqual(value, other, bitmask, customizer, stack) {
+      if (value === other) {
+        return true;
+      }
+      if (value == null || other == null || (!isObjectLike(value) && !isObjectLike(other))) {
+        return value !== value && other !== other;
+      }
+      return baseIsEqualDeep(value, other, bitmask, customizer, baseIsEqual, stack);
+    }
+
+    /**
+     * Performs a deep comparison between two values to determine if they are
+     * equivalent.
+     *
+     * **Note:** This method supports comparing arrays, array buffers, booleans,
+     * date objects, error objects, maps, numbers, `Object` objects, regexes,
+     * sets, strings, symbols, and typed arrays. `Object` objects are compared
+     * by their own, not inherited, enumerable properties. Functions and DOM
+     * nodes are compared by strict equality, i.e. `===`.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Lang
+     * @param {*} value The value to compare.
+     * @param {*} other The other value to compare.
+     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+     * @example
+     *
+     * var object = { 'a': 1 };
+     * var other = { 'a': 1 };
+     *
+     * _.isEqual(object, other);
+     * // => true
+     *
+     * object === other;
+     * // => false
+     */
+    function isEqual(value, other) {
+      return baseIsEqual(value, other);
+    }
+
+    const CONDITIONS_CHECK_INTERVAL = 2000;
+    function guard_ConditionsConditionRequirements(data) {
+        return isObject$1(data) &&
+            (data.room === undefined ||
+                isObject$1(data.room) &&
+                    (data.room.inverted === undefined || data.room.inverted === true) &&
+                    (data.room.type === "public" || data.room.type === "private")) &&
+            (data.roomName === undefined ||
+                isObject$1(data.roomName) &&
+                    (data.roomName.inverted === undefined || data.roomName.inverted === true) &&
+                    typeof data.roomName.name === "string") &&
+            (data.role === undefined ||
+                isObject$1(data.role) &&
+                    (data.role.inverted === undefined || data.role.inverted === true) &&
+                    typeof data.role.role === "number" &&
+                    AccessLevel[data.role.role] !== undefined) &&
+            (data.player === undefined ||
+                isObject$1(data.player) &&
+                    (data.player.inverted === undefined || data.player.inverted === true) &&
+                    typeof data.player.memberNumber === "number");
+    }
+    function guard_ConditionsConditionPublicData(category, condition, data) {
+        const d = data;
+        const handler = conditionHandlers.get(category);
+        if (!handler)
+            return false;
+        return isObject$1(d) &&
+            typeof d.active === "boolean" &&
+            (d.timer === null || typeof d.timer === "number") &&
+            typeof d.timerRemove === "boolean" &&
+            (d.requirements === null || guard_ConditionsConditionRequirements(d.requirements)) &&
+            handler.validatePublicData(condition, d.data);
+    }
+    function guard_ConditionsCategoryPublicData(category, data) {
+        const d = data;
+        const handler = conditionHandlers.get(category);
+        if (!handler)
+            return false;
+        return isObject$1(d) &&
+            typeof d.access_normal === "boolean" &&
+            typeof d.access_limited === "boolean" &&
+            typeof d.access_configure === "boolean" &&
+            typeof d.access_changeLimits === "boolean" &&
+            typeof d.highestRoleInRoom === "number" &&
+            AccessLevel[d.highestRoleInRoom] !== undefined &&
+            isObject$1(d.conditions) &&
+            Object.entries(d.conditions).every(([condition, conditionData]) => guard_ConditionsConditionPublicData(category, condition, conditionData)) &&
+            (d.timer === null || typeof d.timer === "number") &&
+            typeof d.timerRemove === "boolean" &&
+            guard_ConditionsConditionRequirements(d.requirements) &&
+            isObject$1(d.limits) &&
+            Object.entries(d.limits).every(([condition, limit]) => limit === undefined || typeof limit === "number" && ConditionsLimit[limit] !== undefined);
+    }
+    const conditionHandlers = new Map();
+    function ConditionsRegisterCategory(category, handler) {
+        if (moduleInitPhase !== 1 /* init */) {
+            throw new Error("Conditions categories can be registered only during init");
+        }
+        if (conditionHandlers.has(category)) {
+            throw new Error(`Conditions categories "${category}" already defined!`);
+        }
+        conditionHandlers.set(category, handler);
+    }
+    function ConditionsGetCategoryHandler(category) {
+        const handler = conditionHandlers.get(category);
+        if (!handler) {
+            throw new Error(`No handler for conditions category ${category}`);
+        }
+        return handler;
+    }
+    function ConditionsGetCategoryData(category) {
+        var _a;
+        if (!conditionHandlers.has(category)) {
+            throw new Error(`Attempt to get unknown conditions category data ${category}`);
+        }
+        const data = (_a = modStorage.conditions) === null || _a === void 0 ? void 0 : _a[category];
+        if (!data) {
+            throw new Error(`Attempt to get data for uninitialized category ${category}`);
+        }
+        return data;
+    }
+    function ConditionsMakeConditionPublicData(handler, condition, conditionData) {
+        var _a, _b, _c;
+        return {
+            active: conditionData.active,
+            data: handler.makePublicData(condition, conditionData),
+            timer: (_a = conditionData.timer) !== null && _a !== void 0 ? _a : null,
+            timerRemove: (_b = conditionData.timerRemove) !== null && _b !== void 0 ? _b : false,
+            requirements: (_c = conditionData.requirements) !== null && _c !== void 0 ? _c : null
+        };
+    }
+    function ConditionsGetCategoryPublicData(category, requester) {
+        var _a, _b;
+        const handler = ConditionsGetCategoryHandler(category);
+        const data = ConditionsGetCategoryData(category);
+        const res = {
+            access_normal: checkPermissionAccess(handler.permission_normal, requester),
+            access_limited: checkPermissionAccess(handler.permission_limited, requester),
+            access_configure: checkPermissionAccess(handler.permission_configure, requester),
+            access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
+            highestRoleInRoom: AccessLevel.public,
+            conditions: {},
+            timer: (_a = data.timer) !== null && _a !== void 0 ? _a : null,
+            timerRemove: (_b = data.timerRemove) !== null && _b !== void 0 ? _b : false,
+            limits: cloneDeep(data.limits),
+            requirements: cloneDeep(data.requirements)
+        };
+        for (const char of getAllCharactersInRoom()) {
+            const role = getCharacterAccessLevel(char);
+            if (role !== AccessLevel.self && role < res.highestRoleInRoom) {
+                res.highestRoleInRoom = role;
+            }
+        }
+        for (const [condition, conditionData] of Object.entries(data.conditions)) {
+            res.conditions[condition] = ConditionsMakeConditionPublicData(handler, condition, conditionData);
+        }
+        return res;
+    }
+    function ConditionsGetCondition(category, condition) {
+        return ConditionsGetCategoryData(category).conditions[condition];
+    }
+    function ConditionsSetCondition(category, condition, data) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return;
+        const categoryData = ConditionsGetCategoryData(category);
+        const existing = categoryData.conditions[condition];
+        if (existing) {
+            existing.data = data;
+        }
+        else {
+            categoryData.conditions[condition] = {
+                active: true,
+                timer: categoryData.timer !== undefined ? Date.now() + categoryData.timer : undefined,
+                timerRemove: categoryData.timerRemove,
+                data
+            };
+        }
+        modStorageSync();
+        notifyOfChange();
+    }
+    function ConditionsGetConditionLimit(category, condition) {
+        var _a;
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return ConditionsLimit.blocked;
+        const data = ConditionsGetCategoryData(category);
+        return (_a = data.limits[condition]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal;
+    }
+    function ConditionsCheckAccess(category, condition, character) {
+        const limit = ConditionsGetConditionLimit(category, condition);
+        if (limit === ConditionsLimit.blocked)
+            return false;
+        const handler = ConditionsGetCategoryHandler(category);
+        return checkPermissionAccess(limit === ConditionsLimit.limited ? handler.permission_limited : handler.permission_normal, character);
+    }
+    function ConditionsRemoveCondition(category, conditions) {
+        if (!Array.isArray(conditions)) {
+            conditions = [conditions];
+        }
+        const categoryData = ConditionsGetCategoryData(category);
+        let changed = false;
+        for (const condition of conditions) {
+            if (categoryData.conditions[condition]) {
+                delete categoryData.conditions[condition];
+                changed = true;
+            }
+        }
+        if (changed) {
+            modStorageSync();
+            notifyOfChange();
+        }
+        return changed;
+    }
+    function ConditionsSetLimit(category, condition, limit, character) {
+        var _a;
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return false;
+        if (!handler.loadValidateConditionKey(condition)) {
+            console.warn(`Attempt to set invalid condition limit ${category}:${condition}`);
+            return false;
+        }
+        const data = ConditionsGetCategoryData(category);
+        if (character && !checkPermissionAccess(handler.permission_changeLimits, character)) {
+            return false;
+        }
+        if (data.conditions[condition] !== undefined)
+            return false;
+        const oldLimit = (_a = data.limits[condition]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal;
+        if (oldLimit === limit)
+            return true;
+        if (limit === ConditionsLimit.normal) {
+            delete data.limits[condition];
+        }
+        else {
+            data.limits[condition] = limit;
+        }
+        if (character) {
+            handler.logLimitChange(condition, character, limit, oldLimit);
+        }
+        notifyOfChange();
+        modStorageSync();
+        return true;
+    }
+    function ConditionsUpdate(category, condition, data, character) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (character && !ConditionsCheckAccess(category, condition, character))
+            return false;
+        const conditionData = ConditionsGetCondition(category, condition);
+        if (!conditionData)
+            return false;
+        const oldData = ConditionsMakeConditionPublicData(handler, condition, conditionData);
+        if (!handler.updateCondition(condition, conditionData, data.data, character))
+            return false;
+        conditionData.active = data.active;
+        if (data.requirements) {
+            conditionData.requirements = data.requirements;
+        }
+        else {
+            delete conditionData.requirements;
+        }
+        if (data.timer !== null) {
+            conditionData.timer = data.timer;
+        }
+        else {
+            delete conditionData.timer;
+        }
+        if (data.timerRemove) {
+            conditionData.timerRemove = true;
+        }
+        else {
+            delete conditionData.timerRemove;
+        }
+        if (character) {
+            handler.logConditionUpdate(condition, character, data, oldData);
+        }
+        notifyOfChange();
+        modStorageSync();
+        return true;
+    }
+    function ConditionsCategoryUpdate(category, data, character) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (character && !checkPermissionAccess(handler.permission_configure, character))
+            return false;
+        const conditionData = ConditionsGetCategoryData(category);
+        if (!conditionData)
+            return false;
+        const oldData = character && ConditionsGetCategoryPublicData(category, character);
+        conditionData.requirements = data.requirements;
+        if (data.timer !== null) {
+            conditionData.timer = data.timer;
+        }
+        else {
+            delete conditionData.timer;
+        }
+        if (data.timerRemove) {
+            conditionData.timerRemove = true;
+        }
+        else {
+            delete conditionData.timerRemove;
+        }
+        if (character && oldData) {
+            handler.logCategoryUpdate(character, data, oldData);
+        }
+        notifyOfChange();
+        modStorageSync();
+        return true;
+    }
+    function ConditionsEvaluateRequirements(requirements) {
+        const inChatroom = ServerPlayerIsInChatRoom();
+        const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
+        if (requirements.room) {
+            const res = inChatroom &&
+                (requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
+            if (!(requirements.room.inverted ? !res : res))
+                return false;
+        }
+        if (requirements.roomName) {
+            const res = inChatroom &&
+                ChatRoomData &&
+                typeof ChatRoomData.Name === "string" &&
+                ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
+            if (!(requirements.roomName.inverted ? !res : res))
+                return false;
+        }
+        if (requirements.role) {
+            const res = inChatroom &&
+                getAllCharactersInRoom().some(c => !c.isPlayer() && getCharacterAccessLevel(c) <= requirements.role.role);
+            if (!(requirements.role.inverted ? !res : res))
+                return false;
+        }
+        if (requirements.player) {
+            const res = inChatroom &&
+                getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player.memberNumber);
+            if (!(requirements.player.inverted ? !res : res))
+                return false;
+        }
+        return true;
+    }
+    const ConditionsSubcommands = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer"];
+    /*
+    !curses setactive <condition> <yes/no> - Switch the curse and its conditions on and off
+
+    !curses triggers <condition> global <yes/no> - Set the trigger condition of this curse to the global configuration
+    !curses triggers <condition> <[for each trigger separately]>
+    !curses globaltriggers <[for each trigger separately]>
+
+    !curses timer <condition> <[timer handle]>
+    !curses defaulttimer <[timer handle]>
+
+    timer handling:
+    disable - Remove the timer and set lifetime to infinite
+    set <time> (time in /[0-9]+d [0-9]+h [0-9]+m [0-9]+s/ format, each part optional) - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)
+    autoremove <yes/no> - Set if the curse is removed when the timer runs out or just disables itself
+
+    (global)triggers commands:
+    room ignore 							Remove the 'room type'-based trigger condition
+    room <is/isnot> <public/private>		Add such a 'room type'-based trigger condition
+    roomname ignore							Remove the 'room name'-based trigger condition
+    roomname <is/isnot> <name>				Add such a 'room name'-based trigger condition
+    role ignore								Remove the role-based trigger condition
+    role <with/notwith> <role>				Add such a role-based trigger condition
+    player ignore							Remove the person-based trigger condition
+    player <with/notwith> <memberNumber>	Add such a person-based trigger condition
+    */
+    const ConditionsCommandTriggersKeywords = ["room", "roomname", "role", "player"];
+    function ConditionsCommandProcessTriggers(triggers, argv, sender, respond) {
+        const trigger = (argv[0] || "").toLocaleLowerCase();
+        const keyword = (argv[1] || "").toLocaleLowerCase();
+        if (keyword === "ignore" && argv.length !== 2) {
+            respond(`Error:\n'${trigger} ignore' does not expect any extra arguments.`);
+            return true;
+        }
+        if (!["is", "isnot", "with", "notwith"].includes(keyword)) {
+            respond(`Error:\nUnknown setting '${keyword}'. please use one of: ${trigger === "room" || trigger === "roomname" ? "is, isnot" : "with, notwith"}`);
+            return true;
+        }
+        if (argv.length !== 3) {
+            respond(`Error:\n'${trigger} ${keyword} <value>' got too many arguments. Arguments with space need to be "quoted".`);
+            return true;
+        }
+        const inverted = (keyword === "isnot" || keyword === "notwith") ? true : undefined;
+        let value = argv[2];
+        if (trigger === "room") {
+            if (keyword === "ignore") {
+                delete triggers.room;
+                return false;
+            }
+            value = value.toLocaleLowerCase();
+            if (value !== "public" && value !== "private") {
+                respond(`Error:\nRoom can be either 'public' or 'private', got: '${value}'`);
+                return true;
+            }
+            triggers.room = {
+                type: value,
+                inverted
+            };
+        }
+        else if (trigger === "roomname") {
+            if (keyword === "ignore") {
+                delete triggers.roomName;
+                return false;
+            }
+            triggers.roomName = {
+                name: value,
+                inverted
+            };
+        }
+        else if (trigger === "role") {
+            if (keyword === "ignore") {
+                delete triggers.role;
+                return false;
+            }
+            const level = AccessLevel[value.toLocaleLowerCase()];
+            if (typeof level !== "number" || level === AccessLevel.self) {
+                respond(`Error:\n` +
+                    `'role ${keyword}' expects one of: clubowner, owner, lover, mistress, whitelist, friend, public; got: '${value.toLocaleLowerCase()}'`);
+                return true;
+            }
+            triggers.role = {
+                role: level,
+                inverted
+            };
+        }
+        else if (trigger === "player") {
+            if (keyword === "ignore") {
+                delete triggers.player;
+                return false;
+            }
+            const target = Command_selectCharacterMemberNumber(value, true);
+            if (typeof target === "string") {
+                respond(target);
+                return true;
+            }
+            triggers.player = {
+                memberNumber: target,
+                inverted
+            };
+        }
+        return false;
+    }
+    function ConditionsCommandTriggersAutocomplete(argv, sender) {
+        const trigger = (argv[0] || "").toLocaleLowerCase();
+        if (argv.length < 2)
+            return [];
+        if (trigger === "room" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
+        }
+        if (trigger === "room" && argv.length === 3) {
+            return Command_pickAutocomplete(argv[2], ["public", "private"]);
+        }
+        if (trigger === "roomname" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
+        }
+        if (trigger === "role" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
+        }
+        if (trigger === "role" && argv.length === 3) {
+            return Command_pickAutocomplete(argv[2], ["clubowner", "owner", "lover", "mistress", "whitelist", "friend", "public"]);
+        }
+        if (trigger === "player" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
+        }
+        if (trigger === "player" && argv.length === 3) {
+            return Command_selectCharacterAutocomplete(argv[2]);
+        }
+        return [];
+    }
+    function ConditionsRunSubcommand(category, argv, sender, respond) {
+        const subcommand = (argv[0] || "").toLocaleLowerCase();
+        if (!ConditionsSubcommands.includes(subcommand)) {
+            throw new Error(`Subcomand "${subcommand}" passed to ConditionsRunSubcommand isn't valid ConditionsSubcommand`);
+        }
+        const handler = conditionHandlers.get(category);
+        if (!handler) {
+            throw new Error(`Attempt to run command for unknown conditions category ${category}`);
+        }
+        const categoryData = ConditionsGetCategoryData(category);
+        const categorySingular = category.slice(0, -1);
+        if (subcommand === "setactive") {
+            const active = (argv[2] || "").toLocaleLowerCase();
+            if (argv.length !== 3 || active !== "yes" && active !== "no") {
+                return respond(`Usage:\nsetactive <${categorySingular}> <yes/no>`);
+            }
+            const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
+            if (!result) {
+                return respond(condition);
+            }
+            if (!categoryData.conditions[condition]) {
+                return respond(`This ${categorySingular} doesn't exist`);
+            }
+            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
+            conditionData.active = active === "yes";
+            respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "triggers") {
+            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            if (!result) {
+                return respond(condition);
+            }
+            if (!categoryData.conditions[condition]) {
+                return respond(`This ${categorySingular} doesn't exist`);
+            }
+            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
+            const keyword = (argv[2] || "").toLocaleLowerCase();
+            if (!keyword) {
+                if (!conditionData.requirements) {
+                    return respond(`Current status:\n` +
+                        `Uses global ${category} trigger configuration`);
+                }
+                else {
+                    const triggers = [];
+                    const r = conditionData.requirements;
+                    if (r.room) {
+                        triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+                    }
+                    if (r.roomName) {
+                        triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+                    }
+                    if (r.role) {
+                        const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+                        triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+                    }
+                    if (r.player) {
+                        const name = getCharacterName(r.player.memberNumber, null);
+                        triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+                    }
+                    if (triggers.length > 0) {
+                        return respond(`Current status:\n` +
+                            `This ${categorySingular} will trigger under following conditions:\n` +
+                            triggers.join("\n"));
+                    }
+                    else {
+                        return respond(`Current status:\n` +
+                            `No triggers are set. The ${categorySingular} will now always trigger, while it is active`);
+                    }
+                }
+            }
+            else if (keyword === "global") {
+                const global = (argv[3] || "").toLocaleLowerCase();
+                if (argv.length !== 4 || global !== "yes" && global !== "no") {
+                    return respond(`Usage:\ntriggers <${categorySingular}> global <yes/no>`);
+                }
+                if (global === "yes") {
+                    conditionData.requirements = null;
+                }
+                else if (!conditionData.requirements) {
+                    conditionData.requirements = cloneDeep(categoryData.requirements);
+                }
+            }
+            else if (!ConditionsCommandTriggersKeywords.includes(keyword)) {
+                return respond(`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${categorySingular}> *' options:\n` +
+                    `global <yes/no> - Set the trigger condition of this ${categorySingular} to the global configuration\n` +
+                    `room ignore - Remove the 'room type'-based trigger condition\n` +
+                    `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
+                    `roomname ignore - Remove the 'room name'-based trigger condition\n` +
+                    `roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
+                    `role ignore - Remove the role-based trigger condition\n` +
+                    `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
+                    `player ignore - Remove the person-based trigger condition\n` +
+                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition`);
+            }
+            else if (!conditionData.requirements) {
+                return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${categorySingular}> global no`);
+            }
+            else {
+                if (ConditionsCommandProcessTriggers(conditionData.requirements, argv.slice(2), sender, respond))
+                    return;
+            }
+            respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "globaltriggers") {
+            const configData = ConditionsGetCategoryPublicData(category, sender);
+            if (!argv[1]) {
+                const triggers = [];
+                const r = configData.requirements;
+                if (r.room) {
+                    triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+                }
+                if (r.roomName) {
+                    triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+                }
+                if (r.role) {
+                    const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+                    triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+                }
+                if (r.player) {
+                    const name = getCharacterName(r.player.memberNumber, null);
+                    triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+                }
+                if (triggers.length > 0) {
+                    return respond(`Current status:\n` +
+                        `Globally ${category} are set to trigger under following conditions:\n` +
+                        triggers.join("\n"));
+                }
+                else {
+                    return respond(`Current status:\n` +
+                        `No triggers are set globally. ${capitalizeFirstLetter(category)} using global config will now always trigger, if they are active`);
+                }
+            }
+            else if (!ConditionsCommandTriggersKeywords.includes(argv[1].toLocaleLowerCase())) {
+                return respond(`Unknown trigger '${argv[1].toLocaleLowerCase()}' List of possible 'globaltriggers *' options:\n` +
+                    `room ignore - Remove the 'room type'-based trigger condition\n` +
+                    `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
+                    `roomname ignore - Remove the 'room name'-based trigger condition\n` +
+                    `roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
+                    `role ignore - Remove the role-based trigger condition\n` +
+                    `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
+                    `player ignore - Remove the person-based trigger condition\n` +
+                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition`);
+            }
+            else {
+                if (ConditionsCommandProcessTriggers(configData.requirements, argv.slice(1), sender, respond))
+                    return;
+            }
+            respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "timer") {
+            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            if (!result) {
+                return respond(condition);
+            }
+            if (!categoryData.conditions[condition]) {
+                return respond(`This ${categorySingular} doesn't exist`);
+            }
+            const keyword = (argv[2] || "").toLocaleLowerCase();
+            if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
+                return respond(`Usage:\n` +
+                    `timer <${categorySingular}> disable - Remove the timer and set lifetime to infinite\n` +
+                    `timer <${categorySingular}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+                    `timer <${categorySingular}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
+            }
+            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
+            if (keyword === "disable") {
+                conditionData.timer = null;
+                conditionData.timerRemove = false;
+            }
+            else if (keyword === "set") {
+                let time = 0;
+                for (const v of argv.slice(3)) {
+                    const i = Command_parseTime(v);
+                    if (typeof i === "string") {
+                        return respond(i);
+                    }
+                    time += i;
+                }
+                conditionData.timer = Date.now() + time;
+            }
+            else if (keyword === "autoremove") {
+                const autoremove = (argv[3] || "").toLocaleLowerCase();
+                if (argv.length !== 4 || autoremove !== "yes" && autoremove !== "no") {
+                    return respond(`Usage:\ntimer <${categorySingular}> autoremove <yes/no>`);
+                }
+                if (conditionData.timer === null) {
+                    return respond(`Timer is disabled on this ${categorySingular}. To use autoremove, first set timer`);
+                }
+                conditionData.timerRemove = autoremove === "yes";
+            }
+            respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "defaulttimer") {
+            const keyword = (argv[1] || "").toLocaleLowerCase();
+            if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
+                return respond(`Usage:\n` +
+                    `defaulttimer disable - Remove the timer and set lifetime to infinite\n` +
+                    `defaulttimer set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+                    `defaulttimer autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
+            }
+            const configData = ConditionsGetCategoryPublicData(category, sender);
+            if (keyword === "disable") {
+                configData.timer = null;
+                configData.timerRemove = false;
+            }
+            else if (keyword === "set") {
+                let time = 0;
+                for (const v of argv.slice(2)) {
+                    const i = Command_parseTime(v);
+                    if (typeof i === "string") {
+                        return respond(i);
+                    }
+                    time += i;
+                }
+                configData.timer = time;
+            }
+            else if (keyword === "autoremove") {
+                const autoremove = (argv[2] || "").toLocaleLowerCase();
+                if (argv.length !== 3 || autoremove !== "yes" && autoremove !== "no") {
+                    return respond(`Usage:\ndefaulttimer <${categorySingular}> autoremove <yes/no>`);
+                }
+                if (configData.timer === null) {
+                    return respond(`Timer is disabled by default for ${category}. To use autoremove, first set timer`);
+                }
+                configData.timerRemove = autoremove === "yes";
+            }
+            respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+    }
+    function ConditionsAutocompleteSubcommand(category, argv, sender) {
+        const subcommand = (argv[0] || "").toLocaleLowerCase();
+        if (!ConditionsSubcommands.includes(subcommand)) {
+            throw new Error(`Subcomand "${subcommand}" passed to ConditionsAutocompleteSubcommand isn't valid ConditionsSubcommand`);
+        }
+        const handler = conditionHandlers.get(category);
+        if (!handler) {
+            throw new Error(`Attempt to autocomplete command for unknown conditions category ${category}`);
+        }
+        const categoryData = ConditionsGetCategoryData(category);
+        if (subcommand === "setactive") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+            }
+            else if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+            }
+        }
+        else if (subcommand === "triggers") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+            }
+            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            if (!result || !categoryData.conditions[condition]) {
+                return [];
+            }
+            if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["global", ...ConditionsCommandTriggersKeywords]);
+            }
+            if (argv[2].toLocaleLowerCase() === "global") {
+                return Command_pickAutocomplete(argv[3], ["yes", "no"]);
+            }
+            else if (categoryData.conditions[condition].requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+                return ConditionsCommandTriggersAutocomplete(argv.slice(2), sender);
+            }
+        }
+        else if (subcommand === "globaltriggers") {
+            if (argv.length === 2) {
+                return Command_pickAutocomplete(argv[2], ConditionsCommandTriggersKeywords);
+            }
+            else if (ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+                return ConditionsCommandTriggersAutocomplete(argv.slice(1), sender);
+            }
+        }
+        else if (subcommand === "timer") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+            }
+            else if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["set", "disable", "autoremove"]);
+            }
+            else if (argv.length === 4 && argv[2].toLocaleLowerCase() === "autoremove") {
+                return Command_pickAutocomplete(argv[3], ["yes", "no"]);
+            }
+        }
+        else if (subcommand === "defaulttimer") {
+            if (argv.length === 2) {
+                return Command_pickAutocomplete(argv[1], ["set", "disable", "autoremove"]);
+            }
+            else if (argv.length === 3 && argv[1].toLocaleLowerCase() === "autoremove") {
+                return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+            }
+        }
+        return [];
+    }
+    class ModuleConditions extends BaseModule {
+        constructor() {
+            super(...arguments);
+            this.timer = null;
+        }
+        load() {
+            if (!isObject$1(modStorage.conditions)) {
+                modStorage.conditions = {};
+            }
+            // cursedItems migration
+            if (modStorage.cursedItems) {
+                const curses = modStorage.conditions.curses = {
+                    conditions: {},
+                    limits: {},
+                    requirements: {}
+                };
+                for (const [group, data] of Object.entries(modStorage.cursedItems)) {
+                    curses.conditions[group] = {
+                        active: true,
+                        data
+                    };
+                }
+                delete modStorage.cursedItems;
+            }
+            for (const key of Object.keys(modStorage.conditions)) {
+                const handler = conditionHandlers.get(key);
+                if (!handler || !moduleIsEnabled(handler.category)) {
+                    console.debug(`BCX: Removing unknown or disabled conditions category ${key}`);
+                    delete modStorage.conditions[key];
+                    continue;
+                }
+                const data = modStorage.conditions[key];
+                if (!isObject$1(data) || !isObject$1(data.conditions)) {
+                    console.warn(`BCX: Removing category ${key} with invalid data`);
+                    delete modStorage.conditions[key];
+                    continue;
+                }
+                if (data.timer !== undefined && typeof data.timer !== "number") {
+                    console.warn(`BCX: Removing category ${key} invalid timer`, data.timer);
+                    delete data.timer;
+                }
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
+                if (data.timerRemove !== undefined && data.timerRemove !== true) {
+                    console.warn(`BCX: Removing category ${key} invalid timerRemove`, data.timerRemove);
+                    delete data.timerRemove;
+                }
+                if (!isObject$1(data.limits)) {
+                    console.warn(`BCX: Resetting category ${key} limits with invalid data`);
+                    data.limits = {};
+                }
+                for (const [condition, limitValue] of Object.entries(data.limits)) {
+                    if (!handler.loadValidateConditionKey(condition)) {
+                        console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
+                        delete data.limits[condition];
+                    }
+                    else if (typeof limitValue !== "number" ||
+                        limitValue === ConditionsLimit.normal ||
+                        ConditionsLimit[limitValue] === undefined) {
+                        console.warn(`BCX: Unknown condition ${key}:${condition} limit value, removing it`, limitValue);
+                        delete data.limits[condition];
+                    }
+                }
+                if (!guard_ConditionsConditionRequirements(data.requirements)) {
+                    console.warn(`BCX: Resetting category ${key} requirements with invalid data`);
+                    data.requirements = {};
+                }
+                for (const [condition, conditiondata] of Object.entries(data.conditions)) {
+                    if (!handler.loadValidateConditionKey(condition)) {
+                        console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
+                        delete data.conditions[condition];
+                    }
+                    else if (!handler.loadValidateCondition(condition, conditiondata)) {
+                        delete data.conditions[condition];
+                    }
+                    else if (typeof conditiondata.active !== "boolean" ||
+                        conditiondata.requirements !== undefined && !guard_ConditionsConditionRequirements(conditiondata.requirements) ||
+                        conditiondata.timer !== undefined && typeof conditiondata.timer !== "number" ||
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
+                        conditiondata.timerRemove !== undefined && conditiondata.timerRemove !== true) {
+                        console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
+                        delete data.conditions[condition];
+                    }
+                }
+            }
+            for (const [key, handler] of conditionHandlers.entries()) {
+                if (moduleIsEnabled(handler.category) && !isObject$1(modStorage.conditions[key])) {
+                    console.debug(`BCX: Adding missing conditions category ${key}`);
+                    modStorage.conditions[key] = {
+                        conditions: {},
+                        limits: {},
+                        requirements: {}
+                    };
+                }
+            }
+            queryHandlers.conditionsGet = (sender, resolve, data) => {
+                if (typeof data === "string" && conditionHandlers.has(data)) {
+                    resolve(true, ConditionsGetCategoryPublicData(data, sender));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.conditionSetLimit = (sender, resolve, data) => {
+                if (isObject$1(data) &&
+                    typeof data.category === "string" &&
+                    conditionHandlers.has(data.category) &&
+                    typeof data.condition === "string" &&
+                    typeof data.limit === "number" &&
+                    ConditionsLimit[data.limit] !== undefined) {
+                    resolve(true, ConditionsSetLimit(data.category, data.condition, data.limit, sender));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.conditionUpdate = (sender, resolve, data) => {
+                if (isObject$1(data) &&
+                    typeof data.category === "string" &&
+                    conditionHandlers.has(data.category) &&
+                    typeof data.condition === "string" &&
+                    guard_ConditionsConditionPublicData(data.category, data.condition, data.data)) {
+                    resolve(true, ConditionsUpdate(data.category, data.condition, data.data, sender));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+            queryHandlers.conditionCategoryUpdate = (sender, resolve, data) => {
+                if (isObject$1(data) &&
+                    typeof data.category === "string" &&
+                    conditionHandlers.has(data.category) &&
+                    isObject$1(data.data) &&
+                    (data.data.timer === null || typeof data.data.timer === "number") &&
+                    typeof data.data.timerRemove === "boolean" &&
+                    guard_ConditionsConditionRequirements(data.data.requirements)) {
+                    resolve(true, ConditionsCategoryUpdate(data.category, data.data, sender));
+                }
+                else {
+                    resolve(false);
+                }
+            };
+        }
+        run() {
+            this.timer = setInterval(() => this.conditionsTick(), CONDITIONS_CHECK_INTERVAL);
+        }
+        unload() {
+            if (this.timer !== null) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+        }
+        reload() {
+            this.unload();
+            this.load();
+            this.run();
+        }
+        conditionsTick() {
+            var _a;
+            if (!ServerIsConnected || !modStorage.conditions)
+                return;
+            let dataChanged = false;
+            const now = Date.now();
+            for (const [category, handler] of conditionHandlers.entries()) {
+                const categoryData = modStorage.conditions[category];
+                if (!moduleIsEnabled(handler.category) || !categoryData)
+                    continue;
+                for (const [conditionName, conditionData] of Object.entries(categoryData.conditions)) {
+                    if (conditionData.timer !== undefined && conditionData.timer <= now) {
+                        if (conditionData.timerRemove) {
+                            ConditionsRemoveCondition(category, conditionName);
+                        }
+                        else {
+                            delete conditionData.timer;
+                            conditionData.active = false;
+                            dataChanged = true;
+                        }
+                    }
+                    if (!conditionData.active)
+                        continue;
+                    const requirements = (_a = conditionData.requirements) !== null && _a !== void 0 ? _a : categoryData.requirements;
+                    if (!ConditionsEvaluateRequirements(requirements))
+                        continue;
+                    const copy = cloneDeep(conditionData);
+                    handler.tickHandler(conditionName, conditionData);
+                    if (!isEqual(copy, conditionData)) {
+                        dataChanged = true;
+                    }
+                }
+            }
+            if (dataChanged) {
+                modStorageSync();
+                notifyOfChange();
+            }
+        }
+    }
+
     const CURSES_ANTILOOP_RESET_INTERVAL = 60000;
     const CURSES_ANTILOOP_THRESHOLD = 10;
     const CURSES_ANTILOOP_SUSPEND_TIME = 600000;
@@ -3204,7 +6909,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (!moduleIsEnabled(ModuleCategory.Curses))
             return false;
         const group = AssetGroup.find(g => g.Name === Group);
-        if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null) || !modStorage.cursedItems) {
+        if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null)) {
             console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
             return false;
         }
@@ -3212,47 +6917,39 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             console.warn(`BCX: Attempt to curse body`, Group);
             return false;
         }
-        if (character) {
-            const existingCurse = modStorage.cursedItems[Group];
-            if (existingCurse) {
-                if (curseProperty === null) {
-                    return false;
-                }
-                if (!checkPermissionAccess(curseProperty ? "curses_curse" : "curses_lift", character)) {
-                    return false;
-                }
-            }
-            else if (!checkPermissionAccess("curses_curse", character)) {
-                return false;
-            }
+        if (character && !ConditionsCheckAccess("curses", Group, character)) {
+            return false;
         }
         const currentItem = InventoryGet(Player, Group);
         if (currentItem) {
             if (curseProperty === null) {
+                if (ConditionsGetCondition("curses", Group))
+                    return true;
                 curseProperty = curseDefaultItemCurseProperty(currentItem.Asset);
             }
             if (!curseAllowItemCurseProperty(currentItem.Asset) && curseProperty) {
                 console.warn(`BCX: Attempt to curse properties of item ${currentItem.Asset.Group.Name}:${currentItem.Asset.Name}, while not allowed`);
                 curseProperty = false;
             }
-            const newCurse = modStorage.cursedItems[Group] = {
+            const newCurse = {
                 Name: currentItem.Asset.Name,
                 curseProperty
             };
             if (currentItem.Color && currentItem.Color !== "Default") {
-                newCurse.Color = JSON.parse(JSON.stringify(currentItem.Color));
+                newCurse.Color = cloneDeep(currentItem.Color);
             }
             if (currentItem.Difficulty) {
                 newCurse.Difficulty = currentItem.Difficulty;
             }
             if (currentItem.Property && Object.keys(currentItem.Property).filter(i => !CURSE_IGNORED_PROPERTIES.includes(i)).length !== 0) {
-                newCurse.Property = JSON.parse(JSON.stringify(currentItem.Property));
+                newCurse.Property = cloneDeep(currentItem.Property);
                 if (newCurse.Property) {
                     for (const key of CURSE_IGNORED_PROPERTIES) {
                         delete newCurse.Property[key];
                     }
                 }
             }
+            ConditionsSetCondition("curses", Group, newCurse);
             if (character) {
                 logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
                 if (!character.isPlayer()) {
@@ -3261,7 +6958,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
         }
         else {
-            modStorage.cursedItems[Group] = null;
+            ConditionsSetCondition("curses", Group, null);
             if (character) {
                 logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
                 if (!character.isPlayer()) {
@@ -3274,8 +6971,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         return true;
     }
     function curseBatch(mode, includingEmpty, character) {
-        var _a;
-        if (character && !checkPermissionAccess("curses_curse", character))
+        if (character && !checkPermissionAccess("curses_normal", character) && !checkPermissionAccess("curses_limited", character))
             return false;
         let assetGroups;
         if (mode === "items") {
@@ -3296,7 +6992,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
         }
         for (const group of assetGroups) {
-            if ((_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[group.Name])
+            if (ConditionsGetCondition("curses", group.Name))
+                continue;
+            if (character && !ConditionsCheckAccess("curses", group.Name, character))
                 continue;
             if (!curseItem(group.Name, null, null))
                 return false;
@@ -3307,12 +7005,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         var _a;
         if (!moduleIsEnabled(ModuleCategory.Curses))
             return false;
-        if (character && !checkPermissionAccess("curses_lift", character))
+        if (character && !ConditionsCheckAccess("curses", Group, character))
             return false;
-        if (modStorage.cursedItems && modStorage.cursedItems[Group] !== undefined) {
+        const curse = ConditionsGetCondition("curses", Group);
+        if (curse) {
             const group = AssetGroup.find(g => g.Name === Group);
             if (character && group) {
-                const itemName = modStorage.cursedItems[Group] && ((_a = AssetGet(Player.AssetFamily, Group, modStorage.cursedItems[Group].Name)) === null || _a === void 0 ? void 0 : _a.Description);
+                const itemName = curse.data && ((_a = AssetGet(Player.AssetFamily, Group, curse.data.Name)) === null || _a === void 0 ? void 0 : _a.Description);
                 if (itemName) {
                     logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
                     if (!character.isPlayer()) {
@@ -3326,9 +7025,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
             }
-            delete modStorage.cursedItems[Group];
-            modStorageSync();
-            notifyOfChange();
+            ConditionsRemoveCondition("curses", Group);
             return true;
         }
         return false;
@@ -3336,48 +7033,27 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     function curseLiftAll(character) {
         if (!moduleIsEnabled(ModuleCategory.Curses))
             return false;
-        if (character && !checkPermissionAccess("curses_lift", character))
+        if (character && (!checkPermissionAccess("curses_normal", character) || !checkPermissionAccess("curses_limited", character)))
             return false;
-        if (modStorage.cursedItems) {
-            if (character) {
-                logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
-                if (!character.isPlayer()) {
-                    ChatRoomSendLocal(`${character} lifted all curses on you`);
-                }
+        if (character) {
+            logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
+            if (!character.isPlayer()) {
+                ChatRoomSendLocal(`${character} lifted all curses on you`);
             }
-            modStorage.cursedItems = {};
-            modStorageSync();
-            notifyOfChange();
-            return true;
         }
-        return false;
-    }
-    function curseGetInfo(character) {
-        var _a;
-        const res = {
-            allowCurse: checkPermissionAccess("curses_curse", character),
-            allowLift: checkPermissionAccess("curses_lift", character),
-            curses: {}
-        };
-        for (const [group, info] of Object.entries((_a = modStorage.cursedItems) !== null && _a !== void 0 ? _a : {})) {
-            res.curses[group] = info === null ? null : {
-                Name: info.Name,
-                curseProperties: info.curseProperty
-            };
-        }
-        return res;
+        ConditionsRemoveCondition("curses", Object.keys(ConditionsGetCategoryData("curses").conditions));
+        return true;
     }
     class ModuleCurses extends BaseModule {
         constructor() {
             super(...arguments);
-            this.timer = null;
             this.resetTimer = null;
             this.triggerCounts = new Map();
             this.suspendedUntil = null;
         }
         init() {
-            registerPermission("curses_curse", {
-                name: "Allow cursing objects or the body",
+            registerPermission("curses_normal", {
+                name: "Allows handling curses on non-limited object slots",
                 category: ModuleCategory.Curses,
                 defaults: {
                     [Preset.dominant]: [true, AccessLevel.lover],
@@ -3386,14 +7062,34 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     [Preset.slave]: [false, AccessLevel.mistress]
                 }
             });
-            registerPermission("curses_lift", {
-                name: "Allow lifting curses",
+            registerPermission("curses_limited", {
+                name: "Allows handling curses on limited object slots",
                 category: ModuleCategory.Curses,
                 defaults: {
-                    [Preset.dominant]: [true, AccessLevel.lover],
-                    [Preset.switch]: [true, AccessLevel.lover],
-                    [Preset.submissive]: [false, AccessLevel.mistress],
-                    [Preset.slave]: [false, AccessLevel.mistress]
+                    [Preset.dominant]: [true, AccessLevel.owner],
+                    [Preset.switch]: [true, AccessLevel.owner],
+                    [Preset.submissive]: [false, AccessLevel.lover],
+                    [Preset.slave]: [false, AccessLevel.lover]
+                }
+            });
+            registerPermission("curses_global_configuration", {
+                name: "Allows editing the global curses configuration",
+                category: ModuleCategory.Curses,
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.owner],
+                    [Preset.switch]: [true, AccessLevel.owner],
+                    [Preset.submissive]: [false, AccessLevel.lover],
+                    [Preset.slave]: [false, AccessLevel.lover]
+                }
+            });
+            registerPermission("curses_change_limits", {
+                name: "Allows to limit/block individual curse object slots",
+                category: ModuleCategory.Curses,
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.self],
+                    [Preset.slave]: [false, AccessLevel.owner]
                 }
             });
             registerPermission("curses_color", {
@@ -3406,50 +7102,32 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     [Preset.slave]: [false, AccessLevel.mistress]
                 }
             });
-            queryHandlers.curseGetInfo = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, curseGetInfo(character));
-                }
-                else {
-                    resolve(false);
-                }
-            };
             queryHandlers.curseItem = (sender, resolve, data) => {
-                const character = getChatroomCharacter(sender);
-                if (character && isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
-                    resolve(true, curseItem(data.Group, data.curseProperties, character));
+                if (isObject$1(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
+                    resolve(true, curseItem(data.Group, data.curseProperties, sender));
                 }
                 else {
                     resolve(false);
                 }
             };
             queryHandlers.curseLift = (sender, resolve, data) => {
-                const character = getChatroomCharacter(sender);
-                if (character && typeof data === "string") {
-                    resolve(true, curseLift(data, character));
+                if (typeof data === "string") {
+                    resolve(true, curseLift(data, sender));
                 }
                 else {
                     resolve(false);
                 }
             };
             queryHandlers.curseBatch = (sender, resolve, data) => {
-                const character = getChatroomCharacter(sender);
-                if (character && isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
-                    resolve(true, curseBatch(data.mode, data.includingEmpty, character));
+                if (isObject$1(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
+                    resolve(true, curseBatch(data.mode, data.includingEmpty, sender));
                 }
                 else {
                     resolve(false);
                 }
             };
             queryHandlers.curseLiftAll = (sender, resolve) => {
-                const character = getChatroomCharacter(sender);
-                if (character) {
-                    resolve(true, curseLiftAll(character));
-                }
-                else {
-                    resolve(false);
-                }
+                resolve(true, curseLiftAll(sender));
             };
             registerWhisperCommand("curses", "- Manage curses", (argv, sender, respond) => {
                 var _a;
@@ -3457,8 +7135,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     return respond(`Curses module is disabled.`);
                 }
                 const subcommand = (argv[0] || "").toLocaleLowerCase();
-                const cursesInfo = curseGetInfo(sender).curses;
-                if (subcommand === "list") {
+                const cursesInfo = ConditionsGetCategoryPublicData("curses", sender).conditions;
+                if (ConditionsSubcommands.includes(subcommand)) {
+                    return ConditionsRunSubcommand("curses", argv, sender, respond);
+                }
+                else if (subcommand === "list") {
                     let result = "Current curses:";
                     for (const [k, v] of Object.entries(cursesInfo)) {
                         const group = AssetGroup.find(g => g.Name === k);
@@ -3467,12 +7148,12 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                             continue;
                         }
                         result += `\n[${group.Clothing ? "Clothing" : "Item"}] `;
-                        if (v === null) {
+                        if (v.data === null) {
                             result += `Blocked: ${getVisibleGroupName(group)}`;
                         }
                         else {
-                            const item = AssetGet(Player.AssetFamily, k, v.Name);
-                            result += `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.Name} (${getVisibleGroupName(group)})`;
+                            const item = AssetGet(Player.AssetFamily, k, v.data.Name);
+                            result += `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.data.Name} (${getVisibleGroupName(group)})`;
                         }
                     }
                     respond(result);
@@ -3543,48 +7224,60 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 else if (subcommand === "liftall") {
                     respond(curseLiftAll(sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
                 }
-                else if (subcommand === "settings") {
+                else if (subcommand === "configuration") {
                     const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
                     if (typeof group === "string") {
                         return respond(group);
                     }
-                    if (cursesInfo[group.Name] === undefined) {
+                    const curse = cursesInfo[group.Name];
+                    if (!curse) {
                         return respond(`This group or item is not cursed`);
                     }
                     const target = (argv[2] || "").toLocaleLowerCase();
                     if (target !== "yes" && target !== "no") {
                         return respond(`Expected yes or no`);
                     }
-                    if (cursesInfo[group.Name] == null) {
-                        return respond(`Empty groups cannot have settings cursed`);
+                    if (curse.data == null) {
+                        return respond(`Empty groups cannot have configuration cursed`);
                     }
-                    const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name].Name);
+                    const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name].data.Name);
                     if (asset && target === "yes" && !curseAllowItemCurseProperty(asset)) {
-                        return respond(`This item cannot have settings cursed`);
+                        return respond(`This item cannot have configuration cursed`);
                     }
-                    respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                    curse.data.curseProperties = target === "yes";
+                    respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
                 }
                 else {
                     respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
                         `!curses list - List all active curses and related info\n` +
-                        `!curses listgroups <items|clothes> - Lists all possible item and/or clothing slots\n` +
+                        `!curses listgroups <items|clothes> - Lists all possible item or clothing group slots\n` +
                         `!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
                         `!curses curseworn <items|clothes> - Place a curse on all currenty worn items/clothes\n` +
-                        `!curses curseall <items|clothes> - Place a curse on all item/clothe slots, both used and empty\n` +
+                        `!curses curseall <items|clothes> - Place a curse on all item/cloth slots, both used and empty\n` +
                         `!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
                         `!curses liftall - Lifts (removes) all curses\n` +
-                        `!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`));
+                        `!curses configuration <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`));
+                    respond(Command_fixExclamationMark(sender, `!curses setactive <group> <yes/no> - Switch the curse and its conditions on and off\n` +
+                        `!curses triggers <group> global <yes/no> - Set the trigger condition of this curse to the global configuration\n` +
+                        `!curses triggers <group> help - Set the trigger configuration of a curse\n` +
+                        `!curses globaltriggers help - Set global trigger configuration\n` +
+                        `!curses timer <group> help - Set timer options of a curse\n` +
+                        `!curses defaulttimer help - Set default timer options used on new curses\n\n` +
+                        `Hint: If an argument contains spaces: "put it in quotes"`));
                 }
             }, (argv, sender) => {
                 if (!moduleIsEnabled(ModuleCategory.Curses)) {
                     return [];
                 }
                 if (argv.length <= 1) {
-                    return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "settings"]);
+                    return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "configuration", ...ConditionsSubcommands]);
                 }
                 const subcommand = argv[0].toLocaleLowerCase();
-                const cursesInfo = curseGetInfo(sender).curses;
-                if (subcommand === "listgroups") {
+                const cursesInfo = ConditionsGetCategoryPublicData("curses", sender).conditions;
+                if (ConditionsSubcommands.includes(subcommand)) {
+                    return ConditionsAutocompleteSubcommand("curses", argv, sender);
+                }
+                else if (subcommand === "listgroups") {
                     if (argv.length === 2) {
                         return Command_pickAutocomplete(argv[1], ["items", "clothes"]);
                     }
@@ -3604,7 +7297,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
                     }
                 }
-                else if (subcommand === "settings") {
+                else if (subcommand === "configuration") {
                     if (argv.length === 2) {
                         return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
                     }
@@ -3614,25 +7307,204 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 return [];
             });
+            ConditionsRegisterCategory("curses", {
+                category: ModuleCategory.Curses,
+                permission_normal: "curses_normal",
+                permission_limited: "curses_limited",
+                permission_configure: "curses_global_configuration",
+                permission_changeLimits: "curses_change_limits",
+                loadValidateConditionKey: (group) => AssetGroup.some(g => g.Name === group),
+                loadValidateCondition: (group, data) => {
+                    const info = data.data;
+                    if (info === null)
+                        return true;
+                    if (!isObject$1(info) ||
+                        typeof info.Name !== "string" ||
+                        typeof info.curseProperty !== "boolean") {
+                        console.error(`BCX: Bad data for cursed item in group ${group}, removing it`, info);
+                        return false;
+                    }
+                    if (AssetGet("Female3DCG", group, info.Name) == null) {
+                        console.warn(`BCX: Unknown cursed item ${group}:${info.Name}, removing it`, info);
+                        return false;
+                    }
+                    return true;
+                },
+                tickHandler: this.curseTick.bind(this),
+                makePublicData: (group, data) => {
+                    if (data.data === null) {
+                        return null;
+                    }
+                    return {
+                        Name: data.data.Name,
+                        curseProperties: data.data.curseProperty
+                    };
+                },
+                validatePublicData: (group, data) => data === null ||
+                    isObject$1(data) &&
+                        typeof data.Name === "string" &&
+                        typeof data.curseProperties === "boolean",
+                updateCondition: (condition, data, updateData) => {
+                    var _a;
+                    // Update cannot change cursed item
+                    if (((_a = data.data) === null || _a === void 0 ? void 0 : _a.Name) !== (updateData === null || updateData === void 0 ? void 0 : updateData.Name))
+                        return false;
+                    // Nothing to update on empty slot
+                    if (!data.data || !updateData)
+                        return true;
+                    const asset = AssetGet(Player.AssetFamily, condition, data.data.Name);
+                    if (!asset) {
+                        console.warn(`BCX: Curse asset ${condition}:${data.data.Name} not found during update`);
+                        return false;
+                    }
+                    data.data.curseProperty = updateData.curseProperties;
+                    if (!curseAllowItemCurseProperty(asset) && data.data.curseProperty) {
+                        console.warn(`BCX: Attempt to curse properties of item ${condition}:${data.data.Name}, while not allowed`);
+                        data.data.curseProperty = false;
+                    }
+                    return true;
+                },
+                parseConditionName: (selector, onlyExisting) => {
+                    const group = Command_selectGroup(selector, getPlayerCharacter(), G => (G.Category !== "Appearance" || G.Clothing) && (!onlyExisting || onlyExisting.includes(G.Name)));
+                    if (typeof group === "string") {
+                        return [false, group];
+                    }
+                    return [true, group.Name];
+                },
+                autocompleteConditionName: (selector, onlyExisting) => {
+                    return Command_selectGroupAutocomplete(selector, getPlayerCharacter(), G => (G.Category !== "Appearance" || G.Clothing) && (!onlyExisting || onlyExisting.includes(G.Name)));
+                },
+                logLimitChange: (group, character, newLimit) => {
+                    logMessage("curse_change", LogEntryType.plaintext, `${character} changed ${Player.Name}'s curse slot '${group}' permission to ${newLimit}`);
+                    if (!character.isPlayer()) {
+                        ChatRoomSendLocal(`${character} changed curse slot '${group}' permission to ${newLimit}`, undefined, character.MemberNumber);
+                    }
+                },
+                logConditionUpdate: (group, character, newData, oldData) => {
+                    var _a, _b, _c;
+                    const assetGroup = AssetGroup.find(g => g.Name === group);
+                    const visibleName = assetGroup ? getVisibleGroupName(assetGroup) : "[ERROR]";
+                    const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
+                    const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+                    const didItemConfigCurseChange = ((_a = newData.data) === null || _a === void 0 ? void 0 : _a.curseProperties) !== ((_b = oldData.data) === null || _b === void 0 ? void 0 : _b.curseProperties);
+                    const changeEvents = [];
+                    if (didTimerChange)
+                        changeEvents.push("timer");
+                    if (didTriggerChange)
+                        changeEvents.push("trigger condition");
+                    if (didItemConfigCurseChange)
+                        changeEvents.push("item config curse");
+                    if (changeEvents.length > 0) {
+                        logMessage("curse_change", LogEntryType.plaintext, `${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s curse on slot '${visibleName}'`);
+                    }
+                    if (!character.isPlayer()) {
+                        if (newData.timer !== oldData.timer)
+                            if (newData.timer === null) {
+                                ChatRoomSendLocal(`${character} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
+                            }
+                            else {
+                                ChatRoomSendLocal(`${character} changed the duration of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
+                            }
+                        if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
+                            ChatRoomSendLocal(`${character} changed the timer behavior of the curse on slot '${visibleName}' to ${newData.timerRemove ? "remove" : "disable"} the curse when time runs out`, undefined, character.MemberNumber);
+                        if (didTriggerChange)
+                            if (newData.requirements === null) {
+                                ChatRoomSendLocal(`${character} set the triggers of curse on slot '${visibleName}' to the global curses configuration`, undefined, character.MemberNumber);
+                            }
+                            else {
+                                const triggers = [];
+                                const r = newData.requirements;
+                                if (r.room) {
+                                    triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+                                }
+                                if (r.roomName) {
+                                    triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+                                }
+                                if (r.role) {
+                                    const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+                                    triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+                                }
+                                if (r.player) {
+                                    const name = getCharacterName(r.player.memberNumber, null);
+                                    triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+                                }
+                                if (triggers.length > 0) {
+                                    ChatRoomSendLocal(`${character} set the curse on slot ${visibleName} to trigger under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+                                }
+                                else {
+                                    ChatRoomSendLocal(`${character} deactivated all trigger conditions of the curse on slot ${visibleName}. The curse will now always trigger, while it is active`, undefined, character.MemberNumber);
+                                }
+                            }
+                        if (didItemConfigCurseChange)
+                            ChatRoomSendLocal(`${character} ${((_c = newData.data) === null || _c === void 0 ? void 0 : _c.curseProperties) ? "cursed" : "lifted the curse of"} the '${visibleName}' item's configuration`, undefined, character.MemberNumber);
+                    }
+                },
+                logCategoryUpdate: (character, newData, oldData) => {
+                    const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
+                    const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+                    const changeEvents = [];
+                    if (didTimerChange)
+                        changeEvents.push("default timer");
+                    if (didTriggerChange)
+                        changeEvents.push("trigger condition");
+                    if (changeEvents.length > 0) {
+                        logMessage("curse_change", LogEntryType.plaintext, `${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s global curses config`);
+                    }
+                    if (!character.isPlayer()) {
+                        if (newData.timer !== oldData.timer)
+                            if (newData.timer === null) {
+                                ChatRoomSendLocal(`${character} removed the default timer of the global curses configuration`, undefined, character.MemberNumber);
+                            }
+                            else {
+                                ChatRoomSendLocal(`${character} changed the default timer of the global curses configuration to ${formatTimeInterval(newData.timer)}`, undefined, character.MemberNumber);
+                            }
+                        if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
+                            ChatRoomSendLocal(`${character} changed the default timeout behavior of the global curses configuration to ${newData.timerRemove ? "removal of curses" : "disabling curses"} when time runs out`, undefined, character.MemberNumber);
+                        if (didTriggerChange) {
+                            const triggers = [];
+                            const r = newData.requirements;
+                            if (r.room) {
+                                triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+                            }
+                            if (r.roomName) {
+                                triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+                            }
+                            if (r.role) {
+                                const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+                                triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+                            }
+                            if (r.player) {
+                                const name = getCharacterName(r.player.memberNumber, null);
+                                triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+                            }
+                            if (triggers.length > 0) {
+                                ChatRoomSendLocal(`${character} set the global curses configuration to trigger curses under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+                            }
+                            else {
+                                ChatRoomSendLocal(`${character} deactivated all trigger conditions for the global curses configuration. Curses set to this default configuration will now always trigger, while active`, undefined, character.MemberNumber);
+                            }
+                        }
+                    }
+                }
+            });
         }
         load() {
             if (!moduleIsEnabled(ModuleCategory.Curses)) {
-                delete modStorage.cursedItems;
                 return;
             }
             hookFunction("ValidationResolveModifyDiff", 0, (args, next) => {
-                var _a;
                 const params = args[2];
                 const result = next(args);
                 if (params.C.ID === 0 && result.item) {
-                    const curse = (_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[result.item.Asset.Group.Name];
+                    const condition = ConditionsGetCondition("curses", result.item.Asset.Group.Name);
+                    const curse = condition === null || condition === void 0 ? void 0 : condition.data;
                     const character = getChatroomCharacter(params.sourceMemberNumber);
                     if (curse &&
                         !itemColorsEquals(curse.Color, result.item.Color) &&
                         character &&
                         checkPermissionAccess("curses_color", character)) {
                         if (result.item.Color && result.item.Color !== "Default") {
-                            curse.Color = JSON.parse(JSON.stringify(result.item.Color));
+                            curse.Color = cloneDeep(result.item.Color);
                         }
                         else {
                             delete curse.Color;
@@ -3646,7 +7518,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 const Callback = args[5];
                 if (Callback === ItemColorOnPickerChange) {
                     args[5] = (color) => {
-                        var _a;
                         if (ItemColorCharacter === Player && ItemColorItem) {
                             // Original code
                             const newColors = ItemColorState.colors.slice();
@@ -3654,12 +7525,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                             ItemColorItem.Color = newColors;
                             CharacterLoadCanvas(ItemColorCharacter);
                             // Curse color change code
-                            const curse = (_a = modStorage.cursedItems) === null || _a === void 0 ? void 0 : _a[ItemColorItem.Asset.Group.Name];
+                            const condition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
+                            const curse = condition === null || condition === void 0 ? void 0 : condition.data;
                             if (curse &&
                                 !itemColorsEquals(curse.Color, ItemColorItem.Color) &&
                                 checkPermissionAccess("curses_color", getPlayerCharacter())) {
                                 if (ItemColorItem.Color && ItemColorItem.Color !== "Default") {
-                                    curse.Color = JSON.parse(JSON.stringify(ItemColorItem.Color));
+                                    curse.Color = cloneDeep(ItemColorItem.Color);
                                 }
                                 else {
                                     delete curse.Color;
@@ -3675,46 +7547,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 return next(args);
             });
-            if (!isObject(modStorage.cursedItems)) {
-                modStorage.cursedItems = {};
-            }
-            else {
-                for (const [group, info] of Object.entries(modStorage.cursedItems)) {
-                    if (!AssetGroup.some(g => g.Name === group)) {
-                        console.warn(`BCX: Unknown cursed group ${group}, removing it`, info);
-                        delete modStorage.cursedItems[group];
-                        continue;
-                    }
-                    if (info === null)
-                        continue;
-                    if (!isObject(info) ||
-                        typeof info.Name !== "string" ||
-                        typeof info.curseProperty !== "boolean") {
-                        console.error(`BCX: Bad data for cursed item in group ${group}, removing it`, info);
-                        delete modStorage.cursedItems[group];
-                        continue;
-                    }
-                    if (AssetGet("Female3DCG", group, info.Name) == null) {
-                        console.warn(`BCX: Unknown cursed item ${group}:${info.Name}, removing it`, info);
-                        delete modStorage.cursedItems[group];
-                        continue;
-                    }
-                }
-            }
         }
         run() {
             if (!moduleIsEnabled(ModuleCategory.Curses))
                 return;
-            this.timer = setInterval(() => this.cursesTick(), CURSES_CHECK_INTERVAL);
             this.resetTimer = setInterval(() => {
                 this.triggerCounts.clear();
             }, CURSES_ANTILOOP_RESET_INTERVAL);
         }
         unload() {
-            if (this.timer !== null) {
-                clearInterval(this.timer);
-                this.timer = null;
-            }
             if (this.resetTimer !== null) {
                 clearInterval(this.resetTimer);
                 this.resetTimer = null;
@@ -3725,10 +7566,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             this.load();
             this.run();
         }
-        cursesTick() {
+        curseTick(group, condition) {
             var _a, _b, _c;
-            if (!ServerIsConnected || !modStorage.cursedItems)
-                return;
             if (this.suspendedUntil !== null) {
                 if (Date.now() >= this.suspendedUntil) {
                     this.suspendedUntil = null;
@@ -3739,137 +7578,135 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     return;
                 }
             }
-            const lastState = JSON.stringify(modStorage.cursedItems);
-            for (const [group, curse] of Object.entries(modStorage.cursedItems)) {
-                if (curse === null) {
-                    const current = InventoryGet(Player, group);
-                    if (current) {
-                        InventoryRemove(Player, group, false);
-                        CharacterRefresh(Player, true);
-                        ChatRoomCharacterUpdate(Player);
-                        ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
-                        logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
-                        break;
-                    }
-                    continue;
-                }
-                const asset = AssetGet("Female3DCG", group, curse.Name);
-                if (!asset) {
-                    console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
-                    continue;
-                }
-                let changeType = "";
-                const CHANGE_TEXTS = {
-                    add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears`,
-                    swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,
-                    update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item`,
-                    color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back`
-                };
-                const CHANGE_LOGS = {
-                    add: `The curse on ${Player.Name}'s ${asset.Description} made the item reappear`,
-                    swap: `The curse on ${Player.Name}'s ${asset.Description} prevented replacing the item`,
-                    update: `The curse on ${Player.Name}'s ${asset.Description} reverted all changes to the item`,
-                    color: `The curse on ${Player.Name}'s ${asset.Description} reverted the color of the item`
-                };
-                let currentItem = InventoryGet(Player, group);
-                if (currentItem && currentItem.Asset.Name !== curse.Name) {
+            const curse = condition.data;
+            if (curse === null) {
+                const current = InventoryGet(Player, group);
+                if (current) {
                     InventoryRemove(Player, group, false);
-                    changeType = "swap";
-                    currentItem = null;
+                    CharacterRefresh(Player, true);
+                    ChatRoomCharacterUpdate(Player);
+                    ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
+                    logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
+                    return;
                 }
-                if (!currentItem) {
-                    currentItem = {
-                        Asset: asset,
-                        Color: curse.Color != null ? JSON.parse(JSON.stringify(curse.Color)) : "Default",
-                        Property: curse.Property != null ? JSON.parse(JSON.stringify(curse.Property)) : {},
-                        Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
-                    };
-                    Player.Appearance.push(currentItem);
-                    if (!changeType)
-                        changeType = "add";
-                }
-                const itemProperty = currentItem.Property = ((_a = currentItem.Property) !== null && _a !== void 0 ? _a : {});
-                let curseProperty = (_b = curse.Property) !== null && _b !== void 0 ? _b : {};
-                if (curse.curseProperty) {
-                    for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
-                        if (key === "Effect")
-                            continue;
-                        if (CURSE_IGNORED_PROPERTIES.includes(key)) {
-                            if (curseProperty[key] !== undefined) {
-                                delete curseProperty[key];
-                            }
-                            continue;
+                return;
+            }
+            const asset = AssetGet("Female3DCG", group, curse.Name);
+            if (!asset) {
+                console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
+                return;
+            }
+            let changeType = "";
+            const CHANGE_TEXTS = {
+                add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears`,
+                swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,
+                update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item`,
+                color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back`
+            };
+            const CHANGE_LOGS = {
+                add: `The curse on ${Player.Name}'s ${asset.Description} made the item reappear`,
+                swap: `The curse on ${Player.Name}'s ${asset.Description} prevented replacing the item`,
+                update: `The curse on ${Player.Name}'s ${asset.Description} reverted all changes to the item`,
+                color: `The curse on ${Player.Name}'s ${asset.Description} reverted the color of the item`
+            };
+            let currentItem = InventoryGet(Player, group);
+            if (currentItem && currentItem.Asset.Name !== curse.Name) {
+                InventoryRemove(Player, group, false);
+                changeType = "swap";
+                currentItem = null;
+            }
+            if (!currentItem) {
+                currentItem = {
+                    Asset: asset,
+                    Color: curse.Color != null ? cloneDeep(curse.Color) : "Default",
+                    Property: curse.Property != null ? cloneDeep(curse.Property) : {},
+                    Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
+                };
+                Player.Appearance.push(currentItem);
+                if (!changeType)
+                    changeType = "add";
+            }
+            const itemProperty = currentItem.Property = ((_a = currentItem.Property) !== null && _a !== void 0 ? _a : {});
+            let curseProperty = (_b = curse.Property) !== null && _b !== void 0 ? _b : {};
+            if (curse.curseProperty) {
+                for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
+                    if (key === "Effect")
+                        continue;
+                    if (CURSE_IGNORED_PROPERTIES.includes(key)) {
+                        if (curseProperty[key] !== undefined) {
+                            delete curseProperty[key];
                         }
-                        if (curseProperty[key] === undefined) {
-                            if (itemProperty[key] !== undefined) {
-                                delete itemProperty[key];
-                                if (!changeType)
-                                    changeType = "update";
-                            }
-                        }
-                        else if (typeof curseProperty[key] !== typeof itemProperty[key] ||
-                            JSON.stringify(curseProperty[key]) !== JSON.stringify(itemProperty[key])) {
-                            itemProperty[key] = JSON.parse(JSON.stringify(curseProperty[key]));
+                        continue;
+                    }
+                    if (curseProperty[key] === undefined) {
+                        if (itemProperty[key] !== undefined) {
+                            delete itemProperty[key];
                             if (!changeType)
                                 changeType = "update";
                         }
                     }
-                    const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
-                    const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
-                    const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
-                    if (!CommonArraysEqual(itemEffects, curseEffects)) {
-                        itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
-                    }
-                    else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
-                        curseProperty.Effect = itemProperty.Effect.slice();
-                    }
-                    else {
-                        delete curseProperty.Effect;
+                    else if (typeof curseProperty[key] !== typeof itemProperty[key] ||
+                        !isEqual(curseProperty[key], itemProperty[key])) {
+                        itemProperty[key] = cloneDeep(curseProperty[key]);
+                        if (!changeType)
+                            changeType = "update";
                     }
                 }
+                const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
+                const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+                const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+                if (!CommonArraysEqual(itemEffects, curseEffects)) {
+                    itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
+                }
+                else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
+                    curseProperty.Effect = itemProperty.Effect.slice();
+                }
                 else {
-                    curseProperty = JSON.parse(JSON.stringify(itemProperty));
+                    delete curseProperty.Effect;
+                }
+            }
+            else {
+                if (!isEqual(curseProperty, itemProperty)) {
+                    curseProperty = cloneDeep(itemProperty);
                     for (const key of CURSE_IGNORED_PROPERTIES) {
                         delete curseProperty[key];
                     }
                 }
-                if (Object.keys(curseProperty).length === 0) {
+            }
+            if (Object.keys(curseProperty).length === 0) {
+                if (curse.Property !== undefined) {
                     delete curse.Property;
                 }
-                else {
-                    curse.Property = curseProperty;
-                }
-                if (!itemColorsEquals(curse.Color, currentItem.Color)) {
-                    if (curse.Color === undefined || curse.Color === "Default") {
-                        delete currentItem.Color;
-                    }
-                    else {
-                        currentItem.Color = JSON.parse(JSON.stringify(curse.Color));
-                    }
-                    if (!changeType)
-                        changeType = "color";
-                }
-                if (changeType) {
-                    CharacterRefresh(Player, true);
-                    ChatRoomCharacterUpdate(Player);
-                    if (CHANGE_TEXTS[changeType]) {
-                        ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
-                        logMessage("curse_trigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
-                    }
-                    else {
-                        console.error(`BCX: No chat message for curse action ${changeType}`);
-                    }
-                    const counter = ((_c = this.triggerCounts.get(group)) !== null && _c !== void 0 ? _c : 0) + 1;
-                    this.triggerCounts.set(group, counter);
-                    if (counter >= CURSES_ANTILOOP_THRESHOLD) {
-                        ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
-                        this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
-                    }
-                    break;
-                }
             }
-            if (JSON.stringify(modStorage.cursedItems) !== lastState) {
-                modStorageSync();
+            else if (!isEqual(curse.Property, curseProperty)) {
+                curse.Property = curseProperty;
+            }
+            if (!itemColorsEquals(curse.Color, currentItem.Color)) {
+                if (curse.Color === undefined || curse.Color === "Default") {
+                    delete currentItem.Color;
+                }
+                else {
+                    currentItem.Color = cloneDeep(curse.Color);
+                }
+                if (!changeType)
+                    changeType = "color";
+            }
+            if (changeType) {
+                CharacterRefresh(Player, true);
+                ChatRoomCharacterUpdate(Player);
+                if (CHANGE_TEXTS[changeType]) {
+                    ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
+                    logMessage("curse_trigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
+                }
+                else {
+                    console.error(`BCX: No chat message for curse action ${changeType}`);
+                }
+                const counter = ((_c = this.triggerCounts.get(group)) !== null && _c !== void 0 ? _c : 0) + 1;
+                this.triggerCounts.set(group, counter);
+                if (counter >= CURSES_ANTILOOP_THRESHOLD) {
+                    ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
+                    this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
+                }
             }
         }
     }
@@ -3908,7 +7745,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         getPermissions() {
             return sendQuery("permissions", undefined, this.MemberNumber).then(data => {
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     Object.values(data).some(v => !Array.isArray(v) ||
                         typeof v[0] !== "boolean" ||
                         typeof v[1] !== "number" ||
@@ -3951,7 +7788,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         getRolesData() {
             return sendQuery("rolesData", undefined, this.MemberNumber).then(data => {
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     !Array.isArray(data.mistresses) ||
                     !data.mistresses.every(i => Array.isArray(i) && i.length === 2 && typeof i[0] === "number" && typeof i[1] === "string") ||
                     !Array.isArray(data.owners) ||
@@ -4001,7 +7838,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         getLogConfig() {
             return sendQuery("logConfigGet", undefined, this.MemberNumber).then(data => {
                 var _a;
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     Object.values(data).some(v => typeof v !== "number")) {
                     throw new Error("Bad data");
                 }
@@ -4045,26 +7882,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         logGetAllowedActions() {
             return sendQuery("logGetAllowedActions", undefined, this.MemberNumber).then(data => {
-                if (!isObject(data) ||
+                if (!isObject$1(data) ||
                     typeof data.delete !== "boolean" ||
                     typeof data.configure !== "boolean" ||
                     typeof data.praise !== "boolean" ||
                     typeof data.leaveMessage !== "boolean") {
-                    throw new Error("Bad data");
-                }
-                return data;
-            });
-        }
-        curseGetInfo() {
-            return sendQuery("curseGetInfo", undefined, this.MemberNumber).then(data => {
-                if (!isObject(data) ||
-                    typeof data.allowCurse !== "boolean" ||
-                    typeof data.allowLift !== "boolean" ||
-                    !isObject(data.curses) ||
-                    Object.values(data.curses).some(v => v !== null &&
-                        (!isObject(v) ||
-                            typeof v.Name !== "string" ||
-                            typeof v.curseProperties !== "boolean"))) {
                     throw new Error("Bad data");
                 }
                 return data;
@@ -4100,6 +7922,38 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     throw new Error("Bad data");
                 }
                 return data;
+            });
+        }
+        conditionsGetByCategory(category) {
+            return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
+                if (!guard_ConditionsCategoryPublicData(category, data)) {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        conditionSetLimit(category, condition, limit) {
+            return sendQuery("conditionSetLimit", { category, condition, limit }, this.MemberNumber).then(data => {
+                if (typeof data !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return data;
+            });
+        }
+        conditionUpdate(category, condition, data) {
+            return sendQuery("conditionUpdate", { category, condition, data }, this.MemberNumber).then(res => {
+                if (typeof res !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return res;
+            });
+        }
+        conditionCategoryUpdate(category, data) {
+            return sendQuery("conditionCategoryUpdate", { category, data }, this.MemberNumber).then(res => {
+                if (typeof res !== "boolean") {
+                    throw new Error("Bad data");
+                }
+                return res;
             });
         }
         hasAccessToPlayer() {
@@ -4171,9 +8025,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         logGetAllowedActions() {
             return Promise.resolve(logGetAllowedActions(this));
         }
-        curseGetInfo() {
-            return Promise.resolve(curseGetInfo(this));
-        }
         curseItem(Group, curseProperties) {
             return Promise.resolve(curseItem(Group, curseProperties, this));
         }
@@ -4185,6 +8036,18 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         curseLiftAll() {
             return Promise.resolve(curseLiftAll(this));
+        }
+        conditionsGetByCategory(category) {
+            return Promise.resolve(ConditionsGetCategoryPublicData(category, this));
+        }
+        conditionSetLimit(category, condition, limit) {
+            return Promise.resolve(ConditionsSetLimit(category, condition, limit, this));
+        }
+        conditionUpdate(category, condition, data) {
+            return Promise.resolve(ConditionsUpdate(category, condition, data, this));
+        }
+        conditionCategoryUpdate(category, data) {
+            return Promise.resolve(ConditionsCategoryUpdate(category, data, this));
         }
     }
     const currentRoomCharacters = [];
@@ -4276,14 +8139,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         });
     }
     hiddenMessageHandlers.set("query", (sender, message) => {
-        if (!isObject(message) ||
+        if (!isObject$1(message) ||
             typeof message.id !== "string" ||
             typeof message.query !== "string") {
             console.warn(`BCX: Invalid query`, sender, message);
             return;
         }
         const character = getChatroomCharacter(sender);
-        if (character && !character.hasAccessToPlayer()) {
+        if (!character || !character.hasAccessToPlayer()) {
             return sendHiddenMessage("queryAnswer", {
                 id: message.id,
                 ok: false
@@ -4297,7 +8160,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 ok: false
             });
         }
-        handler(sender, (ok, data) => {
+        handler(character, (ok, data) => {
             sendHiddenMessage("queryAnswer", {
                 id: message.id,
                 ok,
@@ -4306,7 +8169,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }, message.data);
     });
     hiddenMessageHandlers.set("queryAnswer", (sender, message) => {
-        if (!isObject(message) ||
+        if (!isObject$1(message) ||
             typeof message.id !== "string" ||
             typeof message.ok !== "boolean") {
             console.warn(`BCX: Invalid queryAnswer`, sender, message);
@@ -4347,7 +8210,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 if ((data === null || data === void 0 ? void 0 : data.Type) === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
                     if (data.Sender === Player.MemberNumber || firstTimeInit)
                         return;
-                    if (!isObject(data.Dictionary)) {
+                    if (!isObject$1(data.Dictionary)) {
                         console.warn("BCX: Hidden message no Dictionary", data);
                         return;
                     }
@@ -4368,7 +8231,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             hookFunction("ServerAccountBeep", 10, (args, next) => {
                 var _a;
                 const data = args[0];
-                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
+                if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject$1((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
                     const { type, message } = data.Message.BCX;
                     if (typeof type === "string") {
                         const handler = hiddenBeepHandlers.get(type);
@@ -5545,304 +9408,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    class GuiCursesAdd extends GuiSubscreen {
-        constructor(character) {
-            super();
-            this.curseData = null;
-            this.failed = false;
-            this.character = character;
-        }
-        Load() {
-            this.requestData();
-        }
-        onChange(sender) {
-            if (sender === this.character.MemberNumber) {
-                this.requestData();
-            }
-        }
-        requestData() {
-            this.curseData = null;
-            this.character.curseGetInfo().then(res => {
-                this.curseData = res;
-            }, err => {
-                console.error(`BCX: Failed to get permission info for ${this.character}`, err);
-                this.failed = true;
-            });
-        }
-        Run() {
-            MainCanvas.textAlign = "left";
-            DrawText(`- Curses: Place new curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            MainCanvas.textAlign = "center";
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
-            if (this.curseData === null) {
-                DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
-                return;
-            }
-            // items
-            MainCanvas.textAlign = "left";
-            MainCanvas.beginPath();
-            MainCanvas.rect(105, 165, 830, 64);
-            MainCanvas.fillStyle = "#cccccc";
-            MainCanvas.fill();
-            DrawText(`Items`, 120, 165 + 34, "Black");
-            MainCanvas.textAlign = "center";
-            DrawButton(440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
-            DrawButton(720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
-            const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
-            for (let i = 0; i < AssetGroupItems.length; i++) {
-                const row = i % 10;
-                const column = Math.floor(i / 10);
-                const group = AssetGroupItems[i];
-                const currentItem = InventoryGet(this.character.Character, group.Name);
-                const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
-                DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), itemIsCursed ? "#ccc" : (currentItem ? "Gold" : "White"), undefined, itemIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing"), itemIsCursed);
-            }
-            // clothing
-            MainCanvas.textAlign = "left";
-            MainCanvas.beginPath();
-            MainCanvas.rect(950, 165, 830, 64);
-            MainCanvas.fillStyle = "#cccccc";
-            MainCanvas.fill();
-            DrawText(`Clothing`, 965, 165 + 34, "Black");
-            MainCanvas.textAlign = "center";
-            DrawButton(1285, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all clothes on the body at once");
-            DrawButton(1565, 173, 200, 48, "Curse all", "White", undefined, "Curse all clothing slots at once");
-            const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
-            for (let i = 0; i < AssetGroupClothings.length; i++) {
-                const row = i % 10;
-                const column = Math.floor(i / 10);
-                const group = AssetGroupClothings[i];
-                const currentItem = InventoryGet(this.character.Character, group.Name);
-                const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
-                DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), clothingIsCursed ? "#ccc" : (currentItem ? "Gold" : "White"), undefined, clothingIsCursed ? "Already cursed" : (currentItem ? currentItem.Asset.Description : "Nothing"), clothingIsCursed);
-            }
-            //Body
-            // TODO: Actual data
-            // const bodyIsCursed = false;
-            // DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "#ccc" : "White", undefined,
-            //	bodyIsCursed ? "Already cursed" : "Size, skin color, eyes, etc.", bodyIsCursed);
-        }
-        Click() {
-            if (MouseIn(1815, 75, 90, 90))
-                return this.Exit();
-            if (this.curseData === null)
-                return;
-            // items
-            const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
-            for (let i = 0; i < AssetGroupItems.length; i++) {
-                const row = i % 10;
-                const column = Math.floor(i / 10);
-                const group = AssetGroupItems[i];
-                const itemIsCursed = this.curseData.curses[group.Name] !== undefined;
-                if (MouseIn(106 + 281 * column, 240 + 69 * row, 265, 54) && !itemIsCursed) {
-                    this.character.curseItem(group.Name, null);
-                    return;
-                }
-            }
-            if (MouseIn(440, 173, 265, 48)) {
-                this.character.curseBatch("items", false);
-                return;
-            }
-            if (MouseIn(720, 173, 200, 48)) {
-                this.character.curseBatch("items", true);
-                return;
-            }
-            // clothing
-            const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
-            for (let i = 0; i < AssetGroupClothings.length; i++) {
-                const row = i % 10;
-                const column = Math.floor(i / 10);
-                const group = AssetGroupClothings[i];
-                const clothingIsCursed = this.curseData.curses[group.Name] !== undefined;
-                if (MouseIn(951 + 281 * column, 240 + 69 * row, 265, 54) && !clothingIsCursed) {
-                    this.character.curseItem(group.Name, null);
-                    return;
-                }
-            }
-            if (MouseIn(1285, 173, 265, 48)) {
-                this.character.curseBatch("clothes", false);
-                return;
-            }
-            if (MouseIn(1565, 173, 200, 48)) {
-                this.character.curseBatch("clothes", true);
-                return;
-            }
-        }
-        Exit() {
-            setSubscreen(new GuiCurses(this.character));
-        }
-    }
-
-    const PER_COLUMN_COUNT = 7;
-    const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
-    class GuiCurses extends GuiSubscreen {
-        constructor(character) {
-            super();
-            this.curseEntries = [];
-            this.curseData = null;
-            this.failed = false;
-            this.page = 0;
-            this.character = character;
-        }
-        Load() {
-            this.requestData();
-        }
-        onChange(sender) {
-            if (sender === this.character.MemberNumber) {
-                this.requestData();
-            }
-        }
-        requestData() {
-            this.curseData = null;
-            this.rebuildList();
-            this.character.curseGetInfo().then(res => {
-                this.curseData = res;
-                this.rebuildList();
-            }, err => {
-                console.error(`BCX: Failed to get curse info for ${this.character}`, err);
-                this.failed = true;
-            });
-        }
-        rebuildList() {
-            var _a;
-            if (!this.active)
-                return;
-            this.curseEntries = [];
-            if (this.curseData === null)
-                return;
-            for (const [k, v] of Object.entries(this.curseData.curses)) {
-                const group = AssetGroup.find(g => g.Name === k);
-                if (!group) {
-                    console.warn(`BCX: Unknown group ${k}`);
-                    continue;
-                }
-                if (v === null) {
-                    this.curseEntries.push({
-                        group: k,
-                        name: `Blocked: ${getVisibleGroupName(group)}`,
-                        empty: true,
-                        type: group.Clothing ? "clothing" : "item"
-                    });
-                }
-                else {
-                    const item = AssetGet(this.character.Character.AssetFamily, k, v.Name);
-                    this.curseEntries.push({
-                        group: k,
-                        name: `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.Name} (${getVisibleGroupName(group)})`,
-                        empty: false,
-                        type: group.Clothing ? "clothing" : "item",
-                        propertiesCursed: v.curseProperties,
-                        propertiesCursedShow: v.curseProperties || !item || curseAllowItemCurseProperty(item)
-                    });
-                }
-            }
-            this.page = clamp(this.page, 0, Math.ceil(this.curseEntries.length / PER_PAGE_COUNT));
-        }
-        Run() {
-            MainCanvas.textAlign = "left";
-            DrawText(`- Curses: All active curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            MainCanvas.textAlign = "center";
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-            if (this.curseData === null) {
-                MainCanvas.textAlign = "center";
-                DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
-                return;
-            }
-            for (let off = 0; off < PER_PAGE_COUNT; off++) {
-                const i = this.page * PER_PAGE_COUNT + off;
-                if (i >= this.curseEntries.length)
-                    break;
-                const e = this.curseEntries[i];
-                const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
-                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
-                // curse description
-                MainCanvas.textAlign = "left";
-                MainCanvas.beginPath();
-                MainCanvas.rect(X, Y, 440, 60);
-                MainCanvas.stroke();
-                DrawImageEx(e.type === "clothing" ? "Icons/Dress.png" : "Assets/Female3DCG/ItemArms/Preview/NylonRope.png", X + 6, Y + 6, {
-                    Height: 50,
-                    Width: 50
-                });
-                DrawTextFit(e.name, X + 65, Y + 30, 375, "Black");
-                // timer info
-                MainCanvas.textAlign = "center";
-                DrawButton(X + 470, Y, 150, 60, "∞", "White", "", "Permanent curse");
-                // item settings curse
-                if (!e.empty && e.propertiesCursedShow) {
-                    const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
-                    DrawButton(X + 650, Y, 60, 60, "", allowPropertyChange ? (e.propertiesCursed ? "Gold" : "White") : "#ddd", "", e.propertiesCursed ? "Lift curse of item settings only" : "Curse the item settings, too", !allowPropertyChange);
-                    DrawImageEx(e.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 655, Y + 5, {
-                        Height: 50,
-                        Width: 50
-                    });
-                }
-                // remove curse
-                if (this.curseData.allowLift) {
-                    DrawButton(X + 740, Y, 60, 60, "X", "White", "", "Lift curse");
-                }
-            }
-            // Column separator
-            MainCanvas.beginPath();
-            MainCanvas.moveTo(954, 160);
-            MainCanvas.lineTo(954, 780);
-            MainCanvas.stroke();
-            MainCanvas.textAlign = "center";
-            DrawButton(120, 820, 400, 90, "Add new curse", this.curseData.allowCurse ? "White" : "#ddd", "", this.curseData.allowCurse ? "Place new curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowCurse);
-            DrawButton(750, 820, 400, 90, "Lift all curses", this.curseData.allowLift ? "White" : "#ddd", "", this.curseData.allowLift ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !this.curseData.allowLift);
-            // Pagination
-            const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
-            DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
-        }
-        Click() {
-            if (MouseIn(1815, 75, 90, 90))
-                return this.Exit();
-            if (this.curseData === null)
-                return;
-            for (let off = 0; off < PER_PAGE_COUNT; off++) {
-                const i = this.page * PER_PAGE_COUNT + off;
-                if (i >= this.curseEntries.length)
-                    break;
-                const e = this.curseEntries[i];
-                const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
-                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
-                const allowPropertyChange = e.propertiesCursed ? this.curseData.allowLift : this.curseData.allowCurse;
-                if (!e.empty && e.propertiesCursedShow && allowPropertyChange && MouseIn(X + 650, Y, 60, 60)) {
-                    this.character.curseItem(e.group, !e.propertiesCursed);
-                    return;
-                }
-                if (this.curseData.allowLift && MouseIn(X + 740, Y, 60, 60)) {
-                    this.character.curseLift(e.group);
-                    return;
-                }
-            }
-            if (this.curseData.allowCurse && MouseIn(120, 820, 400, 90)) {
-                return setSubscreen(new GuiCursesAdd(this.character));
-            }
-            if (this.curseData.allowLift && MouseIn(750, 820, 400, 90)) {
-                this.character.curseLiftAll();
-                return;
-            }
-            // Pagination
-            const totalPages = Math.ceil(this.curseEntries.length / PER_PAGE_COUNT);
-            if (MouseIn(1605, 800, 150, 90)) {
-                this.page--;
-                if (this.page < 0) {
-                    this.page = Math.max(totalPages - 1, 0);
-                }
-            }
-            else if (MouseIn(1755, 800, 150, 90)) {
-                this.page++;
-                if (this.page >= totalPages) {
-                    this.page = 0;
-                }
-            }
-        }
-        Exit() {
-            setSubscreen(new GuiMainMenu(this.character));
-        }
-    }
-
     const cheatChangeHooks = {};
     function cheatIsEnabled(cheat) {
         return Array.isArray(modStorage.cheats) && modStorage.cheats.includes(cheat);
@@ -6016,6 +9581,1490 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
+    class GuiConditionEdit extends GuiSubscreen {
+        constructor(character, conditionCategory, conditionName, back) {
+            super();
+            this.conditionCategoryData = null;
+            this.conditionData = null;
+            this.failed = false;
+            this.changes = null;
+            this.character = character;
+            this.conditionCategory = conditionCategory;
+            this.conditionName = conditionName;
+            this.back = back;
+        }
+        makeChangesData() {
+            var _a;
+            if (!this.conditionData) {
+                throw new Error("Data required");
+            }
+            return (_a = this.changes) !== null && _a !== void 0 ? _a : cloneDeep(this.conditionData);
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.conditionCategoryData = null;
+            this.conditionData = null;
+            this.failed = false;
+            this.onDataChange();
+            this.character.conditionsGetByCategory(this.conditionCategory).then(res => {
+                if (!this.active)
+                    return;
+                const condition = res.conditions[this.conditionName];
+                if (condition) {
+                    this.conditionCategoryData = res;
+                    this.conditionData = condition;
+                    if (!this.checkAccess()) {
+                        this.changes = null;
+                    }
+                    this.onDataChange();
+                }
+                else {
+                    console.warn(`BCX: Condition ${this.conditionCategory}:${this.conditionName} not found in list from ${this.character}`);
+                    this.failed = true;
+                    this.Exit();
+                }
+            }, err => {
+                console.error(`BCX: Failed to get condition info for ${this.conditionCategory}:${this.conditionName} from ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        onDataChange() {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+            let inputRoomName = document.getElementById("BCX_ConditionRoomName");
+            let inputMemberNumber = document.getElementById("BCX_ConditionMemberNumber");
+            if (!this.conditionCategoryData || !this.conditionData) {
+                if (inputRoomName) {
+                    inputRoomName.remove();
+                }
+                if (inputMemberNumber) {
+                    inputMemberNumber.remove();
+                }
+                return;
+            }
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionData;
+            const requirements = (_b = data.requirements) !== null && _b !== void 0 ? _b : this.conditionCategoryData.requirements;
+            const useGlobalCategorySetting = !data.requirements;
+            const access = this.checkAccess();
+            const disabled = !access || useGlobalCategorySetting;
+            if (!inputRoomName) {
+                inputRoomName = ElementCreateInput("BCX_ConditionRoomName", "text", (_d = (_c = requirements.roomName) === null || _c === void 0 ? void 0 : _c.name) !== null && _d !== void 0 ? _d : "", "30");
+                inputRoomName.oninput = () => {
+                    this.changes = this.makeChangesData();
+                    this.processInputs();
+                };
+            }
+            if (!inputMemberNumber) {
+                inputMemberNumber = ElementCreateInput("BCX_ConditionMemberNumber", "text", (_g = (_f = (_e = requirements.player) === null || _e === void 0 ? void 0 : _e.memberNumber) === null || _f === void 0 ? void 0 : _f.toString()) !== null && _g !== void 0 ? _g : "0", "6");
+                inputMemberNumber.inputMode = "numeric";
+                inputMemberNumber.pattern = "[0-9]+";
+                inputMemberNumber.oninput = () => {
+                    this.changes = this.makeChangesData();
+                    this.processInputs();
+                };
+            }
+            inputRoomName.disabled = disabled || !requirements.roomName;
+            inputMemberNumber.disabled = disabled || !requirements.player;
+            if (!this.changes || disabled || !requirements.roomName) {
+                inputRoomName.value = (_j = (_h = requirements.roomName) === null || _h === void 0 ? void 0 : _h.name) !== null && _j !== void 0 ? _j : "";
+            }
+            if (!this.changes || disabled || !requirements.player) {
+                inputMemberNumber.value = (_m = (_l = (_k = requirements.player) === null || _k === void 0 ? void 0 : _k.memberNumber) === null || _l === void 0 ? void 0 : _l.toString()) !== null && _m !== void 0 ? _m : "0";
+            }
+        }
+        processInputs() {
+            var _a, _b, _c, _d, _e;
+            const inputRoomName = document.getElementById("BCX_ConditionRoomName");
+            const inputMemberNumber = document.getElementById("BCX_ConditionMemberNumber");
+            if (this.changes && inputRoomName && inputMemberNumber) {
+                if ((_a = this.changes.requirements) === null || _a === void 0 ? void 0 : _a.roomName) {
+                    this.changes.requirements.roomName.name = inputRoomName.value;
+                }
+                if ((_b = this.changes.requirements) === null || _b === void 0 ? void 0 : _b.player) {
+                    const memberNumber = inputMemberNumber.value;
+                    if (!memberNumber)
+                        return;
+                    if (/^[0-9]+$/.test(memberNumber)) {
+                        this.changes.requirements.player.memberNumber = Number.parseInt(memberNumber, 10);
+                    }
+                    else {
+                        inputMemberNumber.value = ((_e = (_d = (_c = this.changes.requirements) === null || _c === void 0 ? void 0 : _c.player) === null || _d === void 0 ? void 0 : _d.memberNumber) !== null && _e !== void 0 ? _e : 0).toString();
+                    }
+                }
+            }
+        }
+        checkAccess() {
+            var _a;
+            if (!this.conditionCategoryData)
+                return false;
+            const limit = (_a = this.conditionCategoryData.limits[this.conditionName]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal;
+            return [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][limit];
+        }
+        Run() {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+            MainCanvas.textAlign = "left";
+            DrawText(`- ${this.headerText()} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            if (this.changes) {
+                DrawButton(1815, 75, 90, 90, "", "White", "Icons/Accept.png", "Save all changes and go back");
+                DrawButton(1815, 190, 90, 90, "", "White", "Icons/Cancel.png", "Go back without saving");
+            }
+            else {
+                DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+            }
+            if (this.conditionCategoryData === null || this.conditionData === null) {
+                MainCanvas.textAlign = "center";
+                DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                return true;
+            }
+            if (this.changes && this.changes.timer !== null && this.changes.timer < Date.now()) {
+                this.changes.timer = null;
+                this.changes.timerRemove = false;
+                this.changes.active = false;
+            }
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionData;
+            const requirements = (_b = data.requirements) !== null && _b !== void 0 ? _b : this.conditionCategoryData.requirements;
+            const useGlobalCategorySetting = !data.requirements;
+            const access = this.checkAccess();
+            const disabled = !access || useGlobalCategorySetting;
+            // Spacer
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(98, 272);
+            MainCanvas.lineTo(960, 272);
+            MainCanvas.strokeStyle = "Gray";
+            MainCanvas.stroke();
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(98, 540);
+            MainCanvas.lineTo(960, 540);
+            MainCanvas.stroke();
+            // on-off toggle
+            MainCanvas.textAlign = "left";
+            DrawCheckbox(125, 180, 64, 64, `This ${this.conditionCategory.slice(0, -1)} is active and in effect`, data.active, !access);
+            // global-category-configuration-is-active highlighting
+            if (useGlobalCategorySetting) {
+                MainCanvas.fillStyle = "#0052A3";
+                MainCanvas.fillRect(120, 615, 74, 74);
+                MainCanvas.fillRect(120, 695, 74, 74);
+                MainCanvas.fillRect(120, 775, 74, 74);
+                MainCanvas.fillRect(120, 855, 74, 74);
+            }
+            ////// status and timer area
+            MainCanvas.textAlign = "center";
+            let statusText;
+            if (data.timer === null) {
+                statusText = "Timer disabled";
+            }
+            else {
+                statusText = `Time left: `;
+                const seconds = Math.floor((data.timer - Date.now()) / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+                if (days > 0) {
+                    statusText += `${days} days, `;
+                }
+                if (hours > 0) {
+                    statusText += `${hours % 24} hours, `;
+                }
+                if (minutes > 0) {
+                    statusText += `${minutes % 60} minutes, `;
+                }
+                if (seconds > 0) {
+                    statusText += `${seconds % 60} seconds`;
+                }
+            }
+            DrawText(statusText, 530, 311, "Black");
+            if (data.timer === null) {
+                DrawButton(120, 360, 820, 160, "Enable timer", "White");
+                MainCanvas.textAlign = "left";
+            }
+            else {
+                DrawButton(120, 360, 85, 60, "-1d", !access ? "#ddd" : "White", "", "Remove 1 day from the timer", !access);
+                DrawButton(120 + 125, 360, 85, 60, "-1h", !access ? "#ddd" : "White", "", "Remove 1 hour from the timer", !access);
+                DrawButton(120 + 2 * (125), 360, 85, 60, "-5m", !access ? "#ddd" : "White", "", "Remove 5 minutes from the timer", !access);
+                DrawButton(120 + 3 * (125), 360, 70, 60, "∞", !access ? "#ddd" : "White", "", "Set lifetime to infinite", !access);
+                DrawButton(105 + 4 * (125), 360, 85, 60, "+5m", !access ? "#ddd" : "White", "", "Add 5 minutes to the timer", !access);
+                DrawButton(105 + 5 * (125), 360, 85, 60, "+1h", !access ? "#ddd" : "White", "", "Add 1 hour to the timer", !access);
+                DrawButton(105 + 6 * (125), 360, 85, 60, "+1d", !access ? "#ddd" : "White", "", "Add 1 day to the timer", !access);
+                MainCanvas.textAlign = "left";
+                DrawCheckbox(125, 450, 64, 64, `Remove the ${this.conditionCategory.slice(0, -1)} when timer runs out`, data.timerRemove, !access);
+            }
+            ////// condition factors area
+            DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions (always, if all unselected):`, 130, 580, "Black", "");
+            // In room
+            DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 622, 115, 60, ((_c = requirements.room) === null || _c === void 0 ? void 0 : _c.inverted) ? "not in" : "in", disabled || !requirements.room ? "#ddd" : "White", "", "", disabled || !requirements.room);
+            DrawButton(324 + 115 + 14, 622, 130, 60, ((_d = requirements.room) === null || _d === void 0 ? void 0 : _d.type) === "private" ? "private" : "public", disabled || !requirements.room ? "#ddd" : "White", "", "", disabled || !requirements.room);
+            MainCanvas.textAlign = "left";
+            DrawText(`room`, 324 + 115 + 14 + 130 + 14, 620 + 32, "Black", "Gray");
+            if (requirements.room) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
+                const res = inChatroom &&
+                    (requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
+                MainCanvas.fillStyle = (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 620, 15, 64);
+            }
+            // In room named
+            DrawCheckbox(125, 700, 64, 64, "when", !!requirements.roomName, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 702, 115, 60, ((_e = requirements.roomName) === null || _e === void 0 ? void 0 : _e.inverted) ? "not in" : "in", disabled || !requirements.roomName ? "#ddd" : "White", "", "", disabled || !requirements.roomName);
+            MainCanvas.textAlign = "left";
+            DrawText(`room named`, 324 + 115 + 14, 700 + 32, "Black", "Gray");
+            ElementPosition("BCX_ConditionRoomName", 324 + 115 + 14 + 360, 700 + 26, 285, 60);
+            if (requirements.roomName) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const res = inChatroom &&
+                    ChatRoomData &&
+                    typeof ChatRoomData.Name === "string" &&
+                    ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
+                MainCanvas.fillStyle = (requirements.roomName.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 700, 15, 64);
+            }
+            // In presence of role
+            DrawCheckbox(125, 780, 64, 64, "when", !!requirements.role, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 782, 115, 60, ((_f = requirements.role) === null || _f === void 0 ? void 0 : _f.inverted) ? "not in" : "in", disabled || !requirements.role ? "#ddd" : "White", "", "", disabled || !requirements.role);
+            const roleSelection = (_h = (_g = requirements.role) === null || _g === void 0 ? void 0 : _g.role) !== null && _h !== void 0 ? _h : AccessLevel.mistress;
+            const roleSelectionNext = roleSelection < AccessLevel.public ? roleSelection + 1 : AccessLevel.clubowner;
+            const roleSelectionPrev = roleSelection > AccessLevel.clubowner ? roleSelection - 1 : AccessLevel.public;
+            DrawBackNextButton(324 + 115 + 14 + 242, 782, 244, 60, capitalizeFirstLetter(AccessLevel[roleSelection]) + (roleSelection !== AccessLevel.clubowner ? " ↑" : ""), disabled || !requirements.role ? "#ddd" : "White", "", () => capitalizeFirstLetter(AccessLevel[roleSelectionPrev]), () => capitalizeFirstLetter(AccessLevel[roleSelectionNext]), disabled || !requirements.role);
+            MainCanvas.textAlign = "left";
+            DrawText(`room with role`, 324 + 115 + 14, 780 + 32, "Black", "Gray");
+            if (requirements.role) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const res = inChatroom && getAllCharactersInRoom().length > 1 && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
+                MainCanvas.fillStyle = (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 780, 15, 64);
+            }
+            // In presence of player
+            DrawCheckbox(125, 860, 64, 64, "when", !!requirements.player, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 862, 115, 60, ((_j = requirements.player) === null || _j === void 0 ? void 0 : _j.inverted) ? "not in" : "in", disabled || !requirements.player ? "#ddd" : "White", "", "", disabled || !requirements.player);
+            MainCanvas.textAlign = "left";
+            DrawText(`room with member`, 324 + 115 + 14, 860 + 32, "Black", "Gray");
+            ElementPositionFix("BCX_ConditionMemberNumber", 40, 768, 860, 162, 60);
+            if (requirements.player) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const res = inChatroom &&
+                    getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player.memberNumber);
+                MainCanvas.fillStyle = (requirements.player.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 860, 15, 64);
+                const input = document.getElementById("BCX_ConditionMemberNumber");
+                if (input && document.activeElement === input) {
+                    DrawHoverElements.push(() => {
+                        if (!requirements.player)
+                            return;
+                        const Left = 957;
+                        const Top = 858;
+                        MainCanvas.fillStyle = "#FFFF88";
+                        MainCanvas.fillRect(Left, Top, 450, 65);
+                        MainCanvas.lineWidth = 2;
+                        MainCanvas.strokeStyle = 'black';
+                        MainCanvas.strokeRect(Left, Top, 450, 65);
+                        DrawTextFit(getCharacterName(requirements.player.memberNumber, "[unknown]"), Left + 225, Top + 33, 444, "black");
+                    });
+                }
+            }
+            ////// global category configuration toggle
+            MainCanvas.beginPath();
+            MainCanvas.rect(1190, 830, 720, 104);
+            MainCanvas.strokeStyle = "#0052A3";
+            MainCanvas.stroke();
+            DrawCheckbox(1210, 850, 64, 64, `Set to global ${this.conditionCategory} configuration`, useGlobalCategorySetting, !access);
+            MainCanvas.beginPath();
+            MainCanvas.ellipse(1877 + 33, 800 + 30, 22, 22, 360, 0, 360);
+            MainCanvas.fillStyle = "#0052A3";
+            MainCanvas.fill();
+            DrawImageEx("Icons/General.png", 1877 + 10, 800 + 7, {
+                Height: 46,
+                Width: 46
+            });
+            // hover text for timer behavior toggle
+            MainCanvas.textAlign = "center";
+            if (data.timer !== null && MouseIn(125, 450, 80, 64))
+                DrawButtonHover(125, 450, 64, 64, `Removes ${this.conditionCategory.slice(0, -1)} instead of only deactivating it `);
+            // hover text for clobal configuration category toggle
+            if (MouseIn(1190, 830, 100, 104))
+                DrawButtonHover(1786, 854, 64, 64, `Overwrites current trigger conditions`);
+            return false;
+        }
+        Click() {
+            var _a, _b, _c, _d, _e;
+            if (MouseIn(1815, 75, 90, 90)) {
+                if (this.changes) {
+                    this.processInputs();
+                    this.character.conditionUpdate(this.conditionCategory, this.conditionName, this.changes);
+                }
+                this.Exit();
+                return true;
+            }
+            // Cancel
+            if (this.changes && MouseIn(1815, 190, 90, 90)) {
+                this.Exit();
+                return true;
+            }
+            if (this.conditionCategoryData === null || this.conditionData === null)
+                return true;
+            if (!this.checkAccess())
+                return false;
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionData;
+            // on-off toggle
+            if (MouseIn(125, 180, 64, 64)) {
+                this.changes = this.makeChangesData();
+                this.changes.active = !this.changes.active;
+                return true;
+            }
+            ////// status and timer area
+            if (data.timer === null) {
+                // Enable timer
+                if (MouseIn(120, 360, 820, 160)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer = Date.now() + 5 * 60 * 1000;
+                    return true;
+                }
+            }
+            else {
+                // -1d
+                if (MouseIn(120, 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer -= 1 * 24 * 60 * 60 * 1000;
+                    return true;
+                }
+                // -1h
+                if (MouseIn(120 + 125, 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer -= 1 * 60 * 60 * 1000;
+                    return true;
+                }
+                // -5m
+                if (MouseIn(120 + 2 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer -= 5 * 60 * 1000;
+                    return true;
+                }
+                // Disable timer
+                if (MouseIn(120 + 3 * (125), 360, 70, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer = null;
+                    this.changes.timerRemove = false;
+                    return true;
+                }
+                // +5m
+                if (MouseIn(105 + 4 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer += 5 * 60 * 1000;
+                    return true;
+                }
+                // +1h
+                if (MouseIn(105 + 5 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer += 1 * 60 * 60 * 1000;
+                    return true;
+                }
+                // +1d
+                if (MouseIn(105 + 6 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer += 1 * 24 * 60 * 60 * 1000;
+                    return true;
+                }
+                // Timer remove toggle
+                if (MouseIn(125, 450, 64, 64)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timerRemove = !this.changes.timerRemove;
+                    return true;
+                }
+            }
+            ////// condition factors area
+            const useGlobalCategorySetting = !(this.changes ? this.changes.requirements : this.conditionData.requirements);
+            const requirements = (_b = (this.changes ? this.changes.requirements : this.conditionData.requirements)) !== null && _b !== void 0 ? _b : this.conditionCategoryData.requirements;
+            // In room
+            if (MouseIn(125, 620, 64, 64) && !useGlobalCategorySetting) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.room = this.changes.requirements.room ? undefined : { type: "public" };
+                return true;
+            }
+            if (MouseIn(324, 622, 115, 60) && !useGlobalCategorySetting && requirements.room) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.room.inverted = this.changes.requirements.room.inverted ? undefined : true;
+                return true;
+            }
+            if (MouseIn(324 + 115 + 14, 622, 130, 60) && !useGlobalCategorySetting && requirements.room) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.room.type = this.changes.requirements.room.type === "public" ? "private" : "public";
+                return true;
+            }
+            // In room named
+            if (MouseIn(125, 700, 64, 64) && !useGlobalCategorySetting) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.roomName = this.changes.requirements.roomName ? undefined : { name: "" };
+                this.onDataChange();
+                return true;
+            }
+            if (MouseIn(324, 702, 115, 60) && !useGlobalCategorySetting && requirements.roomName) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.roomName.inverted = this.changes.requirements.roomName.inverted ? undefined : true;
+                return true;
+            }
+            // In presence of role
+            if (MouseIn(125, 780, 64, 64) && !useGlobalCategorySetting) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role = this.changes.requirements.role ? undefined : { role: AccessLevel.mistress };
+                return true;
+            }
+            if (MouseIn(324, 782, 115, 60) && !useGlobalCategorySetting && requirements.role) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role.inverted = this.changes.requirements.role.inverted ? undefined : true;
+                return true;
+            }
+            const roleSelection = (_d = (_c = requirements.role) === null || _c === void 0 ? void 0 : _c.role) !== null && _d !== void 0 ? _d : AccessLevel.mistress;
+            if (MouseIn(324 + 115 + 14 + 274, 782, 106, 60) && !useGlobalCategorySetting && requirements.role) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role.role = roleSelection > AccessLevel.clubowner ? roleSelection - 1 : AccessLevel.public;
+                return true;
+            }
+            if (MouseIn(324 + 115 + 14 + 274 + 106, 782, 106, 60) && !useGlobalCategorySetting && requirements.role) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role.role = roleSelection < AccessLevel.public ? roleSelection + 1 : AccessLevel.clubowner;
+                return true;
+            }
+            // In presence of player
+            if (MouseIn(125, 860, 64, 64)) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.player = this.changes.requirements.player ? undefined : { memberNumber: 0 };
+                this.onDataChange();
+                return true;
+            }
+            if (MouseIn(324, 862, 115, 60) && !useGlobalCategorySetting && requirements.player) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.player.inverted = this.changes.requirements.player.inverted ? undefined : true;
+                return true;
+            }
+            ////// global category configuration toggle
+            if (MouseIn(1210, 850, 64, 64)) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements = this.changes.requirements ? null : cloneDeep((_e = this.conditionData.requirements) !== null && _e !== void 0 ? _e : this.conditionCategoryData.requirements);
+                this.onDataChange();
+                return true;
+            }
+            return false;
+        }
+        Exit() {
+            setSubscreen(this.back);
+        }
+        Unload() {
+            ElementRemove("BCX_ConditionRoomName");
+            ElementRemove("BCX_ConditionMemberNumber");
+        }
+    }
+
+    class GuiConditionEditCurses extends GuiConditionEdit {
+        constructor(character, conditionName, back) {
+            super(character, "curses", conditionName, back);
+            this.item = null;
+            this.allowSettingsCurse = false;
+        }
+        headerText() {
+            const group = AssetGroup.find(i => i.Name === this.conditionName);
+            return `View / Edit the '${group ? getVisibleGroupName(group) : "[ERROR]"}' curse`;
+        }
+        onDataChange() {
+            var _a, _b;
+            super.onDataChange();
+            if (!this.conditionCategoryData || !this.conditionData) {
+                return;
+            }
+            if (this.conditionData.data) {
+                this.item = AssetGet(this.character.Character.AssetFamily, this.conditionName, this.conditionData.data.Name);
+                this.allowSettingsCurse = this.conditionData.data.curseProperties || !this.item || curseAllowItemCurseProperty(this.item);
+            }
+            else {
+                this.item = null;
+                this.allowSettingsCurse = false;
+            }
+            if (this.changes && ((_a = this.changes.data) === null || _a === void 0 ? void 0 : _a.Name) !== ((_b = this.conditionData.data) === null || _b === void 0 ? void 0 : _b.Name)) {
+                this.changes.data = cloneDeep(this.conditionData.data);
+            }
+        }
+        Run() {
+            var _a;
+            if (super.Run() || this.conditionCategoryData === null || this.conditionData === null)
+                return true;
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionData;
+            const access = this.checkAccess();
+            MainCanvas.textAlign = "left";
+            ////// right side: special curse category options
+            if (this.allowSettingsCurse && data.data) {
+                DrawCheckbox(1050, 175, 64, 64, "Also curse the item's configuration", data.data.curseProperties, !access);
+                DrawText(`Example: which rope tie is used`, 1151, 287, "Black", "");
+            }
+            return false;
+        }
+        Click() {
+            var _a;
+            if (super.Click() || this.conditionCategoryData === null || this.conditionData === null)
+                return true;
+            if (!this.checkAccess())
+                return false;
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionData;
+            if (MouseIn(1050, 175, 64, 64) && this.allowSettingsCurse && data.data) {
+                this.changes = this.makeChangesData();
+                this.changes.data.curseProperties = !this.changes.data.curseProperties;
+                return true;
+            }
+            return false;
+        }
+    }
+
+    class GuiConditionGlobal extends GuiSubscreen {
+        constructor(character, conditionCategory, back) {
+            super();
+            this.conditionCategoryData = null;
+            this.failed = false;
+            this.changes = null;
+            this.character = character;
+            this.conditionCategory = conditionCategory;
+            this.back = back;
+        }
+        makeChangesData() {
+            var _a;
+            if (!this.conditionCategoryData) {
+                throw new Error("Data required");
+            }
+            return (_a = this.changes) !== null && _a !== void 0 ? _a : {
+                requirements: cloneDeep(this.conditionCategoryData.requirements),
+                timer: this.conditionCategoryData.timer,
+                timerRemove: this.conditionCategoryData.timerRemove
+            };
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.conditionCategoryData = null;
+            this.failed = false;
+            this.onDataChange();
+            this.character.conditionsGetByCategory(this.conditionCategory).then(res => {
+                if (!this.active)
+                    return;
+                this.conditionCategoryData = res;
+                if (!this.checkAccess()) {
+                    this.changes = null;
+                }
+                this.onDataChange();
+            }, err => {
+                console.error(`BCX: Failed to get condition info for ${this.conditionCategory} from ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        onDataChange() {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+            let inputRoomName = document.getElementById("BCX_ConditionRoomName");
+            let inputMemberNumber = document.getElementById("BCX_ConditionMemberNumber");
+            if (!this.conditionCategoryData) {
+                if (inputRoomName) {
+                    inputRoomName.remove();
+                }
+                if (inputMemberNumber) {
+                    inputMemberNumber.remove();
+                }
+                return;
+            }
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionCategoryData;
+            const requirements = data.requirements;
+            const access = this.checkAccess();
+            const disabled = !access;
+            if (!inputRoomName) {
+                inputRoomName = ElementCreateInput("BCX_ConditionRoomName", "text", (_c = (_b = requirements.roomName) === null || _b === void 0 ? void 0 : _b.name) !== null && _c !== void 0 ? _c : "", "30");
+                inputRoomName.oninput = () => {
+                    this.changes = this.makeChangesData();
+                    this.processInputs();
+                };
+            }
+            if (!inputMemberNumber) {
+                inputMemberNumber = ElementCreateInput("BCX_ConditionMemberNumber", "text", (_f = (_e = (_d = requirements.player) === null || _d === void 0 ? void 0 : _d.memberNumber) === null || _e === void 0 ? void 0 : _e.toString()) !== null && _f !== void 0 ? _f : "0", "6");
+                inputMemberNumber.inputMode = "numeric";
+                inputMemberNumber.pattern = "[0-9]+";
+                inputMemberNumber.oninput = () => {
+                    this.changes = this.makeChangesData();
+                    this.processInputs();
+                };
+            }
+            inputRoomName.disabled = disabled || !requirements.roomName;
+            inputMemberNumber.disabled = disabled || !requirements.player;
+            if (!this.changes || disabled || !requirements.roomName) {
+                inputRoomName.value = (_h = (_g = requirements.roomName) === null || _g === void 0 ? void 0 : _g.name) !== null && _h !== void 0 ? _h : "";
+            }
+            if (!this.changes || disabled || !requirements.player) {
+                inputMemberNumber.value = (_l = (_k = (_j = requirements.player) === null || _j === void 0 ? void 0 : _j.memberNumber) === null || _k === void 0 ? void 0 : _k.toString()) !== null && _l !== void 0 ? _l : "0";
+            }
+        }
+        processInputs() {
+            var _a, _b, _c, _d, _e;
+            const inputRoomName = document.getElementById("BCX_ConditionRoomName");
+            const inputMemberNumber = document.getElementById("BCX_ConditionMemberNumber");
+            if (this.changes && inputRoomName && inputMemberNumber) {
+                if ((_a = this.changes.requirements) === null || _a === void 0 ? void 0 : _a.roomName) {
+                    this.changes.requirements.roomName.name = inputRoomName.value;
+                }
+                if ((_b = this.changes.requirements) === null || _b === void 0 ? void 0 : _b.player) {
+                    const memberNumber = inputMemberNumber.value;
+                    if (!memberNumber)
+                        return;
+                    if (/^[0-9]+$/.test(memberNumber)) {
+                        this.changes.requirements.player.memberNumber = Number.parseInt(memberNumber, 10);
+                    }
+                    else {
+                        inputMemberNumber.value = ((_e = (_d = (_c = this.changes.requirements) === null || _c === void 0 ? void 0 : _c.player) === null || _d === void 0 ? void 0 : _d.memberNumber) !== null && _e !== void 0 ? _e : 0).toString();
+                    }
+                }
+            }
+        }
+        checkAccess() {
+            if (!this.conditionCategoryData)
+                return false;
+            return this.conditionCategoryData.access_configure;
+        }
+        Run() {
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            MainCanvas.textAlign = "left";
+            DrawText(`- ${this.headerText()} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            if (this.changes) {
+                DrawButton(1815, 75, 90, 90, "", "White", "Icons/Accept.png", "Save all changes and go back");
+                DrawButton(1815, 190, 90, 90, "", "White", "Icons/Cancel.png", "Go back without saving");
+            }
+            else {
+                DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+            }
+            if (this.conditionCategoryData === null) {
+                MainCanvas.textAlign = "center";
+                DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                return true;
+            }
+            if (this.changes && this.changes.timer !== null && this.changes.timer <= 0) {
+                this.changes.timer = null;
+                this.changes.timerRemove = false;
+            }
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionCategoryData;
+            const requirements = data.requirements;
+            const access = this.checkAccess();
+            const disabled = !access;
+            // Spacer
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(98, 272);
+            MainCanvas.lineTo(960, 272);
+            MainCanvas.strokeStyle = "Gray";
+            MainCanvas.stroke();
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(98, 540);
+            MainCanvas.lineTo(960, 540);
+            MainCanvas.stroke();
+            ////// status and timer area
+            MainCanvas.textAlign = "center";
+            let statusText;
+            if (data.timer === null) {
+                statusText = "Timer disabled by default";
+            }
+            else {
+                statusText = `Default timer: `;
+                const seconds = Math.floor(data.timer / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+                if (days > 0) {
+                    statusText += `${days} days, `;
+                }
+                if (hours > 0) {
+                    statusText += `${hours % 24} hours, `;
+                }
+                if (minutes > 0) {
+                    statusText += `${minutes % 60} minutes, `;
+                }
+                if (seconds > 0) {
+                    statusText += `${seconds % 60} seconds`;
+                }
+            }
+            DrawText(statusText, 530, 311, "Black");
+            if (data.timer === null) {
+                DrawButton(120, 360, 820, 160, "Enable timer", "White");
+                MainCanvas.textAlign = "left";
+            }
+            else {
+                DrawButton(120, 360, 85, 60, "-1d", !access ? "#ddd" : "White", "", "Remove 1 day from the timer", !access);
+                DrawButton(120 + 125, 360, 85, 60, "-1h", !access ? "#ddd" : "White", "", "Remove 1 hour from the timer", !access);
+                DrawButton(120 + 2 * (125), 360, 85, 60, "-5m", !access ? "#ddd" : "White", "", "Remove 5 minutes from the timer", !access);
+                DrawButton(120 + 3 * (125), 360, 70, 60, "∞", !access ? "#ddd" : "White", "", "Set lifetime to infinite", !access);
+                DrawButton(105 + 4 * (125), 360, 85, 60, "+5m", !access ? "#ddd" : "White", "", "Add 5 minutes to the timer", !access);
+                DrawButton(105 + 5 * (125), 360, 85, 60, "+1h", !access ? "#ddd" : "White", "", "Add 1 hour to the timer", !access);
+                DrawButton(105 + 6 * (125), 360, 85, 60, "+1d", !access ? "#ddd" : "White", "", "Add 1 day to the timer", !access);
+                MainCanvas.textAlign = "left";
+                DrawCheckbox(125, 450, 64, 64, `Remove the ${this.conditionCategory.slice(0, -1)} when timer runs out`, data.timerRemove, !access);
+            }
+            ////// condition factors area
+            DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions (always, if all unselected):`, 130, 580, "Black", "");
+            // In room
+            DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 622, 115, 60, ((_b = requirements.room) === null || _b === void 0 ? void 0 : _b.inverted) ? "not in" : "in", disabled || !requirements.room ? "#ddd" : "White", "", "", disabled || !requirements.room);
+            DrawButton(324 + 115 + 14, 622, 130, 60, ((_c = requirements.room) === null || _c === void 0 ? void 0 : _c.type) === "private" ? "private" : "public", disabled || !requirements.room ? "#ddd" : "White", "", "", disabled || !requirements.room);
+            MainCanvas.textAlign = "left";
+            DrawText(`room`, 324 + 115 + 14 + 130 + 14, 620 + 32, "Black", "Gray");
+            if (requirements.room) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
+                const res = inChatroom &&
+                    (requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
+                MainCanvas.fillStyle = (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 620, 15, 64);
+            }
+            // In room named
+            DrawCheckbox(125, 700, 64, 64, "when", !!requirements.roomName, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 702, 115, 60, ((_d = requirements.roomName) === null || _d === void 0 ? void 0 : _d.inverted) ? "not in" : "in", disabled || !requirements.roomName ? "#ddd" : "White", "", "", disabled || !requirements.roomName);
+            MainCanvas.textAlign = "left";
+            DrawText(`room named`, 324 + 115 + 14, 700 + 32, "Black", "Gray");
+            ElementPosition("BCX_ConditionRoomName", 324 + 115 + 14 + 360, 700 + 26, 285, 60);
+            if (requirements.roomName) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const res = inChatroom &&
+                    ChatRoomData &&
+                    typeof ChatRoomData.Name === "string" &&
+                    ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
+                MainCanvas.fillStyle = (requirements.roomName.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 700, 15, 64);
+            }
+            // In presence of role
+            DrawCheckbox(125, 780, 64, 64, "when", !!requirements.role, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 782, 115, 60, ((_e = requirements.role) === null || _e === void 0 ? void 0 : _e.inverted) ? "not in" : "in", disabled || !requirements.role ? "#ddd" : "White", "", "", disabled || !requirements.role);
+            const roleSelection = (_g = (_f = requirements.role) === null || _f === void 0 ? void 0 : _f.role) !== null && _g !== void 0 ? _g : AccessLevel.mistress;
+            const roleSelectionNext = roleSelection < AccessLevel.public ? roleSelection + 1 : AccessLevel.clubowner;
+            const roleSelectionPrev = roleSelection > AccessLevel.clubowner ? roleSelection - 1 : AccessLevel.public;
+            DrawBackNextButton(324 + 115 + 14 + 242, 782, 244, 60, capitalizeFirstLetter(AccessLevel[roleSelection]) + (roleSelection !== AccessLevel.clubowner ? " ↑" : ""), disabled || !requirements.role ? "#ddd" : "White", "", () => capitalizeFirstLetter(AccessLevel[roleSelectionPrev]), () => capitalizeFirstLetter(AccessLevel[roleSelectionNext]), disabled || !requirements.role);
+            MainCanvas.textAlign = "left";
+            DrawText(`room with role`, 324 + 115 + 14, 780 + 32, "Black", "Gray");
+            if (requirements.role) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const res = inChatroom && getAllCharactersInRoom().length > 1 && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
+                MainCanvas.fillStyle = (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 780, 15, 64);
+            }
+            // In presence of player
+            DrawCheckbox(125, 860, 64, 64, "when", !!requirements.player, disabled);
+            MainCanvas.textAlign = "center";
+            DrawButton(324, 862, 115, 60, ((_h = requirements.player) === null || _h === void 0 ? void 0 : _h.inverted) ? "not in" : "in", disabled || !requirements.player ? "#ddd" : "White", "", "", disabled || !requirements.player);
+            MainCanvas.textAlign = "left";
+            DrawText(`room with member`, 324 + 115 + 14, 860 + 32, "Black", "Gray");
+            ElementPositionFix("BCX_ConditionMemberNumber", 40, 768, 860, 162, 60);
+            if (requirements.player) {
+                const inChatroom = ServerPlayerIsInChatRoom();
+                const res = inChatroom &&
+                    getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player.memberNumber);
+                MainCanvas.fillStyle = (requirements.player.inverted ? !res : res) ? "#00FF22" : "#AA0000";
+                MainCanvas.fillRect(95, 860, 15, 64);
+                const input = document.getElementById("BCX_ConditionMemberNumber");
+                if (input && document.activeElement === input) {
+                    DrawHoverElements.push(() => {
+                        if (!requirements.player)
+                            return;
+                        const Left = 957;
+                        const Top = 858;
+                        MainCanvas.fillStyle = "#FFFF88";
+                        MainCanvas.fillRect(Left, Top, 450, 65);
+                        MainCanvas.lineWidth = 2;
+                        MainCanvas.strokeStyle = 'black';
+                        MainCanvas.strokeRect(Left, Top, 450, 65);
+                        DrawTextFit(getCharacterName(requirements.player.memberNumber, "[unknown]"), Left + 225, Top + 33, 444, "black");
+                    });
+                }
+            }
+            // hover text for timer behavior toggle
+            MainCanvas.textAlign = "center";
+            if (data.timer !== null && MouseIn(125, 450, 80, 64))
+                DrawButtonHover(125, 450, 64, 64, `Removes ${this.conditionCategory.slice(0, -1)} instead of only deactivating it `);
+            return false;
+        }
+        Click() {
+            var _a, _b, _c;
+            if (MouseIn(1815, 75, 90, 90)) {
+                if (this.changes) {
+                    this.processInputs();
+                    this.character.conditionCategoryUpdate(this.conditionCategory, this.changes);
+                }
+                this.Exit();
+                return true;
+            }
+            // Cancel
+            if (this.changes && MouseIn(1815, 190, 90, 90)) {
+                this.Exit();
+                return true;
+            }
+            if (this.conditionCategoryData === null)
+                return true;
+            if (!this.checkAccess())
+                return false;
+            const data = (_a = this.changes) !== null && _a !== void 0 ? _a : this.conditionCategoryData;
+            ////// status and timer area
+            if (data.timer === null) {
+                // Enable timer
+                if (MouseIn(120, 360, 820, 160)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer = 5 * 60 * 1000;
+                    return true;
+                }
+            }
+            else {
+                // -1d
+                if (MouseIn(120, 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer -= 1 * 24 * 60 * 60 * 1000;
+                    return true;
+                }
+                // -1h
+                if (MouseIn(120 + 125, 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer -= 1 * 60 * 60 * 1000;
+                    return true;
+                }
+                // -5m
+                if (MouseIn(120 + 2 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer -= 5 * 60 * 1000;
+                    return true;
+                }
+                // Disable timer
+                if (MouseIn(120 + 3 * (125), 360, 70, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer = null;
+                    this.changes.timerRemove = false;
+                    return true;
+                }
+                // +5m
+                if (MouseIn(105 + 4 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer += 5 * 60 * 1000;
+                    return true;
+                }
+                // +1h
+                if (MouseIn(105 + 5 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer += 1 * 60 * 60 * 1000;
+                    return true;
+                }
+                // +1d
+                if (MouseIn(105 + 6 * (125), 360, 85, 60)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timer += 1 * 24 * 60 * 60 * 1000;
+                    return true;
+                }
+                // Timer remove toggle
+                if (MouseIn(125, 450, 64, 64)) {
+                    this.changes = this.makeChangesData();
+                    this.changes.timerRemove = !this.changes.timerRemove;
+                    return true;
+                }
+            }
+            ////// condition factors area
+            const requirements = data.requirements;
+            // In room
+            if (MouseIn(125, 620, 64, 64)) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.room = this.changes.requirements.room ? undefined : { type: "public" };
+                return true;
+            }
+            if (MouseIn(324, 622, 115, 60) && requirements.room) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.room.inverted = this.changes.requirements.room.inverted ? undefined : true;
+                return true;
+            }
+            if (MouseIn(324 + 115 + 14, 622, 130, 60) && requirements.room) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.room.type = this.changes.requirements.room.type === "public" ? "private" : "public";
+                return true;
+            }
+            // In room named
+            if (MouseIn(125, 700, 64, 64)) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.roomName = this.changes.requirements.roomName ? undefined : { name: "" };
+                this.onDataChange();
+                return true;
+            }
+            if (MouseIn(324, 702, 115, 60) && requirements.roomName) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.roomName.inverted = this.changes.requirements.roomName.inverted ? undefined : true;
+                return true;
+            }
+            // In presence of role
+            if (MouseIn(125, 780, 64, 64)) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role = this.changes.requirements.role ? undefined : { role: AccessLevel.mistress };
+                return true;
+            }
+            if (MouseIn(324, 782, 115, 60) && requirements.role) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role.inverted = this.changes.requirements.role.inverted ? undefined : true;
+                return true;
+            }
+            const roleSelection = (_c = (_b = requirements.role) === null || _b === void 0 ? void 0 : _b.role) !== null && _c !== void 0 ? _c : AccessLevel.mistress;
+            if (MouseIn(324 + 115 + 14 + 274, 782, 106, 60) && requirements.role) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role.role = roleSelection > AccessLevel.clubowner ? roleSelection - 1 : AccessLevel.public;
+                return true;
+            }
+            if (MouseIn(324 + 115 + 14 + 274 + 106, 782, 106, 60) && requirements.role) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.role.role = roleSelection < AccessLevel.public ? roleSelection + 1 : AccessLevel.clubowner;
+                return true;
+            }
+            // In presence of player
+            if (MouseIn(125, 860, 64, 64)) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.player = this.changes.requirements.player ? undefined : { memberNumber: 0 };
+                this.onDataChange();
+                return true;
+            }
+            if (MouseIn(324, 862, 115, 60) && requirements.player) {
+                this.changes = this.makeChangesData();
+                this.changes.requirements.player.inverted = this.changes.requirements.player.inverted ? undefined : true;
+                return true;
+            }
+            return false;
+        }
+        Exit() {
+            setSubscreen(this.back);
+        }
+        Unload() {
+            ElementRemove("BCX_ConditionRoomName");
+            ElementRemove("BCX_ConditionMemberNumber");
+        }
+    }
+
+    class GuiConditionGlobalCurses extends GuiConditionGlobal {
+        constructor(character, back) {
+            super(character, "curses", back);
+        }
+        headerText() {
+            return `View / Edit the global ${this.conditionCategory} configuration`;
+        }
+        Run() {
+            if (super.Run() || this.conditionCategoryData === null)
+                return true;
+            MainCanvas.textAlign = "left";
+            DrawText(`Note: Settings are applied to new curses and all existing ones set to the global config.`, 130, 210, "Black", "");
+            return false;
+        }
+        Click() {
+            if (super.Click() || this.conditionCategoryData === null)
+                return true;
+            return false;
+        }
+    }
+
+    const PER_COLUMN_COUNT = 7;
+    const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
+    class GuiConditionView extends GuiSubscreen {
+        constructor(character, conditionCategory) {
+            super();
+            this.conditionEntries = [];
+            this.conditionCategoryData = null;
+            this.failed = false;
+            this.page = 0;
+            this.character = character;
+            this.conditionCategory = conditionCategory;
+            this.conditionCategorySingluar = conditionCategory.slice(0, -1);
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.conditionCategoryData = null;
+            this.failed = false;
+            this.onDataChange();
+            this.character.conditionsGetByCategory(this.conditionCategory).then(res => {
+                if (!this.active)
+                    return;
+                this.conditionCategoryData = res;
+                this.onDataChange();
+            }, err => {
+                console.error(`BCX: Failed to get condition info for ${this.conditionCategory} from ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        onDataChange() {
+            var _a;
+            if (!this.active)
+                return;
+            this.conditionEntries = [];
+            if (this.conditionCategoryData === null)
+                return;
+            for (const [condition, data] of Object.entries(this.conditionCategoryData.conditions)) {
+                const res = this.loadCondition(condition, data);
+                if (res === null)
+                    continue;
+                const access = [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][(_a = this.conditionCategoryData.limits[condition]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal];
+                this.conditionEntries.push({
+                    condition,
+                    access,
+                    data,
+                    displayName: res[0],
+                    extra: res[1]
+                });
+            }
+            this.page = clamp(this.page, 0, Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT));
+        }
+        Run() {
+            MainCanvas.textAlign = "left";
+            DrawText(`- ${this.headerText()} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            // Column separator
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(953, 160);
+            MainCanvas.lineTo(953, 780);
+            MainCanvas.stroke();
+            if (this.conditionCategoryData === null) {
+                MainCanvas.textAlign = "center";
+                DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                return true;
+            }
+            for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                const i = this.page * PER_PAGE_COUNT + off;
+                if (i >= this.conditionEntries.length)
+                    break;
+                const e = this.conditionEntries[i];
+                const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
+                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
+                const useGlobalCategorySetting = !e.data.requirements;
+                // curse description
+                MainCanvas.textAlign = "left";
+                MainCanvas.beginPath();
+                MainCanvas.rect(X, Y, 440, 60);
+                MainCanvas.stroke();
+                this.drawCategoryImage(X, Y, e);
+                DrawTextFit(e.displayName, X + 65, Y + 30, 375, "Black");
+                // config button info
+                MainCanvas.textAlign = "center";
+                DrawButton(X + 470, Y, 240, 60, "", e.data.active ? "#d8fed7" : "White");
+                if (useGlobalCategorySetting) {
+                    MainCanvas.beginPath();
+                    MainCanvas.ellipse(X + 470 + 33, Y + 30, 22, 22, 360, 0, 360);
+                    MainCanvas.fillStyle = "#0052A3";
+                    MainCanvas.fill();
+                }
+                DrawImageEx("Icons/General.png", X + 480, Y + 7, {
+                    Height: 46,
+                    Width: 46
+                });
+                // shows time left (XXd -> XXh -> XXm -> XXs) or ∞
+                let timeLeftText = "n/a";
+                if (e.data.timer === null) {
+                    timeLeftText = "∞";
+                }
+                else {
+                    const seconds = Math.floor((e.data.timer - Date.now()) / 1000);
+                    const minutes = Math.floor(seconds / 60);
+                    const hours = Math.floor(minutes / 60);
+                    const days = Math.floor(hours / 24);
+                    if (days > 1) {
+                        timeLeftText = `${days}d`;
+                    }
+                    else if (hours > 1) {
+                        timeLeftText = `${hours}h`;
+                    }
+                    else if (minutes > 1) {
+                        timeLeftText = `${minutes}m`;
+                    }
+                    else if (seconds > 0) {
+                        timeLeftText = `${seconds}s`;
+                    }
+                }
+                DrawText(timeLeftText, X + 570, Y + 30, "Black", "");
+                this.drawEntryExtra(X, Y, e);
+                // remove curse
+                if (e.access) {
+                    DrawButton(X + 740, Y, 60, 60, "X", "White", "", this.removeLabel);
+                }
+                if (MouseIn(X + 470, Y, 60, 60)) {
+                    DrawHoverElements.push(() => {
+                        DrawButtonHover(X + 470, Y, 60, 60, `Change this ${this.conditionCategorySingluar}'s configuration`);
+                    });
+                }
+                if (MouseIn(X + 531, Y, 78, 60)) {
+                    DrawHoverElements.push(() => {
+                        DrawButtonHover(X + 531, Y, 78, 60, `Remaining duration of the ${this.conditionCategorySingluar}`);
+                    });
+                }
+            }
+            MainCanvas.textAlign = "center";
+            DrawButton(968, 820, 605, 90, "", this.conditionCategoryData.access_configure ? "White" : "#ddd", "", this.conditionCategoryData.access_configure ? `Existing ${this.conditionCategory} set to global ${this.conditionCategory} config are also changed` : "You have no permission to use this", !this.conditionCategoryData.access_configure);
+            DrawText(`Change global ${this.conditionCategory} config`, 968 + 680 / 2, 865, "Black", "");
+            MainCanvas.beginPath();
+            MainCanvas.ellipse(968 + 10 + 35, 820 + 44, 34, 34, 360, 0, 360);
+            MainCanvas.fillStyle = "#0052A3";
+            MainCanvas.fill();
+            DrawImageEx("Icons/General.png", 968 + 10, 820 + 10, {
+                Height: 70,
+                Width: 70
+            });
+            // Pagination
+            const totalPages = Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT);
+            DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
+            return false;
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90)) {
+                this.Exit();
+                return true;
+            }
+            if (this.conditionCategoryData === null)
+                return true;
+            for (let off = 0; off < PER_PAGE_COUNT; off++) {
+                const i = this.page * PER_PAGE_COUNT + off;
+                if (i >= this.conditionEntries.length)
+                    break;
+                const e = this.conditionEntries[i];
+                const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
+                const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
+                // config button info
+                if (MouseIn(X + 470, Y, 240, 60)) {
+                    this.openEditSubscreen(e.condition);
+                    return true;
+                }
+                if (e.access && MouseIn(X + 740, Y, 60, 60)) {
+                    this.removeCondition(e.condition);
+                    return true;
+                }
+            }
+            if (this.conditionCategoryData.access_configure && MouseIn(968, 820, 605, 90)) {
+                this.openGlobalConfig();
+                return true;
+            }
+            // Pagination
+            const totalPages = Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT);
+            if (MouseIn(1605, 800, 150, 90)) {
+                this.page--;
+                if (this.page < 0) {
+                    this.page = Math.max(totalPages - 1, 0);
+                }
+                return true;
+            }
+            else if (MouseIn(1755, 800, 150, 90)) {
+                this.page++;
+                if (this.page >= totalPages) {
+                    this.page = 0;
+                }
+                return true;
+            }
+            return false;
+        }
+        Exit() {
+            setSubscreen(new GuiMainMenu(this.character));
+        }
+    }
+
+    class GuiCursesAdd extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.curseData = null;
+            this.failed = false;
+            this.permissionMode = false;
+            this.character = character;
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.curseData = null;
+            this.character.conditionsGetByCategory("curses").then(res => {
+                this.curseData = res;
+                if (!this.curseData.access_changeLimits) {
+                    this.permissionMode = false;
+                }
+            }, err => {
+                console.error(`BCX: Failed to get permission info for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        Run() {
+            var _a, _b;
+            MainCanvas.textAlign = "left";
+            DrawText(`- Curses: Place new curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+            if (this.curseData === null) {
+                DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                return;
+            }
+            DrawButton(1815, 190, 90, 90, "", this.curseData.access_changeLimits ? "White" : "#ddd", this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png", this.curseData.access_changeLimits ?
+                (this.permissionMode ? "Leave permission mode" : "Edit curse slot permissions") :
+                "You have no permission to change limits", !this.curseData.access_changeLimits);
+            // items
+            MainCanvas.textAlign = "left";
+            MainCanvas.beginPath();
+            MainCanvas.rect(105, 165, 830, 64);
+            MainCanvas.fillStyle = "#cccccc";
+            MainCanvas.fill();
+            DrawText(`Items`, 120, 165 + 34, "Black");
+            MainCanvas.textAlign = "center";
+            if (!this.permissionMode) {
+                DrawButton(440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
+                DrawButton(720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
+            }
+            const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
+            for (let i = 0; i < AssetGroupItems.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupItems[i];
+                const currentItem = InventoryGet(this.character.Character, group.Name);
+                const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
+                const accessLevel = (_a = this.curseData.limits[group.Name]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal;
+                const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
+                let color;
+                let text;
+                if (this.permissionMode) {
+                    color = ["#ccfece", "#fefc53", "red"][accessLevel];
+                    text = ["Normal", "Limited", "Blocked"][accessLevel];
+                }
+                else {
+                    color = itemIsCursed ? "#88c" :
+                        !allowCurse ? "#ccc" :
+                            (currentItem ? "Gold" : "White");
+                    text = itemIsCursed ? "Already cursed" :
+                        !allowCurse ? "You have no permission to curse this" :
+                            (currentItem ? currentItem.Asset.Description : "Nothing");
+                }
+                DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), color, undefined, text, itemIsCursed || !allowCurse || this.permissionMode);
+            }
+            // clothing
+            MainCanvas.textAlign = "left";
+            MainCanvas.beginPath();
+            MainCanvas.rect(950, 165, 830, 64);
+            MainCanvas.fillStyle = "#cccccc";
+            MainCanvas.fill();
+            DrawText(`Clothing`, 965, 165 + 34, "Black");
+            MainCanvas.textAlign = "center";
+            if (!this.permissionMode) {
+                DrawButton(1285, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all clothes on the body at once");
+                DrawButton(1565, 173, 200, 48, "Curse all", "White", undefined, "Curse all clothing slots at once");
+            }
+            const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
+            for (let i = 0; i < AssetGroupClothings.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupClothings[i];
+                const currentItem = InventoryGet(this.character.Character, group.Name);
+                const clothingIsCursed = this.curseData.conditions[group.Name] !== undefined;
+                const accessLevel = (_b = this.curseData.limits[group.Name]) !== null && _b !== void 0 ? _b : ConditionsLimit.normal;
+                const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
+                let color;
+                let text;
+                if (this.permissionMode) {
+                    color = ["#ccfece", "#fefc53", "red"][accessLevel];
+                    text = ["Normal", "Limited", "Blocked"][accessLevel];
+                }
+                else {
+                    color = clothingIsCursed ? "#88c" :
+                        !allowCurse ? "#ccc" :
+                            (currentItem ? "Gold" : "White");
+                    text = clothingIsCursed ? "Already cursed" :
+                        !allowCurse ? "You have no permission to curse this" :
+                            (currentItem ? currentItem.Asset.Description : "Nothing");
+                }
+                DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group), color, undefined, text, clothingIsCursed || !allowCurse || this.permissionMode);
+            }
+            //Body
+            // TODO: Actual data
+            // const bodyIsCursed = false;
+            // DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "#ccc" : "White", undefined,
+            //	bodyIsCursed ? "Already cursed" : "Size, skin color, eyes, etc.", bodyIsCursed);
+            // permission mode legend
+            if (this.permissionMode) {
+                MainCanvas.fillStyle = "#ccfece";
+                MainCanvas.fillRect(1284, 75, 166, 64);
+                MainCanvas.fillStyle = "#fefc53";
+                MainCanvas.fillRect(1284 + 1 * 166, 75, 166, 64);
+                MainCanvas.fillStyle = "red";
+                MainCanvas.fillRect(1284 + 2 * 166, 75, 165, 64);
+                MainCanvas.textAlign = "center";
+                DrawText(`Normal`, 1284 + 166 / 2, 75 + 34, "Black");
+                DrawText(`Limited`, 1284 + 1 * 166 + 166 / 2, 75 + 34, "Black");
+                DrawText(`Blocked`, 1284 + 2 * 166 + 166 / 2, 75 + 34, "Black");
+            }
+        }
+        Click() {
+            var _a, _b;
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (this.curseData === null)
+                return;
+            // Permission mode
+            if (MouseIn(1815, 190, 90, 90)) {
+                this.permissionMode = this.curseData.access_changeLimits && !this.permissionMode;
+                return;
+            }
+            // items
+            const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
+            for (let i = 0; i < AssetGroupItems.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupItems[i];
+                const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
+                if (MouseIn(106 + 281 * column, 240 + 69 * row, 265, 54)) {
+                    if (this.permissionMode) {
+                        const accessLevel = (_a = this.curseData.limits[group.Name]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal;
+                        this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
+                    }
+                    else if (!itemIsCursed) {
+                        this.character.curseItem(group.Name, null);
+                    }
+                    return;
+                }
+            }
+            if (MouseIn(440, 173, 265, 48) && !this.permissionMode) {
+                this.character.curseBatch("items", false);
+                return;
+            }
+            if (MouseIn(720, 173, 200, 48) && !this.permissionMode) {
+                this.character.curseBatch("items", true);
+                return;
+            }
+            // clothing
+            const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
+            for (let i = 0; i < AssetGroupClothings.length; i++) {
+                const row = i % 10;
+                const column = Math.floor(i / 10);
+                const group = AssetGroupClothings[i];
+                const clothingIsCursed = this.curseData.conditions[group.Name] !== undefined;
+                if (MouseIn(951 + 281 * column, 240 + 69 * row, 265, 54)) {
+                    if (this.permissionMode) {
+                        const accessLevel = (_b = this.curseData.limits[group.Name]) !== null && _b !== void 0 ? _b : ConditionsLimit.normal;
+                        this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
+                    }
+                    else if (!clothingIsCursed) {
+                        this.character.curseItem(group.Name, null);
+                    }
+                    return;
+                }
+            }
+            if (MouseIn(1285, 173, 265, 48) && !this.permissionMode) {
+                this.character.curseBatch("clothes", false);
+                return;
+            }
+            if (MouseIn(1565, 173, 200, 48) && !this.permissionMode) {
+                this.character.curseBatch("clothes", true);
+                return;
+            }
+        }
+        Exit() {
+            setSubscreen(new GuiConditionViewCurses(this.character));
+        }
+    }
+
+    class GuiConditionViewCurses extends GuiConditionView {
+        constructor(character) {
+            super(character, "curses");
+            this.removeLabel = "Lift curse";
+        }
+        Run() {
+            if (super.Run() || this.conditionCategoryData === null)
+                return true;
+            const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
+            DrawButton(120, 820, 384, 90, "Add new curse", access ? "White" : "#ddd", "", access ? "Place new curses on body, items or clothes" : "You have no permission to use this", !access);
+            DrawButton(536, 820, 400, 90, "Lift all curses", access ? "White" : "#ddd", "", access ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !access);
+            return false;
+        }
+        Click() {
+            if (super.Click() || this.conditionCategoryData === null)
+                return true;
+            const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
+            if (access && MouseIn(120, 820, 384, 90)) {
+                setSubscreen(new GuiCursesAdd(this.character));
+                return true;
+            }
+            if (access && MouseIn(536, 820, 400, 90)) {
+                this.character.curseLiftAll();
+                return true;
+            }
+            return false;
+        }
+        drawCategoryImage(X, Y, data) {
+            DrawImageEx(data.extra.type === "clothing" ? "Icons/Dress.png" : "Assets/Female3DCG/ItemArms/Preview/NylonRope.png", X + 6, Y + 6, {
+                Height: 50,
+                Width: 50
+            });
+        }
+        drawEntryExtra(X, Y, data) {
+            if (data.extra.propertiesCursedShow) {
+                DrawImageEx(data.extra.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 635, Y + 10, {
+                    Height: 40,
+                    Width: 40,
+                    Alpha: data.extra.propertiesCursed ? 1 : 0.2
+                });
+                if (MouseIn(X + 635, Y + 6, 44, 44)) {
+                    DrawHoverElements.push(() => {
+                        DrawButtonHover(X + 635, Y + 6, 44, 44, data.extra.propertiesCursed ? "Item configuration cursed" : "Item configuration not cursed");
+                    });
+                }
+            }
+        }
+        headerText() {
+            return `Curses: All active curses on ${this.character.Name}`;
+        }
+        loadCondition(condition, data) {
+            var _a;
+            const group = AssetGroup.find(g => g.Name === condition);
+            if (!group) {
+                console.warn(`BCX: Unknown group ${condition}`);
+                return null;
+            }
+            if (data.data === null) {
+                return [`Blocked: ${getVisibleGroupName(group)}`, {
+                        type: group.Clothing ? "clothing" : "item"
+                    }];
+            }
+            else {
+                const item = AssetGet(this.character.Character.AssetFamily, condition, data.data.Name);
+                return [`${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : data.data.Name} (${getVisibleGroupName(group)})`, {
+                        type: group.Clothing ? "clothing" : "item",
+                        propertiesCursed: data.data.curseProperties,
+                        propertiesCursedShow: data.data.curseProperties || !item || curseAllowItemCurseProperty(item)
+                    }];
+            }
+        }
+        openEditSubscreen(condition) {
+            setSubscreen(new GuiConditionEditCurses(this.character, condition, this));
+        }
+        removeCondition(condition) {
+            this.character.curseLift(condition);
+        }
+        openGlobalConfig() {
+            setSubscreen(new GuiConditionGlobalCurses(this.character, this));
+        }
+    }
+
     const MAIN_MENU_ITEMS = [
         {
             module: ModuleCategory.Global,
@@ -6038,7 +11087,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         {
             module: ModuleCategory.Curses,
             onclick: (C) => {
-                setSubscreen(new GuiCurses(C));
+                setSubscreen(new GuiConditionViewCurses(C));
             }
         },
         {
@@ -6245,6 +11294,25 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     MainCanvas.textAlign = "left";
                     this._currentSubscreen.Run();
                     MainCanvas.textAlign = "center";
+                    if (developmentMode) {
+                        if (MouseX > 0 || MouseY > 0) {
+                            MainCanvas.save();
+                            MainCanvas.lineWidth = 1;
+                            MainCanvas.strokeStyle = "red";
+                            MainCanvas.beginPath();
+                            MainCanvas.moveTo(0, MouseY);
+                            MainCanvas.lineTo(2000, MouseY);
+                            MainCanvas.moveTo(MouseX, 0);
+                            MainCanvas.lineTo(MouseX, 1000);
+                            MainCanvas.stroke();
+                            MainCanvas.fillStyle = "black";
+                            MainCanvas.strokeStyle = "white";
+                            MainCanvas.fillRect(0, 950, 250, 50);
+                            MainCanvas.strokeRect(0, 950, 250, 50);
+                            DrawText(`X: ${MouseX} Y: ${MouseY}`, 125, 975, "white");
+                            MainCanvas.restore();
+                        }
+                    }
                     return;
                 }
                 next(args);
@@ -6504,7 +11572,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     console.warn(`BCX: got versionResponse from unexpected sender ${sender}, ignoring`);
                     return;
                 }
-                if (!isObject(message) || typeof message.status !== "string") {
+                if (!isObject$1(message) || typeof message.status !== "string") {
                     console.warn(`BCX: bad versionResponse`, message);
                     return;
                 }
@@ -6545,6 +11613,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     registerModule(new ModuleChatroom());
     registerModule(new ModuleClubUtils());
     registerModule(new ModuleCommands());
+    registerModule(new ModuleConditions());
     registerModule(new ModuleConsole());
     registerModule(new ModuleCurses());
     registerModule(new ModuleGUI());

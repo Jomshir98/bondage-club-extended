@@ -1,7 +1,7 @@
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
-import { arrayUnique, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName, itemColorsEquals } from "../utilsClub";
+import { arrayUnique, capitalizeFirstLetter, formatTimeInterval, isObject } from "../utils";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorageSync } from "./storage";
@@ -10,7 +10,7 @@ import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
-import { ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsSetCondition } from "./conditions";
+import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -191,24 +191,6 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 	return true;
 }
 
-// TODO: Remove
-export function curseGetInfo(character: ChatroomCharacter): BCX_curseInfo {
-	const res: BCX_curseInfo = {
-		allowCurse: checkPermissionAccess("curses_normal", character),
-		allowLift: checkPermissionAccess("curses_normal", character),
-		curses: {}
-	};
-
-	for (const [group, info] of Object.entries(ConditionsGetCategoryData("curses").conditions)) {
-		res.curses[group] = info.data === null ? null : {
-			Name: info.data.Name,
-			curseProperties: info.data.curseProperty
-		};
-	}
-
-	return res;
-}
-
 export class ModuleCurses extends BaseModule {
 	private resetTimer: number | null = null;
 	private triggerCounts: Map<string, number> = new Map();
@@ -296,8 +278,10 @@ export class ModuleCurses extends BaseModule {
 				return respond(`Curses module is disabled.`);
 			}
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
-			const cursesInfo = curseGetInfo(sender).curses;
-			if (subcommand === "list") {
+			const cursesInfo = ConditionsGetCategoryPublicData("curses", sender).conditions;
+			if (ConditionsSubcommands.includes(subcommand as ConditionsSubcommand)) {
+				return ConditionsRunSubcommand("curses", argv, sender, respond);
+			} else if (subcommand === "list") {
 				let result = "Current curses:";
 				for (const [k, v] of Object.entries(cursesInfo)) {
 					const group = AssetGroup.find(g => g.Name === k);
@@ -308,11 +292,11 @@ export class ModuleCurses extends BaseModule {
 
 					result += `\n[${group.Clothing ? "Clothing" : "Item"}] `;
 
-					if (v === null) {
+					if (v.data === null) {
 						result += `Blocked: ${getVisibleGroupName(group)}`;
 					} else {
-						const item = AssetGet(Player.AssetFamily, k, v.Name);
-						result += `${item?.Description ?? v.Name} (${getVisibleGroupName(group)})`;
+						const item = AssetGet(Player.AssetFamily, k, v.data.Name);
+						result += `${item?.Description ?? v.data.Name} (${getVisibleGroupName(group)})`;
 					}
 				}
 				respond(result);
@@ -379,36 +363,47 @@ export class ModuleCurses extends BaseModule {
 				respond(curseLift(group.Name, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else if (subcommand === "liftall") {
 				respond(curseLiftAll(sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-			} else if (subcommand === "settings") {
+			} else if (subcommand === "configuration") {
 				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
 				if (typeof group === "string") {
 					return respond(group);
 				}
-				if (cursesInfo[group.Name] === undefined) {
+				const curse = cursesInfo[group.Name];
+				if (!curse) {
 					return respond(`This group or item is not cursed`);
 				}
 				const target = (argv[2] || "").toLocaleLowerCase();
 				if (target !== "yes" && target !== "no") {
 					return respond(`Expected yes or no`);
 				}
-				if (cursesInfo[group.Name] == null) {
-					return respond(`Empty groups cannot have settings cursed`);
+				if (curse.data == null) {
+					return respond(`Empty groups cannot have configuration cursed`);
 				}
-				const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name]!.Name);
+				const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name].data!.Name);
 				if (asset && target === "yes" && !curseAllowItemCurseProperty(asset)) {
-					return respond(`This item cannot have settings cursed`);
+					return respond(`This item cannot have configuration cursed`);
 				}
-				respond(curseItem(group.Name, target === "yes", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+				curse.data.curseProperties = target === "yes";
+				respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
 				respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
 					`!curses list - List all active curses and related info\n` +
-					`!curses listgroups <items|clothes> - Lists all possible item and/or clothing slots\n` +
+					`!curses listgroups <items|clothes> - Lists all possible item or clothing group slots\n` +
 					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
 					`!curses curseworn <items|clothes> - Place a curse on all currenty worn items/clothes\n` +
-					`!curses curseall <items|clothes> - Place a curse on all item/clothe slots, both used and empty\n` +
+					`!curses curseall <items|clothes> - Place a curse on all item/cloth slots, both used and empty\n` +
 					`!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
 					`!curses liftall - Lifts (removes) all curses\n` +
-					`!curses settings <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`
+					`!curses configuration <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`
+				));
+				respond(Command_fixExclamationMark(sender,
+					`!curses setactive <group> <yes/no> - Switch the curse and its conditions on and off\n` +
+					`!curses triggers <group> global <yes/no> - Set the trigger condition of this curse to the global configuration\n` +
+					`!curses triggers <group> help - Set the trigger configuration of a curse\n` +
+					`!curses globaltriggers help - Set global trigger configuration\n` +
+					`!curses timer <group> help - Set timer options of a curse\n` +
+					`!curses defaulttimer help - Set default timer options used on new curses\n\n` +
+					`Hint: If an argument contains spaces: "put it in quotes"`
 				));
 			}
 		}, (argv, sender) => {
@@ -416,13 +411,15 @@ export class ModuleCurses extends BaseModule {
 				return [];
 			}
 			if (argv.length <= 1) {
-				return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "settings"]);
+				return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "configuration", ...ConditionsSubcommands]);
 			}
 
 			const subcommand = argv[0].toLocaleLowerCase();
-			const cursesInfo = curseGetInfo(sender).curses;
+			const cursesInfo = ConditionsGetCategoryPublicData("curses", sender).conditions;
 
-			if (subcommand === "listgroups") {
+			if (ConditionsSubcommands.includes(subcommand as ConditionsSubcommand)) {
+				return ConditionsAutocompleteSubcommand("curses", argv, sender);
+			} else if (subcommand === "listgroups") {
 				if (argv.length === 2) {
 					return Command_pickAutocomplete(argv[1], ["items", "clothes"]);
 				}
@@ -438,7 +435,7 @@ export class ModuleCurses extends BaseModule {
 				if (argv.length === 2) {
 					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
 				}
-			} else if (subcommand === "settings") {
+			} else if (subcommand === "configuration") {
 				if (argv.length === 2) {
 					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
 				} else if (argv.length === 3) {
@@ -512,6 +509,126 @@ export class ModuleCurses extends BaseModule {
 				}
 
 				return true;
+			},
+			parseConditionName: (selector, onlyExisting) => {
+				const group = Command_selectGroup(selector, getPlayerCharacter(), G => (G.Category !== "Appearance" || G.Clothing) && (!onlyExisting || onlyExisting.includes(G.Name)));
+				if (typeof group === "string") {
+					return [false, group];
+				}
+				return [true, group.Name];
+			},
+			autocompleteConditionName: (selector, onlyExisting) => {
+				return Command_selectGroupAutocomplete(selector, getPlayerCharacter(), G => (G.Category !== "Appearance" || G.Clothing) && (!onlyExisting || onlyExisting.includes(G.Name)));
+			},
+			logLimitChange: (group, character, newLimit) => {
+				logMessage("curse_change", LogEntryType.plaintext,
+					`${character} changed ${Player.Name}'s curse slot '${group}' permission to ${newLimit}`);
+				if (!character.isPlayer()) {
+					ChatRoomSendLocal(`${character} changed curse slot '${group}' permission to ${newLimit}`, undefined, character.MemberNumber);
+				}
+			},
+			logConditionUpdate: (group, character, newData, oldData) => {
+				const assetGroup = AssetGroup.find(g => g.Name === group);
+				const visibleName = assetGroup ? getVisibleGroupName(assetGroup) : "[ERROR]";
+
+				const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
+				const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+				const didItemConfigCurseChange = newData.data?.curseProperties !== oldData.data?.curseProperties;
+				const changeEvents = [];
+				if (didTimerChange)
+					changeEvents.push("timer");
+				if (didTriggerChange)
+					changeEvents.push("trigger condition");
+				if (didItemConfigCurseChange)
+					changeEvents.push("item config curse");
+				if (changeEvents.length > 0) {
+					logMessage("curse_change", LogEntryType.plaintext,
+						`${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s curse on slot '${visibleName}'`);
+				}
+				if (!character.isPlayer()) {
+					if (newData.timer !== oldData.timer)
+						if (newData.timer === null) {
+							ChatRoomSendLocal(`${character} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
+						} else {
+							ChatRoomSendLocal(`${character} changed the duration of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
+						}
+					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
+						ChatRoomSendLocal(`${character} changed the timer behavior of the curse on slot '${visibleName}' to ${newData.timerRemove ? "remove" : "disable"} the curse when time runs out`, undefined, character.MemberNumber);
+					if (didTriggerChange)
+						if (newData.requirements === null) {
+							ChatRoomSendLocal(`${character} set the triggers of curse on slot '${visibleName}' to the global curses configuration`, undefined, character.MemberNumber);
+						} else {
+							const triggers: string[] = [];
+							const r = newData.requirements;
+							if (r.room) {
+								triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+							}
+							if (r.roomName) {
+								triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+							}
+							if (r.role) {
+								const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+								triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+							}
+							if (r.player) {
+								const name = getCharacterName(r.player.memberNumber, null);
+								triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+							}
+							if (triggers.length > 0) {
+								ChatRoomSendLocal(`${character} set the curse on slot ${visibleName} to trigger under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+							} else {
+								ChatRoomSendLocal(`${character} deactivated all trigger conditions of the curse on slot ${visibleName}. The curse will now always trigger, while it is active`, undefined, character.MemberNumber);
+							}
+						}
+					if (didItemConfigCurseChange)
+						ChatRoomSendLocal(`${character} ${newData.data?.curseProperties ? "cursed" : "lifted the curse of"} the '${visibleName}' item's configuration`, undefined, character.MemberNumber);
+				}
+			},
+			logCategoryUpdate: (character, newData, oldData) => {
+				const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
+				const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+				const changeEvents = [];
+				if (didTimerChange)
+					changeEvents.push("default timer");
+				if (didTriggerChange)
+					changeEvents.push("trigger condition");
+				if (changeEvents.length > 0) {
+					logMessage("curse_change", LogEntryType.plaintext,
+						`${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s global curses config`);
+				}
+				if (!character.isPlayer()) {
+					if (newData.timer !== oldData.timer)
+						if (newData.timer === null) {
+							ChatRoomSendLocal(`${character} removed the default timer of the global curses configuration`, undefined, character.MemberNumber);
+						} else {
+							ChatRoomSendLocal(`${character} changed the default timer of the global curses configuration to ${formatTimeInterval(newData.timer)}`, undefined, character.MemberNumber);
+						}
+					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
+						ChatRoomSendLocal(`${character} changed the default timeout behavior of the global curses configuration to ${newData.timerRemove ? "removal of curses" : "disabling curses"} when time runs out`, undefined, character.MemberNumber);
+					if (didTriggerChange) {
+						const triggers: string[] = [];
+						const r = newData.requirements;
+						if (r.room) {
+							triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+						}
+						if (r.roomName) {
+							triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+						}
+						if (r.role) {
+							const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+							triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+						}
+						if (r.player) {
+							const name = getCharacterName(r.player.memberNumber, null);
+							triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+						}
+						if (triggers.length > 0) {
+							ChatRoomSendLocal(`${character} set the global curses configuration to trigger curses under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+						} else {
+							ChatRoomSendLocal(`${character} deactivated all trigger conditions for the global curses configuration. Curses set to this default configuration will now always trigger, while active`, undefined, character.MemberNumber);
+						}
+					}
+				}
 			}
 		});
 	}

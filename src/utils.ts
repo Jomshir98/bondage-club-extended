@@ -70,3 +70,29 @@ export const clipboardAvailable = Boolean(navigator.clipboard);
 export function clamp(value: number, min: number, max: number) {
 	return Math.min(Math.max(value, min), max);
 }
+
+/** Formats time in ms into days, hours minutes and seconds */
+export function formatTimeInterval(time: number) {
+	let res = "";
+	if (time < 0) {
+		res = "-";
+		time *= -1;
+	}
+	const seconds = Math.floor(time / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
+	if (days > 0) {
+		res += `${days} days, `;
+	}
+	if (hours > 0) {
+		res += `${hours % 24} hours, `;
+	}
+	if (minutes > 0) {
+		res += `${minutes % 60} minutes, `;
+	}
+	if (seconds > 0) {
+		res += `${seconds % 60} seconds`;
+	}
+	return res;
+}

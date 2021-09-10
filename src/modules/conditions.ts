@@ -1,6 +1,6 @@
 import { ConditionsLimit, ModuleCategory, ModuleInitPhase } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
-import { isObject } from "../utils";
+import { capitalizeFirstLetter, isObject } from "../utils";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
@@ -10,6 +10,8 @@ import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { AccessLevel, checkPermissionAccess, getCharacterAccessLevel } from "./authority";
+import { COMMAND_GENERIC_ERROR, Command_parseTime, Command_pickAutocomplete, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber } from "./commands";
+import { getCharacterName } from "../utilsClub";
 
 const CONDITIONS_CHECK_INTERVAL = 2_000;
 
@@ -97,6 +99,11 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 		updateData: ConditionsCategorySpecificPublicData[C],
 		character: ChatroomCharacter | null
 	): boolean;
+	logLimitChange(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter, newLimit: ConditionsLimit, oldLimit: ConditionsLimit): void;
+	logConditionUpdate(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter, newData: ConditionsConditionPublicData<C>, oldData: ConditionsConditionPublicData<C>): void;
+	logCategoryUpdate(character: ChatroomCharacter, newData: ConditionsCategoryConfigurableData, oldData: ConditionsCategoryConfigurableData): void;
+	parseConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): [boolean, string | ConditionsCategoryKeys[C]];
+	autocompleteConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): string[];
 }
 
 const conditionHandlers: Map<ConditionsCategories, ConditionsHandler<ConditionsCategories>> = new Map();
@@ -130,6 +137,16 @@ export function ConditionsGetCategoryData<C extends ConditionsCategories>(catego
 	return data as ConditionsCategoryData<C>;
 }
 
+function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(handler: ConditionsHandler<C>, condition: ConditionsCategoryKeys[C], conditionData: ConditionsConditionData<C>): ConditionsConditionPublicData<C> {
+	return {
+		active: conditionData.active,
+		data: handler.makePublicData(condition, conditionData),
+		timer: conditionData.timer ?? null,
+		timerRemove: conditionData.timerRemove ?? false,
+		requirements: conditionData.requirements ?? null
+	};
+}
+
 export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C, requester: ChatroomCharacter): ConditionsCategoryPublicData<C> {
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	const data = ConditionsGetCategoryData<ConditionsCategories>(category);
@@ -152,13 +169,7 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		}
 	}
 	for (const [condition, conditionData] of Object.entries(data.conditions)) {
-		res.conditions[condition] = {
-			active: conditionData.active,
-			data: handler.makePublicData(condition, conditionData),
-			timer: conditionData.timer ?? null,
-			timerRemove: conditionData.timerRemove ?? false,
-			requirements: conditionData.requirements ?? null
-		};
+		res.conditions[condition] = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData);
 	}
 	return res as ConditionsCategoryPublicData<C>;
 }
@@ -223,10 +234,7 @@ export function ConditionsRemoveCondition<C extends ConditionsCategories>(catego
 }
 
 export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit, character: ChatroomCharacter | null): boolean {
-	const handler = conditionHandlers.get(category);
-	if (!handler) {
-		throw new Error(`Attempt to set limit for unknown conditions category ${category}`);
-	}
+	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	if (!moduleIsEnabled(handler.category))
 		return false;
 	if (!handler.loadValidateConditionKey(condition)) {
@@ -239,7 +247,8 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 	}
 	if (data.conditions[condition] !== undefined)
 		return false;
-	if ((data.limits[condition] ?? ConditionsLimit.normal) === limit)
+	const oldLimit = data.limits[condition] ?? ConditionsLimit.normal;
+	if (oldLimit === limit)
 		return true;
 	if (limit === ConditionsLimit.normal) {
 		delete data.limits[condition];
@@ -247,7 +256,7 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 		data.limits[condition] = limit;
 	}
 	if (character) {
-		// TODO: log
+		handler.logLimitChange(condition, character, limit, oldLimit);
 	}
 	notifyOfChange();
 	modStorageSync();
@@ -255,15 +264,13 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 }
 
 export function ConditionsUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>, character: ChatroomCharacter | null): boolean {
-	const handler = conditionHandlers.get(category);
-	if (!handler) {
-		throw new Error(`Attempt to set limit for unknown conditions category ${category}`);
-	}
+	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	if (character && !ConditionsCheckAccess(category, condition, character))
 		return false;
 	const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);
 	if (!conditionData)
 		return false;
+	const oldData = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData);
 	if (!handler.updateCondition(condition, conditionData, data.data, character))
 		return false;
 	conditionData.active = data.active;
@@ -283,7 +290,7 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 		delete conditionData.timerRemove;
 	}
 	if (character) {
-		// TODO: Log
+		handler.logConditionUpdate(condition, character, data, oldData);
 	}
 	notifyOfChange();
 	modStorageSync();
@@ -291,15 +298,13 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 }
 
 export function ConditionsCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData, character: ChatroomCharacter | null): boolean {
-	const handler = conditionHandlers.get(category);
-	if (!handler) {
-		throw new Error(`Attempt to set limit for unknown conditions category ${category}`);
-	}
+	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	if (character && !checkPermissionAccess(handler.permission_configure, character))
 		return false;
 	const conditionData = ConditionsGetCategoryData<ConditionsCategories>(category);
 	if (!conditionData)
 		return false;
+	const oldData = character && ConditionsGetCategoryPublicData(category, character);
 	conditionData.requirements = data.requirements;
 	if (data.timer !== null) {
 		conditionData.timer = data.timer;
@@ -311,8 +316,8 @@ export function ConditionsCategoryUpdate<C extends ConditionsCategories>(categor
 	} else {
 		delete conditionData.timerRemove;
 	}
-	if (character) {
-		// TODO: Log
+	if (character && oldData) {
+		handler.logCategoryUpdate(character, data, oldData);
 	}
 	notifyOfChange();
 	modStorageSync();
@@ -351,6 +356,421 @@ export function ConditionsEvaluateRequirements(requirements: ConditionsCondition
 
 	return true;
 }
+
+export type ConditionsSubcommand = "setactive" | "triggers" | "globaltriggers" | "timer" | "defaulttimer";
+export const ConditionsSubcommands: ConditionsSubcommand[] = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer"];
+
+/*
+!curses setactive <condition> <yes/no> - Switch the curse and its conditions on and off
+
+!curses triggers <condition> global <yes/no> - Set the trigger condition of this curse to the global configuration
+!curses triggers <condition> <[for each trigger separately]>
+!curses globaltriggers <[for each trigger separately]>
+
+!curses timer <condition> <[timer handle]>
+!curses defaulttimer <[timer handle]>
+
+timer handling:
+disable - Remove the timer and set lifetime to infinite
+set <time> (time in /[0-9]+d [0-9]+h [0-9]+m [0-9]+s/ format, each part optional) - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)
+autoremove <yes/no> - Set if the curse is removed when the timer runs out or just disables itself
+
+(global)triggers commands:
+room ignore 							Remove the 'room type'-based trigger condition
+room <is/isnot> <public/private>		Add such a 'room type'-based trigger condition
+roomname ignore							Remove the 'room name'-based trigger condition
+roomname <is/isnot> <name>				Add such a 'room name'-based trigger condition
+role ignore								Remove the role-based trigger condition
+role <with/notwith> <role>				Add such a role-based trigger condition
+player ignore							Remove the person-based trigger condition
+player <with/notwith> <memberNumber>	Add such a person-based trigger condition
+*/
+
+const ConditionsCommandTriggersKeywords = ["room", "roomname", "role", "player"];
+function ConditionsCommandProcessTriggers(triggers: ConditionsConditionRequirements, argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void): boolean {
+	const trigger = (argv[0] || "").toLocaleLowerCase();
+	const keyword = (argv[1] || "").toLocaleLowerCase();
+	if (keyword === "ignore" && argv.length !== 2) {
+		respond(`Error:\n'${trigger} ignore' does not expect any extra arguments.`);
+		return true;
+	}
+	if (!["is", "isnot", "with", "notwith"].includes(keyword)) {
+		respond(`Error:\nUnknown setting '${keyword}'. please use one of: ${trigger === "room" || trigger === "roomname" ? "is, isnot" : "with, notwith"}`);
+		return true;
+	}
+	if (argv.length !== 3) {
+		respond(`Error:\n'${trigger} ${keyword} <value>' got too many arguments. Arguments with space need to be "quoted".`);
+		return true;
+	}
+	const inverted = (keyword === "isnot" || keyword === "notwith") ? true : undefined;
+	let value = argv[2];
+	if (trigger === "room") {
+		if (keyword === "ignore") {
+			delete triggers.room;
+			return false;
+		}
+		value = value.toLocaleLowerCase();
+		if (value !== "public" && value !== "private") {
+			respond(`Error:\nRoom can be either 'public' or 'private', got: '${value}'`);
+			return true;
+		}
+		triggers.room = {
+			type: value,
+			inverted
+		};
+	} else if (trigger === "roomname") {
+		if (keyword === "ignore") {
+			delete triggers.roomName;
+			return false;
+		}
+		triggers.roomName = {
+			name: value,
+			inverted
+		};
+	} else if (trigger === "role") {
+		if (keyword === "ignore") {
+			delete triggers.role;
+			return false;
+		}
+		const level = (AccessLevel as any)[value.toLocaleLowerCase()] as AccessLevel;
+		if (typeof level !== "number" || level === AccessLevel.self) {
+			respond(`Error:\n` +
+				`'role ${keyword}' expects one of: clubowner, owner, lover, mistress, whitelist, friend, public; got: '${value.toLocaleLowerCase()}'`);
+			return true;
+		}
+		triggers.role = {
+			role: level,
+			inverted
+		};
+	} else if (trigger === "player") {
+		if (keyword === "ignore") {
+			delete triggers.player;
+			return false;
+		}
+		const target = Command_selectCharacterMemberNumber(value, true);
+		if (typeof target === "string") {
+			respond(target);
+			return true;
+		}
+		triggers.player = {
+			memberNumber: target,
+			inverted
+		};
+	}
+	return false;
+}
+function ConditionsCommandTriggersAutocomplete(argv: string[], sender: ChatroomCharacter): string[] {
+	const trigger = (argv[0] || "").toLocaleLowerCase();
+	if (argv.length < 2)
+		return [];
+	if (trigger === "room" && argv.length === 2) {
+		return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
+	}
+	if (trigger === "room" && argv.length === 3) {
+		return Command_pickAutocomplete(argv[2], ["public", "private"]);
+	}
+	if (trigger === "roomname" && argv.length === 2) {
+		return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
+	}
+	if (trigger === "role" && argv.length === 2) {
+		return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
+	}
+	if (trigger === "role" && argv.length === 3) {
+		return Command_pickAutocomplete(argv[2], ["clubowner", "owner", "lover", "mistress", "whitelist", "friend", "public"]);
+	}
+	if (trigger === "player" && argv.length === 2) {
+		return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
+	}
+	if (trigger === "player" && argv.length === 3) {
+		return Command_selectCharacterAutocomplete(argv[2]);
+	}
+	return [];
+}
+
+export function ConditionsRunSubcommand(category: ConditionsCategories, argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void): void {
+	const subcommand = (argv[0] || "").toLocaleLowerCase() as ConditionsSubcommand;
+	if (!ConditionsSubcommands.includes(subcommand)) {
+		throw new Error(`Subcomand "${subcommand}" passed to ConditionsRunSubcommand isn't valid ConditionsSubcommand`);
+	}
+
+	const handler = conditionHandlers.get(category);
+	if (!handler) {
+		throw new Error(`Attempt to run command for unknown conditions category ${category}`);
+	}
+	const categoryData = ConditionsGetCategoryData(category);
+	const categorySingular = category.slice(0, -1);
+
+	if (subcommand === "setactive") {
+		const active = (argv[2] || "").toLocaleLowerCase();
+		if (argv.length !== 3 || active !== "yes" && active !== "no") {
+			return respond(`Usage:\nsetactive <${categorySingular}> <yes/no>`);
+		}
+		const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
+		if (!result) {
+			return respond(condition);
+		}
+		if (!categoryData.conditions[condition]) {
+			return respond(`This ${categorySingular} doesn't exist`);
+		}
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
+		conditionData.active = active === "yes";
+		respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+	} else if (subcommand === "triggers") {
+		const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+		if (!result) {
+			return respond(condition);
+		}
+		if (!categoryData.conditions[condition]) {
+			return respond(`This ${categorySingular} doesn't exist`);
+		}
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
+		const keyword = (argv[2] || "").toLocaleLowerCase();
+		if (!keyword) {
+			if (!conditionData.requirements) {
+				return respond(`Current status:\n` +
+					`Uses global ${category} trigger configuration`
+				);
+			} else {
+				const triggers: string[] = [];
+				const r = conditionData.requirements;
+				if (r.room) {
+					triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+				}
+				if (r.roomName) {
+					triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+				}
+				if (r.role) {
+					const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+					triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+				}
+				if (r.player) {
+					const name = getCharacterName(r.player.memberNumber, null);
+					triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+				}
+				if (triggers.length > 0) {
+					return respond(`Current status:\n` +
+						`This ${categorySingular} will trigger under following conditions:\n` +
+						triggers.join("\n")
+					);
+				} else {
+					return respond(`Current status:\n` +
+						`No triggers are set. The ${categorySingular} will now always trigger, while it is active`
+					);
+				}
+			}
+		} else if (keyword === "global") {
+			const global = (argv[3] || "").toLocaleLowerCase();
+			if (argv.length !== 4 || global !== "yes" && global !== "no") {
+				return respond(`Usage:\ntriggers <${categorySingular}> global <yes/no>`);
+			}
+			if (global === "yes") {
+				conditionData.requirements = null;
+			} else if (!conditionData.requirements) {
+				conditionData.requirements = cloneDeep(categoryData.requirements);
+			}
+		} else if (!ConditionsCommandTriggersKeywords.includes(keyword)) {
+			return respond(
+				`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${categorySingular}> *' options:\n` +
+				`global <yes/no> - Set the trigger condition of this ${categorySingular} to the global configuration\n` +
+				`room ignore - Remove the 'room type'-based trigger condition\n` +
+				`room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
+				`roomname ignore - Remove the 'room name'-based trigger condition\n` +
+				`roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
+				`role ignore - Remove the role-based trigger condition\n` +
+				`role <with/notwith> <role> - Add such a role-based trigger condition\n` +
+				`player ignore - Remove the person-based trigger condition\n` +
+				`player <with/notwith> <memberNumber> - Add such a person-based trigger condition`
+			);
+		} else if (!conditionData.requirements) {
+			return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${categorySingular}> global no`);
+		} else {
+			if (ConditionsCommandProcessTriggers(conditionData.requirements, argv.slice(2), sender, respond))
+				return;
+		}
+		respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+	} else if (subcommand === "globaltriggers") {
+		const configData = ConditionsGetCategoryPublicData(category, sender);
+		if (!argv[1]) {
+			const triggers: string[] = [];
+			const r = configData.requirements;
+			if (r.room) {
+				triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+			}
+			if (r.roomName) {
+				triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+			}
+			if (r.role) {
+				const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+				triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+			}
+			if (r.player) {
+				const name = getCharacterName(r.player.memberNumber, null);
+				triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+			}
+			if (triggers.length > 0) {
+				return respond(`Current status:\n` +
+					`Globally ${category} are set to trigger under following conditions:\n` +
+					triggers.join("\n")
+				);
+			} else {
+				return respond(`Current status:\n` +
+					`No triggers are set globally. ${capitalizeFirstLetter(category)} using global config will now always trigger, if they are active`
+				);
+			}
+		} else if (!ConditionsCommandTriggersKeywords.includes(argv[1].toLocaleLowerCase())) {
+			return respond(
+				`Unknown trigger '${argv[1].toLocaleLowerCase()}' List of possible 'globaltriggers *' options:\n` +
+				`room ignore - Remove the 'room type'-based trigger condition\n` +
+				`room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
+				`roomname ignore - Remove the 'room name'-based trigger condition\n` +
+				`roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
+				`role ignore - Remove the role-based trigger condition\n` +
+				`role <with/notwith> <role> - Add such a role-based trigger condition\n` +
+				`player ignore - Remove the person-based trigger condition\n` +
+				`player <with/notwith> <memberNumber> - Add such a person-based trigger condition`
+			);
+		} else {
+			if (ConditionsCommandProcessTriggers(configData.requirements, argv.slice(1), sender, respond))
+				return;
+		}
+		respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+	} else if (subcommand === "timer") {
+		const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+		if (!result) {
+			return respond(condition);
+		}
+		if (!categoryData.conditions[condition]) {
+			return respond(`This ${categorySingular} doesn't exist`);
+		}
+		const keyword = (argv[2] || "").toLocaleLowerCase();
+		if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
+			return respond(`Usage:\n` +
+				`timer <${categorySingular}> disable - Remove the timer and set lifetime to infinite\n` +
+				`timer <${categorySingular}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+				`timer <${categorySingular}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`
+			);
+		}
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
+		if (keyword === "disable") {
+			conditionData.timer = null;
+			conditionData.timerRemove = false;
+		} else if (keyword === "set") {
+			let time = 0;
+			for (const v of argv.slice(3)) {
+				const i = Command_parseTime(v);
+				if (typeof i === "string") {
+					return respond(i);
+				}
+				time += i;
+			}
+			conditionData.timer = Date.now() + time;
+		} else if (keyword === "autoremove") {
+			const autoremove = (argv[3] || "").toLocaleLowerCase();
+			if (argv.length !== 4 || autoremove !== "yes" && autoremove !== "no") {
+				return respond(`Usage:\ntimer <${categorySingular}> autoremove <yes/no>`);
+			}
+			if (conditionData.timer === null) {
+				return respond(`Timer is disabled on this ${categorySingular}. To use autoremove, first set timer`);
+			}
+			conditionData.timerRemove = autoremove === "yes";
+		}
+		respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+	} else if (subcommand === "defaulttimer") {
+		const keyword = (argv[1] || "").toLocaleLowerCase();
+		if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
+			return respond(`Usage:\n` +
+				`defaulttimer disable - Remove the timer and set lifetime to infinite\n` +
+				`defaulttimer set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+				`defaulttimer autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`
+			);
+		}
+		const configData = ConditionsGetCategoryPublicData(category, sender);
+		if (keyword === "disable") {
+			configData.timer = null;
+			configData.timerRemove = false;
+		} else if (keyword === "set") {
+			let time = 0;
+			for (const v of argv.slice(2)) {
+				const i = Command_parseTime(v);
+				if (typeof i === "string") {
+					return respond(i);
+				}
+				time += i;
+			}
+			configData.timer = time;
+		} else if (keyword === "autoremove") {
+			const autoremove = (argv[2] || "").toLocaleLowerCase();
+			if (argv.length !== 3 || autoremove !== "yes" && autoremove !== "no") {
+				return respond(`Usage:\ndefaulttimer <${categorySingular}> autoremove <yes/no>`);
+			}
+			if (configData.timer === null) {
+				return respond(`Timer is disabled by default for ${category}. To use autoremove, first set timer`);
+			}
+			configData.timerRemove = autoremove === "yes";
+		}
+		respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+	}
+}
+
+export function ConditionsAutocompleteSubcommand(category: ConditionsCategories, argv: string[], sender: ChatroomCharacter): string[] {
+	const subcommand = (argv[0] || "").toLocaleLowerCase() as ConditionsSubcommand;
+	if (!ConditionsSubcommands.includes(subcommand)) {
+		throw new Error(`Subcomand "${subcommand}" passed to ConditionsAutocompleteSubcommand isn't valid ConditionsSubcommand`);
+	}
+
+	const handler = conditionHandlers.get(category);
+	if (!handler) {
+		throw new Error(`Attempt to autocomplete command for unknown conditions category ${category}`);
+	}
+	const categoryData = ConditionsGetCategoryData(category);
+
+	if (subcommand === "setactive") {
+		if (argv.length === 2) {
+			return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+		} else if (argv.length === 3) {
+			return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+		}
+	} else if (subcommand === "triggers") {
+		if (argv.length === 2) {
+			return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+		}
+		const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+		if (!result || !categoryData.conditions[condition]) {
+			return [];
+		}
+		if (argv.length === 3) {
+			return Command_pickAutocomplete(argv[2], ["global", ...ConditionsCommandTriggersKeywords]);
+		}
+		if (argv[2].toLocaleLowerCase() === "global") {
+			return Command_pickAutocomplete(argv[3], ["yes", "no"]);
+		} else if (categoryData.conditions[condition].requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+			return ConditionsCommandTriggersAutocomplete(argv.slice(2), sender);
+		}
+	} else if (subcommand === "globaltriggers") {
+		if (argv.length === 2) {
+			return Command_pickAutocomplete(argv[2], ConditionsCommandTriggersKeywords);
+		} else if (ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+			return ConditionsCommandTriggersAutocomplete(argv.slice(1), sender);
+		}
+	} else if (subcommand === "timer") {
+		if (argv.length === 2) {
+			return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+		} else if (argv.length === 3) {
+			return Command_pickAutocomplete(argv[2], ["set", "disable", "autoremove"]);
+		} else if (argv.length === 4 && argv[2].toLocaleLowerCase() === "autoremove") {
+			return Command_pickAutocomplete(argv[3], ["yes", "no"]);
+		}
+	} else if (subcommand === "defaulttimer") {
+		if (argv.length === 2) {
+			return Command_pickAutocomplete(argv[1], ["set", "disable", "autoremove"]);
+		} else if (argv.length === 3 && argv[1].toLocaleLowerCase() === "autoremove") {
+			return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+		}
+	}
+
+	return [];
+}
+
 
 export class ModuleConditions extends BaseModule {
 	private timer: number | null = null;

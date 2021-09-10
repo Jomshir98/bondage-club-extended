@@ -51,15 +51,6 @@ type BCX_logAllowedActions = {
 	leaveMessage: boolean;
 };
 
-type BCX_curseInfo = {
-	allowCurse: boolean;
-	allowLift: boolean;
-	curses: Record<string, {
-		Name: string;
-		curseProperties: boolean;
-	} | null>;
-};
-
 type BCX_queries = {
 	disabledModules: [undefined, import("./constants").ModuleCategory[]];
 	commandHint: [string, [string, string[] | null]];

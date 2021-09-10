@@ -360,7 +360,7 @@ export function Command_selectWornItem(character: ChatroomCharacter, selector: s
 	if (targets.length === 1) {
 		return targets[0];
 	} else if (targets.length === 0) {
-		return `Item "${selector}" not found on character ${character}.`;
+		return `Item "${selector}" not found on character ${character}. If your item(group) consists of more than one word, please put it in quotes, such as "lower leg".`;
 	} else {
 		return `Multiple items match, please use group name instead. (eg. arms)`;
 	}
@@ -429,6 +429,26 @@ export function Command_selectGroupAutocomplete(selector: string, character: Cha
 	}
 
 	return possible;
+}
+
+export function Command_parseTime(selector: string): string | number {
+	const match = /^([0-9]+)([a-z]+)$/.exec(selector.toLocaleLowerCase());
+	if (!match) {
+		return `Unknown time format "${selector}", please use format 'number+unit' (e.g. 23h 30m)`;
+	}
+	const num = Number.parseInt(match[1], 10);
+	const unit = match[2];
+	if (["d", "day", "days"].includes(unit)) {
+		return num * 24 * 60 * 60 * 1000;
+	} else if (["h", "hour", "hours"].includes(unit)) {
+		return num * 60 * 60 * 1000;
+	} else if (["m", "min", "minute", "minutes"].includes(unit)) {
+		return num * 60 * 1000;
+	} else if (["s", "sec", "second", "seconds"].includes(unit)) {
+		return num * 1000;
+	}
+	return `Unknown time unit "${unit}", please use one of:\n`+
+		`d (day), h (hour), m (minute), s (second)`;
 }
 
 export class ModuleCommands extends BaseModule {

@@ -471,6 +471,9 @@ export class ModuleCommands extends BaseModule {
 					chat.value = msg.substr(1);
 				} else if (msg.startsWith(".")) {
 					if (RunCommand(msg.substr(1))) {
+						// Keeps the chat log in memory so it can be accessed with pageup/pagedown
+						ChatRoomLastMessage.push(msg);
+						ChatRoomLastMessageIndex = ChatRoomLastMessage.length;
 						chat.value = "";
 					}
 					return;

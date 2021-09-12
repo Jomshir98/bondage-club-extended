@@ -356,8 +356,8 @@ window.BCX_Loaded = false;
     function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
     }
-    /** Formats time in ms into days, hours minutes and seconds */
-    function formatTimeInterval(time) {
+    /** Formats time in ms into days, hours minutes and seconds - also has a short mode that only shows the largest unit, e.g. 17h */
+    function formatTimeInterval(time, mode = "full") {
         let res = "";
         if (time < 0) {
             res = "-";
@@ -367,17 +367,33 @@ window.BCX_Loaded = false;
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
         const days = Math.floor(hours / 24);
-        if (days > 0) {
-            res += `${days} days, `;
+        if (mode === "full" || mode === undefined) {
+            if (days > 0) {
+                res += `${days} days, `;
+            }
+            if (hours > 0) {
+                res += `${hours % 24} hours, `;
+            }
+            if (minutes > 0) {
+                res += `${minutes % 60} minutes, `;
+            }
+            if (seconds > 0) {
+                res += `${seconds % 60} seconds`;
+            }
         }
-        if (hours > 0) {
-            res += `${hours % 24} hours, `;
-        }
-        if (minutes > 0) {
-            res += `${minutes % 60} minutes, `;
-        }
-        if (seconds > 0) {
-            res += `${seconds % 60} seconds`;
+        else if (mode === "short") {
+            if (days > 1) {
+                res += `${days}d`;
+            }
+            else if (hours > 1) {
+                res += `${hours}h`;
+            }
+            else if (minutes > 1) {
+                res += `${minutes}m`;
+            }
+            else if (seconds > 0) {
+                res += `${seconds}s`;
+            }
         }
         return res;
     }
@@ -6410,10 +6426,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         const categoryData = ConditionsGetCategoryData(category);
         const categorySingular = category.slice(0, -1);
+        const cshelp = handler.commandConditionSelectorHelp;
         if (subcommand === "setactive") {
             const active = (argv[2] || "").toLocaleLowerCase();
             if (argv.length !== 3 || active !== "yes" && active !== "no") {
-                return respond(`Usage:\nsetactive <${categorySingular}> <yes/no>`);
+                return respond(`Usage:\nsetactive <${cshelp}> <yes/no>`);
             }
             const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
             if (!result) {
@@ -6472,7 +6489,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             else if (keyword === "global") {
                 const global = (argv[3] || "").toLocaleLowerCase();
                 if (argv.length !== 4 || global !== "yes" && global !== "no") {
-                    return respond(`Usage:\ntriggers <${categorySingular}> global <yes/no>`);
+                    return respond(`Usage:\ntriggers <${cshelp}> global <yes/no>`);
                 }
                 if (global === "yes") {
                     conditionData.requirements = null;
@@ -6482,7 +6499,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             }
             else if (!ConditionsCommandTriggersKeywords.includes(keyword)) {
-                return respond(`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${categorySingular}> *' options:\n` +
+                return respond(`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${cshelp}> *' options:\n` +
                     `global <yes/no> - Set the trigger condition of this ${categorySingular} to the global configuration\n` +
                     `room ignore - Remove the 'room type'-based trigger condition\n` +
                     `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
@@ -6491,10 +6508,11 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     `role ignore - Remove the role-based trigger condition\n` +
                     `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
                     `player ignore - Remove the person-based trigger condition\n` +
-                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition`);
+                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
+                    `To show currently set triggers, use just 'triggers <group>' without adding one of the above sub-commands.`);
             }
             else if (!conditionData.requirements) {
-                return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${categorySingular}> global no`);
+                return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${cshelp}> global no`);
             }
             else {
                 if (ConditionsCommandProcessTriggers(conditionData.requirements, argv.slice(2), sender, respond))
@@ -6532,7 +6550,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
             }
             else if (!ConditionsCommandTriggersKeywords.includes(argv[1].toLocaleLowerCase())) {
-                return respond(`Unknown trigger '${argv[1].toLocaleLowerCase()}' List of possible 'globaltriggers *' options:\n` +
+                return respond(`${argv[1] !== "help" ? `Unknown trigger '${argv[1].toLocaleLowerCase()}'. ` : ""}List of possible 'globaltriggers *' options:\n` +
                     `room ignore - Remove the 'room type'-based trigger condition\n` +
                     `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
                     `roomname ignore - Remove the 'room name'-based trigger condition\n` +
@@ -6540,7 +6558,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     `role ignore - Remove the role-based trigger condition\n` +
                     `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
                     `player ignore - Remove the person-based trigger condition\n` +
-                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition`);
+                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
+                    `To show currently set global triggers, use just 'globaltriggers' without anything behind.`);
             }
             else {
                 if (ConditionsCommandProcessTriggers(configData.requirements, argv.slice(1), sender, respond))
@@ -6559,9 +6578,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             const keyword = (argv[2] || "").toLocaleLowerCase();
             if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
                 return respond(`Usage:\n` +
-                    `timer <${categorySingular}> disable - Remove the timer and set lifetime to infinite\n` +
-                    `timer <${categorySingular}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
-                    `timer <${categorySingular}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
+                    `timer <${cshelp}> disable - Remove the timer and set lifetime to infinite\n` +
+                    `timer <${cshelp}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+                    `timer <${cshelp}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
             }
             const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
             if (keyword === "disable") {
@@ -6582,7 +6601,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             else if (keyword === "autoremove") {
                 const autoremove = (argv[3] || "").toLocaleLowerCase();
                 if (argv.length !== 4 || autoremove !== "yes" && autoremove !== "no") {
-                    return respond(`Usage:\ntimer <${categorySingular}> autoremove <yes/no>`);
+                    return respond(`Usage:\ntimer <${cshelp}> autoremove <yes/no>`);
                 }
                 if (conditionData.timer === null) {
                     return respond(`Timer is disabled on this ${categorySingular}. To use autoremove, first set timer`);
@@ -6618,7 +6637,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             else if (keyword === "autoremove") {
                 const autoremove = (argv[2] || "").toLocaleLowerCase();
                 if (argv.length !== 3 || autoremove !== "yes" && autoremove !== "no") {
-                    return respond(`Usage:\ndefaulttimer <${categorySingular}> autoremove <yes/no>`);
+                    return respond(`Usage:\ndefaulttimer <${cshelp}> autoremove <yes/no>`);
                 }
                 if (configData.timer === null) {
                     return respond(`Timer is disabled by default for ${category}. To use autoremove, first set timer`);
@@ -7153,7 +7172,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         }
                         else {
                             const item = AssetGet(Player.AssetFamily, k, v.data.Name);
-                            result += `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.data.Name} (${getVisibleGroupName(group)})`;
+                            const timerText = `Timer: ${v.timer ? formatTimeInterval(v.timer - Date.now(), "short") : "∞"}`;
+                            result += `${(_a = item === null || item === void 0 ? void 0 : item.Description) !== null && _a !== void 0 ? _a : v.data.Name} (${getVisibleGroupName(group)}) | ${timerText}` +
+                                `${v.data.curseProperties ? " | Item configuration also cursed" : ""}`;
                         }
                     }
                     respond(result);
@@ -7249,8 +7270,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 }
                 else {
                     respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
-                        `!curses list - List all active curses and related info\n` +
-                        `!curses listgroups <items|clothes> - Lists all possible item or clothing group slots\n` +
+                        `!curses list - List all cursed <group>s and related info (eg. cursed items)\n` +
+                        `!curses listgroups <items|clothes> - Lists all possible item or clothing <group> slots and worn items\n` +
                         `!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
                         `!curses curseworn <items|clothes> - Place a curse on all currenty worn items/clothes\n` +
                         `!curses curseall <items|clothes> - Place a curse on all item/cloth slots, both used and empty\n` +
@@ -7403,7 +7424,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                                 ChatRoomSendLocal(`${character} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
                             }
                             else {
-                                ChatRoomSendLocal(`${character} changed the duration of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
+                                ChatRoomSendLocal(`${character} changed the remaining time of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
                             }
                         if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
                             ChatRoomSendLocal(`${character} changed the timer behavior of the curse on slot '${visibleName}' to ${newData.timerRemove ? "remove" : "disable"} the curse when time runs out`, undefined, character.MemberNumber);
@@ -7485,7 +7506,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                             }
                         }
                     }
-                }
+                },
+                commandConditionSelectorHelp: "group"
             });
         }
         load() {
@@ -8279,216 +8301,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT$4 = 6;
-    class GuiAuthorityRoles extends GuiSubscreen {
-        constructor(character) {
-            super();
-            this.roleData = null;
-            this.roleList = [];
-            this.failed = false;
-            this.page = 0;
-            this.hoveringTextList = [];
-            this.character = character;
-            this.hoveringTextList =
-                character.isPlayer() ? [
-                    `You - either top or bottom of the hierarchy`,
-                    `Your owner, visible on your character profile`,
-                    `Any character, added to the list on the left as "Owner"`,
-                    `Any of your lovers, visible on your character profile`,
-                    `Any character, added to the list on the left as "Mistress"`,
-                    `Anyone you have white-listed`,
-                    `Anyone you have friend-listed`,
-                    `Anyone, who can use items on you`
-                ] : [
-                    `This player - either top or bottom of the hierarchy`,
-                    `This player's owner, visible on their character profile`,
-                    `Any character, added to the list on the left as "Owner"`,
-                    `Any lover of this player, visible on their profile`,
-                    `Any character, added to the list on the left as "Mistress"`,
-                    `Anyone this player has white-listed`,
-                    `Anyone this player has friend-listed`,
-                    `Anyone, who can use items on this player`
-                ];
-        }
-        Load() {
-            this.requestData();
-        }
-        onChange(sender) {
-            if (sender === this.character.MemberNumber) {
-                this.requestData();
-            }
-        }
-        requestData() {
-            this.roleData = null;
-            this.rebuildList();
-            Promise.all([this.character.getRolesData()]).then(res => {
-                this.roleData = res[0];
-                this.rebuildList();
-            }, err => {
-                console.error(`BCX: Failed to get role info for ${this.character}`, err);
-                this.failed = true;
-            });
-        }
-        rebuildList() {
-            if (!this.active)
-                return;
-            this.roleList = [];
-            let Input = document.getElementById("BCX_RoleAdd");
-            if (!this.roleData) {
-                if (Input) {
-                    Input.remove();
-                }
-                return;
-            }
-            const showInput = this.roleData.allowAddMistress || this.roleData.allowAddOwner;
-            if (!showInput && Input) {
-                Input.remove();
-            }
-            else if (showInput && !Input) {
-                Input = ElementCreateInput("BCX_RoleAdd", "text", "", "6");
-            }
-            this.roleList = this.roleData.owners.map((i) => ({
-                type: "Owner",
-                memberNumber: i[0],
-                name: getCharacterName(i[0], i[1] || null)
-            }));
-            this.roleList.push(...this.roleData.mistresses.map((i) => ({
-                type: "Mistress",
-                memberNumber: i[0],
-                name: getCharacterName(i[0], i[1] || null)
-            })));
-            const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$4);
-            if (this.page < 0) {
-                this.page = Math.max(totalPages - 1, 0);
-            }
-            else if (this.page >= totalPages) {
-                this.page = 0;
-            }
-        }
-        Run() {
-            DrawText("Hierarchy of roles:", 1336, 95, "Black");
-            // hierarchy background
-            MainCanvas.beginPath();
-            MainCanvas.moveTo(1450, 134);
-            MainCanvas.lineTo(1450 + 150, 134);
-            MainCanvas.lineTo(1450 + 80, 740);
-            MainCanvas.lineTo(1450 + 70, 740);
-            MainCanvas.lineTo(1450, 134);
-            MainCanvas.fillStyle = "Black";
-            MainCanvas.fill();
-            if (this.roleData) {
-                for (let off = 0; off < PER_PAGE_COUNT$4; off++) {
-                    const i = this.page * PER_PAGE_COUNT$4 + off;
-                    if (i >= this.roleList.length)
-                        break;
-                    const e = this.roleList[i];
-                    const Y = 210 + off * 95;
-                    // Owner/Mistress list
-                    MainCanvas.beginPath();
-                    MainCanvas.rect(130, Y, 900, 64);
-                    MainCanvas.stroke();
-                    const msg = `${e.type} ${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
-                    DrawTextFit(msg, 140, Y + 34, 590, "Black");
-                    if ((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) {
-                        MainCanvas.textAlign = "center";
-                        DrawButton(1090, Y, 64, 64, "X", "White");
-                        MainCanvas.textAlign = "left";
-                    }
-                }
-                const Input = document.getElementById("BCX_RoleAdd");
-                if (Input) {
-                    DrawText("Member Number:", 130, 847, "Black");
-                    ElementPosition("BCX_RoleAdd", 580, 842, 300, 64);
-                }
-                MainCanvas.textAlign = "center";
-                if (this.roleData.allowAddOwner) {
-                    DrawButton(760, 815, 210, 64, "Add owner", "white");
-                }
-                if (this.roleData.allowAddMistress) {
-                    DrawButton(1008, 815, 210, 64, "Add mistress", "white");
-                }
-                // Pagination
-                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$4);
-                DrawBackNextButton(1317, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
-            }
-            else if (this.failed) {
-                MainCanvas.textAlign = "center";
-                DrawText(`Failed to get role data from ${this.character.Name}. Maybe you have no access?`, 800, 480, "Black");
-            }
-            else {
-                MainCanvas.textAlign = "center";
-                DrawText("Loading...", 800, 480, "Black");
-            }
-            // hierarchy roles
-            MainCanvas.textAlign = "center";
-            DrawButton(1420, 130, 208, 54, this.character.Name, "White", undefined, this.hoveringTextList[0]);
-            for (let i = 1; i < 8; i++) {
-                DrawButton(1430, 130 + 80 * i, 188, 54, capitalizeFirstLetter(AccessLevel[i]), "White", undefined, this.hoveringTextList[i]);
-            }
-            MainCanvas.textAlign = "left";
-            DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            MainCanvas.textAlign = "center";
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
-        }
-        Click() {
-            var _a;
-            if (MouseIn(1815, 75, 90, 90))
-                return this.Exit();
-            if (MouseIn(1815, 190, 90, 90))
-                return this.Back();
-            if (this.roleData) {
-                for (let off = 0; off < PER_PAGE_COUNT$4; off++) {
-                    const i = this.page * PER_PAGE_COUNT$4 + off;
-                    if (i >= this.roleList.length)
-                        break;
-                    const e = this.roleList[i];
-                    const Y = 210 + off * 95;
-                    if (((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) && MouseIn(1090, Y, 64, 64)) {
-                        this.character.editRole(e.type === "Owner" ? "owner" : "mistress", "remove", e.memberNumber);
-                        return;
-                    }
-                }
-                const Input = document.getElementById("BCX_RoleAdd");
-                const inputText = (_a = Input === null || Input === void 0 ? void 0 : Input.value) !== null && _a !== void 0 ? _a : "";
-                const inputNumber = /^[0-9]+$/.test(inputText) ? Number.parseInt(inputText, 10) : null;
-                if (this.roleData.allowAddOwner && Input && inputNumber !== null && MouseIn(760, 815, 210, 64)) {
-                    Input.value = "";
-                    this.character.editRole("owner", "add", inputNumber);
-                    return;
-                }
-                if (this.roleData.allowAddMistress && Input && inputNumber !== null && MouseIn(1008, 815, 210, 64)) {
-                    Input.value = "";
-                    this.character.editRole("mistress", "add", inputNumber);
-                    return;
-                }
-                // Pagination
-                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$4);
-                if (MouseIn(1317, 800, 150, 90)) {
-                    this.page--;
-                    if (this.page < 0) {
-                        this.page = Math.max(totalPages - 1, 0);
-                    }
-                }
-                else if (MouseIn(1467, 800, 150, 90)) {
-                    this.page++;
-                    if (this.page >= totalPages) {
-                        this.page = 0;
-                    }
-                }
-            }
-        }
-        Exit() {
-            setSubscreen(new GuiMainMenu(this.character));
-        }
-        Back() {
-            setSubscreen(new GuiAuthorityPermissions(this.character));
-        }
-        Unload() {
-            ElementRemove("BCX_RoleAdd");
-        }
-    }
-
     class GuiAuthorityDialogMin extends GuiSubscreen {
         constructor(character, permission, data, myAccesLevel, noAccess, back) {
             super();
@@ -8593,7 +8405,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
     }
 
-    const PER_PAGE_COUNT$3 = 6;
+    const PER_PAGE_COUNT$4 = 6;
     class GuiAuthorityPermissions extends GuiSubscreen {
         constructor(character) {
             super();
@@ -8694,7 +8506,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     });
                 }
             }
-            const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$3);
+            const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$4);
             if (this.page < 0) {
                 this.page = Math.max(totalPages - 1, 0);
             }
@@ -8721,8 +8533,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     DrawButton(870, 182, 64, 64, "X", "White");
                 }
                 MainCanvas.textAlign = "left";
-                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
-                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$4; off++) {
+                    const i = this.page * PER_PAGE_COUNT$4 + off;
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
@@ -8752,7 +8564,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
                 // Pagination
-                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT$3));
+                const totalPages = Math.max(1, Math.ceil(this.permList.length / PER_PAGE_COUNT$4));
                 MainCanvas.textAlign = "center";
                 DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
             }
@@ -8768,7 +8580,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
             MainCanvas.textAlign = "center";
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-            DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList, "Role management");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
         }
         Click() {
             if (MouseIn(1815, 75, 90, 90))
@@ -8783,8 +8595,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     elem.value = "";
                     this.rebuildList();
                 }
-                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
-                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                for (let off = 0; off < PER_PAGE_COUNT$4; off++) {
+                    const i = this.page * PER_PAGE_COUNT$4 + off;
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
@@ -8819,7 +8631,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     }
                 }
                 // Pagination
-                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$3);
+                const totalPages = Math.ceil(this.permList.length / PER_PAGE_COUNT$4);
                 if (MouseIn(1605, 800, 150, 90)) {
                     this.page--;
                     if (this.page < 0) {
@@ -8839,6 +8651,216 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         Unload() {
             ElementRemove("BCX_PermissionsFilter");
+        }
+    }
+
+    const PER_PAGE_COUNT$3 = 6;
+    class GuiAuthorityRoles extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.roleData = null;
+            this.roleList = [];
+            this.failed = false;
+            this.page = 0;
+            this.hoveringTextList = [];
+            this.character = character;
+            this.hoveringTextList =
+                character.isPlayer() ? [
+                    `You - either top or bottom of the hierarchy`,
+                    `Your owner, visible on your character profile`,
+                    `Any character, added to the list on the left as "Owner"`,
+                    `Any of your lovers, visible on your character profile`,
+                    `Any character, added to the list on the left as "Mistress"`,
+                    `Anyone you have white-listed`,
+                    `Anyone you have friend-listed`,
+                    `Anyone, who can use items on you`
+                ] : [
+                    `This player - either top or bottom of the hierarchy`,
+                    `This player's owner, visible on their character profile`,
+                    `Any character, added to the list on the left as "Owner"`,
+                    `Any lover of this player, visible on their profile`,
+                    `Any character, added to the list on the left as "Mistress"`,
+                    `Anyone this player has white-listed`,
+                    `Anyone this player has friend-listed`,
+                    `Anyone, who can use items on this player`
+                ];
+        }
+        Load() {
+            this.requestData();
+        }
+        onChange(sender) {
+            if (sender === this.character.MemberNumber) {
+                this.requestData();
+            }
+        }
+        requestData() {
+            this.roleData = null;
+            this.rebuildList();
+            Promise.all([this.character.getRolesData()]).then(res => {
+                this.roleData = res[0];
+                this.rebuildList();
+            }, err => {
+                console.error(`BCX: Failed to get role info for ${this.character}`, err);
+                this.failed = true;
+            });
+        }
+        rebuildList() {
+            if (!this.active)
+                return;
+            this.roleList = [];
+            let Input = document.getElementById("BCX_RoleAdd");
+            if (!this.roleData) {
+                if (Input) {
+                    Input.remove();
+                }
+                return;
+            }
+            const showInput = this.roleData.allowAddMistress || this.roleData.allowAddOwner;
+            if (!showInput && Input) {
+                Input.remove();
+            }
+            else if (showInput && !Input) {
+                Input = ElementCreateInput("BCX_RoleAdd", "text", "", "6");
+            }
+            this.roleList = this.roleData.owners.map((i) => ({
+                type: "Owner",
+                memberNumber: i[0],
+                name: getCharacterName(i[0], i[1] || null)
+            }));
+            this.roleList.push(...this.roleData.mistresses.map((i) => ({
+                type: "Mistress",
+                memberNumber: i[0],
+                name: getCharacterName(i[0], i[1] || null)
+            })));
+            const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+            if (this.page < 0) {
+                this.page = Math.max(totalPages - 1, 0);
+            }
+            else if (this.page >= totalPages) {
+                this.page = 0;
+            }
+        }
+        Run() {
+            DrawText("Hierarchy of roles:", 1336, 95, "Black");
+            // hierarchy background
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(1450, 134);
+            MainCanvas.lineTo(1450 + 150, 134);
+            MainCanvas.lineTo(1450 + 80, 740);
+            MainCanvas.lineTo(1450 + 70, 740);
+            MainCanvas.lineTo(1450, 134);
+            MainCanvas.fillStyle = "Black";
+            MainCanvas.fill();
+            if (this.roleData) {
+                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
+                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                    if (i >= this.roleList.length)
+                        break;
+                    const e = this.roleList[i];
+                    const Y = 210 + off * 95;
+                    // Owner/Mistress list
+                    MainCanvas.beginPath();
+                    MainCanvas.rect(130, Y, 900, 64);
+                    MainCanvas.stroke();
+                    const msg = `${e.type} ${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
+                    DrawTextFit(msg, 140, Y + 34, 590, "Black");
+                    if ((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) {
+                        MainCanvas.textAlign = "center";
+                        DrawButton(1090, Y, 64, 64, "X", "White");
+                        MainCanvas.textAlign = "left";
+                    }
+                }
+                const Input = document.getElementById("BCX_RoleAdd");
+                if (Input) {
+                    DrawText("Member Number:", 130, 847, "Black");
+                    ElementPosition("BCX_RoleAdd", 580, 842, 300, 64);
+                }
+                MainCanvas.textAlign = "center";
+                if (this.roleData.allowAddOwner) {
+                    DrawButton(760, 815, 210, 64, "Add owner", "white");
+                }
+                if (this.roleData.allowAddMistress) {
+                    DrawButton(1008, 815, 210, 64, "Add mistress", "white");
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+                DrawBackNextButton(1317, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+            }
+            else if (this.failed) {
+                MainCanvas.textAlign = "center";
+                DrawText(`Failed to get role data from ${this.character.Name}. Maybe you have no access?`, 800, 480, "Black");
+            }
+            else {
+                MainCanvas.textAlign = "center";
+                DrawText("Loading...", 800, 480, "Black");
+            }
+            // hierarchy roles
+            MainCanvas.textAlign = "center";
+            DrawButton(1420, 130, 208, 54, this.character.Name, "White", undefined, this.hoveringTextList[0]);
+            for (let i = 1; i < 8; i++) {
+                DrawButton(1430, 130 + 80 * i, 188, 54, capitalizeFirstLetter(AccessLevel[i]), "White", undefined, this.hoveringTextList[i]);
+            }
+            MainCanvas.textAlign = "left";
+            DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            DrawButton(1815, 190, 90, 90, "", "White", "Icons/Preference.png", "Configure the role-based BCX permissions");
+        }
+        Click() {
+            var _a;
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (MouseIn(1815, 190, 90, 90))
+                return this.Back();
+            if (this.roleData) {
+                for (let off = 0; off < PER_PAGE_COUNT$3; off++) {
+                    const i = this.page * PER_PAGE_COUNT$3 + off;
+                    if (i >= this.roleList.length)
+                        break;
+                    const e = this.roleList[i];
+                    const Y = 210 + off * 95;
+                    if (((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) && MouseIn(1090, Y, 64, 64)) {
+                        this.character.editRole(e.type === "Owner" ? "owner" : "mistress", "remove", e.memberNumber);
+                        return;
+                    }
+                }
+                const Input = document.getElementById("BCX_RoleAdd");
+                const inputText = (_a = Input === null || Input === void 0 ? void 0 : Input.value) !== null && _a !== void 0 ? _a : "";
+                const inputNumber = /^[0-9]+$/.test(inputText) ? Number.parseInt(inputText, 10) : null;
+                if (this.roleData.allowAddOwner && Input && inputNumber !== null && MouseIn(760, 815, 210, 64)) {
+                    Input.value = "";
+                    this.character.editRole("owner", "add", inputNumber);
+                    return;
+                }
+                if (this.roleData.allowAddMistress && Input && inputNumber !== null && MouseIn(1008, 815, 210, 64)) {
+                    Input.value = "";
+                    this.character.editRole("mistress", "add", inputNumber);
+                    return;
+                }
+                // Pagination
+                const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT$3);
+                if (MouseIn(1317, 800, 150, 90)) {
+                    this.page--;
+                    if (this.page < 0) {
+                        this.page = Math.max(totalPages - 1, 0);
+                    }
+                }
+                else if (MouseIn(1467, 800, 150, 90)) {
+                    this.page++;
+                    if (this.page >= totalPages) {
+                        this.page = 0;
+                    }
+                }
+            }
+        }
+        Exit() {
+            setSubscreen(new GuiMainMenu(this.character));
+        }
+        Back() {
+            setSubscreen(new GuiAuthorityPermissions(this.character));
+        }
+        Unload() {
+            ElementRemove("BCX_RoleAdd");
         }
     }
 
@@ -9761,23 +9783,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 statusText = "Timer disabled";
             }
             else {
-                statusText = `Time left: `;
-                const seconds = Math.floor((data.timer - Date.now()) / 1000);
-                const minutes = Math.floor(seconds / 60);
-                const hours = Math.floor(minutes / 60);
-                const days = Math.floor(hours / 24);
-                if (days > 0) {
-                    statusText += `${days} days, `;
-                }
-                if (hours > 0) {
-                    statusText += `${hours % 24} hours, `;
-                }
-                if (minutes > 0) {
-                    statusText += `${minutes % 60} minutes, `;
-                }
-                if (seconds > 0) {
-                    statusText += `${seconds % 60} seconds`;
-                }
+                statusText = `Time left: ${formatTimeInterval(data.timer - Date.now())}`;
             }
             DrawText(statusText, 530, 311, "Black");
             if (data.timer === null) {
@@ -10279,23 +10285,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 statusText = "Timer disabled by default";
             }
             else {
-                statusText = `Default timer: `;
-                const seconds = Math.floor(data.timer / 1000);
-                const minutes = Math.floor(seconds / 60);
-                const hours = Math.floor(minutes / 60);
-                const days = Math.floor(hours / 24);
-                if (days > 0) {
-                    statusText += `${days} days, `;
-                }
-                if (hours > 0) {
-                    statusText += `${hours % 24} hours, `;
-                }
-                if (minutes > 0) {
-                    statusText += `${minutes % 60} minutes, `;
-                }
-                if (seconds > 0) {
-                    statusText += `${seconds % 60} seconds`;
-                }
+                statusText = `Default timer: ${formatTimeInterval(data.timer)}`;
             }
             DrawText(statusText, 530, 311, "Black");
             if (data.timer === null) {
@@ -10679,22 +10669,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     timeLeftText = "∞";
                 }
                 else {
-                    const seconds = Math.floor((e.data.timer - Date.now()) / 1000);
-                    const minutes = Math.floor(seconds / 60);
-                    const hours = Math.floor(minutes / 60);
-                    const days = Math.floor(hours / 24);
-                    if (days > 1) {
-                        timeLeftText = `${days}d`;
-                    }
-                    else if (hours > 1) {
-                        timeLeftText = `${hours}h`;
-                    }
-                    else if (minutes > 1) {
-                        timeLeftText = `${minutes}m`;
-                    }
-                    else if (seconds > 0) {
-                        timeLeftText = `${seconds}s`;
-                    }
+                    timeLeftText = formatTimeInterval(e.data.timer - Date.now(), "short");
                 }
                 DrawText(timeLeftText, X + 570, Y + 30, "Black", "");
                 this.drawEntryExtra(X, Y, e);
@@ -11075,7 +11050,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         {
             module: ModuleCategory.Authority,
             onclick: (C) => {
-                setSubscreen(new GuiAuthorityPermissions(C));
+                setSubscreen(new GuiAuthorityRoles(C));
             }
         },
         {

@@ -1,7 +1,6 @@
 import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../constants";
 import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, getPermissionMinDisplayText, PermissionData, PermissionInfo } from "../modules/authority";
-import { icon_OwnerList } from "../resources";
 import { DrawImageEx } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
@@ -216,7 +215,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-		DrawButton(1815, 190, 90, 90, "", "White", icon_OwnerList, "Role management");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
 	}
 
 	Click() {

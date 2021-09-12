@@ -1,6 +1,6 @@
 import { ChatroomCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES, TOGGLEABLE_MODULES } from "../constants";
-import { GuiAuthorityPermissions } from "./authority_permissions";
+import { GuiAuthorityRoles } from "./authority_roles";
 import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
 import { GuiMisc } from "./misc";
@@ -21,7 +21,7 @@ const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter)
 	{
 		module: ModuleCategory.Authority,
 		onclick: (C) => {
-			setSubscreen(new GuiAuthorityPermissions(C));
+			setSubscreen(new GuiAuthorityRoles(C));
 		}
 	},
 	{

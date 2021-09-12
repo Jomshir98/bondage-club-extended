@@ -104,6 +104,7 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	logCategoryUpdate(character: ChatroomCharacter, newData: ConditionsCategoryConfigurableData, oldData: ConditionsCategoryConfigurableData): void;
 	parseConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): [boolean, string | ConditionsCategoryKeys[C]];
 	autocompleteConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): string[];
+	commandConditionSelectorHelp: string;
 }
 
 const conditionHandlers: Map<ConditionsCategories, ConditionsHandler<ConditionsCategories>> = new Map();
@@ -499,11 +500,12 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 	}
 	const categoryData = ConditionsGetCategoryData(category);
 	const categorySingular = category.slice(0, -1);
+	const cshelp = handler.commandConditionSelectorHelp;
 
 	if (subcommand === "setactive") {
 		const active = (argv[2] || "").toLocaleLowerCase();
 		if (argv.length !== 3 || active !== "yes" && active !== "no") {
-			return respond(`Usage:\nsetactive <${categorySingular}> <yes/no>`);
+			return respond(`Usage:\nsetactive <${cshelp}> <yes/no>`);
 		}
 		const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
 		if (!result) {
@@ -561,7 +563,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		} else if (keyword === "global") {
 			const global = (argv[3] || "").toLocaleLowerCase();
 			if (argv.length !== 4 || global !== "yes" && global !== "no") {
-				return respond(`Usage:\ntriggers <${categorySingular}> global <yes/no>`);
+				return respond(`Usage:\ntriggers <${cshelp}> global <yes/no>`);
 			}
 			if (global === "yes") {
 				conditionData.requirements = null;
@@ -570,7 +572,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			}
 		} else if (!ConditionsCommandTriggersKeywords.includes(keyword)) {
 			return respond(
-				`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${categorySingular}> *' options:\n` +
+				`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${cshelp}> *' options:\n` +
 				`global <yes/no> - Set the trigger condition of this ${categorySingular} to the global configuration\n` +
 				`room ignore - Remove the 'room type'-based trigger condition\n` +
 				`room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
@@ -579,10 +581,11 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 				`role ignore - Remove the role-based trigger condition\n` +
 				`role <with/notwith> <role> - Add such a role-based trigger condition\n` +
 				`player ignore - Remove the person-based trigger condition\n` +
-				`player <with/notwith> <memberNumber> - Add such a person-based trigger condition`
+				`player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
+				`To show currently set triggers, use just 'triggers <group>' without adding one of the above sub-commands.`
 			);
 		} else if (!conditionData.requirements) {
-			return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${categorySingular}> global no`);
+			return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${cshelp}> global no`);
 		} else {
 			if (ConditionsCommandProcessTriggers(conditionData.requirements, argv.slice(2), sender, respond))
 				return;
@@ -619,7 +622,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			}
 		} else if (!ConditionsCommandTriggersKeywords.includes(argv[1].toLocaleLowerCase())) {
 			return respond(
-				`Unknown trigger '${argv[1].toLocaleLowerCase()}' List of possible 'globaltriggers *' options:\n` +
+				`${argv[1] !== "help" ? `Unknown trigger '${argv[1].toLocaleLowerCase()}'. ` : ""}List of possible 'globaltriggers *' options:\n` +
 				`room ignore - Remove the 'room type'-based trigger condition\n` +
 				`room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
 				`roomname ignore - Remove the 'room name'-based trigger condition\n` +
@@ -627,7 +630,8 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 				`role ignore - Remove the role-based trigger condition\n` +
 				`role <with/notwith> <role> - Add such a role-based trigger condition\n` +
 				`player ignore - Remove the person-based trigger condition\n` +
-				`player <with/notwith> <memberNumber> - Add such a person-based trigger condition`
+				`player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
+				`To show currently set global triggers, use just 'globaltriggers' without anything behind.`
 			);
 		} else {
 			if (ConditionsCommandProcessTriggers(configData.requirements, argv.slice(1), sender, respond))
@@ -645,9 +649,9 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		const keyword = (argv[2] || "").toLocaleLowerCase();
 		if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
 			return respond(`Usage:\n` +
-				`timer <${categorySingular}> disable - Remove the timer and set lifetime to infinite\n` +
-				`timer <${categorySingular}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
-				`timer <${categorySingular}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`
+				`timer <${cshelp}> disable - Remove the timer and set lifetime to infinite\n` +
+				`timer <${cshelp}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+				`timer <${cshelp}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`
 			);
 		}
 		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
@@ -667,7 +671,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		} else if (keyword === "autoremove") {
 			const autoremove = (argv[3] || "").toLocaleLowerCase();
 			if (argv.length !== 4 || autoremove !== "yes" && autoremove !== "no") {
-				return respond(`Usage:\ntimer <${categorySingular}> autoremove <yes/no>`);
+				return respond(`Usage:\ntimer <${cshelp}> autoremove <yes/no>`);
 			}
 			if (conditionData.timer === null) {
 				return respond(`Timer is disabled on this ${categorySingular}. To use autoremove, first set timer`);
@@ -701,7 +705,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		} else if (keyword === "autoremove") {
 			const autoremove = (argv[2] || "").toLocaleLowerCase();
 			if (argv.length !== 3 || autoremove !== "yes" && autoremove !== "no") {
-				return respond(`Usage:\ndefaulttimer <${categorySingular}> autoremove <yes/no>`);
+				return respond(`Usage:\ndefaulttimer <${cshelp}> autoremove <yes/no>`);
 			}
 			if (configData.timer === null) {
 				return respond(`Timer is disabled by default for ${category}. To use autoremove, first set timer`);

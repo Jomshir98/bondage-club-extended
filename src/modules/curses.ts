@@ -296,7 +296,9 @@ export class ModuleCurses extends BaseModule {
 						result += `Blocked: ${getVisibleGroupName(group)}`;
 					} else {
 						const item = AssetGet(Player.AssetFamily, k, v.data.Name);
-						result += `${item?.Description ?? v.data.Name} (${getVisibleGroupName(group)})`;
+						const timerText = `Timer: ${v.timer ? formatTimeInterval(v.timer - Date.now(), "short") : "∞"}`;
+						result += `${item?.Description ?? v.data.Name} (${getVisibleGroupName(group)}) | ${timerText}` +
+							`${v.data.curseProperties ? " | Item configuration also cursed" : "" }`;
 					}
 				}
 				respond(result);
@@ -387,8 +389,8 @@ export class ModuleCurses extends BaseModule {
 				respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
 				respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
-					`!curses list - List all active curses and related info\n` +
-					`!curses listgroups <items|clothes> - Lists all possible item or clothing group slots\n` +
+					`!curses list - List all cursed <group>s and related info (eg. cursed items)\n` +
+					`!curses listgroups <items|clothes> - Lists all possible item or clothing <group> slots and worn items\n` +
 					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
 					`!curses curseworn <items|clothes> - Place a curse on all currenty worn items/clothes\n` +
 					`!curses curseall <items|clothes> - Place a curse on all item/cloth slots, both used and empty\n` +
@@ -550,7 +552,7 @@ export class ModuleCurses extends BaseModule {
 						if (newData.timer === null) {
 							ChatRoomSendLocal(`${character} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
 						} else {
-							ChatRoomSendLocal(`${character} changed the duration of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character} changed the remaining time of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
 						}
 					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
 						ChatRoomSendLocal(`${character} changed the timer behavior of the curse on slot '${visibleName}' to ${newData.timerRemove ? "remove" : "disable"} the curse when time runs out`, undefined, character.MemberNumber);
@@ -629,7 +631,8 @@ export class ModuleCurses extends BaseModule {
 						}
 					}
 				}
-			}
+			},
+			commandConditionSelectorHelp: "group"
 		});
 	}
 

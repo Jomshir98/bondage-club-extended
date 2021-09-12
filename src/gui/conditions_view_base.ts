@@ -2,7 +2,7 @@ import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
-import { clamp } from "../utils";
+import { clamp, formatTimeInterval } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { ConditionsLimit } from "../constants";
 
@@ -143,19 +143,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			if (e.data.timer === null) {
 				timeLeftText = "∞";
 			} else {
-				const seconds = Math.floor((e.data.timer - Date.now()) / 1000);
-				const minutes = Math.floor(seconds / 60);
-				const hours = Math.floor(minutes / 60);
-				const days = Math.floor(hours / 24);
-				if (days > 1) {
-					timeLeftText = `${days}d`;
-				} else if (hours > 1) {
-					timeLeftText = `${hours}h`;
-				} else if (minutes > 1) {
-					timeLeftText = `${minutes}m`;
-				} else if (seconds > 0) {
-					timeLeftText = `${seconds}s`;
-				}
+				timeLeftText = formatTimeInterval(e.data.timer - Date.now(), "short");
 			}
 			DrawText(timeLeftText, X + 570, Y + 30, "Black", "");
 			this.drawEntryExtra(X, Y, e);

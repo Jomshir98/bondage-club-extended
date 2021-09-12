@@ -3,7 +3,7 @@ import { setSubscreen } from "../modules/gui";
 import { GuiSubscreen } from "./subscreen";
 import { getCharacterName } from "../utilsClub";
 import { AccessLevel } from "../modules/authority";
-import { capitalizeFirstLetter } from "../utils";
+import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
 
 import cloneDeep from "lodash-es/cloneDeep";
 
@@ -187,23 +187,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 		if (data.timer === null) {
 			statusText = "Timer disabled by default";
 		} else {
-			statusText = `Default timer: `;
-			const seconds = Math.floor(data.timer / 1000);
-			const minutes = Math.floor(seconds / 60);
-			const hours = Math.floor(minutes / 60);
-			const days = Math.floor(hours / 24);
-			if (days > 0) {
-				statusText += `${days} days, `;
-			}
-			if (hours > 0) {
-				statusText += `${hours % 24} hours, `;
-			}
-			if (minutes > 0) {
-				statusText += `${minutes % 60} minutes, `;
-			}
-			if (seconds > 0) {
-				statusText += `${seconds % 60} seconds`;
-			}
+			statusText = `Default timer: ${formatTimeInterval(data.timer)}`;
 		}
 		DrawText(statusText, 530, 311, "Black");
 

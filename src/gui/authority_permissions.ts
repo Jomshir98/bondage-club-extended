@@ -19,7 +19,7 @@ type PermListItem = (
 	} | {
 		separator: true;
 		name: string;
-	}
+	} | null
 );
 
 const PER_PAGE_COUNT = 6;
@@ -83,7 +83,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			});
 		}
 
-		const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+		const filter = Input.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
 
 		const access_grantSelf = this.permissionData.authority_grant_self ?
 			checkPermisionAccesData(this.permissionData.authority_grant_self, this.myAccessLevel) :
@@ -110,11 +110,22 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			permdata[k as BCX_Permissions] = v;
 		}
 		for (const [category, data] of Array.from(categories.entries()).sort((a, b) => a[0] - b[0])) {
+			if (filter.length === 0) {
+				while (this.permList.length % PER_PAGE_COUNT !== 0) {
+					this.permList.push(null);
+				}
+			}
 			this.permList.push({
 				separator: true,
-				name: MODULE_NAMES[category]
+				name: `${MODULE_NAMES[category]} module permissions`
 			});
 			for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+				if (filter.length === 0 && this.permList.length % PER_PAGE_COUNT === 0) {
+					this.permList.push({
+						separator: true,
+						name: `${MODULE_NAMES[category]} module permissions (continued)`
+					});
+				}
 				const access = checkPermisionAccesData(v, this.myAccessLevel);
 				this.permList.push({
 					separator: false,
@@ -171,6 +182,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 				const i = this.page * PER_PAGE_COUNT + off;
 				if (i >= this.permList.length) break;
 				const e = this.permList[i];
+				if (e === null)
+					continue;
 
 				const Y = 275 + off * 100;
 
@@ -180,7 +193,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					MainCanvas.rect(125, Y, 1173, 64);
 					MainCanvas.fillStyle = "#eeeeee";
 					MainCanvas.fill();
-					DrawText(`${e.name} module permissions`, 140, Y + 34, "Black");
+					DrawText(e.name, 140, Y + 34, "Black");
 				} else {
 					DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
 						Height: 64,
@@ -237,6 +250,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 				const i = this.page * PER_PAGE_COUNT + off;
 				if (i >= this.permList.length) break;
 				const e = this.permList[i];
+				if (e === null)
+					continue;
 
 				const Y = 275 + off * 100;
 

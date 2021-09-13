@@ -87,13 +87,17 @@ export class GuiMainMenu extends GuiSubscreen {
 		}
 
 		MainCanvas.textAlign = "center";
-		DrawText(`Your BCX version: ${VERSION}`, 1450 + 400/2, 765, "Black", "");
 		if (this.character.isPlayer()) {
-			DrawButton(1450, 800, 400, 90, "", "White", "", "Open changelog on GitHub");
-			DrawText(`View changelog`, 1450 + 350/2, 845, "Black", "");
-			DrawImageEx(icon_ExternalLink, 1770, 830, { Width: 30, Height: 30 });
+			DrawText(`Your BCX version: ${VERSION}`, 1450 + 400 / 2, 665, "Black", "");
+			DrawButton(1450, 700, 400, 90, "", "White", "", "Open changelog on GitHub");
+			DrawText(`View changelog`, 1450 + 350 / 2, 745, "Black", "");
+			DrawImageEx(icon_ExternalLink, 1770, 730, { Width: 30, Height: 30 });
+			DrawButton(1450, 810, 400, 90, "", "White", "", "Open invite to BCX Discord server");
+			DrawText(`BCX Discord`, 1450 + 350 / 2, 855, "Black", "");
+			DrawImageEx(icon_ExternalLink, 1770, 840, { Width: 30, Height: 30 });
 		} else {
-			DrawText(`${this.character.Name}'s BCX version: ${this.character.BCXVersion}`, 1450 + 400/2, 845, "Black", "");
+			DrawText(`Your BCX version: ${VERSION}`, 1450 + 400 / 2, 765, "Black", "");
+			DrawText(`${this.character.Name}'s BCX version: ${this.character.BCXVersion}`, 1450 + 400 / 2, 845, "Black", "");
 		}
 	}
 
@@ -101,8 +105,12 @@ export class GuiMainMenu extends GuiSubscreen {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
 		// Changelog
-		if (MouseIn(1450, 800, 400, 90) && this.character.isPlayer()) {
+		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {
 			window.open("https://github.com/Jomshir98/bondage-club-extended/blob/stable/CHANGELOG.md", "_blank");
+		}
+		// Discord invite
+		if (MouseIn(1450, 810, 400, 90) && this.character.isPlayer()) {
+			window.open("https://discord.gg/SHJMjEh9VH", "_blank");
 		}
 
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {

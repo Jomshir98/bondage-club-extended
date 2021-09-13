@@ -10,6 +10,7 @@ This update includes:
  - Authority Module Permissions GUI: Permissions from different modules now start on a new page, making it look more clean
  - Added chat messages just for the BCX user when getting praised or scolded with or without an attached note
  - When looking on someone else's BCX main menu, their BCX version is displayed, too
+ - Added Discord invite to the main menu
 
 ## 0.5.0
 

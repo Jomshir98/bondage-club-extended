@@ -1,5 +1,15 @@
 # BCX Changelog
 
+## 0.5.1
+
+This update includes:
+ - Improvements to the curse commands to make them a bit more intuitive, also adding:
+   - A new command to limit or block curse item and clothing groups
+   - The list command now also shows the remaining time of a curse and whether a cursed item's configuration is also cursed
+ - Authority Module GUI: The permissions and roles views have been swapped so that the main menu first leads to the role one
+ - Authority Module Permissions GUI: Permissions from different modules now start on a new page, making it look more clean
+ - Added chat messages just for the BCX user when getting praised or scolded with or without an attached note
+
 ## 0.5.0
 
 **Breaking change:**

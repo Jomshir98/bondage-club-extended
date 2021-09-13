@@ -9,6 +9,7 @@ This update includes:
  - Authority Module GUI: The permissions and roles views have been swapped so that the main menu first leads to the role one
  - Authority Module Permissions GUI: Permissions from different modules now start on a new page, making it look more clean
  - Added chat messages just for the BCX user when getting praised or scolded with or without an attached note
+ - When looking on someone else's BCX main menu, their BCX version is displayed, too
 
 ## 0.5.0
 

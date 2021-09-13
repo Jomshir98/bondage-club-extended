@@ -88,16 +88,20 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		DrawText(`Your BCX version: ${VERSION}`, 1450 + 400/2, 765, "Black", "");
-		DrawButton(1450, 800, 400, 90, "", "White", "", "Open changelog on GitHub");
-		DrawText(`View changelog`, 1450 + 350/2, 845, "Black", "");
-		DrawImageEx(icon_ExternalLink, 1770, 830, { Width: 30, Height: 30 });
+		if (this.character.isPlayer()) {
+			DrawButton(1450, 800, 400, 90, "", "White", "", "Open changelog on GitHub");
+			DrawText(`View changelog`, 1450 + 350/2, 845, "Black", "");
+			DrawImageEx(icon_ExternalLink, 1770, 830, { Width: 30, Height: 30 });
+		} else {
+			DrawText(`${this.character.Name}'s BCX version: ${this.character.BCXVersion}`, 1450 + 400/2, 845, "Black", "");
+		}
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
 		// Changelog
-		if (MouseIn(1450, 800, 400, 90)) {
+		if (MouseIn(1450, 800, 400, 90) && this.character.isPlayer()) {
 			window.open("https://github.com/Jomshir98/bondage-club-extended/blob/stable/CHANGELOG.md", "_blank");
 		}
 

@@ -226,18 +226,18 @@ window.BCX_Loaded = false;
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
-        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31"],
+        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D"],
         AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
         AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
         ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],
         ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED", "C49AA2C1"],
         ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383"],
-        ChatRoomDrawCharacterOverlay: ["D58A9AD3"],
+        ChatRoomDrawCharacterOverlay: ["D58A9AD3", "4AE4AD9E"],
         ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomKeyDown: ["5FD37EC9", "111B6F0C", "33C77F12"],
-        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77"],
+        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61"],
         ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
-        ChatRoomSync: ["B67D8226"],
+        ChatRoomSync: ["B67D8226", "DF257D5B"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["412422CC", "26C67608"],
         ColorPickerDraw: ["D1E82FB3"],
@@ -245,18 +245,18 @@ window.BCX_Loaded = false;
         DialogDrawItemMenu: ["7B1D71E9", "0199F25B", "D832A940"],
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
-        ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD"],
+        ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD", "BDE09647"],
         FriendListLoadFriendList: ["72099AC9"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
         InformationSheetRun: ["58B7879C", "A8A56ACA"],
         LoginMistressItems: ["B58EF410"],
-        LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547"],
+        LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547", "CF1C0400"],
         LoginStableItems: ["EA93FBF7"],
         MainHallWalk: ["E52553C4"],
         PrivateRansomStart: ["0E968EDD"],
-        ServerAccountBeep: ["2D918B69"],
+        ServerAccountBeep: ["2D918B69", "D2802EE7"],
         SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
         ValidationResolveModifyDiff: ["C2FE52D3"]
     };
@@ -9543,11 +9543,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 return next(args);
             });
             // R71 temporary fix
-            hookFunction("FriendListLoadFriendList", 0, (args, next) => {
-                args[0].forEach((i) => { if (!i.ChatRoomName && i.Private)
-                    i.ChatRoomName = "-Private-"; });
-                next(args);
-            });
+            if (GameVersion === "R71") {
+                hookFunction("FriendListLoadFriendList", 0, (args, next) => {
+                    args[0].forEach((i) => { if (!i.ChatRoomName && i.Private)
+                        i.ChatRoomName = "-Private-"; });
+                    next(args);
+                });
+            }
             const { NMod } = detectOtherMods();
             if (!NMod) {
                 patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
@@ -11595,6 +11597,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         sendHiddenBeep("versionCheck", {
             version: VERSION,
+            GameVersion,
             UA: window.navigator.userAgent
         }, VERSION_CHECK_BOT, true);
         // Set check retry timer to 5 minutes

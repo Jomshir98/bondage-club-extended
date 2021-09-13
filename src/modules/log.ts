@@ -224,17 +224,22 @@ export function logPraise(value: -1 | 0 | 1, message: string | null, character: 
 	if (value > 0) {
 		if (message) {
 			logMessage("user_note", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+			ChatRoomSendLocal(`${character} praised you with the following note: ${message}`, undefined, character.MemberNumber);
 		} else {
 			logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
+			ChatRoomSendLocal(`${character} praised you.`, undefined, character.MemberNumber);
 		}
 	} else if (value < 0) {
 		if (message) {
 			logMessage("user_note", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+			ChatRoomSendLocal(`${character} scolded you with the following note: ${message}`, undefined, character.MemberNumber);
 		} else {
 			logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
+			ChatRoomSendLocal(`${character} scolded you.`, undefined, character.MemberNumber);
 		}
 	} else if (message) {
 		logMessage("user_note", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+		ChatRoomSendLocal(`${character} put the following note on you: ${message}`, undefined, character.MemberNumber);
 	}
 
 	return true;

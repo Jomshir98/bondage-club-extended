@@ -1,5 +1,6 @@
 type BCX_beep_versionCheck = {
 	version: string;
+	GameVersion: string;
 	UA: string;
 };
 

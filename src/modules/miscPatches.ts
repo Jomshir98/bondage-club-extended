@@ -81,10 +81,12 @@ export class ModuleMiscPatches extends BaseModule {
 		});
 
 		// R71 temporary fix
-		hookFunction("FriendListLoadFriendList", 0, (args, next) => {
-			args[0].forEach((i: any) => { if (!i.ChatRoomName && i.Private) i.ChatRoomName = "-Private-"; });
-			next(args);
-		});
+		if (GameVersion === "R71") {
+			hookFunction("FriendListLoadFriendList", 0, (args, next) => {
+				args[0].forEach((i: any) => { if (!i.ChatRoomName && i.Private) i.ChatRoomName = "-Private-"; });
+				next(args);
+			});
+		}
 
 		const { NMod } = detectOtherMods();
 

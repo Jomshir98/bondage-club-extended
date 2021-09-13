@@ -13,6 +13,7 @@ function sendVersionCheckBeep(): void {
 
 	sendHiddenBeep("versionCheck", {
 		version: VERSION,
+		GameVersion,
 		UA: window.navigator.userAgent
 	}, VERSION_CHECK_BOT, true);
 

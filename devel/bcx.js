@@ -222,7 +222,7 @@ window.BCX_Loaded = false;
         return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
     }
 
-    const VERSION = "0.5.0";
+    const VERSION = "0.5.1";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -2279,21 +2279,26 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         if (value > 0) {
             if (message) {
                 logMessage("user_note", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+                ChatRoomSendLocal(`${character} praised you with the following note: ${message}`, undefined, character.MemberNumber);
             }
             else {
                 logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
+                ChatRoomSendLocal(`${character} praised you.`, undefined, character.MemberNumber);
             }
         }
         else if (value < 0) {
             if (message) {
                 logMessage("user_note", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+                ChatRoomSendLocal(`${character} scolded you with the following note: ${message}`, undefined, character.MemberNumber);
             }
             else {
                 logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
+                ChatRoomSendLocal(`${character} scolded you.`, undefined, character.MemberNumber);
             }
         }
         else if (message) {
             logMessage("user_note", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+            ChatRoomSendLocal(`${character} put the following note on you: ${message}`, undefined, character.MemberNumber);
         }
         return true;
     }
@@ -6286,7 +6291,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
         }
         return true;
     }
-    const ConditionsSubcommands = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer"];
+    const ConditionsSubcommands = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer", "setlimit"];
     /*
     !curses setactive <condition> <yes/no> - Switch the curse and its conditions on and off
 
@@ -6296,6 +6301,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
 
     !curses timer <condition> <[timer handle]>
     !curses defaulttimer <[timer handle]>
+
+    !curses setlimit <condition> <normal/limited/blocked> - Set a limit on certain <condition>
 
     timer handling:
     disable - Remove the timer and set lifetime to infinite
@@ -6646,6 +6653,21 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
         }
+        else if (subcommand === "setlimit") {
+            const [result, condition] = handler.parseConditionName(argv[1] || "", false);
+            if (!result) {
+                return respond(condition);
+            }
+            if (!handler.loadValidateConditionKey(condition)) {
+                throw new Error("Parse name returned invalid condition key");
+            }
+            const keyword = (argv[2] || "").toLocaleLowerCase();
+            if (keyword !== "normal" && keyword !== "limited" && keyword !== "blocked") {
+                return respond(`Usage:\n` +
+                    `!curses setlimit <${cshelp}> <normal/limited/blocked> - Set a limit on certain <${cshelp}>`);
+            }
+            respond(ConditionsSetLimit(category, condition, ConditionsLimit[keyword], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
     }
     function ConditionsAutocompleteSubcommand(category, argv, sender) {
         const subcommand = (argv[0] || "").toLocaleLowerCase();
@@ -6708,6 +6730,14 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }
             else if (argv.length === 3 && argv[1].toLocaleLowerCase() === "autoremove") {
                 return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+            }
+        }
+        else if (subcommand === "setlimit") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], false);
+            }
+            else if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["normal", "limited", "blocked"]);
             }
         }
         return [];
@@ -7269,7 +7299,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
                 }
                 else {
-                    respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
+                    respond(Command_fixExclamationMark(sender, `!curses usage (page 1):\n` +
                         `!curses list - List all cursed <group>s and related info (eg. cursed items)\n` +
                         `!curses listgroups <items|clothes> - Lists all possible item or clothing <group> slots and worn items\n` +
                         `!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
@@ -7278,13 +7308,15 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         `!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
                         `!curses liftall - Lifts (removes) all curses\n` +
                         `!curses configuration <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`));
-                    respond(Command_fixExclamationMark(sender, `!curses setactive <group> <yes/no> - Switch the curse and its conditions on and off\n` +
+                    respond(Command_fixExclamationMark(sender, `!curses usage (page 2):\n` +
+                        `!curses setactive <group> <yes/no> - Switch the curse and its conditions on and off\n` +
                         `!curses triggers <group> global <yes/no> - Set the trigger condition of this curse to the global configuration\n` +
                         `!curses triggers <group> help - Set the trigger configuration of a curse\n` +
                         `!curses globaltriggers help - Set global trigger configuration\n` +
                         `!curses timer <group> help - Set timer options of a curse\n` +
-                        `!curses defaulttimer help - Set default timer options used on new curses\n\n` +
-                        `Hint: If an argument contains spaces: "put it in quotes"`));
+                        `!curses defaulttimer help - Set default timer options used on new curses\n` +
+                        `!curses setlimit <group> <normal/limited/blocked> - Set a limit on certain <group>\n` +
+                        `\nHint: If an argument contains spaces: "put it in quotes"`));
                 }
             }, (argv, sender) => {
                 if (!moduleIsEnabled(ModuleCategory.Curses)) {
@@ -8456,7 +8488,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     this.rebuildList();
                 });
             }
-            const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+            const filter = Input.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
             const access_grantSelf = this.permissionData.authority_grant_self ?
                 checkPermisionAccesData(this.permissionData.authority_grant_self, this.myAccessLevel) :
                 false;
@@ -8480,11 +8512,22 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 permdata[k] = v;
             }
             for (const [category, data] of Array.from(categories.entries()).sort((a, b) => a[0] - b[0])) {
+                if (filter.length === 0) {
+                    while (this.permList.length % PER_PAGE_COUNT$4 !== 0) {
+                        this.permList.push(null);
+                    }
+                }
                 this.permList.push({
                     separator: true,
-                    name: MODULE_NAMES[category]
+                    name: `${MODULE_NAMES[category]} module permissions`
                 });
                 for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
+                    if (filter.length === 0 && this.permList.length % PER_PAGE_COUNT$4 === 0) {
+                        this.permList.push({
+                            separator: true,
+                            name: `${MODULE_NAMES[category]} module permissions (continued)`
+                        });
+                    }
                     const access = checkPermisionAccesData(v, this.myAccessLevel);
                     this.permList.push({
                         separator: false,
@@ -8538,6 +8581,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
+                    if (e === null)
+                        continue;
                     const Y = 275 + off * 100;
                     if (e.separator) {
                         // idea to highlight the section separator
@@ -8545,7 +8590,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         MainCanvas.rect(125, Y, 1173, 64);
                         MainCanvas.fillStyle = "#eeeeee";
                         MainCanvas.fill();
-                        DrawText(`${e.name} module permissions`, 140, Y + 34, "Black");
+                        DrawText(e.name, 140, Y + 34, "Black");
                     }
                     else {
                         DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
@@ -8600,6 +8645,8 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     if (i >= this.permList.length)
                         break;
                     const e = this.permList[i];
+                    if (e === null)
+                        continue;
                     const Y = 275 + off * 100;
                     if (!e.separator) {
                         // Permission name

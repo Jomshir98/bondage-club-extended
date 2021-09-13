@@ -298,7 +298,7 @@ export class ModuleCurses extends BaseModule {
 						const item = AssetGet(Player.AssetFamily, k, v.data.Name);
 						const timerText = `Timer: ${v.timer ? formatTimeInterval(v.timer - Date.now(), "short") : "∞"}`;
 						result += `${item?.Description ?? v.data.Name} (${getVisibleGroupName(group)}) | ${timerText}` +
-							`${v.data.curseProperties ? " | Item configuration also cursed" : "" }`;
+							`${v.data.curseProperties ? " | Item configuration also cursed" : ""}`;
 					}
 				}
 				respond(result);
@@ -388,7 +388,7 @@ export class ModuleCurses extends BaseModule {
 				curse.data.curseProperties = target === "yes";
 				respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
-				respond(Command_fixExclamationMark(sender, `!curses usage:\n` +
+				respond(Command_fixExclamationMark(sender, `!curses usage (page 1):\n` +
 					`!curses list - List all cursed <group>s and related info (eg. cursed items)\n` +
 					`!curses listgroups <items|clothes> - Lists all possible item or clothing <group> slots and worn items\n` +
 					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
@@ -398,14 +398,15 @@ export class ModuleCurses extends BaseModule {
 					`!curses liftall - Lifts (removes) all curses\n` +
 					`!curses configuration <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`
 				));
-				respond(Command_fixExclamationMark(sender,
+				respond(Command_fixExclamationMark(sender, `!curses usage (page 2):\n` +
 					`!curses setactive <group> <yes/no> - Switch the curse and its conditions on and off\n` +
 					`!curses triggers <group> global <yes/no> - Set the trigger condition of this curse to the global configuration\n` +
 					`!curses triggers <group> help - Set the trigger configuration of a curse\n` +
 					`!curses globaltriggers help - Set global trigger configuration\n` +
 					`!curses timer <group> help - Set timer options of a curse\n` +
-					`!curses defaulttimer help - Set default timer options used on new curses\n\n` +
-					`Hint: If an argument contains spaces: "put it in quotes"`
+					`!curses defaulttimer help - Set default timer options used on new curses\n` +
+					`!curses setlimit <group> <normal/limited/blocked> - Set a limit on certain <group>\n` +
+					`\nHint: If an argument contains spaces: "put it in quotes"`
 				));
 			}
 		}, (argv, sender) => {

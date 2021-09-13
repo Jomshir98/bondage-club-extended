@@ -358,8 +358,8 @@ export function ConditionsEvaluateRequirements(requirements: ConditionsCondition
 	return true;
 }
 
-export type ConditionsSubcommand = "setactive" | "triggers" | "globaltriggers" | "timer" | "defaulttimer";
-export const ConditionsSubcommands: ConditionsSubcommand[] = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer"];
+export type ConditionsSubcommand = "setactive" | "triggers" | "globaltriggers" | "timer" | "defaulttimer" | "setlimit";
+export const ConditionsSubcommands: ConditionsSubcommand[] = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer", "setlimit"];
 
 /*
 !curses setactive <condition> <yes/no> - Switch the curse and its conditions on and off
@@ -370,6 +370,8 @@ export const ConditionsSubcommands: ConditionsSubcommand[] = ["setactive", "trig
 
 !curses timer <condition> <[timer handle]>
 !curses defaulttimer <[timer handle]>
+
+!curses setlimit <condition> <normal/limited/blocked> - Set a limit on certain <condition>
 
 timer handling:
 disable - Remove the timer and set lifetime to infinite
@@ -713,6 +715,21 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			configData.timerRemove = autoremove === "yes";
 		}
 		respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+	} else if (subcommand === "setlimit") {
+		const [result, condition] = handler.parseConditionName(argv[1] || "", false);
+		if (!result) {
+			return respond(condition);
+		}
+		if (!handler.loadValidateConditionKey(condition)) {
+			throw new Error("Parse name returned invalid condition key");
+		}
+		const keyword = (argv[2] || "").toLocaleLowerCase();
+		if (keyword !== "normal" && keyword !== "limited" && keyword !== "blocked") {
+			return respond(`Usage:\n` +
+				`!curses setlimit <${cshelp}> <normal/limited/blocked> - Set a limit on certain <${cshelp}>`
+			);
+		}
+		respond(ConditionsSetLimit(category, condition, ConditionsLimit[keyword], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 	}
 }
 
@@ -769,6 +786,12 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 			return Command_pickAutocomplete(argv[1], ["set", "disable", "autoremove"]);
 		} else if (argv.length === 3 && argv[1].toLocaleLowerCase() === "autoremove") {
 			return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+		}
+	} else if (subcommand === "setlimit") {
+		if (argv.length === 2) {
+			return handler.autocompleteConditionName(argv[1], false);
+		} else if (argv.length === 3) {
+			return Command_pickAutocomplete(argv[2], ["normal", "limited", "blocked"]);
 		}
 	}
 

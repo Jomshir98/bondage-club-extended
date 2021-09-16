@@ -36,6 +36,18 @@ export function cheatToggle(cheat: MiscCheat) {
 const MISTRESS_CHEAT_ONLY_ITEMS = ["MistressPadlock", "MistressPadlockKey", "MistressTimerPadlock"];
 const PANDORA_CHEAT_ONLY_ITEMS = ["PandoraPadlock", "PandoraPadlockKey"];
 
+const PlayerDialogOverrides: Map<string, string> = new Map();
+
+export function OverridePlayerDialog(keyword: string, value: string) {
+	PlayerDialogOverrides.set(keyword, value);
+}
+
+const GetImageRedirects: Map<string, string> = new Map();
+
+export function RedirectGetImage(original: string, redirect: string) {
+	GetImageRedirects.set(original, redirect);
+}
+
 export class ModuleMiscPatches extends BaseModule {
 	private o_Player_CanChange: (typeof Player.CanChange) | null = null;
 
@@ -45,6 +57,21 @@ export class ModuleMiscPatches extends BaseModule {
 		} else {
 			modStorage.cheats = modStorage.cheats.filter(c => MiscCheat[c] !== undefined);
 		}
+
+		hookFunction("DialogFindPlayer", 10, (args, next) => {
+			const override = PlayerDialogOverrides.get(args[0]);
+			if (override !== undefined)
+				return override;
+			return next(args);
+		});
+
+		hookFunction("DrawGetImage", 10, (args, next) => {
+			const redirect = GetImageRedirects.get(args[0]);
+			if (redirect !== undefined) {
+				args[0] = redirect;
+			}
+			return next(args);
+		});
 
 		hookFunction("AsylumEntranceCanWander", 0, () => true);
 

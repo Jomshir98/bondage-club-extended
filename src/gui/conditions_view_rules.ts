@@ -1,6 +1,7 @@
 import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { RulesGetDisplayDefinition } from "../modules/rules";
+import { DrawImageEx } from "../utilsClub";
 import { GuiConditionEditRules } from "./conditions_edit_rules";
 import { GuiConditionGlobalRules } from "./conditions_global_rules";
 import { ConditionEntry, GuiConditionView } from "./conditions_view_base";
@@ -45,7 +46,10 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 	protected removeLabel: string = "Delete rule";
 
 	protected drawCategoryImage(X: number, Y: number, data: dataEntry): void {
-		// TODO
+		DrawImageEx(data.extra.definition.icon, X + 6, Y + 6, {
+			Height: 50,
+			Width: 50
+		});
 	}
 
 	protected drawEntryExtra(X: number, Y: number, data: dataEntry): void {

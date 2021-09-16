@@ -166,10 +166,21 @@ type ConditionsStorage = Partial<{
 
 type BCX_Rule =
 	| "forbid_remoteuse_self"
-	| "forbid_remoteuse_others";
+	| "forbid_remoteuse_others"
+	| "forbid_keyuse_self"
+	| "forbid_keyuse_others"
+	| "forbid_lockuse_self"
+	| "forbid_lockuse_others"
+	| "forbid_wardrobeaccess_self"
+	| "forbid_wardrobeaccess_others"
+	// | "restrict_allowed_poses"
+	| "forbid_creating_rooms";
+	// | "restrict_accessible_rooms"
+	// | "sensory_deprivation_sound"
 
 interface RuleDisplayDefinition {
 	name: string;
+	icon: string;
 	shortDescription?: string;
 	longDescription: string;
 }

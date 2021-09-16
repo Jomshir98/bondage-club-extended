@@ -7,7 +7,7 @@ import { capitalizeFirstLetter, formatTimeInterval, isObject } from "../utils";
 import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
 import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
-import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands } from "./conditions";
+import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsIsConditionInEffect, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands } from "./conditions";
 import { LogEntryType, logMessage } from "./log";
 import { queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
@@ -42,6 +42,7 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 	}
 	return {
 		name: data.name,
+		icon: data.icon,
 		shortDescription: data.shortDescription,
 		longDescription: data.longDescription
 	};
@@ -112,6 +113,20 @@ export function RulesDelete(rule: BCX_Rule, character: ChatroomCharacter | null)
 	}
 
 	return true;
+}
+
+export function RuleIsEnforced(rule: BCX_Rule): boolean {
+	const data = ConditionsGetCondition("rules", rule);
+	if (!data || !ConditionsIsConditionInEffect("rules", rule))
+		return false;
+	return data.data.enforce !== false;
+}
+
+export function RuleIsLogged(rule: BCX_Rule): boolean {
+	const data = ConditionsGetCondition("rules", rule);
+	if (!data || !ConditionsIsConditionInEffect("rules", rule))
+		return false;
+	return data.data.log !== false;
 }
 
 export class ModuleRules extends BaseModule {
@@ -260,7 +275,17 @@ export class ModuleRules extends BaseModule {
 				typeof data.enforce === "boolean" &&
 				typeof data.log === "boolean",
 			updateCondition: (condition, data, updateData) => {
-				// TODO
+				if (updateData.enforce) {
+					delete data.data.enforce;
+				} else {
+					data.data.enforce = false;
+				}
+
+				if (updateData.log) {
+					delete data.data.log;
+				} else {
+					data.data.log = false;
+				}
 
 				return true;
 			},

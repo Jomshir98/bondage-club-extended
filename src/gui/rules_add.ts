@@ -4,8 +4,13 @@ import { GuiSubscreen } from "./subscreen";
 import { GuiConditionViewRules } from "./conditions_view_rules";
 import { RulesGetList } from "../modules/rules";
 import { GuiConditionEditRules } from "./conditions_edit_rules";
+import { ConditionsLimit } from "../constants";
+import { DrawImageEx } from "../utilsClub";
 
-type RuleListItem = [BCX_Rule, RuleDisplayDefinition];
+type RuleListItem = {
+	name: BCX_Rule;
+	definition: RuleDisplayDefinition;
+};
 
 const PER_PAGE_COUNT = 6;
 
@@ -77,7 +82,10 @@ export class GuiRulesAdd extends GuiSubscreen {
 				!entry[1].name.toLocaleLowerCase().includes(i) &&
 				!entry[1].shortDescription?.toLocaleLowerCase().includes(i)
 			)) continue;
-			this.ruleList.push(entry);
+			this.ruleList.push({
+				name: entry[0],
+				definition: entry[1]
+			});
 		}
 
 		const totalPages = Math.ceil(this.ruleList.length / PER_PAGE_COUNT);
@@ -109,6 +117,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 		);
 
 		// filter
+		MainCanvas.textAlign = "left";
 		DrawText("Filter:", 130, 215, "Black");
 		ElementPosition("BCX_RulesFilter", 550, 210, 600, 64);
 
@@ -128,14 +137,33 @@ export class GuiRulesAdd extends GuiSubscreen {
 				continue;
 
 			const Y = 275 + off * 100;
+			const ruleIsCreated = this.rulesData.conditions[e.name] !== undefined;
+			const accessLevel = this.rulesData.limits[e.name] ?? ConditionsLimit.normal;
+			const allowAccess = [this.rulesData.access_normal, this.rulesData.access_limited, false][accessLevel];
 
-			// DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
-			// 	Height: 64,
-			// 	Width: 64
-			// });
+			DrawImageEx(e.definition.icon, 125, Y, {
+				Height: 64,
+				Width: 64
+			});
+
+			let color: string;
+			let text: string;
+			if (this.permissionMode) {
+				color = ["#ccfece", "#fefc53", "red"][accessLevel];
+				text = ["Normal", "Limited", "Blocked"][accessLevel];
+			} else {
+				color = ruleIsCreated ? "#88c" :
+					!allowAccess ? "#ccc" : "White";
+				text = ruleIsCreated ? "Already applied" :
+					!allowAccess ? "You don't have permission to use this rule" : "";
+			}
 			// Rule name
-			DrawButton(200, Y, 1000, 64, "", "White");
-			DrawTextFit(e[1].name, 210, Y + 34, 990, "Black");
+			DrawButton(200, Y, 1350, 64, "", color, "", text, ruleIsCreated || !allowAccess || this.permissionMode);
+			let description = e.definition.name;
+			if (e.definition.shortDescription) {
+				description += ` (${e.definition.shortDescription})`;
+			}
+			DrawTextFit(description, 210, Y + 34, 1340, "Black");
 		}
 
 		// Pagination
@@ -187,15 +215,22 @@ export class GuiRulesAdd extends GuiSubscreen {
 				continue;
 
 			const Y = 275 + off * 100;
+			const ruleIsCreated = this.rulesData.conditions[e.name] !== undefined;
+			const accessLevel = this.rulesData.limits[e.name] ?? ConditionsLimit.normal;
+			const allowAccess = [this.rulesData.access_normal, this.rulesData.access_limited, false][accessLevel];
 
 			// Rule name
 			if (MouseIn(200, Y, 1000, 64)) {
-				const ruleName = e[0];
-				this.character.ruleCreate(ruleName).then(result => {
-					if (result && this.active) {
-						setSubscreen(new GuiConditionEditRules(this.character, ruleName, new GuiConditionViewRules(this.character)));
-					}
-				});
+				const ruleName = e.name;
+				if (this.permissionMode) {
+					this.character.conditionSetLimit("rules", e.name, (accessLevel + 1) % 3);
+				} else if (!ruleIsCreated && allowAccess) {
+					this.character.ruleCreate(ruleName).then(result => {
+						if (result && this.active) {
+							setSubscreen(new GuiConditionEditRules(this.character, ruleName, new GuiConditionViewRules(this.character)));
+						}
+					});
+				}
 				return;
 			}
 		}

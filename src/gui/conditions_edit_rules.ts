@@ -3,8 +3,6 @@ import { GuiConditionEdit } from "./conditions_edit_base";
 import { GuiSubscreen } from "./subscreen";
 import { RulesGetDisplayDefinition } from "../modules/rules";
 
-import cloneDeep from "lodash-es/cloneDeep";
-
 export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 
 	private definition: RuleDisplayDefinition;
@@ -40,6 +38,8 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		MainCanvas.textAlign = "left";
 
 		////// right side: special rules category options
+		DrawCheckbox(1050, 175, 64, 64, "Enforce this rule", data.data.enforce, !access);
+		DrawCheckbox(1050, 275, 64, 64, "Behaviour log entry when rule is broken", data.data.log, !access);
 
 		return false;
 	}
@@ -51,7 +51,18 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		if (!this.checkAccess())
 			return false;
 
-		const data = this.changes ?? this.conditionData;
+
+		if (MouseIn(1050, 175, 64, 64)) {
+			this.changes = this.makeChangesData();
+			this.changes.data.enforce = !this.changes.data.enforce;
+			return true;
+		}
+
+		if (MouseIn(1050, 275, 64, 64)) {
+			this.changes = this.makeChangesData();
+			this.changes.data.log = !this.changes.data.log;
+			return true;
+		}
 
 		return false;
 	}

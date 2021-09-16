@@ -71,11 +71,12 @@ export class ModuleWardrobe extends BaseModule {
 
 	load() {
 		const { NMod } = detectOtherMods();
+		const NModWardrobe = NMod && typeof AppearanceMode !== "undefined";
 
 		hookFunction("AppearanceRun", 0, (args, next) => {
 			next(args);
-			if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-				const Y = NMod ? 265 : 125;
+			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+				const Y = NModWardrobe ? 265 : 125;
 				DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
 				DrawButton(1534, Y, 207, 50, "Export", "White", "");
 				DrawButton(1768, Y, 207, 50, "Import", "White", "");
@@ -83,8 +84,8 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		hookFunction("AppearanceClick", 0, (args, next) => {
-			if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-				const Y = NMod ? 265 : 125;
+			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+				const Y = NModWardrobe ? 265 : 125;
 				// Restraints toggle
 				if (MouseIn(1457, Y, 50, 50)) {
 					j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;

@@ -8,7 +8,7 @@ import { ModuleCategory, Preset, TOGGLEABLE_MODULES } from "../constants";
 import { getCurrentSubscreen } from "./gui";
 
 const PRESET_DISABLED_MODULES: Record<Preset, ModuleCategory[]> = {
-	[Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses],
+	[Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses, ModuleCategory.Rules],
 	[Preset.switch]: [],
 	[Preset.submissive]: [],
 	[Preset.slave]: []

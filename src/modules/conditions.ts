@@ -49,7 +49,8 @@ export function guard_ConditionsConditionPublicData<C extends ConditionsCategori
 	const handler = conditionHandlers.get(category);
 	if (!handler)
 		return false;
-	return isObject(d) &&
+	return handler.loadValidateConditionKey(condition) &&
+		isObject(d) &&
 		typeof d.active === "boolean" &&
 		(d.timer === null || typeof d.timer === "number") &&
 		typeof d.timerRemove === "boolean" &&
@@ -177,6 +178,26 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 
 export function ConditionsGetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C]): ConditionsConditionData<C> | undefined {
 	return ConditionsGetCategoryData(category).conditions[condition];
+}
+
+export function ConditionsIsConditionInEffect<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C]): boolean {
+	const categoryData = ConditionsGetCategoryData(category);
+	const conditionData = categoryData.conditions[condition];
+
+	if (!conditionData)
+		return false;
+
+	if (conditionData.timer !== undefined && conditionData.timer <= Date.now())
+		return false;
+
+	if (!conditionData.active)
+		return false;
+
+	const requirements = conditionData.requirements ?? categoryData.requirements;
+	if (!ConditionsEvaluateRequirements(requirements))
+		return false;
+
+	return true;
 }
 
 export function ConditionsSetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificData[C]) {
@@ -830,7 +851,7 @@ export class ModuleConditions extends BaseModule {
 				delete modStorage.conditions[key];
 				continue;
 			}
-			const data = modStorage.conditions[key];
+			const data: ConditionsCategoryData<ConditionsCategories> | undefined = modStorage.conditions[key];
 			if (!isObject(data) || !isObject(data.conditions)) {
 				console.warn(`BCX: Removing category ${key} with invalid data`);
 				delete modStorage.conditions[key];

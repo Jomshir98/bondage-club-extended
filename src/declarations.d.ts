@@ -30,6 +30,10 @@ type BCX_Permissions =
 	| "curses_global_configuration"
 	| "curses_change_limits"
 	| "curses_color"
+	| "rules_normal"
+	| "rules_limited"
+	| "rules_global_configuration"
+	| "rules_change_limits"
 	| "misc_test";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
@@ -51,6 +55,8 @@ type BCX_LogCategory =
 	| "user_note"
 	| "curse_change"
 	| "curse_trigger"
+	| "rule_change"
+	| "rule_trigger"
 	| "had_orgasm"
 	| "entered_public_room"
 	| "entered_private_room"
@@ -66,14 +72,17 @@ interface CursedItemInfo {
 
 interface ConditionsCategoryKeys {
 	curses: string;
-	rules: string;
+	rules: BCX_Rule;
 }
 
 type ConditionsCategories = keyof ConditionsCategoryKeys;
 
 interface ConditionsCategorySpecificData {
 	curses: CursedItemInfo | null;
-	rules: null;
+	rules: {
+		enforce?: false;
+		log?: false;
+	};
 }
 
 interface ConditionsCategorySpecificPublicData {
@@ -81,7 +90,10 @@ interface ConditionsCategorySpecificPublicData {
 		Name: string;
 		curseProperties: boolean;
 	} | null;
-	rules: null;
+	rules: {
+		enforce: boolean;
+		log: boolean;
+	};
 }
 
 interface ConditionsConditionRequirements {
@@ -151,6 +163,22 @@ interface ConditionsCategoryPublicData<category extends ConditionsCategories = C
 type ConditionsStorage = Partial<{
 	[category in ConditionsCategories]: ConditionsCategoryData<category>;
 }>;
+
+type BCX_Rule =
+	| "forbid_remoteuse_self"
+	| "forbid_remoteuse_others";
+
+interface RuleDisplayDefinition {
+	name: string;
+	shortDescription?: string;
+	longDescription: string;
+}
+
+interface RuleDefinition extends RuleDisplayDefinition {
+	load?: () => void;
+	unload?: () => void;
+	tick?: () => boolean;
+}
 
 interface ModStorage {
 	preset: import("./constants").Preset;

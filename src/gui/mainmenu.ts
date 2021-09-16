@@ -10,6 +10,7 @@ import { VERSION } from "../config";
 import { icon_ExternalLink } from "../resources";
 import { DrawImageEx } from "../utilsClub";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
+import { GuiConditionViewRules } from "./conditions_view_rules";
 
 const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
@@ -34,6 +35,12 @@ const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter)
 		module: ModuleCategory.Curses,
 		onclick: (C) => {
 			setSubscreen(new GuiConditionViewCurses(C));
+		}
+	},
+	{
+		module: ModuleCategory.Rules,
+		onclick: (C) => {
+			setSubscreen(new GuiConditionViewRules(C));
 		}
 	},
 	{

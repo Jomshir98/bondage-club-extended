@@ -256,6 +256,8 @@ const logConfigDefaults: LogConfig = {
 	permission_change: LogAccessLevel.protected,
 	curse_change: LogAccessLevel.none,
 	curse_trigger: LogAccessLevel.none,
+	rule_change: LogAccessLevel.none,
+	rule_trigger: LogAccessLevel.none,
 	authority_roles_change: LogAccessLevel.protected
 };
 
@@ -270,6 +272,8 @@ export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	permission_change: "Log changes in permission settings",
 	curse_change: "Log each application or removal of curses",
 	curse_trigger: "Log every time a triggered curse reapplies an item",
+	rule_change: "Log all changes done to rules",
+	rule_trigger: "Log every misbehaviour detected by rules",
 	authority_roles_change: "Log getting or losing a BCX owner/mistress"
 };
 

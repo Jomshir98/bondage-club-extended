@@ -119,4 +119,6 @@ type BCX_queries = {
 		category: ConditionsCategories;
 		data: ConditionsCategoryConfigurableData;
 	}, boolean];
+	ruleCreate: [BCX_Rule, boolean];
+	ruleDelete: [BCX_Rule, boolean];
 };

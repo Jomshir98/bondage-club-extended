@@ -71,7 +71,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			return;
 
 		for (const [condition, data] of Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)) {
-			const res = this.loadCondition(condition, data);
+			const res = this.loadCondition(condition as ConditionsCategoryKeys[CAT], data);
 			if (res === null)
 				continue;
 
@@ -205,12 +205,12 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 			// config button info
 			if (MouseIn(X + 470, Y, 240, 60)) {
-				this.openEditSubscreen(e.condition);
+				this.openEditSubscreen(e.condition as ConditionsCategoryKeys[CAT]);
 				return true;
 			}
 
 			if (e.access && MouseIn(X + 740, Y, 60, 60)) {
-				this.removeCondition(e.condition);
+				this.removeCondition(e.condition as ConditionsCategoryKeys[CAT]);
 				return true;
 			}
 

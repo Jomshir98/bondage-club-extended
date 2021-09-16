@@ -6,6 +6,7 @@ import { curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { getDisabledModules } from "./modules/presets";
+import { RulesCreate, RulesDelete } from "./modules/rules";
 import { modStorage } from "./modules/storage";
 import { isObject } from "./utils";
 
@@ -296,6 +297,24 @@ export class ChatroomCharacter {
 		});
 	}
 
+	ruleCreate(name: BCX_Rule): Promise<boolean> {
+		return sendQuery("ruleCreate", name, this.MemberNumber).then(res => {
+			if (typeof res !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
+	ruleDelete(name: BCX_Rule): Promise<boolean> {
+		return sendQuery("ruleDelete", name, this.MemberNumber).then(res => {
+			if (typeof res !== "boolean") {
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
 	hasAccessToPlayer(): boolean {
 		return ServerChatRoomGetAllowItem(this.Character, Player);
 	}
@@ -407,6 +426,14 @@ export class PlayerCharacter extends ChatroomCharacter {
 
 	override conditionUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>): Promise<boolean> {
 		return Promise.resolve(ConditionsUpdate(category, condition, data, this));
+	}
+
+	override ruleCreate(name: BCX_Rule): Promise<boolean> {
+		return Promise.resolve(RulesCreate(name, this));
+	}
+
+	override ruleDelete(name: BCX_Rule): Promise<boolean> {
+		return Promise.resolve(RulesDelete(name, this));
 	}
 
 	conditionCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData): Promise<boolean> {

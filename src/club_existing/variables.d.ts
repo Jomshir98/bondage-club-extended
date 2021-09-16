@@ -32,6 +32,7 @@ declare function CommonColorsEqual(C1: string | string[], C2: string | string[])
 declare function CommonArraysEqual(a1: any[], a2: any[]): boolean;
 
 // Character.js
+declare function CharacterGetCurrent(): Character | null;
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
 declare function CharacterLoadCanvas(C: Character): void;
 
@@ -49,6 +50,7 @@ declare var DialogTextDefault: string;
 declare var DialogFacialExpressions: any[];
 declare var DialogFacialExpressionsSelected: number;
 declare var DialogSelfMenuOptions: any[];
+declare var DialogMenuButton: string[];
 declare function DialogFindPlayer(KeyWord: string): string;
 declare function DialogDrawPoseMenu(): void;
 declare function DialogDrawExpressionMenu(): void;

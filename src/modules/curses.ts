@@ -8,7 +8,7 @@ import { modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset } from "../constants";
-import { hookFunction } from "../patching";
+import { hookFunction, removeAllHooksByModule } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
 
@@ -715,6 +715,7 @@ export class ModuleCurses extends BaseModule {
 			clearInterval(this.resetTimer);
 			this.resetTimer = null;
 		}
+		removeAllHooksByModule(ModuleCategory.Curses);
 	}
 
 	reload() {

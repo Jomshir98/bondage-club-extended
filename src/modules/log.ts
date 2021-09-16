@@ -1,6 +1,6 @@
 import { ChatroomCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
-import { hookFunction, removeHooksByModule } from "../patching";
+import { hookFunction, removeAllHooksByModule } from "../patching";
 import { clamp, isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
@@ -481,8 +481,6 @@ export class ModuleLog extends BaseModule {
 		if (!moduleIsEnabled(ModuleCategory.Log)) {
 			delete modStorage.log;
 			delete modStorage.logConfig;
-			removeHooksByModule("ActivityOrgasmStart", ModuleCategory.Log);
-			removeHooksByModule("ChatRoomSync", ModuleCategory.Log);
 			return;
 		}
 
@@ -554,6 +552,7 @@ export class ModuleLog extends BaseModule {
 	}
 
 	reload() {
+		removeAllHooksByModule(ModuleCategory.Log);
 		this.load();
 	}
 }

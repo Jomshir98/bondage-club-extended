@@ -119,6 +119,18 @@ export function removeHooksByModule(target: string, module: ModuleCategory): boo
 	return true;
 }
 
+export function removeAllHooksByModule(module: ModuleCategory): boolean {
+	for (const data of patchedFunctions.values()) {
+		for (let i = data.hooks.length - 1; i >= 0; i--) {
+			if (data.hooks[i].module === module) {
+				data.hooks.splice(i, 1);
+			}
+		}
+	}
+
+	return true;
+}
+
 export function patchFunction(target: string, patches: Record<string, string>): void {
 	const data = initPatchableFunction(target);
 	Object.assign(data.patches, patches);

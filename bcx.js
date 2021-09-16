@@ -222,7 +222,7 @@ window.BCX_Loaded = false;
         return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
     }
 
-    const VERSION = "0.5.1";
+    const VERSION = "0.5.2";
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
@@ -483,6 +483,16 @@ window.BCX_Loaded = false;
         for (let i = data.hooks.length - 1; i >= 0; i--) {
             if (data.hooks[i].module === module) {
                 data.hooks.splice(i, 1);
+            }
+        }
+        return true;
+    }
+    function removeAllHooksByModule(module) {
+        for (const data of patchedFunctions.values()) {
+            for (let i = data.hooks.length - 1; i >= 0; i--) {
+                if (data.hooks[i].module === module) {
+                    data.hooks.splice(i, 1);
+                }
             }
         }
         return true;
@@ -2526,8 +2536,6 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             if (!moduleIsEnabled(ModuleCategory.Log)) {
                 delete modStorage.log;
                 delete modStorage.logConfig;
-                removeHooksByModule("ActivityOrgasmStart", ModuleCategory.Log);
-                removeHooksByModule("ChatRoomSync", ModuleCategory.Log);
                 return;
             }
             if (!Array.isArray(modStorage.log)) {
@@ -2595,6 +2603,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
             }, ModuleCategory.Log);
         }
         reload() {
+            removeAllHooksByModule(ModuleCategory.Log);
             this.load();
         }
     }
@@ -7614,6 +7623,7 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 clearInterval(this.resetTimer);
                 this.resetTimer = null;
             }
+            removeAllHooksByModule(ModuleCategory.Curses);
         }
         reload() {
             this.unload();

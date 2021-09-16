@@ -1,5 +1,11 @@
 # BCX Changelog
 
+## 0.5.2
+
+Fixes:
+ - Crash when curses module has been disabled
+ - Errorneous logging behaviour connected to the fix above
+
 ## 0.5.1
 
 This update includes:

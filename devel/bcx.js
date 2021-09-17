@@ -7447,10 +7447,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     var _a, _b, _c;
                     const assetGroup = AssetGroup.find(g => g.Name === group);
                     const visibleName = assetGroup ? getVisibleGroupName(assetGroup) : "[ERROR]";
+                    const didActiveChange = newData.active !== oldData.active;
                     const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
                     const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
                     const didItemConfigCurseChange = ((_a = newData.data) === null || _a === void 0 ? void 0 : _a.curseProperties) !== ((_b = oldData.data) === null || _b === void 0 ? void 0 : _b.curseProperties);
                     const changeEvents = [];
+                    if (didActiveChange)
+                        changeEvents.push("active state");
                     if (didTimerChange)
                         changeEvents.push("timer");
                     if (didTriggerChange)
@@ -7461,6 +7464,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         logMessage("curse_change", LogEntryType.plaintext, `${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s curse on slot '${visibleName}'`);
                     }
                     if (!character.isPlayer()) {
+                        if (didActiveChange) {
+                            ChatRoomSendLocal(`${character} ${newData.active ? "reactivated" : "deactivated"} the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
+                        }
                         if (newData.timer !== oldData.timer)
                             if (newData.timer === null) {
                                 ChatRoomSendLocal(`${character} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);

@@ -534,10 +534,13 @@ export class ModuleCurses extends BaseModule {
 				const assetGroup = AssetGroup.find(g => g.Name === group);
 				const visibleName = assetGroup ? getVisibleGroupName(assetGroup) : "[ERROR]";
 
+				const didActiveChange = newData.active !== oldData.active;
 				const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
 				const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
 				const didItemConfigCurseChange = newData.data?.curseProperties !== oldData.data?.curseProperties;
 				const changeEvents = [];
+				if (didActiveChange)
+					changeEvents.push("active state");
 				if (didTimerChange)
 					changeEvents.push("timer");
 				if (didTriggerChange)
@@ -549,6 +552,9 @@ export class ModuleCurses extends BaseModule {
 						`${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s curse on slot '${visibleName}'`);
 				}
 				if (!character.isPlayer()) {
+					if (didActiveChange) {
+						ChatRoomSendLocal(`${character} ${newData.active ? "reactivated" : "deactivated"} the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
+					}
 					if (newData.timer !== oldData.timer)
 						if (newData.timer === null) {
 							ChatRoomSendLocal(`${character} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);

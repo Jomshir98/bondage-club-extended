@@ -4,7 +4,7 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 export const FUNCTION_HASHES: Record<string, string[]> = {
 	ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
-	AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D"],
+	AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF"],
 	AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
 	AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
 	ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],

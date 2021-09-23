@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BCX - Bondage Club Extended (Loader)
 // @namespace    BCX
-// @version      1.0.1
+// @version      1.0.2
 // @description  Loader of Jomshir's "Bondage Club Extended" mod
 // @author       Jomshir98
 // @match        https://www.bondageprojects.elementfx.com/*/BondageClub/*
@@ -20,7 +20,7 @@ setTimeout(
 			let n = document.createElement("script");
 			n.setAttribute("language", "JavaScript");
 			n.setAttribute("crossorigin", "anonymous");
-			n.setAttribute("src", "https://jomshir98.github.io/bondage-club-extended/bcx.js?_="+Date.now());
+			n.setAttribute("src", "https://jomshir98.github.io/bondage-club-extended/bcx.js?_=" + Date.now());
 			n.onload = () => n.remove();
 			document.head.appendChild(n);
 		}

@@ -2,6 +2,8 @@ import { ChatroomCharacter } from "../characters";
 import { GuiConditionEdit } from "./conditions_edit_base";
 import { GuiSubscreen } from "./subscreen";
 import { RulesGetDisplayDefinition } from "../modules/rules";
+import { Views, HELP_TEXTS } from "../helpTexts";
+import { showHelp } from "../utilsClub";
 
 export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 
@@ -40,6 +42,11 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		////// right side: special rules category options
 		DrawCheckbox(1050, 175, 64, 64, "Enforce this rule", data.data.enforce, !access);
 		DrawCheckbox(1050, 275, 64, 64, "Behaviour log entry when rule is broken", data.data.log, !access);
+
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.ConditionsEditRules]);
+		}
 
 		return false;
 	}

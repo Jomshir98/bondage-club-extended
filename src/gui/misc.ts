@@ -5,10 +5,14 @@ import { cheatIsEnabled, cheatToggle } from "../modules/miscPatches";
 import { modStorage, modStorageSync } from "../modules/storage";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
+import { Views, HELP_TEXTS } from "../helpTexts";
+import { showHelp } from "../utilsClub";
 
 export class GuiMisc extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
+
+	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -22,6 +26,7 @@ export class GuiMisc extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		if (!this.character.isPlayer()) {
 			DrawText(`Miscellaneous module configuration is not possible on others`, 1000, 500, "Black");
@@ -35,10 +40,19 @@ export class GuiMisc extends GuiSubscreen {
 		DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status when reputation falls below 50 dominance", cheatIsEnabled(MiscCheat.CantLoseMistress));
 		DrawCheckbox(125, 500, 64, 64, "Cheat: Give yourself the mistress padlock and its key", cheatIsEnabled(MiscCheat.GiveMistressKey));
 		DrawCheckbox(125, 600, 64, 64, "Cheat: Give yourself the pandora padlock and its key", cheatIsEnabled(MiscCheat.GivePandoraKey));
+
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.Misc]);
+		}
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
+			return;
+		}
 
 		if (!this.character.isPlayer())
 			return;

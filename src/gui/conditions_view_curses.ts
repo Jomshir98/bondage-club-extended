@@ -1,11 +1,12 @@
 import { ChatroomCharacter } from "../characters";
 import { curseAllowItemCurseProperty } from "../modules/curses";
 import { setSubscreen } from "../modules/gui";
-import { DrawImageEx, getVisibleGroupName } from "../utilsClub";
+import { DrawImageEx, getVisibleGroupName, showHelp } from "../utilsClub";
 import { GuiConditionEditCurses } from "./conditions_edit_curses";
 import { GuiConditionGlobalCurses } from "./conditions_global_curses";
 import { ConditionEntry, GuiConditionView } from "./conditions_view_base";
 import { GuiCursesAdd } from "./curses_add";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 interface CurseEntry {
 	type: "clothing" | "item";
@@ -31,6 +32,11 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 
 		DrawButton(536, 820, 400, 90, "Lift all curses", access ? "White" : "#ddd", "",
 			access ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !access);
+
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.ConditionsViewCurses]);
+		}
 		return false;
 	}
 

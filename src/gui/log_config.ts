@@ -1,9 +1,10 @@
 import { ChatroomCharacter } from "../characters";
-import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
 import { LogAccessLevel, LogConfig, LOG_CONFIG_NAMES, LOG_LEVEL_NAMES } from "../modules/log";
 import { GuiLog } from "./log";
 import { setSubscreen } from "../modules/gui";
+import { showHelp } from "../utilsClub";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 type ConfigListItem = (
 	{
@@ -24,6 +25,8 @@ export class GuiLogConfig extends GuiSubscreen {
 	private allowDelete: boolean = false;
 	private allowConfigure: boolean = false;
 	private page: number = 0;
+
+	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -161,14 +164,21 @@ export class GuiLogConfig extends GuiSubscreen {
 			DrawButton(1525, 690, 380, 64, "Delete all log entries", "White");
 		}
 
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.LogConfig]);
+		}
+
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
-
-		if (MouseIn(1815, 190, 90, 90)) return setSubscreen(new GuiLog(this.character));
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
+			return;
+		}
 
 		if (this.config !== null) {
 
@@ -221,7 +231,7 @@ export class GuiLogConfig extends GuiSubscreen {
 	}
 
 	Exit() {
-		setSubscreen(new GuiMainMenu(this.character));
+		setSubscreen(new GuiLog(this.character));
 	}
 
 	Unload() {

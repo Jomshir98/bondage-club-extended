@@ -242,3 +242,12 @@ export function itemColorsEquals(color1: null | undefined | string | string[], c
 
 	return (!Array.isArray(color1) || !Array.isArray(color2)) ? color1 === color2 : CommonArraysEqual(color1, color2);
 }
+
+export function showHelp(helpText: string) {
+	MainCanvas.fillStyle = "#ffff88";
+	MainCanvas.fillRect(1000, 190, 800, 600);
+	MainCanvas.strokeStyle = "Black";
+	MainCanvas.strokeRect(1000, 190, 800, 600);
+	MainCanvas.textAlign = "left";
+	DrawTextWrap(helpText, 1020 - 760 / 2, 210, 760, 560, "black");
+}

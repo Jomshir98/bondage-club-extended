@@ -1,11 +1,12 @@
 import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { RulesGetDisplayDefinition } from "../modules/rules";
-import { DrawImageEx } from "../utilsClub";
+import { DrawImageEx, showHelp } from "../utilsClub";
 import { GuiConditionEditRules } from "./conditions_edit_rules";
 import { GuiConditionGlobalRules } from "./conditions_global_rules";
 import { ConditionEntry, GuiConditionView } from "./conditions_view_base";
 import { GuiRulesAdd } from "./rules_add";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 interface RuleEntry {
 	definition: RuleDisplayDefinition;
@@ -27,6 +28,10 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 		DrawButton(120, 820, 384, 90, "Create new rule", access ? "White" : "#ddd", "",
 			access ? "Create new rule from list of available rules" : "You have no permission to use this", !access);
 
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.ConditionsViewRules]);
+		}
 		return false;
 	}
 

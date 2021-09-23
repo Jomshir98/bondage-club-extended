@@ -22,6 +22,8 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 	protected changes: ConditionsConditionPublicData<CAT> | null = null;
 
+	protected showHelp: boolean = false;
+
 	constructor(character: ChatroomCharacter,
 		conditionCategory: CAT,
 		conditionName: ConditionsCategoryKeys[CAT],
@@ -164,6 +166,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			DrawButton(1815, 190, 90, 90, "", "White", "Icons/Cancel.png", "Go back without saving");
 		} else {
 			DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+			DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 		}
 
 		if (this.conditionCategoryData === null || this.conditionData === null) {
@@ -362,6 +365,12 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		// Cancel
 		if (this.changes && MouseIn(1815, 190, 90, 90)) {
 			this.Exit();
+			return true;
+		}
+
+		// help text
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
 			return true;
 		}
 

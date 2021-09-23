@@ -177,12 +177,22 @@ type BCX_Rule =
 	| "forbid_creating_rooms";
 	// | "restrict_accessible_rooms"
 	// | "sensory_deprivation_sound"
+	// | "sensory_deprivation_sight"
+	// | "sensory_deprivation_eyes"
+	// | "sensory_deprivation_blindfolds"
+	// | "always_slow"
+	// | "orgasm_control"
 
 interface RuleDisplayDefinition {
 	name: string;
 	icon: string;
 	shortDescription?: string;
 	longDescription: string;
+	defaultLimit: import("./constants").ConditionsLimit;
+	/** If rule can be enforced, defaults to `true` */
+	enforcabe?: false;
+	/** If rule can be logged, defaults to `true` */
+	loggable?: false;
 }
 
 interface RuleDefinition extends RuleDisplayDefinition {

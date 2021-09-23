@@ -4,7 +4,7 @@ import { ModuleCategory, ModuleInitPhase, Preset } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
 import { initRules_bc_blocks } from "../rules/bc_blocks";
 import { capitalizeFirstLetter, formatTimeInterval, isObject } from "../utils";
-import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
 import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsIsConditionInEffect, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands } from "./conditions";
@@ -44,7 +44,8 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 		name: data.name,
 		icon: data.icon,
 		shortDescription: data.shortDescription,
-		longDescription: data.longDescription
+		longDescription: data.longDescription,
+		defaultLimit: data.defaultLimit
 	};
 }
 
@@ -136,8 +137,7 @@ export class ModuleRules extends BaseModule {
 
 	init() {
 		registerPermission("rules_normal", {
-			// TODO
-			name: "rules_normal",
+			name: "Allows controlling non-limited rules",
 			category: ModuleCategory.Rules,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.lover],
@@ -147,8 +147,7 @@ export class ModuleRules extends BaseModule {
 			}
 		});
 		registerPermission("rules_limited", {
-			// TODO
-			name: "rules_limited",
+			name: "Allows controlling limited rules",
 			category: ModuleCategory.Rules,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.owner],
@@ -158,8 +157,7 @@ export class ModuleRules extends BaseModule {
 			}
 		});
 		registerPermission("rules_global_configuration", {
-			// TODO
-			name: "rules_global_configuration",
+			name: "Allows editing the global rules configuration",
 			category: ModuleCategory.Rules,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.owner],
@@ -169,8 +167,7 @@ export class ModuleRules extends BaseModule {
 			}
 		});
 		registerPermission("rules_change_limits", {
-			// TODO
-			name: "rules_change_limits",
+			name: "Allows to limit/block specific rules",
 			category: ModuleCategory.Rules,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.self],
@@ -453,7 +450,7 @@ export class ModuleRules extends BaseModule {
 			if (Date.now() >= this.suspendedUntil) {
 				this.suspendedUntil = null;
 				this.triggerCounts.clear();
-				// TODO: Wake up message
+				ChatRoomActionMessage(`All of ${Player.Name}'s temporarily suspended rules are in effect again.`);
 			} else {
 				return;
 			}
@@ -470,7 +467,7 @@ export class ModuleRules extends BaseModule {
 				this.triggerCounts.set(rule, counter);
 
 				if (counter >= RULES_ANTILOOP_THRESHOLD) {
-					// TODO: Protection trigger message
+					ChatRoomActionMessage("Protection triggered: The effects of rules have been suspended for 10 minutes. Please refrain from triggering rules so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
 					this.suspendedUntil = Date.now() + RULES_ANTILOOP_SUSPEND_TIME;
 				}
 			}

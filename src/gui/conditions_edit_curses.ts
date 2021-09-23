@@ -1,8 +1,9 @@
 import { ChatroomCharacter } from "../characters";
 import { curseAllowItemCurseProperty } from "../modules/curses";
-import { getVisibleGroupName } from "../utilsClub";
+import { getVisibleGroupName, showHelp } from "../utilsClub";
 import { GuiConditionEdit } from "./conditions_edit_base";
 import { GuiSubscreen } from "./subscreen";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 import cloneDeep from "lodash-es/cloneDeep";
 
@@ -56,6 +57,11 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 		if (this.allowSettingsCurse && data.data) {
 			DrawCheckbox(1050, 175, 64, 64, "Also curse the item's configuration", data.data.curseProperties, !access);
 			DrawText(`Example: which rope tie is used`, 1151, 287, "Black", "");
+		}
+
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.ConditionsEditCurses]);
 		}
 
 		return false;

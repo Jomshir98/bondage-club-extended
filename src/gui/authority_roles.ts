@@ -5,7 +5,8 @@ import { capitalizeFirstLetter } from "../utils";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { setSubscreen } from "../modules/gui";
-import { getCharacterName } from "../utilsClub";
+import { getCharacterName, showHelp } from "../utilsClub";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 const PER_PAGE_COUNT = 6;
 
@@ -25,6 +26,8 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 	private page: number = 0;
 
 	private hoveringTextList: string[] = [];
+
+	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -185,17 +188,28 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 			DrawButton(1430, 130 + 80 * i, 188, 54, capitalizeFirstLetter(AccessLevel[i]), "White", undefined, this.hoveringTextList[i]);
 		}
 
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.AuthorityRoles]);
+		}
+
+
 		MainCanvas.textAlign = "left";
 		DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Preference.png", "Configure the role-based BCX permissions");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
+		DrawButton(1815, 305, 90, 90, "", "White", "Icons/Preference.png", "Configure the role-based BCX permissions");
 
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
-		if (MouseIn(1815, 190, 90, 90)) return this.Back();
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
+			return;
+		}
+		if (MouseIn(1815, 305, 90, 90)) return this.Back();
 
 		if (this.roleData) {
 

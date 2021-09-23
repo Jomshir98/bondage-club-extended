@@ -189,10 +189,4 @@ export function initRules_bc_blocks() {
 	// 	icon: icon_restrictions,
 	// 	longDescription: "This rule blocks/logs entering of not allowed rooms, based on a white list."
 	// });
-
-	// registerRule("sensory_deprivation_sound", {
-	// 	name: "Sensory deprivation: Sound",
-	// 	icon: "Icons/Swap.png",
-	// 	longDescription: "Impacts PLAYER_NAME's ability to hear (strength of the deafening can be adjusted)."
-	// });
 }

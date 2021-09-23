@@ -3,8 +3,9 @@ import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
 import { LogAccessLevel, LogEntry, logMessageRender } from "../modules/log";
 import { GuiLogConfig } from "./log_config";
-import { DrawImageEx } from "../utilsClub";
+import { DrawImageEx, showHelp } from "../utilsClub";
 import { setSubscreen } from "../modules/gui";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 const PER_PAGE_COUNT = 5;
 
@@ -19,6 +20,8 @@ export class GuiLog extends GuiSubscreen {
 	private allowPraise: boolean = false;
 	private allowLeaveMessage: boolean = false;
 	private page: number = 0;
+
+	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -177,16 +180,26 @@ export class GuiLog extends GuiSubscreen {
 			DrawText("Loading...", 1000, 480, "Black");
 		}
 
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.Log]);
+		}
+
 		MainCanvas.textAlign = "left";
 		DrawText(`- Behaviour Log: About ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-		DrawButton(1815, 190, 90, 90, "", this.allowConfiguration ? "White" : "#ddd", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
+		DrawButton(1815, 305, 90, 90, "", this.allowConfiguration ? "White" : "#ddd", "Icons/Preference.png", "Configure logging", !this.allowConfiguration);
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
-		if (MouseIn(1815, 190, 90, 90) && this.allowConfiguration) return setSubscreen(new GuiLogConfig(this.character));
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
+			return;
+		}
+		if (MouseIn(1815, 305, 90, 90) && this.allowConfiguration) return setSubscreen(new GuiLogConfig(this.character));
 
 		if (this.logData !== null) {
 

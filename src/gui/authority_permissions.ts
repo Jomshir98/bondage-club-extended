@@ -1,13 +1,14 @@
 import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../constants";
 import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, getPermissionMinDisplayText, PermissionData, PermissionInfo } from "../modules/authority";
-import { DrawImageEx } from "../utilsClub";
+import { DrawImageEx, showHelp } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
 import { GuiAuthorityRoles } from "./authority_roles";
 import { GuiAuthorityDialogMin } from "./authority_dialogMin";
 import { GuiAuthorityDialogSelf } from "./authority_dialogSelf";
 import { setSubscreen } from "../modules/gui";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 type PermListItem = (
 	{
@@ -32,6 +33,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	private failed: boolean = false;
 	private permList: PermListItem[] = [];
 	private page: number = 0;
+
+	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -136,12 +139,12 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						(v.self ? access_revokeSelf : access_grantSelf) &&
 						// Not player must have access to target rule
 						(isPlayer || access) &&
-						// "minimal access" set to "Self" forces "self access" to "Yes"
+						// "lowest access" set to "Self" forces "self access" to "Yes"
 						(!v.self || v.min !== AccessLevel.self),
 					editMin:
 						// Exception: Player can always lower permissions "Self"->"Owner"
 						(isPlayer && v.min < AccessLevel.owner) ||
-						// Character must have access to "allow minimal access modification" &&
+						// Character must have access to "allow lowest access modification" &&
 						// Character must have access to target rule
 						(access_editMin && access)
 				});
@@ -223,19 +226,29 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			DrawText("Loading...", 1000, 480, "Black");
 		}
 
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[Views.AuthorityPermissions]);
+		}
+
 		MainCanvas.textAlign = "left";
 
 		DrawText(`- Authority: Permission Settings for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/West.png", "Previous screen");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
+		DrawButton(1815, 305, 90, 90, "", "White", "Icons/West.png", "Previous screen");
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
+			return;
+		}
 
 		// Owner list
-		if (MouseIn(1815, 190, 90, 90)) return setSubscreen(new GuiAuthorityRoles(this.character));
+		if (MouseIn(1815, 305, 90, 90)) return setSubscreen(new GuiAuthorityRoles(this.character));
 
 		if (this.permissionData !== null) {
 

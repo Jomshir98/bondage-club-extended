@@ -28,6 +28,8 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 	private failed: boolean = false;
 	private page: number = 0;
 
+	protected showHelp: boolean = false;
+
 	constructor(character: ChatroomCharacter,
 		conditionCategory: CAT
 	) {
@@ -94,6 +96,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		DrawText(`- ${this.headerText()} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		// Column separator
 		MainCanvas.beginPath();
@@ -189,6 +192,12 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 	Click(): boolean {
 		if (MouseIn(1815, 75, 90, 90)) {
 			this.Exit();
+			return true;
+		}
+
+		// help text
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
 			return true;
 		}
 

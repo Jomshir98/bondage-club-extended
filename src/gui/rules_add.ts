@@ -5,7 +5,8 @@ import { GuiConditionViewRules } from "./conditions_view_rules";
 import { RulesGetList } from "../modules/rules";
 import { GuiConditionEditRules } from "./conditions_edit_rules";
 import { ConditionsLimit } from "../constants";
-import { DrawImageEx } from "../utilsClub";
+import { DrawImageEx, showHelp } from "../utilsClub";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 type RuleListItem = {
 	name: BCX_Rule;
@@ -24,6 +25,8 @@ export class GuiRulesAdd extends GuiSubscreen {
 
 	private ruleList: RuleListItem[] = [];
 	private page: number = 0;
+
+	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -101,13 +104,14 @@ export class GuiRulesAdd extends GuiSubscreen {
 		DrawText(`- Rules: Create new rules for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		if (this.rulesData === null) {
 			DrawText(this.failed ? `Failed to get rules data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
 			return;
 		}
 
-		DrawButton(1815, 190, 90, 90, "",
+		DrawButton(1815, 305, 90, 90, "",
 			this.rulesData.access_changeLimits ? "White" : "#ddd",
 			this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png",
 			this.rulesData.access_changeLimits ?
@@ -185,16 +189,25 @@ export class GuiRulesAdd extends GuiSubscreen {
 			DrawText(`Limited`, 1284 + 1 * 166 + 166 / 2, 75 + 34, "Black");
 			DrawText(`Blocked`, 1284 + 2 * 166 + 166 / 2, 75 + 34, "Black");
 		}
+
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[this.permissionMode ? Views.RulesAddPermissionMode : Views.RulesAdd]);
+		}
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
+			return;
+		}
 
 		if (this.rulesData === null)
 			return;
 
 		// Permission mode
-		if (MouseIn(1815, 190, 90, 90)) {
+		if (MouseIn(1815, 305, 90, 90)) {
 			this.permissionMode = this.rulesData.access_changeLimits && !this.permissionMode;
 			return;
 		}

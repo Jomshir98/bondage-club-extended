@@ -1,9 +1,10 @@
 import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
-import { getVisibleGroupName } from "../utilsClub";
+import { getVisibleGroupName, showHelp } from "../utilsClub";
 import { GuiSubscreen } from "./subscreen";
 import { ConditionsLimit } from "../constants";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
+import { Views, HELP_TEXTS } from "../helpTexts";
 
 export class GuiCursesAdd extends GuiSubscreen {
 
@@ -12,6 +13,8 @@ export class GuiCursesAdd extends GuiSubscreen {
 	private curseData: ConditionsCategoryPublicData<"curses"> | null = null;
 	private failed: boolean = false;
 	private permissionMode: boolean = false;
+
+	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -46,13 +49,14 @@ export class GuiCursesAdd extends GuiSubscreen {
 		DrawText(`- Curses: Place new curses on ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		if (this.curseData === null) {
 			DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
 			return;
 		}
 
-		DrawButton(1815, 190, 90, 90, "",
+		DrawButton(1815, 305, 90, 90, "",
 			this.curseData.access_changeLimits ? "White" : "#ddd",
 			this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png",
 			this.curseData.access_changeLimits ?
@@ -94,10 +98,10 @@ export class GuiCursesAdd extends GuiSubscreen {
 			} else {
 				color = itemIsCursed ? "#88c" :
 					!allowCurse ? "#ccc" :
-					(currentItem ? "Gold" : "White");
+						(currentItem ? "Gold" : "White");
 				text = itemIsCursed ? "Already cursed" :
 					!allowCurse ? "You have no permission to curse this" :
-					(currentItem ? currentItem.Asset.Description : "Nothing");
+						(currentItem ? currentItem.Asset.Description : "Nothing");
 			}
 
 			DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
@@ -138,10 +142,10 @@ export class GuiCursesAdd extends GuiSubscreen {
 			} else {
 				color = clothingIsCursed ? "#88c" :
 					!allowCurse ? "#ccc" :
-					(currentItem ? "Gold" : "White");
+						(currentItem ? "Gold" : "White");
 				text = clothingIsCursed ? "Already cursed" :
 					!allowCurse ? "You have no permission to curse this" :
-					(currentItem ? currentItem.Asset.Description : "Nothing");
+						(currentItem ? currentItem.Asset.Description : "Nothing");
 			}
 			DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
 				color, undefined,
@@ -169,16 +173,25 @@ export class GuiCursesAdd extends GuiSubscreen {
 			DrawText(`Limited`, 1284 + 1 * 166 + 166 / 2, 75 + 34, "Black");
 			DrawText(`Blocked`, 1284 + 2 * 166 + 166 / 2, 75 + 34, "Black");
 		}
+
+		// help text
+		if (this.showHelp) {
+			showHelp(HELP_TEXTS[this.permissionMode ? Views.CursesAddPermissionMode : Views.CursesAdd]);
+		}
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
+		if (MouseIn(1815, 190, 90, 90)) {
+			this.showHelp = !this.showHelp;
+			return;
+		}
 
 		if (this.curseData === null)
 			return;
 
 		// Permission mode
-		if (MouseIn(1815, 190, 90, 90)) {
+		if (MouseIn(1815, 305, 90, 90)) {
 			this.permissionMode = this.curseData.access_changeLimits && !this.permissionMode;
 			return;
 		}

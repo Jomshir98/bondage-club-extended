@@ -170,12 +170,12 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 			// Exception: Player can always lower permissions "Self"->"Owner"
 			(characterToCheck.isPlayer() && permData.min < min && min <= AccessLevel.owner) ||
 			(
-				// Character must have access to "allow minimal access modification"
+				// Character must have access to "allow lowest access modification"
 				checkPermissionAccess("authority_edit_min", characterToCheck) &&
 				(
 					// Character must have access to target rule
 					checkPermissionAccess(permission, characterToCheck) ||
-					// Exception: Player bypasses this check when lowering "minimal access"
+					// Exception: Player bypasses this check when lowering "lowest access"
 					characterToCheck.isPlayer() && min >= permData.min
 				) &&
 				(
@@ -335,7 +335,7 @@ export class ModuleAuthority extends BaseModule {
 			}
 		});
 		registerPermission("authority_edit_min", {
-			name: "Allow minimal access modification",
+			name: "Allow lowest access modification",
 			category: ModuleCategory.Authority,
 			defaults: {
 				[Preset.dominant]: [true, AccessLevel.self],

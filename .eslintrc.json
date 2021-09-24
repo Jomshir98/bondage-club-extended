@@ -64,7 +64,6 @@
 		"@typescript-eslint/no-unnecessary-boolean-literal-compare": "warn",
 		"comma-dangle": "error",
 		"eqeqeq": ["error", "always", { "null": "ignore" }],
-		"id-blacklist": ["error", "any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"],
 		"id-match": "error",
 		"new-parens": "error",
 		"no-bitwise": "error",

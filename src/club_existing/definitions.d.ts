@@ -1,4 +1,3 @@
-/* eslint-disable id-blacklist */
 /* eslint-disable @typescript-eslint/ban-types */
 
 //#region Common

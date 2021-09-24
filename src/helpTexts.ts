@@ -30,12 +30,25 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"and lowest role is 'Owner', then current and newly added BCX owners and the BC owner can get full control over " +
 	"any permissions they have access to. So careful with those three permissions!",
 	[Views.Log]: "This screen shows logs of important events. What is logged depends on the logging configuration, which can be viewed/edited " +
-	"via the button to the right. Access is determined by the according permission settings. The log can document the BCX's user's conduct, " +
+	"via the button to the right. Log entries can have normal or protected visibility. Access to those as well as removing entries or the " +
+	"configuration is determined by the according authority module permission settings. The log can document the BCX's user's conduct, " +
 	"any rule violations, important changes made to BCX settings, curses or rules, and notes from other people.",
-	[Views.LogConfig]: "n/a",
-	[Views.ConditionsViewCurses]: "n/a c",
-	[Views.ConditionsEditCurses]: "n/a c",
-	[Views.ConditionsGlobalCurses]: "n/a c",
+	[Views.LogConfig]: "This screen determines what is logged in the behaviour log and what the visibility of each type of log messages is. " +
+	"'Yes' means this log type " +
+	"has normal visibility, while 'protected' means only roles who have permission to view protected entries can view them. 'No' means that " +
+	"this log type is not logged at all. In the permission settings view of the authority module, the permissions of this log module can be configured.",
+	[Views.ConditionsViewCurses]: "This screen shows all active curses on the player, including many information, such as duration, if it is " +
+	"a cursed item or a blocked item or clothing slot that forces to stay unrestrained or naked there. Clicking on the button with the cog icon " +
+	"in the middle of each row moves you to a new screen that allows to configure the curse (is you have permission). If the cog icon has a blue " +
+	"aura then that means that the curse's conditions are the same as the global config. If permitted you can remove single curses with the 'X' button.",
+	[Views.ConditionsEditCurses]: "Here you can configure if the curse is in effect, if it wears off after a while or not, what happens then and " +
+	"most importantly when the curse is active, such as either always or based on where the player is and with whom. The green/red bar next to the " +
+	"checkboxes indicated whether a condition are true at present or not. On the right side, you can curse the usage/" +
+	"alteration of an item such as fixing cuffs overhead or behind the back. Lastly, in the bottom right you can set the four trigger conditions " +
+	"of this curse to the global curses config.",
+	[Views.ConditionsGlobalCurses]: "The settings on this page are the global/default settings for all newly added curses. Changes to the four trigger " +
+	"conditions are also applied to existing curses that are (still) set to global curses configuration, though. Exception is if a timer is set here. " +
+	"Such a timer only applies to newly created curses.",
 	[Views.CursesAdd]: "n/a c",
 	[Views.CursesAddPermissionMode]: "n/a c",
 	[Views.ConditionsViewRules]: "n/a r",

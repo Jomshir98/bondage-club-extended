@@ -25,8 +25,8 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 			return true;
 
 		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-		DrawButton(120, 820, 384, 90, "Create new rule", access ? "White" : "#ddd", "",
-			access ? "Create new rule from list of available rules" : "You have no permission to use this", !access);
+		DrawButton(120, 820, 384, 90, "Add new rule", access ? "White" : "#ddd", "",
+			access ? "Establish a new rule from the list of available rules" : "You have no permission to use this", !access);
 
 		// help text
 		if (this.showHelp) {
@@ -48,7 +48,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 		return false;
 	}
 
-	protected removeLabel: string = "Delete rule";
+	protected removeLabel: string = "Remove rule";
 
 	protected drawCategoryImage(X: number, Y: number, data: dataEntry): void {
 		DrawImageEx(data.extra.definition.icon, X + 6, Y + 6, {

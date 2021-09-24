@@ -272,7 +272,7 @@ export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	permission_change: "Log changes in permission settings",
 	curse_change: "Log each application, removal or change of curses",
 	curse_trigger: "Log every time a triggered curse reapplies an item",
-	rule_change: "Log each addition, cancellation or change of rules",
+	rule_change: "Log each addition, removal or change of rules",
 	rule_trigger: "Log every misbehaviour detected by rules",
 	authority_roles_change: "Log getting or losing a BCX owner/mistress"
 };

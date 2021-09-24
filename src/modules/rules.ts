@@ -84,13 +84,14 @@ export function RulesCreate(rule: BCX_Rule, character: ChatroomCharacter | null)
 	if (character && !ConditionsCheckAccess("rules", rule, character))
 		return false;
 
+	const display = RulesGetDisplayDefinition(rule);
+
 	if (!ConditionsGetCondition("rules", rule)) {
 		ConditionsSetCondition("rules", rule, {});
 		if (character) {
-			// TODO
-			logMessage("rule_change", LogEntryType.plaintext, `${character} rule_create: ${rule}`);
+			logMessage("rule_change", LogEntryType.plaintext, `${character} added a new rule: ${display.name}`);
 			if (!character.isPlayer()) {
-				ChatRoomSendLocal(`${character} rule_create: ${rule}`);
+				ChatRoomSendLocal(`${character} gave you a new rule: "${display.name}"`);
 			}
 		}
 	}
@@ -105,11 +106,12 @@ export function RulesDelete(rule: BCX_Rule, character: ChatroomCharacter | null)
 	if (character && !ConditionsCheckAccess("rules", rule, character))
 		return false;
 
+	const display = RulesGetDisplayDefinition(rule);
+
 	if (ConditionsRemoveCondition("rules", rule) && character) {
-		// TODO
-		logMessage("rule_change", LogEntryType.plaintext, `${character} rule_delete: ${rule}`);
+		logMessage("rule_change", LogEntryType.plaintext, `${character} removed the rule: ${display.name}`);
 		if (!character.isPlayer()) {
-			ChatRoomSendLocal(`${character} rule_delete: ${rule}`);
+			ChatRoomSendLocal(`${character} removed your rule "${display.name}"`);
 		}
 	}
 

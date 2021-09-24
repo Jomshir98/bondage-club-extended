@@ -226,7 +226,7 @@ window.BCX_Loaded = false;
     const VERSION_CHECK_BOT = 37685;
     const FUNCTION_HASHES = {
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
-        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D"],
+        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF"],
         AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
         AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
         ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],
@@ -262,19 +262,19 @@ window.BCX_Loaded = false;
     };
     const FUNCTION_HASHES_NMOD = {
         ActivityOrgasmStart: ["1F7E8FF9"],
-        AppearanceClick: ["B895612C"],
-        AppearanceRun: ["791E142F"],
+        AppearanceClick: ["19A126DF"],
+        AppearanceRun: ["6DDA14A1"],
         AsylumEntranceCanWander: ["609FA096"],
-        ChatRoomCanLeave: ["7EDA9A86"],
+        ChatRoomCanLeave: ["4ED4453D"],
         ChatRoomClearAllElements: ["904C924D"],
         ChatRoomCreateElement: ["76299AEC"],
-        ChatRoomDrawCharacterOverlay: ["1D912EBC"],
+        ChatRoomDrawCharacterOverlay: ["61F5F655"],
         ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomDrawFriendList: ["327DA1B8"],
-        ChatRoomKeyDown: ["977EC709"],
-        ChatRoomMessage: ["8186C1DB"],
-        ChatRoomSendChat: ["385B9E9C"],
-        ChatRoomSync: ["2590802E"],
+        ChatRoomKeyDown: ["15C1889B"],
+        ChatRoomMessage: ["9A5D5A5A"],
+        ChatRoomSendChat: ["7F540ED0"],
+        ChatRoomSync: ["A8E55C95"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["1ECB0CC4"],
         ColorPickerDraw: ["FF93AF2E"],
@@ -282,7 +282,7 @@ window.BCX_Loaded = false;
         DialogDrawItemMenu: ["05301080"],
         DialogDrawPoseMenu: ["4B146E82"],
         ElementIsScrolledToEnd: ["D28B0638"],
-        ExtendedItemDraw: ["455F5FDD"],
+        ExtendedItemDraw: ["BDE09647"],
         FriendListLoadFriendList: ["428B288B"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
@@ -293,7 +293,7 @@ window.BCX_Loaded = false;
         LoginStableItems: ["C3F50DD1"],
         MainHallWalk: ["E52553C4"],
         PrivateRansomStart: ["0E968EDD"],
-        ServerAccountBeep: ["A6DFD3B9"],
+        ServerAccountBeep: ["207D9580"],
         SpeechGarble: ["9D669F73"],
         ValidationResolveModifyDiff: ["C2FE52D3"]
     };
@@ -1299,18 +1299,19 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
     class ModuleWardrobe extends BaseModule {
         load() {
             const { NMod } = detectOtherMods();
+            const NModWardrobe = NMod && typeof AppearanceMode !== "undefined";
             hookFunction("AppearanceRun", 0, (args, next) => {
                 next(args);
-                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-                    const Y = NMod ? 265 : 125;
+                if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                    const Y = NModWardrobe ? 265 : 125;
                     DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
                     DrawButton(1534, Y, 207, 50, "Export", "White", "");
                     DrawButton(1768, Y, 207, 50, "Import", "White", "");
                 }
             });
             hookFunction("AppearanceClick", 0, (args, next) => {
-                if ((CharacterAppearanceMode === "Wardrobe" || NMod && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-                    const Y = NMod ? 265 : 125;
+                if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
+                    const Y = NModWardrobe ? 265 : 125;
                     // Restraints toggle
                     if (MouseIn(1457, Y, 50, 50)) {
                         j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
@@ -7446,10 +7447,13 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                     var _a, _b, _c;
                     const assetGroup = AssetGroup.find(g => g.Name === group);
                     const visibleName = assetGroup ? getVisibleGroupName(assetGroup) : "[ERROR]";
+                    const didActiveChange = newData.active !== oldData.active;
                     const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
                     const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
                     const didItemConfigCurseChange = ((_a = newData.data) === null || _a === void 0 ? void 0 : _a.curseProperties) !== ((_b = oldData.data) === null || _b === void 0 ? void 0 : _b.curseProperties);
                     const changeEvents = [];
+                    if (didActiveChange)
+                        changeEvents.push("active state");
                     if (didTimerChange)
                         changeEvents.push("timer");
                     if (didTriggerChange)
@@ -7460,6 +7464,9 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                         logMessage("curse_change", LogEntryType.plaintext, `${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s curse on slot '${visibleName}'`);
                     }
                     if (!character.isPlayer()) {
+                        if (didActiveChange) {
+                            ChatRoomSendLocal(`${character} ${newData.active ? "reactivated" : "deactivated"} the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
+                        }
                         if (newData.timer !== oldData.timer)
                             if (newData.timer === null) {
                                 ChatRoomSendLocal(`${character} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);

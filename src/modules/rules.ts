@@ -1,3 +1,4 @@
+import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
 import { ChatroomCharacter } from "../characters";
 import { ModuleCategory, ModuleInitPhase, Preset } from "../constants";
@@ -21,10 +22,34 @@ export function guard_BCX_Rule(name: unknown): name is BCX_Rule {
 	return typeof name === "string" && rules.has(name as BCX_Rule);
 }
 
+export function guard_RuleCustomData(rule: BCX_Rule, data: unknown): boolean {
+	const descriptor = rules.get(rule as BCX_Rule);
+	if (!descriptor)
+		return false;
+
+	if (descriptor.dataDefinition) {
+		if (!isObject(data))
+			return false;
+		for (const k of Object.keys(data)) {
+			if (!(descriptor.dataDefinition as Record<string, any>)[k])
+				return false;
+		}
+		for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(descriptor.dataDefinition)) {
+			const handler = ruleCustomDataHandlers[def.type];
+			if (!handler || !handler.validate(data[k]))
+				return false;
+		}
+	} else if (data !== undefined) {
+		return false;
+	}
+
+	return true;
+}
+
 const rules: Map<BCX_Rule, RuleDefinition> = new Map();
 const rulesList: BCX_Rule[] = [];
 
-export function registerRule(name: BCX_Rule, data: RuleDefinition) {
+export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition<ID>) {
 	if (moduleInitPhase !== ModuleInitPhase.init) {
 		throw new Error("Rules can be registered only during init");
 	}
@@ -48,6 +73,65 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 		defaultLimit: data.defaultLimit
 	};
 }
+
+export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomDataTypes> = {
+	validate(value: unknown): boolean;
+	onDataChange?(active: boolean, key: string, onInput: () => void): void;
+	processInput?(key: string): RuleCustomDataTypesMap[type] | undefined;
+	run(value: RuleCustomDataTypesMap[type], Y: number, key: string): void;
+	click(value: RuleCustomDataTypesMap[type], Y: number, key: string): RuleCustomDataTypesMap[type] | undefined;
+};
+
+export const ruleCustomDataHandlers: {
+	[type in RuleCustomDataTypes]: RuleCustomDataHandler<type>;
+} = {
+	memberNumberList: {
+		validate: value => Array.isArray(value) && value.every(Number.isInteger),
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	number: {
+		validate: value => typeof value === "number",
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	orgasm: {
+		validate: value => value === "edge" || value === "ruined" || value === "noResist",
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	poseSelect: {
+		// TODO: stricten
+		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	roleSelector: {
+		validate: value => typeof value === "number" && AccessLevel[value] !== undefined,
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	strengthSelect: {
+		validate: value => value === "light" || value === "medium" || value === "heavy",
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	string: {
+		validate: value => typeof value === "string",
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	stringList: {
+		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	},
+	toggle: {
+		validate: value => typeof value === "boolean",
+		run(value, Y) { /* TODO */ },
+		click(value, Y) { return undefined; }
+	}
+};
 
 function parseRuleName(selector: string, filter?: (ruleName: BCX_Rule) => boolean): [true, BCX_Rule] | [false, string] {
 	selector = selector.toLocaleLowerCase();
@@ -251,6 +335,11 @@ export class ModuleRules extends BaseModule {
 			loadValidateConditionKey: rule => guard_BCX_Rule(rule),
 			loadValidateCondition: (rule, data) => {
 				const info = data.data;
+				const descriptor = rules.get(rule as BCX_Rule);
+				if (!descriptor) {
+					console.error(`BCX: Bad data for rule ${rule}: descriptor not found, removing it`);
+					return false;
+				}
 
 				if (!isObject(info) ||
 					// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
@@ -262,17 +351,46 @@ export class ModuleRules extends BaseModule {
 					return false;
 				}
 
+				if (descriptor.dataDefinition) {
+					if (!isObject(info.customData)) {
+						console.error(`BCX: Bad custom data for rule ${rule}, removing it`, info);
+						return false;
+					}
+					for (const k of Object.keys(info.customData)) {
+						if (!(descriptor.dataDefinition as Record<string, any>)[k]) {
+							console.error(`BCX: Unknown custom data attribute '${k}' for rule ${rule}, removing it`, info);
+							return false;
+						}
+					}
+					for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(descriptor.dataDefinition)) {
+						const handler = ruleCustomDataHandlers[def.type];
+						if (!handler) {
+							console.error(`BCX: Custom data for rule ${rule} unknown type ${def.type}, removing it`, info);
+							return false;
+						}
+						if (!handler.validate(info.customData[k])) {
+							console.error(`BCX: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, removing it`, info);
+							return false;
+						}
+					}
+				} else if (info.customData !== undefined) {
+					console.error(`BCX: Custom data for rule ${rule} without data definition, removing it`, info);
+					return false;
+				}
+
 				return true;
 			},
 			tickHandler: this.ruleTick.bind(this),
 			makePublicData: (rule, data) => ({
 				enforce: data.data.enforce ?? true,
-				log: data.data.log ?? true
+				log: data.data.log ?? true,
+				customData: cloneDeep(data.data.customData)
 			}),
 			validatePublicData: (rule, data) =>
 				isObject(data) &&
 				typeof data.enforce === "boolean" &&
-				typeof data.log === "boolean",
+				typeof data.log === "boolean" &&
+				guard_RuleCustomData(rule, data.customData),
 			updateCondition: (condition, data, updateData) => {
 				if (updateData.enforce) {
 					delete data.data.enforce;
@@ -284,6 +402,10 @@ export class ModuleRules extends BaseModule {
 					delete data.data.log;
 				} else {
 					data.data.log = false;
+				}
+
+				if (updateData.customData) {
+					data.data.customData = cloneDeep(updateData.customData);
 				}
 
 				return true;
@@ -308,11 +430,18 @@ export class ModuleRules extends BaseModule {
 
 				const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
 				const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
-				const changeEvents = [];
+				const changeEvents: string[] = [];
 				if (didTimerChange)
 					changeEvents.push("timer");
 				if (didTriggerChange)
 					changeEvents.push("trigger condition");
+				if (definition.dataDefinition) {
+					for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
+						if (!isEqual(oldData.data.customData?.[k], newData.data.customData?.[k])) {
+							changeEvents.push(def.description);
+						}
+					}
+				}
 				if (changeEvents.length > 0) {
 					logMessage("rule_change", LogEntryType.plaintext,
 						`${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s '${visibleName}' rule`);
@@ -352,6 +481,13 @@ export class ModuleRules extends BaseModule {
 								ChatRoomSendLocal(`${character} deactivated all trigger conditions of the '${visibleName}' rule. The rule will now always trigger, while it is active`, undefined, character.MemberNumber);
 							}
 						}
+					if (definition.dataDefinition) {
+						for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
+							if (!isEqual(oldData.data.customData?.[k], newData.data.customData?.[k])) {
+								ChatRoomSendLocal(`${character} changed the '${visibleName}' rule '${def.description}' setting:`, undefined, character.MemberNumber);
+							}
+						}
+					}
 				}
 			},
 			logCategoryUpdate: (character, newData, oldData) => {

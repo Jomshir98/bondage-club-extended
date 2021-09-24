@@ -1,7 +1,7 @@
 import { ChatroomCharacter } from "../characters";
 import { GuiConditionEdit } from "./conditions_edit_base";
 import { GuiSubscreen } from "./subscreen";
-import { RulesGetDisplayDefinition } from "../modules/rules";
+import { RuleCustomDataHandler, ruleCustomDataHandlers, RulesGetDisplayDefinition } from "../modules/rules";
 import { Views, HELP_TEXTS } from "../helpTexts";
 import { showHelp } from "../utilsClub";
 
@@ -24,10 +24,34 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 	protected override onDataChange() {
 		super.onDataChange();
 
-		if (!this.conditionCategoryData || !this.conditionData) {
-			return;
+		const active = !!this.conditionCategoryData && !!this.conditionData;
+
+		if (this.definition.dataDefinition) {
+			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
+				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
+				handler.onDataChange?.(active, k, () => {
+					this.changes = this.makeChangesData();
+					this.processInputs();
+				});
+			}
 		}
 
+	}
+
+	protected override processInputs() {
+		super.processInputs();
+
+		if (this.changes && this.definition.dataDefinition) {
+			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
+				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
+				if (handler.processInput) {
+					const res = handler.processInput(k);
+					if (res !== undefined) {
+						this.changes.data.customData![k] = res;
+					}
+				}
+			}
+		}
 	}
 
 	Run(): boolean {
@@ -42,6 +66,14 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		////// right side: special rules category options
 		DrawCheckbox(1050, 175, 64, 64, "Enforce this rule", data.data.enforce, !access);
 		DrawCheckbox(1050, 275, 64, 64, "Behaviour log entry when rule is broken", data.data.log, !access);
+
+		if (this.definition.dataDefinition) {
+			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
+				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
+				const Y = 400;
+				handler.run(data.data.customData![k], Y, k);
+			}
+		}
 
 		// help text
 		if (this.showHelp) {
@@ -69,6 +101,20 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 			this.changes = this.makeChangesData();
 			this.changes.data.log = !this.changes.data.log;
 			return true;
+		}
+
+		if (this.definition.dataDefinition) {
+			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
+				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
+				const Y = 400;
+				const data = this.changes ?? this.conditionData;
+				const res = handler.click(data.data.customData![k], Y, k);
+				if (res !== undefined) {
+					this.changes = this.makeChangesData();
+					this.changes.data.customData![k] = res;
+					return true;
+				}
+			}
 		}
 
 		return false;

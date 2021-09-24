@@ -1,4 +1,4 @@
-import { ModuleCategory } from "../constants";
+import { ModuleCategory, ConditionsLimit } from "../constants";
 import { OverridePlayerDialog, RedirectGetImage } from "../modules/miscPatches";
 import { registerRule, RuleIsEnforced } from "../modules/rules";
 import { hookFunction } from "../patching";
@@ -9,6 +9,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using remotes on self",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use or triggering a vibrator or similar remote controlled item on the own body.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			OverridePlayerDialog("BCX_RemoteDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Remote.png", "Icons/Remote.png");
@@ -29,6 +30,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using remotes on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on other club members.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			OverridePlayerDialog("BCX_RemoteDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Remote.png", "Icons/Remote.png");
@@ -49,6 +51,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using keys on self",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use any kind of key for locked items on the own body.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
@@ -72,6 +75,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using keys on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use any kind of key for locked items on other club members.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
@@ -95,6 +99,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using locks on self",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on the own body.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			OverridePlayerDialog("BCX_LockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Lock.png", "Icons/Lock.png");
@@ -115,6 +120,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using locks on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on other club members.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			OverridePlayerDialog("BCX_LockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Lock.png", "Icons/Lock.png");
@@ -137,6 +143,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid wardrobe use on self",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to access the own wardrobe.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			PlayerCanChange_saved = Player.CanChange;
 			Player.CanChange = () => !RuleIsEnforced("forbid_wardrobeaccess_self") && PlayerCanChange_saved.apply(Player);
@@ -150,6 +157,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid wardrobe use on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use the wardrobe of other club members.",
+		defaultLimit: ConditionsLimit.normal,
 		load() {
 			hookFunction("ChatRoomCanChangeClothes", 5, (args, next) => {
 				if (RuleIsEnforced("forbid_wardrobeaccess_others"))
@@ -159,16 +167,25 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	// registerRule("restrict_allowed_poses", {
-	// 	name: "Restrict allowed body poses",
-	// 	icon: icon_restrictions,
-	// 	longDescription: "Only being allowed to be in certain poses, like kneeling or holding arms up."
-	// });
+	registerRule("restrict_allowed_poses", {
+		name: "Restrict allowed body poses",
+		icon: icon_restrictions,
+		longDescription: "Only being allowed to be in certain poses, like kneeling or holding arms up.",
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			poseButtons: {
+				type: "poseSelect",
+				default: [],
+				description: "TODO:poseButtons"
+			}
+		}
+	});
 
 	registerRule("forbid_creating_rooms", {
 		name: "Forbid creating own rooms",
 		icon: icon_restrictions,
 		longDescription: "Blocks/logs PLAYER_NAME from creating public and private rooms.",
+		defaultLimit: ConditionsLimit.limited,
 		load() {
 			hookFunction("ChatSearchRun", 0, (args, next) => {
 				next(args);
@@ -184,9 +201,17 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	// registerRule("restrict_accessible_rooms", {
-	// 	name: "Restrict accessible rooms",
-	// 	icon: icon_restrictions,
-	// 	longDescription: "This rule blocks/logs entering of not allowed rooms, based on a white list."
-	// });
+	registerRule("restrict_accessible_rooms", {
+		name: "Restrict accessible rooms",
+		icon: icon_restrictions,
+		longDescription: "This rule blocks/logs entering of not allowed rooms, based on a white list.",
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			roomList: {
+				type: "stringList",
+				default: [],
+				description: "TODO:roomList"
+			}
+		}
+	});
 }

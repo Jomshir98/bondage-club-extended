@@ -82,6 +82,8 @@ interface ConditionsCategorySpecificData {
 	rules: {
 		enforce?: false;
 		log?: false;
+		/** `RuleCustomData` */
+		customData?: Record<string, any>;
 	};
 }
 
@@ -93,6 +95,8 @@ interface ConditionsCategorySpecificPublicData {
 	rules: {
 		enforce: boolean;
 		log: boolean;
+		/** `RuleCustomData` */
+		customData?: Record<string, any>;
 	};
 }
 
@@ -173,17 +177,63 @@ type BCX_Rule =
 	| "forbid_lockuse_others"
 	| "forbid_wardrobeaccess_self"
 	| "forbid_wardrobeaccess_others"
-	// | "restrict_allowed_poses"
-	| "forbid_creating_rooms";
-	// | "restrict_accessible_rooms"
-	// | "sensory_deprivation_sound"
-	// | "sensory_deprivation_sight"
-	// | "sensory_deprivation_eyes"
-	// | "sensory_deprivation_blindfolds"
-	// | "always_slow"
-	// | "orgasm_control"
+	| "restrict_allowed_poses"
+	| "forbid_creating_rooms"
+	| "restrict_accessible_rooms"
+	| "sensory_deprivation_sound"
+	| "sensory_deprivation_sight"
+	| "sensory_deprivation_eyes"
+	| "sensory_deprivation_blindfolds"
+	| "always_slow"
+	| "orgasm_control";
 
-interface RuleDisplayDefinition {
+type RuleCustomData = {
+	restrict_accessible_rooms: {
+		roomList: string[];
+	},
+	restrict_allowed_poses: {
+		poseButtons: string[];
+	},
+	sensory_deprivation_sound: {
+		deafeningStrength: "light" | "medium" | "heavy";
+	},
+	sensory_deprivation_sight: {
+		blindnessStrength: "light" | "medium" | "heavy";
+	},
+	orgasm_control: {
+		orgasmHandling: "edge" | "ruined" | "noResist";
+	}
+};
+
+type RuleCustomDataTypesMap = {
+	memberNumberList: number[];
+	number: number;
+	orgasm: "edge" | "ruined" | "noResist";
+	poseSelect: string[];
+	roleSelector: import("./modules/authority").AccessLevel;
+	strengthSelect: "light" | "medium" | "heavy";
+	string: string;
+	stringList: string[];
+	toggle: boolean;
+};
+type RuleCustomDataTypes = keyof RuleCustomDataTypesMap;
+
+type RuleCustomDataFilter<U> = {
+	[K in RuleCustomDataTypes]: RuleCustomDataTypesMap[K] extends U ? K : never;
+}[RuleCustomDataTypes];
+
+type RuleCustomDataEntryDefinition = {
+	type: RuleCustomDataTypes;
+	default: RuleCustomDataTypesMap[RuleCustomDataTypes];
+	description: string;
+};
+
+type RuleCustomDataEntryDefinitionStrict<ID extends keyof RuleCustomData, P extends keyof RuleCustomData[ID]> = RuleCustomDataEntryDefinition & {
+	type: RuleCustomDataFilter<RuleCustomData[ID][P]>;
+	default: RuleCustomData[ID][P];
+};
+
+interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 	name: string;
 	icon: string;
 	shortDescription?: string;
@@ -193,9 +243,12 @@ interface RuleDisplayDefinition {
 	enforcabe?: false;
 	/** If rule can be logged, defaults to `true` */
 	loggable?: false;
+	dataDefinition?: ID extends keyof RuleCustomData ? {
+		[P in keyof RuleCustomData[ID]]: RuleCustomDataEntryDefinitionStrict<ID, P>;
+	} : never;
 }
 
-interface RuleDefinition extends RuleDisplayDefinition {
+interface RuleDefinition<ID extends BCX_Rule = BCX_Rule> extends RuleDisplayDefinition<ID> {
 	load?: () => void;
 	unload?: () => void;
 	tick?: () => boolean;

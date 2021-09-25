@@ -185,7 +185,16 @@ type BCX_Rule =
 	| "sensory_deprivation_eyes"
 	| "sensory_deprivation_blindfolds"
 	| "always_slow"
-	| "orgasm_control";
+	| "orgasm_control"
+	| "room_admin_management"
+	| "limit_tied_admins_power"
+	| "set_profile_description"
+	| "always_in_suitcase_game"
+	| "rc_club_owner"
+	| "rc_new_lovers"
+	| "rc_leave_lovers"
+	| "rc_new_subs"
+	| "rc_leave_subs";
 
 type RuleCustomData = {
 	restrict_accessible_rooms: {
@@ -202,6 +211,13 @@ type RuleCustomData = {
 	},
 	orgasm_control: {
 		orgasmHandling: "edge" | "ruined" | "noResist";
+	},
+	room_admin_management: {
+		minimumRole: import("./modules/authority").AccessLevel;
+		removeAdminToggle: boolean;
+	},
+	set_profile_description: {
+		playersProfileDescription: string;
 	}
 };
 
@@ -226,6 +242,7 @@ type RuleCustomDataEntryDefinition = {
 	type: RuleCustomDataTypes;
 	default: RuleCustomDataTypesMap[RuleCustomDataTypes];
 	description: string;
+	Y?: number;
 };
 
 type RuleCustomDataEntryDefinitionStrict<ID extends keyof RuleCustomData, P extends keyof RuleCustomData[ID]> = RuleCustomDataEntryDefinition & {

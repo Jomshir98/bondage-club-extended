@@ -26,7 +26,9 @@ export class GuiMisc extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
+		if (this.character.isPlayer()) {
+			DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
+		}
 
 		if (!this.character.isPlayer()) {
 			DrawText(`Miscellaneous module configuration is not possible on others`, 1000, 500, "Black");
@@ -49,7 +51,7 @@ export class GuiMisc extends GuiSubscreen {
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
-		if (MouseIn(1815, 190, 90, 90)) {
+		if (MouseIn(1815, 190, 90, 90) && this.character.isPlayer()) {
 			this.showHelp = !this.showHelp;
 			return;
 		}

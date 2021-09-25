@@ -1,9 +1,11 @@
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
 import { ChatroomCharacter } from "../characters";
-import { ModuleCategory, ModuleInitPhase, Preset } from "../constants";
+import { ModuleCategory, ModuleInitPhase, Preset, ConditionsLimit } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
+import { initRules_bc_alter } from "../rules/bc_alter";
 import { initRules_bc_blocks } from "../rules/bc_blocks";
+import { initRules_bc_relation_control } from "../rules/relation_control";
 import { capitalizeFirstLetter, formatTimeInterval, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
@@ -36,7 +38,7 @@ export function guard_RuleCustomData(rule: BCX_Rule, data: unknown): boolean {
 		}
 		for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(descriptor.dataDefinition)) {
 			const handler = ruleCustomDataHandlers[def.type];
-			if (!handler || !handler.validate(data[k]))
+			if (!handler || !handler.validate(data[k], def))
 				return false;
 		}
 	} else if (data !== undefined) {
@@ -70,16 +72,20 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 		icon: data.icon,
 		shortDescription: data.shortDescription,
 		longDescription: data.longDescription,
-		defaultLimit: data.defaultLimit
+		defaultLimit: data.defaultLimit,
+		enforcabe: data.enforcabe,
+		loggable: data.loggable,
+		dataDefinition: data.dataDefinition
 	};
 }
 
 export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomDataTypes> = {
-	validate(value: unknown): boolean;
-	onDataChange?(active: boolean, key: string, onInput: () => void): void;
-	processInput?(key: string): RuleCustomDataTypesMap[type] | undefined;
-	run(value: RuleCustomDataTypesMap[type], Y: number, key: string): void;
-	click(value: RuleCustomDataTypesMap[type], Y: number, key: string): RuleCustomDataTypesMap[type] | undefined;
+	validate(value: unknown, def: RuleCustomDataEntryDefinition): boolean;
+	onDataChange?(def: RuleCustomDataEntryDefinition, active: boolean, key: string, onInput: () => void, value: RuleCustomDataTypesMap[type]): void;
+	processInput?(def: RuleCustomDataEntryDefinition, key: string): RuleCustomDataTypesMap[type] | undefined;
+	unload?(def: RuleCustomDataEntryDefinition, key: string): void;
+	run(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string): void;
+	click?(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string): RuleCustomDataTypesMap[type] | undefined;
 };
 
 export const ruleCustomDataHandlers: {
@@ -87,49 +93,143 @@ export const ruleCustomDataHandlers: {
 } = {
 	memberNumberList: {
 		validate: value => Array.isArray(value) && value.every(Number.isInteger),
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) { /* TODO */ },
+		click(def, value, Y) { return undefined; }
 	},
 	number: {
 		validate: value => typeof value === "number",
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) { /* TODO */ },
+		click(def, value, Y) { return undefined; }
 	},
 	orgasm: {
 		validate: value => value === "edge" || value === "ruined" || value === "noResist",
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) {
+			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			const roleSelectionNext: typeof value = value === "edge" ? "ruined" : value === "ruined" ? "noResist" : "edge";
+			const roleSelectionPrev: typeof value = value === "edge" ? "noResist" : value === "ruined" ? "edge" : "ruined";
+			const display: Record<typeof value, string> = {
+				edge: "Edge",
+				ruined: "Ruin",
+				noResist: "Prevent resisting"
+			};
+			MainCanvas.textAlign = "center";
+			DrawBackNextButton(1050, Y + 26, 500, 60,
+				display[value],
+				"White", "",
+				() => display[roleSelectionPrev],
+				() => display[roleSelectionNext]
+			);
+			MainCanvas.textAlign = "left";
+		},
+		click(def, value, Y) {
+			if (MouseIn(1050, Y + 26, 250, 60)) {
+				return value === "edge" ? "noResist" : value === "ruined" ? "edge" : "ruined";
+			}
+			if (MouseIn(1050 + 250, Y + 26, 250, 60)) {
+				return value === "edge" ? "ruined" : value === "ruined" ? "noResist" : "edge";
+			}
+			return undefined;
+		}
 	},
 	poseSelect: {
 		// TODO: stricten
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) { /* TODO */ },
+		click(def, value, Y) { return undefined; }
 	},
 	roleSelector: {
 		validate: value => typeof value === "number" && AccessLevel[value] !== undefined,
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) {
+			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			const roleSelectionNext = value < AccessLevel.public ? value + 1 : AccessLevel.clubowner;
+			const roleSelectionPrev = value > AccessLevel.clubowner ? value - 1 : AccessLevel.public;
+			MainCanvas.textAlign = "center";
+			DrawBackNextButton(1050, Y + 26, 250, 60,
+				capitalizeFirstLetter(AccessLevel[value]) + (value !== AccessLevel.clubowner ? " ↑" : ""),
+				"White", "",
+				() => capitalizeFirstLetter(AccessLevel[roleSelectionPrev]),
+				() => capitalizeFirstLetter(AccessLevel[roleSelectionNext])
+			);
+			MainCanvas.textAlign = "left";
+		},
+		click(def, value, Y) {
+			if (MouseIn(1050, Y + 26, 125, 60)) {
+				return value > AccessLevel.clubowner ? value - 1 : AccessLevel.public;
+			}
+			if (MouseIn(1050 + 125, Y + 26, 125, 60)) {
+				return value < AccessLevel.public ? value + 1 : AccessLevel.clubowner;
+			}
+			return undefined;
+		}
 	},
 	strengthSelect: {
 		validate: value => value === "light" || value === "medium" || value === "heavy",
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) {
+			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			const roleSelectionNext: typeof value = value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
+			const roleSelectionPrev: typeof value = value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
+			MainCanvas.textAlign = "center";
+			DrawBackNextButton(1050, Y + 26, 250, 60,
+				capitalizeFirstLetter(value),
+				"White", "",
+				() => capitalizeFirstLetter(roleSelectionPrev),
+				() => capitalizeFirstLetter(roleSelectionNext)
+			);
+			MainCanvas.textAlign = "left";
+		},
+		click(def, value, Y) {
+			if (MouseIn(1050, Y + 26, 125, 60)) {
+				return value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
+			}
+			if (MouseIn(1050 + 125, Y + 26, 125, 60)) {
+				return value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
+			}
+			return undefined;
+		}
 	},
 	string: {
 		validate: value => typeof value === "string",
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		onDataChange(def, active, key, onInput, value) {
+			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (!active) {
+				if (input) {
+					input.remove();
+				}
+			} else if (!input) {
+				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", value, "50");
+				input.oninput = onInput;
+			} else {
+				input.value = value;
+			}
+		},
+		processInput(def, key) {
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			return input ? input.value : undefined;
+		},
+		run(def, value, Y, key) {
+			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1000, Y + 26, 900, 60);
+		},
+		unload(def, key) {
+			ElementRemove(`BCX_RCDH_${key}`);
+		}
 	},
 	stringList: {
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) { /* TODO */ },
+		click(def, value, Y) { return undefined; }
 	},
 	toggle: {
 		validate: value => typeof value === "boolean",
-		run(value, Y) { /* TODO */ },
-		click(value, Y) { return undefined; }
+		run(def, value, Y) {
+			DrawCheckbox(1050, Y, 64, 64, def.description, value);
+		},
+		click(def, value, Y) {
+			if (MouseIn(1050, Y, 64, 64)) {
+				return !value;
+			}
+			return undefined;
+		}
 	}
 };
 
@@ -171,7 +271,14 @@ export function RulesCreate(rule: BCX_Rule, character: ChatroomCharacter | null)
 	const display = RulesGetDisplayDefinition(rule);
 
 	if (!ConditionsGetCondition("rules", rule)) {
-		ConditionsSetCondition("rules", rule, {});
+		const ruleData: ConditionsCategorySpecificData["rules"] = {};
+		if (display.dataDefinition) {
+			ruleData.customData = {};
+			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(display.dataDefinition)) {
+				ruleData.customData[k] = cloneDeep(v.default);
+			}
+		}
+		ConditionsSetCondition("rules", rule, ruleData);
 		if (character) {
 			logMessage("rule_change", LogEntryType.plaintext, `${character} added a new rule: ${display.name}`);
 			if (!character.isPlayer()) {
@@ -368,7 +475,7 @@ export class ModuleRules extends BaseModule {
 							console.error(`BCX: Custom data for rule ${rule} unknown type ${def.type}, removing it`, info);
 							return false;
 						}
-						if (!handler.validate(info.customData[k])) {
+						if (!handler.validate(info.customData[k], def)) {
 							console.error(`BCX: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, removing it`, info);
 							return false;
 						}
@@ -419,9 +526,9 @@ export class ModuleRules extends BaseModule {
 			logLimitChange: (rule, character, newLimit) => {
 				const definition = RulesGetDisplayDefinition(rule);
 				logMessage("rule_change", LogEntryType.plaintext,
-					`${character} changed ${Player.Name}'s '${definition.name}' rule permission to ${newLimit}`);
+					`${character} changed ${Player.Name}'s '${definition.name}' rule permission to ${ConditionsLimit[newLimit]}`);
 				if (!character.isPlayer()) {
-					ChatRoomSendLocal(`${character} changed '${definition.name}' rule permission to ${newLimit}`, undefined, character.MemberNumber);
+					ChatRoomSendLocal(`${character} changed '${definition.name}' rule permission to ${ConditionsLimit[newLimit]}`, undefined, character.MemberNumber);
 				}
 			},
 			logConditionUpdate: (rule, character, newData, oldData) => {
@@ -541,6 +648,8 @@ export class ModuleRules extends BaseModule {
 
 		// Init individual rules
 		initRules_bc_blocks();
+		initRules_bc_alter();
+		initRules_bc_relation_control();
 	}
 
 	load() {

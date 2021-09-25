@@ -25,14 +25,15 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		super.onDataChange();
 
 		const active = !!this.conditionCategoryData && !!this.conditionData;
+		const data = this.changes ?? this.conditionData;
 
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
-				handler.onDataChange?.(active, k, () => {
+				handler.onDataChange?.(v, active, k, () => {
 					this.changes = this.makeChangesData();
 					this.processInputs();
-				});
+				}, data?.data.customData![k] ?? v.default);
 			}
 		}
 
@@ -45,7 +46,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 				if (handler.processInput) {
-					const res = handler.processInput(k);
+					const res = handler.processInput(v, k);
 					if (res !== undefined) {
 						this.changes.data.customData![k] = res;
 					}
@@ -70,8 +71,8 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
-				const Y = 400;
-				handler.run(data.data.customData![k], Y, k);
+				const Y = v.Y ?? 400;
+				handler.run(v, data.data.customData![k], Y, k);
 			}
 		}
 
@@ -106,17 +107,31 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
-				const Y = 400;
-				const data = this.changes ?? this.conditionData;
-				const res = handler.click(data.data.customData![k], Y, k);
-				if (res !== undefined) {
-					this.changes = this.makeChangesData();
-					this.changes.data.customData![k] = res;
-					return true;
+				if (handler.click) {
+					const Y = v.Y ?? 400;
+					const data = this.changes ?? this.conditionData;
+					const res = handler.click(v, data.data.customData![k], Y, k);
+					if (res !== undefined) {
+						this.changes = this.makeChangesData();
+						this.changes.data.customData![k] = res;
+						return true;
+					}
 				}
 			}
 		}
 
 		return false;
+	}
+
+	override Unload() {
+		if (this.definition.dataDefinition) {
+			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
+				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
+				if (handler.unload) {
+					handler.unload(v, k);
+				}
+			}
+		}
+		super.Unload();
 	}
 }

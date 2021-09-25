@@ -7,7 +7,7 @@ import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
-import { ModuleCategory, Preset } from "../constants";
+import { ModuleCategory, Preset, ConditionsLimit } from "../constants";
 import { hookFunction, removeAllHooksByModule } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
@@ -525,9 +525,9 @@ export class ModuleCurses extends BaseModule {
 			},
 			logLimitChange: (group, character, newLimit) => {
 				logMessage("curse_change", LogEntryType.plaintext,
-					`${character} changed ${Player.Name}'s curse slot '${group}' permission to ${newLimit}`);
+					`${character} changed ${Player.Name}'s curse slot '${group}' permission to ${ConditionsLimit[newLimit]}`);
 				if (!character.isPlayer()) {
-					ChatRoomSendLocal(`${character} changed curse slot '${group}' permission to ${newLimit}`, undefined, character.MemberNumber);
+					ChatRoomSendLocal(`${character} changed curse slot '${group}' permission to ${ConditionsLimit[newLimit]}`, undefined, character.MemberNumber);
 				}
 			},
 			logConditionUpdate: (group, character, newData, oldData) => {

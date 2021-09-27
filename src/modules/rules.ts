@@ -6,7 +6,8 @@ import { moduleInitPhase } from "../moduleManager";
 import { initRules_bc_alter } from "../rules/bc_alter";
 import { initRules_bc_blocks } from "../rules/bc_blocks";
 import { initRules_bc_relation_control } from "../rules/relation_control";
-import { capitalizeFirstLetter, formatTimeInterval, isObject } from "../utils";
+import { initRules_bc_speech_control } from "../rules/speech_control";
+import { capitalizeFirstLetter, clamp, formatTimeInterval, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
 import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
@@ -88,6 +89,8 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 	click?(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string): RuleCustomDataTypesMap[type] | undefined;
 };
 
+const ruleCustomDataHandlerPage: Map<string, number> = new Map();
+
 export const ruleCustomDataHandlers: {
 	[type in RuleCustomDataTypes]: RuleCustomDataHandler<type>;
 } = {
@@ -101,10 +104,11 @@ export const ruleCustomDataHandlers: {
 		run(def, value, Y) { /* TODO */ },
 		click(def, value, Y) { return undefined; }
 	},
+	// element has Y length of 150px (description + elmement plus offset to the next one)
 	orgasm: {
 		validate: value => value === "edge" || value === "ruined" || value === "noResist",
 		run(def, value, Y) {
-			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
 			const roleSelectionNext: typeof value = value === "edge" ? "ruined" : value === "ruined" ? "noResist" : "edge";
 			const roleSelectionPrev: typeof value = value === "edge" ? "noResist" : value === "ruined" ? "edge" : "ruined";
 			const display: Record<typeof value, string> = {
@@ -113,7 +117,7 @@ export const ruleCustomDataHandlers: {
 				noResist: "Prevent resisting"
 			};
 			MainCanvas.textAlign = "center";
-			DrawBackNextButton(1050, Y + 26, 500, 60,
+			DrawBackNextButton(1050, Y + 46, 500, 60,
 				display[value],
 				"White", "",
 				() => display[roleSelectionPrev],
@@ -122,10 +126,10 @@ export const ruleCustomDataHandlers: {
 			MainCanvas.textAlign = "left";
 		},
 		click(def, value, Y) {
-			if (MouseIn(1050, Y + 26, 250, 60)) {
+			if (MouseIn(1050, Y + 46, 250, 60)) {
 				return value === "edge" ? "noResist" : value === "ruined" ? "edge" : "ruined";
 			}
-			if (MouseIn(1050 + 250, Y + 26, 250, 60)) {
+			if (MouseIn(1050 + 250, Y + 46, 250, 60)) {
 				return value === "edge" ? "ruined" : value === "ruined" ? "noResist" : "edge";
 			}
 			return undefined;
@@ -137,14 +141,15 @@ export const ruleCustomDataHandlers: {
 		run(def, value, Y) { /* TODO */ },
 		click(def, value, Y) { return undefined; }
 	},
+	// element has Y length of 150px (description + elmement plus offset to the next one)
 	roleSelector: {
 		validate: value => typeof value === "number" && AccessLevel[value] !== undefined,
 		run(def, value, Y) {
-			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
 			const roleSelectionNext = value < AccessLevel.public ? value + 1 : AccessLevel.clubowner;
 			const roleSelectionPrev = value > AccessLevel.clubowner ? value - 1 : AccessLevel.public;
 			MainCanvas.textAlign = "center";
-			DrawBackNextButton(1050, Y + 26, 250, 60,
+			DrawBackNextButton(1050, Y + 46, 250, 60,
 				capitalizeFirstLetter(AccessLevel[value]) + (value !== AccessLevel.clubowner ? " ↑" : ""),
 				"White", "",
 				() => capitalizeFirstLetter(AccessLevel[roleSelectionPrev]),
@@ -153,23 +158,24 @@ export const ruleCustomDataHandlers: {
 			MainCanvas.textAlign = "left";
 		},
 		click(def, value, Y) {
-			if (MouseIn(1050, Y + 26, 125, 60)) {
+			if (MouseIn(1050, Y + 46, 125, 60)) {
 				return value > AccessLevel.clubowner ? value - 1 : AccessLevel.public;
 			}
-			if (MouseIn(1050 + 125, Y + 26, 125, 60)) {
+			if (MouseIn(1050 + 125, Y + 46, 125, 60)) {
 				return value < AccessLevel.public ? value + 1 : AccessLevel.clubowner;
 			}
 			return undefined;
 		}
 	},
+	// element has Y length of 150px (description + elmement plus offset to the next one)
 	strengthSelect: {
 		validate: value => value === "light" || value === "medium" || value === "heavy",
 		run(def, value, Y) {
-			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
 			const roleSelectionNext: typeof value = value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
 			const roleSelectionPrev: typeof value = value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
 			MainCanvas.textAlign = "center";
-			DrawBackNextButton(1050, Y + 26, 250, 60,
+			DrawBackNextButton(1050, Y + 46, 250, 60,
 				capitalizeFirstLetter(value),
 				"White", "",
 				() => capitalizeFirstLetter(roleSelectionPrev),
@@ -178,10 +184,10 @@ export const ruleCustomDataHandlers: {
 			MainCanvas.textAlign = "left";
 		},
 		click(def, value, Y) {
-			if (MouseIn(1050, Y + 26, 125, 60)) {
+			if (MouseIn(1050, Y + 46, 125, 60)) {
 				return value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
 			}
-			if (MouseIn(1050 + 125, Y + 26, 125, 60)) {
+			if (MouseIn(1050 + 125, Y + 46, 125, 60)) {
 				return value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
 			}
 			return undefined;
@@ -216,8 +222,71 @@ export const ruleCustomDataHandlers: {
 	},
 	stringList: {
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
-		run(def, value, Y) { /* TODO */ },
-		click(def, value, Y) { return undefined; }
+		onDataChange(def, active, key) {
+			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (!active) {
+				if (input) {
+					input.remove();
+				}
+			} else if (!input) {
+				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "100");
+			}
+		},
+		run(def, value, Y, key) {
+			Y -= 20;
+			const PAGE_SIZE = 4;
+			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
+			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
+			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
+			for (let i = 0; i < PAGE_SIZE; i++) {
+				const e = page * PAGE_SIZE + i;
+				if (e >= value.length)
+					break;
+				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
+				const msg = value[e];
+				DrawTextFit(msg, 1060, Y + 26 + i * 70 + 34, 380, "Black");
+				MainCanvas.textAlign = "center";
+				DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
+				MainCanvas.textAlign = "left";
+			}
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + PAGE_SIZE * 70 + 43, 450, 60);
+			MainCanvas.textAlign = "center";
+			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", "White");
+			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
+			MainCanvas.textAlign = "left";
+		},
+		click(def, value, Y, key) {
+			Y -= 20;
+			const PAGE_SIZE = 4;
+			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
+			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
+			for (let i = 0; i < PAGE_SIZE; i++) {
+				const e = page * PAGE_SIZE + i;
+				if (e >= value.length)
+					break;
+				if (MouseIn(1836, Y + 26 + i * 70, 64, 64)) {
+					value.splice(e, 1);
+					return value;
+				}
+			}
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) && input && input.value && !value.includes(input.value)) {
+				value.push(input.value);
+				value.sort();
+				input.value = "";
+				return value;
+			}
+			if (MouseIn(1650, Y + PAGE_SIZE * 70 + 43, 125, 64) && page > 0) {
+				ruleCustomDataHandlerPage.set(key, page - 1);
+			} else if (MouseIn(1650 + 125, Y + PAGE_SIZE * 70 + 43, 125, 64) && page + 1 < totalPages) {
+				ruleCustomDataHandlerPage.set(key, page + 1);
+			}
+			return undefined;
+		},
+		unload(def, key) {
+			ElementRemove(`BCX_RCDH_${key}`);
+			ruleCustomDataHandlerPage.delete(key);
+		}
 	},
 	toggle: {
 		validate: value => typeof value === "boolean",
@@ -650,6 +719,7 @@ export class ModuleRules extends BaseModule {
 		initRules_bc_blocks();
 		initRules_bc_alter();
 		initRules_bc_relation_control();
+		initRules_bc_speech_control();
 	}
 
 	load() {

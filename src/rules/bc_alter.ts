@@ -14,7 +14,7 @@ export function initRules_bc_alter() {
 			deafeningStrength: {
 				type: "strengthSelect",
 				default: "light",
-				description: "TODO:deafeningStrength"
+				description: "Hearing impairment:"
 			}
 		}
 	});
@@ -30,7 +30,7 @@ export function initRules_bc_alter() {
 			blindnessStrength: {
 				type: "strengthSelect",
 				default: "light",
-				description: "TODO:blindnessStrength"
+				description: "Eyesight impairment:"
 			}
 		}
 	});
@@ -60,7 +60,7 @@ export function initRules_bc_alter() {
 	});
 
 	registerRule("orgasm_control", {
-		name: "Controlling ability to orgasmn",
+		name: "Controlling ability to orgasm",
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "adjustable: only-edge, only-ruin, no-resist",
@@ -70,7 +70,7 @@ export function initRules_bc_alter() {
 			orgasmHandling: {
 				type: "orgasm",
 				default: "edge",
-				description: "TODO:orgasmHandling"
+				description: "Orgasm attempts will be fixed to:"
 			}
 		}
 	});
@@ -86,12 +86,14 @@ export function initRules_bc_alter() {
 			minimumRole: {
 				type: "roleSelector",
 				default: AccessLevel.owner,
-				description: "TODO:the minimum role that admin rights are transferred to"
+				description: "Minimum role that gets admin:",
+				Y: 320
 			},
 			removeAdminToggle: {
 				type: "toggle",
 				default: false,
-				description: "TODO:if the player loses their admin rights afterwards"
+				description: "Player loses admin afterwards",
+				Y: 470
 			}
 		}
 	});
@@ -110,13 +112,13 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "directly sets the player's profile",
-		longDescription: "Sets the player's online description with the text field in the rule config while blocking changing of it as long as the rule is active.",
+		longDescription: "Sets the player's Bondage Club online description with the text field in the rule config while blocking changing of it as long as the rule is active.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			playersProfileDescription: {
 				type: "string",
 				default: "", //default should be the player's currently set profile online description
-				description: "TODO:the content of this text field will be set as new Bondage Club profile description of this player"
+				description: "Edit this player's profile description:"
 			}
 		}
 	});

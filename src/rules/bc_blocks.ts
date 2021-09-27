@@ -204,13 +204,14 @@ export function initRules_bc_blocks() {
 	registerRule("restrict_accessible_rooms", {
 		name: "Restrict accessible rooms",
 		icon: icon_restrictions,
-		longDescription: "This rule blocks/logs entering of not allowed rooms, based on a white list.",
-		defaultLimit: ConditionsLimit.limited,
+		shortDescription: "only allow specific ones",
+		longDescription: "This rule blocks/logs entering of not allowed rooms, based on a editable whitelist of rooms that are still permitted for the player to join. This rule could for instance be combined with the rule that forbids the player to create their own rooms.",
+		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			roomList: {
 				type: "stringList",
 				default: [],
-				description: "TODO:roomList"
+				description: "Only joining rooms with these names is allowed:"
 			}
 		}
 	});

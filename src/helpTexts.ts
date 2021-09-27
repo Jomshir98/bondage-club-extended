@@ -64,8 +64,9 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"aura, then that means that the rule's conditions are the same as the global config. If permitted, you can remove single rules with the 'X' button.",
 	[Views.ConditionsEditRules]: "Here you can configure if the rule is in effect, if it is only valid for some time, what happens then and " +
 	"most importantly when the rule applies, such as either always or based on where the player is and with whom. The green/red bars next to the " +
-	"checkboxes indicate whether a triggering condition is true at present or not. Lastly, in the bottom right you can set the four trigger conditions " +
-	"of this rule to the global rules config.",
+	"checkboxes indicate whether a triggering condition is true at present or not. Depending on the rule, you can define additional " +
+	"things specific to this rule on the right side of the screen. Lastly on the bottom right, you can set whether the four trigger conditions " +
+	"of this rule should follow the global rules config or not.",
 	[Views.ConditionsGlobalRules]: "The settings on this page are the global/default settings for all newly added rules. Changes to the four trigger " +
 	"conditions are also applied to existing rules that are (still) set to global rules configuration, though. Exception is if a timer is set here. " +
 	"Such a timer only applies to newly established rules.",

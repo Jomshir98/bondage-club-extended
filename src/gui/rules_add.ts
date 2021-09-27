@@ -162,12 +162,17 @@ export class GuiRulesAdd extends GuiSubscreen {
 					!allowAccess ? "You don't have permission to use this rule" : "";
 			}
 			// Rule name
-			DrawButton(200, Y, 1350, 64, "", color, "", text, ruleIsCreated || !allowAccess || this.permissionMode);
+			DrawButton(200, Y, 1350, 64, "", color, "", "", ruleIsCreated || !allowAccess || this.permissionMode);
 			let description = e.definition.name;
 			if (e.definition.shortDescription) {
 				description += ` (${e.definition.shortDescription})`;
 			}
 			DrawTextFit(description, 210, Y + 34, 1340, "Black");
+			if (MouseIn(200, Y, 1350, 64)) {
+				DrawHoverElements.push(() => {
+					DrawButtonHover(1200, Y, 60, 60, text);
+				});
+			}
 		}
 
 		// Pagination
@@ -233,7 +238,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 			const allowAccess = [this.rulesData.access_normal, this.rulesData.access_limited, false][accessLevel];
 
 			// Rule name
-			if (MouseIn(200, Y, 1000, 64)) {
+			if (MouseIn(200, Y, 1350, 64)) {
 				const ruleName = e.name;
 				if (this.permissionMode) {
 					this.character.conditionSetLimit("rules", e.name, (accessLevel + 1) % 3);

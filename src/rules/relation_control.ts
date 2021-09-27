@@ -36,7 +36,7 @@ export function initRules_bc_relation_control() {
 	});
 
 	registerRule("rc_leave_subs", {
-		name: "Forbid to disown subs",
+		name: "Forbid disowning subs",
 		icon: icon_OwnerList,
 		shortDescription: "relationship control",
 		longDescription: "Forbid the player to uncollar and let go of any of their subs",

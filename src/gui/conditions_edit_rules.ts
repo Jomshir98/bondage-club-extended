@@ -3,7 +3,6 @@ import { GuiConditionEdit } from "./conditions_edit_base";
 import { GuiSubscreen } from "./subscreen";
 import { RuleCustomDataHandler, ruleCustomDataHandlers, RulesGetDisplayDefinition } from "../modules/rules";
 import { Views, HELP_TEXTS } from "../helpTexts";
-import { showHelp } from "../utilsClub";
 
 export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 
@@ -64,21 +63,35 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 
 		MainCanvas.textAlign = "left";
 
+		let Y = 175;
+
 		////// right side: special rules category options
-		DrawCheckbox(1050, 175, 64, 64, "Enforce this rule", data.data.enforce, !access);
-		DrawCheckbox(1050, 275, 64, 64, "Behaviour log entry when rule is broken", data.data.log, !access);
+		if (this.definition.enforcabe !== false) {
+			DrawCheckbox(1050, Y, 64, 64, "Enforce this rule", data.data.enforce, !access);
+			Y += 100;
+		}
+		if (this.definition.loggable !== false) {
+			DrawCheckbox(1050, Y, 64, 64, "Behaviour log entry when rule is violated", data.data.log, !access);
+			Y += 100;
+		}
+
+		Y += 45;
 
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
-				const Y = v.Y ?? 400;
-				handler.run(v, data.data.customData![k], Y, k);
+				handler.run(v, data.data.customData![k], v.Y ?? Y, k);
 			}
 		}
 
 		// help text
 		if (this.showHelp) {
-			showHelp(HELP_TEXTS[Views.ConditionsEditRules]);
+			MainCanvas.fillStyle = "#ffff88";
+			MainCanvas.fillRect(95, 80, 800, 600);
+			MainCanvas.strokeStyle = "Black";
+			MainCanvas.strokeRect(95, 80, 800, 600);
+			MainCanvas.textAlign = "left";
+			DrawTextWrap(HELP_TEXTS[Views.ConditionsEditRules], 115 - 760 / 2, 100, 760, 560, "black");
 		}
 
 		return false;
@@ -91,26 +104,34 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		if (!this.checkAccess())
 			return false;
 
+		let Y = 175;
 
-		if (MouseIn(1050, 175, 64, 64)) {
-			this.changes = this.makeChangesData();
-			this.changes.data.enforce = !this.changes.data.enforce;
-			return true;
+		if (this.definition.enforcabe !== false) {
+			if (MouseIn(1050, Y, 64, 64)) {
+				this.changes = this.makeChangesData();
+				this.changes.data.enforce = !this.changes.data.enforce;
+				return true;
+			}
+			Y += 100;
 		}
 
-		if (MouseIn(1050, 275, 64, 64)) {
-			this.changes = this.makeChangesData();
-			this.changes.data.log = !this.changes.data.log;
-			return true;
+		if (this.definition.loggable !== false) {
+			if (MouseIn(1050, Y, 64, 64)) {
+				this.changes = this.makeChangesData();
+				this.changes.data.log = !this.changes.data.log;
+				return true;
+			}
+			Y += 100;
 		}
+
+		Y += 45;
 
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 				if (handler.click) {
-					const Y = v.Y ?? 400;
 					const data = this.changes ?? this.conditionData;
-					const res = handler.click(v, data.data.customData![k], Y, k);
+					const res = handler.click(v, data.data.customData![k], v.Y ?? Y, k);
 					if (res !== undefined) {
 						this.changes = this.makeChangesData();
 						this.changes.data.customData![k] = res;

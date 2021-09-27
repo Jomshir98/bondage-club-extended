@@ -126,7 +126,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			MainCanvas.rect(X, Y, 440, 60);
 			MainCanvas.stroke();
 			this.drawCategoryImage(X, Y, e);
-			DrawTextFit(e.displayName, X + 65, Y + 30, 375, "Black");
+			DrawTextFit(e.displayName, X + 65, Y + 30, 365, "Black");
 
 			// config button info
 			MainCanvas.textAlign = "center";

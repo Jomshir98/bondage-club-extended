@@ -194,7 +194,14 @@ type BCX_Rule =
 	| "rc_new_lovers"
 	| "rc_leave_lovers"
 	| "rc_new_subs"
-	| "rc_leave_subs";
+	| "rc_leave_subs"
+	| "allow_set_sound_only"
+	| "garble_gagged_whispers"
+	| "block_OOC_while_gagged"
+	| "doll_talk"
+	| "banning_words"
+	| "forbid_talking"
+	| "restricted_whispering";
 
 type RuleCustomData = {
 	restrict_accessible_rooms: {
@@ -218,6 +225,19 @@ type RuleCustomData = {
 	},
 	set_profile_description: {
 		playersProfileDescription: string;
+	},
+	allow_set_sound_only: {
+		soundWhitelist: string;
+	},
+	doll_talk: {
+		maxWordLength: number;
+		maxNumberOfWords: number;
+	},
+	banning_words: {
+		bannedWords: string[];
+	},
+	restricted_whispering: {
+		minimumPermittedRole: import("./modules/authority").AccessLevel;
 	}
 };
 

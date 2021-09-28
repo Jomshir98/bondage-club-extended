@@ -32,7 +32,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 				handler.onDataChange?.(v, active, k, () => {
 					this.changes = this.makeChangesData();
 					this.processInputs();
-				}, data?.data.customData![k] ?? v.default);
+				}, data?.data.customData![k] ?? (typeof v.default === "function" ? v.default() : v.default));
 			}
 		}
 
@@ -45,7 +45,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 				if (handler.processInput) {
-					const res = handler.processInput(v, k);
+					const res = handler.processInput(v, k, this.changes.data.customData![k]);
 					if (res !== undefined) {
 						this.changes.data.customData![k] = res;
 					}

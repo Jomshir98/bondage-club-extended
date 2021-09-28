@@ -116,8 +116,8 @@ export function initRules_bc_alter() {
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			playersProfileDescription: {
-				type: "string",
-				default: "", //default should be the player's currently set profile online description
+				type: "textArea",
+				default: () => (Player.Description || ""),
 				description: "Edit this player's profile description:"
 			}
 		}

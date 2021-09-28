@@ -97,4 +97,37 @@ export function initRules_bc_speech_control() {
 			}
 		}
 	});
+
+	registerRule("forbid_beeping", {
+		name: "Restrict beep messages",
+		icon: "Icons/Chat.png",
+		shortDescription: "sending and recieving, except to/from whitelisted members",
+		longDescription: "Prevents the player from sending and recieving any beep messages, except to the editable white list of member numbers who can still send PLAYER_NAME beep messages and can recieve them also. If someone tries to send PLAYER_NAME a beep message while this rule is in effect, they get an auto reply that there is currently a BCX rule in effect that blocks them from recieving beep message.",
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			whitelistedMemberNumbers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Member numbers still allowed to beep (to):"
+			}
+		}
+	});
+
+	registerRule("greet_order", {
+		name: "Order to greet club",
+		icon: "Icons/Chat.png",
+		loggable: false,
+		shortDescription: "when entering it through the login portal",
+		longDescription: "PLAYER_NAME will automatically send all defined member numbers a beep the moment they join the club to make their presence known.",
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			toGreetMemberNumbers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Member numbers that will be greeted:"
+			}
+		}
+	});
+	// TODO: go over all and check if adding PLAYER_NAME makes sense
+
 }

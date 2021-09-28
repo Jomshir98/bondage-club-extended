@@ -49,7 +49,11 @@ export function guard_RuleCustomData(rule: BCX_Rule, data: unknown): boolean {
 	return true;
 }
 
-const rules: Map<BCX_Rule, RuleDefinition> = new Map();
+interface RuleEntry<ID extends BCX_Rule> extends RuleDefinition<ID> {
+	state: RuleState<ID>;
+}
+
+const rules: Map<BCX_Rule, RuleEntry<BCX_Rule>> = new Map();
 const rulesList: BCX_Rule[] = [];
 
 export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition<ID>) {
@@ -59,7 +63,10 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 	if (rules.has(name)) {
 		throw new Error(`Rule "${name}" already defined!`);
 	}
-	rules.set(name, data);
+	rules.set(name, {
+		...(data as RuleDefinition<BCX_Rule>),
+		state: new RuleState<BCX_Rule>(name)
+	});
 	rulesList.push(name);
 }
 
@@ -83,7 +90,7 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomDataTypes> = {
 	validate(value: unknown, def: RuleCustomDataEntryDefinition): boolean;
 	onDataChange?(def: RuleCustomDataEntryDefinition, active: boolean, key: string, onInput: () => void, value: RuleCustomDataTypesMap[type]): void;
-	processInput?(def: RuleCustomDataEntryDefinition, key: string): RuleCustomDataTypesMap[type] | undefined;
+	processInput?(def: RuleCustomDataEntryDefinition, key: string, value: RuleCustomDataTypesMap[type]): RuleCustomDataTypesMap[type] | undefined;
 	unload?(def: RuleCustomDataEntryDefinition, key: string): void;
 	run(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string): void;
 	click?(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string): RuleCustomDataTypesMap[type] | undefined;
@@ -96,13 +103,128 @@ export const ruleCustomDataHandlers: {
 } = {
 	memberNumberList: {
 		validate: value => Array.isArray(value) && value.every(Number.isInteger),
-		run(def, value, Y) { /* TODO */ },
-		click(def, value, Y) { return undefined; }
+		onDataChange(def, active, key) {
+			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (!active) {
+				if (input) {
+					input.remove();
+				}
+			} else if (!input) {
+				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "100");
+				input.inputMode = "numeric";
+				input.pattern = "[0-9]+";
+			}
+		},
+		run(def, value, Y, key) {
+			Y -= 20;
+			const PAGE_SIZE = 4;
+			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
+			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
+			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
+			for (let i = 0; i < PAGE_SIZE; i++) {
+				const e = page * PAGE_SIZE + i;
+				if (e >= value.length)
+					break;
+				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
+				const msg = `${getCharacterName(value[e], "[unknown]")} (${value[e]})`;
+				DrawTextFit(msg, 1060, Y + 26 + i * 70 + 34, 380, "Black");
+				MainCanvas.textAlign = "center";
+				DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
+				MainCanvas.textAlign = "left";
+			}
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + PAGE_SIZE * 70 + 43, 450, 60);
+			MainCanvas.textAlign = "center";
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (input && document.activeElement === input) {
+				DrawHoverElements.push(() => {
+					const val = input.value && Number.parseInt(input.value, 10);
+					if (!val)
+						return;
+					const Left = 580;
+					const Top = 630;
+					MainCanvas.fillStyle = "#FFFF88";
+					MainCanvas.fillRect(Left, Top, 450, 65);
+					MainCanvas.lineWidth = 2;
+					MainCanvas.strokeStyle = 'black';
+					MainCanvas.strokeRect(Left, Top, 450, 65);
+					DrawTextFit(getCharacterName(val, "[unknown]"), Left + 225, Top + 33, 444, "black");
+				});
+			}
+			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", "White");
+			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
+			MainCanvas.textAlign = "left";
+		},
+		click(def, value, Y, key) {
+			Y -= 20;
+			const PAGE_SIZE = 4;
+			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
+			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
+			for (let i = 0; i < PAGE_SIZE; i++) {
+				const e = page * PAGE_SIZE + i;
+				if (e >= value.length)
+					break;
+				if (MouseIn(1836, Y + 26 + i * 70, 64, 64)) {
+					value.splice(e, 1);
+					return value;
+				}
+			}
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) && input && input.value) {
+				const num = Number.parseInt(input.value, 10);
+				if (Number.isInteger(num) && !value.includes(num)) {
+					value.push(num);
+					value.sort((a, b) => a - b);
+					input.value = "";
+					return value;
+				}
+			}
+			if (MouseIn(1650, Y + PAGE_SIZE * 70 + 43, 125, 64) && page > 0) {
+				ruleCustomDataHandlerPage.set(key, page - 1);
+			} else if (MouseIn(1650 + 125, Y + PAGE_SIZE * 70 + 43, 125, 64) && page + 1 < totalPages) {
+				ruleCustomDataHandlerPage.set(key, page + 1);
+			}
+			return undefined;
+		},
+		unload(def, key) {
+			ElementRemove(`BCX_RCDH_${key}`);
+			ruleCustomDataHandlerPage.delete(key);
+		}
 	},
 	number: {
-		validate: value => typeof value === "number",
-		run(def, value, Y) { /* TODO */ },
-		click(def, value, Y) { return undefined; }
+		validate: value => typeof value === "number" && Number.isInteger(value),
+		onDataChange(def, active, key, onInput, value) {
+			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (!active) {
+				if (input) {
+					input.remove();
+				}
+			} else if (!input) {
+				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", value.toString(10), "50");
+				input.inputMode = "numeric";
+				input.pattern = "[0-9]+";
+				input.oninput = onInput;
+			} else {
+				input.value = value.toString(10);
+			}
+		},
+		processInput(def, key, value) {
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			if (input && input.value) {
+				if (/^[0-9]+$/.test(input.value)) {
+					return Number.parseInt(input.value, 10);
+				} else {
+					input.value = value.toString(10);
+				}
+			}
+			return undefined;
+		},
+		run(def, value, Y, key) {
+			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1000, Y + 26, 900, 60);
+		},
+		unload(def, key) {
+			ElementRemove(`BCX_RCDH_${key}`);
+		}
 	},
 	// element has Y length of 150px (description + elmement plus offset to the next one)
 	orgasm: {
@@ -288,6 +410,45 @@ export const ruleCustomDataHandlers: {
 			ruleCustomDataHandlerPage.delete(key);
 		}
 	},
+	textArea: {
+		validate: value => typeof value === "string",
+		onDataChange(def, active, key, onInput, value) {
+			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLTextAreaElement | undefined;
+			if (!active) {
+				if (input) {
+					input.remove();
+				}
+			} else if (!input) {
+				input = document.createElement("textarea");
+				input.id = `BCX_RCDH_${key}`;
+				input.name = `BCX_RCDH_${key}`;
+				input.value = value;
+				input.maxLength = 10000;
+				input.setAttribute("screen-generated", CurrentScreen);
+				input.className = "HideOnPopup";
+				input.oninput = onInput;
+				document.body.appendChild(input);
+			} else {
+				input.value = value;
+			}
+		},
+		processInput(def, key) {
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLTextAreaElement | undefined;
+			return input ? input.value : undefined;
+		},
+		run(def, value, Y, key) {
+			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLTextAreaElement | undefined;
+			if (input && document.activeElement === input) {
+				ElementPositionFix(`BCX_RCDH_${key}`, 36, 105, 170, 1790, 750);
+			} else {
+				ElementPositionFix(`BCX_RCDH_${key}`, 28, 1000, Y + 26, 900, 765 - Y);
+			}
+		},
+		unload(def, key) {
+			ElementRemove(`BCX_RCDH_${key}`);
+		}
+	},
 	toggle: {
 		validate: value => typeof value === "boolean",
 		run(def, value, Y) {
@@ -344,7 +505,7 @@ export function RulesCreate(rule: BCX_Rule, character: ChatroomCharacter | null)
 		if (display.dataDefinition) {
 			ruleData.customData = {};
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(display.dataDefinition)) {
-				ruleData.customData[k] = cloneDeep(v.default);
+				ruleData.customData[k] = cloneDeep(typeof v.default === "function" ? v.default() : v.default);
 			}
 		}
 		ConditionsSetCondition("rules", rule, ruleData);
@@ -378,18 +539,38 @@ export function RulesDelete(rule: BCX_Rule, character: ChatroomCharacter | null)
 	return true;
 }
 
-export function RuleIsEnforced(rule: BCX_Rule): boolean {
-	const data = ConditionsGetCondition("rules", rule);
-	if (!data || !ConditionsIsConditionInEffect("rules", rule))
-		return false;
-	return data.data.enforce !== false;
-}
+export class RuleState<ID extends BCX_Rule> {
+	readonly rule: ID;
 
-export function RuleIsLogged(rule: BCX_Rule): boolean {
-	const data = ConditionsGetCondition("rules", rule);
-	if (!data || !ConditionsIsConditionInEffect("rules", rule))
-		return false;
-	return data.data.log !== false;
+	get condition(): ConditionsConditionData<"rules"> | undefined {
+		return ConditionsGetCondition("rules", this.rule);
+	}
+
+	get inEffect(): boolean {
+		return ConditionsIsConditionInEffect("rules", this.rule);
+	}
+
+	get isEnforced(): boolean {
+		const data = this.condition;
+		if (!data || !this.inEffect)
+			return false;
+		return data.data.enforce !== false;
+	}
+
+	get isLogged(): boolean {
+		const data = this.condition;
+		if (!data || !this.inEffect)
+			return false;
+		return data.data.log !== false;
+	}
+
+	get customData(): ID extends keyof RuleCustomData ? (RuleCustomData[ID] | undefined) : undefined {
+		return this.condition?.data.customData as any;
+	}
+
+	constructor(rule: ID) {
+		this.rule = rule;
+	}
 }
 
 export class ModuleRules extends BaseModule {
@@ -729,7 +910,7 @@ export class ModuleRules extends BaseModule {
 
 		for (const rule of rules.values()) {
 			if (rule.load) {
-				rule.load();
+				rule.load(rule.state);
 			}
 		}
 	}
@@ -779,7 +960,7 @@ export class ModuleRules extends BaseModule {
 		}
 
 		if (ruleDefinition.tick) {
-			if (ruleDefinition.tick()) {
+			if (ruleDefinition.tick(ruleDefinition.state)) {
 				const counter = (this.triggerCounts.get(rule) ?? 0) + 1;
 				this.triggerCounts.set(rule, counter);
 

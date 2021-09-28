@@ -201,7 +201,9 @@ type BCX_Rule =
 	| "doll_talk"
 	| "banning_words"
 	| "forbid_talking"
-	| "restricted_whispering";
+	| "restricted_whispering"
+	| "forbid_beeping"
+	| "greet_order";
 
 type RuleCustomData = {
 	restrict_accessible_rooms: {
@@ -238,6 +240,12 @@ type RuleCustomData = {
 	},
 	restricted_whispering: {
 		minimumPermittedRole: import("./modules/authority").AccessLevel;
+	},
+	forbid_beeping: {
+		whitelistedMemberNumbers: number[];
+	},
+	greet_order: {
+		toGreetMemberNumbers: number[];
 	}
 };
 
@@ -250,6 +258,7 @@ type RuleCustomDataTypesMap = {
 	strengthSelect: "light" | "medium" | "heavy";
 	string: string;
 	stringList: string[];
+	textArea: string;
 	toggle: boolean;
 };
 type RuleCustomDataTypes = keyof RuleCustomDataTypesMap;
@@ -260,14 +269,14 @@ type RuleCustomDataFilter<U> = {
 
 type RuleCustomDataEntryDefinition = {
 	type: RuleCustomDataTypes;
-	default: RuleCustomDataTypesMap[RuleCustomDataTypes];
+	default: RuleCustomDataTypesMap[RuleCustomDataTypes] | (() => RuleCustomDataTypesMap[RuleCustomDataTypes]);
 	description: string;
 	Y?: number;
 };
 
 type RuleCustomDataEntryDefinitionStrict<ID extends keyof RuleCustomData, P extends keyof RuleCustomData[ID]> = RuleCustomDataEntryDefinition & {
 	type: RuleCustomDataFilter<RuleCustomData[ID][P]>;
-	default: RuleCustomData[ID][P];
+	default: RuleCustomData[ID][P] | (() => RuleCustomData[ID][P]);
 };
 
 interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
@@ -286,9 +295,9 @@ interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 }
 
 interface RuleDefinition<ID extends BCX_Rule = BCX_Rule> extends RuleDisplayDefinition<ID> {
-	load?: () => void;
+	load?: (state: import("./modules/rules").RuleState<ID>) => void;
 	unload?: () => void;
-	tick?: () => boolean;
+	tick?: (state: import("./modules/rules").RuleState<ID>) => boolean;
 }
 
 interface ModStorage {

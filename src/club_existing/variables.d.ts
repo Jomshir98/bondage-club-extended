@@ -146,3 +146,8 @@ declare let ItemColorItem: Item | null;
 declare let ItemColorState: any;
 declare let ItemColorPickerIndices: any[];
 declare function ItemColorOnPickerChange(color: any): void;
+
+// ChatSearch.js
+declare var ChatSearchResult: any[];
+declare var ChatSearchResultOffset: any;
+declare function ChatSearchMuffle(inputText: string): string;

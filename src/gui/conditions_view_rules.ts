@@ -26,7 +26,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 
 		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
 		DrawButton(120, 820, 384, 90, "Add new rule", access ? "White" : "#ddd", "",
-			access ? "Establish a new rule from the list of available rules" : "You have no permission to use this", !access);
+			access ? "...from the list of yet unestablished rules" : "You have no permission to use this", !access);
 
 		// help text
 		if (this.showHelp) {

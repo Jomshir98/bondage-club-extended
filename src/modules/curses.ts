@@ -749,7 +749,7 @@ export class ModuleCurses extends BaseModule {
 				InventoryRemove(Player, group, false);
 				CharacterRefresh(Player, true);
 				ChatRoomCharacterUpdate(Player);
-				ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body`);
+				ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body.`);
 				logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
 				return;
 			}
@@ -766,10 +766,10 @@ export class ModuleCurses extends BaseModule {
 		type change = "add" | "swap" | "update" | "color";
 		let changeType: "" | change = "";
 		const CHANGE_TEXTS: Record<change, string> = {
-			add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears`,
-			swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item`,
-			update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item`,
-			color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back`
+			add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears.`,
+			swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item.`,
+			update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item.`,
+			color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back.`
 		};
 		const CHANGE_LOGS: Record<change, string> = {
 			add: `The curse on ${Player.Name}'s ${asset.Description} made the item reappear`,

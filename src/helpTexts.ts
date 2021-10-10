@@ -41,7 +41,7 @@ export const HELP_TEXTS: Record<Views, string> = {
 	[Views.ConditionsViewCurses]: "This screen shows all active curses on the player, including many information, such as duration, if it is " +
 	"a cursed item or a blocked item or clothing slot that forces to stay unrestrained or naked there. Clicking on the button with the cog icon " +
 	"in the middle of each row moves you to a new screen that allows to configure the curse (if you have permission). When the cog icon has a blue " +
-	"aura, then that means that the curse's conditions are the same as the global config. If permitted, you can remove single curses with the 'X' button.",
+	"aura, that means that the curse's conditions are the same as the global config. If permitted, you can remove single curses with the 'X' button.",
 	[Views.ConditionsEditCurses]: "Here you can configure if the curse is in effect, if it wears off after a while or not, what happens then and " +
 	"most importantly when the curse is active, such as either always or based on where the player is and with whom. The green/red bars next to the " +
 	"checkboxes indicate whether a triggering condition is true at present or not. On the right side, you can curse the usage/" +

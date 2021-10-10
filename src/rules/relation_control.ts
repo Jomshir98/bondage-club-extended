@@ -7,7 +7,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid club owner changes",
 		icon: icon_OwnerList,
 		shortDescription: "relationship control",
-		longDescription: "Forbid the player to leave or get a club owner",
+		longDescription: "Forbid PLAYER_NAME to leave or get a club owner",
 		defaultLimit: ConditionsLimit.limited
 	});
 
@@ -15,7 +15,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid getting lovers",
 		icon: icon_OwnerList,
 		shortDescription: "relationship control",
-		longDescription: "Forbid the player to get a new lover",
+		longDescription: "Forbid PLAYER_NAME to get a new lover",
 		defaultLimit: ConditionsLimit.limited
 	});
 
@@ -23,7 +23,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid leaving lovers",
 		icon: icon_OwnerList,
 		shortDescription: "relationship control",
-		longDescription: "Forbid the player to leave any of their lovers",
+		longDescription: "Forbid PLAYER_NAME to leave any of their lovers",
 		defaultLimit: ConditionsLimit.limited
 	});
 
@@ -31,7 +31,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid getting subs",
 		icon: icon_OwnerList,
 		shortDescription: "relationship control",
-		longDescription: "Forbid the player to collar a new submissive",
+		longDescription: "Forbid PLAYER_NAME to collar a new submissive",
 		defaultLimit: ConditionsLimit.limited
 	});
 
@@ -39,7 +39,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid disowning subs",
 		icon: icon_OwnerList,
 		shortDescription: "relationship control",
-		longDescription: "Forbid the player to uncollar and let go of any of their subs",
+		longDescription: "Forbid PLAYER_NAME to let go of any of their subs",
 		defaultLimit: ConditionsLimit.limited
 	});
 }

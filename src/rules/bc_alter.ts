@@ -64,7 +64,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "adjustable: only-edge, only-ruin, no-resist",
-		longDescription: "Impacts PLAYER_NAME's ability to control their orgasms, independant of items. These are the control options:\n- Never cum (always edge)\n- Force into ruined orgasm\n- Force into orgasm (no resist)",
+		longDescription: "Impacts PLAYER_NAME's ability to control their orgasms, independant of items. There are three control options, which are: Never cum (always edge), force into ruined orgasm and force into orgasm (no resist).",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			orgasmHandling: {
@@ -80,7 +80,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "always hand admin to defined roles",
-		longDescription: "Defines a minimum role which the player will automatically give admin rights to when they join a room the player has room admin. Also has option to remove admin rights from the player afterwards.",
+		longDescription: "Defines a minimum role which PLAYER_NAME will automatically give admin rights to when joining a room PLAYER_NAME has room admin in. Also has option to remove admin rights from PLAYER_NAME afterwards.",
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			minimumRole: {
@@ -103,7 +103,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "restrict room admin powers massively while restrained",
-		longDescription: "When considered tied up by Bondage Club standards, player only has access to kick/ban room admin powers, nothing else. This rule can be nicely combined with the rule to enforce joining the last room to trap the player in it.",
+		longDescription: "When considered tied up by Bondage Club standards, PLAYER_NAME only has access to kick/ban room admin powers, nothing else. This rule can be nicely combined with the rule to enforce joining the last room to trap PLAYER_NAME in it.",
 		defaultLimit: ConditionsLimit.limited
 	});
 
@@ -112,7 +112,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "directly sets the player's profile",
-		longDescription: "Sets the player's Bondage Club online description with the text field in the rule config while blocking changing of it as long as the rule is active.",
+		longDescription: "Sets PLAYER_NAME's Bondage Club online description with the text field in the rule config while blocking changing of it as long as the rule is active.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			playersProfileDescription: {
@@ -128,7 +128,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "from the kidnappers league multiplayer game",
-		longDescription: "Forces the player to constantly participate in the kidnappers league's suitcase delivery task, by automatically replacing the suitcase when it was opened with a new one, every time the room is changed.",
+		longDescription: "Forces PLAYER_NAME to constantly participate in the kidnappers league's suitcase delivery task, by automatically replacing the suitcase when it was opened with a new one, every time the room is changed.",
 		defaultLimit: ConditionsLimit.normal
 	});
 }

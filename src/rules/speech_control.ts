@@ -23,7 +23,7 @@ export function initRules_bc_speech_control() {
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "as it should be when gagged! ",
-		longDescription: "Speech garbles the player's outgoing whisper messages while gagged. Strength of the effect depends on the type of gag.",
+		longDescription: "Speech garbles PLAYER_NAMEs outgoing whisper messages while gagged. Strength of the effect depends on the type of gag.",
 		defaultLimit: ConditionsLimit.normal
 	});
 
@@ -32,7 +32,7 @@ export function initRules_bc_speech_control() {
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "no more misuse of OOC for normal chatting while gagged",
-		longDescription: "Prevents any use of OOC (messages between round brackets) chat messages or whisper messages while the player is gagged.",
+		longDescription: "Prevents any use of OOC (messages between round brackets) chat messages or whisper messages while PLAYER_NAME is gagged.",
 		defaultLimit: ConditionsLimit.blocked
 	});
 
@@ -40,7 +40,7 @@ export function initRules_bc_speech_control() {
 		name: "Doll talk",
 		icon: "Icons/Chat.png",
 		shortDescription: "allows only short sentences with simple words",
-		longDescription: "Any typed message is only allowed to have a settable maximum length of words and every typed word in it also has a settable maximum letter character length.",
+		longDescription: "Any typed message is only allowed to consist of a settable maximum length of words and each typed word of that message has a settable maximum character limit.",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			maxWordLength: {
@@ -62,7 +62,7 @@ export function initRules_bc_speech_control() {
 		name: "Ban certain words in chat",
 		icon: "Icons/Chat.png",
 		shortDescription: "based on a configurable blacklist",
-		longDescription: "Prevents the usage of certain words in the chat. Trying to send a sentence with a banned word will be rejected. The list of banned words can be configured for the rule.",
+		longDescription: "Prevents/logs the usage of certain words in the chat. Trying to send a sentence with a banned word will be rejected or logged. The list of banned words can be configured for the rule. Checks are not case sensitive.",
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			bannedWords: {
@@ -78,7 +78,7 @@ export function initRules_bc_speech_control() {
 		name: "Forbid talking",
 		icon: "Icons/Chat.png",
 		shortDescription: "openly in a chat room",
-		longDescription: "Prevents the player from sending any text to all people inside a chat room. Does not affect whispers or emotes, but does affect OOC.",
+		longDescription: "Prevents PLAYER_NAME from sending any text to all people inside a chat room and/or logs it. Does not affect whispers or emotes, but does affect OOC.",
 		defaultLimit: ConditionsLimit.limited
 	});
 
@@ -87,7 +87,7 @@ export function initRules_bc_speech_control() {
 		name: "Restrict whispering",
 		icon: "Icons/Chat.png",
 		shortDescription: "inside chat room - except to defined roles",
-		longDescription: "Prevents the player from whispering any text to most people inside a chat room, except the defined roles. Does also affect whispered OOC messages.",
+		longDescription: "Logs and/or prevents PLAYER_NAME from whispering any text to most people inside a chat room, except the defined roles. Does also affect whispered OOC messages.",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			minimumPermittedRole: {
@@ -102,7 +102,7 @@ export function initRules_bc_speech_control() {
 		name: "Restrict beep messages",
 		icon: "Icons/Chat.png",
 		shortDescription: "sending and recieving, except to/from whitelisted members",
-		longDescription: "Prevents the player from sending and recieving any beep messages, except to the editable white list of member numbers who can still send PLAYER_NAME beep messages and can recieve them also. If someone tries to send PLAYER_NAME a beep message while this rule is in effect, they get an auto reply that there is currently a BCX rule in effect that blocks them from recieving beep message.",
+		longDescription: "Logs and/or prevents PLAYER_NAME from sending and recieving any beep messages, except to the editable white list of member numbers who can still send PLAYER_NAME beep messages and can recieve them also. If someone tries to send PLAYER_NAME a beep message while this rule is in effect, they get an auto reply that there is currently a BCX rule in effect that blocks them from recieving beep message.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {
@@ -128,6 +128,12 @@ export function initRules_bc_speech_control() {
 			}
 		}
 	});
-	// TODO: go over all and check if adding PLAYER_NAME makes sense
 
+	registerRule("forbid_antigarble", {
+		name: "Forbid the antigarble option",
+		icon: "Icons/Chat.png",
+		shortDescription: "BCX's .antigarble command",
+		longDescription: "Prevents/logs PLAYER_NAME from using the antigarble command in the help chat menu. Antigarble is a BCX feature that enables a BCX user to understand muffled voices from other gagged characters or when PLAYER_NAME wears a deafening item. So if PLAYER_NAME should not be able to understand speech-garbled chat, this rule should be used.",
+		defaultLimit: ConditionsLimit.normal
+	});
 }

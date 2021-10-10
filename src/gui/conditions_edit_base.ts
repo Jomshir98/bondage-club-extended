@@ -509,7 +509,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		}
 
 		// In presence of player
-		if (MouseIn(125, 860, 64, 64)) {
+		if (MouseIn(125, 860, 64, 64) && !useGlobalCategorySetting) {
 			this.changes = this.makeChangesData();
 			this.changes.requirements!.player = this.changes.requirements!.player ? undefined : { memberNumber: 0 };
 			this.onDataChange();

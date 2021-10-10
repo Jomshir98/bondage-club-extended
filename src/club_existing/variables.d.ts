@@ -51,6 +51,7 @@ declare var DialogFacialExpressions: any[];
 declare var DialogFacialExpressionsSelected: number;
 declare var DialogSelfMenuOptions: any[];
 declare var DialogMenuButton: string[];
+declare var CurrentCharacter: Character | null;
 declare function DialogFindPlayer(KeyWord: string): string;
 declare function DialogDrawPoseMenu(): void;
 declare function DialogDrawExpressionMenu(): void;
@@ -151,3 +152,6 @@ declare function ItemColorOnPickerChange(color: any): void;
 declare var ChatSearchResult: any[];
 declare var ChatSearchResultOffset: any;
 declare function ChatSearchMuffle(inputText: string): string;
+
+// Reputation.js
+declare function ReputationCharacterGet(C: Character, RepType: string): number;

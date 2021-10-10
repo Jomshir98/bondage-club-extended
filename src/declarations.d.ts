@@ -175,6 +175,8 @@ type BCX_Rule =
 	| "forbid_keyuse_others"
 	| "forbid_lockuse_self"
 	| "forbid_lockuse_others"
+	| "forbid_lockpicking_self"
+	| "forbid_lockpicking_others"
 	| "forbid_wardrobeaccess_self"
 	| "forbid_wardrobeaccess_others"
 	| "restrict_allowed_poses"
@@ -203,7 +205,10 @@ type BCX_Rule =
 	| "forbid_talking"
 	| "restricted_whispering"
 	| "forbid_beeping"
-	| "greet_order";
+	| "greet_order"
+	| "forbid_freeing_self"
+	| "forbid_tying_others"
+	| "forbid_antigarble";
 
 type RuleCustomData = {
 	restrict_accessible_rooms: {
@@ -246,6 +251,9 @@ type RuleCustomData = {
 	},
 	greet_order: {
 		toGreetMemberNumbers: number[];
+	},
+	forbid_tying_others: {
+		onlyMoreDominantsToggle: boolean;
 	}
 };
 

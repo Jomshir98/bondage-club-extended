@@ -48,6 +48,25 @@ export function RedirectGetImage(original: string, redirect: string) {
 	GetImageRedirects.set(original, redirect);
 }
 
+/**
+ * Function to handle clicks on dialog menu buttons (the buttons on top right when you click character)
+ * @returns `false` if original should still be called, `true` if it should be blocked
+ */
+export type DialogMenuButtonClickHook = (C: Character) => boolean;
+
+const DialogMenuButtonClickHooks: Map<string, DialogMenuButtonClickHook[]> = new Map();
+
+export function HookDialogMenuButtonClick(button: string, fn: DialogMenuButtonClickHook) {
+	let arr = DialogMenuButtonClickHooks.get(button);
+	if (!arr) {
+		arr = [];
+		DialogMenuButtonClickHooks.set(button, arr);
+	}
+	if (!arr.includes(fn)) {
+		arr.push(fn);
+	}
+}
+
 export class ModuleMiscPatches extends BaseModule {
 	private o_Player_CanChange: (typeof Player.CanChange) | null = null;
 
@@ -69,6 +88,19 @@ export class ModuleMiscPatches extends BaseModule {
 			const redirect = GetImageRedirects.get(args[0]);
 			if (redirect !== undefined) {
 				args[0] = redirect;
+			}
+			return next(args);
+		});
+
+		hookFunction("DialogMenuButtonClick", 5, (args, next) => {
+			// Finds the current icon
+			const C = CharacterGetCurrent();
+			for (let I = 0; I < DialogMenuButton.length; I++) {
+				if ((MouseX >= 1885 - I * 110) && (MouseX <= 1975 - I * 110) && C) {
+					const hooks = DialogMenuButtonClickHooks.get(DialogMenuButton[I]);
+					if (hooks?.some(hook => hook(C)))
+						return;
+				}
 			}
 			return next(args);
 		});

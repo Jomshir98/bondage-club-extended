@@ -91,7 +91,7 @@ export class GuiLog extends GuiSubscreen {
 		const filter = LogFilter.value.trim().toLocaleLowerCase().split(" ");
 
 		this.logEntries = this.logData.filter(e => {
-			const msg = logMessageRender(e).toLocaleLowerCase();
+			const msg = logMessageRender(e, this.character).toLocaleLowerCase();
 			return filter.every(f => msg.includes(f));
 		});
 
@@ -131,7 +131,7 @@ export class GuiLog extends GuiSubscreen {
 
 				MainCanvas.textAlign = "left";
 				DrawButton(200, Y, 1030, 64, "", "White");
-				const msg = logMessageRender(e);
+				const msg = logMessageRender(e, this.character);
 				DrawTextFit(msg, 210, Y + 34, 1020, msg.startsWith("[") ? "Gray" : "Black");
 				MainCanvas.beginPath();
 				MainCanvas.rect(1270, Y, 320, 64);

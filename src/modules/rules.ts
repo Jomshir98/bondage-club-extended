@@ -7,8 +7,8 @@ import { initRules_bc_alter } from "../rules/bc_alter";
 import { initRules_bc_blocks } from "../rules/bc_blocks";
 import { initRules_bc_relation_control } from "../rules/relation_control";
 import { initRules_bc_speech_control } from "../rules/speech_control";
-import { capitalizeFirstLetter, clamp, formatTimeInterval, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
+import { capitalizeFirstLetter, clamp, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, InfoBeep } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
 import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsIsConditionInEffect, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands } from "./conditions";
@@ -65,7 +65,7 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 	}
 	rules.set(name, {
 		...(data as RuleDefinition<BCX_Rule>),
-		state: new RuleState<BCX_Rule>(name)
+		state: new RuleState<BCX_Rule>(name, data)
 	});
 	rulesList.push(name);
 }
@@ -80,6 +80,7 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 		icon: data.icon,
 		shortDescription: data.shortDescription,
 		longDescription: data.longDescription,
+		triggerTexts: data.triggerTexts,
 		defaultLimit: data.defaultLimit,
 		enforcabe: data.enforcabe,
 		loggable: data.loggable,
@@ -541,6 +542,7 @@ export function RulesDelete(rule: BCX_Rule, character: ChatroomCharacter | null)
 
 export class RuleState<ID extends BCX_Rule> {
 	readonly rule: ID;
+	readonly ruleDefinition: RuleDisplayDefinition<ID>;
 
 	get condition(): ConditionsConditionData<"rules"> | undefined {
 		return ConditionsGetCondition("rules", this.rule);
@@ -568,8 +570,48 @@ export class RuleState<ID extends BCX_Rule> {
 		return this.condition?.data.customData as any;
 	}
 
-	constructor(rule: ID) {
+	constructor(rule: ID, definition: RuleDisplayDefinition<ID>) {
 		this.rule = rule;
+		this.ruleDefinition = definition;
+	}
+
+	trigger(dictionary: Record<string, string> = {}): void {
+		const texts = this.ruleDefinition.triggerTexts;
+		if (texts) {
+			if (texts.infoBeep) {
+				InfoBeep("BCX: " + texts.infoBeep, 7_000);
+			}
+			if (this.isLogged) {
+				const log = texts.log;
+				if (log) {
+					logMessage("rule_trigger", LogEntryType.ruleTrigger, [this.rule, dictionary]);
+				}
+				const announce = texts.announce ?? texts.log;
+				if (announce) {
+					ChatRoomActionMessage(`${dictionaryProcess(announce, dictionary)}.`);
+				}
+			}
+		}
+	}
+
+	triggerAttempt(dictionary: Record<string, string> = {}): void {
+		const texts = this.ruleDefinition.triggerTexts;
+		if (texts) {
+			const infoBeep = texts.attempt_infoBeep ?? texts.infoBeep;
+			if (infoBeep) {
+				InfoBeep("BCX: " + infoBeep, 7_000);
+			}
+			if (this.isLogged) {
+				const log = texts.attempt_log;
+				if (log) {
+					logMessage("rule_trigger", LogEntryType.ruleTriggerAttempt, [this.rule, dictionary]);
+				}
+				const announce = texts.attempt_announce ?? texts.attempt_log;
+				if (announce) {
+					ChatRoomActionMessage(`${dictionaryProcess(announce, dictionary)}.`);
+				}
+			}
+		}
 	}
 }
 

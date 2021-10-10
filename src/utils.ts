@@ -108,3 +108,23 @@ export function formatTimeInterval(time: number, mode: "full" | "short" = "full"
 	}
 	return res;
 }
+
+/**
+ * Replaces texts in `text` using data in `dictionary`, adding some default replacements.
+ * Default replacements:
+ *
+ * `PLAYER_NAME` - Name of current Player
+ *
+ * @param text - The text to process
+ * @param dictionary - The dictionary to apply to the `text`
+ * @returns The result of replacements
+ */
+export function dictionaryProcess(text: string, dictionary: Record<string, string>): string {
+	for (const [k, v] of Object.entries({
+		PLAYER_NAME: Player.Name,
+		...dictionary
+	})) {
+		text = text.replaceAll(k, v);
+	}
+	return text;
+}

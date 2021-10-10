@@ -1,7 +1,7 @@
-import { ChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, removeAllHooksByModule } from "../patching";
-import { clamp, isObject } from "../utils";
+import { clamp, dictionaryProcess, isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
@@ -9,12 +9,15 @@ import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
 import { ModuleCategory, Preset } from "../constants";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, registerWhisperCommand } from "./commands";
+import { guard_BCX_Rule, RulesGetDisplayDefinition } from "./rules";
 
 export const LOG_ENTRIES_LIMIT = 256;
 
 export enum LogEntryType {
 	plaintext = 0,
-	deleted = 1
+	deleted = 1,
+	ruleTrigger = 2,
+	ruleTriggerAttempt = 3
 }
 
 export enum LogAccessLevel {
@@ -29,6 +32,10 @@ export type LogEntryTypeData = {
 	[LogEntryType.plaintext]: string;
 	/** Deleted log entries are replaced with this */
 	[LogEntryType.deleted]: null;
+	/** When rule is triggered; data is rule name and dictionary */
+	[LogEntryType.ruleTrigger]: [BCX_Rule, Record<string, string>];
+	/** When rule is triggered, blocking the action; data is rule name and dictionary */
+	[LogEntryType.ruleTriggerAttempt]: [BCX_Rule, Record<string, string>];
 };
 
 /**
@@ -167,12 +174,23 @@ export function getVisibleLogEntries(character: ChatroomCharacter): LogEntry[] {
 	return modStorage.log.filter(e => allow[e[1]]);
 }
 
-export function logMessageRender(entry: LogEntry): string {
+export function logMessageRender(entry: LogEntry, character: ChatroomCharacter): string {
 	if (entry[2] === LogEntryType.plaintext) {
 		const e = entry as LogEntry<LogEntryType.plaintext>;
 		return e[3];
 	} else if (entry[2] === LogEntryType.deleted) {
 		return "[Log message deleted]";
+	} else if (entry[2] === LogEntryType.ruleTrigger || entry[2] === LogEntryType.ruleTriggerAttempt) {
+		const data = entry[3] as LogEntryTypeData[LogEntryType.ruleTrigger];
+		if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== "string") {
+			return `[ERROR: Bad data for type ${entry[2]}]`;
+		}
+		if (!guard_BCX_Rule(data[0])) {
+			return `[ERROR: Trigger for unknown rule "${data[0]}"]`;
+		}
+		const rule = RulesGetDisplayDefinition(data[0]);
+		const log = entry[2] === LogEntryType.ruleTriggerAttempt ? rule.triggerTexts?.attempt_log : rule.triggerTexts?.log;
+		return log ? dictionaryProcess(log, { PLAYER_NAME: character.Name, ...data[1] }) : `[ERROR: Missing log text for rule "${data[0]}" trigger]`;
 	}
 	return `[ERROR: Unknown entry type ${entry[2]}]`;
 }
@@ -401,7 +419,7 @@ export class ModuleLog extends BaseModule {
 				for (let i = 5 * (page - 1); i < Math.min(5 * page, logEntries.length); i++) {
 					const entry = logEntries[i];
 					const time = new Date(entry[0]);
-					result += `\n[${time.toUTCString()}] (${entry[0]})\n  ${logMessageRender(entry)}`;
+					result += `\n[${time.toUTCString()}] (${entry[0]})\n  ${logMessageRender(entry, getPlayerCharacter())}`;
 				}
 				respond(result);
 			} else if (subcommand === "delete") {

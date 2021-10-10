@@ -284,6 +284,21 @@ interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 	icon: string;
 	shortDescription?: string;
 	longDescription: string;
+	/** Texts to use for when rule is broken, set to empty string to disable */
+	triggerTexts?: {
+		/** When rule is broken */
+		infoBeep?: string;
+		/** When attempt to break rule is made; defaults to `infoBeep` */
+		attempt_infoBeep?: string;
+		/** When rule is broken */
+		log?: string;
+		/** When attempt to break rule is made */
+		attempt_log?: string;
+		/** When rule is broken; defaults to `log` */
+		announce?: string;
+		/** When attempt to break rule is made; defaults to `attempt_log` */
+		attempt_announce?: string;
+	};
 	defaultLimit: import("./constants").ConditionsLimit;
 	/** If rule can be enforced, defaults to `true` */
 	enforcabe?: false;

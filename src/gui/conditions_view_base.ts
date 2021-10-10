@@ -120,11 +120,19 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 			const useGlobalCategorySetting = !e.data.requirements;
 
-			// curse description
+			// description detailed hover text
+			if (MouseIn(X, Y, 440, 90)) {
+				DrawHoverElements.push(() => {
+					this.showDetailedDescriptionBackground(off < PER_COLUMN_COUNT ? 985 : 120);
+					if (MouseIn(X, Y, 440, 60)) {
+						this.showDetailedDescriptionText(off < PER_COLUMN_COUNT ? 985 : 120, e.condition as ConditionsCategoryKeys[CAT], e);
+					}
+				});
+			}
+
+			// description
 			MainCanvas.textAlign = "left";
-			MainCanvas.beginPath();
-			MainCanvas.rect(X, Y, 440, 60);
-			MainCanvas.stroke();
+			DrawButton(X, Y, 440, 60, "", "White");
 			this.drawCategoryImage(X, Y, e);
 			DrawTextFit(e.displayName, X + 65, Y + 30, 365, "Black");
 
@@ -212,6 +220,11 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			const Y = 170 + (off % PER_COLUMN_COUNT) * 90;
 			const X = 120 + Math.floor(off / PER_COLUMN_COUNT) * 865;
 
+			// description
+			if (MouseIn(X, Y, 440, 60)) {
+				this.onDecriptionTextClick(e.condition as ConditionsCategoryKeys[CAT], e);
+			}
+
 			// config button info
 			if (MouseIn(X + 470, Y, 240, 60)) {
 				this.openEditSubscreen(e.condition as ConditionsCategoryKeys[CAT]);
@@ -259,6 +272,9 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 	protected abstract headerText(): string;
 	protected abstract loadCondition(condition: ConditionsCategoryKeys[CAT], data: ConditionsConditionPublicData<CAT>): [string, ExtraData] | null;
+	protected abstract showDetailedDescriptionBackground(X: number): void;
+	protected abstract showDetailedDescriptionText(X: number, condition: ConditionsCategoryKeys[CAT], data: ConditionEntry<CAT, ExtraData>): void;
+	protected abstract onDecriptionTextClick(condition: ConditionsCategoryKeys[CAT], data: ConditionEntry<CAT, ExtraData>): void;
 	protected abstract openEditSubscreen(condition: ConditionsCategoryKeys[CAT]): void;
 	protected abstract removeCondition(condition: ConditionsCategoryKeys[CAT]): void;
 	protected abstract openGlobalConfig(): void;

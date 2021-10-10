@@ -7,6 +7,8 @@ import { GuiConditionGlobalRules } from "./conditions_global_rules";
 import { ConditionEntry, GuiConditionView } from "./conditions_view_base";
 import { GuiRulesAdd } from "./rules_add";
 import { Views, HELP_TEXTS } from "../helpTexts";
+import { dictionaryProcess } from "../utils";
+import { GuiRulesViewDescription } from "./rules_viewDescription";
 
 interface RuleEntry {
 	definition: RuleDisplayDefinition;
@@ -92,6 +94,27 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 		const definition = RulesGetDisplayDefinition(condition);
 		return [definition.name, { definition }];
 	}
+
+	protected showDetailedDescriptionBackground(X: number): void {
+		const backgroundY = 170;
+
+		MainCanvas.fillStyle = "White";
+		MainCanvas.fillRect(X, backgroundY, 801, 600);
+		MainCanvas.strokeStyle = "Black";
+		MainCanvas.strokeRect(X, backgroundY, 801, 600);
+	}
+
+	protected showDetailedDescriptionText(X: number, condition: ConditionsCategoryKeys["rules"], data: dataEntry): void {
+		const backgroundY = 170;
+
+		MainCanvas.textAlign = "left";
+		DrawTextWrap(dictionaryProcess(data.extra.definition.longDescription, { PLAYER_NAME: this.character.Name }), X + 20 - 760 / 2, backgroundY + 20, 760, 560, "black");
+	}
+
+	protected onDecriptionTextClick(condition: ConditionsCategoryKeys["rules"], data: dataEntry): void {
+		setSubscreen(new GuiRulesViewDescription(this.character, this, condition, false));
+	}
+
 
 	protected openEditSubscreen(condition: ConditionsCategoryKeys["rules"]): void {
 		setSubscreen(new GuiConditionEditRules(this.character, condition, this));

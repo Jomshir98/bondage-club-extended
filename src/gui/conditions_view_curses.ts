@@ -107,6 +107,18 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 		}
 	}
 
+	protected showDetailedDescriptionBackground(X: number): void {
+		return;
+	}
+
+	protected showDetailedDescriptionText(X: number, condition: ConditionsCategoryKeys["curses"], data: dataEntry): void {
+		return;
+	}
+
+	protected onDecriptionTextClick(condition: ConditionsCategoryKeys["curses"], data: dataEntry): void {
+		return;
+	}
+
 	protected openEditSubscreen(condition: ConditionsCategoryKeys["curses"]): void {
 		setSubscreen(new GuiConditionEditCurses(this.character, condition, this));
 	}

@@ -3,10 +3,11 @@ import { setSubscreen } from "../modules/gui";
 import { GuiSubscreen } from "./subscreen";
 import { GuiConditionViewRules } from "./conditions_view_rules";
 import { RulesGetList } from "../modules/rules";
-import { GuiConditionEditRules } from "./conditions_edit_rules";
 import { ConditionsLimit } from "../constants";
 import { DrawImageEx, showHelp } from "../utilsClub";
 import { Views, HELP_TEXTS } from "../helpTexts";
+import { dictionaryProcess } from "../utils";
+import { GuiRulesViewDescription } from "./rules_viewDescription";
 
 type RuleListItem = {
 	name: BCX_Rule;
@@ -165,7 +166,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 			DrawButton(200, Y, 1350, 64, "", color, "", "", ruleIsCreated || !allowAccess || this.permissionMode);
 			let description = e.definition.name;
 			if (e.definition.shortDescription) {
-				description += ` (${e.definition.shortDescription})`;
+				description += ` (${dictionaryProcess(e.definition.shortDescription, { PLAYER_NAME: this.character.Name })})`;
 			}
 			DrawTextFit(description, 210, Y + 34, 1340, "Black");
 			if (MouseIn(200, Y, 1350, 64)) {
@@ -243,11 +244,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 				if (this.permissionMode) {
 					this.character.conditionSetLimit("rules", e.name, (accessLevel + 1) % 3);
 				} else if (!ruleIsCreated && allowAccess) {
-					this.character.ruleCreate(ruleName).then(result => {
-						if (result && this.active) {
-							setSubscreen(new GuiConditionEditRules(this.character, ruleName, new GuiConditionViewRules(this.character)));
-						}
-					});
+					setSubscreen(new GuiRulesViewDescription(this.character, this, ruleName, true));
 				}
 				return;
 			}

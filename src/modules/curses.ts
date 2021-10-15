@@ -657,6 +657,7 @@ export class ModuleCurses extends BaseModule {
 				const curse = condition?.data;
 				const character = getChatroomCharacter(params.sourceMemberNumber);
 				if (curse &&
+					result.item.Asset.Name === curse.Name &&
 					!itemColorsEquals(curse.Color, result.item.Color) &&
 					character &&
 					checkPermissionAccess("curses_color", character)

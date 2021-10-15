@@ -1,4 +1,4 @@
-import { allowMode, detectOtherMods, isBind, isCloth } from "../utilsClub";
+import { allowMode, detectOtherMods, isBind, isCloth, DrawImageEx } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
 import { clipboardAvailable } from "../utils";
@@ -56,6 +56,14 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 }
 
 let j_WardrobeIncludeBinds = false;
+let j_ShowHelp = false;
+// FUTURE: "Importing must not change any locked item or item blocked by locked item"
+const helpText = "BCX's wardrobe export/import works by converting your current appearance into a long code word that is copied to your device's clipboard. " +
+"You can then paste it anywhere you like, for instance a text file with all your outfits. At any time, you can wear the look again by copying the outfit code word to " +
+"the clipboard and importing it with the according button. Functionality of this feature depends on the device you " +
+"are using and if the clipboard can be used on it. The button to the left of the 'Export'-button toggles whether items/restraints on your character should also " +
+"be exported/imported. That said, importing an outfit with restraints will fail if it would overwrite any item that is locked, except collars, neck accessories and " +
+"neck restraints. Those are ignored when exported/imported.";
 
 function PasteListener(ev: ClipboardEvent) {
 	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
@@ -77,15 +85,31 @@ export class ModuleWardrobe extends BaseModule {
 			next(args);
 			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
 				const Y = NModWardrobe ? 265 : 125;
-				DrawButton(1457, Y, 50, 50, "", "White", j_WardrobeIncludeBinds ? "Icons/Checked.png" : "", "Include restraints");
+				DrawButton(1380, Y, 50, 50, "", "White", "", "How does it work?");
+				DrawImageEx("Icons/Question.png", 1380 + 3, Y + 3, {Width: 44, Height: 44});
+				DrawButton(1457, Y, 50, 50, "", "White", "", "Include items/restraints");
+				DrawImageEx("../Icons/Bondage.png", 1457 + 6, Y + 6, {Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38});
 				DrawButton(1534, Y, 207, 50, "Export", "White", "");
 				DrawButton(1768, Y, 207, 50, "Import", "White", "");
+			}
+			if (j_ShowHelp && (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe")) {
+				MainCanvas.fillStyle = "#ffff88";
+				MainCanvas.fillRect(370, 190, 900, 780);
+				MainCanvas.strokeStyle = "Black";
+				MainCanvas.strokeRect(370, 190, 900, 780);
+				MainCanvas.textAlign = "left";
+				DrawTextWrap(helpText, 370 - 810 / 2, 210, 860, 740, "black");
+				MainCanvas.textAlign = "center";
 			}
 		});
 
 		hookFunction("AppearanceClick", 0, (args, next) => {
 			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
 				const Y = NModWardrobe ? 265 : 125;
+				// Help text toggle
+				if (MouseIn(1380, Y, 50, 50) || (MouseIn(370, 190, 900, 780) && j_ShowHelp)) {
+					j_ShowHelp = !j_ShowHelp;
+				}
 				// Restraints toggle
 				if (MouseIn(1457, Y, 50, 50)) {
 					j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;

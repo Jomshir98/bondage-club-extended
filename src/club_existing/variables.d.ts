@@ -87,6 +87,7 @@ declare var ChatRoomLastMessageIndex: number;
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomCharacterUpdate(C: Character): void;
 declare function ChatRoomMessage(data: any): void;
+declare function ChatRoomShouldBlockGaggedOOCMessage(Message: string, WhisperTarget: Character | undefined): boolean;
 
 // Server.js
 declare var ServerBeep: {

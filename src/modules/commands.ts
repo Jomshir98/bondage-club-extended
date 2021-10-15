@@ -1,7 +1,6 @@
 import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName, isBind } from "../utilsClub";
 import { ChatroomCharacter, getAllCharactersInRoom, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { hookFunction } from "../patching";
-import { consoleInterface } from "./console";
 import { arrayUnique, longestCommonPrefix } from "../utils";
 import { BaseModule } from "./_BaseModule";
 import { firstTimeInit, modStorage, modStorageSync } from "./storage";
@@ -447,7 +446,7 @@ export function Command_parseTime(selector: string): string | number {
 	} else if (["s", "sec", "second", "seconds"].includes(unit)) {
 		return num * 1000;
 	}
-	return `Unknown time unit "${unit}", please use one of:\n`+
+	return `Unknown time unit "${unit}", please use one of:\n` +
 		`d (day), h (hour), m (minute), s (second)`;
 }
 
@@ -605,31 +604,6 @@ export class ModuleCommands extends BaseModule {
 			);
 			return true;
 		}, null, false);
-
-		const ANTIGARBLE_LEVELS: Record<string, number> = {
-			"0": 0,
-			"1": 1,
-			"2": 2,
-			"normal": 0,
-			"both": 1,
-			"ungarbled": 2
-		};
-
-		const ANTIGARBLE_LEVEL_NAMES: string[] = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
-
-		registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
-			const val = ANTIGARBLE_LEVELS[value || ""];
-			if (val !== undefined) {
-				consoleInterface.antigarble = val;
-				ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
-				return true;
-			} else {
-				ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
-				return false;
-			}
-		}, value => {
-			return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
-		});
 	}
 
 	unload() {

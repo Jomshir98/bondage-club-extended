@@ -8,8 +8,6 @@ import { modStorage, switchStorageLocation } from "./storage";
 import { sendQuery } from "./messaging";
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 
-export let antigarble = 0;
-
 class ConsoleInterface {
 	get isAllow(): boolean {
 		return allowMode;
@@ -41,17 +39,6 @@ class ConsoleInterface {
 			devel = !developmentMode;
 		}
 		return setDevelopmentMode(devel);
-	}
-
-	get antigarble(): number {
-		return antigarble;
-	}
-
-	set antigarble(value: number) {
-		if (![0, 1, 2].includes(value)) {
-			throw new Error("Bad antigarble value, expected 0/1/2");
-		}
-		antigarble = value;
 	}
 
 	j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
@@ -173,13 +160,6 @@ export class ModuleConsole extends BaseModule {
 			} else if (opt.Name === "Expression") {
 				opt.Draw = function () { return DialogDrawExpressionMenu(); };
 			}
-		});
-
-		hookFunction("SpeechGarble", 0, (args, next) => {
-			if (antigarble === 2) return args[1];
-			let res = next(args);
-			if (typeof res === "string" && res !== args[1] && antigarble === 1) res += ` <> ${args[1]}`;
-			return res;
 		});
 	}
 

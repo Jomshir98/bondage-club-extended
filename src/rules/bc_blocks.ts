@@ -422,8 +422,9 @@ export function initRules_bc_blocks() {
 					if (state.isEnforced) {
 						state.triggerAttempt();
 						return;
+					} else if (state.inEffect) {
+						state.trigger();
 					}
-					state.trigger();
 				}
 				next(args);
 			}, ModuleCategory.Rules);
@@ -453,7 +454,6 @@ export function initRules_bc_blocks() {
 		},
 		load(state) {
 			hookFunction("ChatSearchJoin", 5, (args, next) => {
-				debugger;
 				if (state.inEffect && state.customData) {
 					// Scans results
 					let X = 25;

@@ -88,6 +88,14 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 	};
 }
 
+export function RulesGetRuleState<ID extends BCX_Rule>(rule: ID): RuleState<ID> {
+	const data = rules.get(rule);
+	if (!data) {
+		throw new Error(`Attempt to get state for unknown rule '${rule}'`);
+	}
+	return data.state as RuleState<ID>;
+}
+
 export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomDataTypes> = {
 	validate(value: unknown, def: RuleCustomDataEntryDefinition): boolean;
 	onDataChange?(def: RuleCustomDataEntryDefinition, active: boolean, key: string, onInput: () => void, value: RuleCustomDataTypesMap[type]): void;
@@ -220,8 +228,8 @@ export const ruleCustomDataHandlers: {
 			return undefined;
 		},
 		run(def, value, Y, key) {
-			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
-			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1000, Y + 26, 900, 60);
+			DrawTextFit(def.description, 1050, Y + 0, 850, "Black");
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + 26, 850, 60);
 		},
 		unload(def, key) {
 			ElementRemove(`BCX_RCDH_${key}`);
@@ -325,7 +333,7 @@ export const ruleCustomDataHandlers: {
 					input.remove();
 				}
 			} else if (!input) {
-				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", value, "50");
+				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", value, "160");
 				input.oninput = onInput;
 			} else {
 				input.value = value;
@@ -336,8 +344,8 @@ export const ruleCustomDataHandlers: {
 			return input ? input.value : undefined;
 		},
 		run(def, value, Y, key) {
-			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
-			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1000, Y + 26, 900, 60);
+			DrawTextFit(def.description, 1050, Y + 0, 850, "Black");
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + 26, 850, 60);
 		},
 		unload(def, key) {
 			ElementRemove(`BCX_RCDH_${key}`);
@@ -352,7 +360,7 @@ export const ruleCustomDataHandlers: {
 					input.remove();
 				}
 			} else if (!input) {
-				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "100");
+				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "120");
 			}
 		},
 		run(def, value, Y, key) {
@@ -579,7 +587,7 @@ export class RuleState<ID extends BCX_Rule> {
 		const texts = this.ruleDefinition.triggerTexts;
 		if (texts) {
 			if (texts.infoBeep) {
-				InfoBeep("BCX: " + texts.infoBeep, 7_000);
+				InfoBeep("BCX: " + dictionaryProcess(texts.infoBeep, dictionary), 7_000);
 			}
 			if (this.isLogged) {
 				const log = texts.log;
@@ -599,7 +607,7 @@ export class RuleState<ID extends BCX_Rule> {
 		if (texts) {
 			const infoBeep = texts.attempt_infoBeep ?? texts.infoBeep;
 			if (infoBeep) {
-				InfoBeep("BCX: " + infoBeep, 7_000);
+				InfoBeep("BCX: " + dictionaryProcess(infoBeep, dictionary), 7_000);
 			}
 			if (this.isLogged) {
 				const log = texts.attempt_log;
@@ -943,6 +951,12 @@ export class ModuleRules extends BaseModule {
 		initRules_bc_alter();
 		initRules_bc_relation_control();
 		initRules_bc_speech_control();
+
+		for (const rule of rules.values()) {
+			if (rule.init) {
+				rule.init(rule.state);
+			}
+		}
 	}
 
 	load() {

@@ -39,6 +39,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DrawGetImage: ["BEC7B0DA"],
 	ElementIsScrolledToEnd: ["D28B0638"],
 	ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD", "BDE09647"],
+	FriendListBeepMenuSend: ["B81A695E"],
 	FriendListLoadFriendList: ["72099AC9"],
 	InfiltrationStealItems: ["1F601756"],
 	InformationSheetClick: ["E535609B"],

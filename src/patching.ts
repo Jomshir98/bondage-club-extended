@@ -147,3 +147,8 @@ export function unload_patches() {
 	}
 	patchedFunctions.clear();
 }
+
+export function callOriginal(target: string, args: any[]): any {
+	const data = initPatchableFunction(target);
+	return data.original(...args);
+}

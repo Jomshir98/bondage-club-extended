@@ -203,15 +203,21 @@ type BCX_Rule =
 	| "allow_set_sound_only"
 	| "garble_gagged_whispers"
 	| "block_OOC_while_gagged"
+	| "block_OOC"
 	| "doll_talk"
 	| "banning_words"
 	| "forbid_talking"
 	| "restricted_whispering"
-	| "forbid_beeping"
+	| "forbid_sending_beep"
+	| "forbid_receiving_beep"
 	| "greet_order"
 	| "forbid_freeing_self"
 	| "forbid_tying_others"
-	| "forbid_antigarble";
+	| "forbid_antigarble"
+	| "replace_spoken_words"
+	| "using_honorifics"
+	| "force_to_retype"
+	| "greet_room_order";
 
 type RuleCustomData = {
 	restrict_accessible_rooms: {
@@ -249,14 +255,27 @@ type RuleCustomData = {
 	restricted_whispering: {
 		minimumPermittedRole: import("./modules/authority").AccessLevel;
 	},
-	forbid_beeping: {
+	forbid_sending_beep: {
 		whitelistedMemberNumbers: number[];
+	},
+	forbid_receiving_beep: {
+		whitelistedMemberNumbers: number[];
+		autoreplyText: string;
 	},
 	greet_order: {
 		toGreetMemberNumbers: number[];
 	},
 	forbid_tying_others: {
 		onlyMoreDominantsToggle: boolean;
+	},
+	replace_spoken_words: {
+		stringWithReplacingSyntax: string;
+	},
+	using_honorifics: {
+		stringWithRuleSyntax: string;
+	},
+	greet_room_order: {
+		greetingSentence: string;
 	}
 };
 
@@ -321,6 +340,7 @@ interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 }
 
 interface RuleDefinition<ID extends BCX_Rule = BCX_Rule> extends RuleDisplayDefinition<ID> {
+	init?: (state: import("./modules/rules").RuleState<ID>) => void;
 	load?: (state: import("./modules/rules").RuleState<ID>) => void;
 	unload?: () => void;
 	tick?: (state: import("./modules/rules").RuleState<ID>) => boolean;

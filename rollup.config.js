@@ -6,6 +6,9 @@ import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
 
+import packageJson from "./package.json";
+import simpleGit from "simple-git";
+
 /** @type {import("rollup").RollupOptions} */
 const config = {
 	input: "src/index.ts",
@@ -23,12 +26,22 @@ if (window.BCX_Loaded !== undefined) {
 	throw "Already loaded";
 }
 window.BCX_Loaded = false;
-`
+`,
+		intro: async () => {
+			const git = simpleGit();
+			let BCX_VERSION = packageJson.version;
+			if ((await git.status()).modified.length > 0) {
+				BCX_VERSION += `-DEV-${new Date().toISOString().replace(/[-:T]/g, "").replace(/\.[0-9]*Z/, "")}`
+			} else {
+				BCX_VERSION += `-${(await git.revparse("HEAD")).substr(0, 8)}`
+			}
+			return `const BCX_VERSION="${BCX_VERSION}";`
+		}
 	},
 	treeshake: false,
 	plugins: [
 		progress({ clearLine: true }),
-		resolve(),
+		resolve({ browser: true }),
 		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
 		copy({
 			targets: [{ src: 'static/*', dest: 'dist' }]

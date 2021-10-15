@@ -1,3 +1,6 @@
+/** Package version, provided by rollup */
+declare const BCX_VERSION: string;
+
 interface Window {
 	BCX_Loaded?: boolean;
 }

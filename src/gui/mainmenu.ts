@@ -95,7 +95,7 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		if (this.character.isPlayer()) {
-			DrawText(`Your BCX version: ${VERSION}`, 1450 + 400 / 2, 665, "Black", "");
+			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 665, "Black", "");
 			DrawButton(1450, 700, 400, 90, "", "White", "", "Open changelog on GitHub");
 			DrawText(`View changelog`, 1450 + 350 / 2, 745, "Black", "");
 			DrawImageEx(icon_ExternalLink, 1770, 730, { Width: 30, Height: 30 });
@@ -103,8 +103,8 @@ export class GuiMainMenu extends GuiSubscreen {
 			DrawText(`BCX Discord`, 1450 + 350 / 2, 855, "Black", "");
 			DrawImageEx(icon_ExternalLink, 1770, 840, { Width: 30, Height: 30 });
 		} else {
-			DrawText(`Your BCX version: ${VERSION}`, 1450 + 400 / 2, 765, "Black", "");
-			DrawText(`${this.character.Name}'s BCX version: ${this.character.BCXVersion}`, 1450 + 400 / 2, 845, "Black", "");
+			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 765, "Black", "");
+			DrawText(`${this.character.Name}'s BCX version: ${this.character.BCXVersion?.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 845, "Black", "");
 		}
 	}
 

@@ -60,7 +60,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 	}
 
 	protected drawEntryExtra(X: number, Y: number, entry: dataEntry): void {
-		if (entry.extra.definition.enforcabe !== false) {
+		if (entry.extra.definition.enforceable !== false) {
 			DrawImageEx("Icons/Management.png", X + 610, Y + 10, {
 				Height: 40,
 				Width: 40,

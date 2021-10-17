@@ -331,7 +331,7 @@ interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 	};
 	defaultLimit: import("./constants").ConditionsLimit;
 	/** If rule can be enforced, defaults to `true` */
-	enforcabe?: false;
+	enforceable?: false;
 	/** If rule can be logged, defaults to `true` */
 	loggable?: false;
 	dataDefinition?: ID extends keyof RuleCustomData ? {

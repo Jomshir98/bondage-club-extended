@@ -82,7 +82,7 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 		longDescription: data.longDescription,
 		triggerTexts: data.triggerTexts,
 		defaultLimit: data.defaultLimit,
-		enforcabe: data.enforcabe,
+		enforceable: data.enforceable,
 		loggable: data.loggable,
 		dataDefinition: data.dataDefinition
 	};

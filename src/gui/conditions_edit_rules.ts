@@ -66,7 +66,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		let Y = 175;
 
 		////// right side: special rules category options
-		if (this.definition.enforcabe !== false) {
+		if (this.definition.enforceable !== false) {
 			DrawCheckbox(1050, Y, 64, 64, "Enforce this rule", data.data.enforce, !access);
 			Y += 100;
 		}
@@ -106,7 +106,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 
 		let Y = 175;
 
-		if (this.definition.enforcabe !== false) {
+		if (this.definition.enforceable !== false) {
 			if (MouseIn(1050, Y, 64, 64)) {
 				this.changes = this.makeChangesData();
 				this.changes.data.enforce = !this.changes.data.enforce;

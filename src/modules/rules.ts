@@ -7,6 +7,7 @@ import { initRules_bc_alter } from "../rules/bc_alter";
 import { initRules_bc_blocks } from "../rules/bc_blocks";
 import { initRules_bc_relation_control } from "../rules/relation_control";
 import { initRules_bc_speech_control } from "../rules/speech_control";
+import { initRules_other } from "../rules/other";
 import { capitalizeFirstLetter, clamp, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, InfoBeep } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
@@ -951,6 +952,7 @@ export class ModuleRules extends BaseModule {
 		initRules_bc_alter();
 		initRules_bc_relation_control();
 		initRules_bc_speech_control();
+		initRules_other();
 
 		for (const rule of rules.values()) {
 			if (rule.init) {

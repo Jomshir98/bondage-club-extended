@@ -1,7 +1,7 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
-import { registerSpeechHook, SpeechMessageInfo } from "../modules/speech";
+import { registerSpeechHook, SpeechMessageInfo, falteringSpeech } from "../modules/speech";
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
 import { isObject } from "../utils";
@@ -494,4 +494,55 @@ export function initRules_bc_speech_control() {
 		}
 	});
 	*/
+
+	// Restrained speech:
+	// the wearer is unable to speak freely, she is given a set of sentences/targets allowed and can only use those with the #name talk command.
+	// The given sentences can contain the %target% placeholder to have the target inserted into the sentence. The given sentences can contain
+	// the %self% placeholder which will be replaced by the given "self" attribute. By default it is "I", but could be changed to something else
+	// to avoid having to rewrite all the sentences. WARNING: a target id and a message id always needs to be specified. Therefore, you will be
+	// softlocked/muted if this mode is enabled and you remove all sentences and/or targets.
+	/* TODO: Implement
+	registerRule("restrained_speech", {
+		name: "Restrained speech",
+		icon: "Icons/Chat.png",
+		shortDescription: "only the set sentences are allowed to be spoken",
+		// TODO: needs an updatd describing the special wildcards or placeholders that can be used
+		longDescription: "This rule no longer allows PLAYER_NAME to speak freely, she is given a set of sentences allowed and can only use those in chat and whispers. Does not affect OOC.",
+		triggerTexts: {
+			infoBeep: "You broke a rule by not using one of the allowed phrases for you!",
+			attempt_log: "PLAYER_NAME broke a rule by trying to not use one of the allowed phrases",
+			log: "PLAYER_NAME broke a rule by not using one of the allowed phrases"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			listOfAllowedSentences: {
+				type: "stringList",
+				default: [],
+				// TODO: needs an update describing the special wildcards or placeholders that can be used
+				description: "Only these phrases are still allowed:"
+			}
+		}
+	});
+	*/
+
+	registerRule("faltering_speech", {
+		name: "Enforce speech difficulties",
+		icon: "Icons/Chat.png",
+		loggable: false,
+		shortDescription: "chat text is converted to a faltering voice",
+		longDescription: "PLAYER_NAME is only able to speak studdering and with random filler sounds, for some [RP] reason (anxiousness, arousal, fear, etc.). Converts the typed chat text automatically. Affects chat messages and whispers, but not OOC.",
+		defaultLimit: ConditionsLimit.limited,
+		init(state) {
+			registerSpeechHook({
+				modify: (msg) => {
+					if (state.inEffect) {
+						return falteringSpeech(msg.originalMessage);
+					} else {
+						return msg.originalMessage;
+					}
+				}
+			});
+		}
+	});
+
 }

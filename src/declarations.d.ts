@@ -217,7 +217,12 @@ type BCX_Rule =
 	| "replace_spoken_words"
 	| "using_honorifics"
 	| "force_to_retype"
-	| "greet_room_order";
+	| "greet_room_order"
+	| "restrained_speech"
+	| "faltering_speech"
+	| "forbid_afk"
+	| "log_online_time"
+	| "constant_reminder";
 
 type RuleCustomData = {
 	restrict_accessible_rooms: {
@@ -276,6 +281,16 @@ type RuleCustomData = {
 	},
 	greet_room_order: {
 		greetingSentence: string;
+	},
+	restrained_speech: {
+		listOfAllowedSentences: string[];
+	},
+	forbid_afk: {
+		minutesBeforeAfk: number;
+	},
+	constant_reminder: {
+		reminderText: string;
+		reminderFrequency: number;
 	}
 };
 

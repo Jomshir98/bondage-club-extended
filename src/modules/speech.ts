@@ -30,6 +30,42 @@ export function registerSpeechHook(hook: SpeechHook): void {
 	speechHooks.push(hook);
 }
 
+/**
+ * Alters a message so that it sounds like a faltering voice, including random filler sounds. Does not affect OOC talk.
+ * @param {string} message - The message that will be randomly changed
+ * @returns {string} - Returns the message after studdering and random sounds have been added
+ */
+export function falteringSpeech(message: string): string {
+	const soundList: string[] = ["uuh... ", "uhh... ", "...ah... ", "uhm... ", "mnn... ", "..nn... "];
+	let oocMsg: boolean = false;
+	let firstWord: boolean = true;
+	let alreadyStudderedWord: boolean = false;
+	let seed: number = message.length;
+	for (let messageIndex = 0; messageIndex < message.length; messageIndex++) {
+
+		const character = message.charAt(messageIndex).toLowerCase();
+		// from here on out, an out of context part of the message starts that will stay unchanged
+		if (character === "(") oocMsg = true;
+		if (!oocMsg && !alreadyStudderedWord && /\p{L}/igu.test(character)) {
+			const studderFactor: number = Math.floor(Math.sin(seed++) * 100000) % 10;
+			if ((!alreadyStudderedWord && studderFactor >= 6) || firstWord) {
+				message = message.substring(0, messageIndex + 1) + "-" + message.substring(messageIndex, message.length);
+				seed++;
+				// One third chance to add a sound before a studdered word
+				if (Math.random() < 0.33 && !firstWord) {
+					message = message.substring(0, messageIndex) + soundList[Math.floor(Math.random() * soundList.length)] + message.substring(messageIndex, message.length);
+				}
+				messageIndex += 2;
+				if (firstWord) firstWord = false;
+			}
+			alreadyStudderedWord = true;
+		}
+		if (character === ")") oocMsg = false;
+		if (character === " ") alreadyStudderedWord = false;
+	}
+	return message;
+}
+
 function parseMsg(msg: string): SpeechMessageInfo | null {
 	const rawMessage = msg;
 	if (msg.startsWith("//")) {

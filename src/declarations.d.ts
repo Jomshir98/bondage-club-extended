@@ -172,19 +172,21 @@ type ConditionsStorage = Partial<{
 }>;
 
 type BCX_Rule =
-	| "forbid_remoteuse_self"
-	| "forbid_remoteuse_others"
-	| "forbid_keyuse_self"
-	| "forbid_keyuse_others"
-	| "forbid_lockuse_self"
-	| "forbid_lockuse_others"
-	| "forbid_lockpicking_self"
-	| "forbid_lockpicking_others"
-	| "forbid_wardrobeaccess_self"
-	| "forbid_wardrobeaccess_others"
-	| "restrict_allowed_poses"
-	| "forbid_creating_rooms"
-	| "restrict_accessible_rooms"
+	| "block_remoteuse_self"
+	| "block_remoteuse_others"
+	| "block_keyuse_self"
+	| "block_keyuse_others"
+	| "block_lockpicking_self"
+	| "block_lockpicking_others"
+	| "block_lockuse_self"
+	| "block_lockuse_others"
+	| "block_wardrobe_access_self"
+	| "block_wardrobe_access_others"
+	// | "restrict_allowed_poses"
+	| "block_creating_rooms"
+	| "block_entering_rooms"
+	| "block_freeing_self"
+	| "block_tying_others"
 	| "sensory_deprivation_sound"
 	| "sensory_deprivation_sight"
 	| "sensory_deprivation_eyes"
@@ -211,8 +213,6 @@ type BCX_Rule =
 	| "forbid_sending_beep"
 	| "forbid_receiving_beep"
 	| "greet_order"
-	| "forbid_freeing_self"
-	| "forbid_tying_others"
 	| "forbid_antigarble"
 	| "replace_spoken_words"
 	| "using_honorifics"
@@ -228,11 +228,14 @@ type BCX_Rule =
 	;
 
 type RuleCustomData = {
-	restrict_accessible_rooms: {
-		roomList: string[];
-	},
 	restrict_allowed_poses: {
 		poseButtons: string[];
+	},
+	block_entering_rooms: {
+		roomList: string[];
+	},
+	block_tying_others: {
+		onlyMoreDominantsToggle: boolean;
 	},
 	sensory_deprivation_sound: {
 		deafeningStrength: "light" | "medium" | "heavy";
@@ -272,9 +275,6 @@ type RuleCustomData = {
 	},
 	greet_order: {
 		toGreetMemberNumbers: number[];
-	},
-	forbid_tying_others: {
-		onlyMoreDominantsToggle: boolean;
 	},
 	replace_spoken_words: {
 		stringWithReplacingSyntax: string;

@@ -5,11 +5,11 @@ import { hookFunction } from "../patching";
 import { icon_restrictions } from "../resources";
 
 export function initRules_bc_blocks() {
-	registerRule("forbid_remoteuse_self", {
+	registerRule("block_remoteuse_self", {
 		name: "Forbid using remotes on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to use or triggering a vibrator or similar remote controlled item on the own body.",
+		longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on her own body.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a remote control for items on your body!",
 			attempt_log: "PLAYER_NAME tried to use a remote control on her own body, which was forbidden",
@@ -44,7 +44,7 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_remoteuse_others", {
+	registerRule("block_remoteuse_others", {
 		name: "Forbid using remotes on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on other club members.",
@@ -82,15 +82,15 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_keyuse_self", {
+	registerRule("block_keyuse_self", {
 		name: "Forbid using keys on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to use any kind of key for locked items on the own body.",
+		longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on her own body.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a key on items on your body!",
-			attempt_log: "PLAYER_NAME tried to use a key on worn items, which was forbidden",
-			log: "PLAYER_NAME used a key on worn items, which was forbidden"
+			attempt_log: "PLAYER_NAME tried to use a key on a worn item, which was forbidden",
+			log: "PLAYER_NAME used a key on a worn item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -124,14 +124,14 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_keyuse_others", {
+	registerRule("block_keyuse_others", {
 		name: "Forbid using keys on others",
 		icon: icon_restrictions,
-		longDescription: "This rule forbids PLAYER_NAME to use any kind of key for locked items on other club members.",
+		longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on other club members.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a key on other's items!",
-			attempt_log: "PLAYER_NAME tried to use a key to unlock TARGET_PLAYER, which was forbidden",
-			log: "PLAYER_NAME used a key to unlock TARGET_PLAYER, which was forbidden"
+			attempt_log: "PLAYER_NAME tried to use a key to unlock TARGET_PLAYER's item, which was forbidden",
+			log: "PLAYER_NAME used a key to unlock TARGET_PLAYER's item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -165,15 +165,15 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_lockpicking_self", {
-		name: "Forbid lockpicking on self",
+	registerRule("block_lockpicking_self", {
+		name: "Forbid picking locks on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME picking one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on the own body.",
+		longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on her own body.",
 		triggerTexts: {
-			infoBeep: "You are not allowed to pick locked items on your body!",
-			attempt_log: "PLAYER_NAME tried to pick a locked worn item, which was forbidden",
-			log: "PLAYER_NAME picked a locked worn item, which was forbidden"
+			infoBeep: "You are not allowed to lockpick worn items on your body!",
+			attempt_log: "PLAYER_NAME tried to lockpick a worn item, which was forbidden",
+			log: "PLAYER_NAME lockpicked a worn item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -204,14 +204,14 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_lockpicking_others", {
-		name: "Forbid lockpicking on others",
+	registerRule("block_lockpicking_others", {
+		name: "Forbid picking locks on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on other club members.",
 		triggerTexts: {
-			infoBeep: "You are not allowed to pick locks on others!",
-			attempt_log: "PLAYER_NAME tried to pick a locked item on TARGET_PLAYER, which was forbidden",
-			log: "PLAYER_NAME picked a locked item on TARGET_PLAYER, which was forbidden"
+			infoBeep: "You are not allowed to lockpick items on others!",
+			attempt_log: "PLAYER_NAME tried to lockpick an item on TARGET_PLAYER, which was forbidden",
+			log: "PLAYER_NAME lockpicked an item on TARGET_PLAYER, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -242,15 +242,15 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_lockuse_self", {
+	registerRule("block_lockuse_self", {
 		name: "Forbid using locks on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on the own body.",
+		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on her own body.",
 		triggerTexts: {
-			infoBeep: "You are not allowed to put a lock on items on your body!",
-			attempt_log: "PLAYER_NAME tried to put a lock on a worn item, which was forbidden",
-			log: "PLAYER_NAME put a lock on a worn item, which was forbidden"
+			infoBeep: "You are not allowed to lock items on your body!",
+			attempt_log: "PLAYER_NAME tried to lock a worn item, which was forbidden",
+			log: "PLAYER_NAME locked a worn item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -281,14 +281,14 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_lockuse_others", {
+	registerRule("block_lockuse_others", {
 		name: "Forbid using locks on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on other club members.",
 		triggerTexts: {
-			infoBeep: "You are not allowed to put a lock on other's items!",
-			attempt_log: "PLAYER_NAME tried to puta lock on TARGET_PLAYER, which was forbidden",
-			log: "PLAYER_NAME put a lock on TARGET_PLAYER, which was forbidden"
+			infoBeep: "You are not allowed to lock other's items!",
+			attempt_log: "PLAYER_NAME tried to lock TARGET_PLAYER's item, which was forbidden",
+			log: "PLAYER_NAME locked TARGET_PLAYER's item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -320,15 +320,15 @@ export function initRules_bc_blocks() {
 	});
 
 	// TODO: Make it clearer it is blocked by BCX
-	registerRule("forbid_wardrobeaccess_self", {
+	registerRule("block_wardrobe_access_self", {
 		name: "Forbid wardrobe use on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using PLAYER_NAME's wardrobe",
-		longDescription: "This rule forbids PLAYER_NAME to access the own wardrobe.",
+		longDescription: "This rule forbids PLAYER_NAME to access her own wardrobe.",
 		triggerTexts: {
-			infoBeep: "You are not allowed to change what you wear!",
-			attempt_log: "PLAYER_NAME tried to change their clothing, which was forbidden",
-			log: "PLAYER_NAME changed their clothing, which was forbidden"
+			infoBeep: "You are not allowed to change what you are wearing!",
+			attempt_log: "PLAYER_NAME tried to use their wardrobe, which was forbidden",
+			log: "PLAYER_NAME used their wardrobe, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -346,14 +346,14 @@ export function initRules_bc_blocks() {
 	});
 
 	// TODO: Make it clearer it is blocked by BCX
-	registerRule("forbid_wardrobeaccess_others", {
+	registerRule("block_wardrobe_access_others", {
 		name: "Forbid wardrobe use on others",
 		icon: icon_restrictions,
 		longDescription: "This rule forbids PLAYER_NAME to use the wardrobe of other club members.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to change what others wear!",
-			attempt_log: "PLAYER_NAME tried to change TARGET_PLAYER's clothing, which was forbidden",
-			log: "PLAYER_NAME changed TARGET_PLAYER's clothing, which was forbidden"
+			attempt_log: "PLAYER_NAME tried to use TARGET_PLAYER's wardrobe, which was forbidden",
+			log: "PLAYER_NAME used TARGET_PLAYER's wardrobe, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -394,18 +394,18 @@ export function initRules_bc_blocks() {
 	*/
 
 	// TODO: Triggers on opening chat create *window*, improve to trigger on actual room creation
-	registerRule("forbid_creating_rooms", {
-		name: "Forbid creating own rooms",
+	registerRule("block_creating_rooms", {
+		name: "Forbid creating new rooms",
 		icon: icon_restrictions,
-		longDescription: "Blocks/logs PLAYER_NAME from creating public and private rooms.",
+		longDescription: "This rule forbids PLAYER_NAME to create new rooms.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to create a new room!",
-			attempt_log: "PLAYER_NAME tried to create a chat room, which was forbidden",
-			log: "PLAYER_NAME created a chat room, which was forbidden",
+			attempt_log: "PLAYER_NAME tried to create a chatroom, which was forbidden",
+			log: "PLAYER_NAME created a chatroom, which was forbidden",
 			announce: "",
 			attempt_announce: ""
 		},
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatSearchRun", 0, (args, next) => {
 				next(args);
@@ -428,11 +428,11 @@ export function initRules_bc_blocks() {
 	});
 
 	// TODO: Triggers on attempting to enter room, improve to trigger on actual room entry
-	registerRule("restrict_accessible_rooms", {
-		name: "Restrict accessible rooms",
+	registerRule("block_entering_rooms", {
+		name: "Restrict entering rooms",
 		icon: icon_restrictions,
-		shortDescription: "only allow specific ones",
-		longDescription: "This rule blocks/logs entering of not allowed rooms, based on a editable whitelist of rooms that are still permitted for the player to join. This rule could for instance be combined with the rule that forbids the player to create their own rooms.",
+		shortDescription: "only allow entering specific ones",
+		longDescription: "This rule forbids PLAYER_NAME to enter all rooms, that are not on an editable whitelist of still allowed ones. Tip: This rule can be combined with the rule \"Forbid creating new rooms\".",
 		triggerTexts: {
 			infoBeep: "You are not allowed to enter this room!",
 			attempt_log: "PLAYER_NAME tried to enter a forbidden room",
@@ -502,15 +502,15 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_freeing_self", {
+	registerRule("block_freeing_self", {
 		name: "Forbid freeing self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME removing any items from PLAYER_NAME's body",
-		longDescription: "Blocks/logs PLAYER_NAME from removing items from own body. Other people can still remove them from PLAYER_NAME.",
+		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them.",
 		triggerTexts: {
-			infoBeep: "Removing an item from your body is forbidden to you!",
-			attempt_log: "PLAYER_NAME tried to remove an item from the own body, which was forbidden",
-			log: "PLAYER_NAME removed an item from the own body, which was forbidden"
+			infoBeep: "You are not allowed to remove an item from your body!",
+			attempt_log: "PLAYER_NAME tried to remove a worn item, which was forbidden",
+			log: "PLAYER_NAME removed a worn item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
@@ -567,17 +567,17 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	registerRule("forbid_tying_others", {
+	registerRule("block_tying_others", {
 		name: "Forbid tying up others",
 		icon: icon_restrictions,
 		shortDescription: "either everybody or only more dominant characters",
-		longDescription: "Blocks/logs PLAYER_NAME's usage of any items on another character. Can be set to only affect putting items on characters with a higher dominant / lower submissive score than PLAYER_NAME.",
+		longDescription: "This rule forbids PLAYER_NAME to use any items on other characters. Can be set to only affect using items on characters with a higher dominant / lower submissive score than PLAYER_NAME has.",
 		triggerTexts: {
-			infoBeep: "Putting an item on someone is not allowed to you!",
-			attempt_log: "PLAYER_NAME tried to put an item on TARGET_PLAYER, which was forbidden",
-			log: "PLAYER_NAME put an item on TARGET_PLAYER, which was forbidden"
+			infoBeep: "You are not allowed to use an item on TARGET_PLAYER!",
+			attempt_log: "PLAYER_NAME tried to use an item on TARGET_PLAYER, which was forbidden",
+			log: "PLAYER_NAME used an item on TARGET_PLAYER, which was forbidden"
 		},
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			onlyMoreDominantsToggle: {
 				type: "toggle",

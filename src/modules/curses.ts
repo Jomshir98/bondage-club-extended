@@ -639,6 +639,7 @@ export class ModuleCurses extends BaseModule {
 					}
 				}
 			},
+			getDefaultLimits: () => ({}),
 			commandConditionSelectorHelp: "group"
 		});
 	}

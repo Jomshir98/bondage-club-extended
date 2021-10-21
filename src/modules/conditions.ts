@@ -103,6 +103,7 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	logLimitChange(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter, newLimit: ConditionsLimit, oldLimit: ConditionsLimit): void;
 	logConditionUpdate(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter, newData: ConditionsConditionPublicData<C>, oldData: ConditionsConditionPublicData<C>): void;
 	logCategoryUpdate(character: ChatroomCharacter, newData: ConditionsCategoryConfigurableData, oldData: ConditionsCategoryConfigurableData): void;
+	getDefaultLimits(): Record<string, ConditionsLimit>;
 	parseConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): [boolean, string | ConditionsCategoryKeys[C]];
 	autocompleteConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): string[];
 	commandConditionSelectorHelp: string;
@@ -161,7 +162,10 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		conditions: {},
 		timer: data.timer ?? null,
 		timerRemove: data.timerRemove ?? false,
-		limits: cloneDeep(data.limits),
+		limits: {
+			...handler.getDefaultLimits(),
+			...data.limits
+		},
 		requirements: cloneDeep(data.requirements)
 	};
 	for (const char of getAllCharactersInRoom()) {
@@ -225,7 +229,7 @@ export function ConditionsGetConditionLimit<C extends ConditionsCategories>(cate
 	if (!moduleIsEnabled(handler.category))
 		return ConditionsLimit.blocked;
 	const data = ConditionsGetCategoryData(category);
-	return data.limits[condition] ?? ConditionsLimit.normal;
+	return data.limits[condition] ?? handler.getDefaultLimits()[condition] ?? ConditionsLimit.normal;
 }
 
 export function ConditionsCheckAccess<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], character: ChatroomCharacter): boolean {
@@ -269,10 +273,11 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 	}
 	if (data.conditions[condition] !== undefined)
 		return false;
-	const oldLimit = data.limits[condition] ?? ConditionsLimit.normal;
+	const defaultLimit = handler.getDefaultLimits()[condition] ?? ConditionsLimit.normal;
+	const oldLimit = data.limits[condition] ?? defaultLimit;
 	if (oldLimit === limit)
 		return true;
-	if (limit === ConditionsLimit.normal) {
+	if (limit === defaultLimit) {
 		delete data.limits[condition];
 	} else {
 		data.limits[condition] = limit;
@@ -875,10 +880,10 @@ export class ModuleConditions extends BaseModule {
 					console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
 					delete data.limits[condition];
 				} else if (typeof limitValue !== "number" ||
-					limitValue === ConditionsLimit.normal ||
+					limitValue === (handler.getDefaultLimits()[condition] ?? ConditionsLimit.normal) ||
 					ConditionsLimit[limitValue] === undefined
 				) {
-					console.warn(`BCX: Unknown condition ${key}:${condition} limit value, removing it`, limitValue);
+					console.warn(`BCX: Bad condition ${key}:${condition} limit value, removing it`, limitValue);
 					delete data.limits[condition];
 				}
 			}
@@ -902,6 +907,9 @@ export class ModuleConditions extends BaseModule {
 					conditiondata.timerRemove !== undefined && conditiondata.timerRemove !== true
 				) {
 					console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
+					delete data.conditions[condition];
+				} else if (ConditionsGetConditionLimit(key, condition) === ConditionsLimit.blocked) {
+					console.warn(`BCX: Condition ${key}:${condition} became blocked while active, removing it`);
 					delete data.conditions[condition];
 				}
 			}

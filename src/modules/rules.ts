@@ -944,6 +944,13 @@ export class ModuleRules extends BaseModule {
 					}
 				}
 			},
+			getDefaultLimits: () => {
+				const res: Record<string, ConditionsLimit> = {};
+				for (const [k, v] of rules.entries()) {
+					res[k] = v.defaultLimit;
+				}
+				return res;
+			},
 			commandConditionSelectorHelp: "rule"
 		});
 

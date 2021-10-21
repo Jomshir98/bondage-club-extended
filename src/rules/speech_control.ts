@@ -378,7 +378,7 @@ export function initRules_bc_speech_control() {
 					}
 					state.triggerAttempt({ TARGET_PLAYER: `${data.MemberName} (${data.MemberNumber})` });
 					return;
-			}
+				}
 				return next(args);
 			}, ModuleCategory.Rules);
 		}

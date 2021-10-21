@@ -222,7 +222,10 @@ type BCX_Rule =
 	| "faltering_speech"
 	| "forbid_afk"
 	| "log_online_time"
-	| "constant_reminder";
+	| "constant_reminder"
+	| "restrict_console_usage"
+	| "track_BCX_activation"
+	;
 
 type RuleCustomData = {
 	restrict_accessible_rooms: {

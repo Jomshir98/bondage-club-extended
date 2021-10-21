@@ -5,6 +5,9 @@
 declare var ActivityOrgasmRuined: boolean;
 declare var ActivityOrgasmGameResistCount: number;
 
+// AfkTimer.js
+declare var AfkTimerEventsList: string[];
+
 // Appearance.js
 declare var CharacterAppearanceSelection: Character | null;
 declare var CharacterAppearanceMode: string;

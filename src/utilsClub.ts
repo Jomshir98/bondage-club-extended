@@ -69,11 +69,12 @@ export function InfoBeep(msg: string, timer: number = 3000) {
 	};
 }
 
-export function ChatRoomActionMessage(msg: string) {
+export function ChatRoomActionMessage(msg: string, target: null | number = null) {
 	if (!msg) return;
 	ServerSend("ChatRoomChat", {
 		Content: "Beep",
 		Type: "Action",
+		Target: target,
 		Dictionary: [
 			{ Tag: "Beep", Text: "msg" },
 			{ Tag: "Biep", Text: "msg" },

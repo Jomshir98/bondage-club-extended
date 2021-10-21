@@ -3,6 +3,7 @@
 
 // Activity.js
 declare var ActivityOrgasmRuined: boolean;
+declare var ActivityOrgasmGameResistCount: number;
 
 // Appearance.js
 declare var CharacterAppearanceSelection: Character | null;
@@ -55,6 +56,8 @@ declare var DialogFacialExpressionsSelected: number;
 declare var DialogSelfMenuOptions: any[];
 declare var DialogMenuButton: string[];
 declare var CurrentCharacter: Character | null;
+declare var DialogFacialExpressionsSelectedBlindnessLevel: number;
+declare function DialogLeave(): void;
 declare function DialogFindPlayer(KeyWord: string): string;
 declare function DialogDrawPoseMenu(): void;
 declare function DialogDrawExpressionMenu(): void;
@@ -85,12 +88,27 @@ declare var ChatRoomCharacter: Character[];
 declare var ChatRoomTargetMemberNumber: number | null;
 declare var ChatRoomHideIconState: number;
 declare var ChatRoomData: any;
+declare var ChatRoomGame: string;
 declare var ChatRoomLastMessage: string[];
 declare var ChatRoomLastMessageIndex: number;
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomCharacterUpdate(C: Character): void;
 declare function ChatRoomMessage(data: any): void;
 declare function ChatRoomShouldBlockGaggedOOCMessage(Message: string, WhisperTarget: Character | undefined): boolean;
+declare function ChatRoomPlayerIsAdmin(): boolean;
+
+// ChatAdmin.js
+declare var ChatAdminBackgroundIndex: number;
+declare var ChatAdminBackgroundSelect: string;
+declare var ChatAdminPrivate: boolean;
+declare var ChatAdminLocked: boolean;
+declare var ChatAdminGame: string;
+
+// ChatCreate.js
+declare var ChatCreateBackgroundList: any;
+
+// ChatBlockItem.js
+declare var ChatBlockItemEditable: boolean;
 
 // Server.js
 declare var ServerBeep: {
@@ -139,6 +157,10 @@ declare const ValidationModifiableProperties: string[];
 // Text.js
 declare function TextGet(TextTag: string): string;
 
+// Screens/Room/KidnapLeague/KidnapLeague.js
+declare function KidnapLeagueCanStartOnlineBounty(): boolean;
+declare function KidnapLeagueOnlineBountyStart(): void;
+
 // Screens/Character/InformationSheet/InformationSheet.js
 declare var InformationSheetSelection: Character | null;
 
@@ -158,4 +180,5 @@ declare var ChatSearchResultOffset: any;
 declare function ChatSearchMuffle(inputText: string): string;
 
 // Reputation.js
+declare function ReputationGet(RepType: string): number;
 declare function ReputationCharacterGet(C: Character, RepType: string): number;

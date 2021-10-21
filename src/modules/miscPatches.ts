@@ -68,8 +68,6 @@ export function HookDialogMenuButtonClick(button: string, fn: DialogMenuButtonCl
 }
 
 export class ModuleMiscPatches extends BaseModule {
-	private o_Player_CanChange: (typeof Player.CanChange) | null = null;
-
 	load() {
 		if (!Array.isArray(modStorage.cheats)) {
 			modStorage.cheats = [];
@@ -187,9 +185,7 @@ export class ModuleMiscPatches extends BaseModule {
 
 		// Cheats
 
-		this.o_Player_CanChange = Player.CanChange;
-		Player.CanChange = () => allowMode || !!(this.o_Player_CanChange?.call(Player));
-
+		hookFunction("Player.CanChange", 1, (args, next) => allowMode || next(args));
 		hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
 	}
 
@@ -200,11 +196,5 @@ export class ModuleMiscPatches extends BaseModule {
 			cheatChangeHooks[MiscCheat.GivePandoraKey]!(true);
 		}
 		ServerPlayerInventorySync();
-	}
-
-	unload() {
-		if (this.o_Player_CanChange) {
-			Player.CanChange = this.o_Player_CanChange;
-		}
 	}
 }

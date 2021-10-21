@@ -1,11 +1,12 @@
 import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
 import { ModuleCategory } from "./constants";
-import { crc32 } from "./utils";
+import { crc32, isObject } from "./utils";
 import { detectOtherMods } from "./utilsClub";
 
 type PatchHook = (args: any[], next: (args: any[]) => any) => any;
 
 interface IpatchedFunctionData {
+	context: Record<string, unknown>;
 	original: (...args: any[]) => any;
 	final: (...args: any[]) => any;
 	hooks: {
@@ -22,6 +23,7 @@ let unloaded: boolean = false;
 
 function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 	return (...args: any[]) => {
+		// BCX Function hook
 		if (unloaded) {
 			console.warn(`BCX: Function router called while unloaded for ${data.original.name}`);
 			return data.original(...args);
@@ -33,7 +35,7 @@ function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 				hookIndex++;
 				return hooks[hookIndex - 1].hook(nextargs, callNextHook);
 			} else {
-				return data.final(...args);
+				return data.final.apply(data.context, args);
 			}
 		};
 		return callNextHook(args);
@@ -46,7 +48,15 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 	}
 	let result = patchedFunctions.get(target);
 	if (!result) {
-		const original = (window as any)[target] as (...args: any[]) => any;
+		let context: Record<string, any> = window as any;
+		const targetPath = target.split(".");
+		for (let i = 0; i < targetPath.length - 1; i++) {
+			context = context[targetPath[i]];
+			if (!isObject(context)) {
+				throw new Error(`BCX: Function ${target} to be patched not found; ${targetPath.slice(0, i + 1).join(".")} is not object`);
+			}
+		}
+		const original: (...args: any[]) => any = context[targetPath[targetPath.length - 1]];
 
 		const { NMod } = detectOtherMods();
 
@@ -66,10 +76,11 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 			original,
 			final: original,
 			hooks: [],
-			patches: {}
+			patches: {},
+			context
 		};
 		patchedFunctions.set(target, result);
-		(window as any)[target] = makePatchRouter(result);
+		context[targetPath[targetPath.length - 1]] = makePatchRouter(result);
 	}
 	return result;
 }
@@ -143,7 +154,8 @@ export function unload_patches() {
 		v.hooks = [];
 		v.patches = {};
 		v.final = v.original;
-		(window as any)[k] = v.original;
+		const targetPath = k.split(".");
+		v.context[targetPath[targetPath.length - 1]] = v.original;
 	}
 	patchedFunctions.clear();
 }

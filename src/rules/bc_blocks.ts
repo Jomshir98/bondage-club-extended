@@ -319,8 +319,6 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	let PlayerCanChange_saved: PlayerCharacter["CanChange"];
-
 	// TODO: Make it clearer it is blocked by BCX
 	registerRule("forbid_wardrobeaccess_self", {
 		name: "Forbid wardrobe use on self",
@@ -334,8 +332,9 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			PlayerCanChange_saved = Player.CanChange;
-			Player.CanChange = () => !state.isEnforced && PlayerCanChange_saved.apply(Player);
+			hookFunction("Player.CanChange", 2, (args, next) => {
+				return !state.isEnforced && next(args);
+			}, ModuleCategory.Rules);
 			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
 				const C = args[0] as Character;
 				if (C.ID === 0 && state.inEffect) {
@@ -343,9 +342,6 @@ export function initRules_bc_blocks() {
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-		},
-		unload() {
-			Player.CanChange = PlayerCanChange_saved;
 		}
 	});
 

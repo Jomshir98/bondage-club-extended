@@ -6,13 +6,13 @@ import { InfoBeep } from "../utilsClub";
 import { getAllCharactersInRoom } from "../characters";
 
 export function initRules_bc_alter() {
-	registerRule("sensory_deprivation_sound", {
+	registerRule("alt_restrict_hearing", {
 		name: "Sensory deprivation: Sound",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		shortDescription: "adjustable; impacting general hearing ability",
-		longDescription: "Impacts PLAYER_NAME's natural ability to hear, independant of items (strength of deafening can be adjusted).",
-		defaultLimit: ConditionsLimit.blocked,
+		shortDescription: "impacts PLAYER_NAME's hearing; adjustable",
+		longDescription: "This rule impacts PLAYER_NAME's natural ability to hear in the same way items do, independant of them (strength of deafening can be adjusted).",
+		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			deafeningStrength: {
 				type: "strengthSelect",
@@ -36,13 +36,13 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("sensory_deprivation_sight", {
+	registerRule("alt_restrict_sight", {
 		name: "Sensory deprivation: Sight",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		shortDescription: "adjustable; controlling general eye sight",
-		longDescription: "Impacts PLAYER_NAME's natural ability to see, independant of items (strength of blindness can be adjusted).",
-		defaultLimit: ConditionsLimit.blocked,
+		shortDescription: "impacts PLAYER_NAME's sight; adjustable",
+		longDescription: "This rule impacts PLAYER_NAME's natural ability to see in the same way items do, independant of them (strength of blindness can be adjusted).",
+		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			blindnessStrength: {
 				type: "strengthSelect",
@@ -66,11 +66,11 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("sensory_deprivation_eyes", {
-		name: "Full blind when eyes closed",
+	registerRule("alt_eyes_fullblind", {
+		name: "Fully blind when eyes are closed",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		longDescription: "Sensory deprivation: Enforce that there is a full blindess effect when the eyes are closed.",
+		longDescription: "This rule enforces full blindness when the eyes are closed. (Light sensory deprivation setting is still respected and doesn't blind fully)",
 		defaultLimit: ConditionsLimit.normal,
 		tick(state) {
 			if (state.isEnforced) {
@@ -87,11 +87,11 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("sensory_deprivation_blindfolds", {
-		name: "Full blind when blindfolded",
+	registerRule("alt_blindfolds_fullblind", {
+		name: "Fully blind when blindfolded",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		longDescription: "Sensory deprivation: Enforce that there is always a full blindess effect when wearing any blindfold type.",
+		longDescription: "This rule enforces full blindness when wearing any item that limits sight in any way. (This rules does NOT respect Light sensory deprivation setting and always forces player to be fully blind)",
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("Player.GetBlindLevel", 2, (args, next) => {
@@ -102,11 +102,11 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("always_slow", {
-		name: "Leave rooms slowly",
+	registerRule("alt_always_slow", {
+		name: "Always leave rooms slowly",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		longDescription: "PLAYER_NAME has to always slowly leave the room, independant of items",
+		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independant of the items she is wearing",
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("Player.IsSlow", 2, (args, next) => {
@@ -115,12 +115,12 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("orgasm_control", {
-		name: "Controlling ability to orgasm",
+	registerRule("alt_control_orgasms", {
+		name: "Control ability to orgasm",
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "adjustable: only-edge, only-ruin, no-resist",
-		longDescription: "Impacts PLAYER_NAME's ability to control their orgasms, independant of items. There are three control options, which are: Never cum (always edge), force into ruined orgasm and force into orgasm (no resist).",
+		longDescription: "This rule impacts PLAYER_NAME's ability to control their orgasms, independant of items. There are three control options, which are: Never cum (always edge, the bar never reaches 100%), force into ruined orgasm (orgasm screen starts, but doesn't let her actually cum) and prevent resisting orgasm (able to enter orgasm screen, but unable to resist it).",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			orgasmHandling: {
@@ -153,13 +153,13 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("room_admin_management", {
+	registerRule("alt_room_admin_transfer", {
 		name: "Room admin transfer",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		shortDescription: "always hand admin to defined roles",
-		longDescription: "Defines a minimum role which PLAYER_NAME will automatically give admin rights to when joining a room PLAYER_NAME has room admin in. Also has option to remove admin rights from PLAYER_NAME afterwards.",
-		defaultLimit: ConditionsLimit.normal,
+		shortDescription: "give admin to defined roles",
+		longDescription: "This rule lets you define a minimum role which PLAYER_NAME will automatically give room admin rights to (if she has admin rights in the room). Also has option to remove admin rights from PLAYER_NAME afterwards.",
+		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			minimumRole: {
 				type: "roleSelector",
@@ -209,12 +209,12 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("limit_tied_admins_power", {
+	registerRule("alt_room_admin_limit", {
 		name: "Limit bound admin power",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		shortDescription: "restrict room admin powers massively while restrained",
-		longDescription: "When considered tied up by Bondage Club standards, PLAYER_NAME only has access to kick/ban room admin powers, nothing else. This rule can be nicely combined with the rule to enforce joining the last room to trap PLAYER_NAME in it.",
+		shortDescription: "restrict room admin powers while restrained",
+		longDescription: "This rule forbids PLAYER_NAME to do any room admin actions (except for kick/ban), when she is tied (Either unable to use hands or unable to leave room). Tip: This rule can be combined with the rule to enforce joining the last room to trap her in it.",
 		defaultLimit: ConditionsLimit.limited,
 		load(state) {
 			hookFunction("ChatAdminLoad", 0, (args, next) => {
@@ -281,12 +281,12 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("set_profile_description", {
+	registerRule("alt_set_profile_description", {
 		name: "Control profile online description",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		shortDescription: "directly sets the player's profile",
-		longDescription: "Sets PLAYER_NAME's Bondage Club online description with the text field in the rule config while blocking changing of it as long as the rule is active.",
+		shortDescription: "directly sets PLAYER_NAME's description",
+		longDescription: "This rule sets PLAYER_NAME's online description (in her profile) to any text entered in the rule config, blocking changes to it.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			playersProfileDescription: {
@@ -312,12 +312,12 @@ export function initRules_bc_alter() {
 		}
 	});
 
-	registerRule("always_in_suitcase_game", {
+	registerRule("alt_force_suitcase_game", {
 		name: "Always carry a suitcase",
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "from the kidnappers league multiplayer game",
-		longDescription: "Forces PLAYER_NAME to constantly participate in the kidnappers league's suitcase delivery task, by automatically replacing the suitcase when it was opened with a new one, every time the room is changed.",
+		longDescription: "This rule forces PLAYER_NAME to constantly participate in the kidnappers league's suitcase delivery task, by automatically giving her a new suitcase, whenever the suitcase slot is empty.",
 		defaultLimit: ConditionsLimit.normal,
 		tick(state) {
 			const misc = InventoryGet(Player, "ItemMisc");

@@ -187,16 +187,16 @@ type BCX_Rule =
 	| "block_entering_rooms"
 	| "block_freeing_self"
 	| "block_tying_others"
-	| "sensory_deprivation_sound"
-	| "sensory_deprivation_sight"
-	| "sensory_deprivation_eyes"
-	| "sensory_deprivation_blindfolds"
-	| "always_slow"
-	| "orgasm_control"
-	| "room_admin_management"
-	| "limit_tied_admins_power"
-	| "set_profile_description"
-	| "always_in_suitcase_game"
+	| "alt_restrict_hearing"
+	| "alt_restrict_sight"
+	| "alt_eyes_fullblind"
+	| "alt_blindfolds_fullblind"
+	| "alt_always_slow"
+	| "alt_control_orgasms"
+	| "alt_room_admin_transfer"
+	| "alt_room_admin_limit"
+	| "alt_set_profile_description"
+	| "alt_force_suitcase_game"
 	| "rc_club_owner"
 	| "rc_new_lovers"
 	| "rc_leave_lovers"
@@ -237,20 +237,20 @@ type RuleCustomData = {
 	block_tying_others: {
 		onlyMoreDominantsToggle: boolean;
 	},
-	sensory_deprivation_sound: {
+	alt_restrict_hearing: {
 		deafeningStrength: "light" | "medium" | "heavy";
 	},
-	sensory_deprivation_sight: {
+	alt_restrict_sight: {
 		blindnessStrength: "light" | "medium" | "heavy";
 	},
-	orgasm_control: {
+	alt_control_orgasms: {
 		orgasmHandling: "edge" | "ruined" | "noResist";
 	},
-	room_admin_management: {
+	alt_room_admin_transfer: {
 		minimumRole: import("./modules/authority").AccessLevel;
 		removeAdminToggle: boolean;
 	},
-	set_profile_description: {
+	alt_set_profile_description: {
 		playersProfileDescription: string;
 	},
 	allow_set_sound_only: {

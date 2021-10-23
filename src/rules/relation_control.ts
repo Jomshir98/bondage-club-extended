@@ -7,8 +7,8 @@ export function initRules_bc_relation_control() {
 	registerRule("rc_club_owner", {
 		name: "Forbid club owner changes",
 		icon: icon_OwnerList,
-		shortDescription: "relationship control",
-		longDescription: "Forbid PLAYER_NAME to leave or get a club owner",
+		shortDescription: "getting or leaving owner",
+		longDescription: "This rule forbids PLAYER_NAME to leave their current club owner or get a new one. Advancing ownership from trial to full ownership is unaffected. Doesn't prevent the club owner from releasing her.",
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -16,7 +16,7 @@ export function initRules_bc_relation_control() {
 		// 	attempt_log: "PLAYER_NAME tried to [leave their|get an] owner, which was forbidden.",
 		// 	log: "PLAYER_NAME [left their|got an] owner, which was forbidden."
 		// },
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatRoomOwnershipOptionIs", 5, (args, next) => {
 				const Option = args[0] as string;
@@ -41,11 +41,10 @@ export function initRules_bc_relation_control() {
 		}
 	});
 
-	registerRule("rc_new_lovers", {
-		name: "Forbid getting lovers",
+	registerRule("rc_lover_new", {
+		name: "Forbid getting new lovers",
 		icon: icon_OwnerList,
-		shortDescription: "relationship control",
-		longDescription: "Forbid PLAYER_NAME to get a new lover",
+		longDescription: "This rule forbids PLAYER_NAME to get a new lover. Advancing lovership from dating to engagement or from engagement to marriage is unaffected.",
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -53,7 +52,7 @@ export function initRules_bc_relation_control() {
 		// 	attempt_log: "PLAYER_NAME tried to get a new lover, TARGET_PLAYER, which was forbidden",
 		// 	log: "PLAYER_NAME got a new lover, TARGET_PLAYER, which was forbidden"
 		// },
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatRoomLovershipOptionIs", 5, (args, next) => {
 				const Option = args[0] as string;
@@ -64,11 +63,10 @@ export function initRules_bc_relation_control() {
 		}
 	});
 
-	registerRule("rc_leave_lovers", {
-		name: "Forbid leaving lovers",
+	registerRule("rc_lover_leave", {
+		name: "Forbid breaking up with lovers",
 		icon: icon_OwnerList,
-		shortDescription: "relationship control",
-		longDescription: "Forbid PLAYER_NAME to leave any of their lovers",
+		longDescription: "This rule forbids PLAYER_NAME to leave any of their lovers, independant of lovership stage (leaving dating, engaged and married characters is forbidden). Doesn't prevent her lovers from breaking up with her.",
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -76,7 +74,7 @@ export function initRules_bc_relation_control() {
 		// 	attempt_log: "PLAYER_NAME tried to leave their lover, TARGET_PLAYER, which was forbidden",
 		// 	log: "PLAYER_NAME left their lover, TARGET_PLAYER, which was forbidden"
 		// },
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			for (const fun of [
 				"ManagementCanBreakDatingLoverOnline",
@@ -89,11 +87,11 @@ export function initRules_bc_relation_control() {
 		}
 	});
 
-	registerRule("rc_new_subs", {
-		name: "Forbid getting subs",
+	registerRule("rc_sub_new", {
+		name: "Forbid taking new submissives",
 		icon: icon_OwnerList,
-		shortDescription: "relationship control",
-		longDescription: "Forbid PLAYER_NAME to collar a new submissive",
+		shortDescription: "by offering them an ownership trial",
+		longDescription: "This rule forbids PLAYER_NAME to start a trial with new submissive. Advancing ownership from trial to full ownership is unaffected.",
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -101,7 +99,7 @@ export function initRules_bc_relation_control() {
 		// 	attempt_log: "PLAYER_NAME tried to collar a new sub, TARGET_PLAYER, which was forbidden",
 		// 	log: "PLAYER_NAME collared a new sub, TARGET_PLAYER, which was forbidden"
 		// },
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatRoomOwnershipOptionIs", 5, (args, next) => {
 				const Option = args[0] as string;
@@ -112,11 +110,10 @@ export function initRules_bc_relation_control() {
 		}
 	});
 
-	registerRule("rc_leave_subs", {
-		name: "Forbid disowning subs",
+	registerRule("rc_sub_leave", {
+		name: "Forbid disowning submissives",
 		icon: icon_OwnerList,
-		shortDescription: "relationship control",
-		longDescription: "Forbid PLAYER_NAME to let go of any of their subs",
+		longDescription: "This rule forbids PLAYER_NAME to let go of any of their subs. (affects both trial and full ownerships). Doesn't prevent her submissives from breaking the bond.",
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -124,7 +121,7 @@ export function initRules_bc_relation_control() {
 		// 	attempt_log: "PLAYER_NAME tried to let go of their sub, TARGET_PLAYER, which was forbidden",
 		// 	log: "PLAYER_NAME let go of their sub, TARGET_PLAYER, which was forbidden"
 		// },
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatRoomIsOwnedByPlayer", 5, (args, next) => {
 				return !state.isEnforced && next(args);

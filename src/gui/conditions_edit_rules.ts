@@ -80,7 +80,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
-				handler.run(v, data.data.customData![k], v.Y ?? Y, k);
+				handler.run(v, data.data.customData![k], v.Y ?? Y, k, this.character);
 			}
 		}
 
@@ -131,7 +131,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 				if (handler.click) {
 					const data = this.changes ?? this.conditionData;
-					const res = handler.click(v, data.data.customData![k], v.Y ?? Y, k);
+					const res = handler.click(v, data.data.customData![k], v.Y ?? Y, k, this.character);
 					if (res !== undefined) {
 						this.changes = this.makeChangesData();
 						this.changes.data.customData![k] = res;

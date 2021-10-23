@@ -7,6 +7,7 @@ import { ConditionsLimit } from "../constants";
 import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
 
 import cloneDeep from "lodash-es/cloneDeep";
+import { GuiMemberSelect } from "./member_select";
 
 export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends GuiSubscreen {
 
@@ -303,6 +304,8 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		MainCanvas.textAlign = "left";
 		DrawText(`room with member`, 324 + 115 + 14, 860 + 32, "Black", "Gray");
 		ElementPositionFix("BCX_ConditionMemberNumber", 40, 768, 860, 162, 60);
+		DrawButton(950, 862, 64, 64, "", disabled || !requirements.player ? "#ddd" : "White", undefined, undefined , disabled || !requirements.player);
+		DrawImageEx("Icons/Title.png", 952, 864, { Width: 60, Height: 60 });
 		if (requirements.player) {
 			const inChatroom = ServerPlayerIsInChatRoom();
 			const res = inChatroom &&
@@ -348,6 +351,9 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 		// hover text for clobal configuration category toggle
 		if (MouseIn(1190, 830, 100, 104)) DrawButtonHover(1786, 854, 64, 64, `Overwrites current trigger conditions`);
+
+		// hover text for member selector
+		if (MouseIn(950, 862, 64, 64)) DrawButtonHover(950, 782, 4, 64, `Select member number from list`);
 
 		return false;
 	}
@@ -518,6 +524,13 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		if (MouseIn(324, 862, 115, 60) && !useGlobalCategorySetting && requirements.player) {
 			this.changes = this.makeChangesData();
 			this.changes.requirements!.player!.inverted = this.changes.requirements!.player!.inverted ? undefined : true;
+			return true;
+		}
+		if (MouseIn(950, 862, 64, 64) && !useGlobalCategorySetting && requirements.player) {
+			setSubscreen(new GuiMemberSelect(this.character, this, result => {
+				this.changes = this.makeChangesData();
+				this.changes.requirements!.player!.memberNumber = result;
+			}));
 			return true;
 		}
 

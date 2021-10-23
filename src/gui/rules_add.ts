@@ -154,7 +154,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 			let color: string;
 			let text: string;
 			if (this.permissionMode) {
-				color = ["#ccfece", "#fefc53", "red"][accessLevel];
+				color = ["#50ff56", "#f6fe78", "#ffa7a7"][accessLevel];
 				text = ["Normal", "Limited", "Blocked"][accessLevel];
 			} else {
 				color = ruleIsCreated ? "#88c" :
@@ -183,11 +183,11 @@ export class GuiRulesAdd extends GuiSubscreen {
 
 		// permission mode legend
 		if (this.permissionMode) {
-			MainCanvas.fillStyle = "#ccfece";
+			MainCanvas.fillStyle = "#50ff56";
 			MainCanvas.fillRect(1284, 75, 166, 64);
-			MainCanvas.fillStyle = "#fefc53";
+			MainCanvas.fillStyle = "#f6fe78";
 			MainCanvas.fillRect(1284 + 1 * 166, 75, 166, 64);
-			MainCanvas.fillStyle = "red";
+			MainCanvas.fillStyle = "#ffa7a7";
 			MainCanvas.fillRect(1284 + 2 * 166, 75, 165, 64);
 
 			MainCanvas.textAlign = "center";

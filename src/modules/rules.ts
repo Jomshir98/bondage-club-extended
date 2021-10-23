@@ -9,7 +9,7 @@ import { initRules_bc_relation_control } from "../rules/relation_control";
 import { initRules_bc_speech_control } from "../rules/speech_control";
 import { initRules_other } from "../rules/other";
 import { capitalizeFirstLetter, clamp, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, InfoBeep } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, DrawImageEx, InfoBeep } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
 import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsIsConditionInEffect, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands } from "./conditions";
@@ -17,6 +17,8 @@ import { LogEntryType, logMessage } from "./log";
 import { queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { BaseModule } from "./_BaseModule";
+import { getCurrentSubscreen, setSubscreen } from "./gui";
+import { GuiMemberSelect } from "../gui/member_select";
 
 const RULES_ANTILOOP_RESET_INTERVAL = 60_000;
 const RULES_ANTILOOP_THRESHOLD = 10;
@@ -102,11 +104,13 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 	onDataChange?(def: RuleCustomDataEntryDefinition, active: boolean, key: string, onInput: () => void, value: RuleCustomDataTypesMap[type]): void;
 	processInput?(def: RuleCustomDataEntryDefinition, key: string, value: RuleCustomDataTypesMap[type]): RuleCustomDataTypesMap[type] | undefined;
 	unload?(def: RuleCustomDataEntryDefinition, key: string): void;
-	run(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string): void;
-	click?(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string): RuleCustomDataTypesMap[type] | undefined;
+	run(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string, target: ChatroomCharacter): void;
+	click?(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string, target: ChatroomCharacter): RuleCustomDataTypesMap[type] | undefined;
 };
 
 const ruleCustomDataHandlerPage: Map<string, number> = new Map();
+// memberNumberList helper variable
+let memberNumberListAutoFill: number | null = null;
 
 export const ruleCustomDataHandlers: {
 	[type in RuleCustomDataTypes]: RuleCustomDataHandler<type>;
@@ -123,6 +127,10 @@ export const ruleCustomDataHandlers: {
 				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "100");
 				input.inputMode = "numeric";
 				input.pattern = "[0-9]+";
+				if (memberNumberListAutoFill !== null) {
+					input.value = `${memberNumberListAutoFill}`;
+					memberNumberListAutoFill = null;
+				}
 			}
 		},
 		run(def, value, Y, key) {
@@ -142,7 +150,7 @@ export const ruleCustomDataHandlers: {
 				DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
 				MainCanvas.textAlign = "left";
 			}
-			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + PAGE_SIZE * 70 + 43, 450, 60);
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + PAGE_SIZE * 70 + 43, 360, 60);
 			MainCanvas.textAlign = "center";
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (input && document.activeElement === input) {
@@ -160,11 +168,14 @@ export const ruleCustomDataHandlers: {
 					DrawTextFit(getCharacterName(val, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
 			}
+			// TODO: add click event
+			DrawButton(1444, Y + PAGE_SIZE * 70 + 43, 64, 64, "", "White", undefined);
+			DrawImageEx("Icons/Title.png", 1446, Y + PAGE_SIZE * 70 + 43, { Width: 60, Height: 60 });
 			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", "White");
 			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
 			MainCanvas.textAlign = "left";
 		},
-		click(def, value, Y, key) {
+		click(def, value, Y, key, target) {
 			Y -= 20;
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -179,6 +190,12 @@ export const ruleCustomDataHandlers: {
 				}
 			}
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
+			const screen = getCurrentSubscreen();
+			if (MouseIn(1444, Y + PAGE_SIZE * 70 + 43, 64, 64) && input && screen) {
+				setSubscreen(new GuiMemberSelect(target, screen, result => {
+					memberNumberListAutoFill = result;
+				}, value.slice()));
+			}
 			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) && input && input.value) {
 				const num = Number.parseInt(input.value, 10);
 				if (Number.isInteger(num) && !value.includes(num)) {

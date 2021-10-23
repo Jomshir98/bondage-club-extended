@@ -5,8 +5,9 @@ import { capitalizeFirstLetter } from "../utils";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiAuthorityPermissions } from "./authority_permissions";
 import { setSubscreen } from "../modules/gui";
-import { getCharacterName, showHelp } from "../utilsClub";
+import { getCharacterName, DrawImageEx, showHelp } from "../utilsClub";
 import { Views, HELP_TEXTS } from "../helpTexts";
+import { GuiMemberSelect } from "./member_select";
 
 const PER_PAGE_COUNT = 6;
 
@@ -26,6 +27,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 	private page: number = 0;
 
 	private hoveringTextList: string[] = [];
+	private roleAddInputAutofill: number | null = null;
 
 	private showHelp: boolean = false;
 
@@ -34,25 +36,25 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 		this.character = character;
 
 		this.hoveringTextList =
-		character.isPlayer() ? [
-			`You - either top or bottom of the hierarchy`,
-			`Your owner, visible on your character profile`,
-			`Any character, added to the list on the left as "Owner"`,
-			`Any of your lovers, visible on your character profile`,
-			`Any character, added to the list on the left as "Mistress"`,
-			`Anyone you have white-listed`,
-			`Anyone you have friend-listed`,
-			`Anyone, who can use items on you`
-		] : [
-			`This player - either top or bottom of the hierarchy`,
-			`This player's owner, visible on their character profile`,
-			`Any character, added to the list on the left as "Owner"`,
-			`Any lover of this player, visible on their profile`,
-			`Any character, added to the list on the left as "Mistress"`,
-			`Anyone this player has white-listed`,
-			`Anyone this player has friend-listed`,
-			`Anyone, who can use items on this player`
-		];
+			character.isPlayer() ? [
+				`You - either top or bottom of the hierarchy`,
+				`Your owner, visible on your character profile`,
+				`Any character, added to the list on the left as "Owner"`,
+				`Any of your lovers, visible on your character profile`,
+				`Any character, added to the list on the left as "Mistress"`,
+				`Anyone you have white-listed`,
+				`Anyone you have friend-listed`,
+				`Anyone, who can use items on you`
+			] : [
+				`This player - either top or bottom of the hierarchy`,
+				`This player's owner, visible on their character profile`,
+				`Any character, added to the list on the left as "Owner"`,
+				`Any lover of this player, visible on their profile`,
+				`Any character, added to the list on the left as "Mistress"`,
+				`Anyone this player has white-listed`,
+				`Anyone this player has friend-listed`,
+				`Anyone, who can use items on this player`
+			];
 	}
 
 	Load() {
@@ -97,6 +99,10 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 			Input.remove();
 		} else if (showInput && !Input) {
 			Input = ElementCreateInput("BCX_RoleAdd", "text", "", "6");
+			if (this.roleAddInputAutofill !== null) {
+				Input.value = `${this.roleAddInputAutofill}`;
+				this.roleAddInputAutofill = null;
+			}
 		}
 
 		this.roleList = this.roleData.owners.map((i): RoleListItem => ({
@@ -148,7 +154,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 				const msg = `${e.type} ${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
 				DrawTextFit(msg, 140, Y + 34, 590, "Black");
 
-				if ((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber ) {
+				if ((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) {
 					MainCanvas.textAlign = "center";
 					DrawButton(1090, Y, 64, 64, "X", "White");
 					MainCanvas.textAlign = "left";
@@ -163,16 +169,19 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 
 			MainCanvas.textAlign = "center";
 			if (this.roleData.allowAddOwner) {
-				DrawButton(760, 815, 210, 64, "Add owner", "white");
+				DrawButton(833, 815, 210, 64, "Add as owner", "white");
 			}
 
 			if (this.roleData.allowAddMistress) {
-				DrawButton(1008, 815, 210, 64, "Add mistress", "white");
+				DrawButton(1074, 815, 210, 64, "Add as mistress", "white");
 			}
+
+			DrawButton(740, 815, 64, 64, "", "White", undefined, `Select member number from list`);
+			DrawImageEx("Icons/Title.png", 742, 815, { Width: 60, Height: 60 });
 
 			// Pagination
 			const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);
-			DrawBackNextButton(1317, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+			DrawBackNextButton(1430, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 		} else if (this.failed) {
 			MainCanvas.textAlign = "center";
 			DrawText(`Failed to get role data from ${this.character.Name}. Maybe you have no access?`, 800, 480, "Black");
@@ -220,7 +229,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 
 				const Y = 210 + off * 95;
 
-				if (((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber ) && MouseIn(1090, Y, 64, 64)) {
+				if (((e.type === "Owner" ? this.roleData.allowRemoveOwner : this.roleData.allowRemoveMistress) || e.memberNumber === Player.MemberNumber) && MouseIn(1090, Y, 64, 64)) {
 					this.character.editRole(e.type === "Owner" ? "owner" : "mistress", "remove", e.memberNumber);
 					return;
 				}
@@ -230,13 +239,13 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 			const inputText = Input?.value ?? "";
 			const inputNumber = /^[0-9]+$/.test(inputText) ? Number.parseInt(inputText, 10) : null;
 
-			if (this.roleData.allowAddOwner && Input && inputNumber !== null && MouseIn(760, 815, 210, 64)) {
+			if (this.roleData.allowAddOwner && Input && inputNumber !== null && MouseIn(833, 815, 210, 64)) {
 				Input.value = "";
 				this.character.editRole("owner", "add", inputNumber);
 				return;
 			}
 
-			if (this.roleData.allowAddMistress && Input && inputNumber !== null && MouseIn(1008, 815, 210, 64)) {
+			if (this.roleData.allowAddMistress && Input && inputNumber !== null && MouseIn(1074, 815, 210, 64)) {
 				Input.value = "";
 				this.character.editRole("mistress", "add", inputNumber);
 				return;
@@ -244,16 +253,24 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 
 			// Pagination
 			const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);
-			if (MouseIn(1317, 800, 150, 90)) {
+			if (MouseIn(1430, 800, 150, 90)) {
 				this.page--;
 				if (this.page < 0) {
 					this.page = Math.max(totalPages - 1, 0);
 				}
-			} else if (MouseIn(1467, 800, 150, 90)) {
+			} else if (MouseIn(1580, 800, 150, 90)) {
 				this.page++;
 				if (this.page >= totalPages) {
 					this.page = 0;
 				}
+			}
+
+			// member select
+			if (MouseIn(740, 815, 64, 64)) {
+				setSubscreen(new GuiMemberSelect(this.character, this, result => {
+					this.roleAddInputAutofill = result;
+				}));
+				return;
 			}
 		}
 

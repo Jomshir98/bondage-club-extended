@@ -127,7 +127,7 @@ window.BCX_Loaded = false;
         const w = window;
         return {
             NMod: typeof w.ChatRoomDrawFriendList === "function",
-            BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
+            BondageClubTools: window.BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
         };
     }
     /**

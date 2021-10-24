@@ -147,7 +147,7 @@ function setAntigarble(value: number): boolean {
 		throw new Error("Bad antigarble value, expected 0/1/2");
 	}
 	if (value !== 0) {
-		const blockRule = RulesGetRuleState("forbid_antigarble");
+		const blockRule = RulesGetRuleState("speech_block_antigarble");
 		if (blockRule.isEnforced) {
 			blockRule.triggerAttempt();
 			return false;
@@ -171,7 +171,7 @@ export class ModuleSpeech extends BaseModule {
 					if (info) {
 						const msg2 = processMsg(info);
 						if (msg2 === null) {
-							if (RulesGetRuleState("force_to_retype").isEnforced) {
+							if (RulesGetRuleState("speech_force_retype").isEnforced) {
 								chat.value = "";
 							}
 							return;
@@ -206,7 +206,7 @@ export class ModuleSpeech extends BaseModule {
 			});
 			if (msg2 !== null) {
 				return next(["*" + msg2]);
-			} else if (RulesGetRuleState("force_to_retype").isEnforced) {
+			} else if (RulesGetRuleState("speech_force_retype").isEnforced) {
 				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 				if (chat) {
 					chat.value = "";

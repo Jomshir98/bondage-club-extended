@@ -8,17 +8,17 @@ import { isObject } from "../utils";
 import { getCharacterName } from "../utilsClub";
 
 export function initRules_bc_speech_control() {
-	registerRule("allow_set_sound_only", {
+	registerRule("speech_specific_sound", {
 		name: "Allow specific sound only",
 		icon: "Icons/Chat.png",
 		shortDescription: "such as an animal sound",
-		longDescription: "Only allowed to communicate using a specific sound pattern. Any variation of it is allowed as long as the letters are in order. Therefore if your sound is 'Meow' this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~'",
+		longDescription: "This rule allows PLAYER_NAME to only communicate using a specific sound pattern. Any variation of it is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
 		triggerTexts: {
-			infoBeep: "You broke the speech rule of only speaking with a specific sound!",
-			attempt_log: "PLAYER_NAME tried to break a rule to only speak in a specific sound pattern",
-			log: "PLAYER_NAME broke a rule to only speak in a specific sound pattern"
+			infoBeep: "You are allowed to speak only using a specific sound!",
+			attempt_log: "PLAYER_NAME tried to break a rule to only speak using a specific sound pattern",
+			log: "PLAYER_NAME broke a rule to only speak using a specific sound pattern"
 		},
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			soundWhitelist: {
 				type: "string",
@@ -61,13 +61,13 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("garble_gagged_whispers", {
-		name: "Speech garble gagged whispers",
+	registerRule("speech_garble_whispers", {
+		name: "Garble whispers while gagged",
 		icon: "Icons/Chat.png",
 		loggable: false,
-		shortDescription: "as it should be when gagged! ",
-		longDescription: "Speech garbles PLAYER_NAMEs outgoing whisper messages while gagged. Strength of the effect depends on the type of gag. Does not affect OOC whispers.",
-		defaultLimit: ConditionsLimit.normal,
+		shortDescription: "same as normal messages",
+		longDescription: "This rule alters PLAYER_NAME's outgoing whisper messages while gagged to be garbled the same way normal chat messages are. This means, that strength of the effect depends on the type of gag and (OOC text) is not affected.",
+		defaultLimit: ConditionsLimit.limited,
 		init(state) {
 			registerSpeechHook({
 				modify: (info, message) => state.isEnforced && info.type === "Whisper" ? callOriginal("SpeechGarble", [Player, message, true]) : message
@@ -75,14 +75,15 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("block_OOC_while_gagged", {
+	registerRule("speech_block_gagged_ooc", {
 		name: "Block OOC chat while gagged",
 		icon: "Icons/Chat.png",
-		loggable: false,
 		shortDescription: "no more misuse of OOC for normal chatting while gagged",
-		longDescription: "Prevents any use of OOC (messages between round brackets) chat or OOC whisper messages while PLAYER_NAME is gagged.",
+		longDescription: "This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages while she is gagged.",
 		triggerTexts: {
-			infoBeep: "A BCX rule prevents you from using OOC messages while gagged."
+			infoBeep: "You are not allowed to use OOC in messages while gagged.",
+			attempt_log: "PLAYER_NAME tried to use OOC in a message while gagged",
+			log: "PLAYER_NAME used OOC in a message while gagged"
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -104,14 +105,15 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("block_OOC", {
+	registerRule("speech_block_ooc", {
 		name: "Block OOC chat",
 		icon: "Icons/Chat.png",
-		loggable: false,
-		shortDescription: "blocks use of OOC chat and whisper messages",
-		longDescription: "Prevents any use of OOC (messages between round brackets) chat or OOC whisper messages for PLAYER_NAME completely. This is a very extreme rule and should be used with great caution!",
+		shortDescription: "blocks use of OOC in messages",
+		longDescription: "This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages at any moment. This is a very extreme rule and should be used with great caution!",
 		triggerTexts: {
-			infoBeep: "A BCX rule prevents you from using OOC messages!"
+			infoBeep: "You are not allowed to use OOC in messages!",
+			attempt_log: "PLAYER_NAME tried to use OOC in a message",
+			log: "PLAYER_NAME used OOC in a message"
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -133,17 +135,17 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("doll_talk", {
+	registerRule("speech_doll_talk", {
 		name: "Doll talk",
 		icon: "Icons/Chat.png",
 		shortDescription: "allows only short sentences with simple words",
-		longDescription: "Any typed message is only allowed to consist of a settable maximum length of words and each typed word of that message has a settable maximum character limit.",
+		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independantly. Doesn't affect OOC text.",
 		triggerTexts: {
 			infoBeep: "You broke the doll talk rule!",
 			attempt_log: "PLAYER_NAME tried to break the doll talk rule",
 			log: "PLAYER_NAME broke the doll talk rule"
 		},
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			maxWordLength: {
 				type: "number",
@@ -186,14 +188,14 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("banning_words", {
+	registerRule("speech_ban_words", {
 		name: "Forbid saying certain words in chat",
 		icon: "Icons/Chat.png",
 		shortDescription: "based on a configurable blacklist",
-		longDescription: "Prevents/logs the usage of certain words in the chat. Trying to send a sentence with a banned word will be rejected or logged. The list of banned words can be configured for the rule. Checks are not case sensitive.",
+		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect OOC text.",
 		triggerTexts: {
-			infoBeep: "You broke a speech rule by using the banned word 'USED_WORD'!",
-			attempt_log: "PLAYER_NAME tried using the banned word 'USED_WORD'",
+			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
+			attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",
 			log: "PLAYER_NAME used the banned word 'USED_WORD'"
 		},
 		defaultLimit: ConditionsLimit.normal,
@@ -230,17 +232,17 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("forbid_talking", {
-		name: "Forbid talking",
+	registerRule("speech_forbid_open_talking", {
+		name: "Forbid talking openly",
 		icon: "Icons/Chat.png",
-		shortDescription: "openly in a chat room",
-		longDescription: "Prevents PLAYER_NAME from sending any text to all people inside a chat room and/or logs it. Does not affect whispers or emotes, but does affect OOC.",
+		shortDescription: "in a chat room",
+		longDescription: "This rule forbids PLAYER_NAME to send any message to all people inside a chat room. Does not affect whispers or emotes, but does affect OOC.",
 		triggerTexts: {
-			infoBeep: "You broke the speech rule that forbids talking!",
-			attempt_log: "PLAYER_NAME broke a rule by trying to speak in a room",
-			log: "PLAYER_NAME broke a rule by speaking in a room"
+			infoBeep: "You are not allowed to talk openly in chatrooms!",
+			attempt_log: "PLAYER_NAME tried to openly speak in a room",
+			log: "PLAYER_NAME spoke openly in a room"
 		},
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => msg.type !== "Chat";
 			registerSpeechHook({
@@ -260,15 +262,15 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("restricted_whispering", {
+	registerRule("speech_restrict_whispering", {
 		name: "Restrict whispering",
 		icon: "Icons/Chat.png",
-		shortDescription: "inside chat room - except to defined roles",
-		longDescription: "Logs and/or prevents PLAYER_NAME from whispering any text to most people inside a chat room, except the defined roles. Does also affect whispered OOC messages.",
+		shortDescription: "except to defined roles",
+		longDescription: "This rule forbids PLAYER_NAME to whisper anything to most people inside a chat room, except to the defined roles. Also affects whispered OOC messages.",
 		triggerTexts: {
-			infoBeep: "You broke the rule that forbids whispering to TARGET_PLAYER!",
-			attempt_log: "PLAYER_NAME broke a rule by trying to whisper to TARGET_PLAYER",
-			log: "PLAYER_NAME broke a rule by whispering to TARGET_PLAYER"
+			infoBeep: "You are not allowed to whisper to TARGET_PLAYER!",
+			attempt_log: "PLAYER_NAME tried to whisper to TARGET_PLAYER",
+			log: "PLAYER_NAME whispered to TARGET_PLAYER"
 		},
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
@@ -300,11 +302,11 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("forbid_sending_beep", {
-		name: "Restrict sending beeps",
+	registerRule("speech_restrict_beep_send", {
+		name: "Restrict sending beep messages",
 		icon: "Icons/Chat.png",
-		shortDescription: "sending beep messages, except to selected members",
-		longDescription: "Logs and/or prevents PLAYER_NAME from sending any beep messages, except to the editable list of member numbers.",
+		shortDescription: "except to selected members",
+		longDescription: "This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. Sending beeps without a message is not affected.",
 		triggerTexts: {
 			infoBeep: "You broke the rule that forbids sending a beep message to TARGET_PLAYER!",
 			attempt_log: "PLAYER_NAME broke a rule by trying to send a beep message to TARGET_PLAYER",
@@ -337,12 +339,12 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("forbid_receiving_beep", {
+	registerRule("speech_restrict_beep_receive", {
 		name: "Restrict recieving beeps",
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
-		longDescription: "Blocks PLAYER_NAME from recieving any beep (messages), except from the editable list of member numbers who still can. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep if the rule has an auto reply set.",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she should have received a beep.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {
@@ -407,15 +409,15 @@ export function initRules_bc_speech_control() {
 	});
 	*/
 
-	registerRule("forbid_antigarble", {
+	registerRule("speech_block_antigarble", {
 		name: "Forbid the antigarble option",
 		icon: "Icons/Chat.png",
 		shortDescription: "BCX's .antigarble command",
-		longDescription: "Prevents/logs PLAYER_NAME from using the antigarble command in the help chat menu. Antigarble is a BCX feature that enables a BCX user to understand muffled voices from other gagged characters or when PLAYER_NAME wears a deafening item. So if PLAYER_NAME should not be able to understand speech-garbled chat, this rule should be used.",
+		longDescription: "This rule forbids PLAYER_NAME to use the antigarble command. Antigarble is a BCX feature that enables a BCX user to understand muffled voices from other gagged characters or when wearing a deafening item. If PLAYER_NAME should not be able to understand speech-garbled chat, this rule should be used.",
 		triggerTexts: {
-			infoBeep: "You broke the rule that forbids usage of the antigarble command!",
-			attempt_log: "PLAYER_NAME broke a rule by trying to use the antigarble command",
-			log: "PLAYER_NAME broke a rule by using the antigarble command"
+			infoBeep: "You are not allowed to use the antigarble command!",
+			attempt_log: "PLAYER_NAME tried to use the antigarble command",
+			log: "PLAYER_NAME used the antigarble command"
 		},
 		defaultLimit: ConditionsLimit.normal
 		// Implmented externally
@@ -462,7 +464,7 @@ export function initRules_bc_speech_control() {
 	});
 	*/
 
-	registerRule("force_to_retype", {
+	registerRule("speech_force_retype", {
 		name: "Force to retype",
 		icon: "Icons/Chat.png",
 		loggable: false,
@@ -525,20 +527,20 @@ export function initRules_bc_speech_control() {
 	});
 	*/
 
-	registerRule("faltering_speech", {
-		name: "Enforce speech difficulties",
+	registerRule("speech_alter_faltering", {
+		name: "Enforce faltering speech",
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "chat text is converted to a faltering voice",
-		longDescription: "PLAYER_NAME is only able to speak studdering and with random filler sounds, for some [RP] reason (anxiousness, arousal, fear, etc.). Converts the typed chat text automatically. Affects chat messages and whispers, but not OOC.",
+		longDescription: "Thus rule converts PLAYER_NAME's messages, so she is only able to speak studdering and with random filler sounds, for some [RP] reason (anxiousness, arousal, fear, etc.). Converts the typed chat text automatically. Affects chat messages and whispers, but not OOC.",
 		defaultLimit: ConditionsLimit.limited,
 		init(state) {
 			registerSpeechHook({
-				modify: (msg) => {
-					if (state.inEffect) {
-						return falteringSpeech(msg.originalMessage);
+				modify: (msg, text) => {
+					if (state.inEffect && (msg.type === "Chat" || msg.type === "Whisper")) {
+						return falteringSpeech(text);
 					} else {
-						return msg.originalMessage;
+						return text;
 					}
 				}
 			});

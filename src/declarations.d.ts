@@ -202,24 +202,24 @@ type BCX_Rule =
 	| "rc_lover_leave"
 	| "rc_sub_new"
 	| "rc_sub_leave"
-	| "allow_set_sound_only"
-	| "garble_gagged_whispers"
-	| "block_OOC_while_gagged"
-	| "block_OOC"
-	| "doll_talk"
-	| "banning_words"
-	| "forbid_talking"
-	| "restricted_whispering"
-	| "forbid_sending_beep"
-	| "forbid_receiving_beep"
-	| "greet_order"
-	| "forbid_antigarble"
-	| "replace_spoken_words"
-	| "using_honorifics"
-	| "force_to_retype"
-	| "greet_room_order"
-	| "restrained_speech"
-	| "faltering_speech"
+	| "speech_specific_sound"
+	| "speech_garble_whispers"
+	| "speech_block_gagged_ooc"
+	| "speech_block_ooc"
+	| "speech_doll_talk"
+	| "speech_ban_words"
+	| "speech_forbid_open_talking"
+	| "speech_restrict_whispering"
+	| "speech_restrict_beep_send"
+	| "speech_restrict_beep_receive"
+	// | "greet_order"
+	| "speech_block_antigarble"
+	// | "replace_spoken_words"
+	// | "using_honorifics"
+	| "speech_force_retype"
+	// | "greet_room_order"
+	// | "restrained_speech"
+	| "speech_alter_faltering"
 	| "forbid_afk"
 	| "log_online_time"
 	| "constant_reminder"
@@ -228,9 +228,9 @@ type BCX_Rule =
 	;
 
 type RuleCustomData = {
-	restrict_allowed_poses: {
-		poseButtons: string[];
-	},
+	// restrict_allowed_poses: {
+	// 	poseButtons: string[];
+	// },
 	block_entering_rooms: {
 		roomList: string[];
 	},
@@ -253,41 +253,41 @@ type RuleCustomData = {
 	alt_set_profile_description: {
 		playersProfileDescription: string;
 	},
-	allow_set_sound_only: {
+	speech_specific_sound: {
 		soundWhitelist: string;
 	},
-	doll_talk: {
+	speech_doll_talk: {
 		maxWordLength: number;
 		maxNumberOfWords: number;
 	},
-	banning_words: {
+	speech_ban_words: {
 		bannedWords: string[];
 	},
-	restricted_whispering: {
+	speech_restrict_whispering: {
 		minimumPermittedRole: import("./modules/authority").AccessLevel;
 	},
-	forbid_sending_beep: {
+	speech_restrict_beep_send: {
 		whitelistedMemberNumbers: number[];
 	},
-	forbid_receiving_beep: {
+	speech_restrict_beep_receive: {
 		whitelistedMemberNumbers: number[];
 		autoreplyText: string;
 	},
-	greet_order: {
-		toGreetMemberNumbers: number[];
-	},
-	replace_spoken_words: {
-		stringWithReplacingSyntax: string;
-	},
-	using_honorifics: {
-		stringWithRuleSyntax: string;
-	},
-	greet_room_order: {
-		greetingSentence: string;
-	},
-	restrained_speech: {
-		listOfAllowedSentences: string[];
-	},
+	// greet_order: {
+	// 	toGreetMemberNumbers: number[];
+	// },
+	// replace_spoken_words: {
+	// 	stringWithReplacingSyntax: string;
+	// },
+	// using_honorifics: {
+	// 	stringWithRuleSyntax: string;
+	// },
+	// greet_room_order: {
+	// 	greetingSentence: string;
+	// },
+	// restrained_speech: {
+	// 	listOfAllowedSentences: string[];
+	// },
 	forbid_afk: {
 		minutesBeforeAfk: number;
 	},

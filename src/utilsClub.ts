@@ -116,7 +116,7 @@ export function detectOtherMods() {
 	const w = window as any;
 	return {
 		NMod: typeof w.ChatRoomDrawFriendList === "function",
-		BondageClubTools: ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
+		BondageClubTools: (window as any).BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
 	};
 }
 

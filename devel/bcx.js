@@ -11575,20 +11575,21 @@ xBaQJfz/AJiiFen2ESExAAAAAElFTkSuQmCC
                 window.BCX_BondageClubToolsPatch = true;
                 const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
                 const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
-                console.assert(ChatRoomMessageForwarder !== undefined && AccountBeepForwarder !== undefined);
-                ServerSocket.off("ChatRoomMessage");
+                if (!ChatRoomMessageForwarder || !AccountBeepForwarder) {
+                    throw new Error("Failed to patch for Bondage Club Tools!");
+                }
+                ServerSocket.off("ChatRoomMessage", ChatRoomMessageForwarder);
                 ServerSocket.on("ChatRoomMessage", data => {
                     if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
                         ChatRoomMessageForwarder(data);
                     }
-                    return ChatRoomMessage(data);
                 });
-                ServerSocket.off("AccountBeep");
+                ServerSocket.off("AccountBeep", AccountBeepForwarder);
                 ServerSocket.on("AccountBeep", data => {
-                    if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !data.BeepType.startsWith("Jmod:")) {
+                    var _a;
+                    if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !["Leash", "BCX"].includes(data.BeepType) || !isObject$1((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
                         AccountBeepForwarder(data);
                     }
-                    return ServerAccountBeep(data);
                 });
             }
         }

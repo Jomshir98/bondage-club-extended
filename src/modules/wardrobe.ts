@@ -1,7 +1,9 @@
-import { allowMode, detectOtherMods, isBind, isCloth, DrawImageEx } from "../utilsClub";
+import { allowMode, detectOtherMods, isBind, isCloth, DrawImageEx, itemColorsEquals } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
 import { clipboardAvailable } from "../utils";
+
+import isEqual from "lodash-es/isEqual";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -30,11 +32,63 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 		return "No character";
 	}
 
-	if (includeBinds && !force && C.Appearance.some(a => isBind(a) && a.Property?.Effect?.includes("Lock"))) {
-		return "Character is bound";
-	}
-
 	const Allow = (a: Item | Asset) => isCloth(a, CharacterAppearanceSelection!.ID === 0) || (includeBinds && isBind(a));
+
+	if (includeBinds && !force && C.Appearance.some(a => isBind(a) && a.Property?.Effect?.includes("Lock"))) {
+		// Looks for all locked items and items blocked by locked items and checks, that none of those change by the import
+		// First find which groups should match
+		const matchedGroups: Set<string> = new Set();
+		const test = (item: Item) => {
+			if (isBind(item)) {
+				// For each blocked group
+				for (const block of (item.Asset.Block || []).concat(Array.isArray(item.Property?.Block) ? item.Property!.Block : [])) {
+					if (matchedGroups.has(block) || !AssetGroup.some(g => g.Name === block))
+						continue;
+					matchedGroups.add(block);
+					const item2 = C.Appearance.find(a => a.Asset.Group.Name === block);
+					if (item2) {
+						test(item2);
+					}
+				}
+			}
+		};
+		for (const a of C.Appearance) {
+			if (a.Property?.Effect?.includes("Lock") && !matchedGroups.has(a.Asset.Group.Name)) {
+				matchedGroups.add(a.Asset.Group.Name);
+				test(a);
+			}
+		}
+		console.log("Import groups will be tested", matchedGroups);
+		// Then test all required groups to match
+		let success = true;
+		for (const testedGroup of matchedGroups) {
+			const currentItem = C.Appearance.find(a => a.Asset.Group.Name === testedGroup);
+			const newItem = data.find(b => b.Group === testedGroup);
+			if (!currentItem) {
+				if (newItem) {
+					success = false;
+					console.log("Prevent add blocked slot", testedGroup);
+					break;
+				} else {
+					continue;
+				}
+			}
+			if (!Allow(currentItem))
+				continue;
+			if (
+				!newItem ||
+				currentItem.Asset.Name !== newItem.Name ||
+				!itemColorsEquals(currentItem.Color, newItem.Color) ||
+				!isEqual(currentItem.Property, newItem.Property)
+			) {
+				console.log("Prevent mismatch group", testedGroup);
+				success = false;
+				break;
+			}
+		}
+		if (!success)
+			return "Character is bound";
+	}
 
 	C.Appearance = C.Appearance.filter(a => !Allow(a));
 	for (const cloth of data) {
@@ -59,11 +113,11 @@ let j_WardrobeIncludeBinds = false;
 let j_ShowHelp = false;
 // FUTURE: "Importing must not change any locked item or item blocked by locked item"
 const helpText = "BCX's wardrobe export/import works by converting your current appearance into a long code word that is copied to your device's clipboard. " +
-"You can then paste it anywhere you like, for instance a text file with all your outfits. At any time, you can wear the look again by copying the outfit code word to " +
-"the clipboard and importing it with the according button. Functionality of this feature depends on the device you " +
-"are using and if the clipboard can be used on it. The button to the left of the 'Export'-button toggles whether items/restraints on your character should also " +
-"be exported/imported. That said, importing an outfit with restraints will fail if it would overwrite any item that is locked, except collars, neck accessories and " +
-"neck restraints. Those are ignored when exported/imported.";
+	"You can then paste it anywhere you like, for instance a text file with all your outfits. At any time, you can wear the look again by copying the outfit code word to " +
+	"the clipboard and importing it with the according button. Functionality of this feature depends on the device you " +
+	"are using and if the clipboard can be used on it. The button to the left of the 'Export'-button toggles whether items/restraints on your character should also " +
+	"be exported/imported. That said, importing an outfit with restraints will fail if it would change any item that is locked (or blocked by a locked item), " +
+	"except collars, neck accessories and neck restraints. Those, as well as the body itself, are ignored.";
 
 function PasteListener(ev: ClipboardEvent) {
 	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
@@ -86,9 +140,9 @@ export class ModuleWardrobe extends BaseModule {
 			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
 				const Y = NModWardrobe ? 265 : 125;
 				DrawButton(1380, Y, 50, 50, "", "White", "", "How does it work?");
-				DrawImageEx("Icons/Question.png", 1380 + 3, Y + 3, {Width: 44, Height: 44});
+				DrawImageEx("Icons/Question.png", 1380 + 3, Y + 3, { Width: 44, Height: 44 });
 				DrawButton(1457, Y, 50, 50, "", "White", "", "Include items/restraints");
-				DrawImageEx("../Icons/Bondage.png", 1457 + 6, Y + 6, {Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38});
+				DrawImageEx("../Icons/Bondage.png", 1457 + 6, Y + 6, { Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38 });
 				DrawButton(1534, Y, 207, 50, "Export", "White", "");
 				DrawButton(1768, Y, 207, 50, "Import", "White", "");
 			}

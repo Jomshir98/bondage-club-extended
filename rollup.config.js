@@ -44,7 +44,7 @@ window.BCX_Loaded = false;
 		resolve({ browser: true }),
 		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
 		copy({
-			targets: [{ src: 'static/*', dest: 'dist' }]
+			targets: [{ src: process.env.IS_DEVEL ? 'static_devel/*' : 'static/*', dest: 'dist' }]
 		})
 	],
 	onwarn: function (warning, warn) {

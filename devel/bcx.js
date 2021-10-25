@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-6222a09b";
+    const BCX_VERSION="0.6.0-b836bbde";
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -76,7 +76,6 @@ window.BCX_Loaded = false;
         return developmentMode ? group.Name : ((_a = GROUP_NAME_OVERRIDES[group.Name]) !== null && _a !== void 0 ? _a : group.Description);
     }
     function InfoBeep(msg, timer = 3000) {
-        console.log(`BCX msg: ${msg}`);
         ServerBeep = {
             Timer: Date.now() + timer,
             Message: msg
@@ -15303,7 +15302,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         //#endregion
         window.BCX_Loaded = true;
-        InfoBeep(`BCX loaded! Version: ${VERSION}`);
+        InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
+        console.log(`BCX loaded! Version: ${VERSION}`);
     }
     function unload() {
         unload_patches();
@@ -15836,6 +15836,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 loginInit(args[0]);
             });
             InfoBeep(`BCX Ready!`);
+            console.log(`BCX Ready!`);
         }
         else {
             init();

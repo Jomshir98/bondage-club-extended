@@ -1,5 +1,27 @@
 # BCX Changelog
 
+## 0.6.0 "Rules update"
+
+This update includes:
+ - Rules, rules and even more rules!
+   - New rules module - currently with 44 rules to use. Gotta try 'em all !~
+   - Each rule has name and detailed description plus some also quite extensive configuration options
+   - The rules range from rules blocking actions, interacting with speech or even altering how Bondage Club works to some degree
+   - A limit system to limit and/or block rules that feel too intense or just not to your liking
+   - Some rules are limited or blocked by default
+   - 4 new permissions in the authority module allow you to configure who can use normal and/or limited rules, configure rules triggers and change which rules are limited/blocked.
+   - Most rules can be set to add a log in the behaviour log when broken (to enable this feature see "Log every misbehaviour detected by rules" option in behaviour log configuration)
+ - New contextual help buttons
+   - On most views, there is now a `(?)`-Button right below the exit/back button that summarizes what the view is about
+ - Member number input fields are enhanced with a button that leads to a subscreen with a filterable list of names from BC(X) relationships, friendlist and current chat room for selection, instead of having to enter the member number manually
+ - Improved the green/yellow/red colors used by the limit/block curse slots and rules view towards better text readability - Note for users with color blindness: the light-dark order of the three colors was reversed; the softest color now means "blocked"
+ - Improved usability of the wardrobe export/import feature by allowing to import items, while wearing locked items, if none of the locked items will be changed by import (useful if you are wearing some permanently locked item, like piercings)
+
+Fixes:
+ - Fixed a bug which deleted the saved color information of a cursed item, which made it reappear in an unexpected color when triggering the curse would reapply it
+ - Compatability fixes with "Bondage Club Tools" extension
+ - Player presence checkbox now properly detects when it can be used
+
 ## 0.5.2
 
 Fixes:

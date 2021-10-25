@@ -3,8 +3,11 @@ import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerD
 import { registerRule } from "../modules/rules";
 import { hookFunction } from "../patching";
 import { icon_restrictions } from "../resources";
+import { detectOtherMods } from "../utilsClub";
 
 export function initRules_bc_blocks() {
+	const { NMod } = detectOtherMods();
+
 	registerRule("block_remoteuse_self", {
 		name: "Forbid using remotes on self",
 		icon: icon_restrictions,
@@ -407,12 +410,15 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
-			hookFunction("ChatSearchRun", 0, (args, next) => {
-				next(args);
-				if (state.isEnforced) {
-					DrawButton(1280, 898, 280, 64, TextGet("CreateRoom"), "Gray", undefined, "Blocked by BCX", true);
-				}
-			}, ModuleCategory.Rules);
+			// TODO: Fix for NMod
+			if (!NMod) {
+				hookFunction("ChatSearchRun", 0, (args, next) => {
+					next(args);
+					if (state.isEnforced) {
+						DrawButton(1280, 898, 280, 64, TextGet("CreateRoom"), "Gray", undefined, "Blocked by BCX", true);
+					}
+				}, ModuleCategory.Rules);
+			}
 			hookFunction("CommonSetScreen", 5, (args, next) => {
 				if (args[0] === "Online" && args[1] === "ChatCreate") {
 					if (state.isEnforced) {
@@ -449,56 +455,59 @@ export function initRules_bc_blocks() {
 			}
 		},
 		load(state) {
-			hookFunction("ChatSearchJoin", 5, (args, next) => {
-				if (state.inEffect && state.customData) {
-					// Scans results
-					let X = 25;
-					let Y = 25;
-					for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
-						// If the player clicked on a valid room
-						if (MouseIn(X, Y, 630, 85)) {
-							if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
-								if (state.isEnforced) {
-									state.triggerAttempt();
-									return;
-								} else {
-									state.trigger();
+			// TODO: Fix for NMod
+			if (!NMod) {
+				hookFunction("ChatSearchJoin", 5, (args, next) => {
+					if (state.inEffect && state.customData) {
+						// Scans results
+						let X = 25;
+						let Y = 25;
+						for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
+							// If the player clicked on a valid room
+							if (MouseIn(X, Y, 630, 85)) {
+								if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
+									if (state.isEnforced) {
+										state.triggerAttempt();
+										return;
+									} else {
+										state.trigger();
+									}
 								}
 							}
-						}
 
-						// Moves the next window position
-						X += 660;
-						if (X > 1500) {
-							X = 25;
-							Y += 109;
+							// Moves the next window position
+							X += 660;
+							if (X > 1500) {
+								X = 25;
+								Y += 109;
+							}
 						}
 					}
-				}
-				next(args);
-			}, ModuleCategory.Rules);
-			hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
-				next(args);
-				if (state.isEnforced && state.customData) {
-					// Scans results
-					let X = 25;
-					let Y = 25;
-					for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
-						if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
-							DrawButton(X, Y, 630, 85, "", "#88c", undefined, "Blocked by BCX", true);
-							DrawTextFit((ChatSearchResult[C].Friends != null && ChatSearchResult[C].Friends.length > 0 ? "(" + ChatSearchResult[C].Friends.length + ") " : "") + ChatSearchMuffle(ChatSearchResult[C].Name) + " - " + ChatSearchMuffle(ChatSearchResult[C].Creator) + " " + ChatSearchResult[C].MemberCount + "/" + ChatSearchResult[C].MemberLimit + "", X + 315, Y + 25, 620, "black");
-							DrawTextFit(ChatSearchMuffle(ChatSearchResult[C].Description), X + 315, Y + 62, 620, "black");
-						}
+					next(args);
+				}, ModuleCategory.Rules);
+				hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
+					next(args);
+					if (state.isEnforced && state.customData) {
+						// Scans results
+						let X = 25;
+						let Y = 25;
+						for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
+							if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
+								DrawButton(X, Y, 630, 85, "", "#88c", undefined, "Blocked by BCX", true);
+								DrawTextFit((ChatSearchResult[C].Friends != null && ChatSearchResult[C].Friends.length > 0 ? "(" + ChatSearchResult[C].Friends.length + ") " : "") + ChatSearchMuffle(ChatSearchResult[C].Name) + " - " + ChatSearchMuffle(ChatSearchResult[C].Creator) + " " + ChatSearchResult[C].MemberCount + "/" + ChatSearchResult[C].MemberLimit + "", X + 315, Y + 25, 620, "black");
+								DrawTextFit(ChatSearchMuffle(ChatSearchResult[C].Description), X + 315, Y + 62, 620, "black");
+							}
 
-						// Moves the next window position
-						X += 660;
-						if (X > 1500) {
-							X = 25;
-							Y += 109;
+							// Moves the next window position
+							X += 660;
+							if (X > 1500) {
+								X = 25;
+								Y += 109;
+							}
 						}
 					}
-				}
-			}, ModuleCategory.Rules);
+				}, ModuleCategory.Rules);
+			}
 		}
 	});
 

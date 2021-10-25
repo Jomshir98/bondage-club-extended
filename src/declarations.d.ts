@@ -220,11 +220,11 @@ type BCX_Rule =
 	// | "greet_room_order"
 	// | "restrained_speech"
 	| "speech_alter_faltering"
-	| "forbid_afk"
-	| "log_online_time"
-	| "constant_reminder"
-	| "restrict_console_usage"
-	| "track_BCX_activation"
+	| "other_forbid_afk"
+	// | "log_online_time"
+	| "other_constant_reminder"
+	// | "restrict_console_usage"
+	// | "track_BCX_activation"
 	;
 
 type RuleCustomData = {
@@ -288,10 +288,10 @@ type RuleCustomData = {
 	// restrained_speech: {
 	// 	listOfAllowedSentences: string[];
 	// },
-	forbid_afk: {
+	other_forbid_afk: {
 		minutesBeforeAfk: number;
 	},
-	constant_reminder: {
+	other_constant_reminder: {
 		reminderText: string;
 		reminderFrequency: number;
 	}

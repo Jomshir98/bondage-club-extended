@@ -324,7 +324,7 @@ export const ruleCustomDataHandlers: {
 			const roleSelectionNext: typeof value = value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
 			const roleSelectionPrev: typeof value = value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
 			MainCanvas.textAlign = "center";
-			DrawBackNextButton(1050, Y + 46, 250, 60,
+			DrawBackNextButton(1050, Y + 36, 250, 60,
 				capitalizeFirstLetter(value),
 				"White", "",
 				() => capitalizeFirstLetter(roleSelectionPrev),
@@ -333,10 +333,10 @@ export const ruleCustomDataHandlers: {
 			MainCanvas.textAlign = "left";
 		},
 		click(def, value, Y) {
-			if (MouseIn(1050, Y + 46, 125, 60)) {
+			if (MouseIn(1050, Y + 36, 125, 60)) {
 				return value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
 			}
-			if (MouseIn(1050 + 125, Y + 46, 125, 60)) {
+			if (MouseIn(1050 + 125, Y + 36, 125, 60)) {
 				return value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
 			}
 			return undefined;

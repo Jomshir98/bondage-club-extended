@@ -139,7 +139,7 @@ export function initRules_bc_speech_control() {
 		name: "Doll talk",
 		icon: "Icons/Chat.png",
 		shortDescription: "allows only short sentences with simple words",
-		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independantly. Doesn't affect OOC text.",
+		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text.",
 		triggerTexts: {
 			infoBeep: "You broke the doll talk rule!",
 			attempt_log: "PLAYER_NAME tried to break the doll talk rule",
@@ -531,7 +531,7 @@ export function initRules_bc_speech_control() {
 		name: "Enforce faltering speech",
 		icon: "Icons/Chat.png",
 		loggable: false,
-		shortDescription: "chat text is converted to a faltering voice",
+		shortDescription: "an enhanced studder effect is added to PLAYER_NAME's chat texts",
 		longDescription: "Thus rule converts PLAYER_NAME's messages, so she is only able to speak studdering and with random filler sounds, for some [RP] reason (anxiousness, arousal, fear, etc.). Converts the typed chat text automatically. Affects chat messages and whispers, but not OOC.",
 		defaultLimit: ConditionsLimit.limited,
 		init(state) {

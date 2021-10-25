@@ -11,7 +11,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "impacts PLAYER_NAME's hearing; adjustable",
-		longDescription: "This rule impacts PLAYER_NAME's natural ability to hear in the same way items do, independant of them (strength of deafening can be adjusted).",
+		longDescription: "This rule impacts PLAYER_NAME's natural ability to hear in the same way items do, independent of them (strength of deafening can be adjusted).",
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			deafeningStrength: {
@@ -41,7 +41,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "impacts PLAYER_NAME's sight; adjustable",
-		longDescription: "This rule impacts PLAYER_NAME's natural ability to see in the same way items do, independant of them (strength of blindness can be adjusted).",
+		longDescription: "This rule impacts PLAYER_NAME's natural ability to see in the same way items do, independent of them (strength of blindness can be adjusted).",
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			blindnessStrength: {
@@ -106,7 +106,7 @@ export function initRules_bc_alter() {
 		name: "Always leave rooms slowly",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independant of the items she is wearing",
+		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independent of the items she is wearing",
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("Player.IsSlow", 2, (args, next) => {
@@ -120,7 +120,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "adjustable: only-edge, only-ruin, no-resist",
-		longDescription: "This rule impacts PLAYER_NAME's ability to control their orgasms, independant of items. There are three control options, which are: Never cum (always edge, the bar never reaches 100%), force into ruined orgasm (orgasm screen starts, but doesn't let her actually cum) and prevent resisting orgasm (able to enter orgasm screen, but unable to resist it).",
+		longDescription: "This rule impacts PLAYER_NAME's ability to control their orgasms, independent of items. There are three control options, which are: Never cum (always edge, the bar never reaches 100%), force into ruined orgasm (orgasm screen starts, but doesn't let her actually cum) and prevent resisting orgasm (able to enter orgasm screen, but unable to resist it).",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			orgasmHandling: {
@@ -158,7 +158,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "give admin to defined roles",
-		longDescription: "This rule lets you define a minimum role which PLAYER_NAME will automatically give room admin rights to (if she has admin rights in the room). Also has option to remove admin rights from PLAYER_NAME afterwards.",
+		longDescription: "This rule lets you define a minimum role which PLAYER_NAME will automatically give room admin rights to (if she has admin rights in the room). Also has the option to remove admin rights from PLAYER_NAME afterwards.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			minimumRole: {
@@ -214,7 +214,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "restrict room admin powers while restrained",
-		longDescription: "This rule forbids PLAYER_NAME to do any room admin actions (except for kick/ban), when she is tied (Either unable to use hands or unable to leave room). Tip: This rule can be combined with the rule to enforce joining the last room to trap her in it.",
+		longDescription: "This rule forbids PLAYER_NAME to do any room admin actions (except for kick/ban), when she is tied (meaning either being unable to use her hands or unable to leave the room). Tip: This rule can be combined with the rule to enforce joining the last room to trap her in it.",
 		defaultLimit: ConditionsLimit.limited,
 		load(state) {
 			hookFunction("ChatAdminLoad", 0, (args, next) => {
@@ -317,7 +317,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "from the kidnappers league multiplayer game",
-		longDescription: "This rule forces PLAYER_NAME to constantly participate in the kidnappers league's suitcase delivery task, by automatically giving her a new suitcase, whenever the suitcase slot is empty.",
+		longDescription: "This rule forces PLAYER_NAME to constantly participate in the kidnappers league's suitcase delivery task, by automatically giving her a new suitcase, whenever the suitcase item slot is empty.",
 		defaultLimit: ConditionsLimit.normal,
 		tick(state) {
 			const misc = InventoryGet(Player, "ItemMisc");

@@ -73,7 +73,8 @@ export const HELP_TEXTS: Record<Views, string> = {
 	[Views.RulesAdd]: "On this screen you can establish new rules for the player by simply clicking any rule template. " +
 	"After clicking on it, you can edit the rule's configuration. Purple rule templates indicate, that they are already in use; greyed out " +
 	"ones, that you have no access to them due to being blocked or due to your permission settings. Rule templates can be limited/blocked " +
-	"via the settings button on the very right.",
+	"via the settings button on the very right. Note: If you want to be able to log rule violations, this type of log entry may need to be allowed " +
+	"in the configuration page of the behavior log module.",
 	[Views.RulesAddPermissionMode]: "Here you can cycle rule templates between being not limited, limited and blocked. Blocked means " +
 	"no one can add/use this rule, while limited means only roles that have the permission to establish limited rules can add them. There " +
 	"is no need to save changes as they are instantly in effect.",

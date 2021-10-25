@@ -1,6 +1,6 @@
 import { ConditionsLimit } from "../constants";
 import { registerRule } from "../modules/rules";
-import { ChatRoomActionMessage } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal } from "../utilsClub";
 
 export function initRules_other() {
 	let lastAction = Date.now();
@@ -10,12 +10,12 @@ export function initRules_other() {
 		afkDidTrigger = false;
 	}
 
-	registerRule("forbid_afk", {
+	registerRule("other_forbid_afk", {
 		name: "Forbid going afk",
 		icon: "Icons/Chest.png",
 		enforceable: false,
 		shortDescription: "logs whenever PLAYER_NAME is inactive",
-		longDescription: "This rule forbids PLAYER_NAME to go afk and logs it when the allowed inactivity threshold is overstepped.",
+		longDescription: "This rule forbids PLAYER_NAME to go afk and logs when the allowed inactivity threshold is overstepped.",
 		triggerTexts: {
 			log: "PLAYER_NAME became inactive, which was forbidden",
 			announce: ""
@@ -37,6 +37,7 @@ export function initRules_other() {
 			) {
 				afkDidTrigger = true;
 				state.trigger();
+				ChatRoomSendLocal("You broke a BCX rule by being inactive for too long. The transgression was logged.");
 				return true;
 			}
 			return false;
@@ -59,12 +60,12 @@ export function initRules_other() {
 	*/
 
 	let lastReminder = 0;
-	registerRule("constant_reminder", {
+	registerRule("other_constant_reminder", {
 		name: "Listen to my voice",
 		icon: "Icons/Chest.png",
 		loggable: false,
 		enforceable: false,
-		shortDescription: "sets a sentence that will be shown to PLAYER_NAME regularily",
+		shortDescription: "regularily show configurable text to PLAYER_NAME",
 		longDescription: "This rule reminds or tells PLAYER_NAME something in a settable interval. Only PLAYER_NAME can see the set message and it is only shown if in a chat room.",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {

@@ -66,7 +66,7 @@ export function initRules_bc_relation_control() {
 	registerRule("rc_lover_leave", {
 		name: "Forbid breaking up with lovers",
 		icon: icon_OwnerList,
-		longDescription: "This rule forbids PLAYER_NAME to leave any of their lovers, independant of lovership stage (leaving dating, engaged and married characters is forbidden). Doesn't prevent her lovers from breaking up with her.",
+		longDescription: "This rule forbids PLAYER_NAME to leave any of their lovers, independent of lovership stage (leaving dating, engaged and married characters is forbidden). Doesn't prevent her lovers from breaking up with her.",
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {

@@ -98,17 +98,17 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
-		// Column separator
-		MainCanvas.beginPath();
-		MainCanvas.moveTo(953, 160);
-		MainCanvas.lineTo(953, 780);
-		MainCanvas.stroke();
-
 		if (this.conditionCategoryData === null) {
 			MainCanvas.textAlign = "center";
 			DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
 			return true;
 		}
+
+		// Column separator
+		MainCanvas.beginPath();
+		MainCanvas.moveTo(953, 160);
+		MainCanvas.lineTo(953, 780);
+		MainCanvas.stroke();
 
 		for (let off = 0; off < PER_PAGE_COUNT; off++) {
 			const i = this.page * PER_PAGE_COUNT + off;

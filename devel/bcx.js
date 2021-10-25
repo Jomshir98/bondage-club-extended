@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-707b977a";
+    const BCX_VERSION="0.6.0-866d33e8";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -11215,16 +11215,16 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             MainCanvas.textAlign = "center";
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
             DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
-            // Column separator
-            MainCanvas.beginPath();
-            MainCanvas.moveTo(953, 160);
-            MainCanvas.lineTo(953, 780);
-            MainCanvas.stroke();
             if (this.conditionCategoryData === null) {
                 MainCanvas.textAlign = "center";
                 DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
                 return true;
             }
+            // Column separator
+            MainCanvas.beginPath();
+            MainCanvas.moveTo(953, 160);
+            MainCanvas.lineTo(953, 780);
+            MainCanvas.stroke();
             for (let off = 0; off < PER_PAGE_COUNT$1; off++) {
                 const i = this.page * PER_PAGE_COUNT$1 + off;
                 if (i >= this.conditionEntries.length)
@@ -12279,7 +12279,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 return this.Exit();
             // Changelog
             if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {
-                window.open("https://github.com/Jomshir98/bondage-club-extended/blob/stable/CHANGELOG.md", "_blank");
+                window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? '' : 'stable/'}CHANGELOG.md`, "_blank");
             }
             // Discord invite
             if (MouseIn(1450, 810, 400, 90) && this.character.isPlayer()) {

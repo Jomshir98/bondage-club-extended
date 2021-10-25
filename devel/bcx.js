@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-866d33e8";const BCX_DEVEL=true;
+    const BCX_VERSION="0.6.0-3910528b";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -12279,7 +12279,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 return this.Exit();
             // Changelog
             if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {
-                window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? '' : 'stable/'}CHANGELOG.md`, "_blank");
+                window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? 'master' : 'stable'}/CHANGELOG.md`, "_blank");
             }
             // Discord invite
             if (MouseIn(1450, 810, 400, 90) && this.character.isPlayer()) {

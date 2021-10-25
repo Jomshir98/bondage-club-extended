@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-b836bbde";
+    const BCX_VERSION="0.6.0-09130d79";
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -308,38 +308,72 @@ window.BCX_Loaded = false;
         ValidationResolveModifyDiff: ["C2FE52D3"]
     };
     const FUNCTION_HASHES_NMOD = {
+        "Player.CanChange": ["082287C0"],
+        "Player.GetBlindLevel": ["B0DE4B87"],
+        "Player.GetDeafLevel": ["42CB6D63"],
+        "Player.IsSlow": ["4D9B1713"],
+        ActivityOrgasmPrepare: ["AA5FC17F"],
         ActivityOrgasmStart: ["1F7E8FF9"],
         AppearanceClick: ["19A126DF"],
+        AppearanceGetPreviewImageColor: ["C4BDF19F"],
         AppearanceRun: ["6DDA14A1"],
         AsylumEntranceCanWander: ["609FA096"],
+        CharacterAppearanceLoadCharacter: ["3641512F"],
+        ChatAdminClick: ["3355D63D"],
+        ChatAdminLoad: ["BF159B25"],
+        ChatAdminRun: ["F92A0B2E"],
+        ChatRoomAdminAction: ["0C867BF6"],
+        ChatRoomCanChangeClothes: ["DF8A6550"],
         ChatRoomCanLeave: ["4ED4453D"],
         ChatRoomClearAllElements: ["904C924D"],
         ChatRoomCreateElement: ["76299AEC"],
         ChatRoomDrawCharacterOverlay: ["61F5F655"],
         ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomDrawFriendList: ["327DA1B8"],
+        ChatRoomIsOwnedByPlayer: ["82640FF9"],
         ChatRoomKeyDown: ["15C1889B"],
-        ChatRoomMessage: ["9A5D5A5A"],
+        ChatRoomMessage: ["1FA3BF62"],
+        ChatRoomLovershipOptionIs: ["6F5CE6A0"],
+        ChatRoomOwnershipOptionIs: ["FE060F0B"],
         ChatRoomSendChat: ["7F540ED0"],
+        ChatRoomSendEmote: ["30DB56A6"],
         ChatRoomSync: ["A8E55C95"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["1ECB0CC4"],
         ColorPickerDraw: ["FF93AF2E"],
+        CommandParse: ["36295DDC"],
+        CommonSetScreen: ["17692CD7"],
+        DialogCanUnlock: ["634C862B"],
+        DialogClickExpressionMenu: ["AFBB0323"],
         DialogDrawExpressionMenu: ["EEFB3D22"],
         DialogDrawItemMenu: ["05301080"],
         DialogDrawPoseMenu: ["4B146E82"],
+        DialogFindPlayer: ["44A7263C"],
+        DialogItemClick: ["C5E68BE8"],
+        DialogMenuButtonBuild: ["76060837"],
+        DialogMenuButtonClick: ["0E218260"],
+        DrawGetImage: ["BEC7B0DA"],
         ElementIsScrolledToEnd: ["D28B0638"],
-        ExtendedItemDraw: ["BDE09647"],
+        ExtendedItemDraw: ["E831F57A"],
+        FriendListBeepMenuSend: ["C5C27229"],
         FriendListLoadFriendList: ["428B288B"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
         InformationSheetExit: ["75521907"],
         InformationSheetRun: ["19872251"],
         LoginMistressItems: ["984A6AD9"],
-        LoginResponse: ["0EA3347D"],
+        LoginResponse: ["0D6009B6"],
         LoginStableItems: ["C3F50DD1"],
         MainHallWalk: ["E52553C4"],
-        PrivateRansomStart: ["0E968EDD"],
+        ManagementCanBeReleased: ["A2E2CA35"],
+        ManagementCanBeReleasedOnline: ["3374263B"],
+        ManagementCanBreakDatingLoverOnline: ["366AECAE"],
+        ManagementCanBreakTrialOnline: ["51E9B7F4"],
+        ManagementCanBreakUpLoverOnline: ["92E30200"],
+        ManagementCannotBeReleased: ["755DB909"],
+        ManagementCannotBeReleasedExtreme: ["2DA1650E"],
+        ManagementCannotBeReleasedOnline: ["D1ACE212"],
+        PrivateRansomStart: ["511E91C6"],
         ServerAccountBeep: ["207D9580"],
         SpeechGarble: ["9D669F73"],
         ValidationResolveModifyDiff: ["C2FE52D3"]
@@ -5131,6 +5165,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
 
     function initRules_bc_blocks() {
+        const { NMod } = detectOtherMods();
         registerRule("block_remoteuse_self", {
             name: "Forbid using remotes on self",
             icon: icon_restrictions,
@@ -5522,12 +5557,15 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             },
             defaultLimit: ConditionsLimit.blocked,
             load(state) {
-                hookFunction("ChatSearchRun", 0, (args, next) => {
-                    next(args);
-                    if (state.isEnforced) {
-                        DrawButton(1280, 898, 280, 64, TextGet("CreateRoom"), "Gray", undefined, "Blocked by BCX", true);
-                    }
-                }, ModuleCategory.Rules);
+                // TODO: Fix for NMod
+                if (!NMod) {
+                    hookFunction("ChatSearchRun", 0, (args, next) => {
+                        next(args);
+                        if (state.isEnforced) {
+                            DrawButton(1280, 898, 280, 64, TextGet("CreateRoom"), "Gray", undefined, "Blocked by BCX", true);
+                        }
+                    }, ModuleCategory.Rules);
+                }
                 hookFunction("CommonSetScreen", 5, (args, next) => {
                     if (args[0] === "Online" && args[1] === "ChatCreate") {
                         if (state.isEnforced) {
@@ -5564,55 +5602,58 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
             },
             load(state) {
-                hookFunction("ChatSearchJoin", 5, (args, next) => {
-                    if (state.inEffect && state.customData) {
-                        // Scans results
-                        let X = 25;
-                        let Y = 25;
-                        for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
-                            // If the player clicked on a valid room
-                            if (MouseIn(X, Y, 630, 85)) {
-                                if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
-                                    if (state.isEnforced) {
-                                        state.triggerAttempt();
-                                        return;
-                                    }
-                                    else {
-                                        state.trigger();
+                // TODO: Fix for NMod
+                if (!NMod) {
+                    hookFunction("ChatSearchJoin", 5, (args, next) => {
+                        if (state.inEffect && state.customData) {
+                            // Scans results
+                            let X = 25;
+                            let Y = 25;
+                            for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
+                                // If the player clicked on a valid room
+                                if (MouseIn(X, Y, 630, 85)) {
+                                    if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
+                                        if (state.isEnforced) {
+                                            state.triggerAttempt();
+                                            return;
+                                        }
+                                        else {
+                                            state.trigger();
+                                        }
                                     }
                                 }
-                            }
-                            // Moves the next window position
-                            X += 660;
-                            if (X > 1500) {
-                                X = 25;
-                                Y += 109;
-                            }
-                        }
-                    }
-                    next(args);
-                }, ModuleCategory.Rules);
-                hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
-                    next(args);
-                    if (state.isEnforced && state.customData) {
-                        // Scans results
-                        let X = 25;
-                        let Y = 25;
-                        for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
-                            if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
-                                DrawButton(X, Y, 630, 85, "", "#88c", undefined, "Blocked by BCX", true);
-                                DrawTextFit((ChatSearchResult[C].Friends != null && ChatSearchResult[C].Friends.length > 0 ? "(" + ChatSearchResult[C].Friends.length + ") " : "") + ChatSearchMuffle(ChatSearchResult[C].Name) + " - " + ChatSearchMuffle(ChatSearchResult[C].Creator) + " " + ChatSearchResult[C].MemberCount + "/" + ChatSearchResult[C].MemberLimit + "", X + 315, Y + 25, 620, "black");
-                                DrawTextFit(ChatSearchMuffle(ChatSearchResult[C].Description), X + 315, Y + 62, 620, "black");
-                            }
-                            // Moves the next window position
-                            X += 660;
-                            if (X > 1500) {
-                                X = 25;
-                                Y += 109;
+                                // Moves the next window position
+                                X += 660;
+                                if (X > 1500) {
+                                    X = 25;
+                                    Y += 109;
+                                }
                             }
                         }
-                    }
-                }, ModuleCategory.Rules);
+                        next(args);
+                    }, ModuleCategory.Rules);
+                    hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
+                        next(args);
+                        if (state.isEnforced && state.customData) {
+                            // Scans results
+                            let X = 25;
+                            let Y = 25;
+                            for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
+                                if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
+                                    DrawButton(X, Y, 630, 85, "", "#88c", undefined, "Blocked by BCX", true);
+                                    DrawTextFit((ChatSearchResult[C].Friends != null && ChatSearchResult[C].Friends.length > 0 ? "(" + ChatSearchResult[C].Friends.length + ") " : "") + ChatSearchMuffle(ChatSearchResult[C].Name) + " - " + ChatSearchMuffle(ChatSearchResult[C].Creator) + " " + ChatSearchResult[C].MemberCount + "/" + ChatSearchResult[C].MemberLimit + "", X + 315, Y + 25, 620, "black");
+                                    DrawTextFit(ChatSearchMuffle(ChatSearchResult[C].Description), X + 315, Y + 62, 620, "black");
+                                }
+                                // Moves the next window position
+                                X += 660;
+                                if (X > 1500) {
+                                    X = 25;
+                                    Y += 109;
+                                }
+                            }
+                        }
+                    }, ModuleCategory.Rules);
+                }
             }
         });
         registerRule("block_freeing_self", {

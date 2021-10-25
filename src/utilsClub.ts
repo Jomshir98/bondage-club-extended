@@ -62,7 +62,6 @@ export function getVisibleGroupName(group: AssetGroup): string {
 }
 
 export function InfoBeep(msg: string, timer: number = 3000) {
-	console.log(`BCX msg: ${msg}`);
 	ServerBeep = {
 		Timer: Date.now() + timer,
 		Message: msg

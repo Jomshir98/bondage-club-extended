@@ -68,7 +68,8 @@ export function init() {
 	//#endregion
 
 	window.BCX_Loaded = true;
-	InfoBeep(`BCX loaded! Version: ${VERSION}`);
+	InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
+	console.log(`BCX loaded! Version: ${VERSION}`);
 }
 
 export function unload(): true {

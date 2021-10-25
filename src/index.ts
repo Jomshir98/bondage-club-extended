@@ -11,6 +11,7 @@ async function initWait() {
 			loginInit(args[0]);
 		});
 		InfoBeep(`BCX Ready!`);
+		console.log(`BCX Ready!`);
 	} else {
 		init();
 	}

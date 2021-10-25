@@ -30,12 +30,17 @@ window.BCX_Loaded = false;
 		intro: async () => {
 			const git = simpleGit();
 			let BCX_VERSION = packageJson.version;
+			let BCX_DEVEL = "false";
 			if ((await git.status()).modified.length > 0) {
 				BCX_VERSION += `-DEV-${new Date().toISOString().replace(/[-:T]/g, "").replace(/\.[0-9]*Z/, "")}`
+				BCX_DEVEL = "true";
 			} else {
 				BCX_VERSION += `-${(await git.revparse("HEAD")).substr(0, 8)}`
 			}
-			return `const BCX_VERSION="${BCX_VERSION}";`
+			if (process.env.IS_DEVEL) {
+				BCX_DEVEL = "true";
+			}
+			return `const BCX_VERSION="${BCX_VERSION}";const BCX_DEVEL=${BCX_DEVEL};`
 		}
 	},
 	treeshake: false,

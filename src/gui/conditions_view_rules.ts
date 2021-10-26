@@ -26,9 +26,8 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 		if (super.Run() || this.conditionCategoryData === null)
 			return true;
 
-		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-		DrawButton(120, 820, 384, 90, "Add new rule", access ? "White" : "#ddd", "",
-			access ? "...from the list of yet unestablished rules" : "You have no permission to use this", !access);
+		DrawButton(120, 820, 384, 90, "Add new rule", "White", "",
+			"...from the list of yet unestablished rules");
 
 		// help text
 		if (this.showHelp) {
@@ -41,8 +40,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 		if (super.Click() || this.conditionCategoryData === null)
 			return true;
 
-		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-		if (access && MouseIn(120, 820, 384, 90)) {
+		if (MouseIn(120, 820, 384, 90)) {
 			setSubscreen(new GuiRulesAdd(this.character));
 			return true;
 		}

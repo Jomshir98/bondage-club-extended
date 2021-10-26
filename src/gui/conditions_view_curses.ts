@@ -26,10 +26,10 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 		if (super.Run() || this.conditionCategoryData === null)
 			return true;
 
-		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-		DrawButton(120, 820, 384, 90, "Add new curse", access ? "White" : "#ddd", "",
-			access ? "Place new curses on body, items or clothes" : "You have no permission to use this", !access);
+		DrawButton(120, 820, 384, 90, "Add new curse", "White", "",
+			"Place new curses on body, items or clothes");
 
+		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
 		DrawButton(536, 820, 400, 90, "Lift all curses", access ? "White" : "#ddd", "",
 			access ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !access);
 
@@ -44,12 +44,12 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 		if (super.Click() || this.conditionCategoryData === null)
 			return true;
 
-		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-		if (access && MouseIn(120, 820, 384, 90)) {
+		if (MouseIn(120, 820, 384, 90)) {
 			setSubscreen(new GuiCursesAdd(this.character));
 			return true;
 		}
 
+		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
 		if (access && MouseIn(536, 820, 400, 90)) {
 			this.character.curseLiftAll();
 			return true;

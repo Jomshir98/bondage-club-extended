@@ -1,7 +1,7 @@
 import { VERSION } from "./config";
 import { ConditionsLimit, ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
-import { ConditionsCategoryUpdate, ConditionsGetCategoryPublicData, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
+import { ConditionsCategoryUpdate, ConditionsGetCategoryEnabled, ConditionsGetCategoryPublicData, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
 import { curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
 import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
@@ -417,6 +417,8 @@ export class PlayerCharacter extends ChatroomCharacter {
 	}
 
 	override conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
+		if (!ConditionsGetCategoryEnabled(category))
+			return Promise.reject("Category is disabled");
 		return Promise.resolve(ConditionsGetCategoryPublicData(category, this));
 	}
 

@@ -1,4 +1,4 @@
-import { ConditionsLimit, ModuleCategory, ModuleInitPhase } from "../constants";
+import { ConditionsLimit, ModuleCategory, ModuleInitPhase, MODULE_NAMES } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
 import { capitalizeFirstLetter, isObject } from "../utils";
 import { notifyOfChange, queryHandlers } from "./messaging";
@@ -129,6 +129,12 @@ export function ConditionsGetCategoryHandler<C extends ConditionsCategories>(cat
 	return handler as ConditionsHandler<C>;
 }
 
+export function ConditionsGetCategoryEnabled(category: ConditionsCategories): boolean {
+	return moduleIsEnabled(ConditionsGetCategoryHandler(category).category);
+}
+
+
+/** Unsafe when category is disabled, check before using */
 export function ConditionsGetCategoryData<C extends ConditionsCategories>(category: C): ConditionsCategoryData<C> {
 	if (!conditionHandlers.has(category)) {
 		throw new Error(`Attempt to get unknown conditions category data ${category}`);
@@ -150,6 +156,7 @@ function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(handl
 	};
 }
 
+/** Unsafe when category is disabled, check before using */
 export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C, requester: ChatroomCharacter): ConditionsCategoryPublicData<C> {
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	const data = ConditionsGetCategoryData<ConditionsCategories>(category);
@@ -181,10 +188,14 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 }
 
 export function ConditionsGetCondition<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C]): ConditionsConditionData<C> | undefined {
+	if (!ConditionsGetCategoryEnabled(category))
+		return undefined;
 	return ConditionsGetCategoryData(category).conditions[condition];
 }
 
 export function ConditionsIsConditionInEffect<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C]): boolean {
+	if (!ConditionsGetCategoryEnabled(category))
+		return false;
 	const categoryData = ConditionsGetCategoryData(category);
 	const conditionData = categoryData.conditions[condition];
 
@@ -241,6 +252,8 @@ export function ConditionsCheckAccess<C extends ConditionsCategories>(category: 
 }
 
 export function ConditionsRemoveCondition<C extends ConditionsCategories>(category: C, conditions: ConditionsCategoryKeys[C] | ConditionsCategoryKeys[C][]): boolean {
+	if (!ConditionsGetCategoryEnabled(category))
+		return false;
 	if (!Array.isArray(conditions)) {
 		conditions = [conditions];
 	}
@@ -292,6 +305,8 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 
 export function ConditionsUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>, character: ChatroomCharacter | null): boolean {
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
+	if (!moduleIsEnabled(handler.category))
+		return false;
 	if (character && !ConditionsCheckAccess(category, condition, character))
 		return false;
 	const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);
@@ -326,6 +341,8 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 
 export function ConditionsCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData, character: ChatroomCharacter | null): boolean {
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
+	if (!moduleIsEnabled(handler.category))
+		return false;
 	if (character && !checkPermissionAccess(handler.permission_configure, character))
 		return false;
 	const conditionData = ConditionsGetCategoryData<ConditionsCategories>(category);
@@ -525,6 +542,9 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 	const handler = conditionHandlers.get(category);
 	if (!handler) {
 		throw new Error(`Attempt to run command for unknown conditions category ${category}`);
+	}
+	if (!moduleIsEnabled(handler.category)) {
+		return respond(`The command failed to execute, because ${Player.Name} disabled her ${MODULE_NAMES[handler.category]} module.`);
 	}
 	const categoryData = ConditionsGetCategoryData(category);
 	const categorySingular = category.slice(0, -1);
@@ -769,6 +789,8 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 	if (!handler) {
 		throw new Error(`Attempt to autocomplete command for unknown conditions category ${category}`);
 	}
+	if (!moduleIsEnabled(handler.category))
+		return [];
 	const categoryData = ConditionsGetCategoryData(category);
 
 	if (subcommand === "setactive") {
@@ -927,7 +949,7 @@ export class ModuleConditions extends BaseModule {
 		}
 
 		queryHandlers.conditionsGet = (sender, resolve, data) => {
-			if (typeof data === "string" && conditionHandlers.has(data)) {
+			if (typeof data === "string" && conditionHandlers.has(data) && ConditionsGetCategoryEnabled(data)) {
 				resolve(true, ConditionsGetCategoryPublicData(data, sender));
 			} else {
 				resolve(false);

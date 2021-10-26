@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-3910528b";const BCX_DEVEL=true;
+    const BCX_VERSION="0.6.0-7af2d110";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -6823,6 +6823,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         return handler;
     }
+    function ConditionsGetCategoryEnabled(category) {
+        return moduleIsEnabled(ConditionsGetCategoryHandler(category).category);
+    }
+    /** Unsafe when category is disabled, check before using */
     function ConditionsGetCategoryData(category) {
         var _a;
         if (!conditionHandlers.has(category)) {
@@ -6844,6 +6848,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             requirements: (_c = conditionData.requirements) !== null && _c !== void 0 ? _c : null
         };
     }
+    /** Unsafe when category is disabled, check before using */
     function ConditionsGetCategoryPublicData(category, requester) {
         var _a, _b;
         const handler = ConditionsGetCategoryHandler(category);
@@ -6875,10 +6880,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         return res;
     }
     function ConditionsGetCondition(category, condition) {
+        if (!ConditionsGetCategoryEnabled(category))
+            return undefined;
         return ConditionsGetCategoryData(category).conditions[condition];
     }
     function ConditionsIsConditionInEffect(category, condition) {
         var _a;
+        if (!ConditionsGetCategoryEnabled(category))
+            return false;
         const categoryData = ConditionsGetCategoryData(category);
         const conditionData = categoryData.conditions[condition];
         if (!conditionData)
@@ -6928,6 +6937,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         return checkPermissionAccess(limit === ConditionsLimit.limited ? handler.permission_limited : handler.permission_normal, character);
     }
     function ConditionsRemoveCondition(category, conditions) {
+        if (!ConditionsGetCategoryEnabled(category))
+            return false;
         if (!Array.isArray(conditions)) {
             conditions = [conditions];
         }
@@ -6979,6 +6990,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
     function ConditionsUpdate(category, condition, data, character) {
         const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return false;
         if (character && !ConditionsCheckAccess(category, condition, character))
             return false;
         const conditionData = ConditionsGetCondition(category, condition);
@@ -7015,6 +7028,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
     function ConditionsCategoryUpdate(category, data, character) {
         const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return false;
         if (character && !checkPermissionAccess(handler.permission_configure, character))
             return false;
         const conditionData = ConditionsGetCategoryData(category);
@@ -7211,6 +7226,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         const handler = conditionHandlers.get(category);
         if (!handler) {
             throw new Error(`Attempt to run command for unknown conditions category ${category}`);
+        }
+        if (!moduleIsEnabled(handler.category)) {
+            return respond(`The command failed to execute, because ${Player.Name} disabled her ${MODULE_NAMES[handler.category]} module.`);
         }
         const categoryData = ConditionsGetCategoryData(category);
         const categorySingular = category.slice(0, -1);
@@ -7459,6 +7477,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         if (!handler) {
             throw new Error(`Attempt to autocomplete command for unknown conditions category ${category}`);
         }
+        if (!moduleIsEnabled(handler.category))
+            return [];
         const categoryData = ConditionsGetCategoryData(category);
         if (subcommand === "setactive") {
             if (argv.length === 2) {
@@ -7623,7 +7643,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
             }
             queryHandlers.conditionsGet = (sender, resolve, data) => {
-                if (typeof data === "string" && conditionHandlers.has(data)) {
+                if (typeof data === "string" && conditionHandlers.has(data) && ConditionsGetCategoryEnabled(data)) {
                     resolve(true, ConditionsGetCategoryPublicData(data, sender));
                 }
                 else {
@@ -11582,8 +11602,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         Run() {
             if (super.Run() || this.conditionCategoryData === null)
                 return true;
+            DrawButton(120, 820, 384, 90, "Add new curse", "White", "", "Place new curses on body, items or clothes");
             const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-            DrawButton(120, 820, 384, 90, "Add new curse", access ? "White" : "#ddd", "", access ? "Place new curses on body, items or clothes" : "You have no permission to use this", !access);
             DrawButton(536, 820, 400, 90, "Lift all curses", access ? "White" : "#ddd", "", access ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !access);
             // help text
             if (this.showHelp) {
@@ -11594,11 +11614,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         Click() {
             if (super.Click() || this.conditionCategoryData === null)
                 return true;
-            const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-            if (access && MouseIn(120, 820, 384, 90)) {
+            if (MouseIn(120, 820, 384, 90)) {
                 setSubscreen(new GuiCursesAdd(this.character));
                 return true;
             }
+            const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
             if (access && MouseIn(536, 820, 400, 90)) {
                 this.character.curseLiftAll();
                 return true;
@@ -12107,8 +12127,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         Run() {
             if (super.Run() || this.conditionCategoryData === null)
                 return true;
-            const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-            DrawButton(120, 820, 384, 90, "Add new rule", access ? "White" : "#ddd", "", access ? "...from the list of yet unestablished rules" : "You have no permission to use this", !access);
+            DrawButton(120, 820, 384, 90, "Add new rule", "White", "", "...from the list of yet unestablished rules");
             // help text
             if (this.showHelp) {
                 showHelp(HELP_TEXTS[Views.ConditionsViewRules]);
@@ -12118,8 +12137,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         Click() {
             if (super.Click() || this.conditionCategoryData === null)
                 return true;
-            const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
-            if (access && MouseIn(120, 820, 384, 90)) {
+            if (MouseIn(120, 820, 384, 90)) {
                 setSubscreen(new GuiRulesAdd(this.character));
                 return true;
             }
@@ -14943,6 +14961,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             return Promise.resolve(curseLiftAll(this));
         }
         conditionsGetByCategory(category) {
+            if (!ConditionsGetCategoryEnabled(category))
+                return Promise.reject("Category is disabled");
             return Promise.resolve(ConditionsGetCategoryPublicData(category, this));
         }
         conditionSetLimit(category, condition, limit) {

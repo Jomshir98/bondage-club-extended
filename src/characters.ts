@@ -1,5 +1,5 @@
 import { VERSION } from "./config";
-import { ConditionsLimit, ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
+import { ConditionsLimit, defaultBCXEffects, ModuleCategory, TOGGLEABLE_MODULES } from "./constants";
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
 import { ConditionsCategoryUpdate, ConditionsGetCategoryEnabled, ConditionsGetCategoryPublicData, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
 import { curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
@@ -9,6 +9,14 @@ import { getDisabledModules } from "./modules/presets";
 import { RulesCreate, RulesDelete } from "./modules/rules";
 import { modStorage } from "./modules/storage";
 import { isObject } from "./utils";
+import { BaseModule } from "./modules/_BaseModule";
+import { hookFunction } from "./patching";
+import { announceSelf } from "./modules/chatroom";
+
+import cloneDeep from "lodash-es/cloneDeep";
+import isEqual from "lodash-es/isEqual";
+
+export const PLAYER_EFFECT_REBUILD_INTERVAL = 2_000;
 
 export class ChatroomCharacter {
 	isPlayer(): this is PlayerCharacter {
@@ -17,6 +25,7 @@ export class ChatroomCharacter {
 
 	BCXVersion: string | null = null;
 	Character: Character;
+	Effects: BCX_effects;
 
 	get MemberNumber(): number {
 		if (typeof this.Character.MemberNumber !== "number") {
@@ -38,6 +47,7 @@ export class ChatroomCharacter {
 		if (character.ID === 0) {
 			this.BCXVersion = VERSION;
 		}
+		this.Effects = cloneDeep(defaultBCXEffects);
 		console.debug(`BCX: Loaded character ${character.Name} (${character.MemberNumber})`);
 	}
 
@@ -484,4 +494,54 @@ export function getPlayerCharacter(): PlayerCharacter {
 		currentRoomCharacters.push(character);
 	}
 	return character;
+}
+
+const effectBuilderFunctions: ((PlayerEffects: BCX_effects) => void)[] = [];
+
+export function registerEffectBuilder(builder: (PlayerEffects: BCX_effects) => void): void {
+	effectBuilderFunctions.push(builder);
+}
+
+export function buildPlayerEffects(): void {
+	const effects = cloneDeep(defaultBCXEffects);
+	for (const builder of effectBuilderFunctions) {
+		builder(effects);
+	}
+	const player = getPlayerCharacter();
+	if (isEqual(effects, player.Effects))
+		return;
+
+	player.Effects = effects;
+	CharacterRefresh(Player, false);
+	announceSelf(false);
+}
+
+export class ModuleCharacter extends BaseModule {
+	private timer: number | null = null;
+
+	load() {
+		hookFunction("CharacterLoadEffect", 0, (args, next) => {
+			next(args);
+			const C = args[0] as Character;
+			const character = typeof C.MemberNumber === "number" && getChatroomCharacter(C.MemberNumber);
+			if (character) {
+				for (const effect of character.Effects.Effect) {
+					if (!C.Effect.includes(effect)) {
+						C.Effect.push(effect);
+					}
+				}
+			}
+		});
+	}
+
+	run() {
+		this.timer = setInterval(buildPlayerEffects, PLAYER_EFFECT_REBUILD_INTERVAL);
+	}
+
+	unload() {
+		if (this.timer !== null) {
+			clearInterval(this.timer);
+			this.timer = null;
+		}
+	}
 }

@@ -60,3 +60,7 @@ export enum ConditionsLimit {
 	limited = 1,
 	blocked = 2
 }
+
+export const defaultBCXEffects: Readonly<BCX_effects> = {
+	Effect: []
+};

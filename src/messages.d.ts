@@ -19,9 +19,16 @@ type BCX_message_ChatRoomStatusEvent = {
 	Target: number | null;
 };
 
+/** BCX effects that should be visible to everyone in room */
+interface BCX_effects {
+	/** Any extra effects to be applied to character */
+	Effect: string[];
+}
+
 type BCX_message_hello = {
 	version: string;
 	request: boolean;
+	effects?: Partial<BCX_effects>;
 };
 
 type BCX_message_query = {

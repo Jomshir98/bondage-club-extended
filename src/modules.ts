@@ -1,6 +1,7 @@
 import { registerModule } from "./moduleManager";
 
 import { ModuleAuthority } from "./modules/authority";
+import { ModuleCharacter } from "./characters";
 import { ModuleChatroom } from "./modules/chatroom";
 import { ModuleClubUtils } from "./modules/clubUtils";
 import { ModuleCommands } from "./modules/commands";
@@ -19,6 +20,7 @@ import { ModuleVersionCheck } from "./modules/versionCheck";
 import { ModuleWardrobe } from "./modules/wardrobe";
 
 registerModule(new ModuleAuthority());
+registerModule(new ModuleCharacter());
 registerModule(new ModuleChatroom());
 registerModule(new ModuleClubUtils());
 registerModule(new ModuleCommands());

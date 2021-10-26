@@ -4,8 +4,11 @@ import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_Emote, icon_PurpleHeart, icon_Typing, icon_BCX_chatroom } from "../resources";
-import { getChatroomCharacter } from "../characters";
+import { getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { modStorage } from "./storage";
+import cloneDeep from "lodash-es/cloneDeep";
+import { defaultBCXEffects } from "../constants";
+import { isObject } from "../utils";
 
 class ChatRoomStatusManager {
 	InputTimeoutMs = 3_000;
@@ -139,7 +142,7 @@ export class ModuleChatroom extends BaseModule {
 			modStorage.typingIndicatorEnable = true;
 		}
 
-		hiddenMessageHandlers.set("hello", (sender, message: any) => {
+		hiddenMessageHandlers.set("hello", (sender, message) => {
 			const char = getChatroomCharacter(sender);
 			if (!char) {
 				console.warn(`BCX: Hello from character not found in room`, sender);
@@ -153,6 +156,14 @@ export class ModuleChatroom extends BaseModule {
 				console.log(`BCX: ${char.Character.Name} (${char.Character.MemberNumber}) uses BCX version ${message.version}`);
 			}
 			char.BCXVersion = message.version;
+			// Apply effects
+			const effects: Partial<BCX_effects> = isObject(message.effects) ? message.effects : {};
+			char.Effects = cloneDeep(defaultBCXEffects);
+			if (Array.isArray(effects.Effect) && effects.Effect.every(i => typeof i === "string")) {
+				char.Effects.Effect = effects.Effect;
+			}
+			CharacterRefresh(char.Character, false);
+			// Send announcement, if requested
 			if (message.request === true) {
 				announceSelf(false);
 			}
@@ -162,6 +173,8 @@ export class ModuleChatroom extends BaseModule {
 			const char = getChatroomCharacter(sender);
 			if (char) {
 				char.BCXVersion = null;
+				char.Effects = cloneDeep(defaultBCXEffects);
+				CharacterRefresh(char.Character, false);
 			}
 		});
 
@@ -310,8 +323,10 @@ export class ModuleChatroom extends BaseModule {
 }
 
 export function announceSelf(request: boolean = false) {
+	const player = getPlayerCharacter();
 	sendHiddenMessage("hello", {
 		version: VERSION,
-		request
+		request,
+		effects: player.Effects
 	});
 }

@@ -3,7 +3,7 @@ import { registerRule } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { hookFunction } from "../patching";
 import { InfoBeep } from "../utilsClub";
-import { getAllCharactersInRoom } from "../characters";
+import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
@@ -106,12 +106,14 @@ export function initRules_bc_alter() {
 		name: "Always leave rooms slowly",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independent of the items she is wearing",
+		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independent of the items she is wearing. WARNING: Due to limitation in Bondage Club itself, only BCX users will be able to stop PLAYER_NAME from leaving the room.",
 		defaultLimit: ConditionsLimit.normal,
-		load(state) {
-			hookFunction("Player.IsSlow", 2, (args, next) => {
-				return state.isEnforced || next(args);
-			}, ModuleCategory.Rules);
+		init(state) {
+			registerEffectBuilder(PlayerEffects => {
+				if (state.isEnforced && !PlayerEffects.Effect.includes("Slow")) {
+					PlayerEffects.Effect.push("Slow");
+				}
+			});
 		}
 	});
 

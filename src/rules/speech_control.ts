@@ -12,7 +12,7 @@ export function initRules_bc_speech_control() {
 		name: "Allow specific sound only",
 		icon: "Icons/Chat.png",
 		shortDescription: "such as an animal sound",
-		longDescription: "This rule allows PLAYER_NAME to only communicate using a specific sound pattern. Any variation of it is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
+		longDescription: "This rule allows PLAYER_NAME to only communicate using a specific sound pattern in chat messages and whispers. Any variation of it is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
 		triggerTexts: {
 			infoBeep: "You are allowed to speak only using a specific sound!",
 			attempt_log: "PLAYER_NAME tried to break a rule to only speak using a specific sound pattern",
@@ -29,7 +29,7 @@ export function initRules_bc_speech_control() {
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				const sound = state.customData?.soundWhitelist.toLocaleLowerCase();
-				if (sound && msg.type === "Chat") {
+				if (sound && (msg.type === "Chat" || msg.type === "Whisper")) {
 					let i = 0;
 					for (const c of (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase()) {
 						if (/\p{L}/igu.test(c)) {
@@ -139,7 +139,7 @@ export function initRules_bc_speech_control() {
 		name: "Doll talk",
 		icon: "Icons/Chat.png",
 		shortDescription: "allows only short sentences with simple words",
-		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text.",
+		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text, but does affect whispers.",
 		triggerTexts: {
 			infoBeep: "You broke the doll talk rule!",
 			attempt_log: "PLAYER_NAME tried to break the doll talk rule",
@@ -162,7 +162,7 @@ export function initRules_bc_speech_control() {
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
-				if (msg.type !== "Chat" || !state.customData?.maxWordLength || !state.customData.maxNumberOfWords)
+				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.maxWordLength || !state.customData.maxNumberOfWords)
 					return true;
 				const words = Array.from((msg.noOOCMessage ?? msg.originalMessage).matchAll(/\S+/gmu)).map(i => i[0]);
 				if (words.length > state.customData.maxNumberOfWords)
@@ -192,7 +192,7 @@ export function initRules_bc_speech_control() {
 		name: "Forbid saying certain words in chat",
 		icon: "Icons/Chat.png",
 		shortDescription: "based on a configurable blacklist",
-		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect OOC text.",
+		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect OOC text, but does affect whispers.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
 			attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",
@@ -209,7 +209,7 @@ export function initRules_bc_speech_control() {
 		init(state) {
 			let transgression: undefined | string;
 			const check = (msg: SpeechMessageInfo): boolean => {
-				if (msg.type !== "Chat" || !state.customData?.bannedWords)
+				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.bannedWords)
 					return true;
 				const words = Array.from((msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().matchAll(/\p{L}+/igu)).map(i => i[0]);
 				transgression = state.customData?.bannedWords.find(i => words.includes(i.toLocaleLowerCase()));

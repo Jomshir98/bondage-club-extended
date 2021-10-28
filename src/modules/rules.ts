@@ -909,7 +909,7 @@ export class ModuleRules extends BaseModule {
 					if (definition.dataDefinition) {
 						for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
 							if (!isEqual(oldData.data.customData?.[k], newData.data.customData?.[k])) {
-								ChatRoomSendLocal(`${character} changed the '${visibleName}' rule '${def.description}' setting:`, undefined, character.MemberNumber);
+								ChatRoomSendLocal(`${character} changed the '${visibleName}' rule's setting '${def.description}' from '${oldData.data.customData?.[k]}' to '${newData.data.customData?.[k]}'`, undefined, character.MemberNumber);
 							}
 						}
 					}

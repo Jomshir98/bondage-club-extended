@@ -438,7 +438,7 @@ export function initRules_bc_blocks() {
 		name: "Restrict entering rooms",
 		icon: icon_restrictions,
 		shortDescription: "only allow entering specific ones",
-		longDescription: "This rule forbids PLAYER_NAME to enter all rooms, that are not on an editable whitelist of still allowed ones. Tip: This rule can be combined with the rule \"Forbid creating new rooms\".",
+		longDescription: "This rule forbids PLAYER_NAME to enter all rooms, that are not on an editable whitelist of still allowed ones. NOTE: As safety measure this rule is not in effect while the list is empty. TIP: This rule can be combined with the rule \"Forbid creating new rooms\".",
 		triggerTexts: {
 			infoBeep: "You are not allowed to enter this room!",
 			attempt_log: "PLAYER_NAME tried to enter a forbidden room",
@@ -458,7 +458,7 @@ export function initRules_bc_blocks() {
 			// TODO: Fix for NMod
 			if (!NMod) {
 				hookFunction("ChatSearchJoin", 5, (args, next) => {
-					if (state.inEffect && state.customData) {
+					if (state.inEffect && state.customData && state.customData.roomList.length > 0) {
 						// Scans results
 						let X = 25;
 						let Y = 25;
@@ -487,7 +487,7 @@ export function initRules_bc_blocks() {
 				}, ModuleCategory.Rules);
 				hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
 					next(args);
-					if (state.isEnforced && state.customData) {
+					if (state.isEnforced && state.customData && state.customData.roomList.length > 0) {
 						// Scans results
 						let X = 25;
 						let Y = 25;

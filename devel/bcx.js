@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-582e1358";const BCX_DEVEL=true;
+    const BCX_VERSION="0.6.0-3173daff";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -5189,7 +5189,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Forbid using remotes on self",
             icon: icon_restrictions,
             shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-            longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on her own body.",
+            longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on her own body. (Others still can use remotes on her)",
             triggerTexts: {
                 infoBeep: "You are not allowed to use a remote control for items on your body!",
                 attempt_log: "PLAYER_NAME tried to use a remote control on her own body, which was forbidden",
@@ -5264,7 +5264,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Forbid using keys on self",
             icon: icon_restrictions,
             shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-            longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on her own body.",
+            longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on her own body. (Others still can unlock her locks normally)",
             triggerTexts: {
                 infoBeep: "You are not allowed to use a key on items on your body!",
                 attempt_log: "PLAYER_NAME tried to use a key on a worn item, which was forbidden",
@@ -5345,7 +5345,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Forbid picking locks on self",
             icon: icon_restrictions,
             shortDescription: "PLAYER_NAME picking one on PLAYER_NAME",
-            longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on her own body.",
+            longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on her own body. (Others still can pick locks on her normally)",
             triggerTexts: {
                 infoBeep: "You are not allowed to lockpick worn items on your body!",
                 attempt_log: "PLAYER_NAME tried to lockpick a worn item, which was forbidden",
@@ -5420,7 +5420,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Forbid using locks on self",
             icon: icon_restrictions,
             shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-            longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on her own body.",
+            longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on her own body. (Others still can add locks on her items normally)",
             triggerTexts: {
                 infoBeep: "You are not allowed to lock items on your body!",
                 attempt_log: "PLAYER_NAME tried to lock a worn item, which was forbidden",
@@ -5496,7 +5496,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Forbid wardrobe use on self",
             icon: icon_restrictions,
             shortDescription: "PLAYER_NAME using PLAYER_NAME's wardrobe",
-            longDescription: "This rule forbids PLAYER_NAME to access her own wardrobe.",
+            longDescription: "This rule forbids PLAYER_NAME to access her own wardrobe. (Others still can change her clothes normally)",
             triggerTexts: {
                 infoBeep: "You are not allowed to change what you are wearing!",
                 attempt_log: "PLAYER_NAME tried to use their wardrobe, which was forbidden",
@@ -5604,7 +5604,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Restrict entering rooms",
             icon: icon_restrictions,
             shortDescription: "only allow entering specific ones",
-            longDescription: "This rule forbids PLAYER_NAME to enter all rooms, that are not on an editable whitelist of still allowed ones. Tip: This rule can be combined with the rule \"Forbid creating new rooms\".",
+            longDescription: "This rule forbids PLAYER_NAME to enter all rooms, that are not on an editable whitelist of still allowed ones. NOTE: As safety measure this rule is not in effect while the list is empty. TIP: This rule can be combined with the rule \"Forbid creating new rooms\".",
             triggerTexts: {
                 infoBeep: "You are not allowed to enter this room!",
                 attempt_log: "PLAYER_NAME tried to enter a forbidden room",
@@ -5624,7 +5624,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 // TODO: Fix for NMod
                 if (!NMod) {
                     hookFunction("ChatSearchJoin", 5, (args, next) => {
-                        if (state.inEffect && state.customData) {
+                        if (state.inEffect && state.customData && state.customData.roomList.length > 0) {
                             // Scans results
                             let X = 25;
                             let Y = 25;
@@ -5653,7 +5653,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     }, ModuleCategory.Rules);
                     hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
                         next(args);
-                        if (state.isEnforced && state.customData) {
+                        if (state.isEnforced && state.customData && state.customData.roomList.length > 0) {
                             // Scans results
                             let X = 25;
                             let Y = 25;
@@ -6138,7 +6138,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Allow specific sound only",
             icon: "Icons/Chat.png",
             shortDescription: "such as an animal sound",
-            longDescription: "This rule allows PLAYER_NAME to only communicate using a specific sound pattern. Any variation of it is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
+            longDescription: "This rule allows PLAYER_NAME to only communicate using a specific sound pattern in chat messages and whispers. Any variation of it is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
             triggerTexts: {
                 infoBeep: "You are allowed to speak only using a specific sound!",
                 attempt_log: "PLAYER_NAME tried to break a rule to only speak using a specific sound pattern",
@@ -6156,7 +6156,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 const check = (msg) => {
                     var _a, _b;
                     const sound = (_a = state.customData) === null || _a === void 0 ? void 0 : _a.soundWhitelist.toLocaleLowerCase();
-                    if (sound && msg.type === "Chat") {
+                    if (sound && (msg.type === "Chat" || msg.type === "Whisper")) {
                         let i = 0;
                         for (const c of ((_b = msg.noOOCMessage) !== null && _b !== void 0 ? _b : msg.originalMessage).toLocaleLowerCase()) {
                             if (/\p{L}/igu.test(c)) {
@@ -6263,7 +6263,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Doll talk",
             icon: "Icons/Chat.png",
             shortDescription: "allows only short sentences with simple words",
-            longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text.",
+            longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text, but does affect whispers.",
             triggerTexts: {
                 infoBeep: "You broke the doll talk rule!",
                 attempt_log: "PLAYER_NAME tried to break the doll talk rule",
@@ -6287,7 +6287,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             init(state) {
                 const check = (msg) => {
                     var _a, _b;
-                    if (msg.type !== "Chat" || !((_a = state.customData) === null || _a === void 0 ? void 0 : _a.maxWordLength) || !state.customData.maxNumberOfWords)
+                    if ((msg.type !== "Chat" && msg.type !== "Whisper") || !((_a = state.customData) === null || _a === void 0 ? void 0 : _a.maxWordLength) || !state.customData.maxNumberOfWords)
                         return true;
                     const words = Array.from(((_b = msg.noOOCMessage) !== null && _b !== void 0 ? _b : msg.originalMessage).matchAll(/\S+/gmu)).map(i => i[0]);
                     if (words.length > state.customData.maxNumberOfWords)
@@ -6316,7 +6316,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Forbid saying certain words in chat",
             icon: "Icons/Chat.png",
             shortDescription: "based on a configurable blacklist",
-            longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect OOC text.",
+            longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect OOC text, but does affect whispers.",
             triggerTexts: {
                 infoBeep: "You are not allowed to use the word 'USED_WORD'!",
                 attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",
@@ -6334,7 +6334,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 let transgression;
                 const check = (msg) => {
                     var _a, _b, _c;
-                    if (msg.type !== "Chat" || !((_a = state.customData) === null || _a === void 0 ? void 0 : _a.bannedWords))
+                    if ((msg.type !== "Chat" && msg.type !== "Whisper") || !((_a = state.customData) === null || _a === void 0 ? void 0 : _a.bannedWords))
                         return true;
                     const words = Array.from(((_b = msg.noOOCMessage) !== null && _b !== void 0 ? _b : msg.originalMessage).toLocaleLowerCase().matchAll(/\p{L}+/igu)).map(i => i[0]);
                     transgression = (_c = state.customData) === null || _c === void 0 ? void 0 : _c.bannedWords.find(i => words.includes(i.toLocaleLowerCase()));
@@ -7956,8 +7956,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             "aura, then that means that the rule's conditions are the same as the global config. If permitted, you can remove single rules with the 'X' button.",
         [Views.ConditionsEditRules]: "Here you can configure if the rule is in effect, if it is only valid for some time, what happens then and " +
             "most importantly when the rule applies, such as either always or based on where the player is and with whom. The green/red bars next to the " +
-            "checkboxes indicate whether a triggering condition is true at present or not. Depending on the rule, you can define additional " +
-            "things specific to this rule on the right side of the screen. Lastly on the bottom right, you can set whether the four trigger conditions " +
+            "checkboxes indicate whether a triggering condition is true at present or not. Depending on the rule, you can either enforce its effect, " +
+            "log all violations, or both at the same time. Lastly on the bottom right, you can set whether the four trigger conditions " +
             "of this rule should follow the global rules config or not.",
         [Views.ConditionsGlobalRules]: "The settings on this page are the global/default settings for all newly added rules. Changes to the four trigger " +
             "conditions are also applied to existing rules that are (still) set to global rules configuration, though. Exception is if a timer is set here. " +
@@ -13323,7 +13323,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     }
                 },
                 logConditionUpdate: (rule, character, newData, oldData) => {
-                    var _a, _b, _c, _d;
+                    var _a, _b, _c, _d, _e, _f;
                     const definition = RulesGetDisplayDefinition(rule);
                     const visibleName = definition.name;
                     const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
@@ -13384,7 +13384,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         if (definition.dataDefinition) {
                             for (const [k, def] of Object.entries(definition.dataDefinition)) {
                                 if (!isEqual((_c = oldData.data.customData) === null || _c === void 0 ? void 0 : _c[k], (_d = newData.data.customData) === null || _d === void 0 ? void 0 : _d[k])) {
-                                    ChatRoomSendLocal(`${character} changed the '${visibleName}' rule '${def.description}' setting:`, undefined, character.MemberNumber);
+                                    ChatRoomSendLocal(`${character} changed the '${visibleName}' rule's setting '${def.description}' from '${(_e = oldData.data.customData) === null || _e === void 0 ? void 0 : _e[k]}' to '${(_f = newData.data.customData) === null || _f === void 0 ? void 0 : _f[k]}'`, undefined, character.MemberNumber);
                                 }
                             }
                         }
@@ -15692,11 +15692,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
                 if (j_ShowHelp && (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe")) {
                     MainCanvas.fillStyle = "#ffff88";
-                    MainCanvas.fillRect(370, 190, 900, 780);
+                    MainCanvas.fillRect(170, 190, 1100, 780);
                     MainCanvas.strokeStyle = "Black";
-                    MainCanvas.strokeRect(370, 190, 900, 780);
+                    MainCanvas.strokeRect(170, 190, 1100, 780);
                     MainCanvas.textAlign = "left";
-                    DrawTextWrap(helpText, 370 - 810 / 2, 210, 860, 740, "black");
+                    DrawTextWrap(helpText, 170 - 1010 / 2, 210, 1060, 740, "black");
                     MainCanvas.textAlign = "center";
                 }
             });
@@ -15704,7 +15704,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
                     const Y = NModWardrobe ? 265 : 125;
                     // Help text toggle
-                    if (MouseIn(1380, Y, 50, 50) || (MouseIn(370, 190, 900, 780) && j_ShowHelp)) {
+                    if (MouseIn(1380, Y, 50, 50) || (MouseIn(170, 190, 1100, 780) && j_ShowHelp)) {
                         j_ShowHelp = !j_ShowHelp;
                     }
                     // Restraints toggle

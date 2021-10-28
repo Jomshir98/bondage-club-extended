@@ -148,11 +148,11 @@ export class ModuleWardrobe extends BaseModule {
 			}
 			if (j_ShowHelp && (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe")) {
 				MainCanvas.fillStyle = "#ffff88";
-				MainCanvas.fillRect(370, 190, 900, 780);
+				MainCanvas.fillRect(170, 190, 1100, 780);
 				MainCanvas.strokeStyle = "Black";
-				MainCanvas.strokeRect(370, 190, 900, 780);
+				MainCanvas.strokeRect(170, 190, 1100, 780);
 				MainCanvas.textAlign = "left";
-				DrawTextWrap(helpText, 370 - 810 / 2, 210, 860, 740, "black");
+				DrawTextWrap(helpText, 170 - 1010 / 2, 210, 1060, 740, "black");
 				MainCanvas.textAlign = "center";
 			}
 		});
@@ -161,7 +161,7 @@ export class ModuleWardrobe extends BaseModule {
 			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
 				const Y = NModWardrobe ? 265 : 125;
 				// Help text toggle
-				if (MouseIn(1380, Y, 50, 50) || (MouseIn(370, 190, 900, 780) && j_ShowHelp)) {
+				if (MouseIn(1380, Y, 50, 50) || (MouseIn(170, 190, 1100, 780) && j_ShowHelp)) {
 					j_ShowHelp = !j_ShowHelp;
 				}
 				// Restraints toggle

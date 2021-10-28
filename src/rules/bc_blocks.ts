@@ -12,7 +12,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using remotes on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on her own body.",
+		longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on her own body. (Others still can use remotes on her)",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a remote control for items on your body!",
 			attempt_log: "PLAYER_NAME tried to use a remote control on her own body, which was forbidden",
@@ -89,7 +89,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using keys on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on her own body.",
+		longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on her own body. (Others still can unlock her locks normally)",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a key on items on your body!",
 			attempt_log: "PLAYER_NAME tried to use a key on a worn item, which was forbidden",
@@ -172,7 +172,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid picking locks on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME picking one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on her own body.",
+		longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on her own body. (Others still can pick locks on her normally)",
 		triggerTexts: {
 			infoBeep: "You are not allowed to lockpick worn items on your body!",
 			attempt_log: "PLAYER_NAME tried to lockpick a worn item, which was forbidden",
@@ -249,7 +249,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using locks on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on her own body.",
+		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on her own body. (Others still can add locks on her items normally)",
 		triggerTexts: {
 			infoBeep: "You are not allowed to lock items on your body!",
 			attempt_log: "PLAYER_NAME tried to lock a worn item, which was forbidden",
@@ -327,7 +327,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid wardrobe use on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using PLAYER_NAME's wardrobe",
-		longDescription: "This rule forbids PLAYER_NAME to access her own wardrobe.",
+		longDescription: "This rule forbids PLAYER_NAME to access her own wardrobe. (Others still can change her clothes normally)",
 		triggerTexts: {
 			infoBeep: "You are not allowed to change what you are wearing!",
 			attempt_log: "PLAYER_NAME tried to use their wardrobe, which was forbidden",

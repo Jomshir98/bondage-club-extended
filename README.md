@@ -11,17 +11,17 @@ This has several advantages: There is no longer any need to install a browser ad
 BCX is a complete remake of Jomshir98's previous [JMod](https://github.com/jomshir98/testing) which was basically all about testing features Jomshir developed for the bondage club, before they were even part of any BETAs, such as BEEPs with messages attached or icon-based room movement.
 
 The extension is very modular and highly customizable. These are currently planned modules and their current development status:
-| Module name      | Description                                                                                                      | Development status                                     |
-|------------------|------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
-| Basic            | The base configuration of the extension, including managing permissions for other players                        | Done                                                   |
-| Behavior Logging | A record book for breaking any rules or other events of interest for yourself or the player's dommes             | Done; More events will be added based on other modules |
-| Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned (low priority)                                 |
-| Curses           | Cursing an item slot so a restraint or clothing stays on or off very securely                                    | Done                                                   |
-| Commands         | One time actions such as forcing you into a pose                                                                 | Planned                                                |
-| Rules            | Toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage                     | Done; More rules being worked on                       |
-| Speech           | Any commands and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk              | Done as part of "Rules"                                |
-| Punishment       | Automatic punishments can be set by the dommes for breaking any of your rules                                    | Planned (low priority)                                 |
-| Miscellaneous    | Other nifty features.                                                                                            | Random features get added here randomly.               |
+| Module name      | Description                                                                                                      | Development status                                                   |
+|------------------|------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| Basic            | The base configuration of the extension, including managing permissions for other players                        | Done                                                                 |
+| Behavior Logging | A record book for breaking any rules or other events of interest for yourself or the player's dommes             | Done; More events will be added based on other modules               |
+| Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned (low priority)                                               |
+| Curses           | Cursing an item slot so a restraint or clothing stays on or off very securely                                    | Done                                                                 |
+| Commands         | One time actions such as forcing you into a pose                                                                 | Planned                                                              |
+| Rules            | Toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage                     | Done; More rules being worked on                                     |
+| Speech           | Any commands and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk              | Done as part of "Rules"                                              |
+| Punishment       | Automatic punishments can be set by the dommes for breaking any of your rules                                    | Planned (low priority)                                               |
+| Miscellaneous    | Other nifty features.                                                                                            | Various features not fitting the previous categories are added here. |
 
 ### Miscellaneous module currently includes:
 - Wardrobe outfit import/export (incl. restraints)

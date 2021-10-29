@@ -22,6 +22,39 @@ const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 const CURSE_IGNORED_EFFECTS = ["Lock"];
 
+function curseCreateCurseItemInfo(item: Item): CursedItemInfo {
+	const result: CursedItemInfo = {
+		Name: item.Asset.Name,
+		curseProperty: false,
+		Difficulty: item.Difficulty || undefined,
+		Color: (item.Color && item.Color !== "Default") ? cloneDeep(item.Color) : undefined,
+		Property: {}
+	};
+
+	if (isObject(item.Property)) {
+		for (const key of Object.keys(item.Property)) {
+			if (key === "Effect") {
+				if (Array.isArray(item.Property.Effect) && item.Property.Effect.every(i => typeof i === "string")) {
+					const effect = item.Property.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i));
+					if (effect.length > 0) {
+						result.Property!.Effect = effect;
+					}
+				} else {
+					console.error(`BCX: Bad effect of item: `, item.Property.Effect, item);
+				}
+			} else if (!CURSE_IGNORED_PROPERTIES.includes(key) && item.Property[key] !== undefined) {
+				result.Property![key] = cloneDeep(item.Property[key]);
+			}
+		}
+	}
+
+	if (Object.keys(result.Property!).length === 0) {
+		delete result.Property;
+	}
+
+	return result;
+}
+
 export function curseAllowItemCurseProperty(asset: Asset): boolean {
 	return !!(
 		asset.Extended ||
@@ -71,23 +104,9 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 			curseProperty = false;
 		}
 
-		const newCurse: CursedItemInfo = {
-			Name: currentItem.Asset.Name,
-			curseProperty
-		};
-		if (currentItem.Color && currentItem.Color !== "Default") {
-			newCurse.Color = cloneDeep(currentItem.Color);
-		}
-		if (currentItem.Difficulty) {
-			newCurse.Difficulty = currentItem.Difficulty;
-		}
-		if (currentItem.Property && Object.keys(currentItem.Property).filter(i => !CURSE_IGNORED_PROPERTIES.includes(i)).length !== 0) {
-			newCurse.Property = cloneDeep(currentItem.Property);
-			if (newCurse.Property) {
-				for (const key of CURSE_IGNORED_PROPERTIES) {
-					delete newCurse.Property[key];
-				}
-			}
+		const newCurse = curseCreateCurseItemInfo(currentItem);
+		if (curseProperty) {
+			newCurse.curseProperty = true;
 		}
 		ConditionsSetCondition("curses", Group, newCurse);
 		if (character) {
@@ -799,18 +818,16 @@ export class ModuleCurses extends BaseModule {
 			if (!changeType) changeType = "add";
 		}
 
-		const itemProperty = currentItem.Property = (currentItem.Property ?? {});
-		let curseProperty = curse.Property ?? {};
 
 		if (curse.curseProperty) {
+			const itemProperty = currentItem.Property = (currentItem.Property ?? {});
+			const curseProperty = curse.Property ?? {};
 			for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
 				if (key === "Effect")
 					continue;
 
 				if (CURSE_IGNORED_PROPERTIES.includes(key)) {
-					if (curseProperty[key] !== undefined) {
-						delete curseProperty[key];
-					}
+					delete curseProperty[key];
 					continue;
 				}
 
@@ -827,30 +844,18 @@ export class ModuleCurses extends BaseModule {
 				}
 			}
 			const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
-			const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
-			const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+			const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)).sort() : [];
+			const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)).sort() : [];
 			if (!CommonArraysEqual(itemEffects, curseEffects)) {
 				itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
-			} else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
-				curseProperty.Effect = itemProperty.Effect.slice();
-			} else {
-				delete curseProperty.Effect;
+			}
+			if (Object.keys(curseProperty).length === 0) {
+				delete curse.Property;
+			} else if (!isEqual(curse.Property, curseProperty)) {
+				curse.Property = curseProperty;
 			}
 		} else {
-			if (!isEqual(curseProperty, itemProperty)) {
-				curseProperty = cloneDeep(itemProperty);
-				for (const key of CURSE_IGNORED_PROPERTIES.filter(e => e !== "Effect")) {
-					delete curseProperty[key];
-				}
-			}
-		}
-
-		if (Object.keys(curseProperty).length === 0) {
-			if (curse.Property !== undefined) {
-				delete curse.Property;
-			}
-		} else if (!isEqual(curse.Property, curseProperty)) {
-			curse.Property = curseProperty;
+			curse.Property = curseCreateCurseItemInfo(currentItem).Property;
 		}
 
 		if (!itemColorsEquals(curse.Color, currentItem.Color)) {

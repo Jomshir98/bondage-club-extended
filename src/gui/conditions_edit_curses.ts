@@ -1,5 +1,5 @@
 import { ChatroomCharacter } from "../characters";
-import { curseAllowItemCurseProperty } from "../modules/curses";
+import { curseAllowItemCurseProperty, curseDefaultItemCurseProperty } from "../modules/curses";
 import { getVisibleGroupName, showHelp } from "../utilsClub";
 import { GuiConditionEdit } from "./conditions_edit_base";
 import { GuiSubscreen } from "./subscreen";
@@ -57,6 +57,14 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 		if (this.allowSettingsCurse && data.data) {
 			DrawCheckbox(1050, 175, 64, 64, "Also curse the item's configuration", data.data.curseProperties, !access);
 			DrawText(`Example: which rope tie is used`, 1151, 287, "Black", "");
+			if (this.item && !curseDefaultItemCurseProperty(this.item)) {
+				DrawTextWrap(
+					"Warning: This item is not standardized and some or all of its configuration states could behave in unexpected ways " +
+					"if they are cursed with the above checkbox. Please assume most of them will not work correctly. " +
+					"Issues could range from respawning with a different configuration to the curse triggering randomly all the time. " +
+					"As some of these items do work (partially), the option to curse the configuration is still offered.",
+					1151 - 760 / 2, 365, 760, 400, "FireBrick");
+			}
 		}
 
 		// help text

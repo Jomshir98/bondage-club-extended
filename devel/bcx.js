@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-49c67090";const BCX_DEVEL=true;
+    const BCX_VERSION="0.6.0-a0f9366c";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -9365,6 +9365,37 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     const CURSES_ANTILOOP_SUSPEND_TIME = 600000;
     const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
     const CURSE_IGNORED_EFFECTS = ["Lock"];
+    function curseCreateCurseItemInfo(item) {
+        const result = {
+            Name: item.Asset.Name,
+            curseProperty: false,
+            Difficulty: item.Difficulty || undefined,
+            Color: (item.Color && item.Color !== "Default") ? cloneDeep(item.Color) : undefined,
+            Property: {}
+        };
+        if (isObject$1(item.Property)) {
+            for (const key of Object.keys(item.Property)) {
+                if (key === "Effect") {
+                    if (Array.isArray(item.Property.Effect) && item.Property.Effect.every(i => typeof i === "string")) {
+                        const effect = item.Property.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i));
+                        if (effect.length > 0) {
+                            result.Property.Effect = effect;
+                        }
+                    }
+                    else {
+                        console.error(`BCX: Bad effect of item: `, item.Property.Effect, item);
+                    }
+                }
+                else if (!CURSE_IGNORED_PROPERTIES.includes(key) && item.Property[key] !== undefined) {
+                    result.Property[key] = cloneDeep(item.Property[key]);
+                }
+            }
+        }
+        if (Object.keys(result.Property).length === 0) {
+            delete result.Property;
+        }
+        return result;
+    }
     function curseAllowItemCurseProperty(asset) {
         var _a, _b, _c, _d;
         return !!(asset.Extended ||
@@ -9402,23 +9433,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 console.warn(`BCX: Attempt to curse properties of item ${currentItem.Asset.Group.Name}:${currentItem.Asset.Name}, while not allowed`);
                 curseProperty = false;
             }
-            const newCurse = {
-                Name: currentItem.Asset.Name,
-                curseProperty
-            };
-            if (currentItem.Color && currentItem.Color !== "Default") {
-                newCurse.Color = cloneDeep(currentItem.Color);
-            }
-            if (currentItem.Difficulty) {
-                newCurse.Difficulty = currentItem.Difficulty;
-            }
-            if (currentItem.Property && Object.keys(currentItem.Property).filter(i => !CURSE_IGNORED_PROPERTIES.includes(i)).length !== 0) {
-                newCurse.Property = cloneDeep(currentItem.Property);
-                if (newCurse.Property) {
-                    for (const key of CURSE_IGNORED_PROPERTIES) {
-                        delete newCurse.Property[key];
-                    }
-                }
+            const newCurse = curseCreateCurseItemInfo(currentItem);
+            if (curseProperty) {
+                newCurse.curseProperty = true;
             }
             ConditionsSetCondition("curses", Group, newCurse);
             if (character) {
@@ -10111,16 +10128,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 if (!changeType)
                     changeType = "add";
             }
-            const itemProperty = currentItem.Property = ((_a = currentItem.Property) !== null && _a !== void 0 ? _a : {});
-            let curseProperty = (_b = curse.Property) !== null && _b !== void 0 ? _b : {};
             if (curse.curseProperty) {
+                const itemProperty = currentItem.Property = ((_a = currentItem.Property) !== null && _a !== void 0 ? _a : {});
+                const curseProperty = (_b = curse.Property) !== null && _b !== void 0 ? _b : {};
                 for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
                     if (key === "Effect")
                         continue;
                     if (CURSE_IGNORED_PROPERTIES.includes(key)) {
-                        if (curseProperty[key] !== undefined) {
-                            delete curseProperty[key];
-                        }
+                        delete curseProperty[key];
                         continue;
                     }
                     if (curseProperty[key] === undefined) {
@@ -10138,33 +10153,20 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     }
                 }
                 const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
-                const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
-                const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)) : [];
+                const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)).sort() : [];
+                const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)).sort() : [];
                 if (!CommonArraysEqual(itemEffects, curseEffects)) {
                     itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
                 }
-                else if (Array.isArray(itemProperty.Effect) && itemProperty.Effect.length > 0) {
-                    curseProperty.Effect = itemProperty.Effect.slice();
+                if (Object.keys(curseProperty).length === 0) {
+                    delete curse.Property;
                 }
-                else {
-                    delete curseProperty.Effect;
+                else if (!isEqual(curse.Property, curseProperty)) {
+                    curse.Property = curseProperty;
                 }
             }
             else {
-                if (!isEqual(curseProperty, itemProperty)) {
-                    curseProperty = cloneDeep(itemProperty);
-                    for (const key of CURSE_IGNORED_PROPERTIES.filter(e => e !== "Effect")) {
-                        delete curseProperty[key];
-                    }
-                }
-            }
-            if (Object.keys(curseProperty).length === 0) {
-                if (curse.Property !== undefined) {
-                    delete curse.Property;
-                }
-            }
-            else if (!isEqual(curse.Property, curseProperty)) {
-                curse.Property = curseProperty;
+                curse.Property = curseCreateCurseItemInfo(currentItem).Property;
             }
             if (!itemColorsEquals(curse.Color, currentItem.Color)) {
                 if (curse.Color === undefined || curse.Color === "Default") {
@@ -10722,6 +10724,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             if (this.allowSettingsCurse && data.data) {
                 DrawCheckbox(1050, 175, 64, 64, "Also curse the item's configuration", data.data.curseProperties, !access);
                 DrawText(`Example: which rope tie is used`, 1151, 287, "Black", "");
+                if (this.item && !curseDefaultItemCurseProperty(this.item)) {
+                    DrawTextWrap("Warning: This item is not standardized and some or all of its configuration states could behave in unexpected ways " +
+                        "if they are cursed with the above checkbox. Please assume most of them will not work correctly. " +
+                        "Issues could range from respawning with a different configuration to the curse triggering randomly all the time. " +
+                        "As some of these items do work (partially), the option to curse the configuration is still offered.", 1151 - 760 / 2, 365, 760, 400, "FireBrick");
+                }
             }
             // help text
             if (this.showHelp) {

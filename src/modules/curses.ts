@@ -839,7 +839,7 @@ export class ModuleCurses extends BaseModule {
 		} else {
 			if (!isEqual(curseProperty, itemProperty)) {
 				curseProperty = cloneDeep(itemProperty);
-				for (const key of CURSE_IGNORED_PROPERTIES) {
+				for (const key of CURSE_IGNORED_PROPERTIES.filter(e => e !== "Effect")) {
 					delete curseProperty[key];
 				}
 			}

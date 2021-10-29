@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-3173daff";const BCX_DEVEL=true;
+    const BCX_VERSION="0.6.0-49c67090";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -10153,7 +10153,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             else {
                 if (!isEqual(curseProperty, itemProperty)) {
                     curseProperty = cloneDeep(itemProperty);
-                    for (const key of CURSE_IGNORED_PROPERTIES) {
+                    for (const key of CURSE_IGNORED_PROPERTIES.filter(e => e !== "Effect")) {
                         delete curseProperty[key];
                     }
                 }

@@ -212,7 +212,8 @@ type BCX_Rule =
 	| "speech_doll_talk"
 	| "speech_ban_words"
 	| "speech_forbid_open_talking"
-	| "speech_restrict_whispering"
+	| "speech_restrict_whisper_send"
+	| "speech_restrict_whisper_receive"
 	| "speech_restrict_beep_send"
 	| "speech_restrict_beep_receive"
 	// | "greet_order"
@@ -264,7 +265,7 @@ type RuleCustomData = {
 		whitelistedMembers: number[];
 	},
 	speech_specific_sound: {
-		soundWhitelist: string;
+		soundWhitelist: string[];
 	},
 	speech_doll_talk: {
 		maxWordLength: number;
@@ -273,8 +274,12 @@ type RuleCustomData = {
 	speech_ban_words: {
 		bannedWords: string[];
 	},
-	speech_restrict_whispering: {
+	speech_restrict_whisper_send: {
 		minimumPermittedRole: import("./modules/authority").AccessLevel;
+	},
+	speech_restrict_whisper_receive: {
+		minimumPermittedRole: import("./modules/authority").AccessLevel;
+		autoreplyText: string;
 	},
 	speech_restrict_beep_send: {
 		whitelistedMemberNumbers: number[];

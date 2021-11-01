@@ -4,43 +4,52 @@ import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { registerSpeechHook, SpeechMessageInfo, falteringSpeech } from "../modules/speech";
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
-import { isObject } from "../utils";
+import { dictionaryProcess, isObject } from "../utils";
 import { getCharacterName } from "../utilsClub";
 
 export function initRules_bc_speech_control() {
 	registerRule("speech_specific_sound", {
-		name: "Allow specific sound only",
+		name: "Allow specific sounds only",
 		icon: "Icons/Chat.png",
 		shortDescription: "such as an animal sound",
-		longDescription: "This rule allows PLAYER_NAME to only communicate using a specific sound pattern in chat messages and whispers. Any variation of it is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
+		longDescription: "This rule allows PLAYER_NAME to only communicate using a list of specific sound patterns in chat messages and whispers. These patterns cannot be mixed in the same message, though. Only one sound from the list per message is valid. That said, any variation of a sound in the list is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
 		triggerTexts: {
-			infoBeep: "You are allowed to speak only using a specific sound!",
-			attempt_log: "PLAYER_NAME tried to break a rule to only speak using a specific sound pattern",
-			log: "PLAYER_NAME broke a rule to only speak using a specific sound pattern"
+			infoBeep: "You are allowed to speak only using one of the defined sounds!",
+			attempt_log: "PLAYER_NAME tried to break a rule to only speak using specific sound patterns",
+			log: "PLAYER_NAME broke a rule to only speak using specific sound patterns"
 		},
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			soundWhitelist: {
-				type: "string",
-				default: "",
-				description: "Set the allowed sound:"
+				type: "stringList",
+				default: [],
+				description: "Set the allowed sounds:"
 			}
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
-				const sound = state.customData?.soundWhitelist.toLocaleLowerCase();
-				if (sound && (msg.type === "Chat" || msg.type === "Whisper")) {
+				const sounds = state.customData?.soundWhitelist;
+				if (sounds && sounds.length > 0 && (msg.type === "Chat" || msg.type === "Whisper")) {
 					let i = 0;
-					for (const c of (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase()) {
-						if (/\p{L}/igu.test(c)) {
-							const nx = sound[(i + 1) % sound.length];
-							if (c === nx) {
-								i = (i + 1) % sound.length;
-							} else if (c !== sound[i]) {
-								return false;
+					const message = msg.noOOCMessage ?? msg.originalMessage;
+					for (let sound of sounds) {
+						sound = sound.toLocaleLowerCase();
+						let ok = true;
+						for (const c of message.toLocaleLowerCase()) {
+							if (/\p{L}/igu.test(c)) {
+								const nx = sound[(i + 1) % sound.length];
+								if (c === nx) {
+									i = (i + 1) % sound.length;
+								} else if (c !== sound[i]) {
+									ok = false;
+									break;
+								}
 							}
 						}
+						if (ok)
+							return true;
 					}
+					return false;
 				}
 				return true;
 			};
@@ -262,8 +271,8 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	registerRule("speech_restrict_whispering", {
-		name: "Restrict whispering",
+	registerRule("speech_restrict_whisper_send", {
+		name: "Restrict sending whispers",
 		icon: "Icons/Chat.png",
 		shortDescription: "except to defined roles",
 		longDescription: "This rule forbids PLAYER_NAME to whisper anything to most people inside a chat room, except to the defined roles. Also affects whispered OOC messages.",
@@ -299,6 +308,56 @@ export function initRules_bc_speech_control() {
 					}
 				}
 			});
+		}
+	});
+
+	registerRule("speech_restrict_whisper_receive", {
+		name: "Restrict recieving whispers",
+		icon: "Icons/Chat.png",
+		loggable: false,
+		shortDescription: "except from defined roles",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a whisper. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			minimumPermittedRole: {
+				type: "roleSelector",
+				default: AccessLevel.whitelist,
+				description: "Minimum role still allowed to send whisper:",
+				Y: 480
+			},
+			autoreplyText: {
+				type: "string",
+				default: "Your whisper message was blocked automatically by a BCX rule. Please address me publicly.",
+				description: "Auto replies blocked sender with this:",
+				Y: 320
+			}
+		},
+		load(state) {
+			hookFunction("ChatRoomMessage", 5, (args, next) => {
+				const data = args[0];
+
+				if (isObject(data) &&
+					typeof data.Content === "string" &&
+					data.Content !== "" &&
+					data.Type === "Whisper" &&
+					typeof data.Sender === "number" &&
+					state.isEnforced &&
+					state.customData
+				) {
+					const character = getChatroomCharacter(data.Sender);
+					if (character && getCharacterAccessLevel(character) >= state.customData.minimumPermittedRole) {
+						if (state.customData.autoreplyText) {
+							ServerSend("ChatRoomChat", {
+								Content: `[Automatic reply by BCX]\n${state.customData.autoreplyText}`,
+								Type: "Whisper",
+								Target: data.Sender
+							});
+						}
+						return;
+					}
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 		}
 	});
 
@@ -344,7 +403,7 @@ export function initRules_bc_speech_control() {
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she should have received a beep.",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {
@@ -355,7 +414,7 @@ export function initRules_bc_speech_control() {
 			},
 			autoreplyText: {
 				type: "string",
-				default: "",
+				default: "PLAYER_NAME is currently forbidden to receive beeps from you by a BCX rule.",
 				description: "Auto replies blocked sender with this:",
 				Y: 280
 			}
@@ -375,7 +434,7 @@ export function initRules_bc_speech_control() {
 						ServerSend("AccountBeep", {
 							MemberNumber: data.MemberNumber,
 							BeepType: "",
-							Message: `[Automatic message by BCX]\n${state.customData.autoreplyText}`
+							Message: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`
 						});
 					}
 					state.triggerAttempt({ TARGET_PLAYER: `${data.MemberName} (${data.MemberNumber})` });

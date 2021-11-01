@@ -198,6 +198,8 @@ type BCX_Rule =
 	| "alt_room_admin_limit"
 	| "alt_set_profile_description"
 	| "alt_force_suitcase_game"
+	| "alt_hearing_whitelist"
+	| "alt_seeing_whitelist"
 	| "rc_club_owner"
 	| "rc_lover_new"
 	| "rc_lover_leave"
@@ -253,6 +255,13 @@ type RuleCustomData = {
 	},
 	alt_set_profile_description: {
 		playersProfileDescription: string;
+	},
+	alt_hearing_whitelist: {
+		whitelistedMembers: number[];
+		ignoreGaggedMembersToggle: boolean;
+	},
+	alt_seeing_whitelist: {
+		whitelistedMembers: number[];
 	},
 	speech_specific_sound: {
 		soundWhitelist: string;

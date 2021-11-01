@@ -3,6 +3,7 @@ import { registerRule } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { hookFunction } from "../patching";
 import { InfoBeep } from "../utilsClub";
+import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 
 export function initRules_bc_alter() {
@@ -36,6 +37,45 @@ export function initRules_bc_alter() {
 		}
 	});
 
+	registerRule("alt_hearing_whitelist", {
+		name: "Hearing whitelist",
+		icon: "Icons/Swap.png",
+		loggable: false,
+		shortDescription: "of members whom PLAYER_NAME can always understand",
+		longDescription: "This rule defines a list of members whose voice can always be understood by PLAYER_NAME - independent of any sensory deprivation items or hearing impairing BCX rules on PLAYER_NAME. There is an additional option to toggle whether PLAYER_NAME can still understand a white-listed member's voice if that member is speech impaired herself (e.g. by being gagged).",
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			whitelistedMembers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Members numbers still heard while hearing impaired:",
+				Y: 350
+			},
+			ignoreGaggedMembersToggle: {
+				type: "toggle",
+				default: false,
+				description: "Also understand if those are speech impaired",
+				Y: 750
+			}
+		},
+		load(state) {
+			hookFunction("SpeechGarble", 2, (args, next) => {
+				const C = args[0] as Character;
+				if (state.isEnforced &&
+					state.customData &&
+					C.MemberNumber != null &&
+					state.customData.whitelistedMembers
+						.filter(m => m !== Player.MemberNumber)
+						.includes(C.MemberNumber) &&
+					(C.CanTalk() || state.customData.ignoreGaggedMembersToggle)
+				) {
+					return args[1];
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+		}
+	});
+
 	registerRule("alt_restrict_sight", {
 		name: "Sensory deprivation: Sight",
 		icon: "Icons/Swap.png",
@@ -63,6 +103,75 @@ export function initRules_bc_alter() {
 				}
 				return Math.min(res, Player.GameplaySettings?.SensDepChatLog === "SensDepLight" ? 2 : 3);
 			}, ModuleCategory.Rules);
+		}
+	});
+
+	registerRule("alt_seeing_whitelist", {
+		name: "Seeing whitelist",
+		icon: "Icons/Swap.png",
+		loggable: false,
+		shortDescription: "of members whom PLAYER_NAME can always see",
+		longDescription: "This rule defines a list of members whose appearance can always be seen normally by PLAYER_NAME - independent of any blinding items or seeing impairing BCX rules on PLAYER_NAME.",
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			whitelistedMembers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Members still seen while under blindness:"
+			}
+		},
+		load(state) {
+			let noBlind = false;
+			hookFunction("DrawCharacter", 0, (args, next) => {
+				const C = args[0] as Character;
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomClickCharacter", 0, (args, next) => {
+				const C = args[0] as Character;
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomMessage", 0, (args, next) => {
+				let C: ChatroomCharacter | null = null;
+				if (typeof args[0]?.Sender === "number") {
+					C = getChatroomCharacter(args[0].Sender);
+				}
+				if (C && state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("Player.GetBlindLevel", 6, (args, next) => {
+				if (noBlind)
+					return 0;
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomUpdateDisplay", 0, (args, next) => {
+				next(args);
+				if (state.isEnforced && state.customData) {
+					if (ChatRoomCharacterCount === 1) {
+						ChatRoomCharacterDrawlist = [Player];
+					}
+					ChatRoomSenseDepBypass = true;
+					for (const C of ChatRoomCharacter) {
+						if (C.MemberNumber != null && !ChatRoomCharacterDrawlist.includes(C) && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+							ChatRoomCharacterDrawlist.push(C);
+						}
+					}
+					ChatRoomCharacterDrawlist.sort((a, b) => {
+						return ChatRoomCharacter.indexOf(a) - ChatRoomCharacter.indexOf(b);
+					});
+					ChatRoomCharacterCount = ChatRoomCharacterDrawlist.length;
+				}
+			});
 		}
 	});
 

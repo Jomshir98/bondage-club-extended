@@ -133,6 +133,7 @@ declare var Asset: Asset[];
 declare var AssetGroup: AssetGroup[];
 declare function AssetLoadDescription(Family: string): void;
 declare function AssetGet(Family: string, Group: string, Name: string): Asset | null;
+declare function AssetGroupGet(Family: string, Group: string): AssetGroup | null;
 
 // Wardrobe.js
 declare function WardrobeAssetBundle(A: Item): ItemBundle;

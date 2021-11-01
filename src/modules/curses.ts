@@ -1,7 +1,7 @@
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { arrayUnique, capitalizeFirstLetter, formatTimeInterval, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, itemColorsEquals } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, isBind, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorageSync } from "./storage";
@@ -761,6 +761,16 @@ export class ModuleCurses extends BaseModule {
 				return;
 			}
 		}
+
+		const assetGroup = AssetGroupGet(Player.AssetFamily, group);
+		if (!assetGroup) {
+			console.error(`BCX: AssetGroup not found for curse ${group}`, condition);
+			return;
+		}
+
+		// Pause curses of clothes while in appearance menu
+		if (CurrentScreen === "Appearance" && !isBind(assetGroup))
+			return;
 
 		const curse = condition.data;
 

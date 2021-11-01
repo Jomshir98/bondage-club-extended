@@ -204,15 +204,31 @@ export function DrawImageEx(
 	return true;
 }
 
-export function isCloth(item: Item | Asset, allowCosplay: boolean = false): boolean {
-	const asset = (item as any).Asset ? (item as Item).Asset : item as Asset;
-	return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
+export function smartGetAsset(item: Item | Asset): Asset {
+	const asset = Asset.includes(item as Asset) ? item as Asset : (item as Item).Asset;
+	if (!Asset.includes(asset)) {
+		throw new Error("Failed to convert item to asset");
+	}
+	return asset;
 }
 
-export function isBind(item: Item | Asset): boolean {
-	const asset = (item as any).Asset ? (item as Item).Asset : item as Asset;
-	if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay) return false;
-	return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
+export function smartGetAssetGroup(item: Item | Asset | AssetGroup): AssetGroup {
+	const group = AssetGroup.includes(item as AssetGroup) ? item as AssetGroup : Asset.includes(item as Asset) ? (item as Asset).Group : (item as Item).Asset.Group;
+	if (!AssetGroup.includes(group)) {
+		throw new Error("Failed to convert item to group");
+	}
+	return group;
+}
+
+export function isCloth(item: Item | Asset | AssetGroup, allowCosplay: boolean = false): boolean {
+	const group = smartGetAssetGroup(item);
+	return group.Category === "Appearance" && group.AllowNone && group.Clothing && (allowCosplay || !group.BodyCosplay);
+}
+
+export function isBind(item: Item | Asset | AssetGroup): boolean {
+	const group = smartGetAssetGroup(item);
+	if (group.Category !== "Item" || group.BodyCosplay) return false;
+	return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(group.Name);
 }
 
 export function getCharacterName(memberNumber: number, defaultText: string): string;

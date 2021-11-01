@@ -58,7 +58,6 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 				test(a);
 			}
 		}
-		console.log("Import groups will be tested", matchedGroups);
 		// Then test all required groups to match
 		let success = true;
 		for (const testedGroup of matchedGroups) {
@@ -67,7 +66,6 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 			if (!currentItem) {
 				if (newItem) {
 					success = false;
-					console.log("Prevent add blocked slot", testedGroup);
 					break;
 				} else {
 					continue;
@@ -81,7 +79,6 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 				!itemColorsEquals(currentItem.Color, newItem.Color) ||
 				!isEqual(currentItem.Property, newItem.Property)
 			) {
-				console.log("Prevent mismatch group", testedGroup);
 				success = false;
 				break;
 			}

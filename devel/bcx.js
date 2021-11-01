@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.0-a0f9366c";const BCX_DEVEL=true;
+    const BCX_VERSION="0.6.1-d09d5129";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -188,15 +188,29 @@ window.BCX_Loaded = false;
         Canvas.restore();
         return true;
     }
+    function smartGetAsset(item) {
+        const asset = Asset.includes(item) ? item : item.Asset;
+        if (!Asset.includes(asset)) {
+            throw new Error("Failed to convert item to asset");
+        }
+        return asset;
+    }
+    function smartGetAssetGroup(item) {
+        const group = AssetGroup.includes(item) ? item : Asset.includes(item) ? item.Group : item.Asset.Group;
+        if (!AssetGroup.includes(group)) {
+            throw new Error("Failed to convert item to group");
+        }
+        return group;
+    }
     function isCloth(item, allowCosplay = false) {
-        const asset = item.Asset ? item.Asset : item;
-        return asset.Group.Category === "Appearance" && asset.Group.AllowNone && asset.Group.Clothing && (allowCosplay || !asset.Group.BodyCosplay);
+        const group = smartGetAssetGroup(item);
+        return group.Category === "Appearance" && group.AllowNone && group.Clothing && (allowCosplay || !group.BodyCosplay);
     }
     function isBind(item) {
-        const asset = item.Asset ? item.Asset : item;
-        if (asset.Group.Category !== "Item" || asset.Group.BodyCosplay)
+        const group = smartGetAssetGroup(item);
+        if (group.Category !== "Item" || group.BodyCosplay)
             return false;
-        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(asset.Group.Name);
+        return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(group.Name);
     }
     function getCharacterName(memberNumber, defaultText = null) {
         var _a;
@@ -254,17 +268,19 @@ window.BCX_Loaded = false;
         ChatRoomCanChangeClothes: ["87102B7C"],
         ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],
         ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED", "C49AA2C1"],
+        ChatRoomClickCharacter: ["21AEE568"],
         ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383"],
         ChatRoomDrawCharacterOverlay: ["D58A9AD3", "4AE4AD9E"],
         ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomIsOwnedByPlayer: ["82640FF9"],
         ChatRoomKeyDown: ["5FD37EC9", "111B6F0C", "33C77F12"],
-        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61", "60ECCB9B"],
         ChatRoomLovershipOptionIs: ["6F5CE6A0"],
+        ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61", "60ECCB9B"],
         ChatRoomOwnershipOptionIs: ["FE060F0B"],
         ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
         ChatRoomSendEmote: ["30DB56A6"],
         ChatRoomSync: ["B67D8226", "DF257D5B"],
+        ChatRoomUpdateDisplay: ["8DFC494A"],
         ChatSearchJoin: ["22514B80"],
         ChatSearchNormalDraw: ["6BEDBABB"],
         ChatSearchRun: ["4C56AC68", "06BFF877"],
@@ -282,6 +298,7 @@ window.BCX_Loaded = false;
         DialogItemClick: ["7039462A"],
         DialogMenuButtonBuild: ["1D4265E4"],
         DialogMenuButtonClick: ["9D8202CC", "8B705620"],
+        DrawCharacter: ["A9C65470"],
         DrawGetImage: ["BEC7B0DA"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD", "BDE09647", "E831F57A"],
@@ -328,18 +345,20 @@ window.BCX_Loaded = false;
         ChatRoomCanChangeClothes: ["DF8A6550"],
         ChatRoomCanLeave: ["4ED4453D"],
         ChatRoomClearAllElements: ["904C924D"],
+        ChatRoomClickCharacter: ["21AEE568"],
         ChatRoomCreateElement: ["76299AEC"],
         ChatRoomDrawCharacterOverlay: ["61F5F655"],
-        ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomDrawFriendList: ["327DA1B8"],
+        ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomIsOwnedByPlayer: ["82640FF9"],
         ChatRoomKeyDown: ["15C1889B"],
-        ChatRoomMessage: ["1FA3BF62"],
         ChatRoomLovershipOptionIs: ["6F5CE6A0"],
+        ChatRoomMessage: ["1FA3BF62"],
         ChatRoomOwnershipOptionIs: ["FE060F0B"],
         ChatRoomSendChat: ["7F540ED0"],
         ChatRoomSendEmote: ["30DB56A6"],
         ChatRoomSync: ["A8E55C95"],
+        ChatRoomUpdateDisplay: ["8B37556F"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["1ECB0CC4"],
         ColorPickerDraw: ["FF93AF2E"],
@@ -354,6 +373,7 @@ window.BCX_Loaded = false;
         DialogItemClick: ["C5E68BE8"],
         DialogMenuButtonBuild: ["76060837"],
         DialogMenuButtonClick: ["0E218260"],
+        DrawCharacter: ["C9EC1A94"],
         DrawGetImage: ["BEC7B0DA"],
         ElementIsScrolledToEnd: ["D28B0638"],
         ExtendedItemDraw: ["E831F57A"],
@@ -4735,6 +4755,43 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }, ModuleCategory.Rules);
             }
         });
+        registerRule("alt_hearing_whitelist", {
+            name: "Hearing whitelist",
+            icon: "Icons/Swap.png",
+            loggable: false,
+            shortDescription: "of members whom PLAYER_NAME can always understand",
+            longDescription: "This rule defines a list of members whose voice can always be understood by PLAYER_NAME - independent of any sensory deprivation items or hearing impairing BCX rules on PLAYER_NAME. There is an additional option to toggle whether PLAYER_NAME can still understand a white-listed member's voice if that member is speech impaired herself (e.g. by being gagged).",
+            defaultLimit: ConditionsLimit.normal,
+            dataDefinition: {
+                whitelistedMembers: {
+                    type: "memberNumberList",
+                    default: [],
+                    description: "Members numbers still heard while hearing impaired:",
+                    Y: 350
+                },
+                ignoreGaggedMembersToggle: {
+                    type: "toggle",
+                    default: false,
+                    description: "Also understand if those are speech impaired",
+                    Y: 750
+                }
+            },
+            load(state) {
+                hookFunction("SpeechGarble", 2, (args, next) => {
+                    const C = args[0];
+                    if (state.isEnforced &&
+                        state.customData &&
+                        C.MemberNumber != null &&
+                        state.customData.whitelistedMembers
+                            .filter(m => m !== Player.MemberNumber)
+                            .includes(C.MemberNumber) &&
+                        (C.CanTalk() || state.customData.ignoreGaggedMembersToggle)) {
+                        return args[1];
+                    }
+                    return next(args);
+                }, ModuleCategory.Rules);
+            }
+        });
         registerRule("alt_restrict_sight", {
             name: "Sensory deprivation: Sight",
             icon: "Icons/Swap.png",
@@ -4763,6 +4820,75 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     }
                     return Math.min(res, ((_a = Player.GameplaySettings) === null || _a === void 0 ? void 0 : _a.SensDepChatLog) === "SensDepLight" ? 2 : 3);
                 }, ModuleCategory.Rules);
+            }
+        });
+        registerRule("alt_seeing_whitelist", {
+            name: "Seeing whitelist",
+            icon: "Icons/Swap.png",
+            loggable: false,
+            shortDescription: "of members whom PLAYER_NAME can always see",
+            longDescription: "This rule defines a list of members whose appearance can always be seen normally by PLAYER_NAME - independent of any blinding items or seeing impairing BCX rules on PLAYER_NAME.",
+            defaultLimit: ConditionsLimit.normal,
+            dataDefinition: {
+                whitelistedMembers: {
+                    type: "memberNumberList",
+                    default: [],
+                    description: "Members still seen while under blindness:"
+                }
+            },
+            load(state) {
+                let noBlind = false;
+                hookFunction("DrawCharacter", 0, (args, next) => {
+                    const C = args[0];
+                    if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+                        noBlind = true;
+                    }
+                    next(args);
+                    noBlind = false;
+                }, ModuleCategory.Rules);
+                hookFunction("ChatRoomClickCharacter", 0, (args, next) => {
+                    const C = args[0];
+                    if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+                        noBlind = true;
+                    }
+                    next(args);
+                    noBlind = false;
+                }, ModuleCategory.Rules);
+                hookFunction("ChatRoomMessage", 0, (args, next) => {
+                    var _a;
+                    let C = null;
+                    if (typeof ((_a = args[0]) === null || _a === void 0 ? void 0 : _a.Sender) === "number") {
+                        C = getChatroomCharacter(args[0].Sender);
+                    }
+                    if (C && state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+                        noBlind = true;
+                    }
+                    next(args);
+                    noBlind = false;
+                }, ModuleCategory.Rules);
+                hookFunction("Player.GetBlindLevel", 6, (args, next) => {
+                    if (noBlind)
+                        return 0;
+                    return next(args);
+                }, ModuleCategory.Rules);
+                hookFunction("ChatRoomUpdateDisplay", 0, (args, next) => {
+                    next(args);
+                    if (state.isEnforced && state.customData) {
+                        if (ChatRoomCharacterCount === 1) {
+                            ChatRoomCharacterDrawlist = [Player];
+                        }
+                        ChatRoomSenseDepBypass = true;
+                        for (const C of ChatRoomCharacter) {
+                            if (C.MemberNumber != null && !ChatRoomCharacterDrawlist.includes(C) && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+                                ChatRoomCharacterDrawlist.push(C);
+                            }
+                        }
+                        ChatRoomCharacterDrawlist.sort((a, b) => {
+                            return ChatRoomCharacter.indexOf(a) - ChatRoomCharacter.indexOf(b);
+                        });
+                        ChatRoomCharacterCount = ChatRoomCharacterDrawlist.length;
+                    }
+                });
             }
         });
         registerRule("alt_eyes_fullblind", {
@@ -6135,40 +6261,49 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
 
     function initRules_bc_speech_control() {
         registerRule("speech_specific_sound", {
-            name: "Allow specific sound only",
+            name: "Allow specific sounds only",
             icon: "Icons/Chat.png",
             shortDescription: "such as an animal sound",
-            longDescription: "This rule allows PLAYER_NAME to only communicate using a specific sound pattern in chat messages and whispers. Any variation of it is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
+            longDescription: "This rule allows PLAYER_NAME to only communicate using a list of specific sound patterns in chat messages and whispers. These patterns cannot be mixed in the same message, though. Only one sound from the list per message is valid. That said, any variation of a sound in the list is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
             triggerTexts: {
-                infoBeep: "You are allowed to speak only using a specific sound!",
-                attempt_log: "PLAYER_NAME tried to break a rule to only speak using a specific sound pattern",
-                log: "PLAYER_NAME broke a rule to only speak using a specific sound pattern"
+                infoBeep: "You are allowed to speak only using one of the defined sounds!",
+                attempt_log: "PLAYER_NAME tried to break a rule to only speak using specific sound patterns",
+                log: "PLAYER_NAME broke a rule to only speak using specific sound patterns"
             },
             defaultLimit: ConditionsLimit.normal,
             dataDefinition: {
                 soundWhitelist: {
-                    type: "string",
-                    default: "",
-                    description: "Set the allowed sound:"
+                    type: "stringList",
+                    default: [],
+                    description: "Set the allowed sounds:"
                 }
             },
             init(state) {
                 const check = (msg) => {
                     var _a, _b;
-                    const sound = (_a = state.customData) === null || _a === void 0 ? void 0 : _a.soundWhitelist.toLocaleLowerCase();
-                    if (sound && (msg.type === "Chat" || msg.type === "Whisper")) {
+                    const sounds = (_a = state.customData) === null || _a === void 0 ? void 0 : _a.soundWhitelist;
+                    if (sounds && sounds.length > 0 && (msg.type === "Chat" || msg.type === "Whisper")) {
                         let i = 0;
-                        for (const c of ((_b = msg.noOOCMessage) !== null && _b !== void 0 ? _b : msg.originalMessage).toLocaleLowerCase()) {
-                            if (/\p{L}/igu.test(c)) {
-                                const nx = sound[(i + 1) % sound.length];
-                                if (c === nx) {
-                                    i = (i + 1) % sound.length;
-                                }
-                                else if (c !== sound[i]) {
-                                    return false;
+                        const message = (_b = msg.noOOCMessage) !== null && _b !== void 0 ? _b : msg.originalMessage;
+                        for (let sound of sounds) {
+                            sound = sound.toLocaleLowerCase();
+                            let ok = true;
+                            for (const c of message.toLocaleLowerCase()) {
+                                if (/\p{L}/igu.test(c)) {
+                                    const nx = sound[(i + 1) % sound.length];
+                                    if (c === nx) {
+                                        i = (i + 1) % sound.length;
+                                    }
+                                    else if (c !== sound[i]) {
+                                        ok = false;
+                                        break;
+                                    }
                                 }
                             }
+                            if (ok)
+                                return true;
                         }
+                        return false;
                     }
                     return true;
                 };
@@ -6385,8 +6520,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 });
             }
         });
-        registerRule("speech_restrict_whispering", {
-            name: "Restrict whispering",
+        registerRule("speech_restrict_whisper_send", {
+            name: "Restrict sending whispers",
             icon: "Icons/Chat.png",
             shortDescription: "except to defined roles",
             longDescription: "This rule forbids PLAYER_NAME to whisper anything to most people inside a chat room, except to the defined roles. Also affects whispered OOC messages.",
@@ -6423,6 +6558,53 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         }
                     }
                 });
+            }
+        });
+        registerRule("speech_restrict_whisper_receive", {
+            name: "Restrict recieving whispers",
+            icon: "Icons/Chat.png",
+            loggable: false,
+            shortDescription: "except from defined roles",
+            longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a whisper. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
+            defaultLimit: ConditionsLimit.blocked,
+            dataDefinition: {
+                minimumPermittedRole: {
+                    type: "roleSelector",
+                    default: AccessLevel.whitelist,
+                    description: "Minimum role still allowed to send whisper:",
+                    Y: 480
+                },
+                autoreplyText: {
+                    type: "string",
+                    default: "Your whisper message was blocked automatically by a BCX rule. Please address me publicly.",
+                    description: "Auto replies blocked sender with this:",
+                    Y: 320
+                }
+            },
+            load(state) {
+                hookFunction("ChatRoomMessage", 5, (args, next) => {
+                    const data = args[0];
+                    if (isObject$1(data) &&
+                        typeof data.Content === "string" &&
+                        data.Content !== "" &&
+                        data.Type === "Whisper" &&
+                        typeof data.Sender === "number" &&
+                        state.isEnforced &&
+                        state.customData) {
+                        const character = getChatroomCharacter(data.Sender);
+                        if (character && getCharacterAccessLevel(character) >= state.customData.minimumPermittedRole) {
+                            if (state.customData.autoreplyText) {
+                                ServerSend("ChatRoomChat", {
+                                    Content: `[Automatic reply by BCX]\n${state.customData.autoreplyText}`,
+                                    Type: "Whisper",
+                                    Target: data.Sender
+                                });
+                            }
+                            return;
+                        }
+                    }
+                    return next(args);
+                }, ModuleCategory.Rules);
             }
         });
         registerRule("speech_restrict_beep_send", {
@@ -6466,7 +6648,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             icon: "Icons/Chat.png",
             loggable: false,
             shortDescription: "and beep messages, except from selected members",
-            longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she should have received a beep.",
+            longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep.",
             defaultLimit: ConditionsLimit.blocked,
             dataDefinition: {
                 whitelistedMemberNumbers: {
@@ -6477,7 +6659,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 },
                 autoreplyText: {
                     type: "string",
-                    default: "",
+                    default: "PLAYER_NAME is currently forbidden to receive beeps from you by a BCX rule.",
                     description: "Auto replies blocked sender with this:",
                     Y: 280
                 }
@@ -6496,7 +6678,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                             ServerSend("AccountBeep", {
                                 MemberNumber: data.MemberNumber,
                                 BeepType: "",
-                                Message: `[Automatic message by BCX]\n${state.customData.autoreplyText}`
+                                Message: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`
                             });
                         }
                         state.triggerAttempt({ TARGET_PLAYER: `${data.MemberName} (${data.MemberNumber})` });
@@ -10080,6 +10262,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     return;
                 }
             }
+            const assetGroup = AssetGroupGet(Player.AssetFamily, group);
+            if (!assetGroup) {
+                console.error(`BCX: AssetGroup not found for curse ${group}`, condition);
+                return;
+            }
+            // Pause curses of clothes while in appearance menu
+            if (CurrentScreen === "Appearance" && !isBind(assetGroup))
+                return;
             const curse = condition.data;
             if (curse === null) {
                 const current = InventoryGet(Player, group);
@@ -15614,7 +15804,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     test(a);
                 }
             }
-            console.log("Import groups will be tested", matchedGroups);
             // Then test all required groups to match
             let success = true;
             for (const testedGroup of matchedGroups) {
@@ -15623,7 +15812,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 if (!currentItem) {
                     if (newItem) {
                         success = false;
-                        console.log("Prevent add blocked slot", testedGroup);
                         break;
                     }
                     else {
@@ -15636,7 +15824,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     currentItem.Asset.Name !== newItem.Name ||
                     !itemColorsEquals(currentItem.Color, newItem.Color) ||
                     !isEqual(currentItem.Property, newItem.Property)) {
-                    console.log("Prevent mismatch group", testedGroup);
                     success = false;
                     break;
                 }

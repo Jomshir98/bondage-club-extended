@@ -8,7 +8,7 @@ The extension can, among other things, be considered a continuation of Ace's won
 
 This has several advantages: There is no longer any need to install a browser addon and keep it up-to-date. BCX is a simple script, where the latest version can automatically be run with a loader in the console or via a browser bookmark (see section ['running the script'](#running-the-script)). Moreover, the new design will make it easier to configure and expand the extension with new exciting features. Configuration data is bound to your Bondage Club account and will be shared between different devices, but not between different accounts.
 
-BCX is a complete remake of Jomshir98's previous [JMod](https://github.com/jomshir98/testing) which was basically all about testing features Jomshir developed for the bondage club, before they were even part of any BETAs, such as BEEPs with messages attached or icon-based room movement.
+BCX is a complete remake of Jomshir98's previous [JMod](https://github.com/jomshir98/testing) which was basically all about testing features Jomshir developed for the bondage club, before they were even part of any bondage club betas, such as BEEPs with messages attached or icon-based room movement.
 
 The extension is very modular and highly customizable. These are currently planned modules and their current development status:
 | Module name      | Description                                                                                                      | Development status                                                   |
@@ -24,8 +24,8 @@ The extension is very modular and highly customizable. These are currently plann
 | Miscellaneous    | Other nifty features.                                                                                            | Various features not fitting the previous categories are added here. |
 
 ### Miscellaneous module currently includes:
-- Wardrobe outfit import/export (incl. restraints)
-- Chat typing indicator visible by BCX users
+- Wardrobe outfit import/export (optionally also with worn restraints)
+- Chat typing indicator visible between BCX users
 - Cheats to give special locks/keys, prevent loosing of Mistress status and to prevent random kidnappings, including private NPC ransom
 
 # Running the script
@@ -39,4 +39,4 @@ Associated Discord server:
 
 [![Discord image](https://discordapp.com/api/guilds/842082194209112074/widget.png?style=banner1)](https://discord.gg/SHJMjEh9VH)
 
-**THIS PAGE WAS LAST EDITED ON 29-08-2021**
+**THIS PAGE WAS LAST EDITED ON 1-11-2021**

@@ -241,6 +241,10 @@ type RuleCustomData = {
 	block_tying_others: {
 		onlyMoreDominantsToggle: boolean;
 	},
+	block_keyuse_others: {
+		allowOwnerLocks: boolean;
+		allowLoverLocks: boolean;
+	},
 	alt_restrict_hearing: {
 		deafeningStrength: "light" | "medium" | "heavy";
 	},

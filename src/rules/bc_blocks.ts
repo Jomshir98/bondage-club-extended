@@ -89,7 +89,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid using keys on self",
 		icon: icon_restrictions,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-		longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on her own body. (Others still can unlock her locks normally)",
+		longDescription: "This rule forbids PLAYER_NAME to unlock any locked item on her own body. Note: Despite the name, this rule also blocks unlocking locks that don't require a key (e.g. exclusive lock). However, locks that can be unlocked in other ways (timer locks by removing time, code/password locks by entering correct code) can still be unlocked by PLAYER_NAME. Others can still unlock her items on her normally.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a key on items on your body!",
 			attempt_log: "PLAYER_NAME tried to use a key on a worn item, which was forbidden",
@@ -130,37 +130,68 @@ export function initRules_bc_blocks() {
 	registerRule("block_keyuse_others", {
 		name: "Forbid using keys on others",
 		icon: icon_restrictions,
-		longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on other club members.",
+		longDescription: "This rule forbids PLAYER_NAME to unlock any locked item on other club members, with options to still allow unlocking of owner and/or lover locks and items. Note: Despite the name, this rule also blocks unlocking locks that don't require a key (e.g. exclusive lock). However, locks that can be unlocked in other ways (timer locks by removing time, code/password locks by entering correct code) can still be unlocked by PLAYER_NAME.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a key on other's items!",
 			attempt_log: "PLAYER_NAME tried to use a key to unlock TARGET_PLAYER's item, which was forbidden",
 			log: "PLAYER_NAME used a key to unlock TARGET_PLAYER's item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			allowOwnerLocks: {
+				type: "toggle",
+				default: false,
+				description: "Still allow unlocking owner locks or items"
+			},
+			allowLoverLocks: {
+				type: "toggle",
+				default: false,
+				description: "Still allow unlocking lover locks or items",
+				Y: 530
+			}
+		},
 		load(state) {
+			let ignore = false;
 			OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
 			hookFunction("DialogCanUnlock", 0, (args, next) => {
 				const C = args[0] as Character;
+				const Item = args[1] as Item;
+				const lock = InventoryGetLock(Item);
+				if (state.customData &&
+					C.ID !== 0 &&
+					Item != null &&
+					Item.Asset != null &&
+					(
+						(state.customData.allowOwnerLocks && (Item.Asset.OwnerOnly || lock?.Asset.OwnerOnly) && C.IsOwnedByPlayer()) ||
+						(state.customData.allowLoverLocks && (Item.Asset.LoverOnly || lock?.Asset.LoverOnly) && C.IsLoverOfPlayer())
+					)
+				) {
+					ignore = true;
+					return next(args);
+				}
+				ignore = false;
 				if (C.ID !== 0 && state.isEnforced)
 					return false;
 				return next(args);
 			}, ModuleCategory.Rules);
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
-				if (C.ID !== 0 && state.isEnforced && DialogMenuButton.includes("InspectLock")) {
-					DialogMenuButton.splice(-1, 0, "BCX_UnlockDisabled");
+				if (!ignore) {
+					const C = args[0] as Character;
+					if (C.ID !== 0 && state.isEnforced && DialogMenuButton.includes("InspectLock")) {
+						DialogMenuButton.splice(-1, 0, "BCX_UnlockDisabled");
+					}
 				}
 			}, ModuleCategory.Rules);
 			hookDialogMenuButtonClick("Unlock", (C) => {
-				if (C.ID !== 0 && state.inEffect) {
+				if (!ignore && C.ID !== 0 && state.inEffect) {
 					state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
 				}
 				return false;
 			});
 			hookDialogMenuButtonClick("BCX_UnlockDisabled", (C) => {
-				if (C.ID !== 0 && state.inEffect) {
+				if (!ignore && C.ID !== 0 && state.inEffect) {
 					state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
 				}
 				return false;

@@ -145,6 +145,7 @@ declare function WardrobeAssetBundle(A: Item): ItemBundle;
 declare function InventoryAdd(C: Character, NewItemName: string, NewItemGroup: string, Push?: boolean): void;
 declare function InventoryDelete(C: Character, DelItemName: string, DelItemGroup: string, Push?: boolean): void;
 declare function InventoryGet(C: Character, AssetGroup: string): Item | null;
+declare function InventoryGetLock(Item: Item): Item | null;
 declare function InventoryRemove(C: Character, AssetGroup: string, Refresh?: boolean): void;
 declare function InventoryItemHasEffect(Item: Item, Effect?: string, CheckProperties?: boolean): boolean;
 

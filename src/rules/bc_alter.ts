@@ -5,6 +5,7 @@ import { hookFunction } from "../patching";
 import { InfoBeep } from "../utilsClub";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
+import { isObject } from "../utils";
 
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
@@ -241,6 +242,20 @@ export function initRules_bc_alter() {
 			}
 		},
 		load(state) {
+			hookFunction("ServerSend", 0, (args, next) => {
+				if (args[0] === "ChatRoomChat" && isObject(args[1]) && typeof args[1].Content === "string" && args[1].Type === "Activity" && state.isEnforced) {
+					if (args[1].Content.startsWith("OrgasmFailPassive")) {
+						args[1].Content = "OrgasmFailPassive0";
+					} else if (args[1].Content.startsWith("OrgasmFailTimeout")) {
+						args[1].Content = "OrgasmFailTimeout2";
+					} else if (args[1].Content.startsWith("OrgasmFailResist")) {
+						args[1].Content = "OrgasmFailResist2";
+					} else if (args[1].Content.startsWith("OrgasmFailSurrender")) {
+						args[1].Content = "OrgasmFailSurrender2";
+					}
+				}
+				next(args);
+			});
 			hookFunction("ActivityOrgasmPrepare", 5, (args, next) => {
 				const C = args[0] as Character;
 				if (state.isEnforced && state.customData && C.ID === 0) {

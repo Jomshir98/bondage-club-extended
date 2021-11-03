@@ -273,7 +273,7 @@ export class ChatroomCharacter {
 
 	conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
-			if (!guard_ConditionsCategoryPublicData(category, data)) {
+			if (!guard_ConditionsCategoryPublicData(category, data, true)) {
 				throw new Error("Bad data");
 			}
 			return data;

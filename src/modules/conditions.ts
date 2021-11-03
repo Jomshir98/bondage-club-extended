@@ -58,7 +58,7 @@ export function guard_ConditionsConditionPublicData<C extends ConditionsCategori
 		handler.validatePublicData(condition, d.data);
 }
 
-export function guard_ConditionsCategoryPublicData<C extends ConditionsCategories>(category: C, data: unknown): data is ConditionsCategoryPublicData<C> {
+export function guard_ConditionsCategoryPublicData<C extends ConditionsCategories>(category: C, data: unknown, allowInvalidConditionRemoval: boolean = false): data is ConditionsCategoryPublicData<C> {
 	const d = data as ConditionsCategoryPublicData;
 	const handler = conditionHandlers.get(category);
 	if (!handler)
@@ -72,7 +72,15 @@ export function guard_ConditionsCategoryPublicData<C extends ConditionsCategorie
 		AccessLevel[d.highestRoleInRoom] !== undefined &&
 		isObject(d.conditions) &&
 		Object.entries(d.conditions).every(
-			([condition, conditionData]) => guard_ConditionsConditionPublicData(category, condition, conditionData)
+			([condition, conditionData]) => {
+				const res = guard_ConditionsConditionPublicData(category, condition, conditionData);
+				if (!res && allowInvalidConditionRemoval) {
+					console.warn(`BCX: Removing invalid ${condition}:${category} condition from public data`, conditionData);
+					delete d.conditions[condition];
+					return true;
+				}
+				return res;
+			}
 		) &&
 		(d.timer === null || typeof d.timer === "number") &&
 		typeof d.timerRemove === "boolean" &&

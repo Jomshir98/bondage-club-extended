@@ -778,13 +778,13 @@ export class ModuleRules extends BaseModule {
 
 				if (descriptor.dataDefinition) {
 					if (!isObject(info.customData)) {
-						console.error(`BCX: Bad custom data for rule ${rule}, removing it`, info);
-						return false;
+						console.warn(`BCX: Missing custom data for rule ${rule}, fixing`);
+						info.customData = {};
 					}
 					for (const k of Object.keys(info.customData)) {
 						if (!(descriptor.dataDefinition as Record<string, any>)[k]) {
-							console.error(`BCX: Unknown custom data attribute '${k}' for rule ${rule}, removing it`, info);
-							return false;
+							console.warn(`BCX: Unknown custom data attribute '${k}' for rule ${rule}, cleaning up`, info.customData[k]);
+							delete info.customData[k];
 						}
 					}
 					for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(descriptor.dataDefinition)) {
@@ -794,8 +794,8 @@ export class ModuleRules extends BaseModule {
 							return false;
 						}
 						if (!handler.validate(info.customData[k], def)) {
-							console.error(`BCX: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, removing it`, info);
-							return false;
+							console.warn(`BCX: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, replacing with default`, info.customData[k]);
+							info.customData[k] = (typeof def.default === "function" ? def.default() : def.default);
 						}
 					}
 				} else if (info.customData !== undefined) {

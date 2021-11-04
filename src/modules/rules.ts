@@ -853,13 +853,22 @@ export class ModuleRules extends BaseModule {
 				const definition = RulesGetDisplayDefinition(rule);
 				const visibleName = definition.name;
 
+				const didActiveChange = newData.active !== oldData.active;
 				const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
 				const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+				const didEnforcementChange = newData.data.enforce !== oldData.data.enforce;
+				const didLoggingChange = newData.data.log !== oldData.data.log;
 				const changeEvents: string[] = [];
+				if (didActiveChange)
+					changeEvents.push("active state");
 				if (didTimerChange)
 					changeEvents.push("timer");
 				if (didTriggerChange)
 					changeEvents.push("trigger condition");
+				if (didEnforcementChange)
+					changeEvents.push("enforcement");
+				if (didLoggingChange)
+					changeEvents.push("logging");
 				if (definition.dataDefinition) {
 					for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
 						if (!isEqual(oldData.data.customData?.[k], newData.data.customData?.[k])) {
@@ -872,6 +881,9 @@ export class ModuleRules extends BaseModule {
 						`${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s '${visibleName}' rule`);
 				}
 				if (!character.isPlayer()) {
+					if (didActiveChange) {
+						ChatRoomSendLocal(`${character} ${newData.active ? "reactivated" : "deactivated"} the '${visibleName}' rule`, undefined, character.MemberNumber);
+					}
 					if (newData.timer !== oldData.timer)
 						if (newData.timer === null) {
 							ChatRoomSendLocal(`${character} disabled the timer of the '${visibleName}' rule`, undefined, character.MemberNumber);
@@ -906,6 +918,12 @@ export class ModuleRules extends BaseModule {
 								ChatRoomSendLocal(`${character} deactivated all trigger conditions of the '${visibleName}' rule. The rule will now always trigger, while it is active`, undefined, character.MemberNumber);
 							}
 						}
+					if (didEnforcementChange) {
+						ChatRoomSendLocal(`${character} ${newData.data.enforce ? "enabled enforcement" : "stopped enforcement"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
+					}
+					if (didLoggingChange) {
+						ChatRoomSendLocal(`${character} ${newData.data.log ? "enabled logging" : "stopped logging"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
+					}
 					if (definition.dataDefinition) {
 						for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
 							if (!isEqual(oldData.data.customData?.[k], newData.data.customData?.[k])) {

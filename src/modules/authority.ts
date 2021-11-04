@@ -5,7 +5,7 @@ import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
-import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, ModuleInitPhase, MODULE_NAMES, Preset } from "../constants";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber, registerWhisperCommand } from "./commands";
@@ -282,10 +282,14 @@ export function editRole(role: "owner" | "mistress", action: "add" | "remove", t
 		const targetDescriptor = character.MemberNumber === target ? "herself" : `${getCharacterName(target, "[unknown name]")} (${target})`;
 		const msg = action === "add" ?
 			`${character} added ${targetDescriptor} as ${role}.` :
-			`${character} removed ${targetDescriptor} from ${role} role.`;
+			`${character} removed ${targetDescriptor} from being ${role}.`;
 		logMessage("authority_roles_change", LogEntryType.plaintext, msg);
 		if (!character.isPlayer()) {
 			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+		}
+		if (action === "add" && character.MemberNumber !== target) {
+			const user = character.isPlayer() ? "her" : `${Player.Name}'s (${Player.MemberNumber})`;
+			ChatRoomActionMessage(`${character} added you as ${user} BCX ${role}.`, target);
 		}
 	}
 
@@ -568,8 +572,8 @@ export class ModuleAuthority extends BaseModule {
 					if (typeof level === "number") {
 						respond(setPermissionMinAccess(subcommand as BCX_Permissions, level, sender) ? "Ok!" : COMMAND_GENERIC_ERROR);
 					} else {
-						respond(`Unknown AccessLevel '${subcommand3}';\n`+
-						`expected one of: ${Player.Name}, clubowner, owner, lover, mistress, whitelist, friend, public`);
+						respond(`Unknown AccessLevel '${subcommand3}';\n` +
+							`expected one of: ${Player.Name}, clubowner, owner, lover, mistress, whitelist, friend, public`);
 					}
 				} else {
 					respond(`Unknown setting '${subcommand2}'; expected 'selfaccess' or 'lowestaccess'`);

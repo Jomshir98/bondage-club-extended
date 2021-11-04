@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.1-d09d5129";const BCX_DEVEL=false;
+    const BCX_VERSION="0.6.2-775bcb10";const BCX_DEVEL=false;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -322,6 +322,7 @@ window.BCX_Loaded = false;
         ManagementCannotBeReleasedOnline: ["D1ACE212"],
         PrivateRansomStart: ["0E968EDD", "511E91C6"],
         ServerAccountBeep: ["2D918B69", "D2802EE7"],
+        ServerSend: ["90A61F57"],
         SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
         ValidationResolveModifyDiff: ["C2FE52D3"]
     };
@@ -3723,13 +3724,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     let firstTimeHelp = null;
     function CommandsShowFirstTimeHelp() {
         if (!firstTimeHelp && modStorage.chatShouldDisplayFirstTimeHelp) {
-            firstTimeHelp = ChatRoomSendLocal(`BCX also provides helpful chat commands.\n` +
+            firstTimeHelp = ChatRoomSendLocal(`[ BCX commands tutorial ]\n` +
+                `BCX also provides helpful chat commands.\n` +
                 `All commands start with a dot ( . )\n` +
                 `The commands also support auto-completion: While writing a command, press 'Tab' to try automatically completing the currently typed word.\n` +
                 `Other club members can also use commands of your BCX, without needing BCX themselves. They will get a list of all commands they have permission using by whispering '!help' ( ! instead of . ) to you.\n` +
                 `Note: Messages colored like this text can only be seen by you and no one else.\n` +
                 `\n` +
-                `To dismiss this message, write '.he' and press 'Tab' to complete it to '.help', which will show you list of available commands.`);
+                `To complete this tutorial, use '.help' command by writing '.he' and pressing 'Tab' to complete it to '.help', it will show you list of available BCX commands.`);
         }
     }
     function CommandsCompleteFirstTimeHelp() {
@@ -4954,6 +4956,23 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
             },
             load(state) {
+                hookFunction("ServerSend", 0, (args, next) => {
+                    if (args[0] === "ChatRoomChat" && isObject$1(args[1]) && typeof args[1].Content === "string" && args[1].Type === "Activity" && state.isEnforced) {
+                        if (args[1].Content.startsWith("OrgasmFailPassive")) {
+                            args[1].Content = "OrgasmFailPassive0";
+                        }
+                        else if (args[1].Content.startsWith("OrgasmFailTimeout")) {
+                            args[1].Content = "OrgasmFailTimeout2";
+                        }
+                        else if (args[1].Content.startsWith("OrgasmFailResist")) {
+                            args[1].Content = "OrgasmFailResist2";
+                        }
+                        else if (args[1].Content.startsWith("OrgasmFailSurrender")) {
+                            args[1].Content = "OrgasmFailSurrender2";
+                        }
+                    }
+                    next(args);
+                });
                 hookFunction("ActivityOrgasmPrepare", 5, (args, next) => {
                     const C = args[0];
                     if (state.isEnforced && state.customData && C.ID === 0) {
@@ -5390,7 +5409,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Forbid using keys on self",
             icon: icon_restrictions,
             shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
-            longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on her own body. (Others still can unlock her locks normally)",
+            longDescription: "This rule forbids PLAYER_NAME to unlock any locked item on her own body. Note: Despite the name, this rule also blocks unlocking locks that don't require a key (e.g. exclusive lock). However, locks that can be unlocked in other ways (timer locks by removing time, code/password locks by entering correct code) can still be unlocked by PLAYER_NAME. Others can still unlock her items on her normally.",
             triggerTexts: {
                 infoBeep: "You are not allowed to use a key on items on your body!",
                 attempt_log: "PLAYER_NAME tried to use a key on a worn item, which was forbidden",
@@ -5430,37 +5449,65 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         registerRule("block_keyuse_others", {
             name: "Forbid using keys on others",
             icon: icon_restrictions,
-            longDescription: "This rule forbids PLAYER_NAME to use any kind of key on locked items on other club members.",
+            longDescription: "This rule forbids PLAYER_NAME to unlock any locked item on other club members, with options to still allow unlocking of owner and/or lover locks and items. Note: Despite the name, this rule also blocks unlocking locks that don't require a key (e.g. exclusive lock). However, locks that can be unlocked in other ways (timer locks by removing time, code/password locks by entering correct code) can still be unlocked by PLAYER_NAME.",
             triggerTexts: {
                 infoBeep: "You are not allowed to use a key on other's items!",
                 attempt_log: "PLAYER_NAME tried to use a key to unlock TARGET_PLAYER's item, which was forbidden",
                 log: "PLAYER_NAME used a key to unlock TARGET_PLAYER's item, which was forbidden"
             },
             defaultLimit: ConditionsLimit.normal,
+            dataDefinition: {
+                allowOwnerLocks: {
+                    type: "toggle",
+                    default: false,
+                    description: "Still allow unlocking owner locks or items"
+                },
+                allowLoverLocks: {
+                    type: "toggle",
+                    default: false,
+                    description: "Still allow unlocking lover locks or items",
+                    Y: 530
+                }
+            },
             load(state) {
+                let ignore = false;
                 OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
                 RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
                 hookFunction("DialogCanUnlock", 0, (args, next) => {
                     const C = args[0];
+                    const Item = args[1];
+                    const lock = InventoryGetLock(Item);
+                    if (state.customData &&
+                        C.ID !== 0 &&
+                        Item != null &&
+                        Item.Asset != null &&
+                        ((state.customData.allowOwnerLocks && (Item.Asset.OwnerOnly || (lock === null || lock === void 0 ? void 0 : lock.Asset.OwnerOnly)) && C.IsOwnedByPlayer()) ||
+                            (state.customData.allowLoverLocks && (Item.Asset.LoverOnly || (lock === null || lock === void 0 ? void 0 : lock.Asset.LoverOnly)) && C.IsLoverOfPlayer()))) {
+                        ignore = true;
+                        return next(args);
+                    }
+                    ignore = false;
                     if (C.ID !== 0 && state.isEnforced)
                         return false;
                     return next(args);
                 }, ModuleCategory.Rules);
                 hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
                     next(args);
-                    const C = args[0];
-                    if (C.ID !== 0 && state.isEnforced && DialogMenuButton.includes("InspectLock")) {
-                        DialogMenuButton.splice(-1, 0, "BCX_UnlockDisabled");
+                    if (!ignore) {
+                        const C = args[0];
+                        if (C.ID !== 0 && state.isEnforced && DialogMenuButton.includes("InspectLock")) {
+                            DialogMenuButton.splice(-1, 0, "BCX_UnlockDisabled");
+                        }
                     }
                 }, ModuleCategory.Rules);
                 HookDialogMenuButtonClick("Unlock", (C) => {
-                    if (C.ID !== 0 && state.inEffect) {
+                    if (!ignore && C.ID !== 0 && state.inEffect) {
                         state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
                     }
                     return false;
                 });
                 HookDialogMenuButtonClick("BCX_UnlockDisabled", (C) => {
-                    if (C.ID !== 0 && state.inEffect) {
+                    if (!ignore && C.ID !== 0 && state.inEffect) {
                         state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
                     }
                     return false;
@@ -6576,7 +6623,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 },
                 autoreplyText: {
                     type: "string",
-                    default: "Your whisper message was blocked automatically by a BCX rule. Please address me publicly.",
+                    default: "PLAYER_NAME is currently forbidden to receive whispers.",
                     description: "Auto replies blocked sender with this:",
                     Y: 320
                 }
@@ -6595,7 +6642,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         if (character && getCharacterAccessLevel(character) >= state.customData.minimumPermittedRole) {
                             if (state.customData.autoreplyText) {
                                 ServerSend("ChatRoomChat", {
-                                    Content: `[Automatic reply by BCX]\n${state.customData.autoreplyText}`,
+                                    Content: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`,
                                     Type: "Whisper",
                                     Target: data.Sender
                                 });
@@ -6611,7 +6658,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             name: "Restrict sending beep messages",
             icon: "Icons/Chat.png",
             shortDescription: "except to selected members",
-            longDescription: "This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. Sending beeps without a message is not affected.",
+            longDescription: "This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. Sending beeps without a message is not affected. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
             triggerTexts: {
                 infoBeep: "You broke the rule that forbids sending a beep message to TARGET_PLAYER!",
                 attempt_log: "PLAYER_NAME broke a rule by trying to send a beep message to TARGET_PLAYER",
@@ -6623,16 +6670,23 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     type: "memberNumberList",
                     default: [],
                     description: "Member numbers still allowed to be beeped:"
+                },
+                onlyWhenBound: {
+                    type: "toggle",
+                    default: false,
+                    description: "Only in effect when unable to use hands",
+                    Y: 76
                 }
             },
             load(state) {
                 hookFunction("FriendListBeepMenuSend", 5, (args, next) => {
-                    var _a, _b;
+                    var _a;
                     if (state.inEffect &&
-                        ((_a = state.customData) === null || _a === void 0 ? void 0 : _a.whitelistedMemberNumbers) &&
-                        ((_b = document.getElementById("FriendListBeepTextArea")) === null || _b === void 0 ? void 0 : _b.value) &&
+                        state.customData &&
+                        ((_a = document.getElementById("FriendListBeepTextArea")) === null || _a === void 0 ? void 0 : _a.value) &&
                         FriendListBeepTarget != null &&
-                        !state.customData.whitelistedMemberNumbers.includes(FriendListBeepTarget)) {
+                        !state.customData.whitelistedMemberNumbers.includes(FriendListBeepTarget) &&
+                        (!Player.CanInteract() || !state.customData.onlyWhenBound)) {
                         if (state.isEnforced) {
                             state.triggerAttempt({ TARGET_PLAYER: `${getCharacterName(FriendListBeepTarget, "[unknown]")} (${FriendListBeepTarget})` });
                             return;
@@ -6648,7 +6702,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             icon: "Icons/Chat.png",
             loggable: false,
             shortDescription: "and beep messages, except from selected members",
-            longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep.",
+            longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
             defaultLimit: ConditionsLimit.blocked,
             dataDefinition: {
                 whitelistedMemberNumbers: {
@@ -6659,21 +6713,27 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 },
                 autoreplyText: {
                     type: "string",
-                    default: "PLAYER_NAME is currently forbidden to receive beeps from you by a BCX rule.",
+                    default: "PLAYER_NAME is currently forbidden to receive beeps.",
                     description: "Auto replies blocked sender with this:",
                     Y: 280
+                },
+                onlyWhenBound: {
+                    type: "toggle",
+                    default: false,
+                    description: "Only in effect when unable to use hands",
+                    Y: 76
                 }
             },
             load(state) {
                 hookFunction("ServerAccountBeep", 5, (args, next) => {
-                    var _a, _b;
                     const data = args[0];
                     if (isObject$1(data) &&
                         !data.BeepType &&
                         typeof data.MemberNumber === "number" &&
                         state.isEnforced &&
-                        ((_a = state.customData) === null || _a === void 0 ? void 0 : _a.whitelistedMemberNumbers) &&
-                        !((_b = state.customData) === null || _b === void 0 ? void 0 : _b.whitelistedMemberNumbers.includes(data.MemberNumber))) {
+                        state.customData &&
+                        !state.customData.whitelistedMemberNumbers.includes(data.MemberNumber) &&
+                        (!Player.CanInteract() || !state.customData.onlyWhenBound)) {
                         if (state.customData.autoreplyText) {
                             ServerSend("AccountBeep", {
                                 MemberNumber: data.MemberNumber,
@@ -6987,7 +7047,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             (d.requirements === null || guard_ConditionsConditionRequirements(d.requirements)) &&
             handler.validatePublicData(condition, d.data);
     }
-    function guard_ConditionsCategoryPublicData(category, data) {
+    function guard_ConditionsCategoryPublicData(category, data, allowInvalidConditionRemoval = false) {
         const d = data;
         const handler = conditionHandlers.get(category);
         if (!handler)
@@ -7000,7 +7060,15 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             typeof d.highestRoleInRoom === "number" &&
             AccessLevel[d.highestRoleInRoom] !== undefined &&
             isObject$1(d.conditions) &&
-            Object.entries(d.conditions).every(([condition, conditionData]) => guard_ConditionsConditionPublicData(category, condition, conditionData)) &&
+            Object.entries(d.conditions).every(([condition, conditionData]) => {
+                const res = guard_ConditionsConditionPublicData(category, condition, conditionData);
+                if (!res && allowInvalidConditionRemoval) {
+                    console.warn(`BCX: Removing invalid ${condition}:${category} condition from public data`, conditionData);
+                    delete d.conditions[condition];
+                    return true;
+                }
+                return res;
+            }) &&
             (d.timer === null || typeof d.timer === "number") &&
             typeof d.timerRemove === "boolean" &&
             guard_ConditionsConditionRequirements(d.requirements) &&
@@ -13449,13 +13517,13 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     }
                     if (descriptor.dataDefinition) {
                         if (!isObject$1(info.customData)) {
-                            console.error(`BCX: Bad custom data for rule ${rule}, removing it`, info);
-                            return false;
+                            console.warn(`BCX: Missing custom data for rule ${rule}, fixing`);
+                            info.customData = {};
                         }
                         for (const k of Object.keys(info.customData)) {
                             if (!descriptor.dataDefinition[k]) {
-                                console.error(`BCX: Unknown custom data attribute '${k}' for rule ${rule}, removing it`, info);
-                                return false;
+                                console.warn(`BCX: Unknown custom data attribute '${k}' for rule ${rule}, cleaning up`, info.customData[k]);
+                                delete info.customData[k];
                             }
                         }
                         for (const [k, def] of Object.entries(descriptor.dataDefinition)) {
@@ -13465,8 +13533,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                                 return false;
                             }
                             if (!handler.validate(info.customData[k], def)) {
-                                console.error(`BCX: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, removing it`, info);
-                                return false;
+                                console.warn(`BCX: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, replacing with default`, info.customData[k]);
+                                info.customData[k] = (typeof def.default === "function" ? def.default() : def.default);
                             }
                         }
                     }
@@ -13524,13 +13592,22 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     var _a, _b, _c, _d, _e, _f;
                     const definition = RulesGetDisplayDefinition(rule);
                     const visibleName = definition.name;
+                    const didActiveChange = newData.active !== oldData.active;
                     const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
                     const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+                    const didEnforcementChange = newData.data.enforce !== oldData.data.enforce;
+                    const didLoggingChange = newData.data.log !== oldData.data.log;
                     const changeEvents = [];
+                    if (didActiveChange)
+                        changeEvents.push("active state");
                     if (didTimerChange)
                         changeEvents.push("timer");
                     if (didTriggerChange)
                         changeEvents.push("trigger condition");
+                    if (didEnforcementChange)
+                        changeEvents.push("enforcement");
+                    if (didLoggingChange)
+                        changeEvents.push("logging");
                     if (definition.dataDefinition) {
                         for (const [k, def] of Object.entries(definition.dataDefinition)) {
                             if (!isEqual((_a = oldData.data.customData) === null || _a === void 0 ? void 0 : _a[k], (_b = newData.data.customData) === null || _b === void 0 ? void 0 : _b[k])) {
@@ -13542,6 +13619,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         logMessage("rule_change", LogEntryType.plaintext, `${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s '${visibleName}' rule`);
                     }
                     if (!character.isPlayer()) {
+                        if (didActiveChange) {
+                            ChatRoomSendLocal(`${character} ${newData.active ? "reactivated" : "deactivated"} the '${visibleName}' rule`, undefined, character.MemberNumber);
+                        }
                         if (newData.timer !== oldData.timer)
                             if (newData.timer === null) {
                                 ChatRoomSendLocal(`${character} disabled the timer of the '${visibleName}' rule`, undefined, character.MemberNumber);
@@ -13579,6 +13659,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                                     ChatRoomSendLocal(`${character} deactivated all trigger conditions of the '${visibleName}' rule. The rule will now always trigger, while it is active`, undefined, character.MemberNumber);
                                 }
                             }
+                        if (didEnforcementChange) {
+                            ChatRoomSendLocal(`${character} ${newData.data.enforce ? "enabled enforcement" : "stopped enforcement"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
+                        }
+                        if (didLoggingChange) {
+                            ChatRoomSendLocal(`${character} ${newData.data.log ? "enabled logging" : "stopped logging"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
+                        }
                         if (definition.dataDefinition) {
                             for (const [k, def] of Object.entries(definition.dataDefinition)) {
                                 if (!isEqual((_c = oldData.data.customData) === null || _c === void 0 ? void 0 : _c[k], (_d = newData.data.customData) === null || _d === void 0 ? void 0 : _d[k])) {
@@ -14451,10 +14537,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             const targetDescriptor = character.MemberNumber === target ? "herself" : `${getCharacterName(target, "[unknown name]")} (${target})`;
             const msg = action === "add" ?
                 `${character} added ${targetDescriptor} as ${role}.` :
-                `${character} removed ${targetDescriptor} from ${role} role.`;
+                `${character} removed ${targetDescriptor} from being ${role}.`;
             logMessage("authority_roles_change", LogEntryType.plaintext, msg);
             if (!character.isPlayer()) {
                 ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+            }
+            if (action === "add" && character.MemberNumber !== target) {
+                const user = character.isPlayer() ? "her" : `${Player.Name}'s (${Player.MemberNumber})`;
+                ChatRoomActionMessage(`${character} added you as ${user} BCX ${role}.`, target);
             }
         }
         const ownerIndex = modStorage.owners.indexOf(target);
@@ -15052,7 +15142,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         conditionsGetByCategory(category) {
             return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
-                if (!guard_ConditionsCategoryPublicData(category, data)) {
+                if (!guard_ConditionsCategoryPublicData(category, data, true)) {
                     throw new Error("Bad data");
                 }
                 return data;

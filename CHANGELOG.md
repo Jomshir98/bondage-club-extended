@@ -1,5 +1,18 @@
 # BCX Changelog
 
+## 0.6.2
+
+This update includes:
+ - Changed the rule "Control ability to orgasm" to use more general orgasm messages, not mentioning vibrators specifically.
+ - Changed the rule "Forbid using keys on others" to have two new toggles for still allowing to unlock owner and lover items or locks.
+ - Changed the rules "Restrict sending beep messages" and "Restrict recieving beeps" to have the option to only be in effect while hands cannot be used.
+ - Improved the BCX commands tutorial text to make the behavior more clear.
+ - Added a chatroom message that notifies other users when they have been added as someone's BCX owner/mistress.
+
+Fixes:
+ - Fix: Added missing local chat messages and log entries when changing a rule's active state, enforcement state or logging state.
+ - Fixed an incompatibility between different BCX versions when rules were changed between the versions.
+
 ## 0.6.1 "Rules update release"
 
 This update includes:
@@ -37,7 +50,7 @@ This update includes:
 
 Fixes:
  - Fixed a bug which deleted the saved color information of a cursed item, which made it reappear in an unexpected color when triggering the curse would reapply it
- - Compatability fixes with "Bondage Club Tools" extension
+ - Compatibility fixes with "Bondage Club Tools" extension
  - Player presence checkbox now properly detects when it can be used
 
 ## 0.5.2

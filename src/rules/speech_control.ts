@@ -327,7 +327,7 @@ export function initRules_bc_speech_control() {
 			},
 			autoreplyText: {
 				type: "string",
-				default: "Your whisper message was blocked automatically by a BCX rule. Please address me publicly.",
+				default: "PLAYER_NAME is currently forbidden to receive whispers.",
 				description: "Auto replies blocked sender with this:",
 				Y: 320
 			}
@@ -348,7 +348,7 @@ export function initRules_bc_speech_control() {
 					if (character && getCharacterAccessLevel(character) >= state.customData.minimumPermittedRole) {
 						if (state.customData.autoreplyText) {
 							ServerSend("ChatRoomChat", {
-								Content: `[Automatic reply by BCX]\n${state.customData.autoreplyText}`,
+								Content: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`,
 								Type: "Whisper",
 								Target: data.Sender
 							});
@@ -365,7 +365,7 @@ export function initRules_bc_speech_control() {
 		name: "Restrict sending beep messages",
 		icon: "Icons/Chat.png",
 		shortDescription: "except to selected members",
-		longDescription: "This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. Sending beeps without a message is not affected.",
+		longDescription: "This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. Sending beeps without a message is not affected. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
 		triggerTexts: {
 			infoBeep: "You broke the rule that forbids sending a beep message to TARGET_PLAYER!",
 			attempt_log: "PLAYER_NAME broke a rule by trying to send a beep message to TARGET_PLAYER",
@@ -377,15 +377,22 @@ export function initRules_bc_speech_control() {
 				type: "memberNumberList",
 				default: [],
 				description: "Member numbers still allowed to be beeped:"
+			},
+			onlyWhenBound: {
+				type: "toggle",
+				default: false,
+				description: "Only in effect when unable to use hands",
+				Y: 76
 			}
 		},
 		load(state) {
 			hookFunction("FriendListBeepMenuSend", 5, (args, next) => {
 				if (state.inEffect &&
-					state.customData?.whitelistedMemberNumbers &&
+					state.customData &&
 					(document.getElementById("FriendListBeepTextArea") as HTMLTextAreaElement | null)?.value &&
 					FriendListBeepTarget != null &&
-					!state.customData.whitelistedMemberNumbers.includes(FriendListBeepTarget)
+					!state.customData.whitelistedMemberNumbers.includes(FriendListBeepTarget) &&
+					(!Player.CanInteract() || !state.customData.onlyWhenBound)
 				) {
 					if (state.isEnforced) {
 						state.triggerAttempt({ TARGET_PLAYER: `${getCharacterName(FriendListBeepTarget, "[unknown]")} (${FriendListBeepTarget})` });
@@ -403,7 +410,7 @@ export function initRules_bc_speech_control() {
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep.",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {
@@ -414,9 +421,15 @@ export function initRules_bc_speech_control() {
 			},
 			autoreplyText: {
 				type: "string",
-				default: "PLAYER_NAME is currently forbidden to receive beeps from you by a BCX rule.",
+				default: "PLAYER_NAME is currently forbidden to receive beeps.",
 				description: "Auto replies blocked sender with this:",
 				Y: 280
+			},
+			onlyWhenBound: {
+				type: "toggle",
+				default: false,
+				description: "Only in effect when unable to use hands",
+				Y: 76
 			}
 		},
 		load(state) {
@@ -427,8 +440,9 @@ export function initRules_bc_speech_control() {
 					!data.BeepType &&
 					typeof data.MemberNumber === "number" &&
 					state.isEnforced &&
-					state.customData?.whitelistedMemberNumbers &&
-					!state.customData?.whitelistedMemberNumbers.includes(data.MemberNumber)
+					state.customData &&
+					!state.customData.whitelistedMemberNumbers.includes(data.MemberNumber) &&
+					(!Player.CanInteract() || !state.customData.onlyWhenBound)
 				) {
 					if (state.customData.autoreplyText) {
 						ServerSend("AccountBeep", {

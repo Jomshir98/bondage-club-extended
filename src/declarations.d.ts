@@ -287,10 +287,12 @@ type RuleCustomData = {
 	},
 	speech_restrict_beep_send: {
 		whitelistedMemberNumbers: number[];
+		onlyWhenBound: boolean;
 	},
 	speech_restrict_beep_receive: {
 		whitelistedMemberNumbers: number[];
 		autoreplyText: string;
+		onlyWhenBound: boolean;
 	},
 	// greet_order: {
 	// 	toGreetMemberNumbers: number[];

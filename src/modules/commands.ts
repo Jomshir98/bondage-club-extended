@@ -45,13 +45,14 @@ let firstTimeHelp: HTMLDivElement | null = null;
 export function CommandsShowFirstTimeHelp() {
 	if (!firstTimeHelp && modStorage.chatShouldDisplayFirstTimeHelp) {
 		firstTimeHelp = ChatRoomSendLocal(
+			`[ BCX commands tutorial ]\n` +
 			`BCX also provides helpful chat commands.\n` +
 			`All commands start with a dot ( . )\n` +
 			`The commands also support auto-completion: While writing a command, press 'Tab' to try automatically completing the currently typed word.\n` +
 			`Other club members can also use commands of your BCX, without needing BCX themselves. They will get a list of all commands they have permission using by whispering '!help' ( ! instead of . ) to you.\n` +
 			`Note: Messages colored like this text can only be seen by you and no one else.\n` +
 			`\n` +
-			`To dismiss this message, write '.he' and press 'Tab' to complete it to '.help', which will show you list of available commands.`
+			`To complete this tutorial, use '.help' command by writing '.he' and pressing 'Tab' to complete it to '.help', it will show you list of available BCX commands.`
 		);
 	}
 }

@@ -17,13 +17,14 @@ export function initRules_bc_alter() {
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			deafeningStrength: {
-				type: "strengthSelect",
+				type: "listSelect",
+				options: [["light", "Light"], ["medium", "Medium"], ["heavy", "Heavy"]],
 				default: "light",
 				description: "Hearing impairment:"
 			}
 		},
 		load(state) {
-			const strengthMap: Record<RuleCustomDataTypesMap["strengthSelect"], number> = {
+			const strengthMap: Record<string, number> = {
 				light: 1,
 				medium: 2,
 				heavy: 4
@@ -31,7 +32,7 @@ export function initRules_bc_alter() {
 			hookFunction("Player.GetDeafLevel", 1, (args, next) => {
 				let res = next(args);
 				if (state.isEnforced && state.customData) {
-					res += strengthMap[state.customData.deafeningStrength];
+					res += strengthMap[state.customData.deafeningStrength] ?? 0;
 				}
 				return res;
 			}, ModuleCategory.Rules);
@@ -86,13 +87,14 @@ export function initRules_bc_alter() {
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			blindnessStrength: {
-				type: "strengthSelect",
+				type: "listSelect",
+				options: [["light", "Light"], ["medium", "Medium"], ["heavy", "Heavy"]],
 				default: "light",
 				description: "Eyesight impairment:"
 			}
 		},
 		load(state) {
-			const strengthMap: Record<RuleCustomDataTypesMap["strengthSelect"], number> = {
+			const strengthMap: Record<string, number> = {
 				light: 1,
 				medium: 2,
 				heavy: 3
@@ -100,7 +102,7 @@ export function initRules_bc_alter() {
 			hookFunction("Player.GetBlindLevel", 1, (args, next) => {
 				let res = next(args);
 				if (state.isEnforced && state.customData) {
-					res += strengthMap[state.customData.blindnessStrength];
+					res += strengthMap[state.customData.blindnessStrength] ?? 0;
 				}
 				return Math.min(res, Player.GameplaySettings?.SensDepChatLog === "SensDepLight" ? 2 : 3);
 			}, ModuleCategory.Rules);
@@ -236,8 +238,9 @@ export function initRules_bc_alter() {
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			orgasmHandling: {
-				type: "orgasm",
+				type: "listSelect",
 				default: "edge",
+				options: [["edge", "Edge"], ["ruined", "Ruin"], ["noResist", "Prevent resisting"]],
 				description: "Orgasm attempts will be fixed to:"
 			}
 		},

@@ -246,13 +246,13 @@ type RuleCustomData = {
 		allowLoverLocks: boolean;
 	},
 	alt_restrict_hearing: {
-		deafeningStrength: "light" | "medium" | "heavy";
+		deafeningStrength: string;
 	},
 	alt_restrict_sight: {
-		blindnessStrength: "light" | "medium" | "heavy";
+		blindnessStrength: string;
 	},
 	alt_control_orgasms: {
-		orgasmHandling: "edge" | "ruined" | "noResist";
+		orgasmHandling: string;
 	},
 	alt_room_admin_transfer: {
 		minimumRole: import("./modules/authority").AccessLevel;
@@ -319,34 +319,34 @@ type RuleCustomData = {
 };
 
 type RuleCustomDataTypesMap = {
+	listSelect: string;
 	memberNumberList: number[];
 	number: number;
-	orgasm: "edge" | "ruined" | "noResist";
 	poseSelect: string[];
 	roleSelector: import("./modules/authority").AccessLevel;
-	strengthSelect: "light" | "medium" | "heavy";
 	string: string;
 	stringList: string[];
 	textArea: string;
 	toggle: boolean;
 };
 type RuleCustomDataTypes = keyof RuleCustomDataTypesMap;
+type RuleCustomDataTypesOptions = {
+	listSelect: [string, string][];
+};
 
 type RuleCustomDataFilter<U> = {
 	[K in RuleCustomDataTypes]: RuleCustomDataTypesMap[K] extends U ? K : never;
 }[RuleCustomDataTypes];
 
-type RuleCustomDataEntryDefinition = {
-	type: RuleCustomDataTypes;
-	default: RuleCustomDataTypesMap[RuleCustomDataTypes] | (() => RuleCustomDataTypesMap[RuleCustomDataTypes]);
+type RuleCustomDataEntryDefinition<T extends RuleCustomDataTypes = RuleCustomDataTypes> = {
+	type: T;
+	default: RuleCustomDataTypesMap[T] | (() => RuleCustomDataTypesMap[T]);
+	options?: T extends keyof RuleCustomDataTypesOptions ? RuleCustomDataTypesOptions[T] : undefined;
 	description: string;
 	Y?: number;
 };
 
-type RuleCustomDataEntryDefinitionStrict<ID extends keyof RuleCustomData, P extends keyof RuleCustomData[ID]> = RuleCustomDataEntryDefinition & {
-	type: RuleCustomDataFilter<RuleCustomData[ID][P]>;
-	default: RuleCustomData[ID][P] | (() => RuleCustomData[ID][P]);
-};
+type RuleCustomDataEntryDefinitionStrict<ID extends keyof RuleCustomData, P extends keyof RuleCustomData[ID]> = RuleCustomDataEntryDefinition<RuleCustomDataFilter<RuleCustomData[ID][P]>>;
 
 interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 	name: string;

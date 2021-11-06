@@ -8,7 +8,7 @@ import { initRules_bc_blocks } from "../rules/bc_blocks";
 import { initRules_bc_relation_control } from "../rules/relation_control";
 import { initRules_bc_speech_control } from "../rules/speech_control";
 import { initRules_other } from "../rules/other";
-import { capitalizeFirstLetter, clamp, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
+import { capitalizeFirstLetter, clamp, clampWrap, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, DrawImageEx, InfoBeep } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
 import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
@@ -66,6 +66,17 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 	if (rules.has(name)) {
 		throw new Error(`Rule "${name}" already defined!`);
 	}
+	if (data.dataDefinition) {
+		for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(data.dataDefinition)) {
+			const handler = ruleCustomDataHandlers[v.type];
+			if (!handler) {
+				throw new Error(`Unknown handler for ${name}:${k} (${v.type})`);
+			}
+			if (handler.validateOptions && !handler.validateOptions(v.options!)) {
+				throw new Error(`Bad options for ${name}:${k} (${v.type})`);
+			}
+		}
+	}
 	rules.set(name, {
 		...(data as RuleDefinition<BCX_Rule>),
 		state: new RuleState<BCX_Rule>(name, data)
@@ -106,7 +117,11 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 	unload?(def: RuleCustomDataEntryDefinition, key: string): void;
 	run(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string, target: ChatroomCharacter): void;
 	click?(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string, target: ChatroomCharacter): RuleCustomDataTypesMap[type] | undefined;
-};
+} & (type extends keyof RuleCustomDataTypesOptions ? {
+	validateOptions(options: RuleCustomDataTypesOptions[type]): boolean;
+} : {
+	validateOptions?: undefined
+});
 
 const ruleCustomDataHandlerPage: Map<string, number> = new Map();
 // memberNumberList helper variable
@@ -115,6 +130,38 @@ let memberNumberListAutoFill: number | null = null;
 export const ruleCustomDataHandlers: {
 	[type in RuleCustomDataTypes]: RuleCustomDataHandler<type>;
 } = {
+	// element has Y length of 150px (description + elmement plus offset to the next one)
+	listSelect: {
+		validateOptions: options => Array.isArray(options) && options.every(i => Array.isArray(i) && i.length === 2 && i.every(j => typeof j === "string")),
+		validate: (value, def) => typeof value === "string" && def.options!.map(i => i[0]).includes(value),
+		run(def, value, Y) {
+			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
+			const index = def.options!.findIndex(i => i[0] === value);
+			if (index < 0) {
+				throw new Error(`Bad data during listSelect render`);
+			}
+			const next = clampWrap(index + 1, 0, def.options!.length - 1);
+			const prev = clampWrap(index - 1, 0, def.options!.length - 1);
+			MainCanvas.textAlign = "center";
+			DrawBackNextButton(1050, Y + 36, 250, 60,
+				def.options![index][1],
+				"White", "",
+				() => def.options![prev][1],
+				() => def.options![next][1]
+			);
+			MainCanvas.textAlign = "left";
+		},
+		click(def, value, Y) {
+			const index = def.options!.findIndex(i => i[0] === value);
+			if (MouseIn(1050, Y + 36, 125, 60)) {
+				return def.options![clampWrap(index - 1, 0, def.options!.length - 1)][0];
+			}
+			if (MouseIn(1050 + 125, Y + 36, 125, 60)) {
+				return def.options![clampWrap(index + 1, 0, def.options!.length - 1)][0];
+			}
+			return undefined;
+		}
+	},
 	memberNumberList: {
 		validate: value => Array.isArray(value) && value.every(Number.isInteger),
 		onDataChange(def, active, key) {
@@ -168,7 +215,6 @@ export const ruleCustomDataHandlers: {
 					DrawTextFit(getCharacterName(val, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
 			}
-			// TODO: add click event
 			DrawButton(1444, Y + PAGE_SIZE * 70 + 43, 64, 64, "", "White", undefined);
 			DrawImageEx("Icons/Title.png", 1446, Y + PAGE_SIZE * 70 + 43, { Width: 60, Height: 60 });
 			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", "White");
@@ -253,37 +299,6 @@ export const ruleCustomDataHandlers: {
 			ElementRemove(`BCX_RCDH_${key}`);
 		}
 	},
-	// element has Y length of 150px (description + elmement plus offset to the next one)
-	orgasm: {
-		validate: value => value === "edge" || value === "ruined" || value === "noResist",
-		run(def, value, Y) {
-			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
-			const roleSelectionNext: typeof value = value === "edge" ? "ruined" : value === "ruined" ? "noResist" : "edge";
-			const roleSelectionPrev: typeof value = value === "edge" ? "noResist" : value === "ruined" ? "edge" : "ruined";
-			const display: Record<typeof value, string> = {
-				edge: "Edge",
-				ruined: "Ruin",
-				noResist: "Prevent resisting"
-			};
-			MainCanvas.textAlign = "center";
-			DrawBackNextButton(1050, Y + 46, 500, 60,
-				display[value],
-				"White", "",
-				() => display[roleSelectionPrev],
-				() => display[roleSelectionNext]
-			);
-			MainCanvas.textAlign = "left";
-		},
-		click(def, value, Y) {
-			if (MouseIn(1050, Y + 46, 250, 60)) {
-				return value === "edge" ? "noResist" : value === "ruined" ? "edge" : "ruined";
-			}
-			if (MouseIn(1050 + 250, Y + 46, 250, 60)) {
-				return value === "edge" ? "ruined" : value === "ruined" ? "noResist" : "edge";
-			}
-			return undefined;
-		}
-	},
 	poseSelect: {
 		// TODO: stricten
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
@@ -312,32 +327,6 @@ export const ruleCustomDataHandlers: {
 			}
 			if (MouseIn(1050 + 125, Y + 46, 125, 60)) {
 				return value < AccessLevel.public ? value + 1 : AccessLevel.clubowner;
-			}
-			return undefined;
-		}
-	},
-	// element has Y length of 150px (description + elmement plus offset to the next one)
-	strengthSelect: {
-		validate: value => value === "light" || value === "medium" || value === "heavy",
-		run(def, value, Y) {
-			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
-			const roleSelectionNext: typeof value = value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
-			const roleSelectionPrev: typeof value = value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
-			MainCanvas.textAlign = "center";
-			DrawBackNextButton(1050, Y + 36, 250, 60,
-				capitalizeFirstLetter(value),
-				"White", "",
-				() => capitalizeFirstLetter(roleSelectionPrev),
-				() => capitalizeFirstLetter(roleSelectionNext)
-			);
-			MainCanvas.textAlign = "left";
-		},
-		click(def, value, Y) {
-			if (MouseIn(1050, Y + 36, 125, 60)) {
-				return value === "light" ? "heavy" : value === "medium" ? "light" : "medium";
-			}
-			if (MouseIn(1050 + 125, Y + 36, 125, 60)) {
-				return value === "light" ? "medium" : value === "medium" ? "heavy" : "light";
 			}
 			return undefined;
 		}

@@ -71,6 +71,11 @@ export function clamp(value: number, min: number, max: number) {
 	return Math.min(Math.max(value, min), max);
 }
 
+/** Clamp number between two values, wrapping if necessary */
+export function clampWrap(value: number, min: number, max: number): number {
+	return value < min ? max : value > max ? min : value;
+}
+
 /** Formats time in ms into days, hours minutes and seconds - also has a short mode that only shows the largest unit, e.g. 17h */
 export function formatTimeInterval(time: number, mode: "full" | "short" = "full") {
 	let res = "";

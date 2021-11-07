@@ -14,6 +14,9 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
 	AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF", "0D1455A9"],
 	AppearanceGetPreviewImageColor: ["C4BDF19F"],
+	AppearanceMenuBuild: ["264DC3C6"],
+	AppearanceMenuClick: ["187B3371"],
+	AppearanceMenuDraw: ["28FDF65B"],
 	AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
 	AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
 	CharacterAppearanceLoadCharacter: ["3641512F"],
@@ -21,6 +24,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatAdminClick: ["6B460E3D"],
 	ChatAdminLoad: ["EB8AF0DB"],
 	ChatAdminRun: ["CBE642C8"],
+	ChatCreateRun: ["B0A3D236"],
 	ChatRoomAdminAction: ["0C867BF6"],
 	ChatRoomCanChangeClothes: ["87102B7C"],
 	ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8"],
@@ -45,6 +49,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	CheatImport: ["412422CC", "26C67608"],
 	ColorPickerDraw: ["D1E82FB3"],
 	CommandParse: ["12DC018B"],
+	CommonKeyDown: ["A8EC46AB"],
 	CommonSetScreen: ["17692CD7"],
 	DialogCanUnlock: ["634C862B"],
 	DialogClickExpressionMenu: ["5938DDC1"],
@@ -52,7 +57,9 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DialogDrawItemMenu: ["7B1D71E9", "0199F25B", "D832A940"],
 	DialogDrawPoseMenu: ["4B146E82"],
 	DialogFindPlayer: ["32851FF2"],
+	DialogInventoryAdd: ["FD9268E1"],
 	DialogItemClick: ["7039462A", "A08AC13E"],
+	DialogLeaveItemMenu: ["B369F7C0"],
 	DialogMenuButtonBuild: ["1D4265E4", "75E8CCCD"],
 	DialogMenuButtonClick: ["9D8202CC", "8B705620"],
 	DrawCharacter: ["A9C65470"],
@@ -81,6 +88,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ServerAccountBeep: ["2D918B69", "D2802EE7"],
 	ServerSend: ["90A61F57"],
 	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
+	TextGet: ["4DDE5794"],
 	ValidationResolveModifyDiff: ["C2FE52D3"]
 };
 

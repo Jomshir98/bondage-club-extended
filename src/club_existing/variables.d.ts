@@ -12,9 +12,10 @@ declare var AfkTimerEventsList: string[];
 declare var CharacterAppearanceSelection: Character | null;
 declare var CharacterAppearanceMode: string;
 declare var CharacterAppearanceWardrobeText: string;
+declare var AppearanceMenu: any[];
 /** NMod ONLY! */
 declare var AppearanceMode: string;
-
+declare function AppearanceMenuBuild(C: Character): void;
 declare function CharacterAppearanceSetItem(C: Character, Group: string, ItemAsset: Asset | null, NewColor?: string | string[], DifficultyFactor?: number, ItemMemberNumber?: number, Refresh?: boolean): void;
 
 // BackgroundSelection.js
@@ -53,14 +54,21 @@ declare function ElementPositionFix(ElementID: string, Font: any, X: number, Y: 
 declare function ElementRemove(ID: string): void;
 
 // Dialog.js
+declare var StruggleProgress: number;
+declare var DialogColor: any;
 declare var DialogTextDefault: string;
 declare var DialogFacialExpressions: any[];
 declare var DialogFacialExpressionsSelected: number;
 declare var DialogSelfMenuOptions: any[];
 declare var DialogMenuButton: string[];
+declare var DialogActivityMode: boolean;
+declare var DialogItemToLock: any;
+declare var DialogInventory: DialogInventoryItem[];
+declare var DialogItemPermissionMode: boolean;
 declare var CurrentCharacter: Character | null;
 declare var DialogFacialExpressionsSelectedBlindnessLevel: number;
 declare function DialogLeave(): void;
+declare function DialogInventoryBuild(C: Character, Offset?: number, redrawPreviews?: boolean): void;
 declare function DialogFindPlayer(KeyWord: string): string;
 declare function DialogDrawPoseMenu(): void;
 declare function DialogDrawExpressionMenu(): void;
@@ -154,6 +162,7 @@ declare function LogQuery(QueryLogName: string, QueryLogGroup: string): boolean;
 
 // Mouse.js
 declare function MouseIn(Left: number, Top: number, Width: number, Height: number): boolean;
+declare function MouseXIn(Left: number, Width: number): boolean;
 
 // Login.js
 declare function LoginMistressItems(): void;
@@ -164,6 +173,9 @@ declare const ValidationModifiableProperties: string[];
 
 // Text.js
 declare function TextGet(TextTag: string): string;
+
+// Struggle.js
+declare var StruggleLockPickOrder: any;
 
 // Screens/Room/KidnapLeague/KidnapLeague.js
 declare function KidnapLeagueCanStartOnlineBounty(): boolean;

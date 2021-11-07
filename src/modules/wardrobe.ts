@@ -4,6 +4,7 @@ import { hookFunction } from "../patching";
 import { clipboardAvailable } from "../utils";
 
 import isEqual from "lodash-es/isEqual";
+import { RedirectGetImage } from "./miscPatches";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -126,6 +127,30 @@ function PasteListener(ev: ClipboardEvent) {
 	}
 }
 
+let searchBar: HTMLInputElement | null = null;
+
+function enterSearchMode(C: Character) {
+	if (!searchBar) {
+		searchBar = ElementCreateInput("BCXSearch", "text", "", "40");
+		searchBar.oninput = () => {
+			DialogInventoryBuild(C);
+			AppearanceMenuBuild(C);
+		};
+		searchBar.focus();
+		DialogInventoryBuild(C);
+		AppearanceMenuBuild(C);
+	}
+}
+
+function exitSearchMode(C: Character) {
+	if (searchBar) {
+		searchBar.remove();
+		searchBar = null;
+		DialogInventoryBuild(C);
+		AppearanceMenuBuild(C);
+	}
+}
+
 export class ModuleWardrobe extends BaseModule {
 
 	load() {
@@ -191,9 +216,86 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		document.addEventListener("paste", PasteListener);
+
+		//#region Search bar
+
+		RedirectGetImage("Icons/BCX_Search.png", "Icons/Search.png");
+		RedirectGetImage("Icons/BCX_SearchExit.png", "Icons/Remove.png");
+
+		hookFunction("TextGet", 0, (args, next) => {
+			if (args[0] === "BCX_Search") {
+				return "Filter items";
+			} else if (args[0] === "BCX_SearchExit") {
+				return "";
+			}
+			return next(args);
+		});
+
+		hookFunction("AppearanceMenuBuild", 5, (args, next) => {
+			next(args);
+			const C = args[0] as Character;
+			if (CharacterAppearanceMode !== "Cloth") {
+				exitSearchMode(C);
+			} else if (searchBar) {
+				AppearanceMenu = [];
+				if (DialogInventory.length > 9) AppearanceMenu.push("Next");
+				AppearanceMenu.push("BCX_SearchExit");
+				if (!DialogItemPermissionMode) AppearanceMenu.push("Cancel");
+				AppearanceMenu.push("Accept");
+			} else {
+				AppearanceMenu.splice(AppearanceMenu.length - (AppearanceMenu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
+			}
+		});
+
+		hookFunction("AppearanceMenuClick", 4, (args, next) => {
+			const X = 2000 - AppearanceMenu.length * 117;
+			const C = args[0] as Character;
+			for (let B = 0; B < AppearanceMenu.length; B++) {
+				if (MouseXIn(X + 117 * B, 90)) {
+					const Button = AppearanceMenu[B];
+					if (Button === "BCX_Search") {
+						enterSearchMode(C);
+						return;
+					} else if (Button === "BCX_SearchExit") {
+						exitSearchMode(C);
+						return;
+					}
+				}
+			}
+			next(args);
+		});
+
+		hookFunction("DialogInventoryAdd", 5, (args, next) => {
+			if (searchBar) {
+				const item = args[1] as Item;
+				if (!searchBar.value
+					.trim()
+					.toLocaleLowerCase()
+					.split(" ")
+					.every(i =>
+						item.Asset.Description.toLocaleLowerCase().includes(i) ||
+						item.Asset.Name.toLocaleLowerCase().includes(i)
+					)
+				) {
+					return;
+				}
+			}
+			next(args);
+		});
+
+		hookFunction("AppearanceMenuDraw", 0, (args, next) => {
+			if (searchBar) {
+				ElementPositionFix("BCXSearch", 40, 900, 35, 600, 60);
+			}
+			next(args);
+		});
+
+		//#endregion
 	}
 
 	unload() {
 		document.removeEventListener("paste", PasteListener);
+		exitSearchMode(CharacterAppearanceSelection ?? Player);
+		AppearanceMenuBuild(CharacterAppearanceSelection ?? Player);
 	}
 }

@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.2-775bcb10";const BCX_DEVEL=false;
+    const BCX_VERSION="0.6.2-0e44b5c7";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -5317,6 +5317,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             // Cheats
             hookFunction("Player.CanChange", 1, (args, next) => allowMode || next(args));
             hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
+            // Anti-stupid-null
+            hookFunction("DrawCharacter", 100, (args, next) => {
+                if (args[0] != null)
+                    return next(args);
+            });
         }
         run() {
             LoginMistressItems();

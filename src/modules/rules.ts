@@ -5,6 +5,7 @@ import { ModuleCategory, ModuleInitPhase, Preset, ConditionsLimit } from "../con
 import { moduleInitPhase } from "../moduleManager";
 import { initRules_bc_alter } from "../rules/bc_alter";
 import { initRules_bc_blocks } from "../rules/bc_blocks";
+import { initRules_bc_settings } from "../rules/bc_settings";
 import { initRules_bc_relation_control } from "../rules/relation_control";
 import { initRules_bc_speech_control } from "../rules/speech_control";
 import { initRules_other } from "../rules/other";
@@ -74,6 +75,10 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 			}
 			if (handler.validateOptions && !handler.validateOptions(v.options!)) {
 				throw new Error(`Bad options for ${name}:${k} (${v.type})`);
+			}
+			const defaultValue = typeof v.default === "function" ? v.default() : v.default;
+			if (!handler.validate(defaultValue, v)) {
+				throw new Error(`Default doesn't validate for ${name}:${k} (${v.type})`);
 			}
 		}
 	}
@@ -981,6 +986,7 @@ export class ModuleRules extends BaseModule {
 		// Init individual rules
 		initRules_bc_blocks();
 		initRules_bc_alter();
+		initRules_bc_settings();
 		initRules_bc_relation_control();
 		initRules_bc_speech_control();
 		initRules_other();

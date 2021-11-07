@@ -229,6 +229,25 @@ type BCX_Rule =
 	| "other_constant_reminder"
 	// | "restrict_console_usage"
 	// | "track_BCX_activation"
+	| "setting_item_permission"
+	| "setting_forbid_lockpicking"
+	| "setting_forbid_SP_rooms"
+	| "setting_forbid_safeword"
+	| "setting_arousal_meter"
+	| "setting_block_vibe_modes"
+	| "setting_arousal_stutter"
+	| "setting_show_afk"
+	| "setting_show_wardrobe_use"
+	| "setting_allow_body_mod"
+	| "setting_forbid_cosplay_change"
+	| "setting_sensdep"
+	| "setting_hide_non_adjecent"
+	| "setting_blind_room_garbling"
+	| "setting_relog_keeps_restraints"
+	| "setting_leashed_roomchange"
+	| "setting_room_rejoin"
+	| "setting_plug_vibe_events"
+	| "setting_upsidedown_view"
 	;
 
 type RuleCustomData = {
@@ -315,6 +334,67 @@ type RuleCustomData = {
 	other_constant_reminder: {
 		reminderText: string;
 		reminderFrequency: number;
+	},
+	setting_item_permission: {
+		value: string;
+	},
+	setting_forbid_lockpicking: {
+		value: boolean;
+	},
+	setting_forbid_SP_rooms: {
+		value: boolean;
+	},
+	setting_forbid_safeword: {
+		value: boolean;
+	},
+	setting_arousal_meter: {
+		active: string;
+		visible: string;
+	},
+	setting_block_vibe_modes: {
+		value: boolean;
+	},
+	setting_arousal_stutter: {
+		value: string;
+	},
+	setting_show_afk: {
+		value: boolean;
+	},
+	setting_show_wardrobe_use: {
+		value: boolean;
+	},
+	setting_allow_body_mod: {
+		value: boolean;
+	},
+	setting_forbid_cosplay_change: {
+		value: boolean;
+	},
+	setting_sensdep: {
+		value: string;
+		disableExamine: boolean;
+		hideMessages: boolean;
+	},
+	setting_hide_non_adjecent: {
+		value: boolean;
+	},
+	setting_blind_room_garbling: {
+		value: boolean;
+	},
+	setting_relog_keeps_restraints: {
+		value: boolean;
+	},
+	setting_leashed_roomchange: {
+		value: boolean;
+	},
+	setting_room_rejoin: {
+		value: boolean;
+		remakeRooms: boolean;
+	},
+	setting_plug_vibe_events: {
+		value: boolean;
+	},
+	setting_upsidedown_view: {
+		value: boolean;
 	}
 };
 

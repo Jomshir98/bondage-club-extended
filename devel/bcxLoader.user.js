@@ -9,7 +9,7 @@
 // @match        https://*.bondage-europe.com/*/BondageClub/*
 // @homepage     https://github.com/jomshir98/bondage-club-extended#readme
 // @source       https://github.com/jomshir98/bondage-club-extended
-// @downloadURL  https://jomshir98.github.io/bondage-club-extended/devel/bcxLoader.user.js
+// @downloadURL  https://jomshir98.github.io/bondage-club-extended/bcxLoader.user.js
 // @run-at       document-end
 // @grant        none
 // ==/UserScript==
@@ -20,7 +20,7 @@ setTimeout(
 			let n = document.createElement("script");
 			n.setAttribute("language", "JavaScript");
 			n.setAttribute("crossorigin", "anonymous");
-			n.setAttribute("src", "https://jomshir98.github.io/bondage-club-extended/devel/bcx.js?_=" + Date.now());
+			n.setAttribute("src", "https://jomshir98.github.io/bondage-club-extended/bcx.js?_=" + Date.now());
 			n.onload = () => n.remove();
 			document.head.appendChild(n);
 		}

@@ -187,6 +187,13 @@ export class ModuleMiscPatches extends BaseModule {
 
 		hookFunction("Player.CanChange", 1, (args, next) => allowMode || next(args));
 		hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
+
+		// Anti-stupid-null
+
+		hookFunction("DrawCharacter", 100, (args, next) => {
+			if (args[0] != null)
+				return next(args);
+		});
 	}
 
 	run() {

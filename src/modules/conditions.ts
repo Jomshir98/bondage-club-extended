@@ -9,7 +9,7 @@ import { BaseModule } from "./_BaseModule";
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
-import { AccessLevel, checkPermissionAccess, getCharacterAccessLevel } from "./authority";
+import { AccessLevel, checkPermissionAccess, getHighestRoleInRoom } from "./authority";
 import { COMMAND_GENERIC_ERROR, Command_parseTime, Command_pickAutocomplete, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber } from "./commands";
 import { getCharacterName } from "../utilsClub";
 
@@ -17,6 +17,10 @@ const CONDITIONS_CHECK_INTERVAL = 2_000;
 
 export function guard_ConditionsConditionRequirements(data: unknown): data is ConditionsConditionRequirements {
 	return isObject(data) &&
+		(
+			data.orLogic === undefined ||
+			data.orLogic === true
+		) &&
 		(
 			data.room === undefined ||
 			isObject(data.room) &&
@@ -68,8 +72,13 @@ export function guard_ConditionsCategoryPublicData<C extends ConditionsCategorie
 		typeof d.access_limited === "boolean" &&
 		typeof d.access_configure === "boolean" &&
 		typeof d.access_changeLimits === "boolean" &&
-		typeof d.highestRoleInRoom === "number" &&
-		AccessLevel[d.highestRoleInRoom] !== undefined &&
+		(
+			d.highestRoleInRoom === null ||
+			(
+				typeof d.highestRoleInRoom === "number" &&
+				AccessLevel[d.highestRoleInRoom] !== undefined
+			)
+		) &&
 		isObject(d.conditions) &&
 		Object.entries(d.conditions).every(
 			([condition, conditionData]) => {
@@ -173,7 +182,7 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		access_limited: checkPermissionAccess(handler.permission_limited, requester),
 		access_configure: checkPermissionAccess(handler.permission_configure, requester),
 		access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
-		highestRoleInRoom: AccessLevel.public,
+		highestRoleInRoom: getHighestRoleInRoom(),
 		conditions: {},
 		timer: data.timer ?? null,
 		timerRemove: data.timerRemove ?? false,
@@ -183,12 +192,6 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		},
 		requirements: cloneDeep(data.requirements)
 	};
-	for (const char of getAllCharactersInRoom()) {
-		const role = getCharacterAccessLevel(char);
-		if (role !== AccessLevel.self && role < res.highestRoleInRoom) {
-			res.highestRoleInRoom = role;
-		}
-	}
 	for (const [condition, conditionData] of Object.entries(data.conditions)) {
 		res.conditions[condition] = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData);
 	}
@@ -326,6 +329,12 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	conditionData.active = data.active;
 	if (data.requirements) {
 		conditionData.requirements = data.requirements;
+		// Default back to "AND", if requirements are empty
+		const requirements = conditionData.requirements;
+		const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
+		if (requirements.orLogic && !hasAnyRequirement) {
+			delete requirements.orLogic;
+		}
 	} else {
 		delete conditionData.requirements;
 	}
@@ -358,6 +367,12 @@ export function ConditionsCategoryUpdate<C extends ConditionsCategories>(categor
 		return false;
 	const oldData = character && ConditionsGetCategoryPublicData(category, character);
 	conditionData.requirements = data.requirements;
+	// Default back to "AND", if requirements are empty
+	const requirements = conditionData.requirements;
+	const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
+	if (requirements.orLogic && !hasAnyRequirement) {
+		delete requirements.orLogic;
+	}
 	if (data.timer !== null) {
 		conditionData.timer = data.timer;
 	} else {
@@ -376,37 +391,41 @@ export function ConditionsCategoryUpdate<C extends ConditionsCategories>(categor
 	return true;
 }
 
-export function ConditionsEvaluateRequirements(requirements: ConditionsConditionRequirements): boolean {
+export function ConditionsEvaluateRequirements(requirements: ConditionsConditionRequirements, highestRoleInRoom?: AccessLevel | null): boolean {
 	const inChatroom = ServerPlayerIsInChatRoom();
 	const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
+	const results: boolean[] = [];
 	if (requirements.room) {
 		const res = inChatroom &&
 			(requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
-		if (!(requirements.room.inverted ? !res : res))
-			return false;
+		results.push(requirements.room.inverted ? !res : res);
 	}
 	if (requirements.roomName) {
 		const res = inChatroom &&
 			ChatRoomData &&
 			typeof ChatRoomData.Name === "string" &&
 			ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
-		if (!(requirements.roomName.inverted ? !res : res))
-			return false;
+		results.push(requirements.roomName.inverted ? !res : res);
 	}
 	if (requirements.role) {
-		const res = inChatroom &&
-			getAllCharactersInRoom().some(c => !c.isPlayer() && getCharacterAccessLevel(c) <= requirements.role!.role);
-		if (!(requirements.role.inverted ? !res : res))
-			return false;
+		if (highestRoleInRoom === undefined) {
+			highestRoleInRoom = getHighestRoleInRoom();
+		}
+		const res = highestRoleInRoom != null && highestRoleInRoom <= requirements.role.role;
+		results.push(requirements.role.inverted ? !res : res);
 	}
 	if (requirements.player) {
 		const res = inChatroom &&
 			getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player!.memberNumber);
-		if (!(requirements.player.inverted ? !res : res))
-			return false;
+		results.push(requirements.player.inverted ? !res : res);
 	}
 
-	return true;
+	if (results.length === 0)
+		return true;
+	else if (requirements.orLogic)
+		return results.includes(true);
+	else // AND logic
+		return !results.includes(false);
 }
 
 export type ConditionsSubcommand = "setactive" | "triggers" | "globaltriggers" | "timer" | "defaulttimer" | "setlimit";
@@ -430,6 +449,7 @@ set <time> (time in /[0-9]+d [0-9]+h [0-9]+m [0-9]+s/ format, each part optional
 autoremove <yes/no> - Set if the curse is removed when the timer runs out or just disables itself
 
 (global)triggers commands:
+logic <or/and>							If the logic should be OR or AND logic; defaults to AND
 room ignore 							Remove the 'room type'-based trigger condition
 room <is/isnot> <public/private>		Add such a 'room type'-based trigger condition
 roomname ignore							Remove the 'room name'-based trigger condition
@@ -572,7 +592,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		}
 		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]);
 		conditionData.active = active === "yes";
-		respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+		respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 	} else if (subcommand === "triggers") {
 		const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
 		if (!result) {
@@ -591,6 +611,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			} else {
 				const triggers: string[] = [];
 				const r = conditionData.requirements;
+				triggers.push(r.orLogic ? `Logic: OR (at least one)` : `Logic: AND (all of)`);
 				if (r.room) {
 					triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
 				}
@@ -605,7 +626,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 					const name = getCharacterName(r.player.memberNumber, null);
 					triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
 				}
-				if (triggers.length > 0) {
+				if (triggers.length > 1) {
 					return respond(`Current status:\n` +
 						`This ${categorySingular} will trigger under following conditions:\n` +
 						triggers.join("\n")
@@ -626,10 +647,24 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			} else if (!conditionData.requirements) {
 				conditionData.requirements = cloneDeep(categoryData.requirements);
 			}
+		} else if (keyword === "logic") {
+			const logic = (argv[3] || "").toLocaleLowerCase();
+			if (argv.length !== 4 || logic !== "or" && logic !== "and") {
+				return respond(`Usage:\ntriggers <${cshelp}> logic <or/and>`);
+			}
+			if (!conditionData.requirements) {
+				return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${cshelp}> global no`);
+			}
+			if (logic === "or") {
+				conditionData.requirements.orLogic = true;
+			} else {
+				delete conditionData.requirements.orLogic;
+			}
 		} else if (!ConditionsCommandTriggersKeywords.includes(keyword)) {
 			return respond(
 				`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${cshelp}> *' options:\n` +
 				`global <yes/no> - Set the trigger condition of this ${categorySingular} to the global configuration\n` +
+				`logic <or/and>	- Set if the logic should be OR (at least one) or AND (all of) logic; default is AND\n` +
 				`room ignore - Remove the 'room type'-based trigger condition\n` +
 				`room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
 				`roomname ignore - Remove the 'room name'-based trigger condition\n` +
@@ -646,12 +681,13 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			if (ConditionsCommandProcessTriggers(conditionData.requirements, argv.slice(2), sender, respond))
 				return;
 		}
-		respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+		respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 	} else if (subcommand === "globaltriggers") {
 		const configData = ConditionsGetCategoryPublicData(category, sender);
 		if (!argv[1]) {
 			const triggers: string[] = [];
 			const r = configData.requirements;
+			triggers.push(r.orLogic ? `Logic: OR (at least one)` : `Logic: AND (all of)`);
 			if (r.room) {
 				triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
 			}
@@ -666,7 +702,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 				const name = getCharacterName(r.player.memberNumber, null);
 				triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
 			}
-			if (triggers.length > 0) {
+			if (triggers.length > 1) {
 				return respond(`Current status:\n` +
 					`Globally ${category} are set to trigger under following conditions:\n` +
 					triggers.join("\n")
@@ -676,9 +712,20 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 					`No triggers are set globally. ${capitalizeFirstLetter(category)} using global config will now always trigger, if they are active`
 				);
 			}
+		} else if (argv[1].toLocaleLowerCase() === "logic") {
+			const logic = (argv[2] || "").toLocaleLowerCase();
+			if (argv.length !== 3 || logic !== "or" && logic !== "and") {
+				return respond(`Usage:\nglobaltriggers logic <or/and>`);
+			}
+			if (logic === "or") {
+				configData.requirements.orLogic = true;
+			} else {
+				delete configData.requirements.orLogic;
+			}
 		} else if (!ConditionsCommandTriggersKeywords.includes(argv[1].toLocaleLowerCase())) {
 			return respond(
 				`${argv[1] !== "help" ? `Unknown trigger '${argv[1].toLocaleLowerCase()}'. ` : ""}List of possible 'globaltriggers *' options:\n` +
+				`logic <or/and>	- Set if the logic should be OR (at least one) or AND (all of) logic; default is AND\n` +
 				`room ignore - Remove the 'room type'-based trigger condition\n` +
 				`room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
 				`roomname ignore - Remove the 'room name'-based trigger condition\n` +
@@ -734,7 +781,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			}
 			conditionData.timerRemove = autoremove === "yes";
 		}
-		respond(ConditionsUpdate("curses", condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+		respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 	} else if (subcommand === "defaulttimer") {
 		const keyword = (argv[1] || "").toLocaleLowerCase();
 		if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
@@ -780,7 +827,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		const keyword = (argv[2] || "").toLocaleLowerCase();
 		if (keyword !== "normal" && keyword !== "limited" && keyword !== "blocked") {
 			return respond(`Usage:\n` +
-				`!curses setlimit <${cshelp}> <normal/limited/blocked> - Set a limit on certain <${cshelp}>`
+				`setlimit <${cshelp}> <normal/limited/blocked> - Set a limit on certain <${cshelp}>`
 			);
 		}
 		respond(ConditionsSetLimit(category, condition, ConditionsLimit[keyword], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
@@ -816,16 +863,20 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 			return [];
 		}
 		if (argv.length === 3) {
-			return Command_pickAutocomplete(argv[2], ["global", ...ConditionsCommandTriggersKeywords]);
+			return Command_pickAutocomplete(argv[2], ["global", "logic", ...ConditionsCommandTriggersKeywords]);
 		}
 		if (argv[2].toLocaleLowerCase() === "global") {
 			return Command_pickAutocomplete(argv[3], ["yes", "no"]);
+		} else if (argv[2].toLocaleLowerCase() === "logic") {
+			return Command_pickAutocomplete(argv[3], ["and", "or"]);
 		} else if (categoryData.conditions[condition].requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
 			return ConditionsCommandTriggersAutocomplete(argv.slice(2), sender);
 		}
 	} else if (subcommand === "globaltriggers") {
 		if (argv.length === 2) {
-			return Command_pickAutocomplete(argv[2], ConditionsCommandTriggersKeywords);
+			return Command_pickAutocomplete(argv[1], ["logic", ...ConditionsCommandTriggersKeywords]);
+		} else if (argv[1].toLocaleLowerCase() === "logic") {
+			return Command_pickAutocomplete(argv[2], ["and", "or"]);
 		} else if (ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
 			return ConditionsCommandTriggersAutocomplete(argv.slice(1), sender);
 		}

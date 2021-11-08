@@ -1,7 +1,7 @@
 import { moduleInitPhase } from "../moduleManager";
 import { BaseModule } from "./_BaseModule";
 import { capitalizeFirstLetter, isObject } from "../utils";
-import { ChatroomCharacter, getPlayerCharacter } from "../characters";
+import { ChatroomCharacter, getAllCharactersInRoom, getPlayerCharacter } from "../characters";
 import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
@@ -68,6 +68,18 @@ export function getCharacterAccessLevel(character: ChatroomCharacter): AccessLev
 		if (Player.FriendList?.includes(character.MemberNumber)) return AccessLevel.friend;
 	}
 	return AccessLevel.public;
+}
+
+/** Returns the highest role, that is currently in room (except self), `null` if not in room or alone */
+export function getHighestRoleInRoom(): AccessLevel | null {
+	let res: AccessLevel | null = null;
+	for (const char of getAllCharactersInRoom()) {
+		const role = getCharacterAccessLevel(char);
+		if (role !== AccessLevel.self && (!res || role < res)) {
+			res = role;
+		}
+	}
+	return res;
 }
 
 export function checkPermissionAccess(permission: BCX_Permissions, character: ChatroomCharacter): boolean {

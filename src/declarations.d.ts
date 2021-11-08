@@ -105,6 +105,8 @@ interface ConditionsCategorySpecificPublicData {
 }
 
 interface ConditionsConditionRequirements {
+	/** If the conditions should be treated as "OR". Default is "AND" */
+	orLogic?: true;
 	room?: {
 		type: "public" | "private";
 		inverted?: true;
@@ -162,7 +164,7 @@ interface ConditionsCategoryPublicData<category extends ConditionsCategories = C
 	access_limited: boolean;
 	access_configure: boolean;
 	access_changeLimits: boolean;
-	highestRoleInRoom: import("./modules/authority").AccessLevel;
+	highestRoleInRoom: import("./modules/authority").AccessLevel | null;
 	conditions: ConditionsCategoryPublicRecord<category>;
 	/** List of limited/blocked conditions; defaults to normal */
 	limits: { [P in ConditionsCategoryKeys[category]]?: import("./constants").ConditionsLimit };

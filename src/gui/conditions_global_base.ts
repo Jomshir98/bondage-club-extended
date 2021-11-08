@@ -4,6 +4,7 @@ import { GuiSubscreen } from "./subscreen";
 import { getCharacterName } from "../utilsClub";
 import { AccessLevel } from "../modules/authority";
 import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
+import { ConditionsEvaluateRequirements } from "../modules/conditions";
 
 import cloneDeep from "lodash-es/cloneDeep";
 
@@ -211,7 +212,14 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 		}
 
 		////// condition factors area
-		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions (always, if all unselected):`, 130, 580, "Black", "");
+		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions`, 130, 580, "Black", "");
+		MainCanvas.textAlign = "center";
+		const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
+		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "some of below" : "all of below") : "Always triggering", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
+		MainCanvas.textAlign = "left";
+
+		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";
+		MainCanvas.fillRect(75, 620, 15, 304);
 
 		// In room
 		DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
@@ -263,8 +271,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 		MainCanvas.textAlign = "left";
 		DrawText(`room with role`, 324 + 115 + 14, 780 + 32, "Black", "Gray");
 		if (requirements.role) {
-			const inChatroom = ServerPlayerIsInChatRoom();
-			const res = inChatroom && getAllCharactersInRoom().length > 1 && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
+			const res = this.conditionCategoryData.highestRoleInRoom != null && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
 			MainCanvas.fillStyle = (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000";
 			MainCanvas.fillRect(95, 780, 15, 64);
 		}
@@ -400,6 +407,12 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 
 		////// condition factors area
 		const requirements = data.requirements;
+
+		if (MouseIn(530, 550, 410, 60)) {
+			this.changes = this.makeChangesData();
+			this.changes.requirements!.orLogic = this.changes.requirements!.orLogic ? undefined : true;
+			return true;
+		}
 
 		// In room
 		if (MouseIn(125, 620, 64, 64)) {

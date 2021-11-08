@@ -5,9 +5,10 @@ import { DrawImageEx, getCharacterName } from "../utilsClub";
 import { AccessLevel } from "../modules/authority";
 import { ConditionsLimit } from "../constants";
 import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
+import { GuiMemberSelect } from "./member_select";
+import { ConditionsEvaluateRequirements } from "../modules/conditions";
 
 import cloneDeep from "lodash-es/cloneDeep";
-import { GuiMemberSelect } from "./member_select";
 
 export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends GuiSubscreen {
 
@@ -239,7 +240,14 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		}
 
 		////// condition factors area
-		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions (always, if all unselected):`, 130, 580, "Black", "");
+		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions`, 130, 580, "Black", "");
+		MainCanvas.textAlign = "center";
+		const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
+		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "some of below" : "all of below") : "Always triggering", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
+		MainCanvas.textAlign = "left";
+
+		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";
+		MainCanvas.fillRect(75, 620, 15, 304);
 
 		// In room
 		DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
@@ -291,8 +299,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		MainCanvas.textAlign = "left";
 		DrawText(`room with role`, 324 + 115 + 14, 780 + 32, "Black", "Gray");
 		if (requirements.role) {
-			const inChatroom = ServerPlayerIsInChatRoom();
-			const res = inChatroom && getAllCharactersInRoom().length > 1 && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
+			const res = this.conditionCategoryData.highestRoleInRoom != null && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
 			MainCanvas.fillStyle = (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000";
 			MainCanvas.fillRect(95, 780, 15, 64);
 		}
@@ -304,7 +311,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		MainCanvas.textAlign = "left";
 		DrawText(`room with member`, 324 + 115 + 14, 860 + 32, "Black", "Gray");
 		ElementPositionFix("BCX_ConditionMemberNumber", 40, 768, 860, 162, 60);
-		DrawButton(950, 862, 64, 64, "", disabled || !requirements.player ? "#ddd" : "White", undefined, undefined , disabled || !requirements.player);
+		DrawButton(950, 862, 64, 64, "", disabled || !requirements.player ? "#ddd" : "White", undefined, undefined, disabled || !requirements.player);
 		DrawImageEx("Icons/Title.png", 952, 864, { Width: 60, Height: 60 });
 		if (requirements.player) {
 			const inChatroom = ServerPlayerIsInChatRoom();
@@ -460,6 +467,12 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		////// condition factors area
 		const useGlobalCategorySetting = !(this.changes ? this.changes.requirements : this.conditionData.requirements);
 		const requirements = (this.changes ? this.changes.requirements : this.conditionData.requirements) ?? this.conditionCategoryData.requirements;
+
+		if (MouseIn(530, 550, 410, 60) && !useGlobalCategorySetting) {
+			this.changes = this.makeChangesData();
+			this.changes.requirements!.orLogic = this.changes.requirements!.orLogic ? undefined : true;
+			return true;
+		}
 
 		// In room
 		if (MouseIn(125, 620, 64, 64) && !useGlobalCategorySetting) {

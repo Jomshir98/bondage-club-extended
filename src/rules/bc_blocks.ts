@@ -651,4 +651,18 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 		}
 	});
+
+	registerRule("block_antiblind", {
+		name: "Forbid the antiblind option",
+		icon: icon_restrictions,
+		shortDescription: "BCX's .antiblind command",
+		longDescription: "This rule forbids PLAYER_NAME to use the antiblind command. Antiblind is a BCX feature that enables a BCX user to see the whole chat room and all other characters at all times, even when wearing a blinding item. If PLAYER_NAME should be forbidden to use the command, this rule should be used.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to use the antiblind command!",
+			attempt_log: "PLAYER_NAME tried to use the antiblind command",
+			log: "PLAYER_NAME used the antiblind command"
+		},
+		defaultLimit: ConditionsLimit.normal
+		// Implmented externally
+	});
 }

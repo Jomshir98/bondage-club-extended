@@ -1,6 +1,9 @@
 import { Command_selectCharacter, Command_selectCharacterAutocomplete, Command_selectWornItem, Command_selectWornItemAutocomplete, registerCommandParsed } from "./commands";
 import { BaseModule } from "./_BaseModule";
 import { ChatRoomSendLocal } from "../utilsClub";
+import { registerCommand } from "./commands";
+import { hookFunction } from "../patching";
+import { RulesGetRuleState } from "./rules";
 
 export function InvisibilityEarbuds() {
 	if (InventoryGet(Player, "ItemEars")?.Asset.Name === "BluetoothEarbuds") {
@@ -24,8 +27,39 @@ export function InvisibilityEarbuds() {
 	ChatRoomCharacterUpdate(Player);
 }
 
+//#region Antiblind
+let antiblind: boolean = false;
+
+function toggleAntiblind(): boolean {
+	if (!antiblind) {
+		const blockRule = RulesGetRuleState("block_antiblind");
+		if (blockRule.isEnforced) {
+			blockRule.triggerAttempt();
+			return false;
+		} else if (blockRule.inEffect) {
+			blockRule.trigger();
+		}
+	}
+	antiblind = !antiblind;
+	return true;
+}
+//#endregion
+
 export class ModuleClubUtils extends BaseModule {
 	load() {
+		//#region Antiblind
+		registerCommand("antiblind", "- toggles blind effect prevention to always see despite items", () => {
+			if (toggleAntiblind()) {
+				ChatRoomSendLocal(`Antiblind switched ${antiblind ? "on": "off"}`);
+				return true;
+			}
+			return false;
+		});
+		hookFunction("Player.GetBlindLevel", 9, (args, next) => {
+			if (antiblind) return 0;
+			return next(args);
+		});
+		//#endregion
 		registerCommandParsed("colour", "<source> <item> <target> - Copies color of certain item from source character to target character",
 			(argv) => {
 				if (argv.length !== 3) {

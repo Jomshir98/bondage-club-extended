@@ -486,7 +486,7 @@ export function initRules_bc_speech_control() {
 		name: "Forbid the antigarble option",
 		icon: "Icons/Chat.png",
 		shortDescription: "BCX's .antigarble command",
-		longDescription: "This rule forbids PLAYER_NAME to use the antigarble command. Antigarble is a BCX feature that enables a BCX user to understand muffled voices from other gagged characters or when wearing a deafening item. If PLAYER_NAME should not be able to understand speech-garbled chat, this rule should be used.",
+		longDescription: "This rule forbids PLAYER_NAME to use the antigarble command. Antigarble is a BCX feature that enables a BCX user to understand muffled voices from other gagged characters or when wearing a deafening item. If PLAYER_NAME should be forbidden to use the command, this rule should be used.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the antigarble command!",
 			attempt_log: "PLAYER_NAME tried to use the antigarble command",

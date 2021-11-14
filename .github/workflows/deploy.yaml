@@ -21,11 +21,9 @@ jobs:
 
     - run: yarn test
 
-    - name: Copy to devel
-      run: cp -R dist dist_devel && mv dist_devel dist/devel
-
     - name: Deploy
-      uses: JamesIves/github-pages-deploy-action@4.1.4
+      uses: JamesIves/github-pages-deploy-action@4.1.5
       with:
         branch: gh-pages
         folder: dist
+        clean-exclude: devel

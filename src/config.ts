@@ -63,6 +63,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DialogLeaveItemMenu: ["B369F7C0"],
 	DialogMenuButtonBuild: ["1D4265E4", "75E8CCCD"],
 	DialogMenuButtonClick: ["9D8202CC", "8B705620"],
+	DrawArousalMeter: ["F4BDB7C1"],
 	DrawCharacter: ["A9C65470"],
 	DrawGetImage: ["BEC7B0DA"],
 	ElementIsScrolledToEnd: ["D28B0638"],

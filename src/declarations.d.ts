@@ -198,6 +198,7 @@ type BCX_Rule =
 	| "alt_blindfolds_fullblind"
 	| "alt_always_slow"
 	| "alt_control_orgasms"
+	| "alt_secret_orgasms"
 	| "alt_room_admin_transfer"
 	| "alt_room_admin_limit"
 	| "alt_set_profile_description"

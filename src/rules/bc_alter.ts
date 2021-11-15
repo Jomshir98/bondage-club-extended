@@ -282,6 +282,32 @@ export function initRules_bc_alter() {
 		}
 	});
 
+	registerRule("alt_secret_orgasms", {
+		name: "Secret orgasm progress",
+		icon: "Icons/Swap.png",
+		loggable: false,
+		shortDescription: "unable to see the own arousal meter",
+		longDescription: "This rule prevents PLAYER_NAME from seeing their own arousal meter, even while it is active and working. This means, that it is a surprise to them, when the orgasm (quick-time event) happens. Does not effect other characters being able to see the meter, if club settings allow that.",
+		defaultLimit: ConditionsLimit.limited,
+		load(state) {
+			hookFunction("DrawArousalMeter", 5, (args, next) => {
+				const C = args[0] as Character;
+				if (C.ID === 0 && state.isEnforced)
+					return;
+				return next(args);
+			});
+			hookFunction("ChatRoomClickCharacter", 5, (args, next) => {
+				const C = args[0] as Character;
+				const CharX = args[1];
+				const CharY = args[2];
+				const Zoom = args[3];
+				if (C.ID === 0 && state.isEnforced && MouseIn(CharX + 60 * Zoom, CharY + 400 * Zoom, 80 * Zoom, 100 * Zoom) && !C.ArousalZoom) return;
+				if (C.ID === 0 && state.isEnforced && MouseIn(CharX + 50 * Zoom, CharY + 200 * Zoom, 100 * Zoom, 500 * Zoom) && C.ArousalZoom) return;
+				return next(args);
+			});
+		}
+	});
+
 	registerRule("alt_room_admin_transfer", {
 		name: "Room admin transfer",
 		icon: "Icons/Swap.png",

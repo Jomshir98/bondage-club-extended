@@ -223,7 +223,7 @@ type BCX_Rule =
 	| "speech_restrict_whisper_receive"
 	| "speech_restrict_beep_send"
 	| "speech_restrict_beep_receive"
-	// | "greet_order"
+	| "speech_greet_order"
 	| "speech_block_antigarble"
 	// | "replace_spoken_words"
 	// | "using_honorifics"
@@ -330,9 +330,9 @@ type RuleCustomData = {
 		autoreplyText: string;
 		onlyWhenBound: boolean;
 	},
-	// greet_order: {
-	// 	toGreetMemberNumbers: number[];
-	// },
+	speech_greet_order: {
+		toGreetMemberNumbers: number[];
+	},
 	// replace_spoken_words: {
 	// 	stringWithReplacingSyntax: string;
 	// },

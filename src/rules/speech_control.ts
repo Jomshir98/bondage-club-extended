@@ -458,28 +458,42 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
-	/* TODO: Implement
-	registerRule("greet_order", {
+	registerRule("speech_greet_order", {
 		name: "Order to greet club",
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "when entering it through the login portal",
-		longDescription: "PLAYER_NAME will automatically send all defined member numbers a beep the moment they join the club to make their presence known. Disconnects don't count as coming into the club again, as far as detectable.",
+		longDescription: "PLAYER_NAME will automatically send all defined member numbers (if they are currently online) a beep the moment PLAYER_NAME joins the club or the moment she start BCX to make her presence known. Disconnects don't count as coming into the club again, as far as detectable. NOTE: Trigger conditions should not be selected when using this rule, as if you for instance select 'when in public room' the rule will only greet when you load BCX in a public room.",
 		triggerTexts: {
-			infoBeep: "A BCX rule made you greet one or more people by sending a beep.",
+			infoBeep: "A BCX rule made you greet one or more people (if currently online) with a beep.",
 			attempt_log: "",
 			log: ""
 		},
-		defaultLimit: ConditionsLimit.limited,
+		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			toGreetMemberNumbers: {
 				type: "memberNumberList",
 				default: [],
 				description: "Member numbers that will be greeted:"
 			}
+		},
+		load(state) {
+			if (state.isEnforced && state.customData) {
+				for (const number of state.customData.toGreetMemberNumbers) {
+					ServerSend("AccountBeep", {
+						MemberNumber: number,
+						BeepType: "",
+						IsSecret: true
+					});
+				}
+				if (state.customData.toGreetMemberNumbers.length > 0) {
+					setTimeout(() => {
+						state.trigger();
+					}, 5_000);
+				}
+			}
 		}
 	});
-	*/
 
 	registerRule("speech_block_antigarble", {
 		name: "Forbid the antigarble option",

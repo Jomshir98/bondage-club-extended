@@ -3,7 +3,8 @@ import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerD
 import { registerRule } from "../modules/rules";
 import { hookFunction } from "../patching";
 import { icon_restrictions } from "../resources";
-import { detectOtherMods } from "../utilsClub";
+import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
+import { getAllCharactersInRoom } from "../characters";
 
 export function initRules_bc_blocks() {
 	const { NMod } = detectOtherMods();
@@ -539,6 +540,48 @@ export function initRules_bc_blocks() {
 					}
 				}, ModuleCategory.Rules);
 			}
+		}
+	});
+
+	registerRule("block_leaving_room", {
+		name: "Prevent leaving the room",
+		icon: icon_restrictions,
+		loggable: false,
+		shortDescription: "while defined roles are inside",
+		longDescription: "This rule prevents PLAYER_NAME from leaving the room they are currently inside while at least one character with the set minimum role or a higher one is present inside. NOTE: Careful when setting the minimum role too low. If it is set to public for instance, it would mean that PLAYER_NAME can only leave the room when they are alone in it.",
+		triggerTexts: {
+			infoBeep: "Someone's presence does not allowed you to leave!",
+			attempt_announce: "PLAYER_NAME violated a rule by trying to leave this room"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			minimumRole: {
+				type: "roleSelector",
+				default: AccessLevel.mistress,
+				description: "Minimum role preventing room leaving:",
+				Y: 320
+			}
+		},
+		load(state) {
+			const active = (): boolean => state.isEnforced &&
+				!!state.customData &&
+				getAllCharactersInRoom()
+					.some(c => !c.isPlayer() && getCharacterAccessLevel(c) <= state.customData!.minimumRole);
+
+			hookFunction("ChatRoomCanLeave", 6, (args, next) => {
+				if (active())
+					return false;
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomMenuClick", 6, (args, next) => {
+				const Space = 870 / (ChatRoomMenuButtons.length - 1);
+				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
+					if (MouseXIn(1005 + Space * B, 120) && ChatRoomMenuButtons[B] === "Exit" && active()) {
+						state.triggerAttempt();
+					}
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 		}
 	});
 

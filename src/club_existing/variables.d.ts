@@ -104,6 +104,7 @@ declare var ChatRoomLastMessage: string[];
 declare var ChatRoomLastMessageIndex: number;
 declare var ChatRoomCharacterCount: number;
 declare var ChatRoomCharacterDrawlist: Character[];
+declare var ChatRoomMenuButtons: string[];
 declare var ChatRoomSenseDepBypass: boolean;
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomCharacterUpdate(C: Character): void;

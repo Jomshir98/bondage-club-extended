@@ -36,6 +36,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomIsOwnedByPlayer: ["82640FF9"],
 	ChatRoomKeyDown: ["5FD37EC9", "111B6F0C", "33C77F12"],
 	ChatRoomLovershipOptionIs: ["6F5CE6A0"],
+	ChatRoomMenuClick: ["8D9D74CE"],
 	ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61", "60ECCB9B"],
 	ChatRoomOwnershipOptionIs: ["FE060F0B"],
 	ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],

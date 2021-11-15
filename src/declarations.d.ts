@@ -188,6 +188,7 @@ type BCX_Rule =
 	// | "restrict_allowed_poses"
 	| "block_creating_rooms"
 	| "block_entering_rooms"
+	| "block_leaving_room"
 	| "block_freeing_self"
 	| "block_tying_others"
 	| "block_antiblind"
@@ -259,6 +260,9 @@ type RuleCustomData = {
 	// },
 	block_entering_rooms: {
 		roomList: string[];
+	},
+	block_leaving_room: {
+		minimumRole: import("./modules/authority").AccessLevel;
 	},
 	block_tying_others: {
 		onlyMoreDominantsToggle: boolean;

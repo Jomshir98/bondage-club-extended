@@ -451,7 +451,6 @@ export function initRules_bc_speech_control() {
 							Message: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`
 						});
 					}
-					state.triggerAttempt({ TARGET_PLAYER: `${data.MemberName} (${data.MemberNumber})` });
 					return;
 				}
 				return next(args);

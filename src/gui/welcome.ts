@@ -44,7 +44,9 @@ export class GuiWelcomeSelection extends GuiSubscreen {
 			`who want to give some of their\n` +
 			`control to selected dominants and\n` +
 			`lovers, giving only them authority\n` +
-			`over some of BCX's settings.`;
+			`over some of BCX's settings. You\n` +
+			`can irreversably give away more\n` +
+			`and more control, when you want.`;
 
 		const descriptionSlave =
 			`This preset is a much more\n` +
@@ -52,9 +54,9 @@ export class GuiWelcomeSelection extends GuiSubscreen {
 			`not leaving much control over the\n` +
 			`settings and permissions to you,\n` +
 			`thus enabling others to use many\n` +
-			`of BCX's features on you, except\n` +
-			`the most extreme ones, which you\n` +
-			`can still configure to your liking.`;
+			`of BCX's features on you. Owners\n` +
+			`can even unblock the most extreme\n` +
+			`settings, if they desire so.`;
 
 		const descriptions = [descriptionDominant, descriptionSwitch, descriptionSubmissive, descriptionSlave];
 

@@ -176,8 +176,10 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 				DrawButton(1074, 815, 210, 64, "Add as mistress", "white");
 			}
 
-			DrawButton(740, 815, 64, 64, "", "White", undefined, `Select member number from list`);
-			DrawImageEx("Icons/Title.png", 742, 815, { Width: 60, Height: 60 });
+			if (this.roleData.allowAddMistress || this.roleData.allowAddOwner) {
+				DrawButton(740, 815, 64, 64, "", "White", undefined, `Select member number from list`);
+				DrawImageEx("Icons/Title.png", 742, 815, { Width: 60, Height: 60 });
+			}
 
 			// Pagination
 			const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);

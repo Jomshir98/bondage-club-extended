@@ -246,10 +246,24 @@ export function getPermissionMinDisplayText(minAccess: AccessLevel, character?: 
 
 export function getPlayerRoleData(character: ChatroomCharacter): PermissionRoleBundle {
 	const loadNames = (memberNumber: number): [number, string] => [memberNumber, getCharacterName(memberNumber, "")];
+	let allowedMistressList: [number, string][] = [];
+	let allowedOwnerList: [number, string][] = [];
+
+	if (checkPermissionAccess("authority_view_roles", character) || checkPermissionAccess("authority_mistress_remove", character)) {
+		allowedMistressList = (modStorage.mistresses ?? []).map(loadNames);
+	} else if (modStorage.mistresses?.includes(character.MemberNumber)) {
+		allowedMistressList = [[character.MemberNumber, character.Name]];
+	}
+
+	if (checkPermissionAccess("authority_view_roles", character) || checkPermissionAccess("authority_owner_remove", character)) {
+		allowedOwnerList = (modStorage.owners ?? []).map(loadNames);
+	} else if (modStorage.owners?.includes(character.MemberNumber)) {
+		allowedOwnerList = [[character.MemberNumber, character.Name]];
+	}
 
 	return {
-		mistresses: (modStorage.mistresses ?? []).map(loadNames),
-		owners: (modStorage.owners ?? []).map(loadNames),
+		mistresses: allowedMistressList,
+		owners: allowedOwnerList,
 		allowAddMistress: checkPermissionAccess("authority_mistress_add", character),
 		allowRemoveMistress: checkPermissionAccess("authority_mistress_remove", character),
 		allowAddOwner: checkPermissionAccess("authority_owner_add", character),
@@ -459,7 +473,15 @@ export class ModuleAuthority extends BaseModule {
 		};
 
 		queryHandlers.rolesData = (sender, resolve) => {
-			if (!checkPermissionAccess("authority_view_roles", sender)) {
+			if (
+				!checkPermissionAccess("authority_view_roles", sender) &&
+				!checkPermissionAccess("authority_mistress_add", sender) &&
+				!checkPermissionAccess("authority_mistress_remove", sender) &&
+				!checkPermissionAccess("authority_owner_add", sender) &&
+				!checkPermissionAccess("authority_owner_remove", sender) &&
+				!modStorage.mistresses?.includes(sender.MemberNumber) &&
+				!modStorage.owners?.includes(sender.MemberNumber)
+			) {
 				return resolve(false);
 			}
 
@@ -482,11 +504,19 @@ export class ModuleAuthority extends BaseModule {
 		registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
 			if (subcommand === "list") {
-				if (!checkPermissionAccess("authority_view_roles", sender)) {
+				if (
+					!checkPermissionAccess("authority_view_roles", sender) &&
+					!checkPermissionAccess("authority_mistress_add", sender) &&
+					!checkPermissionAccess("authority_mistress_remove", sender) &&
+					!checkPermissionAccess("authority_owner_add", sender) &&
+					!checkPermissionAccess("authority_owner_remove", sender) &&
+					!modStorage.mistresses?.includes(sender.MemberNumber) &&
+					!modStorage.owners?.includes(sender.MemberNumber)
+				) {
 					return respond(COMMAND_GENERIC_ERROR);
 				}
 				const data = getPlayerRoleData(sender);
-				let res = "Full list:";
+				let res = "Visible list:";
 				for (const owner of data.owners) {
 					res += `\nOwner ${owner[1] || "[unknown name]"} (${owner[0]})`;
 				}

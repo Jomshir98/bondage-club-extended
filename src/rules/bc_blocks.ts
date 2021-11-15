@@ -3,6 +3,7 @@ import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerD
 import { registerRule } from "../modules/rules";
 import { hookFunction } from "../patching";
 import { icon_restrictions } from "../resources";
+import { detectOtherMods, getCharacterName } from "../utilsClub";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
 
@@ -689,6 +690,56 @@ export function initRules_bc_blocks() {
 				const C = args[0] as Character;
 				if (C && C.ID !== 0 && state.isEnforced && (toggleOn ? ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") : true)) {
 					return "grey";
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+		}
+	});
+
+	// TODO: update when https://github.com/Ben987/Bondage-College/pull/3082 goes live
+	registerRule("block_blacklisting", {
+		name: "Prevent blacklisting",
+		icon: icon_restrictions,
+		loggable: false,
+		shortDescription: "and ghosting of the defined roles",
+		longDescription: "This rule prevents PLAYER_NAME from adding characters with the set minimum role or a higher one to their bondage club blacklist and ghostlist.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to blacklist/ghost this person!",
+			attempt_announce: "PLAYER_NAME violated a rule by trying to blacklist TARGET_CHARACTER"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			minimumRole: {
+				type: "roleSelector",
+				default: AccessLevel.mistress,
+				description: "Minimum role forbidden to blacklist:",
+				Y: 320
+			}
+		},
+		load(state) {
+			hookFunction("ChatRoomListManipulation", 6, (args, next) => {
+				const CN = parseInt(args[2], 10);
+				if (state.isEnforced &&
+					state.customData &&
+					(args[0] === Player.BlackList || args[0] === Player.GhostList) &&
+					typeof CN === "number" &&
+					getCharacterAccessLevel(CN) <= state.customData.minimumRole
+				) {
+					state.triggerAttempt({ TARGET_CHARACTER: `${getCharacterName(CN, "[Unknown]")} (${CN})` });
+					return;
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomListManage", 6, (args, next) => {
+				if (state.isEnforced &&
+					state.customData &&
+					args[0] === "Add" &&
+					(args[1] === "BlackList" || args[1] === "GhostList") &&
+					CurrentCharacter?.MemberNumber != null &&
+					getCharacterAccessLevel(CurrentCharacter.MemberNumber) <= state.customData.minimumRole
+				) {
+					state.triggerAttempt({ TARGET_CHARACTER: `${CurrentCharacter.Name} (${CurrentCharacter.MemberNumber})` });
+					return;
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

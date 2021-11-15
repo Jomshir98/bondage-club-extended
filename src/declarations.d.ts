@@ -191,6 +191,7 @@ type BCX_Rule =
 	| "block_leaving_room"
 	| "block_freeing_self"
 	| "block_tying_others"
+	| "block_blacklisting"
 	| "block_antiblind"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
@@ -271,6 +272,9 @@ type RuleCustomData = {
 	block_keyuse_others: {
 		allowOwnerLocks: boolean;
 		allowLoverLocks: boolean;
+	},
+	block_blacklisting: {
+		minimumRole: import("./modules/authority").AccessLevel;
 	},
 	alt_restrict_hearing: {
 		deafeningStrength: string;

@@ -109,7 +109,8 @@ export class ModuleGUI extends BaseModule {
 					DrawText(`You can find BCX here ►`, 1550, 685 + 45, "White");
 				}
 			} else if (C && C.BCXVersion !== null) {
-				DrawButton(1815, 685, 90, 90, "", "White", icon_BCX, "BCX");
+				const playerHasAccessToCharacter = C.playerHasAccessToCharacter();
+				DrawButton(1815, 685, 90, 90, "", playerHasAccessToCharacter ? "White" : "#ddd", icon_BCX, playerHasAccessToCharacter ? "BCX" : "Needs BC item permission", !playerHasAccessToCharacter);
 			}
 		});
 
@@ -125,7 +126,7 @@ export class ModuleGUI extends BaseModule {
 						ServerBeep = {};
 						this.currentSubscreen = new GuiWelcomeSelection();
 					}
-				} else if (C && C.BCXVersion !== null && MouseIn(1815, 685, 90, 90)) {
+				} else if (C && C.BCXVersion !== null && C.playerHasAccessToCharacter()) {
 					this.currentSubscreen = new GuiMainMenu(C);
 				}
 			} else {

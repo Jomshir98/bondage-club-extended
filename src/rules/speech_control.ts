@@ -201,7 +201,7 @@ export function initRules_bc_speech_control() {
 		name: "Forbid saying certain words in chat",
 		icon: "Icons/Chat.png",
 		shortDescription: "based on a configurable blacklist",
-		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect OOC text, but does affect whispers.",
+		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect emotes and OOC text, but does affect whispers.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
 			attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",

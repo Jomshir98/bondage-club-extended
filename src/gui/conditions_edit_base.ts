@@ -202,11 +202,12 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 		// on-off toggle
 		MainCanvas.textAlign = "left";
-		DrawCheckbox(125, 180, 64, 64, `This ${this.conditionCategory.slice(0, -1)} is active and in effect`, data.active, !access);
+		DrawCheckbox(125, 180, 64, 64, `This ${this.conditionCategory.slice(0, -1)} is active and can trigger`, data.active, !access);
 
 		// global-category-configuration-is-active highlighting
 		if (useGlobalCategorySetting) {
 			MainCanvas.fillStyle = "#0052A3";
+			MainCanvas.fillRect(526, 546, 418, 68);
 			MainCanvas.fillRect(120, 615, 74, 74);
 			MainCanvas.fillRect(120, 695, 74, 74);
 			MainCanvas.fillRect(120, 775, 74, 74);
@@ -240,14 +241,14 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		}
 
 		////// condition factors area
-		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions`, 130, 580, "Black", "");
+		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions:`, 130, 580, "Black", "");
 		MainCanvas.textAlign = "center";
 		const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
-		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "some of below" : "all of below") : "Always triggering", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
+		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "Any selected below" : "All selected below") : "Always in effect", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
 		MainCanvas.textAlign = "left";
 
 		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";
-		MainCanvas.fillRect(75, 620, 15, 304);
+		MainCanvas.fillRect(80, 620, 15, 304);
 
 		// In room
 		DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);

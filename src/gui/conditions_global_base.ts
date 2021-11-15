@@ -212,10 +212,10 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 		}
 
 		////// condition factors area
-		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions`, 130, 580, "Black", "");
+		DrawText(`${capitalizeFirstLetter(this.conditionCategory.slice(0, -1))} trigger conditions:`, 130, 580, "Black", "");
 		MainCanvas.textAlign = "center";
 		const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
-		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "some of below" : "all of below") : "Always triggering", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
+		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "Any selected below" : "All selected below") : "Always in effect", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
 		MainCanvas.textAlign = "left";
 
 		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";

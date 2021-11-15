@@ -42,12 +42,13 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"a cursed item or a blocked item or clothing slot that forces to stay unrestrained or naked there. Clicking on the button with the cog icon " +
 	"in the middle of each row moves you to a new screen that allows to configure the curse (if you have permission). When the cog icon has a blue " +
 	"aura, that means that the curse's conditions are the same as the global config. If permitted, you can remove single curses with the 'X' button.",
-	[Views.ConditionsEditCurses]: "Here you can configure if the curse is in effect, if it wears off after a while or not, what happens then and " +
-	"most importantly when the curse is active, such as either always or based on where the player is and with whom. The green/red bars next to the " +
-	"checkboxes indicate whether a triggering condition is true at present or not. On the right side, you can curse the usage/" +
-	"alteration of an item such as fixing cuffs overhead or behind the back. Lastly, in the bottom right you can set the four trigger conditions " +
+	[Views.ConditionsEditCurses]: "Here you can configure if the curse is active, if it wears off after some time or not, and " +
+	"when the curse is in effect, such as either always or based on where the player is and with whom. The small green/red bars next to the " +
+	"checkboxes indicate whether a condition is true at present or not and the big bar whether this means that the curse is in effect, if active. " +
+	"On the right side, you can curse the usage/" +
+	"alteration of an item such as fixing cuffs behind the back. Lastly, in the bottom right you can set the trigger conditions " +
 	"of this curse to the global curses config.",
-	[Views.ConditionsGlobalCurses]: "The settings on this page are the global/default settings for all newly added curses. Changes to the four trigger " +
+	[Views.ConditionsGlobalCurses]: "The settings on this page are the global/default settings for all newly added curses. Changes to the trigger " +
 	"conditions are also applied to existing curses that are (still) set to global curses configuration, though. Exception is if a timer is set here. " +
 	"Such a timer only applies to newly created curses.",
 	[Views.CursesAdd]: "On this screen you can add a curse to any empty slot (white) which will keep it empty or on any worn item (gold) " +
@@ -62,12 +63,13 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"rule type and little status icons that show if the rule is enforced and/or transgressions are logged. Clicking on the button with the cog icon " +
 	"in the middle of each row moves you to a new screen that allows to configure the rule (if you have permission). When the cog icon has a blue " +
 	"aura, then that means that the rule's conditions are the same as the global config. If permitted, you can remove single rules with the 'X' button.",
-	[Views.ConditionsEditRules]: "Here you can configure if the rule is in effect, if it is only valid for some time, what happens then and " +
-	"most importantly when the rule applies, such as either always or based on where the player is and with whom. The green/red bars next to the " +
-	"checkboxes indicate whether a triggering condition is true at present or not. Depending on the rule, you can either enforce its effect, " +
-	"log all violations, or both at the same time. Lastly on the bottom right, you can set whether the four trigger conditions " +
+	[Views.ConditionsEditRules]: "Here you can configure if the rule is active, if it is only valid for some time, what happens then and " +
+	"when the rule applies, such as either always or based on where the player is and with whom. The small green/red bars next to the " +
+	"checkboxes indicate whether a condition is true at present or not and the big bar whether this means that the rule is in effect, if active. " +
+	"Depending on the rule, you can either enforce its effect, " +
+	"log all violations, or both at the same time. Lastly on the bottom right, you can set whether the trigger conditions " +
 	"of this rule should follow the global rules config or not.",
-	[Views.ConditionsGlobalRules]: "The settings on this page are the global/default settings for all newly added rules. Changes to the four trigger " +
+	[Views.ConditionsGlobalRules]: "The settings on this page are the global/default settings for all newly added rules. Changes to the trigger " +
 	"conditions are also applied to existing rules that are (still) set to global rules configuration, though. Exception is if a timer is set here. " +
 	"Such a timer only applies to newly established rules.",
 	[Views.RulesAdd]: "On this screen you can establish new rules for the player by simply clicking any rule template. " +

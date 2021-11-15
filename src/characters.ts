@@ -484,6 +484,9 @@ export function getChatroomCharacter(memberNumber: number): ChatroomCharacter | 
 }
 
 export function getAllCharactersInRoom(): ChatroomCharacter[] {
+	if (!ServerPlayerIsInChatRoom()) {
+		return [getPlayerCharacter()];
+	}
 	return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber!)).filter(Boolean) as ChatroomCharacter[];
 }
 

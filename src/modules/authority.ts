@@ -57,15 +57,16 @@ export function registerPermission(name: BCX_Permissions, data: PermissionSetup)
 	});
 }
 
-export function getCharacterAccessLevel(character: ChatroomCharacter): AccessLevel {
-	if (character.isPlayer()) return AccessLevel.self;
-	if (character.MemberNumber !== null) {
-		if (Player.IsOwnedByMemberNumber(character.MemberNumber)) return AccessLevel.clubowner;
-		if (modStorage.owners?.includes(character.MemberNumber)) return AccessLevel.owner;
-		if (Player.IsLoverOfMemberNumber(character.MemberNumber)) return AccessLevel.lover;
-		if (modStorage.mistresses?.includes(character.MemberNumber)) return AccessLevel.mistress;
-		if (Player.WhiteList.includes(character.MemberNumber)) return AccessLevel.whitelist;
-		if (Player.FriendList?.includes(character.MemberNumber)) return AccessLevel.friend;
+export function getCharacterAccessLevel(character: ChatroomCharacter | number): AccessLevel {
+	const memberNumber = typeof character === "number" ? character : character.MemberNumber;
+	if (Player.MemberNumber === memberNumber) return AccessLevel.self;
+	if (memberNumber !== null) {
+		if (Player.IsOwnedByMemberNumber(memberNumber)) return AccessLevel.clubowner;
+		if (modStorage.owners?.includes(memberNumber)) return AccessLevel.owner;
+		if (Player.IsLoverOfMemberNumber(memberNumber)) return AccessLevel.lover;
+		if (modStorage.mistresses?.includes(memberNumber)) return AccessLevel.mistress;
+		if (Player.WhiteList.includes(memberNumber)) return AccessLevel.whitelist;
+		if (Player.FriendList?.includes(memberNumber)) return AccessLevel.friend;
 	}
 	return AccessLevel.public;
 }

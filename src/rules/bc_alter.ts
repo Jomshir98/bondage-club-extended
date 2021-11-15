@@ -2,7 +2,7 @@ import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { hookFunction } from "../patching";
-import { InfoBeep } from "../utilsClub";
+import { ChatRoomActionMessage, InfoBeep } from "../utilsClub";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
@@ -481,6 +481,72 @@ export function initRules_bc_alter() {
 				return true;
 			}
 			return false;
+		}
+	});
+
+	registerRule("alt_forced_summoning", {
+		name: "Ready to be summoned",
+		icon: "Icons/Swap.png",
+		loggable: false,
+		shortDescription: "from anywhere to the room of the permitted caller",
+		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the one sending the summon after 15 seconds have passed. The rule allows to manage a list of members who are allowed to send a summon to PLAYER_NAME. It works by sending a beep message with either the set summoning text to PLAYER_NAME or just sending the word 'summon'.",
+		triggerTexts: {
+			infoBeep: "You are summoned by SUMMONER!"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			allowedMembers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Members numbers allowed to summon:",
+				Y: 300
+			},
+			summoningText: {
+				type: "string",
+				default: "Come to my room immediately",
+				description: "The text used for summoning:",
+				Y: 715
+			}
+		},
+		load(state) {
+			let beep = false;
+			hookFunction("ServerAccountBeep", 7, (args, next) => {
+				const data = args[0];
+
+				if (isObject(data) &&
+					!data.BeepType &&
+					typeof data.MemberNumber === "number" &&
+					state.isEnforced &&
+					state.customData &&
+					state.customData.allowedMembers.includes(data.MemberNumber) &&
+					(data.Message.includes(state.customData.summoningText) || data.Message === "summon") &&
+					data.ChatRoomName
+				) {
+					ChatRoomActionMessage(`${Player.Name} recieved a summon: "${state.customData.summoningText}".`);
+					beep = true;
+					setTimeout(() => {
+						// Check if rule is still in effect!
+						if (!state.isEnforced || !state.inEffect) return;
+
+						// leave
+						ChatRoomActionMessage(`The demand for ${Player.Name}'s presence is now enforced.`);
+						DialogLentLockpicks = false;
+						ChatRoomClearAllElements();
+						ServerSend("ChatRoomLeave", "");
+						ChatRoomSetLastChatRoom("");
+						ChatRoomLeashPlayer = null;
+						CommonSetScreen("Online", "ChatSearch");
+						CharacterDeleteAllOnline();
+
+						// join
+						ChatRoomPlayerCanJoin = true;
+						ServerSend("ChatRoomJoin", { Name: data.ChatRoomName });
+					}, 15_000);
+				}
+				next(args);
+				if (beep) state.triggerAttempt({ SUMMONER: `${data.MemberName} (${data.MemberNumber})` });
+				beep = false;
+			}, ModuleCategory.Rules);
 		}
 	});
 }

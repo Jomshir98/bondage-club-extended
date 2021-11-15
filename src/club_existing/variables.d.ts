@@ -35,11 +35,13 @@ declare var GameVersion: string;
 declare const CommonGetFont: MemoizedFunction<(size: number) => string>;
 declare function CommonColorsEqual(C1: string | string[], C2: string | string[]): boolean;
 declare function CommonArraysEqual(a1: any[], a2: any[]): boolean;
+declare function CommonSetScreen(NewModule: string, NewScreen: string): void;
 
 // FriendList.js
 declare var FriendListBeepTarget: number | null;
 
 // Character.js
+declare function CharacterDeleteAllOnline(): void;
 declare function CharacterGetCurrent(): Character | null;
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
 declare function CharacterLoadCanvas(C: Character): void;
@@ -102,15 +104,20 @@ declare var ChatRoomData: any;
 declare var ChatRoomGame: string;
 declare var ChatRoomLastMessage: string[];
 declare var ChatRoomLastMessageIndex: number;
+declare var ChatRoomLeashPlayer: number | null;
 declare var ChatRoomCharacterCount: number;
 declare var ChatRoomCharacterDrawlist: Character[];
 declare var ChatRoomMenuButtons: string[];
+declare var ChatRoomPlayerCanJoin: boolean;
 declare var ChatRoomSenseDepBypass: boolean;
+declare var DialogLentLockpicks: boolean;
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomCharacterUpdate(C: Character): void;
 declare function ChatRoomMessage(data: any): void;
+declare function ChatRoomSetLastChatRoom(room: string): void;
 declare function ChatRoomShouldBlockGaggedOOCMessage(Message: string, WhisperTarget: Character | undefined): boolean;
 declare function ChatRoomPlayerIsAdmin(): boolean;
+declare function ChatRoomClearAllElements(): void;
 
 // ChatAdmin.js
 declare var ChatAdminBackgroundIndex: number;

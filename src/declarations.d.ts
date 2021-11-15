@@ -206,6 +206,7 @@ type BCX_Rule =
 	| "alt_force_suitcase_game"
 	| "alt_hearing_whitelist"
 	| "alt_seeing_whitelist"
+	| "alt_forced_summoning"
 	| "rc_club_owner"
 	| "rc_lover_new"
 	| "rc_lover_leave"
@@ -298,6 +299,10 @@ type RuleCustomData = {
 	},
 	alt_seeing_whitelist: {
 		whitelistedMembers: number[];
+	},
+	alt_forced_summoning : {
+		allowedMembers: number[];
+		summoningText: string;
 	},
 	speech_specific_sound: {
 		soundWhitelist: string[];

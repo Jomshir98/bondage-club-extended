@@ -1,6 +1,6 @@
 import { ConditionsLimit } from "../constants";
 import { registerRule } from "../modules/rules";
-import { ChatRoomActionMessage, ChatRoomSendLocal } from "../utilsClub";
+import { ChatRoomSendLocal } from "../utilsClub";
 
 export function initRules_other() {
 	let lastAction = Date.now();
@@ -65,30 +65,30 @@ export function initRules_other() {
 		icon: "Icons/Chest.png",
 		loggable: false,
 		enforceable: false,
-		shortDescription: "regularily show configurable text to PLAYER_NAME",
-		longDescription: "This rule reminds or tells PLAYER_NAME something in a settable interval. Only PLAYER_NAME can see the set message and it is only shown if in a chat room.",
+		shortDescription: "regularily show configurable sentences to PLAYER_NAME",
+		longDescription: "This rule reminds or tells PLAYER_NAME one of the recorded sentences at random in a settable interval. Only PLAYER_NAME can see the set message and it is only shown if in a chat room.",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			reminderText: {
-				type: "string",
-				default: "",
-				description: "The sentence that will be shown:",
-				Y: 300
+				type: "stringList",
+				default: [],
+				description: "The sentences that will be shown at random:",
+				Y: 296
 			},
 			reminderFrequency: {
 				type: "number",
 				default: 15,
-				description: "Frequency of the sentence being shown (in minutes):",
-				Y: 490
+				description: "Frequency of a sentence being shown (in minutes):",
+				Y: 715
 			}
 		},
 		tick(state) {
-			if (state.inEffect && state.customData &&
+			if (state.inEffect && state.customData && state.customData.reminderText !== [] &&
 				ServerPlayerIsInChatRoom() &&
 				Date.now() > lastReminder + state.customData.reminderFrequency * 60 * 1000
 			) {
 				lastReminder = Date.now();
-				ChatRoomActionMessage(state.customData.reminderText, Player.MemberNumber);
+				ChatRoomSendLocal("[Voice] " + state.customData.reminderText[Math.floor(Math.random()*state.customData.reminderText.length)]);
 				return true;
 			}
 			return false;

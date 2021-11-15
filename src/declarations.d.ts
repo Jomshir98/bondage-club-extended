@@ -335,7 +335,7 @@ type RuleCustomData = {
 		minutesBeforeAfk: number;
 	},
 	other_constant_reminder: {
-		reminderText: string;
+		reminderText: string[];
 		reminderFrequency: number;
 	},
 	setting_item_permission: {

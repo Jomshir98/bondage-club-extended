@@ -321,7 +321,7 @@ export function initRules_bc_alter() {
 					const UpdatedRoom = {
 						Name: ChatRoomData.Name,
 						Description: ChatRoomData.Description,
-						Background: ChatAdminBackgroundSelect,
+						Background: ChatRoomData.Background,
 						Limit: ChatRoomData.Limit.toString(),
 						Admin: ChatRoomData.Admin.filter((i: number) => i !== Player.MemberNumber),
 						Ban: ChatRoomData.Ban,

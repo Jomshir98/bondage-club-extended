@@ -25,14 +25,22 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 
 		const active = !!this.conditionCategoryData && !!this.conditionData;
 		const data = this.changes ?? this.conditionData;
+		const access = this.checkAccess();
 
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
-				handler.onDataChange?.(v, active, k, () => {
-					this.changes = this.makeChangesData();
-					this.processInputs();
-				}, data?.data.customData![k] ?? (typeof v.default === "function" ? v.default() : v.default));
+				handler.onDataChange?.({
+					def: v,
+					active,
+					key: k,
+					onInput: () => {
+						this.changes = this.makeChangesData();
+						this.processInputs();
+					},
+					value: data?.data.customData![k] ?? (typeof v.default === "function" ? v.default() : v.default),
+					access
+				});
 			}
 		}
 
@@ -45,7 +53,11 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 				if (handler.processInput) {
-					const res = handler.processInput(v, k, this.changes.data.customData![k]);
+					const res = handler.processInput({
+						def: v,
+						key: k,
+						value: this.changes.data.customData![k]
+					});
 					if (res !== undefined) {
 						this.changes.data.customData![k] = res;
 					}
@@ -80,7 +92,14 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		if (this.definition.dataDefinition) {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
-				handler.run(v, data.data.customData![k], v.Y ?? Y, k, this.character);
+				handler.run({
+					def: v,
+					value: data.data.customData![k],
+					Y: v.Y ?? Y,
+					key: k,
+					target: this.character,
+					access
+				});
 			}
 		}
 
@@ -131,7 +150,13 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 				if (handler.click) {
 					const data = this.changes ?? this.conditionData;
-					const res = handler.click(v, data.data.customData![k], v.Y ?? Y, k, this.character);
+					const res = handler.click({
+						def: v,
+						value: data.data.customData![k],
+						Y: v.Y ?? Y,
+						key: k,
+						target: this.character
+					});
 					if (res !== undefined) {
 						this.changes = this.makeChangesData();
 						this.changes.data.customData![k] = res;
@@ -149,7 +174,10 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(this.definition.dataDefinition)) {
 				const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 				if (handler.unload) {
-					handler.unload(v, k);
+					handler.unload({
+						def: v,
+						key: k
+					});
 				}
 			}
 		}

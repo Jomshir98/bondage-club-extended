@@ -117,11 +117,38 @@ export function RulesGetRuleState<ID extends BCX_Rule>(rule: ID): RuleState<ID> 
 
 export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomDataTypes> = {
 	validate(value: unknown, def: RuleCustomDataEntryDefinition): boolean;
-	onDataChange?(def: RuleCustomDataEntryDefinition, active: boolean, key: string, onInput: () => void, value: RuleCustomDataTypesMap[type]): void;
-	processInput?(def: RuleCustomDataEntryDefinition, key: string, value: RuleCustomDataTypesMap[type]): RuleCustomDataTypesMap[type] | undefined;
-	unload?(def: RuleCustomDataEntryDefinition, key: string): void;
-	run(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string, target: ChatroomCharacter): void;
-	click?(def: RuleCustomDataEntryDefinition, value: RuleCustomDataTypesMap[type], Y: number, key: string, target: ChatroomCharacter): RuleCustomDataTypesMap[type] | undefined;
+	onDataChange?(data: {
+		def: RuleCustomDataEntryDefinition;
+		active: boolean;
+		key: string;
+		onInput: () => void;
+		value: RuleCustomDataTypesMap[type];
+		access: boolean;
+	}): void;
+	processInput?(data: {
+		def: RuleCustomDataEntryDefinition;
+		key: string;
+		value: RuleCustomDataTypesMap[type];
+	}): RuleCustomDataTypesMap[type] | undefined;
+	unload?(data: {
+		def: RuleCustomDataEntryDefinition;
+		key: string
+	}): void;
+	run(data: {
+		def: RuleCustomDataEntryDefinition;
+		value: RuleCustomDataTypesMap[type];
+		Y: number;
+		key: string;
+		target: ChatroomCharacter;
+		access: boolean;
+	}): void;
+	click?(data: {
+		def: RuleCustomDataEntryDefinition;
+		value: RuleCustomDataTypesMap[type];
+		Y: number;
+		key: string;
+		target: ChatroomCharacter;
+	}): RuleCustomDataTypesMap[type] | undefined;
 } & (type extends keyof RuleCustomDataTypesOptions ? {
 	validateOptions(options: RuleCustomDataTypesOptions[type]): boolean;
 } : {
@@ -139,7 +166,7 @@ export const ruleCustomDataHandlers: {
 	listSelect: {
 		validateOptions: options => Array.isArray(options) && options.every(i => Array.isArray(i) && i.length === 2 && i.every(j => typeof j === "string")),
 		validate: (value, def) => typeof value === "string" && def.options!.map(i => i[0]).includes(value),
-		run(def, value, Y) {
+		run({ def, value, Y, access }) {
 			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
 			const index = def.options!.findIndex(i => i[0] === value);
 			if (index < 0) {
@@ -150,13 +177,14 @@ export const ruleCustomDataHandlers: {
 			MainCanvas.textAlign = "center";
 			DrawBackNextButton(1050, Y + 36, 250, 60,
 				def.options![index][1],
-				"White", "",
+				access ? "White" : "#ddd", "",
 				() => def.options![prev][1],
-				() => def.options![next][1]
+				() => def.options![next][1],
+				!access
 			);
 			MainCanvas.textAlign = "left";
 		},
-		click(def, value, Y) {
+		click({ def, value, Y }) {
 			const index = def.options!.findIndex(i => i[0] === value);
 			if (MouseIn(1050, Y + 36, 125, 60)) {
 				return def.options![clampWrap(index - 1, 0, def.options!.length - 1)][0];
@@ -169,13 +197,15 @@ export const ruleCustomDataHandlers: {
 	},
 	memberNumberList: {
 		validate: value => Array.isArray(value) && value.every(Number.isInteger),
-		onDataChange(def, active, key) {
+		onDataChange({ active, key, access }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
 				if (input) {
 					input.remove();
 				}
-			} else if (!input) {
+				return;
+			}
+			if (!input) {
 				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "100");
 				input.inputMode = "numeric";
 				input.pattern = "[0-9]+";
@@ -184,8 +214,9 @@ export const ruleCustomDataHandlers: {
 					memberNumberListAutoFill = null;
 				}
 			}
+			input.disabled = !access;
 		},
-		run(def, value, Y, key) {
+		run({ def, value, Y, key, access }) {
 			Y -= 20;
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -198,9 +229,11 @@ export const ruleCustomDataHandlers: {
 				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
 				const msg = `${getCharacterName(value[e], "[unknown]")} (${value[e]})`;
 				DrawTextFit(msg, 1060, Y + 26 + i * 70 + 34, 380, "Black");
-				MainCanvas.textAlign = "center";
-				DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
-				MainCanvas.textAlign = "left";
+				if (access) {
+					MainCanvas.textAlign = "center";
+					DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
+					MainCanvas.textAlign = "left";
+				}
 			}
 			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + PAGE_SIZE * 70 + 43, 360, 60);
 			MainCanvas.textAlign = "center";
@@ -220,13 +253,13 @@ export const ruleCustomDataHandlers: {
 					DrawTextFit(getCharacterName(val, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
 			}
-			DrawButton(1444, Y + PAGE_SIZE * 70 + 43, 64, 64, "", "White", undefined);
+			DrawButton(1444, Y + PAGE_SIZE * 70 + 43, 64, 64, "", access ? "White" : "#ddd", undefined, undefined, !access);
 			DrawImageEx("Icons/Title.png", 1446, Y + PAGE_SIZE * 70 + 43, { Width: 60, Height: 60 });
-			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", "White");
+			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", access ? "White" : "#ddd", undefined, undefined, !access);
 			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
 			MainCanvas.textAlign = "left";
 		},
-		click(def, value, Y, key, target) {
+		click({ value, Y, key, target }) {
 			Y -= 20;
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -263,20 +296,22 @@ export const ruleCustomDataHandlers: {
 			}
 			return undefined;
 		},
-		unload(def, key) {
+		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
 			ruleCustomDataHandlerPage.delete(key);
 		}
 	},
 	number: {
 		validate: value => typeof value === "number" && Number.isInteger(value),
-		onDataChange(def, active, key, onInput, value) {
+		onDataChange({ active, key, onInput, value, access }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
 				if (input) {
 					input.remove();
 				}
-			} else if (!input) {
+				return;
+			}
+			if (!input) {
 				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", value.toString(10), "50");
 				input.inputMode = "numeric";
 				input.pattern = "[0-9]+";
@@ -284,8 +319,9 @@ export const ruleCustomDataHandlers: {
 			} else {
 				input.value = value.toString(10);
 			}
+			input.disabled = !access;
 		},
-		processInput(def, key, value) {
+		processInput({ key, value }) {
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (input && input.value) {
 				if (/^[0-9]+$/.test(input.value)) {
@@ -296,37 +332,38 @@ export const ruleCustomDataHandlers: {
 			}
 			return undefined;
 		},
-		run(def, value, Y, key) {
+		run({ def, Y, key }) {
 			DrawTextFit(def.description, 1050, Y + 0, 850, "Black");
 			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + 26, 850, 60);
 		},
-		unload(def, key) {
+		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
 		}
 	},
 	poseSelect: {
 		// TODO: stricten
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
-		run(def, value, Y) { /* TODO */ },
-		click(def, value, Y) { return undefined; }
+		run() { /* TODO */ },
+		click() { return undefined; }
 	},
 	// element has Y length of 150px (description + elmement plus offset to the next one)
 	roleSelector: {
 		validate: value => typeof value === "number" && AccessLevel[value] !== undefined,
-		run(def, value, Y) {
+		run({ def, value, Y, access }) {
 			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
 			const roleSelectionNext = value < AccessLevel.public ? value + 1 : AccessLevel.clubowner;
 			const roleSelectionPrev = value > AccessLevel.clubowner ? value - 1 : AccessLevel.public;
 			MainCanvas.textAlign = "center";
 			DrawBackNextButton(1050, Y + 46, 250, 60,
 				capitalizeFirstLetter(AccessLevel[value]) + (value !== AccessLevel.clubowner ? " ↑" : ""),
-				"White", "",
+				access ? "White" : "#ddd", "",
 				() => capitalizeFirstLetter(AccessLevel[roleSelectionPrev]),
-				() => capitalizeFirstLetter(AccessLevel[roleSelectionNext])
+				() => capitalizeFirstLetter(AccessLevel[roleSelectionNext]),
+				!access
 			);
 			MainCanvas.textAlign = "left";
 		},
-		click(def, value, Y) {
+		click({ value, Y }) {
 			if (MouseIn(1050, Y + 46, 125, 60)) {
 				return value > AccessLevel.clubowner ? value - 1 : AccessLevel.public;
 			}
@@ -338,44 +375,50 @@ export const ruleCustomDataHandlers: {
 	},
 	string: {
 		validate: value => typeof value === "string",
-		onDataChange(def, active, key, onInput, value) {
+		onDataChange({ active, key, onInput, value, access }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
 				if (input) {
 					input.remove();
 				}
-			} else if (!input) {
+				return;
+			}
+			if (!input) {
 				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", value, "160");
 				input.oninput = onInput;
 			} else {
 				input.value = value;
 			}
+			input.disabled = !access;
 		},
-		processInput(def, key) {
+		processInput({ key }) {
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			return input ? input.value : undefined;
 		},
-		run(def, value, Y, key) {
+		run({ def, Y, key }) {
 			DrawTextFit(def.description, 1050, Y + 0, 850, "Black");
 			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + 26, 850, 60);
 		},
-		unload(def, key) {
+		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
 		}
 	},
 	stringList: {
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
-		onDataChange(def, active, key) {
+		onDataChange({ active, key, access }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
 				if (input) {
 					input.remove();
 				}
-			} else if (!input) {
+				return;
+			}
+			if (!input) {
 				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "120");
 			}
+			input.disabled = !access;
 		},
-		run(def, value, Y, key) {
+		run({ def, value, Y, key, access }) {
 			Y -= 20;
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -387,18 +430,20 @@ export const ruleCustomDataHandlers: {
 					break;
 				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
 				const msg = value[e];
-				DrawTextFit(msg, 1060, Y + 26 + i * 70 + 34, 380, "Black");
-				MainCanvas.textAlign = "center";
-				DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
-				MainCanvas.textAlign = "left";
+				DrawTextFit(msg.length > 81 ? msg.substr(0, 80) + "\u2026" : msg, 1060, Y + 26 + i * 70 + 34, 750, "Black");
+				if (access) {
+					MainCanvas.textAlign = "center";
+					DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
+					MainCanvas.textAlign = "left";
+				}
 			}
 			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + PAGE_SIZE * 70 + 43, 450, 60);
 			MainCanvas.textAlign = "center";
-			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", "White");
+			DrawButton(1530, Y + PAGE_SIZE * 70 + 43, 100, 64, "Add", access ? "White" : "#ddd", undefined, undefined, !access);
 			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
 			MainCanvas.textAlign = "left";
 		},
-		click(def, value, Y, key) {
+		click({ value, Y, key }) {
 			Y -= 20;
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -426,20 +471,22 @@ export const ruleCustomDataHandlers: {
 			}
 			return undefined;
 		},
-		unload(def, key) {
+		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
 			ruleCustomDataHandlerPage.delete(key);
 		}
 	},
 	textArea: {
 		validate: value => typeof value === "string",
-		onDataChange(def, active, key, onInput, value) {
+		onDataChange({ active, key, onInput, value, access }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLTextAreaElement | undefined;
 			if (!active) {
 				if (input) {
 					input.remove();
 				}
-			} else if (!input) {
+				return;
+			}
+			if (!input) {
 				input = document.createElement("textarea");
 				input.id = `BCX_RCDH_${key}`;
 				input.name = `BCX_RCDH_${key}`;
@@ -452,12 +499,13 @@ export const ruleCustomDataHandlers: {
 			} else {
 				input.value = value;
 			}
+			input.disabled = !access;
 		},
-		processInput(def, key) {
+		processInput({ key }) {
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLTextAreaElement | undefined;
 			return input ? input.value : undefined;
 		},
-		run(def, value, Y, key) {
+		run({ def, Y, key }) {
 			DrawTextFit(def.description, 1000, Y + 0, 900, "Black");
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLTextAreaElement | undefined;
 			if (input && document.activeElement === input) {
@@ -466,16 +514,16 @@ export const ruleCustomDataHandlers: {
 				ElementPositionFix(`BCX_RCDH_${key}`, 28, 1000, Y + 26, 900, 765 - Y);
 			}
 		},
-		unload(def, key) {
+		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
 		}
 	},
 	toggle: {
 		validate: value => typeof value === "boolean",
-		run(def, value, Y) {
-			DrawCheckbox(1050, Y, 64, 64, def.description, value);
+		run({ def, value, Y, access }) {
+			DrawCheckbox(1050, Y, 64, 64, def.description, value, !access);
 		},
-		click(def, value, Y) {
+		click({ value, Y }) {
 			if (MouseIn(1050, Y, 64, 64)) {
 				return !value;
 			}

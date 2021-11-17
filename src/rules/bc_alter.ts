@@ -133,6 +133,14 @@ export function initRules_bc_alter() {
 				next(args);
 				noBlind = false;
 			}, ModuleCategory.Rules);
+			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
+				const C = args[0] as Character;
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
 			hookFunction("ChatRoomClickCharacter", 0, (args, next) => {
 				const C = args[0] as Character;
 				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {

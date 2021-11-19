@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BCX - Bondage Club Extended (Loader)
 // @namespace    BCX
-// @version      2.0.4
+// @version      2.0.5
 // @description  Loader of Jomshir's "Bondage Club Extended" mod
 // @author       Jomshir98
 // @include      /^https:\/\/(www\.)?bondageprojects\.elementfx\.com\/R\d+\/(BondageClub|\d+)(\/((index|\d+)\.html)?)?$/

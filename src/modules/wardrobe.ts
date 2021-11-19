@@ -1,10 +1,12 @@
 import { allowMode, detectOtherMods, isBind, isCloth, DrawImageEx, itemColorsEquals } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
-import { clipboardAvailable } from "../utils";
+import { arrayUnique, clipboardAvailable } from "../utils";
 
 import isEqual from "lodash-es/isEqual";
+import cloneDeep from "lodash-es/cloneDeep";
 import { RedirectGetImage } from "./miscPatches";
+import { curseMakeSavedProperty } from "./curses";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -14,23 +16,23 @@ export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false):
 	return LZString.compressToBase64(JSON.stringify(save));
 }
 
-export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], includeBinds: boolean, force: boolean = false): string | true {
-	if (typeof data !== "string" || data.length < 1) return "No data";
+export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], includeBinds: boolean, force: boolean = false): string {
+	if (typeof data !== "string" || data.length < 1) return "Import error: No data";
 	try {
 		if (data[0] !== "[") {
 			const decompressed = LZString.decompressFromBase64(data);
-			if (!decompressed) return "Bad data";
+			if (!decompressed) return "Import error: Bad data";
 			data = decompressed;
 		}
 		data = JSON.parse(data) as ItemBundle[];
-		if (!Array.isArray(data)) return "Bad data";
+		if (!Array.isArray(data)) return "Import error: Bad data";
 	} catch (error) {
 		console.warn(error);
-		return "Bad data";
+		return "Import error: Bad data";
 	}
 	const C = CharacterAppearanceSelection;
 	if (!C) {
-		return "No character";
+		return "Import error: No character";
 	}
 
 	const Allow = (a: Item | Asset) => isCloth(a, CharacterAppearanceSelection!.ID === 0) || (includeBinds && isBind(a));
@@ -85,10 +87,34 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 			}
 		}
 		if (!success)
-			return "Character is bound";
+			return "Refusing to change locked item!";
 	}
 
-	C.Appearance = C.Appearance.filter(a => !Allow(a));
+	// Check if everything (except ignored properties) matches
+	let fullMatch = includeBinds;
+	const matchingGroups = new Set<string>();
+	if (includeBinds) {
+		for (const group of arrayUnique(C.Appearance.filter(Allow).map(item => item.Asset.Group.Name).concat(data.map(item => item.Group)))) {
+			const wornItem = C.Appearance.find(item => item.Asset.Group.Name === group);
+			const bundleItem = data.find(item => item.Group === group);
+			if (
+				!wornItem ||
+				!bundleItem ||
+				wornItem.Asset.Name !== bundleItem.Name ||
+				!itemColorsEquals(wornItem.Color, bundleItem.Color) ||
+				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(bundleItem.Property))
+			) {
+				fullMatch = false;
+				break;
+			} else {
+				matchingGroups.add(group);
+			}
+		}
+	}
+
+	if (!fullMatch) {
+		// If there is item change we only apply items, not locks
+		C.Appearance = C.Appearance.filter(a => !Allow(a) || matchingGroups.has(a.Asset.Group.Name));
 	for (const cloth of data) {
 		if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group)) continue;
 		const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
@@ -96,15 +122,26 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 			CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
 			const item = InventoryGet(C, cloth.Group);
 			if (cloth.Property && item) {
-				if (item.Property == null) item.Property = {};
-				Object.assign(item.Property, cloth.Property);
+					item.Property = cloneDeep(curseMakeSavedProperty(cloth.Property));
 			}
 		} else {
 			console.warn(`Clothing not found: `, cloth);
+			}
+		}
+	} else {
+		// Import locks on top
+		for (const cloth of data) {
+			const item = InventoryGet(C, cloth.Group);
+			if (cloth.Property && item) {
+				item.Property = cloneDeep(cloth.Property);
+			}
 		}
 	}
 	CharacterRefresh(C);
-	return true;
+	return (!fullMatch &&
+		includeBinds &&
+		data.some(i => Array.isArray(i.Property?.Effect) && i.Property?.Effect.includes("Lock"))
+	) ? "Imported! Repeat to also import locks." : "Imported!";
 }
 
 let j_WardrobeIncludeBinds = false;
@@ -122,8 +159,7 @@ function PasteListener(ev: ClipboardEvent) {
 		ev.preventDefault();
 		ev.stopImmediatePropagation();
 		const data = (ev.clipboardData || (window as any).clipboardData).getData("text");
-		const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-		CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+		CharacterAppearanceWardrobeText = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
 	}
 }
 
@@ -206,8 +242,7 @@ export class ModuleWardrobe extends BaseModule {
 							return;
 						}
 						const data = await navigator.clipboard.readText();
-						const res = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-						CharacterAppearanceWardrobeText = res !== true ? `Import error: ${res}` : "Imported!";
+						CharacterAppearanceWardrobeText = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
 					}, 0);
 					return;
 				}

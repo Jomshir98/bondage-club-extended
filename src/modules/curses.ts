@@ -22,31 +22,37 @@ const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 const CURSE_IGNORED_EFFECTS = ["Lock"];
 
+export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
+	const result: ItemProperties = {};
+
+	if (isObject(properties)) {
+		for (const key of Object.keys(properties)) {
+			if (key === "Effect") {
+				if (Array.isArray(properties.Effect) && properties.Effect.every(i => typeof i === "string")) {
+					const effect = properties.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i));
+					if (effect.length > 0) {
+						result.Effect = effect;
+					}
+				} else {
+					console.error(`BCX: Bad effect of properties: `, properties.Effect);
+				}
+			} else if (!CURSE_IGNORED_PROPERTIES.includes(key) && properties[key] !== undefined) {
+				result[key] = cloneDeep(properties[key]);
+			}
+		}
+	}
+
+	return result;
+}
+
 function curseCreateCurseItemInfo(item: Item): CursedItemInfo {
 	const result: CursedItemInfo = {
 		Name: item.Asset.Name,
 		curseProperty: false,
 		Difficulty: item.Difficulty || undefined,
 		Color: (item.Color && item.Color !== "Default") ? cloneDeep(item.Color) : undefined,
-		Property: {}
+		Property: curseMakeSavedProperty(item.Property)
 	};
-
-	if (isObject(item.Property)) {
-		for (const key of Object.keys(item.Property)) {
-			if (key === "Effect") {
-				if (Array.isArray(item.Property.Effect) && item.Property.Effect.every(i => typeof i === "string")) {
-					const effect = item.Property.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i));
-					if (effect.length > 0) {
-						result.Property!.Effect = effect;
-					}
-				} else {
-					console.error(`BCX: Bad effect of item: `, item.Property.Effect, item);
-				}
-			} else if (!CURSE_IGNORED_PROPERTIES.includes(key) && item.Property[key] !== undefined) {
-				result.Property![key] = cloneDeep(item.Property[key]);
-			}
-		}
-	}
 
 	if (Object.keys(result.Property!).length === 0) {
 		delete result.Property;

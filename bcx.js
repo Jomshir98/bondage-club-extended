@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.2-e4d676cb";const BCX_DEVEL=false;
+    const BCX_VERSION="0.6.2-9d8c0630";const BCX_DEVEL=false;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",
@@ -248,6 +248,8 @@ window.BCX_Loaded = false;
 
     const VERSION = BCX_VERSION;
     const VERSION_CHECK_BOT = 37685;
+    // Server commit: a2e5454d002ed8d93c4009e59fdbd47c800277a9
+    // Game commit: fdf0d0323bf137fbfbaaf8a22ca77f96465beefa
     const FUNCTION_HASHES = {
         "Player.CanChange": ["082287C0"],
         "Player.GetBlindLevel": ["B0DE4B87"],
@@ -255,7 +257,7 @@ window.BCX_Loaded = false;
         "Player.IsSlow": ["4D9B1713"],
         ActivityOrgasmPrepare: ["E4EE085D"],
         ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9"],
-        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF"],
+        AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF", "0D1455A9"],
         AppearanceGetPreviewImageColor: ["C4BDF19F"],
         AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
         AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
@@ -295,8 +297,8 @@ window.BCX_Loaded = false;
         DialogDrawItemMenu: ["7B1D71E9", "0199F25B", "D832A940"],
         DialogDrawPoseMenu: ["4B146E82"],
         DialogFindPlayer: ["32851FF2"],
-        DialogItemClick: ["7039462A"],
-        DialogMenuButtonBuild: ["1D4265E4"],
+        DialogItemClick: ["7039462A", "A08AC13E"],
+        DialogMenuButtonBuild: ["1D4265E4", "75E8CCCD"],
         DialogMenuButtonClick: ["9D8202CC", "8B705620"],
         DrawCharacter: ["A9C65470"],
         DrawGetImage: ["BEC7B0DA"],

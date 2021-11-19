@@ -12,7 +12,7 @@ window.BCX_Loaded = false;
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.6.2-7a851986";const BCX_DEVEL=true;
+    const BCX_VERSION="0.6.2-9d8c0630";const BCX_DEVEL=true;
 
     const GROUP_NAME_OVERRIDES = {
         "ItemNeckAccessories": "Collar Addon",

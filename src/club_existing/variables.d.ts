@@ -36,6 +36,7 @@ declare const CommonGetFont: MemoizedFunction<(size: number) => string>;
 declare function CommonColorsEqual(C1: string | string[], C2: string | string[]): boolean;
 declare function CommonArraysEqual(a1: any[], a2: any[]): boolean;
 declare function CommonSetScreen(NewModule: string, NewScreen: string): void;
+declare function CommonConvertStringToArray(s: string): number[];
 
 // FriendList.js
 declare var FriendListBeepTarget: number | null;
@@ -54,6 +55,8 @@ declare function ElementCreateInput(ID: string, Type: string, Value: string, Max
 declare function ElementPosition(ElementID: string, X: number, Y: number, W: number, H?: number): void;
 declare function ElementPositionFix(ElementID: string, Font: any, X: number, Y: number, W: number, H: number): void;
 declare function ElementRemove(ID: string): void;
+declare function ElementToggleGeneratedElements(Screen: string, ShouldDisplay: boolean): void;
+declare function ElementValue(ID: string, Value?: string): string | undefined;
 
 // Dialog.js
 declare var StruggleProgress: number;
@@ -125,6 +128,7 @@ declare var ChatAdminBackgroundSelect: string;
 declare var ChatAdminPrivate: boolean;
 declare var ChatAdminLocked: boolean;
 declare var ChatAdminGame: string;
+declare var ChatAdminBlockCategory: any[];
 
 // ChatCreate.js
 declare var ChatCreateBackgroundList: any;
@@ -210,3 +214,10 @@ declare function ChatSearchMuffle(inputText: string): string;
 // Reputation.js
 declare function ReputationGet(RepType: string): number;
 declare function ReputationCharacterGet(C: Character, RepType: string): number;
+
+// ChatCreate.js
+declare var ChatCreateBackgroundSelect: string;
+declare var ChatCreatePrivate: boolean | null;
+declare var ChatCreateLocked: boolean | null;
+declare var ChatCreateGame: string;
+declare var ChatBlockItemCategory: any[];

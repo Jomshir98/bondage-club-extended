@@ -300,7 +300,7 @@ type RuleCustomData = {
 	alt_seeing_whitelist: {
 		whitelistedMembers: number[];
 	},
-	alt_forced_summoning : {
+	alt_forced_summoning: {
 		allowedMembers: number[];
 		summoningText: string;
 	},
@@ -482,6 +482,18 @@ interface RuleDefinition<ID extends BCX_Rule = BCX_Rule> extends RuleDisplayDefi
 	tick?: (state: import("./modules/rules").RuleState<ID>) => boolean;
 }
 
+interface RoomTemplate {
+	Name: string;
+	Description: string;
+	Background: string;
+	Limit: string;
+	Admin: number[];
+	Game: string;
+	Private: boolean;
+	Locked: boolean;
+	BlockCategory: string[];
+}
+
 interface ModStorage {
 	preset: import("./constants").Preset;
 	chatShouldDisplayFirstTimeHelp?: true;
@@ -499,4 +511,5 @@ interface ModStorage {
 	 */
 	cursedItems: Record<string, CursedItemInfo | null>;
 	conditions: ConditionsStorage;
+	roomTemplates: (RoomTemplate | null)[];
 }

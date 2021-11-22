@@ -343,7 +343,7 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	} else {
 		delete conditionData.timer;
 	}
-	if (data.timerRemove) {
+	if (data.timerRemove && data.active) {
 		conditionData.timerRemove = true;
 	} else {
 		delete conditionData.timerRemove;
@@ -775,8 +775,9 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 			const autoremove = (argv[3] || "").toLocaleLowerCase();
 			if (argv.length !== 4 || autoremove !== "yes" && autoremove !== "no") {
 				return respond(`Usage:\ntimer <${cshelp}> autoremove <yes/no>`);
-			}
-			if (conditionData.timer === null) {
+			} else if (!conditionData.active) {
+				return respond(`Timer is counting until ${categorySingular} becomes enabled, cannot use autoremove in this mode.`);
+			} else if (conditionData.timer === null) {
 				return respond(`Timer is disabled on this ${categorySingular}. To use autoremove, first set timer`);
 			}
 			conditionData.timerRemove = autoremove === "yes";
@@ -992,6 +993,9 @@ export class ModuleConditions extends BaseModule {
 				} else if (ConditionsGetConditionLimit(key, condition) === ConditionsLimit.blocked) {
 					console.warn(`BCX: Condition ${key}:${condition} became blocked while active, removing it`);
 					delete data.conditions[condition];
+				} else if (conditiondata.timerRemove && !conditiondata.active) {
+					console.warn(`BCX: Condition ${key}:${condition} had timerRemove while inactive, cleaning up`);
+					delete conditiondata.timerRemove;
 				}
 			}
 		}
@@ -1090,11 +1094,12 @@ export class ModuleConditions extends BaseModule {
 
 			for (const [conditionName, conditionData] of Object.entries<ConditionsConditionData>(categoryData.conditions)) {
 				if (conditionData.timer !== undefined && conditionData.timer <= now) {
-					if (conditionData.timerRemove) {
+					if (conditionData.timerRemove && conditionData.active) {
 						ConditionsRemoveCondition(category, conditionName);
 					} else {
 						delete conditionData.timer;
-						conditionData.active = false;
+						delete conditionData.timerRemove;
+						conditionData.active = !conditionData.active;
 						dataChanged = true;
 					}
 				}

@@ -177,10 +177,14 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			return true;
 		}
 
-		if (this.changes && this.changes.timer !== null && this.changes.timer < Date.now()) {
-			this.changes.timer = null;
-			this.changes.timerRemove = false;
-			this.changes.active = false;
+		if (this.changes && this.changes.timer !== null) {
+			if (this.changes.timer < Date.now()) {
+				this.changes.timer = null;
+				this.changes.timerRemove = false;
+				this.changes.active = !this.changes.active;
+			} else if (!this.changes.active) {
+				this.changes.timerRemove = false;
+			}
 		}
 
 		const data = this.changes ?? this.conditionData;
@@ -220,9 +224,9 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		if (data.timer === null) {
 			statusText = "Timer disabled";
 		} else {
-			statusText = `Time left: ${formatTimeInterval(data.timer - Date.now())}`;
+			statusText = `${data.active ? 'Deactivates' : 'Activates'} in: ${formatTimeInterval(data.timer - Date.now())}`;
 		}
-		DrawText(statusText, 530, 311, "Black");
+		DrawText(statusText, 530, 311, data.active || !data.timer ? "Black" : "#060");
 
 		if (data.timer === null) {
 			DrawButton(120, 360, 820, 160, "Enable timer", "White");
@@ -231,13 +235,15 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			DrawButton(120, 360, 85, 60, "-1d", !access ? "#ddd" : "White", "", "Remove 1 day from the timer", !access);
 			DrawButton(120 + 125, 360, 85, 60, "-1h", !access ? "#ddd" : "White", "", "Remove 1 hour from the timer", !access);
 			DrawButton(120 + 2 * (125), 360, 85, 60, "-5m", !access ? "#ddd" : "White", "", "Remove 5 minutes from the timer", !access);
-			DrawButton(120 + 3 * (125), 360, 70, 60, "∞", !access ? "#ddd" : "White", "", "Set lifetime to infinite", !access);
+			DrawButton(120 + 3 * (125), 360, 70, 60, "∞", !access ? "#ddd" : "White", "", "Disable the timer", !access);
 			DrawButton(105 + 4 * (125), 360, 85, 60, "+5m", !access ? "#ddd" : "White", "", "Add 5 minutes to the timer", !access);
 			DrawButton(105 + 5 * (125), 360, 85, 60, "+1h", !access ? "#ddd" : "White", "", "Add 1 hour to the timer", !access);
 			DrawButton(105 + 6 * (125), 360, 85, 60, "+1d", !access ? "#ddd" : "White", "", "Add 1 day to the timer", !access);
 
 			MainCanvas.textAlign = "left";
-			DrawCheckbox(125, 450, 64, 64, `Remove the ${this.conditionCategory.slice(0, -1)} when timer runs out`, data.timerRemove, !access);
+			if (data.active) {
+				DrawCheckbox(125, 450, 64, 64, `Delete the ${this.conditionCategory.slice(0, -1)} when timer runs out`, data.timerRemove, !access);
+			}
 		}
 
 		////// condition factors area
@@ -400,6 +406,8 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		if (MouseIn(125, 180, 64, 64)) {
 			this.changes = this.makeChangesData();
 			this.changes.active = !this.changes.active;
+			this.changes.timer = null;
+			this.changes.timerRemove = false;
 			return true;
 		}
 
@@ -458,7 +466,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			}
 
 			// Timer remove toggle
-			if (MouseIn(125, 450, 64, 64)) {
+			if (MouseIn(125, 450, 64, 64) && data.active) {
 				this.changes = this.makeChangesData();
 				this.changes.timerRemove = !this.changes.timerRemove;
 				return true;

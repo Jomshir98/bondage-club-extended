@@ -501,6 +501,7 @@ export class ModuleCurses extends BaseModule {
 				}
 				return true;
 			},
+			stateChangeHandler: () => { /* NOOP */ },
 			tickHandler: this.curseTick.bind(this),
 			makePublicData: (group, data) => {
 				if (data.data === null) {

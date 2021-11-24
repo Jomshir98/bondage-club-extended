@@ -15,7 +15,7 @@ export function initRules_bc_settings() {
 		});
 	}
 
-	function settingHelper(setting: string, defaultLimit: ConditionsLimit): RuleDefinition {
+	function settingHelper(setting: string, defaultLimit: ConditionsLimit): RuleDisplayDefinition {
 		return {
 			name: `Force '${setting}'`,
 			icon: "Icons/Preference.png",
@@ -61,16 +61,39 @@ export function initRules_bc_settings() {
 	}) {
 		return registerRule<BooleanRule>(id, {
 			...settingHelper(setting, defaultLimit),
+			longDescription: `This rule forces PLAYER_NAME's base game setting '${setting}' to configurable value and prevents her from changing it. ` +
+				`There is also an option to restore the setting to the state it was in before the rule changed it. The restoration happens either when the rule becomes ` +
+				`inactive (for instance through toggle or unfulfilled trigger conditions) or when it is removed.`,
 			dataDefinition: {
 				value: {
 					type: "toggle",
 					description: setting,
 					default: defaultValue
+				},
+				restore: {
+					type: "toggle",
+					description: "Restore previous value when rule ends",
+					default: true,
+					Y: 420
+				}
+			},
+			internalDataValidate: (data) => typeof data === "boolean",
+			internalDataDefault: () => get() ?? false,
+			stateChange(state, newState) {
+				if (newState) {
+					const current = get();
+					if (current !== undefined) {
+						state.internalData = current;
+					}
+				} else if (state.customData?.restore) {
+					const old = state.internalData;
+					if (old !== undefined) {
+						set(old);
+						preferenceSync();
+					}
 				}
 			},
 			tick(state) {
-				state.trigger();
-
 				if (state.isEnforced && state.customData) {
 					const current = get();
 					if (current == null) {

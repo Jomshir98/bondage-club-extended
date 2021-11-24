@@ -20,6 +20,7 @@ import { moduleIsEnabled } from "./presets";
 import { BaseModule } from "./_BaseModule";
 import { getCurrentSubscreen, setSubscreen } from "./gui";
 import { GuiMemberSelect } from "../gui/member_select";
+import { modStorageSync } from "./storage";
 
 const RULES_ANTILOOP_RESET_INTERVAL = 60_000;
 const RULES_ANTILOOP_THRESHOLD = 10;
@@ -81,6 +82,13 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 				throw new Error(`Default doesn't validate for ${name}:${k} (${v.type})`);
 			}
 		}
+	}
+	if (data.internalDataValidate) {
+		if (!data.internalDataValidate(data.internalDataDefault?.())) {
+			throw new Error(`Default internal data doesn't validate for rule ${name}`);
+		}
+	} else if (data.internalDataDefault !== undefined) {
+		throw new Error(`Default internal data for rule ${name} without internal data validation`);
 	}
 	rules.set(name, {
 		...(data as RuleDefinition<BCX_Rule>),
@@ -567,21 +575,30 @@ export function RulesCreate(rule: BCX_Rule, character: ChatroomCharacter | null)
 	if (character && !ConditionsCheckAccess("rules", rule, character))
 		return false;
 
-	const display = RulesGetDisplayDefinition(rule);
+	const definition = rules.get(rule);
+	if (!definition) {
+		throw new Error(`Attempt to create unknown rule '${rule}'`);
+	}
 
 	if (!ConditionsGetCondition("rules", rule)) {
 		const ruleData: ConditionsCategorySpecificData["rules"] = {};
-		if (display.dataDefinition) {
+		if (definition.dataDefinition) {
 			ruleData.customData = {};
-			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(display.dataDefinition)) {
+			for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
 				ruleData.customData[k] = cloneDeep(typeof v.default === "function" ? v.default() : v.default);
+			}
+		}
+		if (definition.internalDataDefault) {
+			ruleData.internalData = definition.internalDataDefault();
+			if (!definition.internalDataValidate?.(ruleData.internalData)) {
+				throw new Error(`Failed to create valid internal data for rule '${rule}'`);
 			}
 		}
 		ConditionsSetCondition("rules", rule, ruleData);
 		if (character) {
-			logMessage("rule_change", LogEntryType.plaintext, `${character} added a new rule: ${display.name}`);
+			logMessage("rule_change", LogEntryType.plaintext, `${character} added a new rule: ${definition.name}`);
 			if (!character.isPlayer()) {
-				ChatRoomSendLocal(`${character} gave you a new rule: "${display.name}"`);
+				ChatRoomSendLocal(`${character} gave you a new rule: "${definition.name}"`);
 			}
 		}
 	}
@@ -636,6 +653,18 @@ export class RuleState<ID extends BCX_Rule> {
 
 	get customData(): ID extends keyof RuleCustomData ? (RuleCustomData[ID] | undefined) : undefined {
 		return this.condition?.data.customData as any;
+	}
+
+	get internalData(): ID extends keyof RuleInternalData ? (RuleInternalData[ID] | undefined) : undefined {
+		return cloneDeep(this.condition?.data.internalData);
+	}
+
+	set internalData(data: ID extends keyof RuleInternalData ? (RuleInternalData[ID] | undefined) : undefined) {
+		const condition = this.condition;
+		if (condition && !isEqual(condition.data.internalData, data)) {
+			condition.data.internalData = data;
+			modStorageSync();
+		}
 	}
 
 	constructor(rule: ID, definition: RuleDisplayDefinition<ID>) {
@@ -845,8 +874,24 @@ export class ModuleRules extends BaseModule {
 					return false;
 				}
 
+				if (descriptor.internalDataValidate) {
+					if (!descriptor.internalDataValidate(info.internalData)) {
+						if (info.internalData === undefined && descriptor.internalDataDefault) {
+							console.warn(`BCX: Missing internal data for rule ${rule}, fixing`);
+							info.internalData = descriptor.internalDataDefault();
+						} else {
+							console.error(`BCX: Bad internal data for rule ${rule}, removing it`, info);
+							return false;
+						}
+					}
+				} else if (info.internalData !== undefined) {
+					console.error(`BCX: Internal data for rule ${rule} without validator, removing it`, info);
+					return false;
+				}
+
 				return true;
 			},
+			stateChangeHandler: this.ruleStateChange.bind(this),
 			tickHandler: this.ruleTick.bind(this),
 			makePublicData: (rule, data) => ({
 				enforce: data.data.enforce ?? true,
@@ -1084,6 +1129,15 @@ export class ModuleRules extends BaseModule {
 		this.unload();
 		this.load();
 		this.run();
+	}
+
+	ruleStateChange(rule: BCX_Rule, condition: ConditionsConditionData<"rules">, newState: boolean): void {
+		const ruleDefinition = rules.get(rule);
+		if (!ruleDefinition) {
+			throw new Error(`Definition for rule ${rule} not found`);
+		}
+
+		ruleDefinition.stateChange?.(ruleDefinition.state, newState);
 	}
 
 	ruleTick(rule: BCX_Rule, condition: ConditionsConditionData<"rules">): void {

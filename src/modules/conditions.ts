@@ -108,6 +108,7 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	permission_changeLimits: BCX_Permissions;
 	loadValidateConditionKey(key: string): boolean;
 	loadValidateCondition(key: string, data: ConditionsConditionData<C>): boolean;
+	stateChangeHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>, newState: boolean): void;
 	tickHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): void;
 	makePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): ConditionsCategorySpecificPublicData[C];
 	validatePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificPublicData[C]): boolean;
@@ -237,6 +238,7 @@ export function ConditionsSetCondition<C extends ConditionsCategories>(category:
 	} else {
 		categoryData.conditions[condition] = {
 			active: true,
+			lastActive: false,
 			timer: categoryData.timer !== undefined ? Date.now() + categoryData.timer : undefined,
 			timerRemove: categoryData.timerRemove,
 			data
@@ -269,9 +271,11 @@ export function ConditionsRemoveCondition<C extends ConditionsCategories>(catego
 		conditions = [conditions];
 	}
 	const categoryData = ConditionsGetCategoryData(category);
+	const handler = ConditionsGetCategoryHandler(category);
 	let changed = false;
 	for (const condition of conditions) {
 		if (categoryData.conditions[condition]) {
+			handler.stateChangeHandler(condition, categoryData.conditions[condition], false);
 			delete categoryData.conditions[condition];
 			changed = true;
 		}
@@ -925,6 +929,7 @@ export class ModuleConditions extends BaseModule {
 			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
 				curses.conditions[group] = {
 					active: true,
+					lastActive: false,
 					data
 				};
 			}
@@ -979,8 +984,10 @@ export class ModuleConditions extends BaseModule {
 				if (!handler.loadValidateConditionKey(condition)) {
 					console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
 					delete data.conditions[condition];
+					continue;
 				} else if (!handler.loadValidateCondition(condition, conditiondata)) {
 					delete data.conditions[condition];
+					continue;
 				} else if (
 					typeof conditiondata.active !== "boolean" ||
 					conditiondata.requirements !== undefined && !guard_ConditionsConditionRequirements(conditiondata.requirements) ||
@@ -990,12 +997,19 @@ export class ModuleConditions extends BaseModule {
 				) {
 					console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
 					delete data.conditions[condition];
+					continue;
 				} else if (ConditionsGetConditionLimit(key, condition) === ConditionsLimit.blocked) {
 					console.warn(`BCX: Condition ${key}:${condition} became blocked while active, removing it`);
 					delete data.conditions[condition];
-				} else if (conditiondata.timerRemove && !conditiondata.active) {
+					continue;
+				}
+				if (conditiondata.timerRemove && !conditiondata.active) {
 					console.warn(`BCX: Condition ${key}:${condition} had timerRemove while inactive, cleaning up`);
 					delete conditiondata.timerRemove;
+				}
+				if (typeof conditiondata.lastActive !== "boolean") {
+					console.warn(`BCX: Condition ${key}:${condition} missing lastActive, adding`);
+					conditiondata.lastActive = false;
 				}
 			}
 		}
@@ -1104,11 +1118,21 @@ export class ModuleConditions extends BaseModule {
 					}
 				}
 
-				if (!conditionData.active)
-					continue;
+				const resolvedActive = conditionData.active && ConditionsEvaluateRequirements(conditionData.requirements ?? categoryData.requirements);
 
-				const requirements = conditionData.requirements ?? categoryData.requirements;
-				if (!ConditionsEvaluateRequirements(requirements))
+				if (resolvedActive !== conditionData.lastActive) {
+					conditionData.lastActive = resolvedActive;
+					dataChanged = true;
+					const copyChange = cloneDeep(conditionData);
+
+					handler.stateChangeHandler(conditionName, conditionData, resolvedActive);
+
+					if (!isEqual(copyChange, conditionData)) {
+						dataChanged = true;
+					}
+				}
+
+				if (!resolvedActive)
 					continue;
 
 				const copy = cloneDeep(conditionData);

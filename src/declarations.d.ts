@@ -88,6 +88,8 @@ interface ConditionsCategorySpecificData {
 		log?: false;
 		/** `RuleCustomData` */
 		customData?: Record<string, any>;
+		/** `RuleInternalData` */
+		internalData?: any;
 	};
 }
 
@@ -127,6 +129,7 @@ interface ConditionsConditionRequirements {
 
 interface ConditionsConditionData<category extends ConditionsCategories = ConditionsCategories> {
 	active: boolean;
+	lastActive: boolean;
 	data: ConditionsCategorySpecificData[category];
 	timer?: number;
 	timerRemove?: true | undefined;
@@ -357,12 +360,15 @@ type RuleCustomData = {
 	},
 	setting_forbid_lockpicking: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_forbid_SP_rooms: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_forbid_safeword: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_arousal_meter: {
 		active: string;
@@ -370,21 +376,26 @@ type RuleCustomData = {
 	},
 	setting_block_vibe_modes: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_arousal_stutter: {
 		value: string;
 	},
 	setting_show_afk: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_show_wardrobe_use: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_allow_body_mod: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_forbid_cosplay_change: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_sensdep: {
 		value: string;
@@ -393,15 +404,19 @@ type RuleCustomData = {
 	},
 	setting_hide_non_adjecent: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_blind_room_garbling: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_relog_keeps_restraints: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_leashed_roomchange: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_room_rejoin: {
 		value: boolean;
@@ -409,10 +424,29 @@ type RuleCustomData = {
 	},
 	setting_plug_vibe_events: {
 		value: boolean;
+		restore: boolean;
 	},
 	setting_upsidedown_view: {
 		value: boolean;
+		restore: boolean;
 	}
+};
+
+type RuleInternalData = {
+	setting_forbid_lockpicking: boolean;
+	setting_forbid_SP_rooms: boolean;
+	setting_forbid_safeword: boolean;
+	setting_block_vibe_modes: boolean;
+	setting_show_afk: boolean;
+	setting_show_wardrobe_use: boolean;
+	setting_allow_body_mod: boolean;
+	setting_forbid_cosplay_change: boolean;
+	setting_hide_non_adjecent: boolean;
+	setting_blind_room_garbling: boolean;
+	setting_relog_keeps_restraints: boolean;
+	setting_leashed_roomchange: boolean;
+	setting_plug_vibe_events: boolean;
+	setting_upsidedown_view: boolean;
 };
 
 type RuleCustomDataTypesMap = {
@@ -479,7 +513,10 @@ interface RuleDefinition<ID extends BCX_Rule = BCX_Rule> extends RuleDisplayDefi
 	init?: (state: import("./modules/rules").RuleState<ID>) => void;
 	load?: (state: import("./modules/rules").RuleState<ID>) => void;
 	unload?: () => void;
+	stateChange?: (state: import("./modules/rules").RuleState<ID>, newState: boolean) => void;
 	tick?: (state: import("./modules/rules").RuleState<ID>) => boolean;
+	internalDataValidate?: ID extends keyof RuleInternalData ? (data: unknown) => boolean : never;
+	internalDataDefault?: ID extends keyof RuleInternalData ? () => RuleInternalData[ID] : never;
 }
 
 interface RoomTemplate {

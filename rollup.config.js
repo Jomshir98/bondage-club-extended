@@ -5,7 +5,8 @@ import progress from "rollup-plugin-progress";
 import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
-import json from '@rollup/plugin-json';
+import json from "@rollup/plugin-json";
+import { terser } from "rollup-plugin-terser";
 
 import packageJson from "./package.json";
 import simpleGit from "simple-git";
@@ -64,6 +65,10 @@ window.BCX_Loaded = false;
 		}
 	}
 };
+
+if (!process.env.ROLLUP_WATCH) {
+	config.plugins.push(terser());
+}
 
 if (process.env.ROLLUP_WATCH) {
 	config.plugins.push(

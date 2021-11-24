@@ -25,7 +25,7 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"For instance, if something applies or is permitted for a Mistress, it also always is for an Owner. Any number of " +
 	"Owners and Mistresses can be set. Check their current power over BCX with the button on the right.",
 	[Views.AuthorityPermissions]: "The heart of BCX: Allows to configure the permissions to set up and use most of " +
-	"BCX. Initial access settings depend on the preset selected for this BCX. " +
+	"BCX. Default settings depend on the initial BCX setup preset selected. " +
 	"Self access is the checkbox next to every permission and the lowest access role is to its right. " +
 	"Example: If 'allow forbidding self access', 'allow granting self access', 'allow lowest access modification' have the checkbox removed " +
 	"and lowest role is 'Owner', then current and newly added BCX owners and the BC owner can get full control over " +
@@ -42,8 +42,8 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"a cursed item or a blocked item or clothing slot that forces to stay unrestrained or naked there. Clicking on the button with the cog icon " +
 	"in the middle of each row moves you to a new screen that allows to configure the curse (if you have permission). When the cog icon has a blue " +
 	"aura, that means that the curse's conditions are the same as the global config. If permitted, you can remove single curses with the 'X' button.",
-	[Views.ConditionsEditCurses]: "Here you can configure if the curse is active, if it wears off after some time or not, and " +
-	"when the curse is in effect, such as either always or based on where the player is and with whom. The small green/red bars next to the " +
+	[Views.ConditionsEditCurses]: "Here you can switch the curse on/off, set a timer for activating/deactivating/deleting the curse and " +
+	"define when it can trigger, such as either always or based on where the player is and with whom. The small green/red bars next to the " +
 	"checkboxes indicate whether a condition is true at present or not and the big bar whether this means that the curse is in effect, if active. " +
 	"On the right side, you can curse the usage/" +
 	"alteration of an item such as fixing cuffs behind the back. Lastly, in the bottom right you can set the trigger conditions " +
@@ -63,8 +63,8 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"rule type and little status icons that show if the rule is enforced and/or transgressions are logged. Clicking on the button with the cog icon " +
 	"in the middle of each row moves you to a new screen that allows to configure the rule (if you have permission). When the cog icon has a blue " +
 	"aura, then that means that the rule's conditions are the same as the global config. If permitted, you can remove single rules with the 'X' button.",
-	[Views.ConditionsEditRules]: "Here you can configure if the rule is active, if it is only valid for some time, what happens then and " +
-	"when the rule applies, such as either always or based on where the player is and with whom. The small green/red bars next to the " +
+	[Views.ConditionsEditRules]: "Here you switch the rule on/off, set a timer for activating/deactivating/deleting the rule and " +
+	"define when it can trigger, such as either always or based on where the player is and with whom. The small green/red bars next to the " +
 	"checkboxes indicate whether a condition is true at present or not and the big bar whether this means that the rule is in effect, if active. " +
 	"Depending on the rule, you can either enforce its effect, " +
 	"log all violations, or both at the same time. Lastly on the bottom right, you can set whether the trigger conditions " +

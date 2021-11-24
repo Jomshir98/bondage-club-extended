@@ -115,17 +115,17 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 	if (!fullMatch) {
 		// If there is item change we only apply items, not locks
 		C.Appearance = C.Appearance.filter(a => !Allow(a) || matchingGroups.has(a.Asset.Group.Name));
-	for (const cloth of data) {
-		if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group)) continue;
-		const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
-		if (A != null) {
-			CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
-			const item = InventoryGet(C, cloth.Group);
-			if (cloth.Property && item) {
+		for (const cloth of data) {
+			if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group)) continue;
+			const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
+			if (A != null) {
+				CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
+				const item = InventoryGet(C, cloth.Group);
+				if (cloth.Property && item) {
 					item.Property = cloneDeep(curseMakeSavedProperty(cloth.Property));
-			}
-		} else {
-			console.warn(`Clothing not found: `, cloth);
+				}
+			} else {
+				console.warn(`Clothing not found: `, cloth);
 			}
 		}
 	} else {
@@ -151,7 +151,8 @@ const helpText = "BCX's wardrobe export/import works by converting your current 
 	"You can then paste it anywhere you like, for instance a text file with all your outfits. At any time, you can wear the look again by copying the outfit code word to " +
 	"the clipboard and importing it with the according button. Functionality of this feature depends on the device you " +
 	"are using and if the clipboard can be used on it. The button to the left of the 'Export'-button toggles whether items/restraints on your character should also " +
-	"be exported/imported. That said, importing an outfit with restraints will fail if it would change any item that is locked (or blocked by a locked item), " +
+	"be exported/imported. Importing with items has two stages: First usage adds no locks, second one also imports locks from the exported items. " +
+	"That said, importing an outfit with restraints will fail if it would change any item that is locked (or blocked by a locked item), " +
 	"except collars, neck accessories and neck restraints. Those, as well as the body itself, are ignored.";
 
 function PasteListener(ev: ClipboardEvent) {
@@ -206,11 +207,11 @@ export class ModuleWardrobe extends BaseModule {
 			}
 			if (j_ShowHelp && (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe")) {
 				MainCanvas.fillStyle = "#ffff88";
-				MainCanvas.fillRect(170, 190, 1100, 780);
+				MainCanvas.fillRect(30, 190, 1240, 780);
 				MainCanvas.strokeStyle = "Black";
-				MainCanvas.strokeRect(170, 190, 1100, 780);
+				MainCanvas.strokeRect(30, 190, 1240, 780);
 				MainCanvas.textAlign = "left";
-				DrawTextWrap(helpText, 170 - 1010 / 2, 210, 1060, 740, "black");
+				DrawTextWrap(helpText, 30 - 1160 / 2, 210, 1200, 740, "black");
 				MainCanvas.textAlign = "center";
 			}
 		});
@@ -219,7 +220,7 @@ export class ModuleWardrobe extends BaseModule {
 			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
 				const Y = NModWardrobe ? 265 : 125;
 				// Help text toggle
-				if (MouseIn(1380, Y, 50, 50) || (MouseIn(170, 190, 1100, 780) && j_ShowHelp)) {
+				if (MouseIn(1380, Y, 50, 50) || (MouseIn(30, 190, 1240, 780) && j_ShowHelp)) {
 					j_ShowHelp = !j_ShowHelp;
 				}
 				// Restraints toggle

@@ -17,6 +17,7 @@
 		"lodash-es": "^4.17.21"
 	},
 	"devDependencies": {
+		"@rollup/plugin-json": "^4.1.0",
 		"@rollup/plugin-node-resolve": "^13.0.6",
 		"@rollup/plugin-typescript": "^8.3.0",
 		"@typescript-eslint/eslint-plugin": "^5.1.0",

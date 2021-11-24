@@ -14,7 +14,8 @@
 		"experimentalDecorators": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": false,
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"resolveJsonModule": true
 	},
 	"include": ["./src/**/*"]
 }

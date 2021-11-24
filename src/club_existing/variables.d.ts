@@ -18,8 +18,14 @@ declare var AppearanceMode: string;
 declare function AppearanceMenuBuild(C: Character): void;
 declare function CharacterAppearanceSetItem(C: Character, Group: string, ItemAsset: Asset | null, NewColor?: string | string[], DifficultyFactor?: number, ItemMemberNumber?: number, Refresh?: boolean): void;
 
+// Backgrounds.js
+declare var BackgroundsTagList: string[];
+declare var BackgroundsList: { Name: string; Tag: string[]; }[];
+
 // BackgroundSelection.js
 declare var BackgroundSelectionAll: { Name: string; Description: string; Low: string; }[];
+declare var BackgroundSelectionOffset: number;
+declare var BackgroundSelectionView: any[];
 
 // Timer.js
 declare var CurrentTime: number;

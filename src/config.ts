@@ -19,6 +19,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	AppearanceMenuDraw: ["28FDF65B"],
 	AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
 	AsylumEntranceCanWander: ["3F5F4041", "609FA096"],
+	BackgroundSelectionRun: ["DB865494"],
 	CharacterAppearanceLoadCharacter: ["3641512F"],
 	CharacterLoadEffect: ["0498693B"],
 	ChatAdminClick: ["6B460E3D"],

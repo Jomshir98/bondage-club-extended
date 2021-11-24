@@ -267,3 +267,44 @@ export function showHelp(helpText: string) {
 	MainCanvas.textAlign = "left";
 	DrawTextWrap(helpText, 1020 - 760 / 2, 210, 760, 560, "black");
 }
+
+interface RoomInfo {
+	Name: string;
+	// Space: string;
+	Description: string;
+	Background: string;
+	Limit: number;
+	Admin: number[];
+	Ban: number[];
+	Game: string;
+	Private: boolean;
+	Locked: boolean;
+	BlockCategory: any[];
+}
+
+export function getCurrentRoomData(): RoomInfo | null {
+	if (!ChatRoomData)
+		return null;
+	return ({
+		Name: ChatRoomData.Name,
+		Description: ChatRoomData.Description,
+		Background: ChatRoomData.Background,
+		Limit: ChatRoomData.Limit,
+		Admin: ChatRoomData.Admin.slice(),
+		Ban: ChatRoomData.Ban.slice(),
+		BlockCategory: ChatRoomData.BlockCategory.slice(),
+		Game: ChatRoomGame,
+		Private: ChatRoomData.Private,
+		Locked: ChatRoomData.Locked
+	});
+}
+
+export function updateChatroom(newData: Partial<RoomInfo>): boolean {
+	const data = getCurrentRoomData();
+	if (!ServerPlayerIsInChatRoom() || !ChatRoomPlayerIsAdmin() || !data)
+		return false;
+	const Room: Record<string, any> = { ...data, ...newData };
+	Room.Limit = Room.Limit.toString();
+	ServerSend("ChatRoomAdmin", { MemberNumber: Player.ID, Action: "Update", Room });
+	return true;
+}

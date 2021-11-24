@@ -5,6 +5,7 @@ import progress from "rollup-plugin-progress";
 import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
+import json from '@rollup/plugin-json';
 
 import packageJson from "./package.json";
 import simpleGit from "simple-git";
@@ -47,6 +48,7 @@ window.BCX_Loaded = false;
 	plugins: [
 		progress({ clearLine: true }),
 		resolve({ browser: true }),
+		json(),
 		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
 		copy({
 			targets: [{ src: process.env.IS_DEVEL ? 'static_devel/*' : 'static/*', dest: 'dist' }]

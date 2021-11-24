@@ -161,7 +161,7 @@ function CommandParse(msg: string): [string, string] {
 function CommandParseArguments(args: string): string[] {
 	return [...args.matchAll(/".*?(?:"|$)|'.*?(?:'|$)|[^ ]+/g)]
 		.map(a => a[0])
-		.map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
+		.map(a => a[0] === '"' || a[0] === "'" ? a.substring(1, a.length > 1 && a[a.length - 1] === a[0] ? a.length - 1 : a.length) : a);
 }
 
 function CommandHasEmptyArgument(args: string): boolean {
@@ -169,18 +169,54 @@ function CommandHasEmptyArgument(args: string): boolean {
 	return argv.length === 0 || !args.endsWith(argv[argv.length - 1]);
 }
 
-function CommandQuoteArgument(arg: string): string {
+function CommandArgumentNeedsQuotes(arg: string): boolean {
+	return arg.includes(" ") || arg.includes('"') || arg.startsWith(`'`);
+}
+
+function CommandQuoteArgument(arg: string, force: boolean = false): string {
 	if (arg.startsWith(`"`)) {
 		return `'${arg}'`;
 	} else if (arg.startsWith(`'`)) {
 		return `"${arg}"`;
-	} else if (arg.includes(" ")) {
+	} else if (arg.includes(" ") || force) {
 		return arg.includes('"') ? `'${arg}'` : `"${arg}"`;
 	}
 	return arg;
 }
 
+let autocompleteMessage: null | HTMLDivElement = null;
+let autocompleteLastQuery: string | null = null;
+let autocompleteLastResult: [string, string][] = [];
+let autocompleteNextIndex = 0;
+
+function autocompleteClear() {
+	if (autocompleteMessage) {
+		autocompleteMessage.remove();
+		autocompleteMessage = null;
+	}
+	autocompleteLastQuery = null;
+}
+
+function autocompleteShow(header: string, options: string[], highlight?: number) {
+	autocompleteClear();
+	if (options.length > 0) {
+		const res = document.createElement("div");
+		res.innerText += `[${header}]\n`;
+		for (let i = 0; i < options.length; i++) {
+			const option = document.createElement("div");
+			option.innerText = options[i];
+			if (i === highlight) {
+				option.style.background = `#7e7eff54`;
+			}
+			res.appendChild(option);
+		}
+		autocompleteMessage = ChatRoomSendLocal(res, 10_000);
+	}
+}
+
 function RunCommand(msg: string): boolean {
+	autocompleteClear();
+
 	const [command, args] = CommandParse(msg);
 
 	const commandInfo = commands.get(command);
@@ -215,19 +251,15 @@ function RunWhisperCommand(msg: string, sender: ChatroomCharacter, respond: (msg
 	return commandInfo.callback(CommandParseArguments(args), sender, respond);
 }
 
-function CommandAutocomplete(msg: string): string {
+function CommandAutocomplete(msg: string): [string, string][] {
 	msg = msg.trimStart();
 	const [command, args] = CommandParse(msg);
 
 	if (msg.length === command.length) {
 		const prefixes = Array.from(commands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
 		if (prefixes.length === 0)
-			return msg;
-		const best = longestCommonPrefix(prefixes);
-		if (best === msg) {
-			ChatRoomSendLocal("[autocomplete hint]\n" + prefixes.slice().sort().join("\n"), 10_000);
-		}
-		return best;
+			return [];
+		return prefixes.map(i => [i, i]);
 	}
 
 	const commandInfo = commands.get(command);
@@ -237,31 +269,57 @@ function CommandAutocomplete(msg: string): string {
 			if (CommandHasEmptyArgument(args)) {
 				argv.push("");
 			}
-			const lastOptions = commandInfo.autocomplete(argv);
-			if (lastOptions.length > 0) {
-				const best = longestCommonPrefix(lastOptions);
-				if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
-					ChatRoomSendLocal("[autocomplete hint]\n" + lastOptions.slice().sort().join("\n"), 10_000);
-				}
-				argv[argv.length - 1] = best;
+			let lastOptions = commandInfo.autocomplete(argv);
+			console.log(argv, lastOptions);
+			const fin = lastOptions.length === 1;
+			if (lastOptions.length === 0) {
+				lastOptions = [argv[argv.length - 1]];
 			}
-			return `${command} ` +
-				argv.map(CommandQuoteArgument).join(" ") +
-				(lastOptions.length === 1 ? " " : "");
+			argv.pop();
+			const needsQuotes = lastOptions.some(CommandArgumentNeedsQuotes);
+			return lastOptions.map(
+				i => [
+					`${command} ` +
+					argv
+						.map(a => CommandQuoteArgument(a))
+						.concat(needsQuotes ? CommandQuoteArgument(i, true) : i)
+						.join(" ") +
+					(fin ? " " : ""),
+					i
+				]
+			);
 		} else {
 			const possibleArgs = commandInfo.autocomplete(args);
 			if (possibleArgs.length === 0) {
-				return msg;
+				return [];
 			}
-			const best = longestCommonPrefix(possibleArgs);
-			if (possibleArgs.length > 1 && best === args) {
-				ChatRoomSendLocal("[autocomplete hint]\n" + possibleArgs.slice().sort().join("\n"), 10_000);
-			}
-			return `${command} ${best}`;
+			return possibleArgs.map(arg => [`${command} ${arg}`, arg]);
 		}
 	}
 
-	return "";
+	return [];
+}
+
+function CommandAutocompleteCycle(msg: string): string {
+	if (autocompleteLastQuery === msg && autocompleteNextIndex < autocompleteLastResult.length) {
+		autocompleteShow("autocomplete hint", autocompleteLastResult.map(i => i[1]), autocompleteNextIndex);
+		const res = autocompleteLastResult[autocompleteNextIndex][0].trim();
+		autocompleteNextIndex = (autocompleteNextIndex + 1) % autocompleteLastResult.length;
+		autocompleteLastQuery = res;
+		return res;
+	}
+	autocompleteClear();
+	autocompleteLastResult = CommandAutocomplete(msg).sort((a, b) => a[1].localeCompare(b[1]));
+	if (autocompleteLastResult.length === 0) {
+		return msg;
+	} else if (autocompleteLastResult.length === 1) {
+		return autocompleteLastResult[0][0];
+	}
+	const best = longestCommonPrefix(autocompleteLastResult.map(i => i[0]));
+	autocompleteShow("autocomplete hint", autocompleteLastResult.map(i => i[1]));
+	autocompleteLastQuery = best;
+	autocompleteNextIndex = 0;
+	return best;
 }
 
 function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [string, string[] | null] {
@@ -292,7 +350,7 @@ function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [st
 			argv[argv.length - 1] = best;
 		}
 		return [`${command} ` +
-			argv.map(CommandQuoteArgument).join(" ") +
+			argv.map(i => CommandQuoteArgument(i)).join(" ") +
 			(lastOptions.length === 1 ? " " : ""), opts];
 	}
 
@@ -305,7 +363,7 @@ export function Command_fixExclamationMark(sender: ChatroomCharacter, text: stri
 
 export function Command_pickAutocomplete(selector: string, options: string[]): string[] {
 	selector = selector.toLocaleLowerCase();
-	return options.filter(o => o.startsWith(selector));
+	return options.filter(o => o.toLocaleLowerCase().startsWith(selector));
 }
 
 export function Command_selectCharacter(selector: string): ChatroomCharacter | string {
@@ -496,7 +554,7 @@ export class ModuleCommands extends BaseModule {
 				e?.preventDefault();
 				e?.stopImmediatePropagation();
 
-				chat.value = "." + CommandAutocomplete(chat.value.substr(1));
+				chat.value = "." + CommandAutocompleteCycle(chat.value.substr(1));
 			} else if (
 				KeyPress === 9 &&
 				ChatRoomTargetMemberNumber != null &&

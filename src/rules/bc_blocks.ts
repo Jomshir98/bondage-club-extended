@@ -759,4 +759,50 @@ export function initRules_bc_blocks() {
 		defaultLimit: ConditionsLimit.normal
 		// Implmented externally
 	});
+
+	registerRule("block_difficulty_change", {
+		name: "Forbid changing difficulty",
+		icon: icon_restrictions,
+		shortDescription: "multiplayer difficulty preference",
+		longDescription: "This rule forbids PLAYER_NAME to change her Bondage Club multiplayer difficulty, regardless of the current value.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to change your difficulty!",
+			attempt_log: "PLAYER_NAME tried to change her multiplayer difficulty",
+			log: "PLAYER_NAME changed her multiplayer difficulty"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		load(state) {
+			hookFunction("PreferenceSubscreenDifficultyRun", 5, (args, next) => {
+				next(args);
+				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? Player.Creation : Player.Difficulty.LastChange;
+				if (
+					state.isEnforced &&
+					PreferenceDifficultyLevel != null &&
+					PreferenceDifficultyLevel !== Player.GetDifficulty() &&
+					(PreferenceDifficultyLevel <= 1 || LastChange + 604800000 < CurrentTime) &&
+					PreferenceDifficultyAccept
+				) {
+					DrawButton(500, 825, 300, 64, TextGet("DifficultyChangeMode") + " " + TextGet("DifficultyLevel" + PreferenceDifficultyLevel.toString()), "#88c", undefined, "Blocked by BCX", true);
+				}
+			});
+			hookFunction("PreferenceSubscreenDifficultyClick", 5, (args, next) => {
+				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? Player.Creation : Player.Difficulty.LastChange;
+				if (
+					state.inEffect &&
+					PreferenceDifficultyLevel != null &&
+					PreferenceDifficultyLevel !== Player.GetDifficulty() &&
+					(PreferenceDifficultyLevel <= 1 || LastChange + 604800000 < CurrentTime) &&
+					PreferenceDifficultyAccept &&
+					MouseIn(500, 825, 300, 64)
+				) {
+					if (state.isEnforced) {
+						state.triggerAttempt();
+						return;
+					}
+					state.trigger();
+				}
+				next(args);
+			});
+		}
+	});
 }

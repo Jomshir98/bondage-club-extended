@@ -196,6 +196,7 @@ type BCX_Rule =
 	| "block_tying_others"
 	| "block_blacklisting"
 	| "block_antiblind"
+	| "block_difficulty_change"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"

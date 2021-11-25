@@ -182,6 +182,10 @@ declare function LogQuery(QueryLogName: string, QueryLogGroup: string): boolean;
 declare function MouseIn(Left: number, Top: number, Width: number, Height: number): boolean;
 declare function MouseXIn(Left: number, Width: number): boolean;
 
+// Preference.js
+declare var PreferenceDifficultyLevel: any;
+declare var PreferenceDifficultyAccept: boolean;
+
 // Login.js
 declare function LoginMistressItems(): void;
 declare function LoginStableItems(): void;

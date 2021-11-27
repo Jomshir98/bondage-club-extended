@@ -170,7 +170,7 @@ function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(handl
 		data: handler.makePublicData(condition, conditionData),
 		timer: conditionData.timer ?? null,
 		timerRemove: conditionData.timerRemove ?? false,
-		requirements: conditionData.requirements ?? null
+		requirements: conditionData.requirements ? cloneDeep(conditionData.requirements) : null
 	};
 }
 

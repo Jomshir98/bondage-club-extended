@@ -232,7 +232,7 @@ type BCX_Rule =
 	// | "replace_spoken_words"
 	// | "using_honorifics"
 	| "speech_force_retype"
-	// | "greet_room_order"
+	| "greet_room_order"
 	// | "restrained_speech"
 	| "speech_alter_faltering"
 	| "other_forbid_afk"
@@ -343,9 +343,9 @@ type RuleCustomData = {
 	// using_honorifics: {
 	// 	stringWithRuleSyntax: string;
 	// },
-	// greet_room_order: {
-	// 	greetingSentence: string;
-	// },
+	greet_room_order: {
+		greetingSentence: string;
+	},
 	// restrained_speech: {
 	// 	listOfAllowedSentences: string[];
 	// },

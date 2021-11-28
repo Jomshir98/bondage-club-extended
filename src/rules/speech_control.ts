@@ -5,7 +5,7 @@ import { registerSpeechHook, SpeechMessageInfo, falteringSpeech } from "../modul
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
 import { dictionaryProcess, isObject } from "../utils";
-import { getCharacterName } from "../utilsClub";
+import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 
 export function initRules_bc_speech_control() {
 	registerRule("speech_specific_sound", {
@@ -560,17 +560,18 @@ export function initRules_bc_speech_control() {
 		// Implmented externally
 	});
 
-	/* TODO: Implement
+	let alreadyGreeted = false;
+	let lastRoomName: string = "";
 	registerRule("greet_room_order", {
 		name: "Order to greet room",
 		icon: "Icons/Chat.png",
 		shortDescription: "with a settable sentence when entering it newly",
 		longDescription: "Sets a specific sentence that PLAYER_NAME must say loud after entering a room that is not empty. The sentence is autopopulating the chat window text input. When to say it is left to PLAYER_NAME, but when the rule is enforced, it is the only thing that can be said in this room after joining it. Disconnects don't count as coming into a new room again, as far as detectable.",
 		triggerTexts: {
-			infoBeep: "You broke the rule to greet this room as expected!",
-			attempt_infoBeep: "You tried to break the rule to greet this room as expected!",
-			attempt_log: "PLAYER_NAME almost broke a rule by not greeting the room in the way taught",
-			log: "PLAYER_NAME broke a rule by not greeting the room in the way taught"
+			infoBeep: "You broke the rule to greet this room like taught!",
+			attempt_infoBeep: "You need to greet this room like taught!",
+			attempt_log: "PLAYER_NAME almost broke a rule by not greeting the room like taught",
+			log: "PLAYER_NAME broke a rule by not greeting the room like taught"
 		},
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
@@ -579,9 +580,44 @@ export function initRules_bc_speech_control() {
 				default: "",
 				description: "The sentence that has to be used to greet any joined room:"
 			}
+		},
+		load(state) {
+			// 1. hook ChatRoomSync to set alreadyGreeted to false if the room name is different from the one stored locally
+			hookFunction("ChatRoomSync", 0, (args, next) => {
+				const data = args[0];
+				if (data.Name !== lastRoomName) alreadyGreeted = false;
+				next(args);
+				// 2. populate chat field with the default text from the rule
+				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+				if (chat && state.customData && state.inEffect && !alreadyGreeted && data.Name !== lastRoomName) {
+					chat.value = state.customData.greetingSentence;
+				}
+			}, ModuleCategory.Rules);
+		},
+		// 3. do not allow sending anything else when enforced
+		init(state) {
+			const check = (msg: SpeechMessageInfo): boolean => (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase() === state.customData?.greetingSentence.toLocaleLowerCase();
+			registerSpeechHook({
+				allowSend: (msg) => {
+					if (state.isEnforced && !alreadyGreeted && !check(msg)) {
+						state.triggerAttempt();
+						ChatRoomSendLocal(`You are expected to greet the room with "${state.customData?.greetingSentence}".`);
+						return false;
+					}
+					// 4. set alreadyGreeted to true and overwrite lastRoomName
+					if (check(msg)) alreadyGreeted = true;
+					lastRoomName = ChatRoomData.Name;
+					return true;
+				},
+				onSend: (msg) => {
+					if (state.inEffect && !alreadyGreeted && !check(msg)) {
+						state.trigger();
+						alreadyGreeted = true;
+					}
+				}
+			});
 		}
 	});
-	*/
 
 	// Restrained speech:
 	// the wearer is unable to speak freely, she is given a set of sentences/targets allowed and can only use those with the #name talk command.

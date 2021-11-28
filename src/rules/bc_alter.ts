@@ -1,8 +1,7 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
-import { hookFunction } from "../patching";
-import { ChatRoomActionMessage, InfoBeep } from "../utilsClub";
+import { ChatRoomActionMessage, getCharacterName, InfoBeep } from "../utilsClub";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
@@ -489,6 +488,37 @@ export function initRules_bc_alter() {
 				return true;
 			}
 			return false;
+		}
+	});
+
+	registerRule("alt_restrict_leashability", {
+		name: "Restrict being leashed by others",
+		icon: "Icons/Swap.png",
+		loggable: false,
+		longDescription: "This rule only allows selected roles to leash PLAYER_NAME, responding with a message about unsuccessful leashing to others when they attempt to do so.",
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			minimumRole: {
+				type: "roleSelector",
+				default: AccessLevel.owner,
+				description: "Minimum role that is allowed to leash:",
+				Y: 320
+			}
+		},
+		load(state) {
+			hookFunction("ChatRoomCanBeLeashedBy", 4, (args, next) => {
+				const sourceMemberNumber = args[0] as number;
+				if (sourceMemberNumber !== 0 &&
+					sourceMemberNumber !== Player.MemberNumber &&
+					state.isEnforced &&
+					state.customData &&
+					getCharacterAccessLevel(sourceMemberNumber) > state.customData.minimumRole
+				) {
+					ChatRoomActionMessage(`${Player.Name}'s leash seems to be cursed and slips out of ${getCharacterName(sourceMemberNumber, "[unknown]")}'s hand.`);
+					return false;
+				}
+				return next(args);
+			});
 		}
 	});
 

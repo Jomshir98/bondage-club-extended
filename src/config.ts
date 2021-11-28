@@ -74,7 +74,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ElementIsScrolledToEnd: ["D28B0638"],
 	ExtendedItemDraw: ["486A52DF", "9256549A", "45432E84", "455F5FDD", "BDE09647", "E831F57A"],
 	FriendListBeepMenuSend: ["B81A695E"],
-	FriendListLoadFriendList: ["72099AC9"],
+	FriendListLoadFriendList: ["72099AC9", "1F8A29E2"],
 	InfiltrationStealItems: ["1F601756"],
 	InformationSheetClick: ["E535609B"],
 	InformationSheetExit: ["75521907"],

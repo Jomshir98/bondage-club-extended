@@ -1,6 +1,7 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
+import { patchFunction, hookFunction } from "../patching";
 import { ChatRoomActionMessage, getCharacterName, InfoBeep } from "../utilsClub";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
@@ -516,6 +517,43 @@ export function initRules_bc_alter() {
 				) {
 					ChatRoomActionMessage(`${Player.Name}'s leash seems to be cursed and slips out of ${getCharacterName(sourceMemberNumber, "[unknown]")}'s hand.`);
 					return false;
+				}
+				return next(args);
+			});
+		}
+	});
+
+	registerRule("alt_hide_friends", {
+		name: "Hide online friends if blind",
+		icon: "Icons/Swap.png",
+		loggable: false,
+		shortDescription: "also preventing beeps from the friendlist - exceptions settable",
+		longDescription: "This rule hides persons on PLAYER_NAME's friend list when she is fully blinded, which also makes sending beeps impossible. Recieved beeps can still be answered. The rule allows to manage a list of members who can be seen normally.",
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			allowedMembers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Members numbers that can always be seen:"
+			}
+		},
+		load(state) {
+			patchFunction("FriendListLoadFriendList", {
+				'data.forEach(friend => {': 'data.forEach(friend => { if (typeof friend.MemberNumber !== "number") return;'
+			});
+			patchFunction("FriendListLoadFriendList", {
+				"FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;": "if (typeof friend.MemberNumber === 'number') FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;"
+			});
+			hookFunction("FriendListLoadFriendList", 1, (args, next) => {
+				const data = args[0];
+				const allowList = state.customData?.allowedMembers;
+				if (state.isEnforced && allowList && Player.GetBlindLevel() >= 3) {
+					data.forEach((friend: any) => {
+						if (!allowList.includes(friend.MemberNumber)) {
+							friend.MemberName = "Someone";
+							friend.MemberNumber = "######";
+						}
+					});
 				}
 				return next(args);
 			});

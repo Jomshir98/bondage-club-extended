@@ -211,6 +211,7 @@ type BCX_Rule =
 	| "alt_hearing_whitelist"
 	| "alt_seeing_whitelist"
 	| "alt_restrict_leashability"
+	| "alt_hide_friends"
 	| "alt_forced_summoning"
 	| "rc_club_owner"
 	| "rc_lover_new"
@@ -307,6 +308,9 @@ type RuleCustomData = {
 	},
 	alt_restrict_leashability: {
 		minimumRole: import("./modules/authority").AccessLevel;
+	},
+	alt_hide_friends: {
+		allowedMembers: number[];
 	},
 	alt_forced_summoning: {
 		allowedMembers: number[];

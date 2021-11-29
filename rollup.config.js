@@ -52,7 +52,15 @@ window.BCX_Loaded = false;
 		json(),
 		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
 		copy({
-			targets: [{ src: process.env.IS_DEVEL ? 'static_devel/*' : 'static/*', dest: 'dist' }]
+			targets: [
+				{
+					src: [
+						"static_common/*",
+						process.env.IS_DEVEL ? 'static_devel/*' : 'static/*'
+					],
+					dest: 'dist'
+				}
+			]
 		})
 	],
 	onwarn: function (warning, warn) {

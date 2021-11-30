@@ -128,13 +128,34 @@ export class GuiMemberSelect extends GuiSubscreen {
 				});
 			}
 		}
-		for (const character of getAllCharactersInRoom()) {
-			if (!this.roleList.some(r => r.memberNumber === character.MemberNumber)) {
-				this.roleList.push({
-					type: "in same room",
-					memberNumber: character.MemberNumber,
-					name: character.Name
-				});
+		// Skip if fully blinded and BlindDisableExamine is set
+		if (Player.GetBlindLevel() < 3 || !Player.GameplaySettings?.BlindDisableExamine) {
+			const ChatRoomCharacterList = getAllCharactersInRoom();
+			// Only add adjecent characters if only those can be seen
+			if (Player.GetBlindLevel() > 0 && Player.ImmersionSettings?.BlindAdjacent) {
+				const playerIndex = ChatRoomCharacterList.findIndex(c => c.isPlayer());
+				// Filter out the characters adjacent to the player index
+				for (let i = 0; i < ChatRoomCharacterList.length; i++) {
+					if (Math.abs(i - playerIndex) === 1 &&
+					!this.roleList.some(r => r.memberNumber === ChatRoomCharacterList[i].MemberNumber)) {
+						this.roleList.push({
+							type: "in same room",
+							memberNumber: ChatRoomCharacterList[i].MemberNumber,
+							name: ChatRoomCharacterList[i].Name
+						});
+					}
+				}
+			// Add the whole room
+			} else {
+				for (const character of ChatRoomCharacterList) {
+					if (!this.roleList.some(r => r.memberNumber === character.MemberNumber)) {
+						this.roleList.push({
+							type: "in same room",
+							memberNumber: character.MemberNumber,
+							name: character.Name
+						});
+					}
+				}
 			}
 		}
 

@@ -116,7 +116,13 @@ export function detectOtherMods() {
 	const w = window as any;
 	return {
 		NMod: typeof w.ChatRoomDrawFriendList === "function",
-		BondageClubTools: (window as any).BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage"))
+		BondageClubTools: (window as any).BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage")),
+		Curse: typeof w.CursedStarter === "function" ? (`${w.currentManifestVersion}` || true) : false,
+		RPScript: typeof (Player as any)?.RPSScriptstatus === "string" ? (`${(Player as any)?.RPSScriptstatus}` || true) : false,
+		Moaner: w.M_MOANER_scriptOn !== undefined ? (`${w.M_MOANER_scriptOn}` || true) : false,
+		BcUtil: typeof w.StartBcUtil === "function",
+		QuickAccessMenu: typeof w.OLDmenu === "function" && typeof w.NEWmenu === "function",
+		ImprovedStruggle: typeof w.OLDclick === "function" && typeof w.NEWclick === "function"
 	};
 }
 

@@ -3,6 +3,7 @@ import { VERSION } from "./config";
 import { init_modules, unload_modules } from "./moduleManager";
 import { unload_patches } from "./patching";
 import { isObject } from "./utils";
+import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
 
 export function loginInit(C: any) {
 	if (window.BCX_Loaded) return;
@@ -29,6 +30,8 @@ function clearCaches() {
 }
 
 export function init() {
+
+	InitErrorReporter();
 
 	init_modules();
 
@@ -75,6 +78,8 @@ export function init() {
 export function unload(): true {
 	unload_patches();
 	unload_modules();
+
+	UnloadErrorReporter();
 
 	// clear some caches
 	clearCaches();

@@ -8,6 +8,7 @@ type PatchHook = (args: any[], next: (args: any[]) => any) => any;
 interface IpatchedFunctionData {
 	context: Record<string, unknown>;
 	original: (...args: any[]) => any;
+	originalHash: string;
 	final: (...args: any[]) => any;
 	hooks: {
 		hook: PatchHook;
@@ -42,6 +43,12 @@ function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 	};
 }
 
+function isHashExpected(functionName: string, hash: string): boolean {
+	const { NMod } = detectOtherMods();
+	const expectedHashes = (NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[functionName] ?? [];
+	return expectedHashes.includes(hash);
+}
+
 function initPatchableFunction(target: string): IpatchedFunctionData {
 	if (unloaded) {
 		throw new Error("Cannot init patchable function after unload");
@@ -58,22 +65,19 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 		}
 		const original: (...args: any[]) => any = context[targetPath[targetPath.length - 1]];
 
-		const { NMod } = detectOtherMods();
-
-		const expectedHashes = (NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[target] ?? [];
-
 		if (typeof original !== "function") {
 			throw new Error(`BCX: Function ${target} to be patched not found`);
 		}
 
-		const hash = crc32(original.toString().replaceAll("\r\n", "\n"));
-		if (!expectedHashes.includes(hash)) {
-			console.warn(`BCX: Patched function ${target} has unknown hash ${hash}`);
+		const originalHash = crc32(original.toString().replaceAll("\r\n", "\n"));
+		if (!isHashExpected(target, originalHash)) {
+			console.warn(`BCX: Patched function ${target} has unknown hash ${originalHash}`);
 		}
 		console.debug(`BCX: Initialized ${target} for patching`);
 
 		result = {
 			original,
+			originalHash,
 			final: original,
 			hooks: [],
 			patches: {},
@@ -163,4 +167,11 @@ export function unload_patches() {
 export function callOriginal(target: string, args: any[]): any {
 	const data = initPatchableFunction(target);
 	return data.original(...args);
+}
+
+export function getPatchedFunctionsHashes(includeExpected: boolean): [string, string][] {
+	return Array
+		.from(patchedFunctions.entries())
+		.map<[string, string]>(i => [i[0], i[1].originalHash])
+		.filter(i => includeExpected || !isHashExpected(...i));
 }

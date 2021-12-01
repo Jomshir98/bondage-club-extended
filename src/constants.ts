@@ -40,7 +40,7 @@ export const TOGGLEABLE_MODULES: readonly ModuleCategory[] = [
 	ModuleCategory.Rules
 ];
 
-export const enum ModuleInitPhase {
+export enum ModuleInitPhase {
 	construct,
 	init,
 	load,

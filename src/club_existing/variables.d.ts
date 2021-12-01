@@ -32,6 +32,7 @@ declare var CurrentTime: number;
 
 // Common.js
 declare const Player: PlayerCharacter;
+declare var CurrentModule: any;
 declare var CurrentScreen: string;
 declare var KeyPress: number | string;
 declare var CurrentScreenFunctions: ScreenFunctions;
@@ -177,6 +178,9 @@ declare function InventoryItemHasEffect(Item: Item, Effect?: string, CheckProper
 
 // GameLog.js
 declare function LogQuery(QueryLogName: string, QueryLogGroup: string): boolean;
+
+// GLDraw.js
+declare var GLVersion: "webgl2" | "webgl" | "No WebGL";
 
 // Mouse.js
 declare function MouseIn(Left: number, Top: number, Width: number, Height: number): boolean;

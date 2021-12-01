@@ -7,6 +7,7 @@ import { unload } from "../main";
 import { modStorage, switchStorageLocation } from "./storage";
 import { sendQuery } from "./messaging";
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
+import { debugGenerateReport, showErrorOverlay } from "../errorReporting";
 
 class ConsoleInterface {
 	get isAllow(): boolean {
@@ -95,6 +96,15 @@ class ConsoleInterface {
 			return false;
 		switchStorageLocation(location);
 		return true;
+	}
+
+	showDebugReport(): void {
+		showErrorOverlay(
+			"BCX Debug Report",
+			"This is manually created debug report.\n" +
+			"You can use the 'Close' button at the bottom to close this overlay.",
+			debugGenerateReport()
+		);
 	}
 }
 

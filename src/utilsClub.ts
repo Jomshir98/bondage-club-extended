@@ -117,6 +117,7 @@ export function detectOtherMods() {
 	return {
 		NMod: typeof w.ChatRoomDrawFriendList === "function",
 		BondageClubTools: (window as any).BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage")),
+		BCFriendList: ServerSocket.listeners("AccountQueryResult").some(i => i.toString().includes("f_t_body.innerText")),
 		Curse: typeof w.CursedStarter === "function" ? (`${w.currentManifestVersion}` || true) : false,
 		RPScript: typeof (Player as any)?.RPSScriptstatus === "string" ? (`${(Player as any)?.RPSScriptstatus}` || true) : false,
 		Moaner: w.M_MOANER_scriptOn !== undefined ? (`${w.M_MOANER_scriptOn}` || true) : false,

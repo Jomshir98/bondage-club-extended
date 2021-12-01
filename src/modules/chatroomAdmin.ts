@@ -20,15 +20,17 @@ function ChatSettingsExtraRun() {
 		const X = 124 + i * 455;
 		const template = modStorage.roomTemplates?.[i];
 
+		if (template) DrawImageEx("Backgrounds/" + template.Background + ".jpg", X, 700, { Alpha: MouseIn(X, 700, 400, 200) ? 0.3 : 1, Width: 400, Height: 200 });
+		MainCanvas.fillStyle = "rgba(255, 255, 255, 0.5)";
+		MainCanvas.fillRect(X, 700, 340, 64);
 		MainCanvas.beginPath();
 		MainCanvas.rect(X, 700, 340, 64);
 		MainCanvas.stroke();
-		DrawTextFit(template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -", X + 170, 700 + 34, 325, "Black", "");
-		DrawButton(X + 340, 700, 60, 64, "X", template ? "White" : "#ddd", "", "Delete template", !template);
-		DrawButton(X, 780, 230, 64, "    Load", template ? "White" : "#ddd", "", undefined, !template);
-		DrawImageEx("Icons/Export.png", X + 6, 780 + 6, { Width: 56, Height: 56 });
-		DrawButton(X + 250, 780, 150, 64, "    Save", "White", "");
-		DrawImageEx("Icons/Save.png", X + 250 + 6, 780 + 12, { Width: 40, Height: 40 });
+		DrawTextFit(template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -", X + 170, 700 + 34, 325, "Black", "Gray");
+		DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", "Delete template", !template);
+		DrawButton(X, 835, 230, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
+		DrawText("Load", X + 51, 835 + 32, "Black");
+		DrawButton(X + 250, 835, 150, 64, "    Save", "rgba(255, 255, 255, 0.2)", "");
 	}
 }
 // Click events for the second page of the chat room settings screen with a callback to transport data to the two patched click event functions
@@ -45,7 +47,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 			modStorageSync();
 			return;
 		}
-		if (MouseIn(X, 780, 230, 64)) {
+		if (MouseIn(X, 835, 230, 64)) {
 			const template = modStorage.roomTemplates?.[i];
 			if (template) {
 				apply(template);
@@ -53,7 +55,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 			}
 			return;
 		}
-		if (MouseIn(X + 250, 780, 150, 64) && modStorage.roomTemplates) {
+		if (MouseIn(X + 250, 835, 150, 64) && modStorage.roomTemplates) {
 			modStorage.roomTemplates[i] = {
 				Name: ElementValue("InputName") ? ElementValue("InputName")!.trim() : "",
 				Description: ElementValue("InputDescription") ? ElementValue("InputDescription")!.trim() : "",
@@ -101,9 +103,11 @@ export class ModuleChatroomAdmin extends BaseModule {
 				return ChatSettingsExtraRun();
 			}
 			next(args);
-			DrawText("More", 169, 110, "Black", "Gray");
-			DrawButton(124, 147, 90, 90, "", "White", icon_BCX);
-			if (MouseIn(124, 147, 90, 90)) DrawButtonHover(34, 70, 64, 64, `More room setup options`);
+			if (!ChatCreateShowBackgroundMode) {
+				DrawText("More", 169, 110, "Black", "Gray");
+				DrawButton(124, 147, 90, 90, "", "White", icon_BCX);
+				if (MouseIn(124, 147, 90, 90)) DrawButtonHover(34, 70, 64, 64, `More room setup options`);
+			}
 		});
 		//#endregion
 		hookFunction("ChatCreateClick", 0, (args, next) => {

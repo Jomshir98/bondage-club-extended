@@ -139,6 +139,7 @@ declare var ChatAdminBlockCategory: any[];
 
 // ChatCreate.js
 declare var ChatCreateBackgroundList: any;
+declare var ChatCreateShowBackgroundMode: boolean;
 
 // ChatBlockItem.js
 declare var ChatBlockItemEditable: boolean;

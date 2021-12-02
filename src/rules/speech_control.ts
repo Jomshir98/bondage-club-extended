@@ -30,12 +30,12 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				const sounds = state.customData?.soundWhitelist;
 				if (sounds && sounds.length > 0 && (msg.type === "Chat" || msg.type === "Whisper")) {
-					let i = 0;
-					const message = msg.noOOCMessage ?? msg.originalMessage;
+					const message = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
 					for (let sound of sounds) {
 						sound = sound.toLocaleLowerCase();
 						let ok = true;
-						for (const c of message.toLocaleLowerCase()) {
+						let i = 0;
+						for (const c of message) {
 							if (/\p{L}/igu.test(c)) {
 								const nx = sound[(i + 1) % sound.length];
 								if (c === nx) {

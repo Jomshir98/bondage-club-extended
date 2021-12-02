@@ -55,8 +55,8 @@ window.BCX_Loaded = false;
 			targets: [
 				{
 					src: [
-						"static_common/*",
-						process.env.IS_DEVEL ? 'static_devel/*' : 'static/*'
+						"static/*",
+						process.env.IS_DEVEL ? 'static_devel/*' : 'static_stable/*'
 					],
 					dest: 'dist'
 				}

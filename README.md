@@ -18,14 +18,18 @@ The extension is very modular and highly customizable. These are currently plann
 | Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned (low priority)                                               |
 | Curses           | Cursing an item slot so a restraint or clothing stays on or off very securely                                    | Done                                                                 |
 | Commands         | One time actions such as forcing you into a pose                                                                 | Planned                                                              |
-| Rules            | Toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage                     | Done; More rules being worked on                                     |
+| Rules            | Over 70 toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage             | Done; More rules being worked on                                     |
 | Speech           | Any commands and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk              | Done as part of "Rules"                                              |
 | Punishment       | Automatic punishments can be set by the dommes for breaking any of your rules                                    | Planned (low priority)                                               |
 | Miscellaneous    | Other nifty features.                                                                                            | Various features not fitting the previous categories are added here. |
 
 ### Miscellaneous module currently includes:
 - Wardrobe outfit import/export (optionally also with worn restraints)
+- Room creation templates, to save and load frequently used chat rooms
 - Chat typing indicator visible between BCX users
+- A search function during item and clothing selection
+- A chat command for switching room backgrounds quickly (also making all single player backgrounds available)
+- An auto-refresh option for the friendlist
 - Cheats to give special locks/keys, prevent loosing of Mistress status and to prevent random kidnappings, including private NPC ransom
 
 # Running the script

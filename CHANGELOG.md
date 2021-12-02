@@ -1,5 +1,48 @@
 # BCX Changelog
 
+## 0.7.0 "Quality of life"
+
+This update includes:
+ - Added a filter button to the item and clothing selection views to search for specific things (item selection also allows you to just start typing)
+ - Added a second page in the room create and administration screens which currently offers four slots to store and load chat room templates
+ - Added all existing BC backgrounds (e.g. from Pandora or Magic School) to the room background selection screen (changed room background can be seen without BCX)
+ - Added a feature to 'chat command autocomplete' that cycles through the shown options with repeated presses of the "Tab" key when there are several possible matches
+ - Added a command `.background` that switches the current chat room background to the specified one ("Tab"-key helps a lot here)
+ - Added a command `.antiblind` that toggles blind effect prevention to always see despite items plus an according rule to block this command
+ - Added a toggle to the curses/rules trigger conditions to switch between previous 'AND' and new 'OR' logic when checking triggers
+ - Added a second type of timer that activates the according curse/rule when time runs out. It works by enabling the timer while a curse/rule is currently not active
+ - Changed the wardrobe import/export feature to first ignore locks when importing a hash with items -> "Imported! Repeat to also import locks"
+ - Added a toggle next to the refresh button in the Friendlist that will automatically refresh the list every 10 seconds if set
+ - Updated some of the contextual help texts and preset selection descriptions
+ - The page with installation instructions has been updated, now including list of tested browsers
+ - Added crash handler that can display fatal errors, once per session, to help find and fix bugs more quickly and easily (both BC and BCX ones)
+
+Rule changes:
+ - Changed the rule "Listen to my voice" to allow setting multiple sentences that will be used at random as well as highlighting those in the chat more
+ - Changed the rule "Doll talk" to not count some special characters for the word length limit
+ - Changed the rule "Seeing whitelist" to also allow interacting with locks on whitelisted characters
+ - Changed the rule "Garble whispers while gagged" to allow non-OOC whispers despite the BC immersion setting to prevent whispers and OOC while gagged
+ - Added 29 new rules!
+   - Lots of rules to control various settings that already are part of BC
+   - Added rule "Prevent leaving the room" to prevent leaving room when defined roles are inside it, too
+   - Added rule "Secret orgasm progress" to hide the player's own arousal meter, while the meter continues to function normally
+   - Added rule "Prevent blacklisting" to prevent the player from actively blacklisting defined roles (existing blacklists are not affected)
+   - Added rule "Ready to be summoned" that allows specified characters to leash the player into their room using a beep message
+   - Added rule "Restrict being leashed by others" that prevents the player from being leashed by others up to the set role
+   - Added rule "Order to greet club" that sends a beep to the specified online characters when the player comes online 
+   - Added rule "Forbid changing difficulty" that prevents changing BC's multiplayer difficulty preference
+   - Added rule "Order to greet room" to command the player to say a phrase upon entering a new room
+   - Added rule "Hide online friends if blind" that hides names and member numbers on the friendlist when the player is fully blind
+
+Fixes:
+ - Changed it so you can see yourself being a BCX mistress or owner of someone even if you do not have permission to see the whole list
+ - Changed it so authority roles add/remove buttons are available to you (with the according permissions) independant of having permission to see the list itself
+ - Changed it so that the BCX button in another user's profile is grayed out without bondage club "item permission" for this user
+ - Changed the member select buttons to not list members in the same room while blinded and having certain BC immersion settings
+ - Fixed the member select screen to no longer display characters from the last room after leaving it
+ - Fixed being able to interact with custom rule configuration elements (e.g. toggles, text fields) without being permitted as player
+ - Fixed a bug in the rule "Room admin transfer" which unexpectedly changed the room background during transfer
+
 ## 0.6.2
 
 This update includes:

@@ -64,6 +64,7 @@ declare function ElementPositionFix(ElementID: string, Font: any, X: number, Y: 
 declare function ElementRemove(ID: string): void;
 declare function ElementToggleGeneratedElements(Screen: string, ShouldDisplay: boolean): void;
 declare function ElementValue(ID: string, Value?: string): string | undefined;
+declare function ElementContent(ID: string, Content: string): string | undefined;
 
 // Dialog.js
 declare var StruggleProgress: number;

@@ -543,6 +543,8 @@ interface RoomTemplate {
 interface ModStorage {
 	preset: import("./constants").Preset;
 	chatShouldDisplayFirstTimeHelp?: true;
+	/** Toggle, if friendlist autorefresh is enabled */
+	FLAutorefresh?: true;
 	cheats: import("./constants").MiscCheat[];
 	disabledModules: import("./constants").ModuleCategory[];
 	permissions: PermissionsBundle;

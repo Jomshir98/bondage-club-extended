@@ -21,8 +21,10 @@ declare function CharacterAppearanceSetItem(C: Character, Group: string, ItemAss
 // Backgrounds.js
 declare var BackgroundsTagList: string[];
 declare var BackgroundsList: { Name: string; Tag: string[]; }[];
+declare function BackgroundsGenerateList(BackgroundTagList: string[]): string[];
 
 // BackgroundSelection.js
+declare var BackgroundSelectionTagList: any[];
 declare var BackgroundSelectionAll: { Name: string; Description: string; Low: string; }[];
 declare var BackgroundSelectionOffset: number;
 declare var BackgroundSelectionView: any[];

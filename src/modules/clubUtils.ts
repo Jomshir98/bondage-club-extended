@@ -183,8 +183,19 @@ export class ModuleClubUtils extends BaseModule {
 		);
 	}
 
+	run() {
+		// Refresh current background list, if already built
+		if (ChatCreateBackgroundList != null) {
+			ChatCreateBackgroundList = BackgroundsGenerateList(BackgroundSelectionTagList);
+		}
+	}
+
 	unload() {
 		remove(BackgroundsTagList, i => i === BACKGROUNDS_BCX_NAME);
 		remove(BackgroundsList, i => i.Tag.includes(BACKGROUNDS_BCX_NAME));
+		// Refresh current background list, if already built
+		if (ChatCreateBackgroundList != null) {
+			ChatCreateBackgroundList = BackgroundsGenerateList(BackgroundSelectionTagList);
+		}
 	}
 }

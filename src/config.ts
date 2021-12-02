@@ -82,6 +82,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	InformationSheetClick: ["E535609B"],
 	InformationSheetExit: ["75521907"],
 	InformationSheetRun: ["58B7879C", "A8A56ACA"],
+	InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech: ["BE1F6406"],
 	LoginMistressItems: ["B58EF410"],
 	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547", "CF1C0400"],
 	LoginStableItems: ["EA93FBF7"],

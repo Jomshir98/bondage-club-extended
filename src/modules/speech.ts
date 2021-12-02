@@ -248,5 +248,22 @@ export class ModuleSpeech extends BaseModule {
 			return res;
 		});
 		//#endregion
+
+		//#region Item specific fixes
+
+		// Teach shock collar and futuristic gag, that commands are OOC
+		if (typeof (window as any).InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech === "function") {
+			hookFunction("InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech", 10, (args, next) => {
+				if (ChatRoomLastMessage &&
+					ChatRoomLastMessage.length > 0 &&
+					ChatRoomLastMessage[ChatRoomLastMessage.length - 1].startsWith(".") &&
+					!ChatRoomLastMessage[ChatRoomLastMessage.length - 1].startsWith("..")
+				)
+					return false;
+				return next(args);
+			});
+		}
+
+		//#endregion
 	}
 }

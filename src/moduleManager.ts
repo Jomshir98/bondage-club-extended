@@ -10,7 +10,6 @@ export function registerModule<T extends BaseModule>(module: T): T {
 		throw new Error("Modules can be registered only before initialization");
 	}
 	modules.push(module);
-	console.debug(`BCX: Registered module ${module.constructor.name}`);
 	return module;
 }
 

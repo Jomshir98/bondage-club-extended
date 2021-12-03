@@ -270,7 +270,6 @@ function CommandAutocomplete(msg: string): [string, string][] {
 				argv.push("");
 			}
 			let lastOptions = commandInfo.autocomplete(argv);
-			console.log(argv, lastOptions);
 			const fin = lastOptions.length === 1;
 			if (lastOptions.length === 0) {
 				lastOptions = [argv[argv.length - 1]];

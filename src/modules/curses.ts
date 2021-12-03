@@ -723,7 +723,6 @@ export class ModuleCurses extends BaseModule {
 							} else {
 								delete curse.Color;
 							}
-							console.debug("Picker curse color change trigger");
 							modStorageSync();
 						}
 					} else {

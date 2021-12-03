@@ -152,9 +152,9 @@ export class ModuleChatroom extends BaseModule {
 				console.warn(`BCX: Invalid hello`, sender, message);
 				return;
 			}
-			if (char.BCXVersion !== message.version) {
-				console.log(`BCX: ${char.Character.Name} (${char.Character.MemberNumber}) uses BCX version ${message.version}`);
-			}
+			// if (char.BCXVersion !== message.version) {
+			// 	console.log(`BCX: ${char.Character.Name} (${char.Character.MemberNumber}) uses BCX version ${message.version}`);
+			// }
 			char.BCXVersion = message.version;
 			// Apply effects
 			const effects: Partial<BCX_effects> = isObject(message.effects) ? message.effects : {};

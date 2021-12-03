@@ -16,6 +16,8 @@ export class GuiRulesViewDescription extends GuiSubscreen {
 
 	private allowAdd: boolean;
 
+	private showFailedMsg: boolean = false;
+
 	constructor(character: ChatroomCharacter, back: GuiSubscreen, rule: BCX_Rule, allowAdd: boolean) {
 		super();
 		this.character = character;
@@ -36,9 +38,12 @@ export class GuiRulesViewDescription extends GuiSubscreen {
 		DrawText(`- Rules: Description of the rule: "${this.ruleDefinition.name}"-`, 125, 125, "Black", "Gray");
 
 		MainCanvas.textAlign = "left";
-		DrawTextWrap(dictionaryProcess(this.ruleDefinition.longDescription, { PLAYER_NAME: this.character.Name }), 125 - 1750 / 2, 230, 1750, 520, "Black");
+		DrawTextWrap(dictionaryProcess(this.ruleDefinition.longDescription, { PLAYER_NAME: this.character.Name }), 125 - 1750 / 2, 220, 1750, 500, "Black");
 
 		MainCanvas.textAlign = "center";
+		if (this.showFailedMsg) {
+			DrawText(`Adding this rule failed! Likely cause is that it does not exist on ${this.character.Name}'s BCX version.`, 1000, 750, "Red", "Gray");
+		}
 		if (this.allowAdd) {
 			DrawButton(700, 800, 200, 80, "Add", "White");
 			DrawButton(1100, 800, 200, 80, "Back", "White");
@@ -54,6 +59,9 @@ export class GuiRulesViewDescription extends GuiSubscreen {
 					if (result) {
 						setSubscreen(new GuiConditionEditRules(this.character, this.rule, new GuiConditionViewRules(this.character)));
 					}
+				}).catch((err) => {
+					this.showFailedMsg = true;
+					console.warn(`Error creating rule on ${this.character}: `, err);
 				});
 			}
 			if (MouseIn(1100, 800, 200, 80)) {

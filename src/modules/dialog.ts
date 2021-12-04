@@ -4,9 +4,13 @@ import { BaseModule } from "./_BaseModule";
 
 let searchBar: HTMLInputElement | null = null;
 let searchBarAutoCloase = false;
+let struggleCooldown: number = 0;
+const STRUGGLE_COOLDOWN_TIME = 2_000;
 
 function allowSearchMode(): boolean {
-	return DialogColor == null && StruggleProgress < 0 && !StruggleLockPickOrder && !DialogActivityMode && DialogItemToLock == null;
+	return DialogColor == null && StruggleProgress < 0 &&
+		!StruggleLockPickOrder && DialogFocusItem == null &&
+		!DialogActivityMode && DialogItemToLock == null;
 }
 
 function enterSearchMode(C: Character) {
@@ -69,7 +73,12 @@ export class ModuleDialog extends BaseModule {
 		hookFunction("CommonKeyDown", 5, (args, next) => {
 			const ev = args[0] as KeyboardEvent;
 			const sb = searchBar;
-			if (!sb && CurrentCharacter && allowSearchMode() && ev.key.length === 1) {
+			if (!sb &&
+				CurrentCharacter &&
+				allowSearchMode() &&
+				ev.key.length === 1 &&
+				(struggleCooldown <= Date.now() || !["a", "s"].includes(ev.key.toLowerCase()))
+			) {
 				enterSearchMode(CurrentCharacter);
 				searchBarAutoCloase = true;
 				if (searchBar) {
@@ -79,6 +88,12 @@ export class ModuleDialog extends BaseModule {
 				return;
 			}
 			next(args);
+		});
+
+		hookFunction("StruggleDrawStrengthProgress", 0, (args, next) => {
+			next(args);
+			// Prevent A/S spamming from writing into search right after struggle finishes
+			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
 		});
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {

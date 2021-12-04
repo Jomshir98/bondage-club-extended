@@ -74,6 +74,7 @@ declare var DialogColor: any;
 declare var DialogTextDefault: string;
 declare var DialogFacialExpressions: any[];
 declare var DialogFacialExpressionsSelected: number;
+declare var DialogFocusItem: Item;
 declare var DialogSelfMenuOptions: any[];
 declare var DialogMenuButton: string[];
 declare var DialogActivityMode: boolean;

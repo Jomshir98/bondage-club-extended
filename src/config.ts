@@ -101,6 +101,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ServerAccountBeep: ["2D918B69", "D2802EE7"],
 	ServerSend: ["90A61F57"],
 	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
+	StruggleDrawStrengthProgress: ["4755C02D"],
 	TextGet: ["4DDE5794"],
 	ValidationResolveModifyDiff: ["C2FE52D3"]
 };

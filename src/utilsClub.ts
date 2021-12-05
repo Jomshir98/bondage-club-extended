@@ -1,3 +1,5 @@
+import { icon_Typing_star, icon_Typing_base, icon_Typing_dot, icon_heart, icon_BCX_cross } from "./resources";
+
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
 	"ItemNeckRestraints": "Collar Restraint",
@@ -314,4 +316,52 @@ export function updateChatroom(newData: Partial<RoomInfo>): boolean {
 	Room.Limit = Room.Limit.toString();
 	ServerSend("ChatRoomAdmin", { MemberNumber: Player.ID, Action: "Update", Room });
 	return true;
+}
+
+export function drawTypingIndicatorSpeechBubble(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, alpha: number, emote: boolean = false) {
+	ctx.save();
+	ctx.globalAlpha = alpha;
+	ctx.translate(x, y);
+	ctx.scale(width / 50, height / 50);
+	ctx.fillStyle = "white";
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 3;
+	let p = new Path2D(icon_Typing_base);
+	ctx.fill(p);
+	ctx.stroke(p);
+	ctx.fillStyle = "black";
+	p = new Path2D(emote ? icon_Typing_star : icon_Typing_dot);
+	for (const dx of [0, 12, 12]) {
+		ctx.translate(dx, 0);
+		ctx.fill(p);
+	}
+	ctx.restore();
+}
+
+export function drawHeart(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, alpha: number, fill: string) {
+	ctx.save();
+	ctx.globalAlpha = alpha;
+	ctx.translate(x, y);
+	ctx.scale(width / 50, height / 50);
+	ctx.fillStyle = fill;
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 4;
+	const p = new Path2D(icon_heart);
+	ctx.fill(p);
+	ctx.stroke(p);
+	ctx.restore();
+}
+
+export function drawBcxCross(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, alpha: number, fill: string) {
+	ctx.save();
+	ctx.globalAlpha = alpha;
+	ctx.translate(x, y);
+	ctx.scale(width / 50, height / 50);
+	ctx.fillStyle = fill;
+	ctx.strokeStyle = "black";
+	ctx.lineWidth = 3;
+	const p = new Path2D(icon_BCX_cross);
+	ctx.fill(p);
+	ctx.stroke(p);
+	ctx.restore();
 }

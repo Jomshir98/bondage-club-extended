@@ -10,10 +10,10 @@ interface ICommandInfo {
 	description: string | null;
 }
 
-type CommandHandlerRaw = (args: string) => boolean;
-type CommandHandlerParsed = (argv: string[]) => boolean;
-type CommandAutocompleterRaw = (args: string) => string[];
-type CommandAutocompleterParsed = (argv: string[]) => string[];
+export type CommandHandlerRaw = (args: string) => boolean;
+export type CommandHandlerParsed = (argv: string[]) => boolean;
+export type CommandAutocompleterRaw = (args: string) => string[];
+export type CommandAutocompleterParsed = (argv: string[]) => string[];
 
 type WhisperCommandHandler = (argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void) => void;
 type WhisperCommandAutocompleter = (argv: string[], sender: ChatroomCharacter) => string[];

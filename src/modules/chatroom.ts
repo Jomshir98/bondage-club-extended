@@ -1,9 +1,8 @@
-import { detectOtherMods, DrawImageEx } from "../utilsClub";
+import { detectOtherMods, drawBcxCross, drawHeart, DrawImageEx, drawTypingIndicatorSpeechBubble } from "../utilsClub";
 import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
-import { icon_Emote, icon_PurpleHeart, icon_Typing, icon_BCX_chatroom } from "../resources";
 import { getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { modStorage } from "./storage";
 import cloneDeep from "lodash-es/cloneDeep";
@@ -196,11 +195,11 @@ export class ModuleChatroom extends BaseModule {
 				const Char = getChatroomCharacter(C.MemberNumber!);
 				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
 				if (Char?.BCXVersion && ChatRoomHideIconState === 0) {
-					DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
-						Width: 50 * Zoom,
-						Height: 50 * Zoom,
-						Alpha: Friend ? 1 : 0.5
-					});
+					if (Friend) {
+						drawHeart(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 1, "#6e6eff");
+					} else {
+						drawBcxCross(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 0.5, "#6e6eff");
+					}
 				} else {
 					next(args);
 				}
@@ -221,11 +220,11 @@ export class ModuleChatroom extends BaseModule {
 				const Char = getChatroomCharacter(C.MemberNumber!);
 				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
 				if (Char?.BCXVersion && ChatRoomHideIconState === 0) {
-					DrawImageEx(Friend ? icon_PurpleHeart : icon_BCX_chatroom, CharX + 375 * Zoom, CharY, {
-						Width: 50 * Zoom,
-						Height: 50 * Zoom,
-						Alpha: Friend ? 1 : 0.7
-					});
+					if (Friend) {
+						drawHeart(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 1, "#6e6eff");
+					} else {
+						drawBcxCross(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 0.7, "#6e6eff");
+					}
 				} else if (Friend && ChatRoomHideIconState === 0) {
 					DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {
 						Width: 50 * Zoom,
@@ -246,23 +245,13 @@ export class ModuleChatroom extends BaseModule {
 			const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
 			switch (ChatroomSM.GetCharacterStatus(C)) {
 				case ChatroomSM.StatusTypes.Typing:
-					DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-						Width: 50 * Zoom,
-						Height: 50 * Zoom
-					});
+					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 1);
 					break;
 				case ChatroomSM.StatusTypes.Whisper:
-					DrawImageEx(icon_Typing, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-						Width: 50 * Zoom,
-						Height: 50 * Zoom,
-						Alpha: 0.5
-					});
+					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 0.5);
 					break;
 				case ChatroomSM.StatusTypes.Emote:
-					DrawImageEx(icon_Emote, CharX + 375 * Zoom, CharY + 50 * Zoom, {
-						Width: 50 * Zoom,
-						Height: 50 * Zoom
-					});
+					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 1, true);
 					break;
 				case ChatroomSM.StatusTypes.DMS:
 					DrawRect(CharX + 380 * Zoom, CharY + 53 * Zoom, 40 * Zoom, 40 * Zoom, "White");

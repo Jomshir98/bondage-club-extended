@@ -78,6 +78,7 @@ declare var DialogFacialExpressionsSelected: number;
 declare var DialogFocusItem: Item;
 declare var DialogSelfMenuOptions: any[];
 declare var DialogMenuButton: string[];
+declare var DialogActivePoses: Pose[][];
 declare var DialogActivityMode: boolean;
 declare var DialogItemToLock: any;
 declare var DialogInventory: DialogInventoryItem[];
@@ -89,6 +90,7 @@ declare function DialogInventoryBuild(C: Character, Offset?: number, redrawPrevi
 declare function DialogFindPlayer(KeyWord: string): string;
 declare function DialogDrawPoseMenu(): void;
 declare function DialogDrawExpressionMenu(): void;
+declare function DialogActivePoseMenuBuild(): void;
 
 // Drawing.js
 /** @deprecated */

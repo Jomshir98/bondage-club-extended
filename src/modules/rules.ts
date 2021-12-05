@@ -351,8 +351,42 @@ export const ruleCustomDataHandlers: {
 	poseSelect: {
 		// TODO: stricten
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
-		run() { /* TODO */ },
-		click() { return undefined; }
+		run({ def, value, Y, access }) {
+			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
+			if (!DialogActivePoses || !DialogActivePoses.length) DialogActivePoseMenuBuild();
+
+			for (let I = 0; I < DialogActivePoses.length; I++) {
+				const OffsetY = Y + 60 + 140 * I;
+				const PoseGroup: Pose[] = DialogActivePoses[I];
+
+				for (let P = 0; P < PoseGroup.length; P++) {
+					const OffsetX = 1070 + 100 * P;
+					const IsDisabled = value.includes(PoseGroup[P].Name);
+
+					DrawButton(OffsetX, OffsetY, 90, 90, "", IsDisabled ? access ? "Darkred" : "#333" : access ? "White" : "#ddd", "Icons/Poses/" + PoseGroup[P].Name + ".png", "", !access);
+				}
+			}
+		},
+		click({ value, Y }) {
+			for (let I = 0; I < DialogActivePoses.length; I++) {
+				const OffsetY = Y + 60 + 140 * I;
+				const PoseGroup: Pose[] = DialogActivePoses[I];
+
+				for (let P = 0; P < PoseGroup.length; P++) {
+					const OffsetX = 1070 + 100 * P;
+
+					if (MouseIn(OffsetX, OffsetY, 90, 90)) {
+						if (value.includes(PoseGroup[P].Name)) {
+							value.splice(value.indexOf(PoseGroup[P].Name), 1);
+						} else {
+							value.push(PoseGroup[P].Name);
+						}
+						return value;
+					}
+				}
+			}
+			return undefined;
+		}
 	},
 	// element has Y length of 150px (description + elmement plus offset to the next one)
 	roleSelector: {

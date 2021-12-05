@@ -408,26 +408,48 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	/* TODO: Implement
-	registerRule("restrict_allowed_poses", {
+	registerRule("block_restrict_allowed_poses", {
 		name: "Restrict allowed body poses",
 		icon: icon_restrictions,
-		longDescription: "Only being allowed to be in certain poses, like kneeling or holding arms up.",
-		triggerTexts: {
-			infoBeep: "You are not allowed to be in the current pose!",
-			attempt_log: "PLAYER_NAME tried to change her pose in a forbidden way",
-			log: "PLAYER_NAME changed her pose in a forbidden way"
-		},
+		loggable: false,
+		longDescription: "Allows to restrict the body poses PLAYER_NAME is able to get into by herself.",
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			poseButtons: {
 				type: "poseSelect",
 				default: [],
-				description: "TODO:poseButtons"
+				description: "Mark poses as being allowed or forbidden:"
 			}
+		},
+		load(state) {
+			let bypassPoseChange = false;
+			hookFunction("CharacterCanChangeToPose", 3, (args, next) => {
+				if (!bypassPoseChange && state.isEnforced && state.customData?.poseButtons.includes(args[1]))
+					return false;
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomCanAttemptStand", 3, (args, next) => {
+				if (state.isEnforced && state.customData?.poseButtons.includes("BaseLower"))
+					return false;
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomCanAttemptKneel", 3, (args, next) => {
+				if (state.isEnforced && state.customData?.poseButtons.includes("Kneel"))
+					return false;
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("CharacterCanKneel", 3, (args, next) => {
+				if (state.isEnforced && state.customData?.poseButtons.includes("Kneel") && !Player.IsKneeling())
+					return false;
+				if (state.isEnforced && state.customData?.poseButtons.includes("BaseLower") && Player.IsKneeling())
+					return false;
+				bypassPoseChange = true;
+				const res = next(args);
+				bypassPoseChange = false;
+				return res;
+			}, ModuleCategory.Rules);
 		}
 	});
-	*/
 
 	// TODO: Triggers on opening chat create *window*, improve to trigger on actual room creation
 	registerRule("block_creating_rooms", {

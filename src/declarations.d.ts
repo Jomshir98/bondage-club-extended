@@ -188,7 +188,7 @@ type BCX_Rule =
 	| "block_lockuse_others"
 	| "block_wardrobe_access_self"
 	| "block_wardrobe_access_others"
-	// | "restrict_allowed_poses"
+	| "block_restrict_allowed_poses"
 	| "block_creating_rooms"
 	| "block_entering_rooms"
 	| "block_leaving_room"
@@ -264,9 +264,9 @@ type BCX_Rule =
 	;
 
 type RuleCustomData = {
-	// restrict_allowed_poses: {
-	// 	poseButtons: string[];
-	// },
+	block_restrict_allowed_poses: {
+		poseButtons: string[];
+	},
 	block_entering_rooms: {
 		roomList: string[];
 	},

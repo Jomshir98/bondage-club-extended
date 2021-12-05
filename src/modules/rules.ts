@@ -959,7 +959,11 @@ export class ModuleRules extends BaseModule {
 				if (definition.dataDefinition) {
 					for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
 						if (!isEqual(oldData.data.customData?.[k], newData.data.customData?.[k])) {
-							changeEvents.push(def.description);
+							let descr = def.description;
+							if (descr.includes(":")) {
+								descr = descr.slice(0, descr.lastIndexOf(":"));
+							}
+							changeEvents.push(`${changeEvents.length > 0 ? "and " : ""}the value of the setting '${descr}'`);
 						}
 					}
 				}

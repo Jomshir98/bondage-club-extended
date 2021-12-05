@@ -6,6 +6,7 @@ import { GuiLogConfig } from "./log_config";
 import { DrawImageEx, showHelp } from "../utilsClub";
 import { setSubscreen } from "../modules/gui";
 import { Views, HELP_TEXTS } from "../helpTexts";
+import { createInputElement, positionElement } from "../utils";
 
 const PER_PAGE_COUNT = 5;
 
@@ -24,9 +25,14 @@ export class GuiLog extends GuiSubscreen {
 
 	private showHelp: boolean = false;
 
+	private filterInput = createInputElement("text", 30);
+
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+		this.filterInput.addEventListener("input", ev => {
+			this.refreshScreen();
+		});
 	}
 
 	Load() {
@@ -63,24 +69,18 @@ export class GuiLog extends GuiSubscreen {
 
 		this.logEntries = [];
 
-		let LogFilter = document.getElementById("BCX_LogFilter") as HTMLInputElement | undefined;
 		let NoteField = document.getElementById("BCX_NoteField") as HTMLInputElement | undefined;
 
 		if (this.logData === null) {
-			if (LogFilter) {
-				LogFilter.remove();
-			}
+			this.filterInput.remove();
 			if (NoteField) {
 				NoteField.remove();
 			}
 			return;
 		}
 
-		if (!LogFilter) {
-			LogFilter = ElementCreateInput("BCX_LogFilter", "text", "", "30");
-			LogFilter.addEventListener("input", ev => {
-				this.refreshScreen();
-			});
+		if (!this.filterInput.parentElement) {
+			document.body.appendChild(this.filterInput);
 		}
 
 		if (!this.allowLeaveMessage && NoteField) {
@@ -89,7 +89,7 @@ export class GuiLog extends GuiSubscreen {
 			NoteField = ElementCreateInput("BCX_NoteField", "text", "", "30");
 		}
 
-		const filter = LogFilter.value.trim().toLocaleLowerCase().split(" ");
+		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ");
 
 		this.logEntries = this.logData.filter(e => {
 			const msg = logMessageRender(e, this.character).toLocaleLowerCase();
@@ -109,10 +109,10 @@ export class GuiLog extends GuiSubscreen {
 
 			// filter
 			DrawText("Filter:", 130, 215, "Black");
-			ElementPosition("BCX_LogFilter", 550, 210, 600, 64);
+			positionElement(this.filterInput, 550, 210, 600, 64);
 
 			//reset button
-			if ((document.getElementById("BCX_LogFilter") as HTMLInputElement | undefined)?.value) {
+			if (this.filterInput.value) {
 				MainCanvas.textAlign = "center";
 				DrawButton(870, 182, 64, 64, "X", "White");
 			}
@@ -217,9 +217,8 @@ export class GuiLog extends GuiSubscreen {
 		if (this.logData !== null) {
 
 			//reset button
-			const elem = document.getElementById("BCX_LogFilter") as HTMLInputElement | undefined;
-			if (MouseIn(870, 182, 64, 64) && elem) {
-				elem.value = "";
+			if (MouseIn(870, 182, 64, 64)) {
+				this.filterInput.value = "";
 				this.refreshScreen();
 			}
 
@@ -296,7 +295,7 @@ export class GuiLog extends GuiSubscreen {
 	}
 
 	Unload() {
-		ElementRemove("BCX_LogFilter");
+		this.filterInput.remove();
 		ElementRemove("BCX_NoteField");
 	}
 }

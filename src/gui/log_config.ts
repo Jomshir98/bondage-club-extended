@@ -5,6 +5,7 @@ import { GuiLog } from "./log";
 import { setSubscreen } from "../modules/gui";
 import { showHelp } from "../utilsClub";
 import { Views, HELP_TEXTS } from "../helpTexts";
+import { createInputElement, positionElement } from "../utils";
 
 type ConfigListItem = (
 	{
@@ -28,9 +29,14 @@ export class GuiLogConfig extends GuiSubscreen {
 
 	private showHelp: boolean = false;
 
+	private filterInput = createInputElement("text", 30);
+
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+		this.filterInput.addEventListener("input", ev => {
+			this.rebuildList();
+		});
 	}
 
 	Load() {
@@ -65,22 +71,16 @@ export class GuiLogConfig extends GuiSubscreen {
 		if (!this.active) return;
 
 		this.configList = [];
-		let Input = document.getElementById("BCX_LogConfigFilter") as HTMLInputElement | undefined;
 		if (this.config === null) {
-			if (Input) {
-				Input.remove();
-			}
+			this.filterInput.remove();
 			return;
 		}
 
-		if (!Input) {
-			Input = ElementCreateInput("BCX_LogConfigFilter", "text", "", "30");
-			Input.addEventListener("input", ev => {
-				this.rebuildList();
-			});
+		if (!this.filterInput.parentElement) {
+			document.body.appendChild(this.filterInput);
 		}
 
-		const filter = Input.value.trim().toLocaleLowerCase().split(" ");
+		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ");
 
 		for (const [k, v] of Object.entries(this.config) as [BCX_LogCategory, LogAccessLevel][]) {
 			if (LOG_CONFIG_NAMES[k] !== undefined &&
@@ -112,10 +112,10 @@ export class GuiLogConfig extends GuiSubscreen {
 
 			// filter
 			DrawText("Filter:", 130, 215, "Black");
-			ElementPosition("BCX_LogConfigFilter", 550, 210, 600, 64);
+			positionElement(this.filterInput, 550, 210, 600, 64);
 
 			//reset button
-			if ((document.getElementById("BCX_LogConfigFilter") as HTMLInputElement | undefined)?.value) {
+			if (this.filterInput.value) {
 				MainCanvas.textAlign = "center";
 				DrawButton(870, 182, 64, 64, "X", "White");
 			}
@@ -183,9 +183,8 @@ export class GuiLogConfig extends GuiSubscreen {
 		if (this.config !== null) {
 
 			//reset button
-			const elem = document.getElementById("BCX_LogConfigFilter") as HTMLInputElement | undefined;
-			if (MouseIn(870, 182, 64, 64) && elem) {
-				elem.value = "";
+			if (MouseIn(870, 182, 64, 64)) {
+				this.filterInput.value = "";
 				this.rebuildList();
 			}
 
@@ -235,6 +234,6 @@ export class GuiLogConfig extends GuiSubscreen {
 	}
 
 	Unload() {
-		ElementRemove("BCX_LogConfigFilter");
+		this.filterInput.remove();
 	}
 }

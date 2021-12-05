@@ -6,7 +6,7 @@ import { RulesGetList } from "../modules/rules";
 import { ConditionsLimit } from "../constants";
 import { DrawImageEx, showHelp } from "../utilsClub";
 import { Views, HELP_TEXTS } from "../helpTexts";
-import { dictionaryProcess } from "../utils";
+import { createInputElement, dictionaryProcess, positionElement } from "../utils";
 import { GuiRulesViewDescription } from "./rules_viewDescription";
 
 type RuleListItem = {
@@ -29,9 +29,14 @@ export class GuiRulesAdd extends GuiSubscreen {
 
 	private showHelp: boolean = false;
 
+	private filterInput = createInputElement("text", 30);
+
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+		this.filterInput.addEventListener("input", ev => {
+			this.rebuildList();
+		});
 	}
 
 	Load() {
@@ -63,22 +68,16 @@ export class GuiRulesAdd extends GuiSubscreen {
 		if (!this.active) return;
 
 		this.ruleList = [];
-		let Input = document.getElementById("BCX_RulesFilter") as HTMLInputElement | undefined;
 		if (this.rulesData === null) {
-			if (Input) {
-				Input.remove();
-			}
+			this.filterInput.remove();
 			return;
 		}
 
-		if (!Input) {
-			Input = ElementCreateInput("BCX_RulesFilter", "text", "", "30");
-			Input.addEventListener("input", ev => {
-				this.rebuildList();
-			});
+		if (!this.filterInput.parentElement) {
+			document.body.appendChild(this.filterInput);
 		}
 
-		const filter = Input.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
+		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
 
 		for (const entry of RulesGetList()) {
 			if (filter.some(i =>
@@ -124,10 +123,10 @@ export class GuiRulesAdd extends GuiSubscreen {
 		// filter
 		MainCanvas.textAlign = "left";
 		DrawText("Filter:", 130, 215, "Black");
-		ElementPosition("BCX_RulesFilter", 550, 210, 600, 64);
+		positionElement(this.filterInput, 550, 210, 600, 64);
 
 		//reset button
-		if ((document.getElementById("BCX_RulesFilter") as HTMLInputElement | undefined)?.value) {
+		if (this.filterInput.value) {
 			MainCanvas.textAlign = "center";
 			DrawButton(870, 182, 64, 64, "X", "White");
 		}
@@ -219,9 +218,8 @@ export class GuiRulesAdd extends GuiSubscreen {
 		}
 
 		//reset button
-		const elem = document.getElementById("BCX_RulesFilter") as HTMLInputElement | undefined;
-		if (MouseIn(870, 182, 64, 64) && elem) {
-			elem.value = "";
+		if (MouseIn(870, 182, 64, 64)) {
+			this.filterInput.value = "";
 			this.rebuildList();
 		}
 
@@ -270,6 +268,6 @@ export class GuiRulesAdd extends GuiSubscreen {
 	}
 
 	Unload() {
-		ElementRemove("BCX_RulesFilter");
+		this.filterInput.remove();
 	}
 }

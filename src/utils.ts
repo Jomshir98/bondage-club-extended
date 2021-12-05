@@ -133,3 +133,51 @@ export function dictionaryProcess(text: string, dictionary: Record<string, strin
 	}
 	return text;
 }
+
+/**
+ * Creates a new text input element in the main document.
+ * @param Type - Type of the input tag to create.
+ * @param MaxLength - Maximum input tag of the input to create.
+ * @returns - The created HTML input element
+ */
+export function createInputElement(type: string, maxLength?: number): HTMLInputElement {
+	const input = document.createElement("input");
+	input.type = type;
+	if (maxLength) {
+		input.maxLength = maxLength;
+	}
+	input.addEventListener("keydown", KeyDown);
+	input.className = "HideOnPopup";
+	return input;
+}
+
+/**
+ * Draws an existing HTML element at a specific position within the document. The element is "centered" on the given coordinates by dividing its height and width by two.
+ * @param ElementID - The id of the input tag to (re-)position.
+ * @param X - Center point of the element on the X axis.
+ * @param Y - Center point of the element on the Y axis.
+ * @param W - Width of the element.
+ * @param H - Height of the element.
+ */
+export function positionElement(element: HTMLElement, X: number, Y: number, W: number, H?: number) {
+	// Different positions based on the width/height ratio
+	const HRatio = MainCanvas.canvas.clientHeight / 1000;
+	const WRatio = MainCanvas.canvas.clientWidth / 2000;
+	const Font = MainCanvas.canvas.clientWidth <= MainCanvas.canvas.clientHeight * 2 ? MainCanvas.canvas.clientWidth / 50 : MainCanvas.canvas.clientHeight / 25;
+	const Height = H ? H * HRatio : Font * 1.15;
+	const Width = W * WRatio - 18;
+	const Top = MainCanvas.canvas.offsetTop + Y * HRatio - Height / 2;
+	const Left = MainCanvas.canvas.offsetLeft + (X - W / 2) * WRatio;
+
+	// Sets the element style
+	Object.assign(element.style, {
+		fontSize: Font + "px",
+		fontFamily: CommonGetFontName(),
+		position: "fixed",
+		left: Left + "px",
+		top: Top + "px",
+		width: Width + "px",
+		height: Height + "px",
+		display: "inline"
+	});
+}

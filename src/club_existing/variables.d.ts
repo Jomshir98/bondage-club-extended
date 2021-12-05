@@ -42,6 +42,7 @@ declare var MouseX: number;
 declare var MouseY: number;
 declare var GameVersion: string;
 declare const CommonGetFont: MemoizedFunction<(size: number) => string>;
+declare const CommonGetFontName: MemoizedFunction<() => string>;
 declare function CommonColorsEqual(C1: string | string[], C2: string | string[]): boolean;
 declare function CommonArraysEqual(a1: any[], a2: any[]): boolean;
 declare function CommonSetScreen(NewModule: string, NewScreen: string): void;

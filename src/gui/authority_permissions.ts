@@ -9,6 +9,7 @@ import { GuiAuthorityDialogMin } from "./authority_dialogMin";
 import { GuiAuthorityDialogSelf } from "./authority_dialogSelf";
 import { setSubscreen } from "../modules/gui";
 import { Views, HELP_TEXTS } from "../helpTexts";
+import { createInputElement, positionElement } from "../utils";
 
 type PermListItem = (
 	{
@@ -36,12 +37,17 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 	private showHelp: boolean = false;
 
+	private filterInput = createInputElement("text", 30);
+
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
 		if (this.character.isPlayer()) {
 			this.myAccessLevel = AccessLevel.self;
 		}
+		this.filterInput.addEventListener("input", ev => {
+			this.rebuildList();
+		});
 	}
 
 	Load() {
@@ -71,22 +77,16 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		if (!this.active) return;
 
 		this.permList = [];
-		let Input = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
 		if (this.permissionData === null) {
-			if (Input) {
-				Input.remove();
-			}
+			this.filterInput.remove();
 			return;
 		}
 
-		if (!Input) {
-			Input = ElementCreateInput("BCX_PermissionsFilter", "text", "", "30");
-			Input.addEventListener("input", ev => {
-				this.rebuildList();
-			});
+		if (!this.filterInput.parentElement) {
+			document.body.appendChild(this.filterInput);
 		}
 
-		const filter = Input.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
+		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
 
 		const access_grantSelf = this.permissionData.authority_grant_self ?
 			checkPermisionAccesData(this.permissionData.authority_grant_self, this.myAccessLevel) :
@@ -172,10 +172,10 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 			// filter
 			DrawText("Filter:", 130, 215, "Black");
-			ElementPosition("BCX_PermissionsFilter", 550, 210, 600, 64);
+			positionElement(this.filterInput, 550, 210, 600, 64);
 
 			//reset button
-			if ((document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined)?.value) {
+			if (this.filterInput.value) {
 				MainCanvas.textAlign = "center";
 				DrawButton(870, 182, 64, 64, "X", "White");
 			}
@@ -253,9 +253,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		if (this.permissionData !== null) {
 
 			//reset button
-			const elem = document.getElementById("BCX_PermissionsFilter") as HTMLInputElement | undefined;
-			if (MouseIn(870, 182, 64, 64) && elem) {
-				elem.value = "";
+			if (MouseIn(870, 182, 64, 64)) {
+				this.filterInput.value = "";
 				this.rebuildList();
 			}
 
@@ -328,6 +327,6 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	}
 
 	Unload() {
-		ElementRemove("BCX_PermissionsFilter");
+		this.filterInput.remove();
 	}
 }

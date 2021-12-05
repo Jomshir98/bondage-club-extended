@@ -28,6 +28,7 @@ if (window.BCX_Loaded !== undefined) {
 	throw "Already loaded";
 }
 window.BCX_Loaded = false;
+console.debug("BCX: Parse start...");
 `,
 		intro: async () => {
 			const git = simpleGit();

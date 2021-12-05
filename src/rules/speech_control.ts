@@ -454,7 +454,8 @@ export function initRules_bc_speech_control() {
 						ServerSend("AccountBeep", {
 							MemberNumber: data.MemberNumber,
 							BeepType: "",
-							Message: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`
+							Message: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`,
+							IsSecret: true
 						});
 					}
 					return;

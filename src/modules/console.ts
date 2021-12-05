@@ -1,4 +1,4 @@
-import { allowMode, detectOtherMods, developmentMode, setAllowMode, setDevelopmentMode } from "../utilsClub";
+import { allowMode, isNModClient, developmentMode, setAllowMode, setDevelopmentMode } from "../utilsClub";
 import { hookFunction, patchFunction } from "../patching";
 import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } from "./wardrobe";
 import { InvisibilityEarbuds } from "./clubUtils";
@@ -114,7 +114,7 @@ export class ModuleConsole extends BaseModule {
 	load() {
 		(window as any).bcx = consoleInterface;
 
-		const { NMod } = detectOtherMods();
+		const NMod = isNModClient();
 
 		patchFunction("ChatRoomMessage", NMod ? {
 			"A.DynamicDescription(Source).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(Source).toLowerCase() )`,

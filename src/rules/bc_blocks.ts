@@ -3,12 +3,12 @@ import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerD
 import { registerRule } from "../modules/rules";
 import { hookFunction } from "../patching";
 import { icon_restrictions } from "../resources";
-import { detectOtherMods, getCharacterName } from "../utilsClub";
+import { isNModClient, getCharacterName } from "../utilsClub";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
 
 export function initRules_bc_blocks() {
-	const { NMod } = detectOtherMods();
+	const NMod = isNModClient();
 
 	registerRule("block_remoteuse_self", {
 		name: "Forbid using remotes on self",

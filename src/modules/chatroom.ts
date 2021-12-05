@@ -1,4 +1,4 @@
-import { detectOtherMods, drawBcxCross, drawHeart, DrawImageEx, drawTypingIndicatorSpeechBubble } from "../utilsClub";
+import { isNModClient, drawBcxCross, drawHeart, DrawImageEx, drawTypingIndicatorSpeechBubble } from "../utilsClub";
 import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "./_BaseModule";
@@ -62,7 +62,7 @@ class ChatRoomStatusManager {
 			}
 			this.Status = type;
 			sendHiddenMessage("ChatRoomStatusEvent", { Type: type, Target: target }, target);
-			const { NMod } = detectOtherMods();
+			const NMod = isNModClient();
 			if (NMod) ServerSend("ChatRoomStatusEvent", { Type: type, Target: target });
 		}
 	}
@@ -187,7 +187,7 @@ export class ModuleChatroom extends BaseModule {
 			return next(args);
 		});
 
-		const { NMod } = detectOtherMods();
+		const NMod = isNModClient();
 
 		if (NMod) {
 			hookFunction("ChatRoomDrawFriendList", 0, (args, next) => {

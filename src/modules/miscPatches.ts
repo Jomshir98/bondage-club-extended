@@ -1,4 +1,4 @@
-import { allowMode, detectOtherMods } from "../utilsClub";
+import { allowMode, isNModClient } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { MiscCheat } from "../constants";
@@ -137,7 +137,7 @@ export class ModuleMiscPatches extends BaseModule {
 			return next(args);
 		});
 
-		const { NMod } = detectOtherMods();
+		const NMod = isNModClient();
 
 		if (!NMod) {
 			patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });

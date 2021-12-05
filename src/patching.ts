@@ -1,7 +1,7 @@
 import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
 import { ModuleCategory } from "./constants";
 import { crc32, isObject } from "./utils";
-import { detectOtherMods } from "./utilsClub";
+import { isNModClient } from "./utilsClub";
 
 type PatchHook = (args: any[], next: (args: any[]) => any) => any;
 
@@ -44,8 +44,7 @@ function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 }
 
 function isHashExpected(functionName: string, hash: string): boolean {
-	const { NMod } = detectOtherMods();
-	const expectedHashes = (NMod ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[functionName] ?? [];
+	const expectedHashes = (isNModClient() ? FUNCTION_HASHES_NMOD : FUNCTION_HASHES)[functionName] ?? [];
 	return expectedHashes.includes(hash);
 }
 

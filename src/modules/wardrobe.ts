@@ -1,4 +1,4 @@
-import { allowMode, detectOtherMods, isBind, isCloth, DrawImageEx, itemColorsEquals } from "../utilsClub";
+import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
 import { arrayUnique, clipboardAvailable } from "../utils";
@@ -191,7 +191,7 @@ function exitSearchMode(C: Character) {
 export class ModuleWardrobe extends BaseModule {
 
 	load() {
-		const { NMod } = detectOtherMods();
+		const NMod = isNModClient();
 		const NModWardrobe = NMod && typeof AppearanceMode !== "undefined";
 
 		hookFunction("AppearanceRun", 0, (args, next) => {

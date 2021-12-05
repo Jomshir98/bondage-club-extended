@@ -114,10 +114,14 @@ export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?:
 	return null;
 }
 
+export function isNModClient(): boolean {
+	return typeof (window as any).ChatRoomDrawFriendList === "function";
+}
+
 export function detectOtherMods() {
 	const w = window as any;
 	return {
-		NMod: typeof w.ChatRoomDrawFriendList === "function",
+		NMod: isNModClient(),
 		BondageClubTools: (window as any).BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage")),
 		BCFriendList: ServerSocket.listeners("AccountQueryResult").some(i => i.toString().includes("f_t_body.innerText")),
 		Curse: typeof w.CursedStarter === "function" ? (`${w.currentManifestVersion}` || true) : false,

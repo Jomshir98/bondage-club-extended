@@ -48,7 +48,7 @@ Fixes:
 This update includes:
  - Changed the rule "Control ability to orgasm" to use more general orgasm messages, not mentioning vibrators specifically.
  - Changed the rule "Forbid using keys on others" to have two new toggles for still allowing to unlock owner and lover items or locks.
- - Changed the rules "Restrict sending beep messages" and "Restrict recieving beeps" to have the option to only be in effect while hands cannot be used.
+ - Changed the rules "Restrict sending beep messages" and "Restrict receiving beeps" to have the option to only be in effect while hands cannot be used.
  - Improved the BCX commands tutorial text to make the behavior more clear.
  - Added a chatroom message that notifies other users when they have been added as someone's BCX owner/mistress.
 
@@ -63,7 +63,7 @@ This update includes:
  - Some improved, fixed or added rules, now totaling to 47 usable rules!
    - Added a new rule "Hearing whitelist" that allows to set a list of members whose voice can always be understood by the player, even while hearing impaired
    - Added a new rule "Seeing whitelist" that allows to set a list of members who can always be seen normally by the player, even while sight impaired
-   - Added a new rule "Restrict recieving whispers" that prevents the player from receiving any whispers, except from the defined roles; an auto-reply can be set
+   - Added a new rule "Restrict receiving whispers" that prevents the player from receiving any whispers, except from the defined roles; an auto-reply can be set
    - Changed the rules "Allow specific sound only", "Doll talk" and "Forbid saying certain words in chat" to also apply to whisper messages
    - Changed the rule "Restrict entering rooms" to not be in effect while the white list is empty, as a safety measure
    - Changed the rule "Allow specific sounds only" to allow a list of sound patterns instead of a single one

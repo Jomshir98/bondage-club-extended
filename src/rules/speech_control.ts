@@ -318,11 +318,11 @@ export function initRules_bc_speech_control() {
 	});
 
 	registerRule("speech_restrict_whisper_receive", {
-		name: "Restrict recieving whispers",
+		name: "Restrict receiving whispers",
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "except from defined roles",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a whisper. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set (text field is not empty). PLAYER_NAME won't get any indication that she would have received a whisper. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			minimumPermittedRole: {
@@ -412,7 +412,7 @@ export function initRules_bc_speech_control() {
 	});
 
 	registerRule("speech_restrict_beep_receive", {
-		name: "Restrict recieving beeps",
+		name: "Restrict receiving beeps",
 		icon: "Icons/Chat.png",
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",

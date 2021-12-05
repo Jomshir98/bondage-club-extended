@@ -528,7 +528,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "also preventing beeps from the friendlist - exceptions settable",
-		longDescription: "This rule hides persons on PLAYER_NAME's friend list when she is fully blinded, which also makes sending beeps impossible. Recieved beeps can still be answered. The rule allows to manage a list of members who can be seen normally.",
+		longDescription: "This rule hides persons on PLAYER_NAME's friend list when she is fully blinded, which also makes sending beeps impossible. Received beeps can still be answered. The rule allows to manage a list of members who can be seen normally.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			allowedMembers: {
@@ -598,7 +598,7 @@ export function initRules_bc_alter() {
 					(data.Message.includes(state.customData.summoningText) || data.Message === "summon") &&
 					data.ChatRoomName
 				) {
-					ChatRoomActionMessage(`${Player.Name} recieved a summon: "${state.customData.summoningText}".`);
+					ChatRoomActionMessage(`${Player.Name} received a summon: "${state.customData.summoningText}".`);
 					beep = true;
 					setTimeout(() => {
 						// Check if rule is still in effect!

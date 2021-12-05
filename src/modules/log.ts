@@ -70,7 +70,7 @@ function logMessageAdd<Type extends LogEntryType>(access: LogAccessLevel, type: 
 		throw new Error("Mod storage log not initialized");
 	}
 	modStorage.log.unshift([Date.now(), access, type, data]);
-	// Time must me unique
+	// Time must be unique
 	if (modStorage.log.length >= 2 && modStorage.log[0][0] <= modStorage.log[1][0]) {
 		modStorage.log[0][0] = modStorage.log[1][0] + 1;
 	}

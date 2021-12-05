@@ -20,6 +20,7 @@ export class GuiLog extends GuiSubscreen {
 	private allowPraise: boolean = false;
 	private allowLeaveMessage: boolean = false;
 	private page: number = 0;
+	private showMore: boolean[] = new Array(PER_PAGE_COUNT).fill(false);
 
 	private showHelp: boolean = false;
 
@@ -130,9 +131,21 @@ export class GuiLog extends GuiSubscreen {
 				});
 
 				MainCanvas.textAlign = "left";
-				DrawButton(200, Y, 1030, 64, "", "White");
 				const msg = logMessageRender(e, this.character);
-				DrawTextFit(msg, 210, Y + 34, 1020, msg.startsWith("[") ? "Gray" : "Black");
+				if (this.showMore[off]) {
+					MainCanvas.fillStyle = "#ffff88";
+					MainCanvas.fillRect(200, Y - 32, 1030, 128);
+					MainCanvas.strokeStyle = "Black";
+					MainCanvas.strokeRect(200, Y - 32, 1030, 128);
+					DrawTextWrap(msg, 200 - 970 / 2, Y - 32 + 5, 990, 128 - 10, "black", undefined, 3);
+				} else {
+					DrawButton(200, Y, 1030, 64, "", "White");
+					let msgSmall = msg;
+					if (msg.length > 95) {
+						msgSmall = msgSmall.slice(0, 80) + "... >> click <<";
+					}
+					DrawTextFit(msgSmall, 210, Y + 34, 1020, msgSmall.startsWith("[") ? "Gray" : "Black");
+				}
 				MainCanvas.beginPath();
 				MainCanvas.rect(1270, Y, 320, 64);
 				MainCanvas.stroke();
@@ -221,6 +234,15 @@ export class GuiLog extends GuiSubscreen {
 					this.character.logMessageDelete(e[0]);
 					return;
 				}
+
+				if (MouseIn(200, Y - 32, 1030, 128) && this.showMore[off]) {
+					this.showMore[off] = !this.showMore[off];
+				} else if (MouseIn(200, Y, 1030, 64)) {
+					if (this.showMore.includes(true)) {
+						this.showMore.fill(false);
+					}
+					this.showMore[off] = !this.showMore[off];
+				}
 			}
 
 			const field = document.getElementById("BCX_NoteField") as HTMLInputElement | undefined;
@@ -254,11 +276,13 @@ export class GuiLog extends GuiSubscreen {
 			// Pagination
 			const totalPages = Math.ceil(this.logEntries.length / PER_PAGE_COUNT);
 			if (MouseIn(1605, 800, 150, 90)) {
+				this.showMore.fill(false);
 				this.page--;
 				if (this.page < 0) {
 					this.page = Math.max(totalPages - 1, 0);
 				}
 			} else if (MouseIn(1755, 800, 150, 90)) {
+				this.showMore.fill(false);
 				this.page++;
 				if (this.page >= totalPages) {
 					this.page = 0;

@@ -4,6 +4,7 @@ import { BaseModule } from "./_BaseModule";
 import { icon_BCX } from "../resources";
 import { hookFunction, patchFunction } from "../patching";
 import { DrawImageEx } from "../utilsClub";
+import cloneDeep from "lodash-es/cloneDeep";
 
 const ROOM_TEMPLATES_COUNT = 4;
 
@@ -65,7 +66,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 				Game: create ? ChatCreateGame : ChatAdminGame,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList")!.trim()) : [],
 				Limit: ElementValue("InputSize") ? ElementValue("InputSize")!.trim() : "",
-				BlockCategory: create ? ChatBlockItemCategory : ChatAdminBlockCategory
+				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory)
 			};
 			modStorageSync();
 			return;
@@ -86,7 +87,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 		}
 		for (let i = 0; i < modStorage.roomTemplates.length; i++) {
 			if (modStorage.roomTemplates[i] !== null && !isObject(modStorage.roomTemplates[i])) {
-				console.warn(`BCX: Resetting invalid room teplate slot ${i}`, modStorage.roomTemplates[i]);
+				console.warn(`BCX: Resetting invalid room template slot ${i}`, modStorage.roomTemplates[i]);
 				modStorage.roomTemplates[i] = null;
 			}
 		}
@@ -129,7 +130,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 					ChatBlockItemCategory = data.BlockCategory;
 				});
 			}
-			// cick event for second page button
+			// click event for second page button
 			if (MouseIn(124, 147, 90, 90)) {
 				onSecondPage = !onSecondPage;
 				ElementToggleGeneratedElements("ChatCreate", false);
@@ -173,7 +174,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 					ChatAdminBlockCategory = data.BlockCategory;
 				});
 			}
-			// cick event for second page button
+			// click event for second page button
 			if (MouseIn(124, 147, 90, 90)) {
 				onSecondPage = !onSecondPage;
 				ElementToggleGeneratedElements("ChatAdmin", false);

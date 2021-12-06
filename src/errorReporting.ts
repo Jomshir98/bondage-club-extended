@@ -40,7 +40,6 @@ export function debugGenerateReport(): string {
 
 	res += `\n----- BC state report -----\n`;
 	res += `Connected to server: ${ServerIsConnected}\n`;
-	res += `User: ${Player?.Name} (${Player?.MemberNumber})\n`;
 	res += `Screen: ${CurrentModule}/${CurrentScreen}\n`;
 	res += `In chatroom: ${ServerPlayerIsInChatRoom()}\n`;
 	res += `GLVersion: ${GLVersion}\n`;
@@ -57,20 +56,21 @@ export function debugGenerateReport(): string {
 	return res;
 }
 
-export function cleanupErrorLocaion(location: string): string {
+export function cleanupErrorLocation(location: string): string {
 	return location
 		.replaceAll(window.location.href.substr(0, window.location.href.lastIndexOf("/")), "<url>")
 		.replace(/https:\/\/[^?/]+\/([^?]+)?bcx.js(?=$|\?|:)/, "<bcx>")
+		.replace(/\/\d{4,}\.html/, "/<numbers>.html")
 		.replace(/[?&]_=\d+(?=$|&|:)/, "");
 }
 
-export function debugPretifyError(error: unknown): string {
+export function debugPrettifyError(error: unknown): string {
 	if (error instanceof Error) {
 		let stack = `${error.stack}`.split("\n");
 		if (stack.length > MAX_STACK_SIZE) {
 			stack = stack.slice(0, MAX_STACK_SIZE).concat("    ...");
 		}
-		return stack.map(cleanupErrorLocaion).join("\n");
+		return stack.map(cleanupErrorLocation).join("\n");
 	}
 	return `${error}`;
 }
@@ -78,17 +78,21 @@ export function debugPretifyError(error: unknown): string {
 export function debugGenerateReportErrorEvent(event: ErrorEvent): string {
 	let res = `----- UNHANDLED ERROR -----\n` +
 		`Message: ${event.message}\n` +
-		`Source: ${cleanupErrorLocaion(event.filename)}:${event.lineno}:${event.colno}\n`;
+		`Source: ${cleanupErrorLocation(event.filename)}:${event.lineno}:${event.colno}\n`;
 
-	res += debugPretifyError(event.error) + "\n\n";
+	res += debugPrettifyError(event.error) + "\n\n";
 
 	res += debugGenerateReport();
 
 	return res;
 }
 
-export function showErrorOverlay(title: string, description: string, contents: string): void {
+export function showErrorOverlay(title: string, description: string, contents: string, wrapCodeBlock: boolean = true): void {
 	console.info("Error overlay displayed\n", contents);
+
+	if (wrapCodeBlock) {
+		contents = '```\n' + contents.trim() + '\n```';
+	}
 
 	const overlay = document.createElement("div");
 	overlay.style.position = "fixed";
@@ -121,6 +125,11 @@ export function showErrorOverlay(title: string, description: string, contents: s
 	win.appendChild(descriptionElement);
 	descriptionElement.innerText = description;
 
+	// Copy button
+	const copy = document.createElement("button");
+	win.appendChild(copy);
+	copy.innerText = "Copy report";
+
 	// Content
 	const contentElem = document.createElement("textarea");
 	win.appendChild(contentElem);
@@ -128,6 +137,21 @@ export function showErrorOverlay(title: string, description: string, contents: s
 	contentElem.value = contents;
 	contentElem.style.flex = "1";
 	contentElem.style.margin = "0.5em 0";
+
+	copy.onclick = () => {
+		contentElem.focus();
+		contentElem.select();
+
+		if (navigator.clipboard) {
+			navigator.clipboard.writeText(contentElem.value);
+		} else {
+			try {
+				document.execCommand('copy');
+			} catch (err) {
+				/* Ignore */
+			}
+		}
+	};
 
 	// Close button
 	const close = document.createElement("button");

@@ -88,6 +88,8 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			});
 		}
 
+		this.conditionEntries.sort((a,b) => (!a.data.favorite && b.data.favorite) ? 1 : ((a.data.favorite && !b.data.favorite) ? -1 : 0));
+
 		this.page = clamp(this.page, 0, Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT));
 	}
 

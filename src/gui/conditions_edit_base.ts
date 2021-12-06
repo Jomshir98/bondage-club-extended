@@ -193,6 +193,9 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		const access = this.checkAccess();
 		const disabled = !access || useGlobalCategorySetting;
 
+		// favorite toggle
+		DrawButton(62, 97, 56, 56, "", !access ? "#ddd" : data.favorite ? "Yellow" : "White", "Icons/Previews/Favorite.png", "Favorite: Listed first in overview", !access);
+
 		// Spacer
 		MainCanvas.beginPath();
 		MainCanvas.moveTo(98, 272);
@@ -363,7 +366,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		MainCanvas.textAlign = "center";
 		if (data.timer !== null && MouseIn(125, 450, 80, 64)) DrawButtonHover(125, 450, 64, 64, `Removes ${this.conditionCategory.slice(0, -1)} instead of only deactivating it `);
 
-		// hover text for clobal configuration category toggle
+		// hover text for global configuration category toggle
 		if (MouseIn(1190, 830, 100, 104)) DrawButtonHover(1786, 854, 64, 64, `Overwrites current trigger conditions`);
 
 		// hover text for member selector
@@ -408,6 +411,13 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			this.changes.active = !this.changes.active;
 			this.changes.timer = null;
 			this.changes.timerRemove = false;
+			return true;
+		}
+
+		// favorite toggle
+		if (MouseIn(62, 97, 56, 56)) {
+			this.changes = this.makeChangesData();
+			this.changes.favorite = !this.changes.favorite;
 			return true;
 		}
 

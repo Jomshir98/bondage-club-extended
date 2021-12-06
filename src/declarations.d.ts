@@ -134,6 +134,7 @@ interface ConditionsConditionData<category extends ConditionsCategories = Condit
 	timer?: number;
 	timerRemove?: true | undefined;
 	requirements?: ConditionsConditionRequirements;
+	favorite?: true | undefined;
 }
 
 interface ConditionsConditionPublicData<category extends ConditionsCategories = ConditionsCategories> {
@@ -142,6 +143,7 @@ interface ConditionsConditionPublicData<category extends ConditionsCategories = 
 	timer: number | null;
 	timerRemove: boolean;
 	requirements: ConditionsConditionRequirements | null;
+	favorite: boolean;
 }
 
 type ConditionsCategoryRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionData<category>>;

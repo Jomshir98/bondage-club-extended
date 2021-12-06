@@ -56,6 +56,7 @@ export function guard_ConditionsConditionPublicData<C extends ConditionsCategori
 	return handler.loadValidateConditionKey(condition) &&
 		isObject(d) &&
 		typeof d.active === "boolean" &&
+		typeof d.favorite === "boolean" &&
 		(d.timer === null || typeof d.timer === "number") &&
 		typeof d.timerRemove === "boolean" &&
 		(d.requirements === null || guard_ConditionsConditionRequirements(d.requirements)) &&
@@ -170,7 +171,8 @@ function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(handl
 		data: handler.makePublicData(condition, conditionData),
 		timer: conditionData.timer ?? null,
 		timerRemove: conditionData.timerRemove ?? false,
-		requirements: conditionData.requirements ? cloneDeep(conditionData.requirements) : null
+		requirements: conditionData.requirements ? cloneDeep(conditionData.requirements) : null,
+		favorite: conditionData.favorite ?? false
 	};
 }
 
@@ -331,6 +333,11 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	if (!handler.updateCondition(condition, conditionData, data.data, character))
 		return false;
 	conditionData.active = data.active;
+	if (data.favorite) {
+		conditionData.favorite = true;
+	} else {
+		delete conditionData.favorite;
+	}
 	if (data.requirements) {
 		conditionData.requirements = data.requirements;
 		// Default back to "AND", if requirements are empty
@@ -993,7 +1000,9 @@ export class ModuleConditions extends BaseModule {
 					conditiondata.requirements !== undefined && !guard_ConditionsConditionRequirements(conditiondata.requirements) ||
 					conditiondata.timer !== undefined && typeof conditiondata.timer !== "number" ||
 					// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
-					conditiondata.timerRemove !== undefined && conditiondata.timerRemove !== true
+					conditiondata.timerRemove !== undefined && conditiondata.timerRemove !== true ||
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
+					conditiondata.favorite !== undefined && conditiondata.favorite !== true
 				) {
 					console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
 					delete data.conditions[condition];

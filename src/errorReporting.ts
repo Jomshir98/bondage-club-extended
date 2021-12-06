@@ -4,12 +4,15 @@ import { moduleInitPhase } from "./moduleManager";
 import { ConditionsGetCategoryData, ConditionsGetCategoryEnabled } from "./modules/conditions";
 import { getDisabledModules } from "./modules/presets";
 import { firstTimeInit } from "./modules/storage";
-import { getPatchedFunctionsHashes } from "./patching";
+import { getPatchedFunctionsHashes, hookFunction } from "./patching";
 import { detectOtherMods } from "./utilsClub";
 
 const MAX_STACK_SIZE = 15;
 
 let firstError = true;
+
+let lastReceivedMessageType = "";
+let lastSentMessageType = "";
 
 export function debugGenerateReport(): string {
 	let res = `----- Debug report -----\n`;
@@ -39,10 +42,13 @@ export function debugGenerateReport(): string {
 	}
 
 	res += `\n----- BC state report -----\n`;
+	res += `Mouse position: ${MouseX} ${MouseY}\n`;
 	res += `Connected to server: ${ServerIsConnected}\n`;
 	res += `Screen: ${CurrentModule}/${CurrentScreen}\n`;
 	res += `In chatroom: ${ServerPlayerIsInChatRoom()}\n`;
 	res += `GLVersion: ${GLVersion}\n`;
+	res += `Last received message: ${lastReceivedMessageType}\n`;
+	res += `Last sent message: ${lastSentMessageType}\n`;
 
 	res += `\n----- Patching report -----\n`;
 	const unexpectedHashes = getPatchedFunctionsHashes(false);
@@ -180,10 +186,22 @@ export function onUnhandledError(event: ErrorEvent) {
 	);
 }
 
+function logServerMessages(event: string, ...args: any[]) {
+	lastReceivedMessageType = event;
+	// console.log("\u2B07 Receive", event, args);
+}
+
 export function InitErrorReporter() {
 	window.addEventListener("error", onUnhandledError);
+	ServerSocket.onAny(logServerMessages);
+	hookFunction("ServerSend", 0, (args, next) => {
+		lastSentMessageType = args[0];
+		// 	console.log("\u2B06 Send", args[0], args.slice(1));
+		return next(args);
+	});
 }
 
 export function UnloadErrorReporter() {
 	window.removeEventListener("error", onUnhandledError);
+	ServerSocket.offAny(logServerMessages);
 }

@@ -412,16 +412,35 @@ export class ModuleCurses extends BaseModule {
 				}
 				curse.data.curseProperties = target === "yes";
 				respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else if (subcommand === "autoremove") {
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				if (typeof group === "string") {
+					return respond(group);
+				}
+				const curse = cursesInfo[group.Name];
+				if (!curse) {
+					return respond(`This group or item is not cursed`);
+				}
+				const target = (argv[2] || "").toLocaleLowerCase();
+				if (target !== "yes" && target !== "no") {
+					return respond(`Expected yes or no`);
+				}
+				if (curse.data == null) {
+					return respond(`Empty groups have no item to be automatically removed`);
+				}
+				curse.data.itemRemove = target === "yes";
+				respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
 				respond(Command_fixExclamationMark(sender, `!curses usage (page 1):\n` +
 					`!curses list - List all cursed <group>s and related info (eg. cursed items)\n` +
 					`!curses listgroups <items|clothes> - Lists all possible item or clothing <group> slots and worn items\n` +
 					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
-					`!curses curseworn <items|clothes> - Place a curse on all currenty worn items/clothes\n` +
+					`!curses curseworn <items|clothes> - Place a curse on all currently worn items/clothes\n` +
 					`!curses curseall <items|clothes> - Place a curse on all item/cloth slots, both used and empty\n` +
 					`!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
 					`!curses liftall - Lifts (removes) all curses\n` +
-					`!curses configuration <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>`
+					`!curses configuration <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>\n` +
+					`!curses autoremove <group> <yes|no> - Removes an item or clothing from <group> when the curse is no longer in effect`
 				));
 				respond(Command_fixExclamationMark(sender, `!curses usage (page 2):\n` +
 					`!curses setactive <group> <yes/no> - Switch the curse and its conditions on and off\n` +
@@ -469,6 +488,12 @@ export class ModuleCurses extends BaseModule {
 				} else if (argv.length === 3) {
 					return Command_pickAutocomplete(argv[2], ["yes", "no"]);
 				}
+			} else if (subcommand === "autoremove") {
+				if (argv.length === 2) {
+					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => cursesInfo[G.Name] !== undefined);
+				} else if (argv.length === 3) {
+					return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+				}
 			}
 
 			return [];
@@ -501,7 +526,7 @@ export class ModuleCurses extends BaseModule {
 				}
 				return true;
 			},
-			stateChangeHandler: () => { /* NOOP */ },
+			stateChangeHandler: this.curseStateChange.bind(this),
 			tickHandler: this.curseTick.bind(this),
 			makePublicData: (group, data) => {
 				if (data.data === null) {
@@ -509,14 +534,16 @@ export class ModuleCurses extends BaseModule {
 				}
 				return {
 					Name: data.data.Name,
-					curseProperties: data.data.curseProperty
+					curseProperties: data.data.curseProperty,
+					itemRemove: data.data.itemRemove ?? false
 				};
 			},
 			validatePublicData: (group, data) =>
 				data === null ||
 				isObject(data) &&
 				typeof data.Name === "string" &&
-				typeof data.curseProperties === "boolean",
+				typeof data.curseProperties === "boolean" &&
+				typeof data.itemRemove === "boolean",
 			updateCondition: (condition, data, updateData) => {
 				// Update cannot change cursed item
 				if (data.data?.Name !== updateData?.Name)
@@ -535,6 +562,12 @@ export class ModuleCurses extends BaseModule {
 				if (!curseAllowItemCurseProperty(asset) && data.data.curseProperty) {
 					console.warn(`BCX: Attempt to curse properties of item ${condition}:${data.data.Name}, while not allowed`);
 					data.data.curseProperty = false;
+				}
+
+				if (updateData.itemRemove) {
+					data.data.itemRemove = true;
+				} else {
+					delete data.data.itemRemove;
 				}
 
 				return true;
@@ -805,7 +838,7 @@ export class ModuleCurses extends BaseModule {
 		const CHANGE_TEXTS: Record<change, string> = {
 			add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears.`,
 			swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item.`,
-			update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undos all changes to the item.`,
+			update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undoes all changes to the item.`,
 			color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back.`
 		};
 		const CHANGE_LOGS: Record<change, string> = {
@@ -899,6 +932,22 @@ export class ModuleCurses extends BaseModule {
 			if (counter >= CURSES_ANTILOOP_THRESHOLD) {
 				ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
 				this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
+			}
+		}
+	}
+
+	private curseStateChange(curse: string, data: ConditionsConditionData<"curses">, newState: boolean): void {
+		if (!newState && data.data?.itemRemove) {
+			// Removal of cursed item when curse becomes inactive
+			const currentItem = InventoryGet(Player, curse);
+			// Only remove if it is the cursed item and it is not locked
+			if (currentItem &&
+				currentItem.Asset.Name === data.data.Name &&
+				InventoryGetLock(currentItem) == null
+			) {
+				InventoryRemove(Player, curse, true);
+				ChatRoomCharacterUpdate(Player);
+				ChatRoomActionMessage(`The curse on ${Player.Name}'s body becomes dormant and the ${current.Asset.Description} falls off her body.`);
 			}
 		}
 	}

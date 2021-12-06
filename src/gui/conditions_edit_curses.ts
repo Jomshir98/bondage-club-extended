@@ -54,16 +54,30 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 		MainCanvas.textAlign = "left";
 
 		////// right side: special curse category options
+		if (data.data) {
+			DrawCheckbox(1050, 105, 64, 64, "Remove the item when the curse", data.data.itemRemove, !access);
+			MainCanvas.save();
+			MainCanvas.font = CommonGetFont(28);
+			DrawText("becomes inactive, removed, or is no longer", 1152, 185, "Black");
+			DrawText("triggering - does not remove locked items", 1152, 225, "Black");
+			MainCanvas.restore();
+		}
 		if (this.allowSettingsCurse && data.data) {
-			DrawCheckbox(1050, 175, 64, 64, "Also curse the item's configuration", data.data.curseProperties, !access);
-			DrawText(`Example: which rope tie is used`, 1151, 287, "Black", "");
+			DrawCheckbox(1050, 265, 64, 64, "Also curse the item's configuration", data.data.curseProperties, !access);
+			MainCanvas.save();
+			MainCanvas.font = CommonGetFont(28);
+			DrawText(`Example: which rope tie is used`, 1151, 347, "Black", "");
+			MainCanvas.restore();
 			if (this.item && !curseDefaultItemCurseProperty(this.item)) {
+				MainCanvas.save();
+				MainCanvas.font = CommonGetFont(30);
 				DrawTextWrap(
 					"Warning: This item is not standardized and some or all of its configuration states could behave in unexpected ways " +
 					"if they are cursed with the above checkbox. Please assume most of them will not work correctly. " +
 					"Issues could range from respawning with a different configuration to the curse triggering randomly all the time. " +
 					"As some of these items do work (partially), the option to curse the configuration is still offered.",
-					1151 - 760 / 2, 365, 760, 400, "FireBrick");
+					1051 - 860 / 2, 365, 860, 400, "FireBrick");
+				MainCanvas.restore();
 			}
 		}
 
@@ -84,7 +98,13 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 
 		const data = this.changes ?? this.conditionData;
 
-		if (MouseIn(1050, 175, 64, 64) && this.allowSettingsCurse && data.data) {
+		if (MouseIn(1050, 105, 64, 64) && data.data) {
+			this.changes = this.makeChangesData();
+			this.changes.data!.itemRemove = !this.changes.data!.itemRemove;
+			return true;
+		}
+
+		if (MouseIn(1050, 265, 64, 64) && this.allowSettingsCurse && data.data) {
 			this.changes = this.makeChangesData();
 			this.changes.data!.curseProperties = !this.changes.data!.curseProperties;
 			return true;

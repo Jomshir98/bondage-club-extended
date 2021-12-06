@@ -72,6 +72,7 @@ interface CursedItemInfo {
 	Color?: string | string[];
 	Difficulty?: number;
 	Property?: ItemProperties;
+	itemRemove?: true | undefined;
 }
 
 interface ConditionsCategoryKeys {
@@ -97,6 +98,7 @@ interface ConditionsCategorySpecificPublicData {
 	curses: {
 		Name: string;
 		curseProperties: boolean;
+		itemRemove: boolean;
 	} | null;
 	rules: {
 		enforce: boolean;

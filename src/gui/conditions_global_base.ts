@@ -39,7 +39,8 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 		return this.changes ?? {
 			requirements: cloneDeep(this.conditionCategoryData.requirements),
 			timer: this.conditionCategoryData.timer,
-			timerRemove: this.conditionCategoryData.timerRemove
+			timerRemove: this.conditionCategoryData.timerRemove,
+			data: cloneDeep(this.conditionCategoryData.data)
 		};
 	}
 

@@ -94,6 +94,13 @@ interface ConditionsCategorySpecificData {
 	};
 }
 
+interface ConditionsCategorySpecificGlobalData {
+	curses: {
+		itemRemove: boolean;
+	};
+	rules: undefined;
+}
+
 interface ConditionsCategorySpecificPublicData {
 	curses: {
 		Name: string;
@@ -158,15 +165,17 @@ interface ConditionsCategoryData<category extends ConditionsCategories = Conditi
 	requirements: ConditionsConditionRequirements;
 	timer?: number;
 	timerRemove?: true | undefined;
+	data?: ConditionsCategorySpecificGlobalData[category];
 }
 
-interface ConditionsCategoryConfigurableData {
+interface ConditionsCategoryConfigurableData<category extends ConditionsCategories = ConditionsCategories> {
 	requirements: ConditionsConditionRequirements;
 	timer: number | null;
 	timerRemove: boolean;
+	data: ConditionsCategorySpecificGlobalData[category];
 }
 
-interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> extends ConditionsCategoryConfigurableData {
+interface ConditionsCategoryPublicData<category extends ConditionsCategories = ConditionsCategories> extends ConditionsCategoryConfigurableData<category> {
 	access_normal: boolean;
 	access_limited: boolean;
 	access_configure: boolean;

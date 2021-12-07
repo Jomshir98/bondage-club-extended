@@ -115,6 +115,9 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 		if (curseProperty) {
 			newCurse.curseProperty = true;
 		}
+		if (ConditionsGetCategoryData("curses").data?.itemRemove) {
+			newCurse.itemRemove = true;
+		}
 		ConditionsSetCondition("curses", Group, newCurse);
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
@@ -536,6 +539,18 @@ export class ModuleCurses extends BaseModule {
 				}
 				return true;
 			},
+			loadCategorySpecificGlobalData: (data) => {
+				if (!isObject(data)) {
+					console.warn("BCX: Bad curses global data, resetting");
+					data = {
+						itemRemove: false
+					};
+				}
+				if (typeof data.itemRemove !== "boolean") {
+					data.itemRemove = false;
+				}
+				return data;
+			},
 			stateChangeHandler: this.curseStateChange.bind(this),
 			tickHandler: this.curseTick.bind(this),
 			afterTickHandler: this.afterCurseTick.bind(this),
@@ -549,6 +564,7 @@ export class ModuleCurses extends BaseModule {
 					itemRemove: data.data.itemRemove ?? false
 				};
 			},
+			validateCategorySpecificGlobalData: data => isObject(data) && typeof data.itemRemove === "boolean",
 			validatePublicData: (group, data) =>
 				data === null ||
 				isObject(data) &&

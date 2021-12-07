@@ -94,6 +94,7 @@ export function guard_ConditionsCategoryPublicData<C extends ConditionsCategorie
 		) &&
 		(d.timer === null || typeof d.timer === "number") &&
 		typeof d.timerRemove === "boolean" &&
+		handler.validateCategorySpecificGlobalData(d.data) &&
 		guard_ConditionsConditionRequirements(d.requirements) &&
 		isObject(d.limits) &&
 		Object.entries(d.limits).every(
@@ -109,10 +110,12 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	permission_changeLimits: BCX_Permissions;
 	loadValidateConditionKey(key: string): boolean;
 	loadValidateCondition(key: string, data: ConditionsConditionData<C>): boolean;
+	loadCategorySpecificGlobalData(data: ConditionsCategorySpecificGlobalData[C] | undefined): ConditionsCategorySpecificGlobalData[C];
 	stateChangeHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>, newState: boolean): void;
 	tickHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): void;
 	afterTickHandler?(): void;
 	makePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): ConditionsCategorySpecificPublicData[C];
+	validateCategorySpecificGlobalData(data: ConditionsCategorySpecificGlobalData[C]): boolean;
 	validatePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificPublicData[C]): boolean;
 	updateCondition(
 		condition: ConditionsCategoryKeys[C],
@@ -190,6 +193,7 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		conditions: {},
 		timer: data.timer ?? null,
 		timerRemove: data.timerRemove ?? false,
+		data: cloneDeep(data.data),
 		limits: {
 			...handler.getDefaultLimits(),
 			...data.limits
@@ -395,6 +399,7 @@ export function ConditionsCategoryUpdate<C extends ConditionsCategories>(categor
 	} else {
 		delete conditionData.timerRemove;
 	}
+	conditionData.data = cloneDeep(data.data);
 	if (character && oldData) {
 		handler.logCategoryUpdate(character, data, oldData);
 	}
@@ -932,7 +937,10 @@ export class ModuleConditions extends BaseModule {
 			const curses: ConditionsCategoryData<"curses"> = modStorage.conditions.curses = {
 				conditions: {},
 				limits: {},
-				requirements: {}
+				requirements: {},
+				data: {
+					itemRemove: false
+				}
 			};
 			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
 				curses.conditions[group] = {
@@ -987,6 +995,8 @@ export class ModuleConditions extends BaseModule {
 				console.warn(`BCX: Resetting category ${key} requirements with invalid data`);
 				data.requirements = {};
 			}
+
+			data.data = handler.loadCategorySpecificGlobalData(data.data);
 
 			for (const [condition, conditiondata] of Object.entries<ConditionsConditionData>(data.conditions)) {
 				if (!handler.loadValidateConditionKey(condition)) {

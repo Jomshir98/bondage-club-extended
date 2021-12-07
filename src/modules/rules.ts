@@ -941,6 +941,7 @@ export class ModuleRules extends BaseModule {
 
 				return true;
 			},
+			loadCategorySpecificGlobalData: () => undefined,
 			stateChangeHandler: this.ruleStateChange.bind(this),
 			tickHandler: this.ruleTick.bind(this),
 			makePublicData: (rule, data) => ({
@@ -948,6 +949,7 @@ export class ModuleRules extends BaseModule {
 				log: data.data.log ?? true,
 				customData: cloneDeep(data.data.customData)
 			}),
+			validateCategorySpecificGlobalData: () => true,
 			validatePublicData: (rule, data) =>
 				isObject(data) &&
 				typeof data.enforce === "boolean" &&

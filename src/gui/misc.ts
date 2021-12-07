@@ -38,10 +38,11 @@ export class GuiMisc extends GuiSubscreen {
 		MainCanvas.textAlign = "left";
 
 		DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
-		DrawCheckbox(125, 300, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
-		DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent loosing Mistress status when reputation falls below 50 dominance", cheatIsEnabled(MiscCheat.CantLoseMistress));
-		DrawCheckbox(125, 500, 64, 64, "Cheat: Give yourself the mistress padlock and its key", cheatIsEnabled(MiscCheat.GiveMistressKey));
-		DrawCheckbox(125, 600, 64, 64, "Cheat: Give yourself the pandora padlock and its key", cheatIsEnabled(MiscCheat.GivePandoraKey));
+		DrawCheckbox(125, 300, 64, 64, "Enable indicator showing when you are in menus such as wardrobe, profile, BCX", !!modStorage.screenIndicatorEnable);
+		DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
+		DrawCheckbox(125, 500, 64, 64, "Cheat: Prevent loosing Mistress status when reputation falls below 50 dominance", cheatIsEnabled(MiscCheat.CantLoseMistress));
+		DrawCheckbox(125, 600, 64, 64, "Cheat: Give yourself the mistress padlock and its key", cheatIsEnabled(MiscCheat.GiveMistressKey));
+		DrawCheckbox(125, 700, 64, 64, "Cheat: Give yourself the pandora padlock and its key", cheatIsEnabled(MiscCheat.GivePandoraKey));
 
 		// help text
 		if (this.showHelp) {
@@ -65,18 +66,23 @@ export class GuiMisc extends GuiSubscreen {
 		}
 
 		if (MouseIn(125, 300, 64, 64)) {
-			cheatToggle(MiscCheat.BlockRandomEvents);
+			modStorage.screenIndicatorEnable = !modStorage.screenIndicatorEnable;
+			modStorageSync();
 		}
 
 		if (MouseIn(125, 400, 64, 64)) {
-			cheatToggle(MiscCheat.CantLoseMistress);
+			cheatToggle(MiscCheat.BlockRandomEvents);
 		}
 
 		if (MouseIn(125, 500, 64, 64)) {
-			cheatToggle(MiscCheat.GiveMistressKey);
+			cheatToggle(MiscCheat.CantLoseMistress);
 		}
 
 		if (MouseIn(125, 600, 64, 64)) {
+			cheatToggle(MiscCheat.GiveMistressKey);
+		}
+
+		if (MouseIn(125, 700, 64, 64)) {
 			cheatToggle(MiscCheat.GivePandoraKey);
 		}
 	}

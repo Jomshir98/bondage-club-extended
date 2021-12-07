@@ -10,31 +10,35 @@ import { defaultBCXEffects } from "../constants";
 import { isObject } from "../utils";
 import { icon_heart, icon_BCX_cross } from "../resources";
 
+export enum ChatRoomStatusManagerStatusType {
+	None = "None",
+	Typing = "Typing",
+	Emote = "Emote",
+	Whisper = "Whisper",
+	DMS = "DMS",
+	Wardrobe = "Wardrobe",
+	Profile = "Profile",
+	// NMod
+	Action = "Action",
+	Afk = 'Afk'
+}
+
 class ChatRoomStatusManager {
 	InputTimeoutMs = 3_000;
 
-	StatusTypes = {
-		None: "None",
-		Typing: "Typing",
-		Emote: "Emote",
-		Whisper: "Whisper",
-		DMS: "DMS",
-		// NMod
-		Action: "Action",
-		Afk: 'Afk'
-	};
+	// Required for NMod!
+	StatusTypes = {};
 
 	private InputElement: HTMLTextAreaElement | null = null;
 
 	private InputTimeout: number | null = null;
 
-	Status: string;
+	Status: ChatRoomStatusManagerStatusType = ChatRoomStatusManagerStatusType.None;
 
+	// Status triggers
 	DMS: boolean = false;
-
-	constructor() {
-		this.Status = this.StatusTypes.None;
-	}
+	private TypingStatus: ChatRoomStatusManagerStatusType = ChatRoomStatusManagerStatusType.None;
+	private WhisperTarget: number | null = null;
 
 	GetCharacterStatus(C: Character): string | undefined {
 		return C.ID === 0 ? ChatroomSM.Status : C.Status;
@@ -50,42 +54,57 @@ class ChatRoomStatusManager {
 		}
 	}
 
-	SetStatus(type: string, target: number | null = null) {
-		if (!modStorage.typingIndicatorEnable) {
-			type = this.StatusTypes.None;
+	GetStatus(): ChatRoomStatusManagerStatusType {
+		if (this.DMS)
+			return ChatRoomStatusManagerStatusType.DMS;
+		if (modStorage.screenIndicatorEnable) {
+			if (CurrentScreen === "Appearance")
+				return ChatRoomStatusManagerStatusType.Wardrobe;
+			if (["ChatAdmin", "FriendList", "InformationSheet", "OnlineProfile", "Preference", "Title"].includes(CurrentScreen))
+				return ChatRoomStatusManagerStatusType.Profile;
+			if (ChatRoomGame && CurrentScreen === `Game${ChatRoomGame}`)
+				return ChatRoomStatusManagerStatusType.Profile;
 		}
-		if (this.DMS) {
-			type = this.StatusTypes.DMS;
-		}
-		if (type !== this.Status) {
-			if (target !== null && this.Status === this.StatusTypes.Whisper) {
-				this.SetStatus(this.StatusTypes.None, null);
+		if (modStorage.typingIndicatorEnable)
+			return this.TypingStatus;
+		return ChatRoomStatusManagerStatusType.None;
+	}
+
+	UpdateStatus() {
+		const newStatus = this.GetStatus();
+		if (newStatus !== this.Status) {
+			if (this.WhisperTarget !== null && newStatus === ChatRoomStatusManagerStatusType.Whisper) {
+				this.SendUpdate(ChatRoomStatusManagerStatusType.None, null);
 			}
-			this.Status = type;
-			sendHiddenMessage("ChatRoomStatusEvent", { Type: type, Target: target }, target);
-			const NMod = isNModClient();
-			if (NMod) ServerSend("ChatRoomStatusEvent", { Type: type, Target: target });
+			this.Status = newStatus;
+			this.SendUpdate(newStatus, newStatus === ChatRoomStatusManagerStatusType.Whisper ? this.WhisperTarget : null);
 		}
+	}
+
+	private SendUpdate(type: ChatRoomStatusManagerStatusType, target: number | null = null) {
+		sendHiddenMessage("ChatRoomStatusEvent", { Type: type, Target: target }, target);
+		const NMod = isNModClient();
+		if (NMod) ServerSend("ChatRoomStatusEvent", { Type: type, Target: target });
 	}
 
 	InputChange() {
 		const value = this.InputElement?.value;
 		if (typeof value === "string" && value.length > 1) {
-			let type = this.StatusTypes.Typing;
-			let target = null;
+			this.TypingStatus = ChatRoomStatusManagerStatusType.Typing;
+			this.WhisperTarget = null;
 			if (value.startsWith("*") || value.startsWith("/me ") || value.startsWith("/emote ") || value.startsWith("/action ")) {
-				type = this.StatusTypes.Emote;
+				this.TypingStatus = ChatRoomStatusManagerStatusType.Emote;
 			} else if (value.startsWith("/") || value.startsWith(".")) {
 				return this.InputEnd();
 			} else if (ChatRoomTargetMemberNumber !== null) {
-				type = this.StatusTypes.Whisper;
-				target = ChatRoomTargetMemberNumber;
+				this.TypingStatus = ChatRoomStatusManagerStatusType.Whisper;
+				this.WhisperTarget = ChatRoomTargetMemberNumber;
 			}
 			if (this.InputTimeout !== null) {
 				clearTimeout(this.InputTimeout);
 			}
 			this.InputTimeout = setTimeout(this.InputEnd.bind(this), this.InputTimeoutMs);
-			this.SetStatus(type, target);
+			this.UpdateStatus();
 		} else {
 			this.InputEnd();
 		}
@@ -96,7 +115,8 @@ class ChatRoomStatusManager {
 			clearTimeout(this.InputTimeout);
 			this.InputTimeout = null;
 		}
-		this.SetStatus(this.StatusTypes.None);
+		this.TypingStatus = ChatRoomStatusManagerStatusType.None;
+		this.UpdateStatus();
 	}
 
 	unload() {
@@ -113,14 +133,14 @@ function DMSKeydown(ev: KeyboardEvent) {
 			document.activeElement.blur();
 		}
 		ChatroomSM.DMS = true;
-		ChatroomSM.SetStatus(ChatroomSM.StatusTypes.DMS);
+		ChatroomSM.UpdateStatus();
 	}
 }
 
 function DMSKeyup(ev: KeyboardEvent) {
 	if (ChatroomSM.DMS && (ev.key === "Alt" || ev.code === "NumpadEnter")) {
 		ChatroomSM.DMS = false;
-		ChatroomSM.SetStatus(ChatroomSM.StatusTypes.None);
+		ChatroomSM.UpdateStatus();
 	}
 }
 
@@ -140,6 +160,9 @@ export class ModuleChatroom extends BaseModule {
 	load() {
 		if (typeof modStorage.typingIndicatorEnable !== "boolean") {
 			modStorage.typingIndicatorEnable = true;
+		}
+		if (typeof modStorage.screenIndicatorEnable !== "boolean") {
+			modStorage.screenIndicatorEnable = true;
 		}
 
 		hiddenMessageHandlers.set("hello", (sender, message) => {
@@ -245,20 +268,33 @@ export class ModuleChatroom extends BaseModule {
 
 			const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
 			switch (ChatroomSM.GetCharacterStatus(C)) {
-				case ChatroomSM.StatusTypes.Typing:
+				case ChatRoomStatusManagerStatusType.Typing:
 					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 1);
 					break;
-				case ChatroomSM.StatusTypes.Whisper:
+				case ChatRoomStatusManagerStatusType.Whisper:
 					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 0.5);
 					break;
-				case ChatroomSM.StatusTypes.Emote:
+				case ChatRoomStatusManagerStatusType.Emote:
 					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 1, true);
 					break;
-				case ChatroomSM.StatusTypes.DMS:
+				case ChatRoomStatusManagerStatusType.DMS:
 					DrawRect(CharX + 380 * Zoom, CharY + 53 * Zoom, 40 * Zoom, 40 * Zoom, "White");
 					DrawImageEx("Icons/Import.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom
+					});
+					break;
+				case ChatRoomStatusManagerStatusType.Wardrobe:
+					DrawImageEx("Assets/Female3DCG/Emoticon/Wardrobe/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom
+					});
+					break;
+				case ChatRoomStatusManagerStatusType.Profile:
+					DrawImageEx("Assets/Female3DCG/Emoticon/Read/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom,
+						SourcePos: [7, 9, 74, 74]
 					});
 					break;
 			}
@@ -275,6 +311,11 @@ export class ModuleChatroom extends BaseModule {
 		hookFunction("ChatRoomClearAllElements", 0, (args, next) => {
 			next(args);
 			ChatroomSM.SetInputElement(null);
+		});
+
+		hookFunction("CommonSetScreen", 0, (args, next) => {
+			next(args);
+			ChatroomSM.UpdateStatus();
 		});
 
 		hiddenMessageHandlers.set("ChatRoomStatusEvent", (src, data: any) => {

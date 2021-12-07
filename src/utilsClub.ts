@@ -1,4 +1,4 @@
-import { icon_Typing_star, icon_Typing_base, icon_Typing_dot, icon_heart, icon_BCX_cross } from "./resources";
+import { icon_Typing_star, icon_Typing_base, icon_Typing_dot } from "./resources";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -342,29 +342,29 @@ export function drawTypingIndicatorSpeechBubble(ctx: CanvasRenderingContext2D, x
 	ctx.restore();
 }
 
-export function drawHeart(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, alpha: number, fill: string) {
+/**
+ * Draws a path from an SVG on canvas, applying all options
+ * @param {CanvasRenderingContext2D} ctx - Context of the canvas
+ * @param {string} icon - The SVG path for drawing
+ * @param {number} x - Icon position on the X axis
+ * @param {number} y - Icon position on the Y axis
+ * @param {number} width - Width of the icon
+ * @param {number} height - Height of the icon
+ * @param {number} baseSize - The base size of the provided path from the SVG, assuming equal width and height
+ * @param {number} alpha - Transparency between 0-1
+ * @param {number} lineWidth - Thickness of icon outline
+ * @param {string} fillColor - Icon fill colour
+ * @returns {void} - Nothing
+ */
+export function drawIcon(ctx: CanvasRenderingContext2D, icon: string, x: number, y: number, width: number, height: number, baseSize:number, alpha: number, lineWidth: number, fillColor: string) {
 	ctx.save();
 	ctx.globalAlpha = alpha;
 	ctx.translate(x, y);
-	ctx.scale(width / 50, height / 50);
-	ctx.fillStyle = fill;
+	ctx.scale(width / baseSize, height / baseSize);
+	ctx.fillStyle = fillColor;
 	ctx.strokeStyle = "black";
-	ctx.lineWidth = 4;
-	const p = new Path2D(icon_heart);
-	ctx.fill(p);
-	ctx.stroke(p);
-	ctx.restore();
-}
-
-export function drawBcxCross(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, alpha: number, fill: string) {
-	ctx.save();
-	ctx.globalAlpha = alpha;
-	ctx.translate(x, y);
-	ctx.scale(width / 50, height / 50);
-	ctx.fillStyle = fill;
-	ctx.strokeStyle = "black";
-	ctx.lineWidth = 3;
-	const p = new Path2D(icon_BCX_cross);
+	ctx.lineWidth = lineWidth;
+	const p = new Path2D(icon);
 	ctx.fill(p);
 	ctx.stroke(p);
 	ctx.restore();

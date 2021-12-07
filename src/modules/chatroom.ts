@@ -1,4 +1,4 @@
-import { isNModClient, drawBcxCross, drawHeart, DrawImageEx, drawTypingIndicatorSpeechBubble } from "../utilsClub";
+import { isNModClient, drawIcon, DrawImageEx, drawTypingIndicatorSpeechBubble } from "../utilsClub";
 import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "./_BaseModule";
@@ -8,6 +8,7 @@ import { modStorage } from "./storage";
 import cloneDeep from "lodash-es/cloneDeep";
 import { defaultBCXEffects } from "../constants";
 import { isObject } from "../utils";
+import { icon_heart, icon_BCX_cross } from "../resources";
 
 class ChatRoomStatusManager {
 	InputTimeoutMs = 3_000;
@@ -196,9 +197,9 @@ export class ModuleChatroom extends BaseModule {
 				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
 				if (Char?.BCXVersion && ChatRoomHideIconState === 0) {
 					if (Friend) {
-						drawHeart(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 1, "#6e6eff");
+						drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
 					} else {
-						drawBcxCross(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 0.5, "#6e6eff");
+						drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 0.5, 3, "#6e6eff");
 					}
 				} else {
 					next(args);
@@ -221,9 +222,9 @@ export class ModuleChatroom extends BaseModule {
 				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
 				if (Char?.BCXVersion && ChatRoomHideIconState === 0) {
 					if (Friend) {
-						drawHeart(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 1, "#6e6eff");
+						drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
 					} else {
-						drawBcxCross(MainCanvas, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 0.7, "#6e6eff");
+						drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 0.7, 3, "#6e6eff");
 					}
 				} else if (Friend && ChatRoomHideIconState === 0) {
 					DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {

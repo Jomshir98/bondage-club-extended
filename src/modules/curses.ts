@@ -328,16 +328,22 @@ export class ModuleCurses extends BaseModule {
 						continue;
 					}
 
-					result += `\n[${group.Clothing ? "Clothing" : "Item"}] `;
+					let resultItem = `\n[${group.Clothing ? "Clothing" : "Item"}] `;
 
 					if (v.data === null) {
-						result += `Blocked: ${getVisibleGroupName(group)}`;
+						resultItem += `Blocked: ${getVisibleGroupName(group)}`;
 					} else {
 						const item = AssetGet(Player.AssetFamily, k, v.data.Name);
 						const timerText = `Timer: ${v.timer ? formatTimeInterval(v.timer - Date.now(), "short") : "∞"}`;
-						result += `${item?.Description ?? v.data.Name} (${getVisibleGroupName(group)}) | ${timerText}` +
+						resultItem += `${item?.Description ?? v.data.Name} (${getVisibleGroupName(group)}) | ${timerText}` +
 							`${v.data.curseProperties ? " | Item configuration also cursed" : ""}`;
 					}
+					if (result.length + resultItem.length >= 990) {
+						result += "\n...";
+						respond(result);
+						result = "Current curses (continued):";
+					}
+					result += resultItem;
 				}
 				respond(result);
 			} else if (subcommand === "listgroups") {

@@ -821,7 +821,13 @@ export class ModuleRules extends BaseModule {
 				for (const [k, v] of Object.entries(rulesInfo)) {
 					const data = RulesGetDisplayDefinition(k as BCX_Rule);
 					const timerText = `Timer: ${v.timer ? formatTimeInterval(v.timer - Date.now(), "short") : "∞"}`;
-					result += `\n${data.name} | ${timerText}`;
+					const resultItem = `\n${data.name} | ${timerText}`;
+					if (result.length + resultItem.length >= 990) {
+						result += "\n...";
+						respond(result);
+						result = "Current rules (continued):";
+					}
+					result += resultItem;
 				}
 				respond(result);
 			} else if (subcommand === "description") {

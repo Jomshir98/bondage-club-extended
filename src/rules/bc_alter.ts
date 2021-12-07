@@ -565,7 +565,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "from anywhere to the room of the permitted caller",
-		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the one sending the summon after 15 seconds have passed. The rule allows to manage a list of members who are allowed to send a summon to PLAYER_NAME. It works by sending a beep message with either the set summoning text to PLAYER_NAME or just sending the word 'summon'.",
+		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the one sending the summon after 15 seconds have passed. The rule allows to manage a list of members who are allowed to send a summon to PLAYER_NAME. It works by sending a beep message with either the set summoning text to PLAYER_NAME or just sending the word 'summon'. Be sure to not exclude your room name with the beep message or it will not work!",
 		triggerTexts: {
 			infoBeep: "You are summoned by SUMMONER!"
 		},
@@ -595,14 +595,15 @@ export function initRules_bc_alter() {
 					state.isEnforced &&
 					state.customData &&
 					state.customData.allowedMembers.includes(data.MemberNumber) &&
-					(data.Message.includes(state.customData.summoningText) || data.Message === "summon") &&
+					typeof data.Message === "string" &&
+					(data.Message.toLocaleLowerCase().startsWith(state.customData.summoningText.toLocaleLowerCase()) || data.Message.toLocaleLowerCase() === "summon") &&
 					data.ChatRoomName
 				) {
 					ChatRoomActionMessage(`${Player.Name} received a summon: "${state.customData.summoningText}".`);
 					beep = true;
 					setTimeout(() => {
 						// Check if rule is still in effect!
-						if (!state.isEnforced || !state.inEffect) return;
+						if (!state.isEnforced) return;
 
 						// leave
 						ChatRoomActionMessage(`The demand for ${Player.Name}'s presence is now enforced.`);

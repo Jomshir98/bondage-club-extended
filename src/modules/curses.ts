@@ -1,6 +1,6 @@
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
-import { arrayUnique, capitalizeFirstLetter, formatTimeInterval, isObject } from "../utils";
+import { arrayUnique, capitalizeFirstLetter, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, isBind, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
@@ -11,6 +11,7 @@ import { ModuleCategory, Preset, ConditionsLimit } from "../constants";
 import { hookFunction, removeAllHooksByModule } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
+import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -220,6 +221,15 @@ export class ModuleCurses extends BaseModule {
 	private resetTimer: number | null = null;
 	private triggerCounts: Map<string, number> = new Map();
 	private suspendedUntil: number | null = null;
+
+	private pendingMessages: Record<cursedChange | "autoremove", string[]> = {
+		remove: [],
+		add: [],
+		swap: [],
+		update: [],
+		color: [],
+		autoremove: []
+	};
 
 	init() {
 		registerPermission("curses_normal", {
@@ -433,14 +443,14 @@ export class ModuleCurses extends BaseModule {
 			} else {
 				respond(Command_fixExclamationMark(sender, `!curses usage (page 1):\n` +
 					`!curses list - List all cursed <group>s and related info (eg. cursed items)\n` +
-					`!curses listgroups <items|clothes> - Lists all possible item or clothing <group> slots and worn items\n` +
-					`!curses curse <group> - Places a curse on the specified item or clothing <group>\n` +
+					`!curses listgroups <items|clothes> - Lists all possible item or cloth <group> slots and worn items\n` +
+					`!curses curse <group> - Places a curse on the specified item/cloth <group>\n` +
 					`!curses curseworn <items|clothes> - Place a curse on all currently worn items/clothes\n` +
 					`!curses curseall <items|clothes> - Place a curse on all item/cloth slots, both used and empty\n` +
-					`!curses lift <group> - Lifts (removes) the curse from the specified item or clothing <group>\n` +
+					`!curses lift <group> - Lifts (removes) the curse from the specified item/cloth <group>\n` +
 					`!curses liftall - Lifts (removes) all curses\n` +
-					`!curses configuration <group> <yes|no> - Curses or uncurses the usage configuration of an item or clothing in <group>\n` +
-					`!curses autoremove <group> <yes|no> - Removes an item or clothing from <group> when the curse is no longer in effect`
+					`!curses configuration <group> <yes|no> - Curses or uncurses the item configuration of an item/cloth in <group>\n` +
+					`!curses autoremove <group> <yes|no> - Removes an item/cloth in <group> when the curse is no longer in effect`
 				));
 				respond(Command_fixExclamationMark(sender, `!curses usage (page 2):\n` +
 					`!curses setactive <group> <yes/no> - Switch the curse and its conditions on and off\n` +
@@ -528,6 +538,7 @@ export class ModuleCurses extends BaseModule {
 			},
 			stateChangeHandler: this.curseStateChange.bind(this),
 			tickHandler: this.curseTick.bind(this),
+			afterTickHandler: this.afterCurseTick.bind(this),
 			makePublicData: (group, data) => {
 				if (data.data === null) {
 					return null;
@@ -819,8 +830,7 @@ export class ModuleCurses extends BaseModule {
 				InventoryRemove(Player, group, false);
 				CharacterRefresh(Player, true);
 				ChatRoomCharacterUpdate(Player);
-				ChatRoomActionMessage(`${Player.Name}'s body seems to be cursed and the ${current.Asset.Description} just falls off her body.`);
-				logMessage("curse_trigger", LogEntryType.plaintext, `The curse on ${Player.Name}'s body prevented a ${current.Asset.Description} from being added to it`);
+				this.pendingMessages.remove.push(current.Asset.Description);
 				return;
 			}
 			return;
@@ -833,20 +843,7 @@ export class ModuleCurses extends BaseModule {
 			return;
 		}
 
-		type change = "add" | "swap" | "update" | "color";
-		let changeType: "" | change = "";
-		const CHANGE_TEXTS: Record<change, string> = {
-			add: `The curse on ${Player.Name}'s ${asset.Description} wakes up and the item reappears.`,
-			swap: `The curse on ${Player.Name}'s ${asset.Description} wakes up, not allowing the item to be replaced by another item.`,
-			update: `The curse on ${Player.Name}'s ${asset.Description} wakes up and undoes all changes to the item.`,
-			color: `The curse on ${Player.Name}'s ${asset.Description} wakes up, changing the color of the item back.`
-		};
-		const CHANGE_LOGS: Record<change, string> = {
-			add: `The curse on ${Player.Name}'s ${asset.Description} made the item reappear`,
-			swap: `The curse on ${Player.Name}'s ${asset.Description} prevented replacing the item`,
-			update: `The curse on ${Player.Name}'s ${asset.Description} reverted all changes to the item`,
-			color: `The curse on ${Player.Name}'s ${asset.Description} reverted the color of the item`
-		};
+		let changeType: "" | cursedChange = "";
 
 		let currentItem = InventoryGet(Player, group);
 
@@ -919,12 +916,7 @@ export class ModuleCurses extends BaseModule {
 		if (changeType) {
 			CharacterRefresh(Player, true);
 			ChatRoomCharacterUpdate(Player);
-			if (CHANGE_TEXTS[changeType]) {
-				ChatRoomActionMessage(CHANGE_TEXTS[changeType]);
-				logMessage("curse_trigger", LogEntryType.plaintext, CHANGE_LOGS[changeType]);
-			} else {
-				console.error(`BCX: No chat message for curse action ${changeType}`);
-			}
+			this.pendingMessages[changeType].push(asset.Description);
 
 			const counter = (this.triggerCounts.get(group) ?? 0) + 1;
 			this.triggerCounts.set(group, counter);
@@ -933,6 +925,28 @@ export class ModuleCurses extends BaseModule {
 				ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
 				this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
 			}
+		}
+	}
+
+	private afterCurseTick(): void {
+		for (const changeType of Object.keys(this.pendingMessages) as (cursedChange | "autoremove")[]) {
+			const list = this.pendingMessages[changeType];
+			if (list.length === 0)
+				continue;
+			if (list.length >= 3) {
+				ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS_BATCH[changeType], {}));
+				if (changeType !== "autoremove") {
+					logMessage("curse_trigger", LogEntryType.curseTriggerBatch, changeType);
+				}
+			} else {
+				for (const item of list) {
+					ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS[changeType], { ASSET_NAME: item }));
+					if (changeType !== "autoremove") {
+						logMessage("curse_trigger", LogEntryType.curseTrigger, [changeType, item]);
+					}
+				}
+			}
+			this.pendingMessages[changeType] = [];
 		}
 	}
 
@@ -947,7 +961,7 @@ export class ModuleCurses extends BaseModule {
 			) {
 				InventoryRemove(Player, curse, true);
 				ChatRoomCharacterUpdate(Player);
-				ChatRoomActionMessage(`The curse on ${Player.Name}'s body becomes dormant and the ${current.Asset.Description} falls off her body.`);
+				this.pendingMessages.autoremove.push(currentItem.Asset.Description);
 			}
 		}
 	}

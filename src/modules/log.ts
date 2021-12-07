@@ -10,6 +10,7 @@ import { modStorage, modStorageSync } from "./storage";
 import { ModuleCategory, Preset } from "../constants";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, registerWhisperCommand } from "./commands";
 import { guard_BCX_Rule, RulesGetDisplayDefinition } from "./rules";
+import { cursedChange, CURSES_TRIGGER_LOGS, CURSES_TRIGGER_LOGS_BATCH } from "./cursesConstants";
 
 export const LOG_ENTRIES_LIMIT = 256;
 
@@ -17,7 +18,9 @@ export enum LogEntryType {
 	plaintext = 0,
 	deleted = 1,
 	ruleTrigger = 2,
-	ruleTriggerAttempt = 3
+	ruleTriggerAttempt = 3,
+	curseTrigger = 4,
+	curseTriggerBatch = 5
 }
 
 export enum LogAccessLevel {
@@ -36,6 +39,10 @@ export type LogEntryTypeData = {
 	[LogEntryType.ruleTrigger]: [BCX_Rule, Record<string, string>];
 	/** When rule is triggered, blocking the action; data is rule name and dictionary */
 	[LogEntryType.ruleTriggerAttempt]: [BCX_Rule, Record<string, string>];
+	/** When curse triggers, the second argument is name of item it triggered on */
+	[LogEntryType.curseTrigger]: [cursedChange, string];
+	/** When lot of curses trigger */
+	[LogEntryType.curseTriggerBatch]: cursedChange;
 };
 
 /**
@@ -191,6 +198,24 @@ export function logMessageRender(entry: LogEntry, character: ChatroomCharacter):
 		const rule = RulesGetDisplayDefinition(data[0]);
 		const log = entry[2] === LogEntryType.ruleTriggerAttempt ? rule.triggerTexts?.attempt_log : rule.triggerTexts?.log;
 		return log ? dictionaryProcess(log, { PLAYER_NAME: character.Name, ...data[1] }) : `[ERROR: Missing log text for rule "${data[0]}" trigger]`;
+	} else if (entry[2] === LogEntryType.curseTrigger) {
+		const data = entry[3] as LogEntryTypeData[LogEntryType.curseTrigger];
+		if (!Array.isArray(data) ||
+			data.length !== 2 ||
+			data.some(i => typeof i !== "string") ||
+			!Object.keys(CURSES_TRIGGER_LOGS).includes(data[0])
+		) {
+			return `[ERROR: Bad data for type ${entry[2]}]`;
+		}
+		return dictionaryProcess(CURSES_TRIGGER_LOGS[data[0]], { PLAYER_NAME: character.Name, ASSET_NAME: data[1] });
+	} else if (entry[2] === LogEntryType.curseTriggerBatch) {
+		const data = entry[3] as LogEntryTypeData[LogEntryType.curseTriggerBatch];
+		if (typeof data !== "string" ||
+			!Object.keys(CURSES_TRIGGER_LOGS_BATCH).includes(data)
+		) {
+			return `[ERROR: Bad data for type ${entry[2]}]`;
+		}
+		return dictionaryProcess(CURSES_TRIGGER_LOGS_BATCH[data], { PLAYER_NAME: character.Name });
 	}
 	return `[ERROR: Unknown entry type ${entry[2]}]`;
 }

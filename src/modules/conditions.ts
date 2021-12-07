@@ -111,6 +111,7 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	loadValidateCondition(key: string, data: ConditionsConditionData<C>): boolean;
 	stateChangeHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>, newState: boolean): void;
 	tickHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): void;
+	afterTickHandler?(): void;
 	makePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): ConditionsCategorySpecificPublicData[C];
 	validatePublicData(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificPublicData[C]): boolean;
 	updateCondition(
@@ -1152,6 +1153,8 @@ export class ModuleConditions extends BaseModule {
 					dataChanged = true;
 				}
 			}
+
+			handler.afterTickHandler?.();
 		}
 
 		if (dataChanged) {

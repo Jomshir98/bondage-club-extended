@@ -513,7 +513,7 @@ export function initRules_bc_speech_control() {
 			log: "PLAYER_NAME used the antigarble command"
 		},
 		defaultLimit: ConditionsLimit.normal
-		// Implmented externally
+		// Implemented externally
 	});
 
 	/* TODO: Implement
@@ -564,7 +564,7 @@ export function initRules_bc_speech_control() {
 		shortDescription: "if sending a message in chat is rejected by BCX due to a rule violation",
 		longDescription: "This rule forces PLAYER_NAME to retype any chat/whisper/emote/OOC message as a punishment when they try to send it and another enforced BCX speech rule determines that there is any rule violation in that message.",
 		defaultLimit: ConditionsLimit.limited
-		// Implmented externally
+		// Implemented externally
 	});
 
 	let alreadyGreeted = false;
@@ -626,6 +626,60 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
+	registerRule("greet_new_guests", {
+		name: "Greet new guests",
+		icon: "Icons/Chat.png",
+		loggable: false,
+		shortDescription: "when they join the current room",
+		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in.",
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			greetingSentence: {
+				type: "string",
+				default: "",
+				description: "The sentence that will be used to greet new guests:"
+			}
+		},
+		load(state) {
+			const GREET_DELAY = 600_000;
+			const nextGreet: Map<number, number> = new Map();
+			hookFunction("ChatRoomSyncMemberLeave", 2, (args, next) => {
+				next(args);
+				const R = args[0] as Record<string, number>;
+				if (nextGreet.has(R.SourceMemberNumber)) {
+					nextGreet.set(R.SourceMemberNumber, Date.now() + GREET_DELAY);
+				}
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomAddCharacterToChatRoom", 3, (args, next) => {
+				const size = ChatRoomCharacter.length;
+				next(args);
+				if (state.customData && state.isEnforced && size < ChatRoomCharacter.length) {
+					const C = args[0] as Character;
+					if (C.MemberNumber !== undefined &&
+						nextGreet.has(C.MemberNumber) &&
+						nextGreet.get(C.MemberNumber)! < Date.now()
+					) {
+						nextGreet.delete(C.MemberNumber);
+					}
+					setTimeout(() => {
+						if (!state.customData ||
+							!state.isEnforced ||
+							!ChatRoomCharacter.includes(C) ||
+							C.MemberNumber === undefined ||
+							(
+								nextGreet.has(C.MemberNumber) &&
+								nextGreet.get(C.MemberNumber)! >= Date.now()
+							)
+						) return;
+						nextGreet.set(C.MemberNumber, 0);
+						ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: C.MemberNumber });
+						ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: Player.MemberNumber });
+					}, 5_000);
+				}
+			}, ModuleCategory.Rules);
+		}
+	});
+
 	// Restrained speech:
 	// the wearer is unable to speak freely, she is given a set of sentences/targets allowed and can only use those with the #name talk command.
 	// The given sentences can contain the %target% placeholder to have the target inserted into the sentence. The given sentences can contain
@@ -637,7 +691,7 @@ export function initRules_bc_speech_control() {
 		name: "Restrained speech",
 		icon: "Icons/Chat.png",
 		shortDescription: "only the set sentences are allowed to be spoken",
-		// TODO: needs an updatd describing the special wildcards or placeholders that can be used
+		// TODO: needs an updated describing the special wildcards or placeholders that can be used
 		longDescription: "This rule no longer allows PLAYER_NAME to speak freely, she is given a set of sentences allowed and can only use those in chat and whispers. Does not affect OOC.",
 		triggerTexts: {
 			infoBeep: "You broke a rule by not using one of the allowed phrases for you!",

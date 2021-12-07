@@ -239,6 +239,7 @@ type BCX_Rule =
 	// | "using_honorifics"
 	| "speech_force_retype"
 	| "greet_room_order"
+	| "greet_new_guests"
 	// | "restrained_speech"
 	| "speech_alter_faltering"
 	| "other_forbid_afk"
@@ -356,6 +357,9 @@ type RuleCustomData = {
 	// 	stringWithRuleSyntax: string;
 	// },
 	greet_room_order: {
+		greetingSentence: string;
+	},
+	greet_new_guests: {
 		greetingSentence: string;
 	},
 	// restrained_speech: {

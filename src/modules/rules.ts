@@ -12,7 +12,7 @@ import { initRules_other } from "../rules/other";
 import { capitalizeFirstLetter, clamp, clampWrap, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, DrawImageEx, InfoBeep } from "../utilsClub";
 import { AccessLevel, registerPermission } from "./authority";
-import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
+import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand, COMMAND_GENERIC_ERROR } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsIsConditionInEffect, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands } from "./conditions";
 import { LogEntryType, logMessage } from "./log";
 import { queryHandlers } from "./messaging";
@@ -170,7 +170,7 @@ let memberNumberListAutoFill: number | null = null;
 export const ruleCustomDataHandlers: {
 	[type in RuleCustomDataTypes]: RuleCustomDataHandler<type>;
 } = {
-	// element has Y length of 150px (description + elmement plus offset to the next one)
+	// element has Y length of 150px (description + element plus offset to the next one)
 	listSelect: {
 		validateOptions: options => Array.isArray(options) && options.every(i => Array.isArray(i) && i.length === 2 && i.every(j => typeof j === "string")),
 		validate: (value, def) => typeof value === "string" && def.options!.map(i => i[0]).includes(value),
@@ -388,7 +388,7 @@ export const ruleCustomDataHandlers: {
 			return undefined;
 		}
 	},
-	// element has Y length of 150px (description + elmement plus offset to the next one)
+	// element has Y length of 150px (description + element plus offset to the next one)
 	roleSelector: {
 		validate: value => typeof value === "number" && AccessLevel[value] !== undefined,
 		run({ def, value, Y, access }) {
@@ -824,9 +824,25 @@ export class ModuleRules extends BaseModule {
 					result += `\n${data.name} | ${timerText}`;
 				}
 				respond(result);
+			} else if (subcommand === "description") {
+				const result = parseRuleName(argv[1] || "");
+				if (!result[0]) {
+					return respond(result[1]);
+				}
+				const data = RulesGetDisplayDefinition(result[1]);
+				respond(data.longDescription.replaceAll("PLAYER_NAME", Player.Name));
+			} else if (subcommand === "remove") {
+				const result = parseRuleName(argv[1] || "");
+				if (!result[0]) {
+					return respond(result[1]);
+				}
+				respond(RulesDelete(result[1], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
 				respond(Command_fixExclamationMark(sender, `!rules usage (page 1):\n` +
-					`!rules list - List all currently applied rules\n`
+					`!rules list - List all currently applied rules\n` +
+					`!rules description <rule> - Show the rule's description\n` +
+					`!rules remove <rule> - Remove a currently applied rule if permitted to\n` +
+					`\nNote: Adding and setting up rules is only supported via using BCX's graphical user interface yourself.`
 				));
 				respond(Command_fixExclamationMark(sender, `!rules usage (page 2):\n` +
 					`!rules setactive <rule> <yes/no> - Switch the rule and its conditions on and off\n` +
@@ -844,7 +860,7 @@ export class ModuleRules extends BaseModule {
 				return [];
 			}
 			if (argv.length <= 1) {
-				return Command_pickAutocomplete(argv[0], ["list", ...ConditionsSubcommands]);
+				return Command_pickAutocomplete(argv[0], ["list", "description", "remove", ...ConditionsSubcommands]);
 			}
 
 			const subcommand = argv[0].toLocaleLowerCase();

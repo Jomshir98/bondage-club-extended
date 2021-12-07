@@ -356,13 +356,23 @@ export function drawTypingIndicatorSpeechBubble(ctx: CanvasRenderingContext2D, x
  * @param {string} fillColor - Icon fill colour
  * @returns {void} - Nothing
  */
-export function drawIcon(ctx: CanvasRenderingContext2D, icon: string, x: number, y: number, width: number, height: number, baseSize:number, alpha: number, lineWidth: number, fillColor: string) {
+export function drawIcon(
+	ctx: CanvasRenderingContext2D,
+	icon: string,
+	x: number, y: number,
+	width: number, height: number,
+	baseSize: number,
+	alpha: number,
+	lineWidth: number,
+	fillColor: string,
+	strokeColor: string = "black"
+) {
 	ctx.save();
 	ctx.globalAlpha = alpha;
 	ctx.translate(x, y);
 	ctx.scale(width / baseSize, height / baseSize);
 	ctx.fillStyle = fillColor;
-	ctx.strokeStyle = "black";
+	ctx.strokeStyle = strokeColor;
 	ctx.lineWidth = lineWidth;
 	const p = new Path2D(icon);
 	ctx.fill(p);

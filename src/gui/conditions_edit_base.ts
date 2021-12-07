@@ -1,12 +1,13 @@
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { GuiSubscreen } from "./subscreen";
-import { DrawImageEx, getCharacterName } from "../utilsClub";
+import { DrawImageEx, getCharacterName, drawIcon } from "../utilsClub";
 import { AccessLevel } from "../modules/authority";
 import { ConditionsLimit } from "../constants";
 import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
 import { GuiMemberSelect } from "./member_select";
 import { ConditionsEvaluateRequirements } from "../modules/conditions";
+import { icon_star } from "../resources";
 
 import cloneDeep from "lodash-es/cloneDeep";
 
@@ -160,7 +161,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 	Run(): boolean {
 		MainCanvas.textAlign = "left";
-		DrawText(`- ${this.headerText()} -`, 125, 125, "Black", "Gray");
+		DrawText(`- ${this.headerText()} -`, 175, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 
 		if (this.changes) {
@@ -194,7 +195,8 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		const disabled = !access || useGlobalCategorySetting;
 
 		// favorite toggle
-		DrawButton(62, 97, 56, 56, "", !access ? "#ddd" : data.favorite ? "Yellow" : "White", "Icons/Previews/Favorite.png", "Favorite: Listed first in overview", !access);
+		const color = !access ? "#ddd" : data.favorite ? "Yellow" : "White";
+		drawIcon(MainCanvas, icon_star, 105, 91, 60, 60, 24, 1, 1.5, color, access && MouseIn(93, 80, 85, 80) ? "Cyan" : "black");
 
 		// Spacer
 		MainCanvas.beginPath();
@@ -372,6 +374,9 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		// hover text for member selector
 		if (MouseIn(950, 862, 64, 64)) DrawButtonHover(950, 782, 4, 64, `Select member number from list`);
 
+		// hover text for favorite toggle
+		if (MouseIn(93, 80, 85, 80)) DrawButtonHover(93, 80, 80, 80, `Favorite: Listed first in overview`);
+
 		return false;
 	}
 
@@ -415,7 +420,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		}
 
 		// favorite toggle
-		if (MouseIn(62, 97, 56, 56)) {
+		if (MouseIn(93, 80, 85, 80)) {
 			this.changes = this.makeChangesData();
 			this.changes.favorite = !this.changes.favorite;
 			return true;

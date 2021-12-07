@@ -9,6 +9,7 @@ import cloneDeep from "lodash-es/cloneDeep";
 const ROOM_TEMPLATES_COUNT = 4;
 
 let onSecondPage = false;
+let overwriteMode: number | undefined;
 
 // Second page for the chat room settings screen that is used in both the room creation and room administration variants
 function ChatSettingsExtraRun() {
@@ -29,14 +30,21 @@ function ChatSettingsExtraRun() {
 		MainCanvas.stroke();
 		DrawTextFit(template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -", X + 170, 700 + 34, 325, "Black", "Gray");
 		DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", "Delete template", !template);
-		DrawButton(X, 835, 230, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
-		DrawText("Load", X + 51, 835 + 32, "Black");
-		DrawButton(X + 250, 835, 150, 64, "    Save", "rgba(255, 255, 255, 0.2)", "");
+		if (overwriteMode === i) {
+			DrawButton(X, 835, 150, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
+			DrawText("Load", X + 51, 835 + 32, "Black");
+			DrawButton(X + 170, 835, 230, 64, "Overwrite ?", "rgba(255, 242, 0, 0.2)", "");
+		} else {
+			DrawButton(X, 835, 230, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
+			DrawText("Load", X + 51, 835 + 32, "Black");
+			DrawButton(X + 250, 835, 150, 64, "    Save", "rgba(255, 255, 255, 0.2)", "");
+		}
 	}
 }
 // Click events for the second page of the chat room settings screen with a callback to transport data to the two patched click event functions
 function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => void) {
 	if (MouseIn(124, 147, 90, 90)) {
+		overwriteMode = undefined;
 		onSecondPage = !onSecondPage;
 		return;
 	}
@@ -46,17 +54,19 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 		if (MouseIn(X + 340, 700, 60, 64) && modStorage.roomTemplates) {
 			modStorage.roomTemplates[i] = null;
 			modStorageSync();
+			overwriteMode = undefined;
 			return;
 		}
-		if (MouseIn(X, 835, 230, 64)) {
+		if ((overwriteMode === i && MouseIn(X, 835, 150, 64)) || MouseIn(X, 835, 230, 64)) {
 			const template = modStorage.roomTemplates?.[i];
 			if (template) {
 				apply(template);
+				overwriteMode = undefined;
 				onSecondPage = !onSecondPage;
 			}
 			return;
 		}
-		if (MouseIn(X + 250, 835, 150, 64) && modStorage.roomTemplates) {
+		if (modStorage.roomTemplates && ((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
 			modStorage.roomTemplates[i] = {
 				Name: ElementValue("InputName") ? ElementValue("InputName")!.trim() : "",
 				Description: ElementValue("InputDescription") ? ElementValue("InputDescription")!.trim() : "",
@@ -69,6 +79,10 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory)
 			};
 			modStorageSync();
+			overwriteMode = undefined;
+			return;
+		} else if (MouseIn(X + 250, 835, 150, 64)) {
+			overwriteMode = i;
 			return;
 		}
 	}

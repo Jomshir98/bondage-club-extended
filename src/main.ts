@@ -4,6 +4,7 @@ import { init_modules, unload_modules } from "./moduleManager";
 import { unload_patches } from "./patching";
 import { isObject } from "./utils";
 import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
+import { debugContextStart } from "./BCXContext";
 
 export function loginInit(C: any) {
 	if (window.BCX_Loaded) return;
@@ -30,6 +31,8 @@ function clearCaches() {
 }
 
 export function init() {
+
+	const ctx = debugContextStart("BCX init", { bcxArea: true });
 
 	InitErrorReporter();
 
@@ -73,6 +76,8 @@ export function init() {
 	window.BCX_Loaded = true;
 	InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
 	console.log(`BCX loaded! Version: ${VERSION}`);
+
+	ctx.end();
 }
 
 export function unload(): true {

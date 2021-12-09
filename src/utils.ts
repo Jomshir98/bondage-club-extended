@@ -23,14 +23,6 @@ export function addStyle(styleString: string): void {
 	document.head.append(style);
 }
 
-/**
- * Waits for set amount of time, returning promes
- * @param ms The time in ms to wait for
- */
-export function wait(ms: number): Promise<void> {
-	return new Promise(r => setTimeout(r, ms));
-}
-
 /** Checks if the `obj` is an object (not null, not array) */
 export function isObject(obj: unknown): obj is Record<string, any> {
 	return !!obj && typeof obj === "object" && !Array.isArray(obj);

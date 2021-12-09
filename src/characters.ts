@@ -12,6 +12,7 @@ import { isObject } from "./utils";
 import { BaseModule } from "./modules/_BaseModule";
 import { hookFunction } from "./patching";
 import { announceSelf } from "./modules/chatroom";
+import { BCX_setInterval } from "./BCXContext";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -538,7 +539,7 @@ export class ModuleCharacter extends BaseModule {
 	}
 
 	run() {
-		this.timer = setInterval(buildPlayerEffects, PLAYER_EFFECT_REBUILD_INTERVAL);
+		this.timer = BCX_setInterval(buildPlayerEffects, PLAYER_EFFECT_REBUILD_INTERVAL);
 	}
 
 	unload() {

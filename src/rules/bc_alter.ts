@@ -6,6 +6,7 @@ import { ChatRoomActionMessage, getCharacterName, InfoBeep } from "../utilsClub"
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
+import { BCX_setTimeout } from "../BCXContext";
 
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
@@ -601,7 +602,7 @@ export function initRules_bc_alter() {
 				) {
 					ChatRoomActionMessage(`${Player.Name} received a summon: "${state.customData.summoningText}".`);
 					beep = true;
-					setTimeout(() => {
+					BCX_setTimeout(() => {
 						// Check if rule is still in effect!
 						if (!state.isEnforced) return;
 

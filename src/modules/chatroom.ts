@@ -9,6 +9,7 @@ import cloneDeep from "lodash-es/cloneDeep";
 import { defaultBCXEffects } from "../constants";
 import { isObject } from "../utils";
 import { icon_heart, icon_BCX_cross } from "../resources";
+import { BCX_setTimeout } from "../BCXContext";
 
 export enum ChatRoomStatusManagerStatusType {
 	None = "None",
@@ -103,7 +104,7 @@ class ChatRoomStatusManager {
 			if (this.InputTimeout !== null) {
 				clearTimeout(this.InputTimeout);
 			}
-			this.InputTimeout = setTimeout(this.InputEnd.bind(this), this.InputTimeoutMs);
+			this.InputTimeout = BCX_setTimeout(this.InputEnd.bind(this), this.InputTimeoutMs);
 			this.UpdateStatus();
 		} else {
 			this.InputEnd();

@@ -1,4 +1,5 @@
 import { icon_Typing_star, icon_Typing_base, icon_Typing_dot } from "./resources";
+import { BCX_setTimeout } from "./BCXContext";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -99,7 +100,7 @@ export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?:
 	else
 		div.appendChild(msg);
 
-	if (timeout) setTimeout(() => div.remove(), timeout);
+	if (timeout) BCX_setTimeout(() => div.remove(), timeout);
 
 	// Returns the focus on the chat box
 	const Refocus = document.activeElement?.id === "InputChat";

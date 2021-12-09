@@ -12,6 +12,7 @@ import { hookFunction, removeAllHooksByModule } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
+import { BCX_setInterval } from "../BCXContext";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -819,7 +820,7 @@ export class ModuleCurses extends BaseModule {
 		if (!moduleIsEnabled(ModuleCategory.Curses))
 			return;
 
-		this.resetTimer = setInterval(() => {
+		this.resetTimer = BCX_setInterval(() => {
 			this.triggerCounts.clear();
 		}, CURSES_ANTILOOP_RESET_INTERVAL);
 	}

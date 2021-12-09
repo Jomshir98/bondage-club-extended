@@ -12,6 +12,7 @@ import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { AccessLevel, checkPermissionAccess, getHighestRoleInRoom } from "./authority";
 import { COMMAND_GENERIC_ERROR, Command_parseTime, Command_pickAutocomplete, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber } from "./commands";
 import { getCharacterName } from "../utilsClub";
+import { BCX_setInterval } from "../BCXContext";
 
 const CONDITIONS_CHECK_INTERVAL = 2_000;
 
@@ -1098,7 +1099,7 @@ export class ModuleConditions extends BaseModule {
 	}
 
 	run() {
-		this.timer = setInterval(() => this.conditionsTick(), CONDITIONS_CHECK_INTERVAL);
+		this.timer = BCX_setInterval(() => this.conditionsTick(), CONDITIONS_CHECK_INTERVAL);
 	}
 
 	unload() {

@@ -88,6 +88,31 @@
 			{
 				"hoist": "all"
 			}
+		],
+		// Crash handler assurance
+		"no-restricted-globals": [
+			"error",
+			{
+				"name": "setInterval",
+				"message": "Use BCX_setInterval instead."
+			},
+			{
+				"name": "setTimeout",
+				"message": "Use BCX_setTimeout instead."
+			}
+		],
+		"no-restricted-properties": [
+			"error",
+			{
+				"object": "window",
+				"property": "setInterval",
+				"message": "Use BCX_setInterval instead."
+			},
+			{
+				"object": "window",
+				"property": "setTimeout",
+				"message": "Use BCX_setTimeout instead."
+			}
 		]
 	}
 }

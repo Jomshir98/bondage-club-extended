@@ -1,3 +1,4 @@
+import { debugContextStart } from "./BCXContext";
 import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
 import { ModuleCategory } from "./constants";
 import { crc32, isObject } from "./utils";
@@ -6,6 +7,7 @@ import { isNModClient } from "./utilsClub";
 type PatchHook = (args: any[], next: (args: any[]) => any) => any;
 
 interface IpatchedFunctionData {
+	name: string;
 	context: Record<string, unknown>;
 	original: (...args: any[]) => any;
 	originalHash: string;
@@ -29,6 +31,7 @@ function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 			console.warn(`BCX: Function router called while unloaded for ${data.original.name}`);
 			return data.original(...args);
 		}
+		const ctx = debugContextStart(`Hooked function ${data.name}`, { bcxArea: true });
 		const hooks = data.hooks.slice();
 		let hookIndex = 0;
 		const callNextHook = (nextargs: any[]) => {
@@ -36,10 +39,15 @@ function makePatchRouter(data: IpatchedFunctionData): (...args: any[]) => any {
 				hookIndex++;
 				return hooks[hookIndex - 1].hook(nextargs, callNextHook);
 			} else {
-				return data.final.apply(data.context, args);
+				const ctxExit = debugContextStart(`Hook chain exit (${data.name})`, { bcxArea: false });
+				const resExit = data.final.apply(data.context, args);
+				ctxExit.end();
+				return resExit;
 			}
 		};
-		return callNextHook(args);
+		const res = callNextHook(args);
+		ctx.end();
+		return res;
 	};
 }
 
@@ -75,6 +83,7 @@ function initPatchableFunction(target: string): IpatchedFunctionData {
 		console.debug(`BCX: Initialized ${target} for patching`);
 
 		result = {
+			name: target,
 			original,
 			originalHash,
 			final: original,

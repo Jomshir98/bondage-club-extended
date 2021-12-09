@@ -6,6 +6,7 @@ import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
 import { dictionaryProcess, isObject } from "../utils";
 import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
+import { BCX_setTimeout } from "../BCXContext";
 
 export function initRules_bc_speech_control() {
 	registerRule("speech_specific_sound", {
@@ -494,7 +495,7 @@ export function initRules_bc_speech_control() {
 					});
 				}
 				if (state.customData.toGreetMemberNumbers.length > 0) {
-					setTimeout(() => {
+					BCX_setTimeout(() => {
 						state.trigger();
 					}, 5_000);
 				}
@@ -661,7 +662,7 @@ export function initRules_bc_speech_control() {
 					) {
 						nextGreet.delete(C.MemberNumber);
 					}
-					setTimeout(() => {
+					BCX_setTimeout(() => {
 						if (!state.customData ||
 							!state.isEnforced ||
 							!ChatRoomCharacter.includes(C) ||

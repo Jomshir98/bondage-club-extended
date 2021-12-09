@@ -1,3 +1,4 @@
+import { contextInBCXArea, debugContextStart, debugMakeContextReport } from "./BCXContext";
 import { VERSION } from "./config";
 import { ModuleCategory, ModuleInitPhase } from "./constants";
 import { moduleInitPhase } from "./moduleManager";
@@ -14,7 +15,7 @@ let firstError = true;
 let lastReceivedMessageType = "";
 let lastSentMessageType = "";
 
-export function debugGenerateReport(): string {
+export function debugGenerateReport(preBCXReportInsert: string = ""): string {
 	let res = `----- Debug report -----\n`;
 	res += `Location: ${window.location.href.replace(/\d{4,}/g, "<numbers>")}\n`;
 	res += `UA: ${window.navigator.userAgent}\n`;
@@ -31,6 +32,17 @@ export function debugGenerateReport(): string {
 		res += `No other mods detected.\n`;
 	}
 
+	res += `\n----- BC state report -----\n`;
+	res += `Mouse position: ${MouseX} ${MouseY}\n`;
+	res += `Connected to server: ${ServerIsConnected}\n`;
+	res += `Screen: ${CurrentModule}/${CurrentScreen}\n`;
+	res += `In chatroom: ${ServerPlayerIsInChatRoom()}\n`;
+	res += `GLVersion: ${GLVersion}\n`;
+	res += `Last received message: ${lastReceivedMessageType}\n`;
+	res += `Last sent message: ${lastSentMessageType}\n`;
+
+	res += preBCXReportInsert;
+
 	res += `\n----- BCX report -----\n`;
 	res += `Init state: ${ModuleInitPhase[moduleInitPhase]}\n`;
 	res += `First init: ${firstTimeInit}\n`;
@@ -41,15 +53,6 @@ export function debugGenerateReport(): string {
 	if (ConditionsGetCategoryEnabled("rules")) {
 		res += `Rules: ${Object.keys(ConditionsGetCategoryData("rules").conditions).join(", ") || "[None]"}\n`;
 	}
-
-	res += `\n----- BC state report -----\n`;
-	res += `Mouse position: ${MouseX} ${MouseY}\n`;
-	res += `Connected to server: ${ServerIsConnected}\n`;
-	res += `Screen: ${CurrentModule}/${CurrentScreen}\n`;
-	res += `In chatroom: ${ServerPlayerIsInChatRoom()}\n`;
-	res += `GLVersion: ${GLVersion}\n`;
-	res += `Last received message: ${lastReceivedMessageType}\n`;
-	res += `Last sent message: ${lastSentMessageType}\n`;
 
 	res += `\n----- Patching report -----\n`;
 	const unexpectedHashes = getPatchedFunctionsHashes(false);
@@ -82,14 +85,24 @@ export function debugPrettifyError(error: unknown): string {
 	return `${error}`;
 }
 
-export function debugGenerateReportErrorEvent(event: ErrorEvent): string {
-	let res = `----- UNHANDLED ERROR -----\n` +
+export function debugGenerateReportErrorEvent(event: ErrorEvent, addNonBCXNotice: boolean = true): string {
+	const inBCX = contextInBCXArea();
+
+	let res = `----- UNHANDLED ERROR (${inBCX ? "IN BCX" : "OUTSIDE OF BCX"}) -----\n` +
 		`Message: ${event.message}\n` +
 		`Source: ${cleanupErrorLocation(event.filename)}:${event.lineno}:${event.colno}\n`;
 
 	res += debugPrettifyError(event.error) + "\n\n";
 
-	res += debugGenerateReport();
+	res += debugMakeContextReport();
+
+	let insert = "";
+
+	if (!inBCX && addNonBCXNotice) {
+		insert = "```\n\n The error most likely originates outside of BCX, following information might be unnecessary. \n\n```";
+	}
+
+	res += "\n" + debugGenerateReport(insert);
 
 	return res;
 }
@@ -130,7 +143,7 @@ export function showErrorOverlay(title: string, description: string, contents: s
 	// Description
 	const descriptionElement = document.createElement("p");
 	win.appendChild(descriptionElement);
-	descriptionElement.innerText = description;
+	descriptionElement.innerHTML = description;
 
 	// Copy button
 	const copy = document.createElement("button");
@@ -177,24 +190,72 @@ export function onUnhandledError(event: ErrorEvent) {
 	if (!firstError)
 		return;
 	firstError = false;
+	const inBCX = contextInBCXArea();
 	// Display error window
 	showErrorOverlay(
-		"BCX Crash Handler",
-		"The BCX Crash Handler detected an uncaught error, which most likely crashed the Bondage Club.\n" +
-		"While reporting this error, please use the information below to help us find the source faster.\n" +
-		"You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab.",
+		"Crash Handler (by BCX)",
+		"The Crash Handler provided by BCX detected an uncaught error, which most likely crashed the Bondage Club.<br />" +
+		"While reporting this error, please use the information below to help us find the source faster.<br />" +
+		"You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
+		(
+			inBCX ?
+				"<p>Whoops... seems like BCX might be to blame this time. Could you please help us by submitting the report below to the <a href='https://discord.gg/SHJMjEh9VH'>BC Scripting Community Discord</a> server?<br />Thank you!</p>" :
+				"<br /><h3>The error seems NOT to come from BCX!</h3> Please post first part of the report to Bondage Projects server instead!"),
 		debugGenerateReportErrorEvent(event)
 	);
 }
 
-function logServerMessages(event: string, ...args: any[]) {
-	lastReceivedMessageType = event;
-	// console.log("\u2B07 Receive", event, ...args);
+// Server message origin
+let originalSocketEmit: undefined | ((...args: any[]) => any);
+function bcxSocketEmit(this: any, ...args: any[]) {
+	const message = Array.isArray(args[0]) && typeof args[0][0] === "string" ? args[0][0] : "[unknown]";
+	lastReceivedMessageType = message;
+
+	const parameters = Array.isArray(args[0]) ? args[0].slice(1) : [];
+	// console.log("\u2B07 Receive", message, ...parameters);
+
+	const ctx = debugContextStart(`Server message ${message}`, {
+		root: true,
+		bcxArea: false,
+		extraInfo() {
+			return `Event: ${message}\n` + parameters.map(i => JSON.stringify(i, undefined, "  ")).join("\n");
+		}
+	});
+	const res = originalSocketEmit?.apply(this, args);
+	ctx.end();
+	return res;
+}
+
+// Click origin
+let originalClick: undefined | ((event: MouseEvent) => void);
+function bcxClick(this: any, event: MouseEvent) {
+	const ctx = debugContextStart(`Canvas click`, {
+		root: true,
+		bcxArea: false,
+		extraInfo() { return `X: ${MouseX}\nY: ${MouseY}`; }
+	});
+	const res = originalClick?.call(this, event);
+	ctx.end();
+	return res;
 }
 
 export function InitErrorReporter() {
 	window.addEventListener("error", onUnhandledError);
-	ServerSocket.onAny(logServerMessages);
+	// Server message origin
+	originalSocketEmit = (ServerSocket as any).__proto__.emitEvent;
+	if (typeof originalSocketEmit === "function") {
+		(ServerSocket as any).__proto__.emitEvent = bcxSocketEmit;
+	}
+
+	const canvas = document.getElementById("MainCanvas") as (HTMLCanvasElement | undefined);
+	if (canvas) {
+		// Click origin
+		if (typeof canvas.onclick === "function") {
+			originalClick = canvas.onclick;
+			canvas.onclick = bcxClick;
+		}
+	}
+
 	hookFunction("ServerSend", 0, (args, next) => {
 		lastSentMessageType = args[0];
 		// console.log("\u2B06 Send", args[0], ...args.slice(1));
@@ -204,5 +265,13 @@ export function InitErrorReporter() {
 
 export function UnloadErrorReporter() {
 	window.removeEventListener("error", onUnhandledError);
-	ServerSocket.offAny(logServerMessages);
+	// Server message origin
+	if ((ServerSocket as any).__proto__.emitEvent === bcxSocketEmit) {
+		(ServerSocket as any).__proto__.emitEvent = originalSocketEmit;
+	}
+	const canvas = document.getElementById("MainCanvas") as (HTMLCanvasElement | undefined);
+	// Click origin
+	if (canvas && originalClick) {
+		canvas.onclick = originalClick;
+	}
 }

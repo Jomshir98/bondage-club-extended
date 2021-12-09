@@ -6,6 +6,7 @@ import { notifyOfChange, queryHandlers } from "./messaging";
 import { finalizeFirstTimeInit, firstTimeInit, modStorage, modStorageSync } from "./storage";
 import { ModuleCategory, Preset, TOGGLEABLE_MODULES } from "../constants";
 import { getCurrentSubscreen } from "./gui";
+import { BCX_setTimeout } from "../BCXContext";
 
 const PRESET_DISABLED_MODULES: Record<Preset, ModuleCategory[]> = {
 	[Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses, ModuleCategory.Rules],
@@ -79,7 +80,7 @@ export class ModulePresets extends BaseModule {
 
 	run() {
 		if (firstTimeInit) {
-			setTimeout(() => {
+			BCX_setTimeout(() => {
 				if (firstTimeInit && getCurrentSubscreen() === null) {
 					InfoBeep(`Please visit your profile to finish BCX setup`, Infinity);
 				}

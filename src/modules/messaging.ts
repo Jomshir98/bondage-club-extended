@@ -5,6 +5,7 @@ import { hookFunction } from "../patching";
 import { isObject, uuidv4 } from "../utils";
 import { firstTimeInit } from "./storage";
 import { ModuleInitPhase } from "../constants";
+import { BCX_setTimeout } from "../BCXContext";
 
 export const hiddenMessageHandlers: Map<keyof BCX_messages, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();
@@ -61,7 +62,7 @@ export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_querie
 			target,
 			resolve,
 			reject,
-			timeout: setTimeout(() => {
+			timeout: BCX_setTimeout(() => {
 				console.warn("BCX: Query timed out", target, type);
 				pendingQueries.delete(id);
 				reject("Timed out");

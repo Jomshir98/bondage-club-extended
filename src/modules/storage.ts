@@ -5,6 +5,7 @@ import { isObject } from "../utils";
 import { announceSelf } from "./chatroom";
 import { sendHiddenBeep } from "./messaging";
 import { ModuleInitPhase } from "../constants";
+import { BCX_setTimeout } from "../BCXContext";
 
 export enum StorageLocations {
 	OnlineSettings = 0,
@@ -87,7 +88,7 @@ export function clearAllData() {
 	storageClearData();
 
 	sendHiddenBeep("clearData", true, VERSION_CHECK_BOT, true);
-	setTimeout(() => {
+	BCX_setTimeout(() => {
 		window.location.reload();
 	}, 2000);
 }

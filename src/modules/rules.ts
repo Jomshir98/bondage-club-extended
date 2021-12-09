@@ -21,6 +21,7 @@ import { BaseModule } from "./_BaseModule";
 import { getCurrentSubscreen, setSubscreen } from "./gui";
 import { GuiMemberSelect } from "../gui/member_select";
 import { modStorageSync } from "./storage";
+import { BCX_setInterval } from "../BCXContext";
 
 const RULES_ANTILOOP_RESET_INTERVAL = 60_000;
 const RULES_ANTILOOP_THRESHOLD = 10;
@@ -1169,7 +1170,7 @@ export class ModuleRules extends BaseModule {
 		if (!moduleIsEnabled(ModuleCategory.Rules))
 			return;
 
-		this.resetTimer = setInterval(() => {
+		this.resetTimer = BCX_setInterval(() => {
 			this.triggerCounts.clear();
 		}, RULES_ANTILOOP_RESET_INTERVAL);
 	}

@@ -7,6 +7,7 @@ import isEqual from "lodash-es/isEqual";
 import cloneDeep from "lodash-es/cloneDeep";
 import { RedirectGetImage } from "./miscPatches";
 import { curseMakeSavedProperty } from "./curses";
+import { BCX_setTimeout } from "../BCXContext";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -229,7 +230,7 @@ export class ModuleWardrobe extends BaseModule {
 				}
 				// Export
 				if (MouseIn(1534, Y, 207, 50)) {
-					setTimeout(async () => {
+					BCX_setTimeout(async () => {
 						await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
 						CharacterAppearanceWardrobeText = "Copied to clipboard!";
 					}, 0);
@@ -237,7 +238,7 @@ export class ModuleWardrobe extends BaseModule {
 				}
 				// Import
 				if (MouseIn(1768, Y, 207, 50)) {
-					setTimeout(async () => {
+					BCX_setTimeout(async () => {
 						if (typeof navigator.clipboard.readText !== "function") {
 							CharacterAppearanceWardrobeText = "Please press Ctrl+V";
 							return;

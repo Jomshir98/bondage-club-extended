@@ -1132,6 +1132,7 @@ export class ModuleConditions extends BaseModule {
 				if (conditionData.timer !== undefined && conditionData.timer <= now) {
 					if (conditionData.timerRemove && conditionData.active) {
 						ConditionsRemoveCondition(category, conditionName);
+						return;
 					} else {
 						delete conditionData.timer;
 						delete conditionData.timerRemove;

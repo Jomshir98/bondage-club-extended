@@ -1,5 +1,34 @@
 # BCX Changelog
 
+## 0.7.1 "Quality of life" Release
+
+This update includes:
+ - **Everything from the 0.7.0 update released to every BCX user!**
+ - Added a new "Star" button to set applied rules/curses as favorites, which lists them first in the active overview
+ - Added a new option to curses, which removes a cursed item/clothing from the player if the curse becomes inactive, removed or no longer triggered
+ - Added new chat room status indicators when the player is in menus such as wardrobe, profile, BCX (can be disabled in the BCX Miscellaneous module)
+ - Added removing of rules and showing the description of any rule to the `.rules` chat commands
+ - Added an error message in the GUI when adding a rule fails
+ - Changed the behaviour log list to cut off long log entries; Pressing on the entry opens a bigger view now
+ - Changed the room template save buttons to require two clicks to prevent accidental overwriting of that slot
+ - Changed curse trigger messages to get bundled together into a single message, if more than two curses trigger in a short time
+ - Saved around 12 KB on script size by switching some images to SVG drawings
+ - Improved the crash handler and the data it shows
+
+Rule changes:
+ - Some improved, fixed or added rules, now totaling to 78 usable rules!
+ - Added a new rule "Restrict allowed body poses" that can block certain poses which makes the player unable to get into those by herself
+ - Added a new rule "Greet new guests" that forces the player to greet people newly joining the room with a set sentence
+ - Improved the rule "Ready to be summoned" trigger message detection (made it case insensitive and only detect at the beginning of the beep)
+ - Fixed the rule "Restrict receiving beeps" to no longer send the room name with the auto-reply
+
+Fixes:
+ - Changed the curses/rules list chat command to split overly long return values into several chat messages
+ - Changed the filter on the log, log config, adding rules and permission views to not lose its input when the screen refreshes
+ - Fixed the item filtering via just typing to trigger on screens where it should not
+ - Fixed a bug which prevented block categories of rooms from being correctly stored in the room template under specific conditions
+ - Several smaller fixes and improvements
+
 ## 0.7.0 "Quality of life"
 
 This update includes:
@@ -56,7 +85,7 @@ Fixes:
  - Fix: Added missing local chat messages and log entries when changing a rule's active state, enforcement state or logging state.
  - Fixed an incompatibility between different BCX versions when rules were changed between the versions.
 
-## 0.6.1 "Rules update release"
+## 0.6.1 "Rules update" Release
 
 This update includes:
  - **Everything from 0.6.0 update!**

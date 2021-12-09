@@ -25,7 +25,8 @@ export function debugGenerateReport(): string {
 	if (otherMods.length > 0) {
 		res += `Other detected mods:\n` +
 			otherMods
-				.map(i => `  - ${i[0]}` + (typeof i[1] !== "boolean" ? `: ${i[1]}` : "") + "\n");
+				.map(i => `  - ${i[0]}` + (typeof i[1] !== "boolean" ? `: ${i[1]}` : "") + "\n")
+				.join("");
 	} else {
 		res += `No other mods detected.\n`;
 	}
@@ -188,7 +189,7 @@ export function onUnhandledError(event: ErrorEvent) {
 
 function logServerMessages(event: string, ...args: any[]) {
 	lastReceivedMessageType = event;
-	// console.log("\u2B07 Receive", event, args);
+	// console.log("\u2B07 Receive", event, ...args);
 }
 
 export function InitErrorReporter() {
@@ -196,7 +197,7 @@ export function InitErrorReporter() {
 	ServerSocket.onAny(logServerMessages);
 	hookFunction("ServerSend", 0, (args, next) => {
 		lastSentMessageType = args[0];
-		// 	console.log("\u2B06 Send", args[0], args.slice(1));
+		// console.log("\u2B06 Send", args[0], ...args.slice(1));
 		return next(args);
 	});
 }

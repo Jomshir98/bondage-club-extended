@@ -226,7 +226,7 @@ export class ModuleSpeech extends BaseModule {
 
 		const ANTIGARBLE_LEVEL_NAMES: string[] = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
 
-		registerCommand("antigarble", "<level> - set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
+		registerCommand("antigarble", "<level> - Set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
 			const val = ANTIGARBLE_LEVELS[value || ""];
 			if (val !== undefined) {
 				if (setAntigarble(val)) {

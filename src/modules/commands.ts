@@ -631,7 +631,7 @@ export class ModuleCommands extends BaseModule {
 			resolve(true, result);
 		};
 
-		registerCommand("help", "- display this help [alias: . ]", () => {
+		registerCommand("help", "- Display this help [alias: . ]", () => {
 			CommandsCompleteFirstTimeHelp();
 			ChatRoomSendLocal(
 				`Available commands:\n` +
@@ -645,13 +645,13 @@ export class ModuleCommands extends BaseModule {
 		});
 		aliasCommand("help", "");
 
-		registerCommand("action", "- send custom (action) [alias: .a ]", (msg) => {
+		registerCommand("action", "- Send custom (action) [alias: .a ]", (msg) => {
 			ChatRoomActionMessage(msg);
 			return true;
 		});
 		aliasCommand("action", "a");
 
-		registerWhisperCommand("help", "- display this help", (argv, sender, respond) => {
+		registerWhisperCommand("help", "- Display this help", (argv, sender, respond) => {
 			respond(
 				`Available commands:\n` +
 				Array.from(whisperCommands.entries())

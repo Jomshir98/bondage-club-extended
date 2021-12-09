@@ -53,7 +53,7 @@ function toggleAntiblind(): boolean {
 export class ModuleClubUtils extends BaseModule {
 	load() {
 		//#region Antiblind
-		registerCommand("antiblind", "- toggles ability to always see despite items", () => {
+		registerCommand("antiblind", "- Toggles ability to always see despite items", () => {
 			if (toggleAntiblind()) {
 				ChatRoomSendLocal(`Antiblind switched ${antiblind ? "on" : "off"}`);
 				return true;
@@ -66,7 +66,7 @@ export class ModuleClubUtils extends BaseModule {
 		});
 		//#endregion
 		//#region Hidden room backgrounds
-		registerCommand("background", "<name> - changes chat room background", (arg) => {
+		registerCommand("background", "<name> - Changes chat room background", (arg) => {
 			if (arg.trim() === "") {
 				ChatRoomSendLocal(`Try pressing the "tab"-key to show autocomplete options`);
 				return false;

@@ -24,6 +24,17 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 		return `View / Edit the '${group ? getVisibleGroupName(group) : "[ERROR]"}' curse`;
 	}
 
+	protected override setUseGlobal(useGlobal: boolean) {
+		super.setUseGlobal(useGlobal);
+
+		if (!this.changes || !this.conditionData || !this.conditionCategoryData)
+			return;
+
+		if (this.changes?.data) {
+			this.changes.data.itemRemove = useGlobal ? false : this.conditionCategoryData.data.itemRemove;
+		}
+	}
+
 	protected override onDataChange() {
 		super.onDataChange();
 
@@ -49,13 +60,19 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 			return true;
 
 		const data = this.changes ?? this.conditionData;
+		const useGlobalCategorySetting = !data.requirements;
+		const itemRemove = !!(useGlobalCategorySetting ? this.conditionCategoryData.data.itemRemove : data.data?.itemRemove);
 		const access = this.checkAccess();
 
 		MainCanvas.textAlign = "left";
 
 		////// right side: special curse category options
 		if (data.data) {
-			DrawCheckbox(1050, 105, 64, 64, "Remove the item when the curse", data.data.itemRemove, !access);
+			if (useGlobalCategorySetting) {
+				MainCanvas.fillStyle = "#0052A3";
+				MainCanvas.fillRect(1045, 100, 74, 74);
+			}
+			DrawCheckbox(1050, 105, 64, 64, "Remove the item when the curse", itemRemove, !access || useGlobalCategorySetting);
 			MainCanvas.save();
 			MainCanvas.font = CommonGetFont(28);
 			DrawText("becomes inactive, removed, or is no longer", 1152, 185, "Black");
@@ -97,8 +114,9 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 			return false;
 
 		const data = this.changes ?? this.conditionData;
+		const useGlobalCategorySetting = !(this.changes ? this.changes.requirements : data.requirements);
 
-		if (MouseIn(1050, 105, 64, 64) && data.data) {
+		if (MouseIn(1050, 105, 64, 64) && data.data && !useGlobalCategorySetting) {
 			this.changes = this.makeChangesData();
 			this.changes.data!.itemRemove = !this.changes.data!.itemRemove;
 			return true;

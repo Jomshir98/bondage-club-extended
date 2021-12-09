@@ -83,6 +83,12 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		});
 	}
 
+	protected setUseGlobal(useGlobal: boolean) {
+		if (!this.changes || !this.conditionData || !this.conditionCategoryData)
+			return;
+		this.changes.requirements = useGlobal ? null : cloneDeep(this.conditionData.requirements ?? this.conditionCategoryData.requirements);
+	}
+
 	protected onDataChange() {
 
 		let inputRoomName = document.getElementById("BCX_ConditionRoomName") as HTMLInputElement | undefined;
@@ -575,7 +581,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		////// global category configuration toggle
 		if (MouseIn(1210, 850, 64, 64)) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements = this.changes.requirements ? null : cloneDeep(this.conditionData.requirements ?? this.conditionCategoryData.requirements);
+			this.setUseGlobal(!!this.changes.requirements);
 			this.onDataChange();
 			return true;
 		}

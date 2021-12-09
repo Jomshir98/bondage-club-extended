@@ -440,6 +440,9 @@ export class ModuleCurses extends BaseModule {
 				if (!curse) {
 					return respond(`This group or item is not cursed`);
 				}
+				if (!cursesInfo[group.Name].requirements) {
+					return respond(`Cannot change autoremove while the curse uses the global configuration. First use:\ncurses triggers <curse> global no`);
+				}
 				const target = (argv[2] || "").toLocaleLowerCase();
 				if (target !== "yes" && target !== "no") {
 					return respond(`Expected yes or no`);
@@ -477,7 +480,7 @@ export class ModuleCurses extends BaseModule {
 				return [];
 			}
 			if (argv.length <= 1) {
-				return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "configuration", ...ConditionsSubcommands]);
+				return Command_pickAutocomplete(argv[0], ["list", "listgroups", "curse", "curseworn", "curseall", "lift", "liftall", "configuration", "autoremove", ...ConditionsSubcommands]);
 			}
 
 			const subcommand = argv[0].toLocaleLowerCase();
@@ -577,7 +580,7 @@ export class ModuleCurses extends BaseModule {
 				typeof data.Name === "string" &&
 				typeof data.curseProperties === "boolean" &&
 				typeof data.itemRemove === "boolean",
-			updateCondition: (condition, data, updateData) => {
+			updateCondition: (condition, data, updateData, character, rawData) => {
 				// Update cannot change cursed item
 				if (data.data?.Name !== updateData?.Name)
 					return false;
@@ -597,7 +600,7 @@ export class ModuleCurses extends BaseModule {
 					data.data.curseProperty = false;
 				}
 
-				if (updateData.itemRemove) {
+				if (updateData.itemRemove && rawData.requirements) {
 					data.data.itemRemove = true;
 				} else {
 					delete data.data.itemRemove;
@@ -629,6 +632,7 @@ export class ModuleCurses extends BaseModule {
 				const didActiveChange = newData.active !== oldData.active;
 				const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
 				const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+				const didItemRemoveChange = newData.requirements != null && newData.data?.itemRemove !== oldData.data?.itemRemove;
 				const didItemConfigCurseChange = newData.data?.curseProperties !== oldData.data?.curseProperties;
 				const changeEvents = [];
 				if (didActiveChange)
@@ -637,6 +641,8 @@ export class ModuleCurses extends BaseModule {
 					changeEvents.push("timer");
 				if (didTriggerChange)
 					changeEvents.push("trigger condition");
+				if (didItemRemoveChange)
+					changeEvents.push("autoremove option");
 				if (didItemConfigCurseChange)
 					changeEvents.push("item config curse");
 				if (changeEvents.length > 0) {
@@ -655,9 +661,12 @@ export class ModuleCurses extends BaseModule {
 						}
 					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
 						ChatRoomSendLocal(`${character} changed the timer behavior of the curse on slot '${visibleName}' to ${newData.timerRemove ? "remove" : "disable"} the curse when time runs out`, undefined, character.MemberNumber);
+					if (didItemRemoveChange) {
+						ChatRoomSendLocal(`${character} set the curse on slot '${visibleName}' to ${newData.data?.itemRemove ? "remove" : "keep"} the item when the curse is no longer in effect`, undefined, character.MemberNumber);
+					}
 					if (didTriggerChange)
 						if (newData.requirements === null) {
-							ChatRoomSendLocal(`${character} set the triggers of curse on slot '${visibleName}' to the global curses configuration`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character} set the curse on slot '${visibleName}' to use the global curses configuration`, undefined, character.MemberNumber);
 						} else {
 							const triggers: string[] = [];
 							const r = newData.requirements;
@@ -688,11 +697,14 @@ export class ModuleCurses extends BaseModule {
 			logCategoryUpdate: (character, newData, oldData) => {
 				const didTimerChange = newData.timer !== oldData.timer || newData.timerRemove !== oldData.timerRemove;
 				const didTriggerChange = !isEqual(newData.requirements, oldData.requirements);
+				const didItemRemoveChange = newData.data?.itemRemove !== oldData.data?.itemRemove;
 				const changeEvents = [];
 				if (didTimerChange)
 					changeEvents.push("default timer");
 				if (didTriggerChange)
 					changeEvents.push("trigger condition");
+				if (didItemRemoveChange)
+					changeEvents.push("autoremove option");
 				if (changeEvents.length > 0) {
 					logMessage("curse_change", LogEntryType.plaintext,
 						`${character} changed the ${changeEvents.join(", ")} of ${Player.Name}'s global curses config`);
@@ -706,6 +718,9 @@ export class ModuleCurses extends BaseModule {
 						}
 					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
 						ChatRoomSendLocal(`${character} changed the default timeout behavior of the global curses configuration to ${newData.timerRemove ? "removal of curses" : "disabling curses"} when time runs out`, undefined, character.MemberNumber);
+					if (didItemRemoveChange) {
+						ChatRoomSendLocal(`${character} changed the default curses behaviour to ${newData.data?.itemRemove ? "remove" : "keep"} an item when the curse on it is no longer in effect`, undefined, character.MemberNumber);
+					}
 					if (didTriggerChange) {
 						const triggers: string[] = [];
 						const r = newData.requirements;
@@ -973,7 +988,10 @@ export class ModuleCurses extends BaseModule {
 	}
 
 	private curseStateChange(curse: string, data: ConditionsConditionData<"curses">, newState: boolean): void {
-		if (!newState && data.data?.itemRemove) {
+		if (!newState &&
+			data.data &&
+			(data.requirements ? data.data.itemRemove : ConditionsGetCategoryData("curses").data?.itemRemove)
+		) {
 			// Removal of cursed item when curse becomes inactive
 			const currentItem = InventoryGet(Player, curse);
 			// Only remove if it is the cursed item and it is not locked

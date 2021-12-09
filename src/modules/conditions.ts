@@ -121,7 +121,8 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 		condition: ConditionsCategoryKeys[C],
 		data: ConditionsConditionData<C>,
 		updateData: ConditionsCategorySpecificPublicData[C],
-		character: ChatroomCharacter | null
+		character: ChatroomCharacter | null,
+		rawData: ConditionsConditionPublicData<C>
 	): boolean;
 	logLimitChange(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter, newLimit: ConditionsLimit, oldLimit: ConditionsLimit): void;
 	logConditionUpdate(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter, newData: ConditionsConditionPublicData<C>, oldData: ConditionsConditionPublicData<C>): void;
@@ -335,7 +336,7 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	if (!conditionData)
 		return false;
 	const oldData = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData);
-	if (!handler.updateCondition(condition, conditionData, data.data, character))
+	if (!handler.updateCondition(condition, conditionData, data.data, character, data))
 		return false;
 	conditionData.active = data.active;
 	if (data.favorite) {

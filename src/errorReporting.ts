@@ -15,7 +15,7 @@ let firstError = true;
 let lastReceivedMessageType = "";
 let lastSentMessageType = "";
 
-export function debugGenerateReport(preBCXReportInsert: string = ""): string {
+export function debugGenerateReport(includeBCX: boolean = true): string {
 	let res = `----- Debug report -----\n`;
 	res += `Location: ${window.location.href.replace(/\d{4,}/g, "<numbers>")}\n`;
 	res += `UA: ${window.navigator.userAgent}\n`;
@@ -41,25 +41,31 @@ export function debugGenerateReport(preBCXReportInsert: string = ""): string {
 	res += `Last received message: ${lastReceivedMessageType}\n`;
 	res += `Last sent message: ${lastSentMessageType}\n`;
 
-	res += preBCXReportInsert;
-
-	res += `\n----- BCX report -----\n`;
-	res += `Init state: ${ModuleInitPhase[moduleInitPhase]}\n`;
-	res += `First init: ${firstTimeInit}\n`;
-	res += `Disabled modules: ${getDisabledModules().map(i => ModuleCategory[i]).join(", ") || "[None]"}\n`;
-	if (ConditionsGetCategoryEnabled("curses")) {
-		res += `Curses: ${Object.keys(ConditionsGetCategoryData("curses").conditions).join(", ") || "[None]"}\n`;
+	if (includeBCX) {
+		res += `\n----- BCX report -----\n`;
+		res += `Init state: ${ModuleInitPhase[moduleInitPhase]}\n`;
+		res += `First init: ${firstTimeInit}\n`;
+		res += `Disabled modules: ${getDisabledModules().map(i => ModuleCategory[i]).join(", ") || "[None]"}\n`;
+		if (ConditionsGetCategoryEnabled("curses")) {
+			res += `Curses: ${Object.keys(ConditionsGetCategoryData("curses").conditions).join(", ") || "[None]"}\n`;
+		}
+		if (ConditionsGetCategoryEnabled("rules")) {
+			res += `Rules: ${Object.keys(ConditionsGetCategoryData("rules").conditions).join(", ") || "[None]"}\n`;
+		}
 	}
-	if (ConditionsGetCategoryEnabled("rules")) {
-		res += `Rules: ${Object.keys(ConditionsGetCategoryData("rules").conditions).join(", ") || "[None]"}\n`;
-	}
 
-	res += `\n----- Patching report -----\n`;
+	// Patching report
+
 	const unexpectedHashes = getPatchedFunctionsHashes(false);
+
 	if (unexpectedHashes.length > 0) {
-		res += `Patched functions with unknown checksums:\n` +
-			unexpectedHashes.map(i => `${i[0]}: ${i[1]}\n`).join("");
-	} else {
+		res += `\n----- Patching report -----\n`;
+		if (unexpectedHashes.length > 0) {
+			res += `Patched functions with unknown checksums:\n` +
+				unexpectedHashes.map(i => `${i[0]}: ${i[1]}\n`).join("");
+		}
+	} else if (includeBCX) {
+		res += `\n----- Patching report -----\n`;
 		res += `No warnings.\n`;
 	}
 
@@ -68,7 +74,7 @@ export function debugGenerateReport(preBCXReportInsert: string = ""): string {
 
 export function cleanupErrorLocation(location: string): string {
 	return location
-		.replaceAll(window.location.href.substr(0, window.location.href.lastIndexOf("/")), "<url>")
+		.replaceAll(window.location.href.substring(0, window.location.href.lastIndexOf("/")), "<url>")
 		.replace(/https:\/\/[^?/]+\/([^?]+)?bcx.js(?=$|\?|:)/, "<bcx>")
 		.replace(/\/\d{4,}\.html/, "/<numbers>.html")
 		.replace(/[?&]_=\d+(?=$|&|:)/, "");
@@ -85,7 +91,7 @@ export function debugPrettifyError(error: unknown): string {
 	return `${error}`;
 }
 
-export function debugGenerateReportErrorEvent(event: ErrorEvent, addNonBCXNotice: boolean = true): string {
+export function debugGenerateReportErrorEvent(event: ErrorEvent): string {
 	const inBCX = contextInBCXArea();
 
 	let res = `----- UNHANDLED ERROR (${inBCX ? "IN BCX" : "OUTSIDE OF BCX"}) -----\n` +
@@ -96,13 +102,7 @@ export function debugGenerateReportErrorEvent(event: ErrorEvent, addNonBCXNotice
 
 	res += debugMakeContextReport();
 
-	let insert = "";
-
-	if (!inBCX && addNonBCXNotice) {
-		insert = "```\n\n The error most likely originates outside of BCX, following information might be unnecessary. \n\n```";
-	}
-
-	res += "\n" + debugGenerateReport(insert);
+	res += "\n" + debugGenerateReport(inBCX);
 
 	return res;
 }
@@ -199,8 +199,8 @@ export function onUnhandledError(event: ErrorEvent) {
 		"You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
 		(
 			inBCX ?
-				"<p>Whoops... seems like BCX might be to blame this time. Could you please help us by submitting the report below to the <a href='https://discord.gg/SHJMjEh9VH'>BC Scripting Community Discord</a> server?<br />Thank you!</p>" :
-				"<br /><h3>The error seems NOT to come from BCX!</h3> Please post first part of the report to Bondage Projects server instead!"),
+				"<p>Whoops... seems like BCX might be to blame this time. Could you please help us by submitting the report below to the <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server?<br />Thank you!</p>" :
+				"<br /><h3>The error seems NOT to come from BCX!</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server instead!"),
 		debugGenerateReportErrorEvent(event)
 	);
 }

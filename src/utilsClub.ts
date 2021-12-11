@@ -130,7 +130,8 @@ export function detectOtherMods() {
 		Moaner: w.M_MOANER_scriptOn !== undefined ? (`${w.M_MOANER_scriptOn}` || true) : false,
 		BcUtil: typeof w.StartBcUtil === "function",
 		QuickAccessMenu: typeof w.OLDmenu === "function" && typeof w.NEWmenu === "function",
-		ImprovedStruggle: typeof w.OLDclick === "function" && typeof w.NEWclick === "function"
+		ImprovedStruggle: typeof w.OLDclick === "function" && typeof w.NEWclick === "function",
+		BCE: w.BCE_VERSION !== undefined ? (w.BCE_VERSION ?? true) : false
 	};
 }
 

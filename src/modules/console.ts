@@ -8,8 +8,21 @@ import { modStorage, switchStorageLocation } from "./storage";
 import { sendQuery } from "./messaging";
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { debugGenerateReport, showErrorOverlay } from "../errorReporting";
+import { VERSION } from "../config";
 
 class ConsoleInterface {
+	get version(): string {
+		return VERSION;
+	}
+
+	getCharacterVersion(target?: number): string | null {
+		if (target !== undefined && typeof target !== "number")
+			return null;
+
+		const char = target === undefined ? getPlayerCharacter() : getChatroomCharacter(target);
+		return char ? char.BCXVersion : null;
+	}
+
 	get isAllow(): boolean {
 		return allowMode;
 	}

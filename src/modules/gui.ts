@@ -8,6 +8,7 @@ import { icon_BCX } from "../resources";
 import { changeHandlers } from "./messaging";
 import { firstTimeInit } from "./storage";
 import { developmentMode } from "../utilsClub";
+import { ChatroomSM } from "./chatroom";
 
 export function getCurrentSubscreen(): GuiSubscreen | null {
 	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
@@ -37,6 +38,7 @@ export class ModuleGUI extends BaseModule {
 		if (this._currentSubscreen) {
 			this._currentSubscreen.Load();
 		}
+		ChatroomSM.UpdateStatus();
 	}
 
 	constructor() {

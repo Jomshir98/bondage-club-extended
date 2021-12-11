@@ -10,6 +10,7 @@ import { defaultBCXEffects } from "../constants";
 import { isObject } from "../utils";
 import { icon_heart, icon_BCX_cross } from "../resources";
 import { BCX_setTimeout } from "../BCXContext";
+import { getCurrentSubscreen } from "./gui";
 
 export enum ChatRoomStatusManagerStatusType {
 	None = "None",
@@ -61,9 +62,7 @@ class ChatRoomStatusManager {
 		if (modStorage.screenIndicatorEnable) {
 			if (CurrentScreen === "Appearance")
 				return ChatRoomStatusManagerStatusType.Wardrobe;
-			if (["ChatAdmin", "FriendList", "InformationSheet", "OnlineProfile", "Preference", "Title"].includes(CurrentScreen))
-				return ChatRoomStatusManagerStatusType.Profile;
-			if (ChatRoomGame && CurrentScreen === `Game${ChatRoomGame}`)
+			if (CurrentScreen === "OnlineProfile" || getCurrentSubscreen() != null)
 				return ChatRoomStatusManagerStatusType.Profile;
 		}
 		if (modStorage.typingIndicatorEnable)

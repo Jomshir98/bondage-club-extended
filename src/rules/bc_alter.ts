@@ -565,8 +565,8 @@ export function initRules_bc_alter() {
 		name: "Ready to be summoned",
 		icon: "Icons/Swap.png",
 		loggable: false,
-		shortDescription: "from anywhere to the room of the permitted caller",
-		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the one sending the summon after 15 seconds have passed. The rule allows to manage a list of members who are allowed to send a summon to PLAYER_NAME. It works by sending a beep message with either the set summoning text to PLAYER_NAME or just sending the word 'summon'. Be sure to not exclude your room name with the beep message or it will not work!",
+		shortDescription: "leash PLAYER_NAME from anywhere using a beep with message",
+		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the summoner after 15 seconds. It works by sending a beep message with the set text or simply the word 'summon' to PLAYER_NAME. Members who are allowed to summon PLAYER_NAME can be set. NOTES: PLAYER_NAME can always be summoned no matter if she has a leash or is prevented from leaving the room (ignoring restraints or locked rooms). However, if the target room is full or locked, she will end up in the lobby. Summoning will not work if the room name is not included with the beep message!",
 		triggerTexts: {
 			infoBeep: "You are summoned by SUMMONER!"
 		},

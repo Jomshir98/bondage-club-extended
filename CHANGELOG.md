@@ -3,7 +3,6 @@
 ## 0.7.1 "Quality of life" Release
 
 This update includes:
- - **Everything from the 0.7.0 update released to every BCX user!**
  - Added a new "Star" button to set applied rules/curses as favorites, which lists them first in the active overview
  - Added a new option to curses, which removes a cursed item/clothing from the player if the curse becomes inactive, removed or no longer triggered
  - Added new chat room status indicators when the player is in menus such as wardrobe, profile, BCX (can be disabled in the BCX Miscellaneous module)
@@ -14,6 +13,7 @@ This update includes:
  - Changed curse trigger messages to get bundled together into a single message, if more than two curses trigger in a short time
  - Saved around 12 KB on script size by switching some images to SVG drawings
  - Improved the crash handler and the data it shows
+ - And additionally **everything from the 0.7.0 update released to every BCX user!**
 
 Rule changes:
  - Some improved, fixed or added rules, now totaling to 78 usable rules!
@@ -65,7 +65,7 @@ Rule changes:
 
 Fixes:
  - Changed it so you can see yourself being a BCX mistress or owner of someone even if you do not have permission to see the whole list
- - Changed it so authority roles add/remove buttons are available to you (with the according permissions) independant of having permission to see the list itself
+ - Changed it so authority roles add/remove buttons are available to you (with the according permissions) independent of having permission to see the list itself
  - Changed it so that the BCX button in another user's profile is grayed out without bondage club "item permission" for this user
  - Changed the member select buttons to not list members in the same room while blinded and having certain BC immersion settings
  - Fixed the member select screen to no longer display characters from the last room after leaving it
@@ -129,7 +129,7 @@ Fixes:
 
 Fixes:
  - Crash when curses module has been disabled
- - Errorneous logging behaviour connected to the fix above
+ - Erroneous logging behaviour connected to the fix above
 
 ## 0.5.1
 

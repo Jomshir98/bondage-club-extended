@@ -1,4 +1,4 @@
-import { InfoBeep } from "./utilsClub";
+import { InfoBeep, init_findBCXSource } from "./utilsClub";
 import { hookFunction } from "./patching";
 import { init, loginInit } from "./main";
 import { isObject } from "./utils";
@@ -24,4 +24,5 @@ async function initWait() {
 	}
 }
 
+init_findBCXSource();
 initWait();

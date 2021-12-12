@@ -60,6 +60,33 @@ export function setDevelopmentMode(devel: boolean): boolean {
 	return true;
 }
 
+export let BCXSource: string | null = null;
+export let BCXSourceExternal: boolean = false;
+
+export function init_findBCXSource(): void {
+	for (const elem of Array.from(document.getElementsByTagName("script"))) {
+		const match = /^(https:\/\/[^?/]+\/([^?]+)?)bcx.js($|\?)/.exec(elem.src);
+		if (match) {
+			BCXSource = match[1];
+			return;
+		}
+	}
+	const externalSrc = (window as any).BCX_SOURCE as unknown;
+	if (typeof externalSrc === "string") {
+		BCXSourceExternal = true;
+		const match = /^(https:\/\/[^?/]+\/([^?]+)?)(bcx.js)?($|\?)/.exec(externalSrc);
+		if (match) {
+			BCXSource = match[1];
+			console.log("BCX: External BCX_SOURCE supplied, using it");
+			return;
+		}
+		console.warn("BCX: External BCX_SOURCE supplied, but malformed, ignoring", externalSrc);
+	}
+	const msg = "BCX: Failed to find BCX's source! Some functions will not work properly. Are you using the official version?";
+	console.error(msg);
+	alert(msg);
+}
+
 export function getVisibleGroupName(group: AssetGroup): string {
 	return developmentMode ? group.Name : (GROUP_NAME_OVERRIDES[group.Name] ?? group.Description);
 }
@@ -135,6 +162,17 @@ export function detectOtherMods() {
 	};
 }
 
+interface DrawImageExOptions {
+	Canvas?: CanvasRenderingContext2D;
+	Alpha?: number;
+	SourcePos?: [number, number, number, number];
+	Width?: number;
+	Height?: number;
+	Invert?: boolean;
+	Mirror?: boolean;
+	Zoom?: number;
+}
+
 /**
  * Draws an image on canvas, applying all options
  * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
@@ -164,16 +202,7 @@ export function DrawImageEx(
 		Invert = false,
 		Mirror = false,
 		Zoom = 1
-	}: {
-		Canvas?: CanvasRenderingContext2D;
-		Alpha?: number;
-		SourcePos?: [number, number, number, number];
-		Width?: number;
-		Height?: number;
-		Invert?: boolean;
-		Mirror?: boolean;
-		Zoom?: number;
-	} = {}
+	}: DrawImageExOptions = {}
 ) {
 	if (typeof Source === "string") {
 		Source = DrawGetImage(Source);
@@ -217,6 +246,13 @@ export function DrawImageEx(
 
 	Canvas.restore();
 	return true;
+}
+
+export function DrawImageBCX(Name: string, X: number, Y: number, options?: DrawImageExOptions): boolean {
+	if (!BCXSource) {
+		return true;
+	}
+	return DrawImageEx(BCXSource + "resources/" + Name, X, Y, options);
 }
 
 export function smartGetAsset(item: Item | Asset): Asset {

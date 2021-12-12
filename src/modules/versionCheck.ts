@@ -3,6 +3,7 @@ import { hiddenBeepHandlers, sendHiddenBeep } from "./messaging";
 import { BaseModule } from "./_BaseModule";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
+import { BCXSource, BCXSourceExternal } from "../utilsClub";
 
 let nextCheckTimer: number | null = null;
 
@@ -14,7 +15,9 @@ function sendVersionCheckBeep(): void {
 
 	sendHiddenBeep("versionCheck", {
 		version: VERSION,
+		devel: BCX_DEVEL,
 		GameVersion,
+		Source: (BCXSourceExternal ? "E:" : "") + BCXSource,
 		UA: window.navigator.userAgent
 	}, VERSION_CHECK_BOT, true);
 

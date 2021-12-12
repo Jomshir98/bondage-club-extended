@@ -60,6 +60,10 @@ console.debug("BCX: Parse start...");
 						process.env.IS_DEVEL ? 'static_devel/*' : 'static_stable/*'
 					],
 					dest: 'dist'
+				},
+				{
+					src: "resources/*",
+					dest: 'dist/resources'
 				}
 			]
 		})

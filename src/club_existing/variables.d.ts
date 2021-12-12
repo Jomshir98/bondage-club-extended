@@ -109,6 +109,7 @@ declare function DrawBackNextButton(Left: number, Top: number, Width: number, He
 declare function DrawButtonHover(Left: number, Top: number, Width: number, Height: number, HoveringText: string): void;
 declare function DrawEmptyRect(Left: number, Top: number, Width: number, Height: number, Color: string, Thickness?: number): void;
 declare function DrawRect(Left: number, Top: number, Width: number, Height: number, Color: string): void;
+declare function DrawCharacter(C: Character, X: number, Y: number, Zoom: number, IsHeightResizeAllowed: boolean, DrawCanvas: CanvasRenderingContext2D): void;
 
 // Cheat.js
 declare function CheatImport(): void;

@@ -1,7 +1,6 @@
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { GuiMainMenu } from "../gui/mainmenu";
 import { GuiSubscreen } from "../gui/subscreen";
-import { GuiWelcomeSelection } from "../gui/welcome";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { icon_BCX } from "../resources";
@@ -9,6 +8,7 @@ import { changeHandlers } from "./messaging";
 import { firstTimeInit } from "./storage";
 import { developmentMode } from "../utilsClub";
 import { ChatroomSM } from "./chatroom";
+import { GuiTutorial } from "../gui/tutorial";
 
 export function getCurrentSubscreen(): GuiSubscreen | null {
 	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
@@ -126,7 +126,7 @@ export class ModuleGUI extends BaseModule {
 				if (firstTimeInit) {
 					if (C && C.isPlayer()) {
 						ServerBeep = {};
-						this.currentSubscreen = new GuiWelcomeSelection();
+						this.currentSubscreen = new GuiTutorial(C, true);
 					}
 				} else if (C && C.BCXVersion !== null && C.playerHasAccessToCharacter()) {
 					this.currentSubscreen = new GuiMainMenu(C);

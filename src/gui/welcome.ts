@@ -5,15 +5,24 @@ import { icon_OwnerList } from "../resources";
 import { DrawImageEx } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
+import { GuiTutorial } from "./tutorial";
+import { ChatroomCharacter } from "../characters";
 
 export class GuiWelcomeSelection extends GuiSubscreen {
 
+	readonly character: ChatroomCharacter;
+
 	private selectedPreset: number = -1;
+
+	constructor(character: ChatroomCharacter) {
+		super();
+		this.character = character;
+	}
 
 	Run() {
 		MainCanvas.textAlign = "center";
 
-		DrawText(`- Welcome to Bondage Club Extended (BCX) -`, 1000, 100, "Black", "Gray");
+		DrawButton(800, 66, 400, 54, "<< Back to the tutorial", "White");
 		DrawText(`Please choose a preset, which sets your default experience, permissions and configuration.`, 1000, 150, "Black");
 		DrawText(`Note: You can change the defaults, but changing to another preset is not possible without resetting BCX fully.`, 1000, 200, "FireBrick");
 
@@ -82,7 +91,7 @@ export class GuiWelcomeSelection extends GuiSubscreen {
 			if (i === 1) {
 				DrawText("Easily try out all features", X + width / 2, 775, "Black");
 			} else if (i === 2) {
-				DrawText("Similar to Ace's Cursed Script", X+ width / 2, 775, "Black");
+				DrawText("Similar to Ace's Cursed Script", X + width / 2, 775, "Black");
 			}
 			MainCanvas.font = CommonGetFont(36);
 		}
@@ -103,6 +112,8 @@ export class GuiWelcomeSelection extends GuiSubscreen {
 				setSubscreen(new GuiMainMenu(getPlayerCharacter()));
 			}
 		}
+
+		if (MouseIn(800, 66, 400, 54)) setSubscreen(new GuiTutorial(this.character, true));
 
 	}
 

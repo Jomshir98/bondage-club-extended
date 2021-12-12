@@ -11,6 +11,7 @@ import { icon_ExternalLink } from "../resources";
 import { DrawImageEx } from "../utilsClub";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { GuiConditionViewRules } from "./conditions_view_rules";
+import { GuiTutorial } from "./tutorial";
 
 const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
@@ -80,6 +81,7 @@ export class GuiMainMenu extends GuiSubscreen {
 	Run() {
 		DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png", "Show the BCX tutorial again");
 
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];
@@ -110,6 +112,8 @@ export class GuiMainMenu extends GuiSubscreen {
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
+
+		if (MouseIn(1815, 190, 90, 90)) setSubscreen(new GuiTutorial(this.character, false));
 
 		// Changelog
 		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {

@@ -313,9 +313,21 @@ export class ModuleChatroom extends BaseModule {
 			ChatroomSM.SetInputElement(null);
 		});
 
+		// Screen indicator
 		hookFunction("CommonSetScreen", 0, (args, next) => {
 			next(args);
 			ChatroomSM.UpdateStatus();
+		});
+		// Suppress BC wardrobe indicator if BCX one is active
+		hookFunction("ServerSend", 5, (args, next) => {
+			if (modStorage.screenIndicatorEnable &&
+				args[0] === "ChatRoomCharacterExpressionUpdate" &&
+				isObject(args[1]) &&
+				args[1].Group === "Emoticon" &&
+				args[1].Name === "Wardrobe"
+			)
+				return;
+			next(args);
 		});
 
 		hiddenMessageHandlers.set("ChatRoomStatusEvent", (src, data: any) => {

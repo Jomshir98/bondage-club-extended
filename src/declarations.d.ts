@@ -165,7 +165,7 @@ interface ConditionsCategoryData<category extends ConditionsCategories = Conditi
 	requirements: ConditionsConditionRequirements;
 	timer?: number;
 	timerRemove?: true | undefined;
-	data?: ConditionsCategorySpecificGlobalData[category];
+	data: ConditionsCategorySpecificGlobalData[category];
 }
 
 interface ConditionsCategoryConfigurableData<category extends ConditionsCategories = ConditionsCategories> {

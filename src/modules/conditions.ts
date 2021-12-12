@@ -1039,10 +1039,11 @@ export class ModuleConditions extends BaseModule {
 		for (const [key, handler] of conditionHandlers.entries()) {
 			if (moduleIsEnabled(handler.category) && !isObject(modStorage.conditions[key])) {
 				console.debug(`BCX: Adding missing conditions category ${key}`);
-				modStorage.conditions[key] = {
+				(modStorage.conditions as Record<ConditionsCategories, ConditionsCategoryData>)[key] = {
 					conditions: {},
 					limits: {},
-					requirements: {}
+					requirements: {},
+					data: handler.loadCategorySpecificGlobalData(undefined)
 				};
 			}
 		}

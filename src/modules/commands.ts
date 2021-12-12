@@ -582,6 +582,7 @@ export class ModuleCommands extends BaseModule {
 							)
 						)
 					) {
+						console.error("BCX: Bad data during 'commandHint' query\n", result);
 						throw new Error("Bad data");
 					}
 					chat.value = result[0];

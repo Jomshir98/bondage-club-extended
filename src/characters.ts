@@ -55,6 +55,7 @@ export class ChatroomCharacter {
 	getDisabledModules(timeout?: number): Promise<ModuleCategory[]> {
 		return sendQuery("disabledModules", undefined, this.MemberNumber, timeout).then(data => {
 			if (!Array.isArray(data)) {
+				console.error("BCX: Bad data during 'disabledModules' query\n", data);
 				throw new Error("Bad data");
 			}
 
@@ -72,6 +73,7 @@ export class ChatroomCharacter {
 					AccessLevel[v[1]] === undefined
 				)
 			) {
+				console.error("BCX: Bad data during 'permissions' query\n", data);
 				throw new Error("Bad data");
 			}
 
@@ -82,6 +84,7 @@ export class ChatroomCharacter {
 	getPermissionAccess(permission: BCX_Permissions): Promise<boolean> {
 		return sendQuery("permissionAccess", permission, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'permissionAccess' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -94,6 +97,7 @@ export class ChatroomCharacter {
 	getMyAccessLevel(): Promise<AccessLevel> {
 		return sendQuery("myAccessLevel", undefined, this.MemberNumber).then(data => {
 			if (typeof data !== "number" || AccessLevel[data] === undefined) {
+				console.error("BCX: Bad data during 'myAccessLevel' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -109,6 +113,7 @@ export class ChatroomCharacter {
 			target
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'editPermission' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -127,6 +132,7 @@ export class ChatroomCharacter {
 				typeof data.allowAddOwner !== "boolean" ||
 				typeof data.allowRemoveOwner !== "boolean"
 			) {
+				console.error("BCX: Bad data during 'rolesData' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -140,6 +146,7 @@ export class ChatroomCharacter {
 			target
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'editRole' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -158,6 +165,7 @@ export class ChatroomCharacter {
 					typeof e[2] === "number"
 				)
 			) {
+				console.error("BCX: Bad data during 'logData' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -167,6 +175,7 @@ export class ChatroomCharacter {
 	logMessageDelete(time: number): Promise<boolean> {
 		return sendQuery("logDelete", time, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'logDelete' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -178,6 +187,7 @@ export class ChatroomCharacter {
 			if (!isObject(data) ||
 				Object.values(data).some(v => typeof v !== "number")
 			) {
+				console.error("BCX: Bad data during 'logConfigGet' query\n", data);
 				throw new Error("Bad data");
 			}
 			for (const k of Object.keys(data) as BCX_LogCategory[]) {
@@ -195,6 +205,7 @@ export class ChatroomCharacter {
 			target
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'logConfigEdit' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -204,6 +215,7 @@ export class ChatroomCharacter {
 	logClear(): Promise<boolean> {
 		return sendQuery("logClear", undefined, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'logClear' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -216,6 +228,7 @@ export class ChatroomCharacter {
 			value
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'logPraise' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -230,6 +243,7 @@ export class ChatroomCharacter {
 				typeof data.praise !== "boolean" ||
 				typeof data.leaveMessage !== "boolean"
 			) {
+				console.error("BCX: Bad data during 'logGetAllowedActions' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -239,6 +253,7 @@ export class ChatroomCharacter {
 	curseItem(Group: string, curseProperties: boolean | null): Promise<boolean> {
 		return sendQuery("curseItem", { Group, curseProperties }, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'curseItem' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -248,6 +263,7 @@ export class ChatroomCharacter {
 	curseLift(Group: string): Promise<boolean> {
 		return sendQuery("curseLift", Group, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'curseLift' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -257,6 +273,7 @@ export class ChatroomCharacter {
 	curseBatch(mode: "items" | "clothes", includingEmpty: boolean): Promise<boolean> {
 		return sendQuery("curseBatch", { mode, includingEmpty }, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'curseBatch' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -266,6 +283,7 @@ export class ChatroomCharacter {
 	curseLiftAll(): Promise<boolean> {
 		return sendQuery("curseLiftAll", undefined, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'curseLiftAll' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -275,6 +293,7 @@ export class ChatroomCharacter {
 	conditionsGetByCategory<C extends ConditionsCategories>(category: C): Promise<ConditionsCategoryPublicData<C>> {
 		return sendQuery("conditionsGet", category, this.MemberNumber).then(data => {
 			if (!guard_ConditionsCategoryPublicData(category, data, true)) {
+				console.error("BCX: Bad data during 'conditionsGet' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -284,6 +303,7 @@ export class ChatroomCharacter {
 	conditionSetLimit<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], limit: ConditionsLimit): Promise<boolean> {
 		return sendQuery("conditionSetLimit", { category, condition, limit }, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
+				console.error("BCX: Bad data during 'conditionSetLimit' query\n", data);
 				throw new Error("Bad data");
 			}
 			return data;
@@ -293,6 +313,7 @@ export class ChatroomCharacter {
 	conditionUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>): Promise<boolean> {
 		return sendQuery("conditionUpdate", { category, condition, data }, this.MemberNumber).then(res => {
 			if (typeof res !== "boolean") {
+				console.error("BCX: Bad data during 'conditionUpdate' query\n", res);
 				throw new Error("Bad data");
 			}
 			return res;
@@ -302,6 +323,7 @@ export class ChatroomCharacter {
 	conditionCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData): Promise<boolean> {
 		return sendQuery("conditionCategoryUpdate", { category, data }, this.MemberNumber).then(res => {
 			if (typeof res !== "boolean") {
+				console.error("BCX: Bad data during 'conditionCategoryUpdate' query\n", res);
 				throw new Error("Bad data");
 			}
 			return res;
@@ -311,6 +333,7 @@ export class ChatroomCharacter {
 	ruleCreate(name: BCX_Rule): Promise<boolean> {
 		return sendQuery("ruleCreate", name, this.MemberNumber).then(res => {
 			if (typeof res !== "boolean") {
+				console.error("BCX: Bad data during 'ruleCreate' query\n", res);
 				throw new Error("Bad data");
 			}
 			return res;
@@ -320,6 +343,7 @@ export class ChatroomCharacter {
 	ruleDelete(name: BCX_Rule): Promise<boolean> {
 		return sendQuery("ruleDelete", name, this.MemberNumber).then(res => {
 			if (typeof res !== "boolean") {
+				console.error("BCX: Bad data during 'ruleDelete' query\n", res);
 				throw new Error("Bad data");
 			}
 			return res;

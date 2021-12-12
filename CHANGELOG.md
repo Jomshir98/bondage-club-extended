@@ -1,5 +1,17 @@
 # BCX Changelog
 
+## 0.7.2
+
+This update includes:
+ - New tutorial screen! New BCX users will see it automatically, but it can also be opened at any time through the main menu.
+ - Added notification about a new BCX version being available
+ - Improved the description of the "Ready to be summoned" rule
+ - Further improvements to the crash handler
+
+Fixes:
+ - Fixed curses triggering right after being removed by a timer
+ - Fixed curses not working for first-time users
+
 ## 0.7.1 "Quality of life" Release
 
 This update includes:

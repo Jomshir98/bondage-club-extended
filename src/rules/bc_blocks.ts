@@ -817,4 +817,26 @@ export function initRules_bc_blocks() {
 			});
 		}
 	});
+
+	registerRule("block_activities", {
+		name: "Prevent usage of all activities",
+		icon: icon_restrictions,
+		loggable: false,
+		shortDescription: "any action buttons such as kissing or groping",
+		longDescription: "This rule forbids PLAYER_NAME to use any (sexual) activities in chat rooms. Other players can still use activities on her, as this rules does not block the arousal & sexual activities system itself, as forcing the according BC setting would.",
+		defaultLimit: ConditionsLimit.normal,
+		load(state) {
+			OverridePlayerDialog("BCX_ActivityDisabled", "Usage blocked by BCX");
+			RedirectGetImage("Icons/BCX_Activity.png", "Icons/Activity.png");
+			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
+				next(args);
+				if (state.isEnforced) {
+					const index = DialogMenuButton.indexOf("Activity");
+					if (index >= 0) {
+						DialogMenuButton[index] = "BCX_ActivityDisabled";
+					}
+				}
+			}, ModuleCategory.Rules);
+		}
+	});
 }

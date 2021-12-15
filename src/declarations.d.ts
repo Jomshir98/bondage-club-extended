@@ -556,6 +556,7 @@ interface RoomTemplate {
 	Private: boolean;
 	Locked: boolean;
 	BlockCategory: string[];
+	AutoApply: true | undefined;
 }
 
 interface ModStorage {

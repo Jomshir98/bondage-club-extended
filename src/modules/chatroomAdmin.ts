@@ -16,20 +16,21 @@ function ChatSettingsExtraRun() {
 	DrawText("Back", 169, 110, "Black", "Gray");
 	DrawButton(124, 147, 90, 90, "", "White", "Icons/West.png");
 
-	DrawText("Templates for storing / overwriting the current room information and settings", 1000, 650, "Black", "Gray");
+	DrawText("Templates for storing / overwriting current room information & settings (press a name to toggle auto-apply)", 1000, 650, "Black", "Gray");
 
 	for (let i = 0; i < ROOM_TEMPLATES_COUNT; i++) {
 		const X = 124 + i * 455;
 		const template = modStorage.roomTemplates?.[i];
+		let templateName: string = template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -";
+		const tick = Date.now() % 6_000;
+		if (template?.AutoApply && tick < 3_000) {
+			templateName = "- auto-applied default -";
+		}
 
 		if (template) DrawImageEx("Backgrounds/" + template.Background + ".jpg", X, 700, { Alpha: MouseIn(X, 700, 400, 200) ? 0.3 : 1, Width: 400, Height: 200 });
-		MainCanvas.fillStyle = "rgba(255, 255, 255, 0.5)";
-		MainCanvas.fillRect(X, 700, 340, 64);
-		MainCanvas.beginPath();
-		MainCanvas.rect(X, 700, 340, 64);
-		MainCanvas.stroke();
-		DrawTextFit(template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -", X + 170, 700 + 34, 325, "Black", "Gray");
-		DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", "Delete template", !template);
+		DrawButton(X, 700, 340, 64, "", template ? template.AutoApply ? "rgba(136 , 136 , 204, 0.5)" : "rgba(255, 255, 255, 0.5)" : "#ddd", "", !template ? undefined : "Use as room creation dialog default", !template);
+		DrawTextFit(templateName, X + 170, 700 + 34, 325, "Black", "Gray");
+		DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", !template ? undefined : "Delete template", !template);
 		if (overwriteMode === i) {
 			DrawButton(X, 835, 150, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
 			DrawText("Load", X + 51, 835 + 32, "Black");
@@ -48,17 +49,35 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 		onSecondPage = !onSecondPage;
 		return;
 	}
+	if (!modStorage.roomTemplates) {
+		return;
+	}
 	for (let i = 0; i < ROOM_TEMPLATES_COUNT; i++) {
 		const X = 124 + i * 455;
+		const template = modStorage.roomTemplates[i];
 
-		if (MouseIn(X + 340, 700, 60, 64) && modStorage.roomTemplates) {
+		if (MouseIn(X, 700, 340, 64) && template) {
+			if (template.AutoApply) {
+				delete template.AutoApply;
+			} else {
+				for (const t of modStorage.roomTemplates) {
+					if (t) {
+						delete t.AutoApply;
+					}
+				}
+				template.AutoApply = true;
+			}
+			modStorageSync();
+			overwriteMode = undefined;
+			return;
+		}
+		if (MouseIn(X + 340, 700, 60, 64)) {
 			modStorage.roomTemplates[i] = null;
 			modStorageSync();
 			overwriteMode = undefined;
 			return;
 		}
 		if ((overwriteMode === i && MouseIn(X, 835, 150, 64)) || MouseIn(X, 835, 230, 64)) {
-			const template = modStorage.roomTemplates?.[i];
 			if (template) {
 				apply(template);
 				overwriteMode = undefined;
@@ -66,7 +85,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 			}
 			return;
 		}
-		if (modStorage.roomTemplates && ((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
+		if (((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
 			modStorage.roomTemplates[i] = {
 				Name: ElementValue("InputName") ? ElementValue("InputName")!.trim() : "",
 				Description: ElementValue("InputDescription") ? ElementValue("InputDescription")!.trim() : "",
@@ -76,7 +95,8 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 				Game: create ? ChatCreateGame : ChatAdminGame,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList")!.trim()) : [],
 				Limit: ElementValue("InputSize") ? ElementValue("InputSize")!.trim() : "",
-				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory)
+				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory),
+				AutoApply: modStorage.roomTemplates[i]?.AutoApply
 			};
 			modStorageSync();
 			overwriteMode = undefined;
@@ -122,6 +142,26 @@ export class ModuleChatroomAdmin extends BaseModule {
 				DrawText("More", 169, 110, "Black", "Gray");
 				DrawButton(124, 147, 90, 90, "", "White", icon_BCX);
 				if (MouseIn(124, 147, 90, 90)) DrawButtonHover(34, 70, 64, 64, `More room setup options`);
+			}
+		});
+		hookFunction("ChatCreateLoad", 0, (args, next) => {
+			next(args);
+			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
+			if (template) {
+				const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
+				const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
+				const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
+				const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
+
+				if (inputName) inputName.value = template.Name;
+				if (inputDescription) inputDescription.value = template.Description;
+				ChatCreateBackgroundSelect = template.Background;
+				ChatCreatePrivate = template.Private;
+				ChatCreateLocked = template.Locked;
+				ChatCreateGame = template.Game;
+				if (inputAdminList) inputAdminList.value = template.Admin.toString();
+				if (inputSize) inputSize.value = template.Limit;
+				ChatBlockItemCategory = template.BlockCategory;
 			}
 		});
 		//#endregion

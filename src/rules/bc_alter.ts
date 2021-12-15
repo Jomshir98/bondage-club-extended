@@ -62,6 +62,7 @@ export function initRules_bc_alter() {
 			}
 		},
 		load(state) {
+			let ignoreDeaf = false;
 			hookFunction("SpeechGarble", 2, (args, next) => {
 				const C = args[0] as Character;
 				if (state.isEnforced &&
@@ -73,6 +74,29 @@ export function initRules_bc_alter() {
 					(C.CanTalk() || state.customData.ignoreGaggedMembersToggle)
 				) {
 					return args[1];
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+			// depends on the function PreferenceIsPlayerInSensDep()
+			hookFunction("ChatRoomMessage", 9, (args, next) => {
+				const C = args[0].Sender;
+				if (state.isEnforced &&
+					state.customData &&
+					typeof C === "number" &&
+					state.customData.whitelistedMembers
+						.filter(m => m !== Player.MemberNumber)
+						.includes(C)
+				) {
+					ignoreDeaf = true;
+				}
+				next(args);
+				ignoreDeaf = false;
+			}, ModuleCategory.Rules);
+			// does nothing but uses GetDeafLevel -> needs to be watched
+			hookFunction("PreferenceIsPlayerInSensDep", 4, (args, next) => { return next(args); }, ModuleCategory.Rules);
+			hookFunction("Player.GetDeafLevel", 9, (args, next) => {
+				if (ignoreDeaf) {
+					return 0;
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

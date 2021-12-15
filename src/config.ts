@@ -100,6 +100,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ManagementCannotBeReleased: ["755DB909"],
 	ManagementCannotBeReleasedExtreme: ["2DA1650E"],
 	ManagementCannotBeReleasedOnline: ["D1ACE212"],
+	PreferenceIsPlayerInSensDep: ["45EA8806"],
 	PreferenceSubscreenDifficultyClick: ["3882E581"],
 	PreferenceSubscreenDifficultyRun: ["65BF560F"],
 	PrivateRansomStart: ["0E968EDD", "511E91C6"],

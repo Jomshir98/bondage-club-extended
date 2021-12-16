@@ -255,6 +255,7 @@ export function logPraise(value: -1 | 0 | 1, message: string | null, character: 
 
 	const allowed = logGetAllowedActions(character);
 
+	// allowed.praise implies not alreadyPraisedBy
 	if (value !== 0 && !allowed.praise)
 		return false;
 	if (message && !allowed.leaveMessage)
@@ -456,6 +457,12 @@ export class ModuleLog extends BaseModule {
 					return respond(`No such log entry found`);
 				}
 				respond(logMessageDelete(timestamp, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+			} else if (subcommand === "praise" || subcommand === "scold") {
+				if (!checkPermissionAccess("log_praise", sender)) {
+					return respond(COMMAND_GENERIC_ERROR);
+				}
+				respond(logPraise(subcommand === "praise" ? 1 : -1, null, sender) ? `Ok.` :
+					`The command failed to execute, likely because you already did ${subcommand} recently.`);
 			} else if (subcommand === "config") {
 				if (!checkPermissionAccess("log_configure", sender)) {
 					return respond(COMMAND_GENERIC_ERROR);
@@ -492,6 +499,8 @@ export class ModuleLog extends BaseModule {
 				respond(Command_fixExclamationMark(sender, `!log usage:\n` +
 					`!log list [page] - List all visible logs\n` +
 					`!log delete <timestamp> - Deletes the log with the given <timestamp> (the number in parentheses in list)\n` +
+					`!log praise - Note that you praised ${Player.Name} in her log\n` +
+					`!log scold - Note that you scolded ${Player.Name} in her log\n` +
 					`!log config - Shows the current logging settings for ${Player.Name}\n` +
 					`!log config <category> <no|protected|yes> - Sets visibility of the given config <category>`
 				));
@@ -499,7 +508,7 @@ export class ModuleLog extends BaseModule {
 		}, (argv, sender) => {
 			if (argv.length <= 1) {
 				const c = argv[0].toLocaleLowerCase();
-				return ["list", "delete", "config"].filter(i => i.startsWith(c));
+				return ["list", "delete", "praise", "scold", "config"].filter(i => i.startsWith(c));
 			}
 
 			const subcommand = argv[0].toLocaleLowerCase();

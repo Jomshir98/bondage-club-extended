@@ -769,7 +769,7 @@ export function initRules_bc_blocks() {
 			log: "PLAYER_NAME used the antiblind command"
 		},
 		defaultLimit: ConditionsLimit.normal
-		// Implmented externally
+		// Implemented externally
 	});
 
 	registerRule("block_difficulty_change", {
@@ -836,6 +836,27 @@ export function initRules_bc_blocks() {
 						DialogMenuButton[index] = "BCX_ActivityDisabled";
 					}
 				}
+			}, ModuleCategory.Rules);
+		}
+	});
+
+	registerRule("block_mainhall_maidrescue", {
+		name: "Forbid mainhall maid services",
+		loggable: false,
+		icon: icon_restrictions,
+		shortDescription: "to get out of any restraints",
+		longDescription: "This rule forbids PLAYER_NAME to use a maid's help to get out of restraints in the club's main hall. Recommended to combine with the rule: 'Force 'Cannot enter single-player rooms when restrained' (Existing BC setting)' to prevent NPCs in other rooms from helping.",
+		defaultLimit: ConditionsLimit.normal,
+		load(state) {
+			hookFunction("LogValue", 5, (args, next) => {
+				if (state.isEnforced && args[0] === "MaidsDisabled" && args[1] === "Maid")
+					return CurrentTime + 500_000_000; // 6 days left range for nicest message
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("MainHallMaidsDisabledBegForMore", 5, (args, next) => {
+				if (state.isEnforced)
+					return false;
+				return next(args);
 			}, ModuleCategory.Rules);
 		}
 	});

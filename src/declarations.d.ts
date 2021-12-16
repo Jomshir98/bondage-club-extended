@@ -211,6 +211,7 @@ type BCX_Rule =
 	| "block_antiblind"
 	| "block_difficulty_change"
 	| "block_activities"
+	| "block_mainhall_maidrescue"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"

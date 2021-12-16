@@ -19,6 +19,9 @@ export class GuiMisc extends GuiSubscreen {
 		this.character = character;
 	}
 
+	Load() {
+		ElementCreateInput("BCX_RoomSearchValueField", "text", modStorage.roomSearchAutoFill || "", "20");
+	}
 
 	Run() {
 		MainCanvas.textAlign = "left";
@@ -43,6 +46,8 @@ export class GuiMisc extends GuiSubscreen {
 		DrawCheckbox(125, 500, 64, 64, "Cheat: Prevent loosing Mistress status when reputation falls below 50 dominance", cheatIsEnabled(MiscCheat.CantLoseMistress));
 		DrawCheckbox(125, 600, 64, 64, "Cheat: Give yourself the mistress padlock and its key", cheatIsEnabled(MiscCheat.GiveMistressKey));
 		DrawCheckbox(125, 700, 64, 64, "Cheat: Give yourself the pandora padlock and its key", cheatIsEnabled(MiscCheat.GivePandoraKey));
+		DrawText("Use the following text to auto fill the chat room search field:", 125, 830, "Black", "Gray");
+		ElementPosition("BCX_RoomSearchValueField", 1320, 827, 460, 64);
 
 		// help text
 		if (this.showHelp) {
@@ -88,6 +93,19 @@ export class GuiMisc extends GuiSubscreen {
 	}
 
 	Exit() {
+		const field = document.getElementById("BCX_RoomSearchValueField") as HTMLInputElement | undefined;
+		if (field) {
+			if (field.value) {
+				modStorage.roomSearchAutoFill = field.value;
+			} else {
+				delete modStorage.roomSearchAutoFill;
+			}
+			modStorageSync();
+		}
 		setSubscreen(new GuiMainMenu(this.character));
+	}
+
+	Unload() {
+		ElementRemove("BCX_RoomSearchValueField");
 	}
 }

@@ -580,4 +580,5 @@ interface ModStorage {
 	cursedItems: Record<string, CursedItemInfo | null>;
 	conditions: ConditionsStorage;
 	roomTemplates: (RoomTemplate | null)[];
+	roomSearchAutoFill: string;
 }

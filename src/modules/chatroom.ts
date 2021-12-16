@@ -330,6 +330,14 @@ export class ModuleChatroom extends BaseModule {
 			next(args);
 		});
 
+		hookFunction("ChatSearchLoad", 5, (args, next) => {
+			next(args);
+			const field = document.getElementById("InputSearch") as HTMLInputElement | undefined;
+			if (field && modStorage.roomSearchAutoFill) {
+				field.value = modStorage.roomSearchAutoFill;
+			}
+		});
+
 		hiddenMessageHandlers.set("ChatRoomStatusEvent", (src, data: any) => {
 			for (const char of ChatRoomCharacter) {
 				if (char.MemberNumber === src) {

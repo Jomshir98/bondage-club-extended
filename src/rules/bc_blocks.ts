@@ -718,7 +718,6 @@ export function initRules_bc_blocks() {
 		}
 	});
 
-	// TODO: update when https://github.com/Ben987/Bondage-College/pull/3082 goes live
 	registerRule("block_blacklisting", {
 		name: "Prevent blacklisting",
 		icon: icon_restrictions,
@@ -739,28 +738,16 @@ export function initRules_bc_blocks() {
 			}
 		},
 		load(state) {
-			hookFunction("ChatRoomListManipulation", 6, (args, next) => {
+			hookFunction("ChatRoomListUpdate", 6, (args, next) => {
 				const CN = parseInt(args[2], 10);
 				if (state.isEnforced &&
 					state.customData &&
 					(args[0] === Player.BlackList || args[0] === Player.GhostList) &&
+					args[1] &&
 					typeof CN === "number" &&
 					getCharacterAccessLevel(CN) <= state.customData.minimumRole
 				) {
 					state.triggerAttempt({ TARGET_CHARACTER: `${getCharacterName(CN, "[Unknown]")} (${CN})` });
-					return;
-				}
-				return next(args);
-			}, ModuleCategory.Rules);
-			hookFunction("ChatRoomListManage", 6, (args, next) => {
-				if (state.isEnforced &&
-					state.customData &&
-					args[0] === "Add" &&
-					(args[1] === "BlackList" || args[1] === "GhostList") &&
-					CurrentCharacter?.MemberNumber != null &&
-					getCharacterAccessLevel(CurrentCharacter.MemberNumber) <= state.customData.minimumRole
-				) {
-					state.triggerAttempt({ TARGET_CHARACTER: `${CurrentCharacter.Name} (${CurrentCharacter.MemberNumber})` });
 					return;
 				}
 				return next(args);

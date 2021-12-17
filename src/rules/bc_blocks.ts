@@ -738,20 +738,23 @@ export function initRules_bc_blocks() {
 			}
 		},
 		load(state) {
-			hookFunction("ChatRoomListUpdate", 6, (args, next) => {
-				const CN = parseInt(args[2], 10);
-				if (state.isEnforced &&
-					state.customData &&
-					(args[0] === Player.BlackList || args[0] === Player.GhostList) &&
-					args[1] &&
-					typeof CN === "number" &&
-					getCharacterAccessLevel(CN) <= state.customData.minimumRole
-				) {
-					state.triggerAttempt({ TARGET_CHARACTER: `${getCharacterName(CN, "[Unknown]")} (${CN})` });
-					return;
-				}
-				return next(args);
-			}, ModuleCategory.Rules);
+			// TODO: Fix for NMod
+			if (!NMod) {
+				hookFunction("ChatRoomListUpdate", 6, (args, next) => {
+					const CN = parseInt(args[2], 10);
+					if (state.isEnforced &&
+						state.customData &&
+						(args[0] === Player.BlackList || args[0] === Player.GhostList) &&
+						args[1] &&
+						typeof CN === "number" &&
+						getCharacterAccessLevel(CN) <= state.customData.minimumRole
+					) {
+						state.triggerAttempt({ TARGET_CHARACTER: `${getCharacterName(CN, "[Unknown]")} (${CN})` });
+						return;
+					}
+					return next(args);
+				}, ModuleCategory.Rules);
+			}
 		}
 	});
 

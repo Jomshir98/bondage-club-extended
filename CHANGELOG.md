@@ -1,5 +1,12 @@
 # BCX Changelog
 
+## 0.7.3
+
+This update improves compatibility with BC release R75.
+
+Fixes:
+ - Fix rule "Prevent blacklisting" affected by new release
+
 ## 0.7.2
 
 This update includes:

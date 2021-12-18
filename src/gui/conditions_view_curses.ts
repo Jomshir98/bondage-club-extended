@@ -68,15 +68,30 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 	}
 
 	protected drawEntryExtra(X: number, Y: number, data: dataEntry): void {
+		const useGlobalCategorySetting = !data.data.requirements;
+		const itemRemove = useGlobalCategorySetting ? this.conditionCategoryData?.data.itemRemove : data.data.data?.itemRemove;
+
+		if (itemRemove !== undefined && data.data.data) {
+			DrawImageEx("Icons/Remove.png", X + 610, Y + 10, {
+				Height: 40,
+				Width: 40,
+				Alpha: itemRemove ? 1 : 0.2
+			});
+			if (MouseIn(X + 610, Y + 6, 44, 44)) {
+				DrawHoverElements.push(() => {
+					DrawButtonHover(X + 610, Y + 6, 44, 44, itemRemove ? "Remove item when curse is dormant" : "Don't remove item when curse is dormant");
+				});
+			}
+		}
 		if (data.extra.propertiesCursedShow) {
-			DrawImageEx(data.extra.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 635, Y + 10, {
+			DrawImageEx(data.extra.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 660, Y + 10, {
 				Height: 40,
 				Width: 40,
 				Alpha: data.extra.propertiesCursed ? 1 : 0.2
 			});
-			if (MouseIn(X + 635, Y + 6, 44, 44)) {
+			if (MouseIn(X + 660, Y + 6, 44, 44)) {
 				DrawHoverElements.push(() => {
-					DrawButtonHover(X + 635, Y + 6, 44, 44, data.extra.propertiesCursed ? "Item configuration cursed" : "Item configuration not cursed");
+					DrawButtonHover(X + 660, Y + 6, 44, 44, data.extra.propertiesCursed ? "Item configuration cursed" : "Item configuration not cursed");
 				});
 			}
 		}

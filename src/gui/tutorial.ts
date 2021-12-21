@@ -53,19 +53,65 @@ const TUTORIAL_PAGES: TutorialPage[] = [
 		name: "End of introduction",
 		image: "basic_end.png",
 		afterDraw() {
-			DrawCharacter(Player, 240, 160, 0.78, true, MainCanvas);
+			DrawCharacter(Player, 220, 160, 0.78, true, MainCanvas);
 		}
+	},
+	{
+		name: "Logging module screen",
+		image: "log_part1.png"
+	},
+	{
+		name: "Logging configuration screen",
+		image: "log_part2.png"
+	},
+	{
+		name: "Curses module overview",
+		image: "curses1.png"
+	},
+	{
+		name: "Adding curses",
+		image: "curses2.png"
+	},
+	{
+		name: "Rules module overview",
+		image: "rules1.png"
+	},
+	{
+		name: "Adding a rule",
+		image: "rules2.png"
+	},
+	{
+		name: "Limiting curse slots / rules",
+		image: "limit_system.png"
+	},
+	{
+		name: "Trigger conditions",
+		image: "trigger_conditions.png"
+	},
+	{
+		name: "Permission system overview",
+		image: "permissions1.png"
+	},
+	{
+		name: "Permission system base principles",
+		image: "permissions2.png"
+	},
+	{
+		name: "General permission examples",
+		image: "permissions3.png"
+	},
+	{
+		name: "Permission setup example 1",
+		image: "permissions4.png"
+	},
+	{
+		name: "Permission setup example 2",
+		image: "permissions5.png"
+	},
+	{
+		name: "Chat commands",
+		image: "chat_commands.png"
 	}
-	// Dive into log - it exists and has levels that are configurable (normal, limited, not logged), mention of notes/good/bad girl points.
-	// Dive into curses - you can curse items, clothes and empty slots, which also curses color. You can also freeze item state (curse config) (no mention of item autoremoval)
-	// Dive into rules - lots of rules, when you click on any it will give detailed explanation of the rule, so please read more on each individual rule
-	// Limits system - Both curses and rules follow normal/limited/blocked. Rules also might start as limited/blocked and there is button to configure it
-	// Conditions trigger system and timer - ...
-	// Permissions 1 - There are roles, can be configured and how it is determined what applies for which role
-	// Permissions 2 - Self access and min access - difference
-	// Permissions 3 - Example how to use it and configure it
-	// Recap on chat commands since the interactive tutorial cannot be retriggered
-	// Afterword and thanks, mention that the best way to learn more is to ask
 ];
 
 const TUTORIAL_BASIC_END = TUTORIAL_PAGES.findIndex(i => i.name === "End of introduction");

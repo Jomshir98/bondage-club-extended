@@ -747,7 +747,11 @@ export function initRules_bc_speech_control() {
 					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
-					if (state.inEffect && !alreadyGreeted && !check(msg)) {
+					if (state.inEffect &&
+						state.customData?.greetingSentence.trim() &&
+						!alreadyGreeted &&
+						!check(msg)
+					) {
 						state.trigger();
 						alreadyGreeted = true;
 					}

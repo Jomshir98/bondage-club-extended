@@ -336,7 +336,8 @@ export function initRules_bc_speech_control() {
 				type: "string",
 				default: "PLAYER_NAME is currently forbidden to receive whispers.",
 				description: "Auto replies blocked sender with this:",
-				Y: 320
+				Y: 320,
+				options: /^([^/.*].*)?$/
 			}
 		},
 		load(state) {
@@ -529,7 +530,8 @@ export function initRules_bc_speech_control() {
 			stringWithReplacingSyntax: {
 				type: "string",
 				default: "[I,me;this cutie],[spoken_word;replaced_with_this_word]",
-				description: "List in syntax: [word1;substitute1],[w2,w3,...;s2],..."
+				description: "List in syntax: [word1;substitute1],[w2,w3,...;s2],...",
+				options: /^([^/.*()][^()]*)?$/
 			}
 		}
 	});
@@ -552,7 +554,8 @@ export function initRules_bc_speech_control() {
 			stringWithRuleSyntax: {
 				type: "string",
 				default: "",
-				description: "List in syntax: [honorific1;name1],[h2,h3,...;n2,n3,...],..."
+				description: "List in syntax: [honorific1;name1],[h2,h3,...;n2,n3,...],...",
+				options: /^([^/.*()\s][^()]*)?$/
 			}
 		}
 	});
@@ -586,7 +589,8 @@ export function initRules_bc_speech_control() {
 			greetingSentence: {
 				type: "string",
 				default: "",
-				description: "The sentence that has to be used to greet any joined room:"
+				description: "The sentence that has to be used to greet any joined room:",
+				options: /^([^/.*()\s][^()]*)?$/
 			}
 		},
 		load(state) {
@@ -604,18 +608,26 @@ export function initRules_bc_speech_control() {
 		},
 		// 3. do not allow sending anything else when enforced
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase() === state.customData?.greetingSentence.toLocaleLowerCase();
+			const check = (msg: SpeechMessageInfo): boolean => (
+				(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase() === state.customData?.greetingSentence.trim().toLocaleLowerCase() &&
+				msg.type === "Chat"
+			);
 			registerSpeechHook({
 				allowSend: (msg) => {
-					if (state.isEnforced && !alreadyGreeted && !check(msg)) {
+					if (state.isEnforced &&
+						state.customData?.greetingSentence.trim() &&
+						!alreadyGreeted
+					) {
+						lastRoomName = ChatRoomData.Name;
+						// 4. set alreadyGreeted to true and overwrite lastRoomName
+						if (check(msg)) {
+							alreadyGreeted = true;
+							return SpeechHookAllow.ALLOW_BYPASS;
+						} else {
 						state.triggerAttempt();
+						ChatRoomSendLocal(`You are expected to greet the room with "${state.customData?.greetingSentence}".`);
 						return SpeechHookAllow.BLOCK;
 					}
-					// 4. set alreadyGreeted to true and overwrite lastRoomName
-					lastRoomName = ChatRoomData.Name;
-					if (check(msg)) {
-						alreadyGreeted = true;
-						return SpeechHookAllow.ALLOW_BYPASS;
 					}
 					return SpeechHookAllow.ALLOW;
 				},
@@ -640,7 +652,8 @@ export function initRules_bc_speech_control() {
 			greetingSentence: {
 				type: "string",
 				default: "",
-				description: "The sentence that will be used to greet new guests:"
+				description: "The sentence that will be used to greet new guests:",
+				options: /^([^/.*].*)?$/
 			}
 		},
 		load(state) {
@@ -707,7 +720,8 @@ export function initRules_bc_speech_control() {
 				type: "stringList",
 				default: [],
 				// TODO: needs an update describing the special wildcards or placeholders that can be used
-				description: "Only these phrases are still allowed:"
+				description: "Only these phrases are still allowed:",
+				options: /^([^/.*()][^()]*)?$/
 			}
 		}
 	});

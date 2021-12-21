@@ -36,7 +36,11 @@ export function init() {
 
 	InitErrorReporter();
 
-	init_modules();
+	if (!init_modules()) {
+		ctx.end();
+		unload();
+		return;
+	}
 
 	// Loading into already loaded club - clear some caches
 	clearCaches();

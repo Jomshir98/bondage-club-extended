@@ -1,6 +1,9 @@
 import type { BaseModule } from "./modules/_BaseModule";
 import { ModuleInitPhase, Preset } from "./constants";
 import { getCurrentPreset } from "./modules/presets";
+import { modStorage } from "./modules/storage";
+import { BCX_VERSION_PARSED, parseBCXVersion } from "./utils";
+import { runMigration } from "./migration";
 
 export let moduleInitPhase: ModuleInitPhase = ModuleInitPhase.construct;
 const modules: BaseModule[] = [];
@@ -13,11 +16,25 @@ export function registerModule<T extends BaseModule>(module: T): T {
 	return module;
 }
 
-export function init_modules() {
+export function init_modules(): boolean {
 	moduleInitPhase = ModuleInitPhase.init;
 	for (const m of modules) {
 		m.init();
 	}
+
+	const oldVersion: BCXVersion | null = typeof modStorage.version === "string" ? parseBCXVersion(modStorage.version) : { major: 0, minor: 0, patch: 0 };
+	if (!oldVersion) {
+		alert(
+			"Failed to parse BCX version in your saved data.\n" +
+			"Are you loading older version or is your data corrupted?\n" +
+			"Refusing to load."
+		);
+		return false;
+	}
+	if (!runMigration(oldVersion, BCX_VERSION_PARSED))
+		return false;
+	modStorage.version = BCX_VERSION;
+
 	moduleInitPhase = ModuleInitPhase.load;
 	for (const m of modules) {
 		m.load(getCurrentPreset());
@@ -26,6 +43,7 @@ export function init_modules() {
 	for (const m of modules) {
 		m.run();
 	}
+	return true;
 }
 
 export function unload_modules() {

@@ -12,6 +12,14 @@ interface Character {
 	Status?: string;
 }
 
+interface BCXVersion {
+	major: number;
+	minor: number;
+	patch: number;
+	extra?: string;
+	dev?: boolean;
+}
+
 // Player.OnlineSettings.BCX?: string;
 
 type BCX_Permissions =
@@ -572,6 +580,7 @@ interface RoomTemplate {
 }
 
 interface ModStorage {
+	version: string;
 	preset: import("./constants").Preset;
 	chatShouldDisplayFirstTimeHelp?: true;
 	/** Toggle, if friendlist autorefresh is enabled */

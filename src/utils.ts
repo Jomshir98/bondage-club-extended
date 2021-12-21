@@ -173,3 +173,59 @@ export function positionElement(element: HTMLElement, X: number, Y: number, W: n
 		display: "inline"
 	});
 }
+
+export function parseBCXVersion(version: string): BCXVersion | null {
+	const devMatch = /^(\d+).(\d+).(\d+)-(DEV-\d+)$/.exec(version);
+	if (devMatch) {
+		return {
+			major: Number.parseInt(devMatch[1]),
+			minor: Number.parseInt(devMatch[2]),
+			patch: Number.parseInt(devMatch[3]),
+			extra: devMatch[4],
+			dev: true
+		};
+	}
+	const match = /^(\d+).(\d+).(\d+)-([0-f]+)$/.exec(version);
+	if (match) {
+		return {
+			major: Number.parseInt(match[1]),
+			minor: Number.parseInt(match[2]),
+			patch: Number.parseInt(match[3]),
+			extra: match[4],
+			dev: false
+		};
+	}
+	return null;
+}
+
+export function BCXVersionCompare(a: BCXVersion, b: BCXVersion): number {
+	if (a.major !== b.major) {
+		return a.major - b.major;
+	}
+	if (a.minor !== b.minor) {
+		return a.minor - b.minor;
+	}
+	if (a.patch !== b.patch) {
+		return a.patch - b.patch;
+	}
+	if ((a.dev ?? false) !== (b.dev ?? false)) {
+		return a.dev ? 1 : -1;
+	}
+	return 0;
+}
+
+export function BCXVersionToString(ver: BCXVersion): string {
+	let res = `${ver.major}.${ver.minor}.${ver.patch}`;
+	if (ver.extra) {
+		res += `-${ver.extra}`;
+	}
+	return res;
+}
+
+export const BCX_VERSION_PARSED: Readonly<BCXVersion> = (() => {
+	const res = parseBCXVersion(BCX_VERSION);
+	if (!res) {
+		throw Error("Failed to parse own version");
+	}
+	return res;
+})();

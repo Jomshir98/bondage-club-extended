@@ -349,6 +349,46 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
+	registerRule("speech_limit_emotes", {
+		name: "Limit using emotes",
+		icon: "Icons/Chat.png",
+		loggable: false,
+		shortDescription: "only allow a set number of emotes per minute",
+		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room to only the set number per minute. Note: Setting '0' will have no effect, as there is another rule to forbid using emotes completely.",
+		triggerTexts: {
+			infoBeep: "You exceeded the number of allowed emotes per minute!"
+		},
+		dataDefinition: {
+			maxNumberOfEmotes: {
+				type: "number",
+				default: 42,
+				description: "Maximum allowed number of emotes per minute (> 0):",
+				Y: 380
+			}
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		init(state) {
+			let currentCount: number = 0;
+			const check = (msg: SpeechMessageInfo): boolean => msg.type !== "Emote";
+			registerSpeechHook({
+				allowSend: (msg) => {
+					if (state.customData?.maxNumberOfEmotes && state.customData.maxNumberOfEmotes !== 0 && state.isEnforced && !check(msg)) {
+						if (currentCount >= state.customData.maxNumberOfEmotes) {
+							state.triggerAttempt();
+							return SpeechHookAllow.BLOCK;
+						}
+						currentCount++;
+						BCX_setTimeout(() => {
+							if (currentCount > 0) {
+								currentCount--;
+							}
+						}, 60_000);
+					}
+					return SpeechHookAllow.ALLOW;
+				}
+			});
+		}
+	});
 
 	registerRule("speech_restrict_whisper_send", {
 		name: "Restrict sending whispers",
@@ -696,10 +736,10 @@ export function initRules_bc_speech_control() {
 							alreadyGreeted = true;
 							return SpeechHookAllow.ALLOW_BYPASS;
 						} else {
-						state.triggerAttempt();
-						ChatRoomSendLocal(`You are expected to greet the room with "${state.customData?.greetingSentence}".`);
-						return SpeechHookAllow.BLOCK;
-					}
+							state.triggerAttempt();
+							ChatRoomSendLocal(`You are expected to greet the room with "${state.customData?.greetingSentence}".`);
+							return SpeechHookAllow.BLOCK;
+						}
 					}
 					return SpeechHookAllow.ALLOW;
 				},

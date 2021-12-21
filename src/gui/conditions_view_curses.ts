@@ -130,7 +130,7 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 		return;
 	}
 
-	protected onDecriptionTextClick(condition: ConditionsCategoryKeys["curses"], data: dataEntry): void {
+	protected onDescriptionTextClick(condition: ConditionsCategoryKeys["curses"], data: dataEntry): void {
 		return;
 	}
 

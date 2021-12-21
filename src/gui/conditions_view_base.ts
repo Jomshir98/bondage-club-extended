@@ -21,7 +21,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 	readonly character: ChatroomCharacter;
 	readonly conditionCategory: CAT;
-	readonly conditionCategorySingluar: string;
+	readonly conditionCategorySingular: string;
 
 	private conditionEntries: ConditionEntry<CAT, ExtraData>[] = [];
 	protected conditionCategoryData: ConditionsCategoryPublicData<CAT> | null = null;
@@ -36,7 +36,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		super();
 		this.character = character;
 		this.conditionCategory = conditionCategory;
-		this.conditionCategorySingluar = conditionCategory.slice(0, -1);
+		this.conditionCategorySingular = conditionCategory.slice(0, -1);
 	}
 
 	Load() {
@@ -88,7 +88,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			});
 		}
 
-		this.conditionEntries.sort((a,b) => (!a.data.favorite && b.data.favorite) ? 1 : ((a.data.favorite && !b.data.favorite) ? -1 : 0));
+		this.conditionEntries.sort((a, b) => (!a.data.favorite && b.data.favorite) ? 1 : ((a.data.favorite && !b.data.favorite) ? -1 : 0));
 
 		this.page = clamp(this.page, 0, Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT));
 	}
@@ -123,7 +123,11 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			const useGlobalCategorySetting = !e.data.requirements;
 
 			// description detailed hover text
-			if (MouseIn(X, Y, 440, 90)) {
+			if (
+				(off + 1) % PER_COLUMN_COUNT === 0 ||		// smaller click area for an element at the end of a full column
+					i === this.conditionEntries.length - 1 ?	// smaller click area for the last element on the list
+					MouseIn(X, Y, 440, 60) : MouseIn(X, Y, 440, 90)
+			) {
 				DrawHoverElements.push(() => {
 					this.showDetailedDescriptionBackground(off < PER_COLUMN_COUNT ? 985 : 120);
 					if (MouseIn(X, Y, 440, 60)) {
@@ -168,12 +172,12 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 			if (MouseIn(X + 470, Y, 60, 60)) {
 				DrawHoverElements.push(() => {
-					DrawButtonHover(X + 470, Y, 60, 60, `Change this ${this.conditionCategorySingluar}'s configuration`);
+					DrawButtonHover(X + 470, Y, 60, 60, `Change this ${this.conditionCategorySingular}'s configuration`);
 				});
 			}
 			if (MouseIn(X + 531, Y, 78, 60)) {
 				DrawHoverElements.push(() => {
-					DrawButtonHover(X + 531, Y, 78, 60, `Remaining duration of the ${this.conditionCategorySingluar}`);
+					DrawButtonHover(X + 531, Y, 78, 60, `Remaining duration of the ${this.conditionCategorySingular}`);
 				});
 			}
 		}
@@ -224,7 +228,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 			// description
 			if (MouseIn(X, Y, 440, 60)) {
-				this.onDecriptionTextClick(e.condition as ConditionsCategoryKeys[CAT], e);
+				this.onDescriptionTextClick(e.condition as ConditionsCategoryKeys[CAT], e);
 			}
 
 			// config button info
@@ -276,7 +280,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 	protected abstract loadCondition(condition: ConditionsCategoryKeys[CAT], data: ConditionsConditionPublicData<CAT>): [string, ExtraData] | null;
 	protected abstract showDetailedDescriptionBackground(X: number): void;
 	protected abstract showDetailedDescriptionText(X: number, condition: ConditionsCategoryKeys[CAT], data: ConditionEntry<CAT, ExtraData>): void;
-	protected abstract onDecriptionTextClick(condition: ConditionsCategoryKeys[CAT], data: ConditionEntry<CAT, ExtraData>): void;
+	protected abstract onDescriptionTextClick(condition: ConditionsCategoryKeys[CAT], data: ConditionEntry<CAT, ExtraData>): void;
 	protected abstract openEditSubscreen(condition: ConditionsCategoryKeys[CAT]): void;
 	protected abstract removeCondition(condition: ConditionsCategoryKeys[CAT]): void;
 	protected abstract openGlobalConfig(): void;

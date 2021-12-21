@@ -109,7 +109,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 		DrawTextWrap(dictionaryProcess(data.extra.definition.longDescription, { PLAYER_NAME: this.character.Name }), X + 20 - 760 / 2, backgroundY + 20, 760, 560, "black");
 	}
 
-	protected onDecriptionTextClick(condition: ConditionsCategoryKeys["rules"], data: dataEntry): void {
+	protected onDescriptionTextClick(condition: ConditionsCategoryKeys["rules"], data: dataEntry): void {
 		setSubscreen(new GuiRulesViewDescription(this.character, this, condition, false));
 	}
 

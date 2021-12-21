@@ -15,8 +15,17 @@ export interface SpeechMessageInfo {
 	readonly hasOOC: boolean;
 }
 
+export const enum SpeechHookAllow {
+	/** Message is allowed to continue */
+	ALLOW,
+	/** Message will be blocked */
+	BLOCK,
+	/** Message will not be blocked, even if some hook returned BLOCK */
+	ALLOW_BYPASS
+}
+
 export interface SpeechHook {
-	allowSend?(info: SpeechMessageInfo): boolean;
+	allowSend?(info: SpeechMessageInfo): SpeechHookAllow;
 	modify?(info: SpeechMessageInfo, message: string): string;
 	onSend?(info: SpeechMessageInfo, message: string): void;
 }
@@ -111,11 +120,19 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 	}
 
 	// Let hooks block the messsage
+	let result: SpeechHookAllow = SpeechHookAllow.ALLOW;
 	for (const hook of speechHooks) {
-		if (hook.allowSend && !hook.allowSend(msg)) {
-			return null;
+		if (hook.allowSend) {
+			const hookResult = hook.allowSend(msg);
+			if (hookResult === SpeechHookAllow.ALLOW_BYPASS) {
+				result = SpeechHookAllow.ALLOW_BYPASS;
+			} else if (hookResult === SpeechHookAllow.BLOCK && result === SpeechHookAllow.ALLOW) {
+				result = SpeechHookAllow.BLOCK;
+			}
 		}
 	}
+	if (result === SpeechHookAllow.BLOCK)
+		return null;
 
 	let message = msg.originalMessage;
 	// Let hooks modify the message

@@ -1,7 +1,7 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
-import { registerSpeechHook, SpeechMessageInfo, falteringSpeech } from "../modules/speech";
+import { registerSpeechHook, SpeechMessageInfo, falteringSpeech, SpeechHookAllow } from "../modules/speech";
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
 import { dictionaryProcess, isObject } from "../utils";
@@ -58,9 +58,9 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {
 						state.triggerAttempt();
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
-					return true;
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg)) {
@@ -108,9 +108,9 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {
 						state.triggerAttempt();
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
-					return true;
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg)) {
@@ -138,9 +138,9 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {
 						state.triggerAttempt();
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
-					return true;
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg)) {
@@ -191,9 +191,9 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {
 						state.triggerAttempt();
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
-					return true;
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg)) {
@@ -235,9 +235,9 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg) && transgression !== undefined) {
 						state.triggerAttempt({ USED_WORD: transgression });
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
-					return true;
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg) && transgression !== undefined) {
@@ -252,7 +252,7 @@ export function initRules_bc_speech_control() {
 		name: "Forbid talking openly",
 		icon: "Icons/Chat.png",
 		shortDescription: "in a chat room",
-		longDescription: "This rule forbids PLAYER_NAME to send any message to all people inside a chat room. Does not affect whispers or emotes, but does affect OOC.",
+		longDescription: "This rule forbids PLAYER_NAME to send a message to all people inside a chat room. Does not affect whispers or emotes, but does affect OOC.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to talk openly in chatrooms!",
 			attempt_log: "PLAYER_NAME tried to openly speak in a room",
@@ -265,9 +265,9 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {
 						state.triggerAttempt();
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
-					return true;
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg)) {
@@ -305,9 +305,9 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {
 						state.triggerAttempt({ TARGET_PLAYER: `${msg.target ? getCharacterName(msg.target, "[unknown]") : "[unknown]"} (${msg.target})` });
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
-					return true;
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg)) {
@@ -609,13 +609,15 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced && !alreadyGreeted && !check(msg)) {
 						state.triggerAttempt();
-						ChatRoomSendLocal(`You are expected to greet the room with "${state.customData?.greetingSentence}".`);
-						return false;
+						return SpeechHookAllow.BLOCK;
 					}
 					// 4. set alreadyGreeted to true and overwrite lastRoomName
-					if (check(msg)) alreadyGreeted = true;
 					lastRoomName = ChatRoomData.Name;
-					return true;
+					if (check(msg)) {
+						alreadyGreeted = true;
+						return SpeechHookAllow.ALLOW_BYPASS;
+					}
+					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !alreadyGreeted && !check(msg)) {

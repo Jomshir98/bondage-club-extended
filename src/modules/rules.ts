@@ -44,7 +44,7 @@ export function guard_RuleCustomData(rule: BCX_Rule, data: unknown): boolean {
 				return false;
 		}
 		for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(descriptor.dataDefinition)) {
-			const handler = ruleCustomDataHandlers[def.type];
+			const handler: RuleCustomDataHandler = ruleCustomDataHandlers[def.type];
 			if (!handler || !handler.validate(data[k], def))
 				return false;
 		}
@@ -71,11 +71,11 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 	}
 	if (data.dataDefinition) {
 		for (const [k, v] of Object.entries<RuleCustomDataEntryDefinition>(data.dataDefinition)) {
-			const handler = ruleCustomDataHandlers[v.type];
+			const handler: RuleCustomDataHandler = ruleCustomDataHandlers[v.type];
 			if (!handler) {
 				throw new Error(`Unknown handler for ${name}:${k} (${v.type})`);
 			}
-			if (handler.validateOptions && !handler.validateOptions(v.options!)) {
+			if (handler.validateOptions && !handler.validateOptions(v.options as any)) {
 				throw new Error(`Bad options for ${name}:${k} (${v.type})`);
 			}
 			const defaultValue = typeof v.default === "function" ? v.default() : v.default;
@@ -125,9 +125,9 @@ export function RulesGetRuleState<ID extends BCX_Rule>(rule: ID): RuleState<ID> 
 }
 
 export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomDataTypes> = {
-	validate(value: unknown, def: RuleCustomDataEntryDefinition): boolean;
+	validate(value: unknown, def: RuleCustomDataEntryDefinition<type>): boolean;
 	onDataChange?(data: {
-		def: RuleCustomDataEntryDefinition;
+		def: RuleCustomDataEntryDefinition<type>;
 		active: boolean;
 		key: string;
 		onInput: () => void;
@@ -135,16 +135,16 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 		access: boolean;
 	}): void;
 	processInput?(data: {
-		def: RuleCustomDataEntryDefinition;
+		def: RuleCustomDataEntryDefinition<type>;
 		key: string;
 		value: RuleCustomDataTypesMap[type];
 	}): RuleCustomDataTypesMap[type] | undefined;
 	unload?(data: {
-		def: RuleCustomDataEntryDefinition;
+		def: RuleCustomDataEntryDefinition<type>;
 		key: string
 	}): void;
 	run(data: {
-		def: RuleCustomDataEntryDefinition;
+		def: RuleCustomDataEntryDefinition<type>;
 		value: RuleCustomDataTypesMap[type];
 		Y: number;
 		key: string;
@@ -152,7 +152,7 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 		access: boolean;
 	}): void;
 	click?(data: {
-		def: RuleCustomDataEntryDefinition;
+		def: RuleCustomDataEntryDefinition<type>;
 		value: RuleCustomDataTypesMap[type];
 		Y: number;
 		key: string;
@@ -417,8 +417,12 @@ export const ruleCustomDataHandlers: {
 		}
 	},
 	string: {
-		validate: value => typeof value === "string",
-		onDataChange({ active, key, onInput, value, access }) {
+		validateOptions: options => options === undefined || options instanceof RegExp,
+		validate(value, def) {
+			return typeof value === "string" &&
+			(!def.options || def.options.test(value));
+		},
+		onDataChange({ active, key, onInput, value, access, def }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
 				if (input) {
@@ -427,16 +431,25 @@ export const ruleCustomDataHandlers: {
 				return;
 			}
 			if (!input) {
-				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", value, "160");
-				input.oninput = onInput;
+				let lastValue = value;
+				const createdInput = ElementCreateInput(`BCX_RCDH_${key}`, "text", lastValue, "160");
+				createdInput.oninput = () => {
+					if (!def.options || def.options.test(createdInput.value)) {
+						lastValue = createdInput.value;
+						onInput();
+					} else {
+						createdInput.value = lastValue;
+					}
+				};
+				input = createdInput;
 			} else {
 				input.value = value;
 			}
 			input.disabled = !access;
 		},
-		processInput({ key }) {
+		processInput({ key, def }) {
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
-			return input ? input.value : undefined;
+			return input && (!def.options || def.options.test(input.value)) ? input.value : undefined;
 		},
 		run({ def, Y, key }) {
 			DrawTextFit(def.description, 1050, Y + 0, 850, "Black");
@@ -916,7 +929,7 @@ export class ModuleRules extends BaseModule {
 						}
 					}
 					for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(descriptor.dataDefinition)) {
-						const handler = ruleCustomDataHandlers[def.type];
+						const handler: RuleCustomDataHandler = ruleCustomDataHandlers[def.type];
 						if (!handler) {
 							console.error(`BCX: Custom data for rule ${rule} unknown type ${def.type}, removing it`, info);
 							return false;

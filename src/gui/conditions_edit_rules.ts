@@ -59,6 +59,10 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 						value: this.changes.data.customData![k]
 					});
 					if (res !== undefined) {
+						if (!handler.validate(res, v)) {
+							console.error("processInput result failed to validate", res, v);
+							throw new Error("processInput result failed to validate");
+						}
 						this.changes.data.customData![k] = res;
 					}
 				}

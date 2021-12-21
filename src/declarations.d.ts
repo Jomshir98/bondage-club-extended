@@ -491,6 +491,7 @@ type RuleCustomDataTypesMap = {
 type RuleCustomDataTypes = keyof RuleCustomDataTypesMap;
 type RuleCustomDataTypesOptions = {
 	listSelect: [string, string][];
+	string?: RegExp;
 };
 
 type RuleCustomDataFilter<U> = {

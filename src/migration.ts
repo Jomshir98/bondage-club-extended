@@ -15,5 +15,9 @@ export function runMigration(originalVersion: BCXVersion, currentVersion: BCXVer
 
 	console.log("BCX: Version migration from", BCXVersionToString(originalVersion), "to", BCXVersionToString(currentVersion));
 
+	if (BCXVersionCompare(originalVersion, { major: 0, minor: 7, patch: 4 }) < 0) {
+		modStorage.menuShouldDisplayTutorialHelp = true;
+	}
+
 	return true;
 }

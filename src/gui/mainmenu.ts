@@ -13,6 +13,7 @@ import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { GuiConditionViewRules } from "./conditions_view_rules";
 import { GuiTutorial } from "./tutorial";
 import { versionCheckNewAvailable } from "../modules/versionCheck";
+import { modStorage, modStorageSync } from "../modules/storage";
 
 const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
@@ -84,6 +85,14 @@ export class GuiMainMenu extends GuiSubscreen {
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png", "Show the BCX tutorial again");
 
+		if (this.character.isPlayer() && modStorage.menuShouldDisplayTutorialHelp) {
+			MainCanvas.beginPath();
+			MainCanvas.rect(950, 190, 850, 90);
+			MainCanvas.fillStyle = "Black";
+			MainCanvas.fill();
+			DrawText(`New advanced tutorial pages are now available ►`, 980, 190 + 45, "White");
+		}
+
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];
 			const PX = Math.floor(i / 7);
@@ -124,7 +133,13 @@ export class GuiMainMenu extends GuiSubscreen {
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
 
-		if (MouseIn(1815, 190, 90, 90)) setSubscreen(new GuiTutorial(this.character, false));
+		if (MouseIn(1815, 190, 90, 90)) {
+			if (modStorage.menuShouldDisplayTutorialHelp) {
+				delete modStorage.menuShouldDisplayTutorialHelp;
+				modStorageSync();
+			}
+			setSubscreen(new GuiTutorial(this.character, false))
+		};
 
 		// Changelog
 		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {

@@ -582,6 +582,7 @@ interface RoomTemplate {
 interface ModStorage {
 	version: string;
 	preset: import("./constants").Preset;
+	menuShouldDisplayTutorialHelp?: true;
 	chatShouldDisplayFirstTimeHelp?: true;
 	/** Toggle, if friendlist autorefresh is enabled */
 	FLAutorefresh?: true;

@@ -510,6 +510,9 @@ type RuleCustomDataTypes = keyof RuleCustomDataTypesMap;
 type RuleCustomDataTypesOptions = {
 	listSelect: [string, string][];
 	string?: RegExp;
+	stringList?: {
+		validate?: RegExp;
+	}
 };
 
 type RuleCustomDataFilter<U> = {

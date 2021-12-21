@@ -24,7 +24,10 @@ export function initRules_bc_speech_control() {
 			soundWhitelist: {
 				type: "stringList",
 				default: [],
-				description: "Set the allowed sounds:"
+				description: "Set the allowed sounds:",
+				options: {
+					validate: /^\p{L}*$/iu
+				}
 			}
 		},
 		init(state) {

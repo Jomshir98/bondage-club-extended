@@ -420,7 +420,7 @@ export const ruleCustomDataHandlers: {
 		validateOptions: options => options === undefined || options instanceof RegExp,
 		validate(value, def) {
 			return typeof value === "string" &&
-			(!def.options || def.options.test(value));
+				(!def.options || def.options.test(value));
 		},
 		onDataChange({ active, key, onInput, value, access, def }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
@@ -460,8 +460,12 @@ export const ruleCustomDataHandlers: {
 		}
 	},
 	stringList: {
-		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
-		onDataChange({ active, key, access }) {
+		validateOptions: options => options === undefined || (
+			isObject(options) &&
+			(options.validate === undefined || options.validate instanceof RegExp)
+		),
+		validate(value, def) { return Array.isArray(value) && value.every(i => typeof i === "string" && (!def.options?.validate || def.options.validate.test(i))) },
+		onDataChange({ active, key, access, def }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
 				if (input) {
@@ -470,7 +474,19 @@ export const ruleCustomDataHandlers: {
 				return;
 			}
 			if (!input) {
-				input = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "120");
+				let last = "";
+				const newInput = ElementCreateInput(`BCX_RCDH_${key}`, "text", "", "120");
+				newInput.oninput = () => {
+					if (def.options?.validate && !def.options.validate.test(newInput.value)) {
+						if (newInput.value.length === 1 && def.options.validate.test("")) {
+							last = "";
+						}
+						newInput.value = last;
+					} else {
+						last = newInput.value;
+					}
+				}
+				input = newInput;
 			}
 			input.disabled = !access;
 		},
@@ -499,7 +515,7 @@ export const ruleCustomDataHandlers: {
 			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
 			MainCanvas.textAlign = "left";
 		},
-		click({ value, Y, key }) {
+		click({ value, Y, key, def }) {
 			Y -= 20;
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -514,7 +530,11 @@ export const ruleCustomDataHandlers: {
 				}
 			}
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
-			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) && input && input.value && !value.includes(input.value)) {
+			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) &&
+				input && input.value &&
+				(!def.options?.validate || def.options.validate.test(input.value)) &&
+				!value.includes(input.value)
+			) {
 				value.push(input.value);
 				value.sort();
 				input.value = "";

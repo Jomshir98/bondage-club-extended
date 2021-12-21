@@ -5,6 +5,7 @@ import { arrayUnique, longestCommonPrefix } from "../utils";
 import { BaseModule } from "./_BaseModule";
 import { firstTimeInit, modStorage, modStorageSync } from "./storage";
 import { queryHandlers, sendQuery } from "./messaging";
+import { RulesGetRuleState } from "./rules";
 
 interface ICommandInfo {
 	description: string | null;
@@ -647,6 +648,13 @@ export class ModuleCommands extends BaseModule {
 		aliasCommand("help", "");
 
 		registerCommand("action", "- Send custom (action) [alias: .a ]", (msg) => {
+			const blockRule = RulesGetRuleState("block_action");
+			if (blockRule.isEnforced) {
+				blockRule.triggerAttempt();
+				return false;
+			} else if (blockRule.inEffect) {
+				blockRule.trigger();
+			}
 			ChatRoomActionMessage(msg);
 			return true;
 		});

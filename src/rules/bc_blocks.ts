@@ -860,4 +860,18 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 		}
 	});
+
+	registerRule("block_action", {
+		name: "Forbid the action command",
+		icon: icon_restrictions,
+		shortDescription: "BCX's .action/.a chat command",
+		longDescription: "This rule forbids PLAYER_NAME to use the action command. Action is a BCX feature that enables to format a message to look like a BC chat action. If PLAYER_NAME should be forbidden to use the command to communicate, this rule should be used.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to use the action command!",
+			attempt_log: "PLAYER_NAME tried to use the action command",
+			log: "PLAYER_NAME used the action command"
+		},
+		defaultLimit: ConditionsLimit.blocked
+		// Implemented externally
+	});
 }

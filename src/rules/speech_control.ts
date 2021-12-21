@@ -278,6 +278,47 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
+	registerRule("speech_limit_open_talking", {
+		name: "Limit talking openly",
+		icon: "Icons/Chat.png",
+		loggable: false,
+		shortDescription: "only allow a set number of chat messages per minute",
+		longDescription: "This rule limits PLAYER_NAME's ability to send a message to all people inside a chat room to only the set number per minute. Does not affect whispers or emotes, but does affect OOC. Note: Setting '0' will have no effect, as there is another rule to forbid open talking completely.",
+		triggerTexts: {
+			infoBeep: "You exceeded the number of allowed chat messages per minute!"
+		},
+		dataDefinition: {
+			maxNumberOfMsg: {
+				type: "number",
+				default: 42,
+				description: "Maximum allowed number of chat messages per minute (> 0):",
+				Y: 380
+			}
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		init(state) {
+			let currentCount: number = 0;
+			const check = (msg: SpeechMessageInfo): boolean => msg.type !== "Chat";
+			registerSpeechHook({
+				allowSend: (msg) => {
+					if (state.customData?.maxNumberOfMsg && state.customData.maxNumberOfMsg !== 0 && state.isEnforced && !check(msg)) {
+						if (currentCount >= state.customData.maxNumberOfMsg) {
+							state.triggerAttempt();
+							return SpeechHookAllow.BLOCK;
+						}
+						currentCount++;
+						BCX_setTimeout(() => {
+							if (currentCount > 0) {
+								currentCount--;
+							}
+						}, 60_000);
+					}
+					return SpeechHookAllow.ALLOW;
+				}
+			});
+		}
+	});
+
 	registerRule("speech_restrict_whisper_send", {
 		name: "Restrict sending whispers",
 		icon: "Icons/Chat.png",

@@ -241,6 +241,7 @@ type BCX_Rule =
 	| "speech_doll_talk"
 	| "speech_ban_words"
 	| "speech_forbid_open_talking"
+	| "speech_limit_open_talking"
 	| "speech_restrict_whisper_send"
 	| "speech_restrict_whisper_receive"
 	| "speech_restrict_beep_send"
@@ -361,6 +362,9 @@ type RuleCustomData = {
 	},
 	speech_greet_order: {
 		toGreetMemberNumbers: number[];
+	},
+	speech_limit_open_talking: {
+		maxNumberOfMsg: number;
 	},
 	// replace_spoken_words: {
 	// 	stringWithReplacingSyntax: string;

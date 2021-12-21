@@ -464,7 +464,7 @@ export const ruleCustomDataHandlers: {
 			isObject(options) &&
 			(options.validate === undefined || options.validate instanceof RegExp)
 		),
-		validate(value, def) { return Array.isArray(value) && value.every(i => typeof i === "string" && (!def.options?.validate || def.options.validate.test(i))) },
+		validate(value, def) { return Array.isArray(value) && value.every(i => typeof i === "string" && (!def.options?.validate || def.options.validate.test(i))); },
 		onDataChange({ active, key, access, def }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
@@ -485,7 +485,7 @@ export const ruleCustomDataHandlers: {
 					} else {
 						last = newInput.value;
 					}
-				}
+				};
 				input = newInput;
 			}
 			input.disabled = !access;

@@ -178,9 +178,9 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 	const devMatch = /^(\d+).(\d+).(\d+)-(DEV-\d+)$/.exec(version);
 	if (devMatch) {
 		return {
-			major: Number.parseInt(devMatch[1]),
-			minor: Number.parseInt(devMatch[2]),
-			patch: Number.parseInt(devMatch[3]),
+			major: Number.parseInt(devMatch[1], 10),
+			minor: Number.parseInt(devMatch[2], 10),
+			patch: Number.parseInt(devMatch[3], 10),
 			extra: devMatch[4],
 			dev: true
 		};
@@ -188,9 +188,9 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 	const match = /^(\d+).(\d+).(\d+)-([0-f]+)$/.exec(version);
 	if (match) {
 		return {
-			major: Number.parseInt(match[1]),
-			minor: Number.parseInt(match[2]),
-			patch: Number.parseInt(match[3]),
+			major: Number.parseInt(match[1], 10),
+			minor: Number.parseInt(match[2], 10),
+			patch: Number.parseInt(match[3], 10),
 			extra: match[4],
 			dev: false
 		};

@@ -138,8 +138,8 @@ export class GuiMainMenu extends GuiSubscreen {
 				delete modStorage.menuShouldDisplayTutorialHelp;
 				modStorageSync();
 			}
-			setSubscreen(new GuiTutorial(this.character, false))
-		};
+			setSubscreen(new GuiTutorial(this.character, false));
+		}
 
 		// Changelog
 		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {

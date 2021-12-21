@@ -319,6 +319,37 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
+	registerRule("speech_forbid_emotes", {
+		name: "Forbid using emotes",
+		icon: "Icons/Chat.png",
+		shortDescription: "in a chat room",
+		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to use emotes in chatrooms!",
+			attempt_log: "PLAYER_NAME tried to use an emote in a room",
+			log: "PLAYER_NAME used an emote in a room"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		init(state) {
+			const check = (msg: SpeechMessageInfo): boolean => msg.type !== "Emote";
+			registerSpeechHook({
+				allowSend: (msg) => {
+					if (state.isEnforced && !check(msg)) {
+						state.triggerAttempt();
+						return SpeechHookAllow.BLOCK;
+					}
+					return SpeechHookAllow.ALLOW;
+				},
+				onSend: (msg) => {
+					if (state.inEffect && !check(msg)) {
+						state.trigger();
+					}
+				}
+			});
+		}
+	});
+
+
 	registerRule("speech_restrict_whisper_send", {
 		name: "Restrict sending whispers",
 		icon: "Icons/Chat.png",

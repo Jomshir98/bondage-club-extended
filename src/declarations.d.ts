@@ -242,6 +242,7 @@ type BCX_Rule =
 	| "speech_ban_words"
 	| "speech_forbid_open_talking"
 	| "speech_limit_open_talking"
+	| "speech_forbid_emotes"
 	| "speech_restrict_whisper_send"
 	| "speech_restrict_whisper_receive"
 	| "speech_restrict_beep_send"

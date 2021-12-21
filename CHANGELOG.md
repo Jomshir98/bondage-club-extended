@@ -1,5 +1,34 @@
 # BCX Changelog
 
+## 0.7.4
+
+This update includes:
+ - Added 14 new pages to the BCX tutorial in the main menu, including a one time notification for every existing BCX user
+ - Added the possibility to set one of the room template slots to auto-fill the room creation screen when opening it
+ - Added a new feature to the Miscellaneous module to set a text as default for the chat room search field
+ - Added possibility to read the detailed descriptions of blocked rules in the "add rules" list
+ - Added a new icon in the rules overview that quickly shows whether a rule has "item removal" set or not
+ - Added chat commands to praise/scold
+ - Updated the BCX background list to include the new backgrounds from BC version R75
+ - Added a version migration framework (For better internal organization of things)
+
+Rule changes:
+ - Some improved, fixed or added rules, now totaling to 84 usable rules!
+ - Added new rule "Forbid the action command" from the list of chat commands
+ - Added new rule "Limit talking openly" which only allow a set number of chat messages per minute
+ - Added new rule "Forbid using emotes"
+ - Added new rule "Limit using emotes" which only allow a set number of emotes per minute
+ - Added new rule "Forbid mainhall maid services" to get no help with restraints
+ - Added new rule "Prevent usage of all activities" that blocks using the activity icons
+ - Changed the rule "Order to greet room" to not accept emotes or whispers to pass the check
+ - Changed the rule "Order to greet room" to make it impossible to deadlock in combination with other set speech rules
+ - Changed the rule "Fully blind when blindfolded" to not be active when in VR with the according headset item
+ - Changed the rule "Hearing whitelist" to not ignore messages in full sensory deprivation
+ - Added a new input verification to string/stringList type text fields that forbids using certain characters that could lead to unexpected side effects
+
+Fixes:
+ - Fixed an incorrect hitbox for showing rule detailed descriptions in the rule overview
+
 ## 0.7.3
 
 This update improves compatibility with BC release R75.

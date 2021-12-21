@@ -162,7 +162,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 					!allowAccess ? "You don't have permission to use this rule" : "";
 			}
 			// Rule name
-			DrawButton(200, Y, 1350, 64, "", color, "", "", ruleIsCreated || !allowAccess || this.permissionMode);
+			DrawButton(200, Y, 1350, 64, "", color, "", "", ruleIsCreated || this.permissionMode);
 			let description = e.definition.name;
 			if (e.definition.shortDescription) {
 				description += ` (${dictionaryProcess(e.definition.shortDescription, { PLAYER_NAME: this.character.Name })})`;
@@ -241,8 +241,8 @@ export class GuiRulesAdd extends GuiSubscreen {
 				const ruleName = e.name;
 				if (this.permissionMode) {
 					this.character.conditionSetLimit("rules", e.name, (accessLevel + 1) % 3);
-				} else if (!ruleIsCreated && allowAccess) {
-					setSubscreen(new GuiRulesViewDescription(this.character, this, ruleName, true));
+				} else if (!ruleIsCreated) {
+					setSubscreen(new GuiRulesViewDescription(this.character, this, ruleName, allowAccess));
 				}
 				return;
 			}

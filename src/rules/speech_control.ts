@@ -866,4 +866,52 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
+	registerRule("speech_mandatory_words", {
+		name: "Establish mandatory words",
+		icon: "Icons/Chat.png",
+		shortDescription: "of which at least one needs to always be included when speaking openly",
+		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss'). Doesn't affect whispers, emotes and OOC text.",
+		triggerTexts: {
+			infoBeep: "You forgot to include one of the mandatory words!",
+			attempt_log: "PLAYER_NAME almost forgot to use a mandatory word while talking",
+			log: "PLAYER_NAME did not use a mandatory word while talking"
+		},
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			mandatoryWords: {
+				type: "stringList",
+				default: [],
+				description: "At least one of these words always needs to be used:",
+				options: {
+					validate: /^\p{L}*$/iu
+				}
+			}
+		},
+		init(state) {
+			const check = (msg: SpeechMessageInfo): boolean => {
+				if (msg.type !== "Chat" || !state.customData?.mandatoryWords?.length)
+					return true;
+				if (msg.noOOCMessage?.trim() === "") {
+					return true;
+				}
+				const words = Array.from((msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().matchAll(/\p{L}+/igu)).map(i => i[0]);
+				return state.customData?.mandatoryWords.some(i => words.includes(i.toLocaleLowerCase()));
+			};
+			registerSpeechHook({
+				allowSend: (msg) => {
+					if (state.isEnforced && !check(msg)) {
+						state.triggerAttempt();
+						return SpeechHookAllow.BLOCK;
+					}
+					return SpeechHookAllow.ALLOW;
+				},
+				onSend: (msg) => {
+					if (state.inEffect && !check(msg)) {
+						state.trigger();
+					}
+				}
+			});
+		}
+	});
+
 }

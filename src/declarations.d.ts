@@ -265,6 +265,7 @@ type BCX_Rule =
 	| "greet_new_guests"
 	// | "restrained_speech"
 	| "speech_alter_faltering"
+	| "speech_mandatory_words"
 	| "other_forbid_afk"
 	// | "log_online_time"
 	| "other_constant_reminder"
@@ -394,6 +395,9 @@ type RuleCustomData = {
 	// restrained_speech: {
 	// 	listOfAllowedSentences: string[];
 	// },
+	speech_mandatory_words: {
+		mandatoryWords: string[];
+	},
 	other_forbid_afk: {
 		minutesBeforeAfk: number;
 	},

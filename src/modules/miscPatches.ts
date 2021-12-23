@@ -186,6 +186,10 @@ export class ModuleMiscPatches extends BaseModule {
 			if (args[0] != null)
 				return next(args);
 		});
+
+		patchFunction("DrawGetImage", {
+			'Img.src = Source;': 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;'
+		});
 	}
 
 	run() {

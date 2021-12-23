@@ -7,6 +7,7 @@ import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { moduleIsEnabled } from "./presets";
+import { RulesGetRuleState } from "./rules";
 import { ModuleCategory, ModuleInitPhase, MODULE_NAMES, Preset } from "../constants";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber, registerWhisperCommand } from "./commands";
 
@@ -93,14 +94,25 @@ export function checkPermissionAccess(permission: BCX_Permissions, character: Ch
 		return false;
 	if (!moduleIsEnabled(permData.category))
 		return false;
-	return checkPermisionAccesData(permData, getCharacterAccessLevel(character));
+	if (character.isPlayer() && selfAccessBlockedByRule(permData)) {
+		return false;
+	}
+	return checkPermissionAccessData(permData, getCharacterAccessLevel(character));
 }
 
-export function checkPermisionAccesData(permData: PermissionInfo, accessLevel: AccessLevel): boolean {
+export function checkPermissionAccessData(permData: PermissionInfo, accessLevel: AccessLevel): boolean {
 	if (accessLevel === AccessLevel.self) {
 		return permData.self || permData.min === AccessLevel.self;
 	}
 	return accessLevel <= permData.min;
+}
+
+function selfAccessBlockedByRule(permData: PermissionInfo): boolean {
+	const blockRule = RulesGetRuleState("block_BCX_permissions");
+	if (!blockRule.isEnforced || (permData.self && permData.min === AccessLevel.self)) {
+		return false;
+	}
+	return true;
 }
 
 function permissionsMakeBundle(): PermissionsBundle {

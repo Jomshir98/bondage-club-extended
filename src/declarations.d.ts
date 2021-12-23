@@ -221,6 +221,7 @@ type BCX_Rule =
 	| "block_activities"
 	| "block_mainhall_maidrescue"
 	| "block_action"
+	| "block_BCX_permissions"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"

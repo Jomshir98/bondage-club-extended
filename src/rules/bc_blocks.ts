@@ -874,4 +874,14 @@ export function initRules_bc_blocks() {
 		defaultLimit: ConditionsLimit.blocked
 		// Implemented externally
 	});
+
+	registerRule("block_BCX_permissions", {
+		name: "Prevent using BCX permissions",
+		loggable: false,
+		icon: icon_restrictions,
+		shortDescription: "PLAYER_NAME using her permissions for her own BCX, with some exceptions",
+		longDescription: "This rule forbids PLAYER_NAME access to some parts of their own BCX they have permission to use, making it as if they do not have 'self access' (see BCX tutorial on permission system) while the rule is active. This rule still leaves access for all permissions where the lowest permitted role ('lowest access') is also set to PLAYER_NAME (to prevent getting stuck). This rule does not affect PLAYER_NAME's permissions to use another users's BCX.",
+		defaultLimit: ConditionsLimit.blocked
+		// Implemented externally
+	});
 }

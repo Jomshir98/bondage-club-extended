@@ -1,6 +1,6 @@
 import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { ModuleCategory, MODULE_ICONS, MODULE_NAMES } from "../constants";
-import { AccessLevel, checkPermisionAccesData, checkPermissionAccess, getPermissionMinDisplayText, PermissionData, PermissionInfo } from "../modules/authority";
+import { AccessLevel, checkPermissionAccessData, checkPermissionAccess, getPermissionMinDisplayText, PermissionData, PermissionInfo } from "../modules/authority";
 import { DrawImageEx, showHelp } from "../utilsClub";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
@@ -89,13 +89,13 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
 
 		const access_grantSelf = this.permissionData.authority_grant_self ?
-			checkPermisionAccesData(this.permissionData.authority_grant_self, this.myAccessLevel) :
+			checkPermissionAccessData(this.permissionData.authority_grant_self, this.myAccessLevel) :
 			false;
 		const access_revokeSelf = this.permissionData.authority_revoke_self ?
-			checkPermisionAccesData(this.permissionData.authority_revoke_self, this.myAccessLevel) :
+			checkPermissionAccessData(this.permissionData.authority_revoke_self, this.myAccessLevel) :
 			false;
 		const access_editMin = this.permissionData.authority_edit_min ?
-			checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+			checkPermissionAccessData(this.permissionData.authority_edit_min, this.myAccessLevel) :
 			false;
 		const isPlayer = this.myAccessLevel === AccessLevel.self;
 
@@ -129,7 +129,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						name: `${MODULE_NAMES[category]} module permissions (continued)`
 					});
 				}
-				const access = checkPermisionAccesData(v, this.myAccessLevel);
+				const access = checkPermissionAccessData(v, this.myAccessLevel);
 				this.permList.push({
 					separator: false,
 					permission: k as BCX_Permissions,
@@ -291,14 +291,14 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 					// Min access
 					if (MouseIn(1370, Y, 170, 64) && e.editMin) {
 						const access_editMin = this.permissionData.authority_edit_min ?
-							checkPermisionAccesData(this.permissionData.authority_edit_min, this.myAccessLevel) :
+							checkPermissionAccessData(this.permissionData.authority_edit_min, this.myAccessLevel) :
 							false;
 						setSubscreen(new GuiAuthorityDialogMin(
 							this.character,
 							e.permission,
 							e.permissionInfo,
 							this.myAccessLevel,
-							!access_editMin || !checkPermisionAccesData(e.permissionInfo, this.myAccessLevel),
+							!access_editMin || !checkPermissionAccessData(e.permissionInfo, this.myAccessLevel),
 							this
 						));
 						return;

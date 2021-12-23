@@ -439,6 +439,9 @@ export class ModuleLog extends BaseModule {
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
 			if (subcommand === "list") {
 				const logEntries = getVisibleLogEntries(sender);
+				if (logEntries.length === 0) {
+					return respond(`You have no permission to view the log.`);
+				}
 				const totalPages = Math.ceil(logEntries.length / 5);
 				const page = clamp(Number.parseInt(argv[1] || "", 10) || 1, 1, totalPages);
 				let result = `Page ${page} / ${totalPages}:`;

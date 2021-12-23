@@ -93,7 +93,8 @@ export function getVisibleGroupName(group: AssetGroup): string {
 
 export function InfoBeep(msg: string, timer: number = 3000) {
 	ServerBeep = {
-		Timer: Date.now() + timer,
+		// TODO: Use CommonTime() when https://github.com/Ben987/Bondage-College/pull/3152 is public
+		Timer: CurrentTime + timer,
 		Message: msg
 	};
 }

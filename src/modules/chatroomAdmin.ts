@@ -5,6 +5,7 @@ import { icon_BCX } from "../resources";
 import { hookFunction, patchFunction } from "../patching";
 import { DrawImageEx } from "../utilsClub";
 import cloneDeep from "lodash-es/cloneDeep";
+import { RulesGetRuleState } from "./rules";
 
 const ROOM_TEMPLATES_COUNT = 4;
 
@@ -79,6 +80,11 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 		}
 		if ((overwriteMode === i && MouseIn(X, 835, 150, 64)) || MouseIn(X, 835, 230, 64)) {
 			if (template) {
+				const rule = RulesGetRuleState("alt_room_admin_limit");
+				if (rule.isEnforced && ServerPlayerIsInChatRoom() && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {
+					rule.triggerAttempt();
+					return;
+				}
 				apply(template);
 				overwriteMode = undefined;
 				onSecondPage = !onSecondPage;

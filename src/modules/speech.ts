@@ -1,6 +1,7 @@
 import { ModuleInitPhase } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
 import { hookFunction } from "../patching";
+import { isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 import { registerCommand } from "./commands";
 import { RulesGetRuleState } from "./rules";
@@ -179,6 +180,8 @@ function setAntigarble(value: number): boolean {
 
 export class ModuleSpeech extends BaseModule {
 	load() {
+		let lastMessage: string = "";
+		let lastMessageOriginal: string = "";
 		hookFunction("ChatRoomSendChat", 5, (args, next) => {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			if (chat) {
@@ -194,11 +197,51 @@ export class ModuleSpeech extends BaseModule {
 							return;
 						}
 						chat.value = msg2;
+						lastMessage = msg2.startsWith("//") ? msg2.substring(1) : msg2;
+						lastMessageOriginal = info.originalMessage.startsWith("//") ? info.originalMessage.substring(1) : info.originalMessage;
 					}
 				}
 			}
 			return next(args);
 		});
+
+		//#region Antigarble for pre-garbled whispers
+		hookFunction("ServerSend", 1, (args, next) => {
+			const data = args[1];
+			if (args[0] === "ChatRoomChat" &&
+				isObject(data) &&
+				data.Type === "Whisper" &&
+				data.Content === lastMessage &&
+				lastMessageOriginal
+			) {
+				if (!Array.isArray(data.Dictionary)) {
+					data.Dictionary = [];
+				}
+				data.Dictionary.push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: lastMessageOriginal });
+			}
+			return next(args);
+		});
+
+		hookFunction("ChatRoomMessage", 1, (args, next) => {
+			const data = args[0];
+			if (antigarble > 0 &&
+				isObject(data) &&
+				data.Type === "Whisper" &&
+				typeof data.Content === "string" &&
+				Array.isArray(data.Dictionary)
+			) {
+				const orig = data.Dictionary.find(i => isObject(i) && i.Tag === "BCX_ORIGINAL_MESSAGE" && typeof i.Text === "string");
+				if (orig) {
+					if (antigarble === 2) {
+						data.Content = orig.Text;
+					} else {
+						data.Content += ` <> ${orig.Text}`;
+					}
+				}
+			}
+			return next(args);
+		});
+		//#endregion
 
 		// Even if not modified by hook, the hash is very important
 		hookFunction("CommandParse", 0, (args, next) => next(args));

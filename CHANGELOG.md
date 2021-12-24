@@ -1,5 +1,29 @@
 # BCX Changelog
 
+## 0.7.5
+
+This update includes:
+ - Added two new permissions:
+   - "Allow to view who added the curse originally"
+   - "Allow to view who added the rule originally"
+ - Added storing of the member number of the user adding a curse or rule from now on
+   - This information can be viewed in the view/edit curse/rule screen at the top
+   - Only characters who have the permission "Allow to view who added the [curse | rule] originally" can view it
+   - All already added curses/rules will not have this information
+ - Changed the `.antigarble` command to also reveal whispers that were garbled by the rule "Garble whispers while gagged"
+ - Changed a few tutorial pages, with the main addition of explaining that added curses/rules can be marked as Favorite
+
+Rule changes:
+ - Added new rule "Establish mandatory words" which allows to set words of which at least one needs to be used in public chat messages
+ - Added new rule "Prevent using BCX permissions" which blocks the player's self permissions for the own BCX, with some exceptions
+ - Changed the rule "Limit bound admin power" to also block loading any room template while restrained
+ - Changed the description of the rule "Control profile online description" to clarify that after saving changes, the original text is lost.
+
+Fixes:
+ - Fixed a bug that lead to beep notifications showing for a long time if the user's local time was not correctly set up
+ - Fixed an error that occurred when trying to use the command "log list" while having no permission to view any type of logs
+ - Fixed an error that could occur when using the photo shot function after opening the BCX tutorial
+
 ## 0.7.4
 
 This update includes:

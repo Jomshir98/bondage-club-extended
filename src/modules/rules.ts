@@ -662,7 +662,7 @@ export function RulesCreate(rule: BCX_Rule, character: ChatroomCharacter | null)
 				throw new Error(`Failed to create valid internal data for rule '${rule}'`);
 			}
 		}
-		ConditionsSetCondition("rules", rule, ruleData);
+		ConditionsSetCondition("rules", rule, ruleData, character);
 		if (character) {
 			logMessage("rule_change", LogEntryType.plaintext, `${character} added a new rule: ${definition.name}`);
 			if (!character.isPlayer()) {
@@ -826,6 +826,16 @@ export class ModuleRules extends BaseModule {
 				[Preset.slave]: [false, AccessLevel.owner]
 			}
 		});
+		registerPermission("rules_view_originator", {
+			name: "Allow to view who added the rule originally",
+			category: ModuleCategory.Rules,
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.mistress],
+				[Preset.slave]: [true, AccessLevel.mistress]
+			}
+		});
 
 		queryHandlers.ruleCreate = (sender, resolve, data) => {
 			if (guard_BCX_Rule(data)) {
@@ -918,6 +928,7 @@ export class ModuleRules extends BaseModule {
 			permission_limited: "rules_limited",
 			permission_configure: "rules_global_configuration",
 			permission_changeLimits: "rules_change_limits",
+			permission_viewOriginator: "rules_view_originator",
 			loadValidateConditionKey: rule => guard_BCX_Rule(rule),
 			loadValidateCondition: (rule, data) => {
 				const info = data.data;

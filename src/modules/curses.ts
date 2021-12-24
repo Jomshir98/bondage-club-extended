@@ -119,7 +119,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 		if (ConditionsGetCategoryData("curses").data?.itemRemove) {
 			newCurse.itemRemove = true;
 		}
-		ConditionsSetCondition("curses", Group, newCurse);
+		ConditionsSetCondition("curses", Group, newCurse, character);
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
 			if (!character.isPlayer()) {
@@ -127,7 +127,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 			}
 		}
 	} else {
-		ConditionsSetCondition("curses", Group, null);
+		ConditionsSetCondition("curses", Group, null, character);
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
 			if (!character.isPlayer()) {
@@ -284,6 +284,16 @@ export class ModuleCurses extends BaseModule {
 				[Preset.switch]: [true, AccessLevel.lover],
 				[Preset.submissive]: [true, AccessLevel.mistress],
 				[Preset.slave]: [false, AccessLevel.mistress]
+			}
+		});
+		registerPermission("curses_view_originator", {
+			name: "Allow to view who added the curse originally",
+			category: ModuleCategory.Curses,
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.self],
+				[Preset.switch]: [true, AccessLevel.self],
+				[Preset.submissive]: [true, AccessLevel.mistress],
+				[Preset.slave]: [true, AccessLevel.mistress]
 			}
 		});
 
@@ -528,6 +538,7 @@ export class ModuleCurses extends BaseModule {
 			permission_limited: "curses_limited",
 			permission_configure: "curses_global_configuration",
 			permission_changeLimits: "curses_change_limits",
+			permission_viewOriginator: "curses_view_originator",
 			loadValidateConditionKey: (group) => AssetGroup.some(g => g.Name === group),
 			loadValidateCondition: (group, data) => {
 				const info = data.data;

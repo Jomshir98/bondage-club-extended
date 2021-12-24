@@ -42,10 +42,12 @@ type BCX_Permissions =
 	| "curses_global_configuration"
 	| "curses_change_limits"
 	| "curses_color"
+	| "curses_view_originator"
 	| "rules_normal"
 	| "rules_limited"
 	| "rules_global_configuration"
 	| "rules_change_limits"
+	| "rules_view_originator"
 	| "misc_test";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
@@ -152,6 +154,7 @@ interface ConditionsConditionData<category extends ConditionsCategories = Condit
 	timerRemove?: true | undefined;
 	requirements?: ConditionsConditionRequirements;
 	favorite?: true | undefined;
+	addedBy?: number;
 }
 
 interface ConditionsConditionPublicData<category extends ConditionsCategories = ConditionsCategories> {
@@ -161,6 +164,7 @@ interface ConditionsConditionPublicData<category extends ConditionsCategories = 
 	timerRemove: boolean;
 	requirements: ConditionsConditionRequirements | null;
 	favorite: boolean;
+	addedBy?: number;
 }
 
 type ConditionsCategoryRecord<category extends ConditionsCategories = ConditionsCategories> = Record<ConditionsCategoryKeys[category], ConditionsConditionData<category>>;

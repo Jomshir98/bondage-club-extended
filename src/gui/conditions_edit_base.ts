@@ -167,7 +167,14 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 	Run(): boolean {
 		MainCanvas.textAlign = "left";
-		DrawText(`- ${this.headerText()} -`, 175, 125, "Black", "Gray");
+		const addedBy = this.conditionData?.addedBy;
+		DrawText(`- ${this.headerText()} -`, 180, 108, "Black", "Gray");
+		if (addedBy !== undefined) {
+			MainCanvas.save();
+			MainCanvas.font = CommonGetFont(26);
+			DrawText(`Added by: ${getCharacterName(addedBy, "[unknown name]")} (${addedBy})`, 205, 143, "#444");
+			MainCanvas.restore();
+		}
 		MainCanvas.textAlign = "center";
 
 		if (this.changes) {

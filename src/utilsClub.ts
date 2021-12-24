@@ -286,9 +286,18 @@ export function isBind(item: Item | Asset | AssetGroup): boolean {
 export function getCharacterName(memberNumber: number, defaultText: string): string;
 export function getCharacterName(memberNumber: number, defaultText: string | null): string | null;
 export function getCharacterName(memberNumber: number, defaultText: string | null = null): string | null {
-	const character = ChatRoomCharacter.find(c => c.MemberNumber === memberNumber);
-	if (character)
-		return character.Name;
+	for (const char of ChatRoomCharacter) {
+		if (char.MemberNumber === memberNumber)
+			return char.Name;
+		if (char.Ownership?.MemberNumber === memberNumber)
+			return char.Ownership.Name;
+		if (Array.isArray(char.Lovership)) {
+			for (const lover of char.Lovership) {
+				if (lover.MemberNumber === memberNumber)
+					return lover.Name;
+			}
+		}
+	}
 	const friendName = Player.FriendNames?.get(memberNumber);
 	if (friendName)
 		return friendName;

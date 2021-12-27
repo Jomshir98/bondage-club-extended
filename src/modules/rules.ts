@@ -27,6 +27,8 @@ const RULES_ANTILOOP_RESET_INTERVAL = 60_000;
 const RULES_ANTILOOP_THRESHOLD = 10;
 const RULES_ANTILOOP_SUSPEND_TIME = 600_000;
 
+const STRING_LIST_MAX_LENGTH = 128;
+
 export function guard_BCX_Rule(name: unknown): name is BCX_Rule {
 	return typeof name === "string" && rules.has(name as BCX_Rule);
 }
@@ -464,7 +466,11 @@ export const ruleCustomDataHandlers: {
 			isObject(options) &&
 			(options.validate === undefined || options.validate instanceof RegExp)
 		),
-		validate(value, def) { return Array.isArray(value) && value.every(i => typeof i === "string" && (!def.options?.validate || def.options.validate.test(i))); },
+		validate(value, def) {
+			return Array.isArray(value) &&
+				value.length <= STRING_LIST_MAX_LENGTH &&
+				value.every(i => typeof i === "string" && (!def.options?.validate || def.options.validate.test(i)));
+		},
 		onDataChange({ active, key, access, def }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
@@ -535,6 +541,10 @@ export const ruleCustomDataHandlers: {
 				(!def.options?.validate || def.options.validate.test(input.value)) &&
 				!value.includes(input.value)
 			) {
+				if (value.length >= STRING_LIST_MAX_LENGTH) {
+					InfoBeep("Reached the max. number of entries - please delete one first", 10_000);
+					return;
+				}
 				value.push(input.value);
 				value.sort();
 				input.value = "";

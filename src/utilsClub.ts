@@ -286,6 +286,9 @@ export function isBind(item: Item | Asset | AssetGroup): boolean {
 export function getCharacterName(memberNumber: number, defaultText: string): string;
 export function getCharacterName(memberNumber: number, defaultText: string | null): string | null;
 export function getCharacterName(memberNumber: number, defaultText: string | null = null): string | null {
+	if (Player.MemberNumber === memberNumber) {
+		return Player.Name;
+	}
 	for (const char of ChatRoomCharacter) {
 		if (char.MemberNumber === memberNumber)
 			return char.Name;

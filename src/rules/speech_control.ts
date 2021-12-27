@@ -4,7 +4,7 @@ import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { registerSpeechHook, SpeechMessageInfo, falteringSpeech, SpeechHookAllow } from "../modules/speech";
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
-import { dictionaryProcess, isObject } from "../utils";
+import { dictionaryProcess, escapeRegExp, isObject } from "../utils";
 import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 
@@ -230,8 +230,11 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.bannedWords)
 					return true;
-				const words = Array.from((msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().matchAll(/\p{L}+/igu)).map(i => i[0]);
-				transgression = state.customData?.bannedWords.find(i => words.includes(i.toLocaleLowerCase()));
+				transgression = state.customData?.bannedWords.find(i =>
+					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
+						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+					)
+				);
 				return transgression === undefined;
 			};
 			registerSpeechHook({
@@ -856,7 +859,9 @@ export function initRules_bc_speech_control() {
 				default: [],
 				// TODO: needs an update describing the special wildcards or placeholders that can be used
 				description: "Only these phrases are still allowed:",
-				options: /^([^/.*()][^()]*)?$/
+				options: {
+					validate: /^([^/.*()][^()]*)?$/ // TODO: adjust
+				}
 			}
 		}
 	});
@@ -899,7 +904,7 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "At least one of these words always needs to be used:",
 				options: {
-					validate: /^\p{L}*$/iu
+					validate: /^[\p{L} ]*$/iu
 				}
 			}
 		},
@@ -907,11 +912,15 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if (msg.type !== "Chat" || !state.customData?.mandatoryWords?.length)
 					return true;
-				if (msg.noOOCMessage?.trim() === "") {
+				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+				if (checkMsg.trim() === "") {
 					return true;
 				}
-				const words = Array.from((msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().matchAll(/\p{L}+/igu)).map(i => i[0]);
-				return state.customData?.mandatoryWords.some(i => words.includes(i.toLocaleLowerCase()));
+				return state.customData?.mandatoryWords.some(i =>
+					checkMsg.match(
+						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+					)
+				);
 			};
 			registerSpeechHook({
 				allowSend: (msg) => {

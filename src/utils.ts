@@ -174,6 +174,15 @@ export function positionElement(element: HTMLElement, X: number, Y: number, W: n
 	});
 }
 
+/**
+ * Escapes regex-special characters
+ * @param string The string to escape
+ * @returns Escaped version of string
+ */
+export function escapeRegExp(string: string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export function parseBCXVersion(version: string): BCXVersion | null {
 	const devMatch = /^(\d+).(\d+).(\d+)-(DEV-\d+)$/.exec(version);
 	if (devMatch) {

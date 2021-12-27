@@ -2,7 +2,7 @@ import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { GuiSubscreen } from "./subscreen";
 import { GuiConditionViewRules } from "./conditions_view_rules";
-import { RulesGetList } from "../modules/rules";
+import { RulesGetList, RuleType, RULE_ICONS } from "../modules/rules";
 import { ConditionsLimit } from "../constants";
 import { DrawImageEx, showHelp } from "../utilsClub";
 import { Views, HELP_TEXTS } from "../helpTexts";
@@ -15,6 +15,8 @@ type RuleListItem = {
 };
 
 const PER_PAGE_COUNT = 6;
+
+let availabilitySort: boolean = false;
 
 export class GuiRulesAdd extends GuiSubscreen {
 
@@ -30,6 +32,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 	private showHelp: boolean = false;
 
 	private filterInput = createInputElement("text", 30);
+	private filterRuleType: RuleType | null = null;
 
 	constructor(character: ChatroomCharacter) {
 		super();
@@ -80,6 +83,9 @@ export class GuiRulesAdd extends GuiSubscreen {
 		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
 
 		for (const entry of RulesGetList()) {
+			if (this.filterRuleType != null && this.filterRuleType !== entry[1].type) {
+				continue;
+			}
 			if (filter.some(i =>
 				!entry[0].toLocaleLowerCase().includes(i) &&
 				!entry[1].name.toLocaleLowerCase().includes(i) &&
@@ -89,6 +95,20 @@ export class GuiRulesAdd extends GuiSubscreen {
 				name: entry[0],
 				definition: entry[1]
 			});
+		}
+
+		const data = this.rulesData;
+		if (availabilitySort) {
+			this.ruleList.sort((a, b) => (
+				(
+					(this.HasAccess(b) ? 1 : 0) -
+					(this.HasAccess(a) ? 1 : 0)
+				) ||
+				(
+					(data.conditions[a.name] ? 1 : 0) -
+					(data.conditions[b.name] ? 1 : 0)
+				)
+			));
 		}
 
 		const totalPages = Math.ceil(this.ruleList.length / PER_PAGE_COUNT);
@@ -125,11 +145,36 @@ export class GuiRulesAdd extends GuiSubscreen {
 		DrawText("Filter:", 130, 215, "Black");
 		positionElement(this.filterInput, 550, 210, 600, 64);
 
-		//reset button
+		// reset button
+		MainCanvas.textAlign = "center";
 		if (this.filterInput.value) {
-			MainCanvas.textAlign = "center";
 			DrawButton(870, 182, 64, 64, "X", "White");
 		}
+
+		// filter buttons
+		DrawButton(1083, 182, 64, 64, "ALL", this.filterRuleType != null ? "White" : "#FEC5C5");
+
+		DrawButton(1183, 82, 64, 64, "", this.filterRuleType === RuleType.Block ? "#FEC5C5" : "White");
+		DrawImageEx(RULE_ICONS[RuleType.Block], 1183 + 3, 82 + 3, { Width: 58, Height: 58 });
+
+		DrawButton(1283, 82, 64, 64, "", this.filterRuleType === RuleType.Alt ? "#FEC5C5" : "White");
+		DrawImageEx(RULE_ICONS[RuleType.Alt], 1283 + 3, 82 + 3, { Width: 58, Height: 58 });
+
+		DrawButton(1383, 82, 64, 64, "", this.filterRuleType === RuleType.Setting ? "#FEC5C5" : "White");
+		DrawImageEx(RULE_ICONS[RuleType.Setting], 1383 + 3, 82 + 3, { Width: 58, Height: 58 });
+
+		DrawButton(1183, 182, 64, 64, "", this.filterRuleType === RuleType.RC ? "#FEC5C5" : "White");
+		DrawImageEx(RULE_ICONS[RuleType.RC], 1183 + 3, 182 + 3, { Width: 58, Height: 58 });
+
+		DrawButton(1283, 182, 64, 64, "", this.filterRuleType === RuleType.Speech ? "#FEC5C5" : "White");
+		DrawImageEx(RULE_ICONS[RuleType.Speech], 1283 + 3, 182 + 3, { Width: 58, Height: 58 });
+
+		DrawButton(1383, 182, 64, 64, "", this.filterRuleType === RuleType.Other ? "#FEC5C5" : "White");
+		DrawImageEx(RULE_ICONS[RuleType.Other], 1383 + 3, 182 + 3, { Width: 58, Height: 58 });
+
+		// sort toggle
+		DrawButton(1483, 132, 64, 64, "", "White", undefined, "Toggle availability-based sorting");
+		DrawImageEx("Icons/LockMenu.png", 1483 + 3, 132 + 3, { Alpha: availabilitySort ? 1 : 0.2, Width: 58, Height: 58 });
 
 		// Actual rules
 		MainCanvas.textAlign = "left";
@@ -143,9 +188,9 @@ export class GuiRulesAdd extends GuiSubscreen {
 			const Y = 275 + off * 100;
 			const ruleIsCreated = this.rulesData.conditions[e.name] !== undefined;
 			const accessLevel = this.rulesData.limits[e.name] ?? ConditionsLimit.normal;
-			const allowAccess = [this.rulesData.access_normal, this.rulesData.access_limited, false][accessLevel];
+			const allowAccess = this.HasAccess(e);
 
-			DrawImageEx(e.definition.icon, 125, Y, {
+			DrawImageEx(RULE_ICONS[e.definition.type], 125, Y, {
 				Height: 64,
 				Width: 64
 			});
@@ -183,16 +228,16 @@ export class GuiRulesAdd extends GuiSubscreen {
 		// permission mode legend
 		if (this.permissionMode) {
 			MainCanvas.fillStyle = "#50ff56";
-			MainCanvas.fillRect(1284, 75, 166, 64);
+			MainCanvas.fillRect(1739, 574, 166, 64);
 			MainCanvas.fillStyle = "#f6fe78";
-			MainCanvas.fillRect(1284 + 1 * 166, 75, 166, 64);
+			MainCanvas.fillRect(1739, 638, 166, 64);
 			MainCanvas.fillStyle = "#ffa7a7";
-			MainCanvas.fillRect(1284 + 2 * 166, 75, 165, 64);
+			MainCanvas.fillRect(1739, 702, 166, 64);
 
 			MainCanvas.textAlign = "center";
-			DrawText(`Normal`, 1284 + 166 / 2, 75 + 34, "Black");
-			DrawText(`Limited`, 1284 + 1 * 166 + 166 / 2, 75 + 34, "Black");
-			DrawText(`Blocked`, 1284 + 2 * 166 + 166 / 2, 75 + 34, "Black");
+			DrawText(`Normal`, 1739 + 166 / 2, 574 + 34, "Black");
+			DrawText(`Limited`, 1739 + 166 / 2, 638 + 34, "Black");
+			DrawText(`Blocked`, 1739 + 166 / 2, 702 + 34, "Black");
 		}
 
 		// help text
@@ -217,9 +262,51 @@ export class GuiRulesAdd extends GuiSubscreen {
 			return;
 		}
 
-		//reset button
+		// reset button
 		if (MouseIn(870, 182, 64, 64)) {
 			this.filterInput.value = "";
+			this.rebuildList();
+		}
+
+		// filter buttons
+		if (MouseIn(1083, 182, 64, 64)) {
+			this.filterRuleType = null;
+			this.rebuildList();
+		}
+
+		if (MouseIn(1183, 82, 64, 64)) {
+			this.filterRuleType = RuleType.Block;
+			this.rebuildList();
+		}
+
+		if (MouseIn(1283, 82, 64, 64)) {
+			this.filterRuleType = RuleType.Alt;
+			this.rebuildList();
+		}
+
+		if (MouseIn(1383, 82, 64, 64)) {
+			this.filterRuleType = RuleType.Setting;
+			this.rebuildList();
+		}
+
+		if (MouseIn(1183, 182, 64, 64)) {
+			this.filterRuleType = RuleType.RC;
+			this.rebuildList();
+		}
+
+		if (MouseIn(1283, 182, 64, 64)) {
+			this.filterRuleType = RuleType.Speech;
+			this.rebuildList();
+		}
+
+		if (MouseIn(1383, 182, 64, 64)) {
+			this.filterRuleType = RuleType.Other;
+			this.rebuildList();
+		}
+
+		// sort toggle
+		if (MouseIn(1483, 132, 64, 64)) {
+			availabilitySort = !availabilitySort;
 			this.rebuildList();
 		}
 
@@ -261,6 +348,15 @@ export class GuiRulesAdd extends GuiSubscreen {
 				this.page = 0;
 			}
 		}
+	}
+
+	HasAccess(item: RuleListItem): boolean {
+		if (!this.rulesData) {
+			throw new Error(`BCX: Rules data was unexpectedly 'null'`);
+		}
+		const accessLevel = this.rulesData.limits[item.name] ?? ConditionsLimit.normal;
+		return [this.rulesData.access_normal, this.rulesData.access_limited, false][accessLevel];
+
 	}
 
 	Exit() {

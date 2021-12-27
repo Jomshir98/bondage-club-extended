@@ -1,8 +1,7 @@
 import { ModuleCategory, ConditionsLimit } from "../constants";
 import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerDialog, RedirectGetImage } from "../modules/miscPatches";
-import { registerRule } from "../modules/rules";
+import { registerRule, RuleType } from "../modules/rules";
 import { hookFunction } from "../patching";
-import { icon_restrictions } from "../resources";
 import { isNModClient, getCharacterName } from "../utilsClub";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
@@ -12,7 +11,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_remoteuse_self", {
 		name: "Forbid using remotes on self",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
 		longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on her own body. (Others still can use remotes on her)",
 		triggerTexts: {
@@ -62,7 +61,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_remoteuse_others", {
 		name: "Forbid using remotes on others",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		longDescription: "This rule forbids PLAYER_NAME to use or trigger a vibrator or similar remote controlled item on other club members.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a remote control on other's items!",
@@ -111,7 +110,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_keyuse_self", {
 		name: "Forbid using keys on self",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
 		longDescription: "This rule forbids PLAYER_NAME to unlock any locked item on her own body. Note: Despite the name, this rule also blocks unlocking locks that don't require a key (e.g. exclusive lock). However, locks that can be unlocked in other ways (timer locks by removing time, code/password locks by entering correct code) can still be unlocked by PLAYER_NAME. Others can still unlock her items on her normally.",
 		triggerTexts: {
@@ -153,7 +152,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_keyuse_others", {
 		name: "Forbid using keys on others",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		longDescription: "This rule forbids PLAYER_NAME to unlock any locked item on other club members, with options to still allow unlocking of owner and/or lover locks and items. Note: Despite the name, this rule also blocks unlocking locks that don't require a key (e.g. exclusive lock). However, locks that can be unlocked in other ways (timer locks by removing time, code/password locks by entering correct code) can still be unlocked by PLAYER_NAME.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to use a key on other's items!",
@@ -225,7 +224,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_lockpicking_self", {
 		name: "Forbid picking locks on self",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME picking one on PLAYER_NAME",
 		longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on her own body. (Others still can pick locks on her normally)",
 		triggerTexts: {
@@ -264,7 +263,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_lockpicking_others", {
 		name: "Forbid picking locks on others",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		longDescription: "This rule forbids PLAYER_NAME to lockpick any locked items on other club members.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to lockpick items on others!",
@@ -302,7 +301,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_lockuse_self", {
 		name: "Forbid using locks on self",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME using one on PLAYER_NAME",
 		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on her own body. (Others still can add locks on her items normally)",
 		triggerTexts: {
@@ -341,7 +340,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_lockuse_others", {
 		name: "Forbid using locks on others",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		longDescription: "This rule forbids PLAYER_NAME to use any kind of lock on other club members.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to lock other's items!",
@@ -380,7 +379,7 @@ export function initRules_bc_blocks() {
 	// TODO: Make it clearer it is blocked by BCX
 	registerRule("block_wardrobe_access_self", {
 		name: "Forbid wardrobe use on self",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME using PLAYER_NAME's wardrobe",
 		longDescription: "This rule forbids PLAYER_NAME to access her own wardrobe. (Others still can change her clothes normally)",
 		triggerTexts: {
@@ -417,7 +416,7 @@ export function initRules_bc_blocks() {
 	// TODO: Make it clearer it is blocked by BCX
 	registerRule("block_wardrobe_access_others", {
 		name: "Forbid wardrobe use on others",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		longDescription: "This rule forbids PLAYER_NAME to use the wardrobe of other club members.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to change what others wear!",
@@ -454,7 +453,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_restrict_allowed_poses", {
 		name: "Restrict allowed body poses",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		loggable: false,
 		longDescription: "Allows to restrict the body poses PLAYER_NAME is able to get into by herself.",
 		defaultLimit: ConditionsLimit.normal,
@@ -498,7 +497,7 @@ export function initRules_bc_blocks() {
 	// TODO: Triggers on opening chat create *window*, improve to trigger on actual room creation
 	registerRule("block_creating_rooms", {
 		name: "Forbid creating new rooms",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		longDescription: "This rule forbids PLAYER_NAME to create new rooms.",
 		triggerTexts: {
 			infoBeep: "You are not allowed to create a new room!",
@@ -535,7 +534,7 @@ export function initRules_bc_blocks() {
 	// TODO: Triggers on attempting to enter room, improve to trigger on actual room entry
 	registerRule("block_entering_rooms", {
 		name: "Restrict entering rooms",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "only allow entering specific ones",
 		longDescription: "This rule forbids PLAYER_NAME to enter all rooms, that are not on an editable whitelist of still allowed ones. NOTE: As safety measure this rule is not in effect while the list is empty. TIP: This rule can be combined with the rule \"Forbid creating new rooms\".",
 		triggerTexts: {
@@ -612,7 +611,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_leaving_room", {
 		name: "Prevent leaving the room",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		loggable: false,
 		shortDescription: "while defined roles are inside",
 		longDescription: "This rule prevents PLAYER_NAME from leaving the room they are currently inside while at least one character with the set minimum role or a higher one is present inside. NOTE: Careful when setting the minimum role too low. If it is set to public for instance, it would mean that PLAYER_NAME can only leave the room when they are alone in it.",
@@ -654,7 +653,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_freeing_self", {
 		name: "Forbid freeing self",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME removing any items from PLAYER_NAME's body",
 		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them.",
 		triggerTexts: {
@@ -719,7 +718,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_tying_others", {
 		name: "Forbid tying up others",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "either everybody or only more dominant characters",
 		longDescription: "This rule forbids PLAYER_NAME to use any items on other characters. Can be set to only affect using items on characters with a higher dominant / lower submissive score than PLAYER_NAME has.",
 		triggerTexts: {
@@ -764,7 +763,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_blacklisting", {
 		name: "Prevent blacklisting",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		loggable: false,
 		shortDescription: "and ghosting of the defined roles",
 		longDescription: "This rule prevents PLAYER_NAME from adding characters with the set minimum role or a higher one to their bondage club blacklist and ghostlist.",
@@ -804,7 +803,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_antiblind", {
 		name: "Forbid the antiblind option",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "BCX's .antiblind command",
 		longDescription: "This rule forbids PLAYER_NAME to use the antiblind command. Antiblind is a BCX feature that enables a BCX user to see the whole chat room and all other characters at all times, even when wearing a blinding item. If PLAYER_NAME should be forbidden to use the command, this rule should be used.",
 		triggerTexts: {
@@ -818,7 +817,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_difficulty_change", {
 		name: "Forbid changing difficulty",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "multiplayer difficulty preference",
 		longDescription: "This rule forbids PLAYER_NAME to change her Bondage Club multiplayer difficulty, regardless of the current value.",
 		triggerTexts: {
@@ -864,7 +863,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_activities", {
 		name: "Prevent usage of all activities",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		loggable: false,
 		shortDescription: "any action buttons such as kissing or groping",
 		longDescription: "This rule forbids PLAYER_NAME to use any (sexual) activities in chat rooms. Other players can still use activities on her, as this rules does not block the arousal & sexual activities system itself, as forcing the according BC setting would.",
@@ -887,7 +886,7 @@ export function initRules_bc_blocks() {
 	registerRule("block_mainhall_maidrescue", {
 		name: "Forbid mainhall maid services",
 		loggable: false,
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "to get out of any restraints",
 		longDescription: "This rule forbids PLAYER_NAME to use a maid's help to get out of restraints in the club's main hall. Recommended to combine with the rule: 'Force 'Cannot enter single-player rooms when restrained' (Existing BC setting)' to prevent NPCs in other rooms from helping.",
 		defaultLimit: ConditionsLimit.normal,
@@ -907,7 +906,7 @@ export function initRules_bc_blocks() {
 
 	registerRule("block_action", {
 		name: "Forbid the action command",
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "BCX's .action/.a chat command",
 		longDescription: "This rule forbids PLAYER_NAME to use the action command. Action is a BCX feature that enables to format a message to look like a BC chat action. If PLAYER_NAME should be forbidden to use the command to communicate, this rule should be used.",
 		triggerTexts: {
@@ -922,7 +921,7 @@ export function initRules_bc_blocks() {
 	registerRule("block_BCX_permissions", {
 		name: "Prevent using BCX permissions",
 		loggable: false,
-		icon: icon_restrictions,
+		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME using her permissions for her own BCX, with some exceptions",
 		longDescription: "This rule forbids PLAYER_NAME access to some parts of their own BCX they have permission to use, making it as if they do not have 'self access' (see BCX tutorial on permission system) while the rule is active. This rule still leaves access for all permissions where the lowest permitted role ('lowest access') is also set to PLAYER_NAME (to prevent getting stuck). This rule does not affect PLAYER_NAME's permissions to use another users's BCX.",
 		defaultLimit: ConditionsLimit.blocked

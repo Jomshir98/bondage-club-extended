@@ -1,5 +1,5 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
-import { registerRule } from "../modules/rules";
+import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { patchFunction, hookFunction } from "../patching";
 import { ChatRoomActionMessage, getCharacterName, InfoBeep } from "../utilsClub";
@@ -11,7 +11,7 @@ import { BCX_setTimeout } from "../BCXContext";
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
 		name: "Sensory deprivation: Sound",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "impacts PLAYER_NAME's hearing; adjustable",
 		longDescription: "This rule impacts PLAYER_NAME's natural ability to hear in the same way items do, independent of them (strength of deafening can be adjusted).",
@@ -42,7 +42,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_hearing_whitelist", {
 		name: "Hearing whitelist",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "of members whom PLAYER_NAME can always understand",
 		longDescription: "This rule defines a list of members whose voice can always be understood by PLAYER_NAME - independent of any sensory deprivation items or hearing impairing BCX rules on PLAYER_NAME. There is an additional option to toggle whether PLAYER_NAME can still understand a white-listed member's voice if that member is speech impaired herself (e.g. by being gagged).",
@@ -108,7 +108,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_restrict_sight", {
 		name: "Sensory deprivation: Sight",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "impacts PLAYER_NAME's sight; adjustable",
 		longDescription: "This rule impacts PLAYER_NAME's natural ability to see in the same way items do, independent of them (strength of blindness can be adjusted).",
@@ -139,7 +139,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_seeing_whitelist", {
 		name: "Seeing whitelist",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "of members whom PLAYER_NAME can always see",
 		longDescription: "This rule defines a list of members whose appearance can always be seen normally by PLAYER_NAME - independent of any blinding items or seeing impairing BCX rules on PLAYER_NAME.",
@@ -216,7 +216,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_eyes_fullblind", {
 		name: "Fully blind when eyes are closed",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule enforces full blindness when the eyes are closed. (Light sensory deprivation setting is still respected and doesn't blind fully)",
 		defaultLimit: ConditionsLimit.normal,
@@ -237,7 +237,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_blindfolds_fullblind", {
 		name: "Fully blind when blindfolded",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule enforces full blindness when wearing any item that limits sight in any way. (This rules does NOT respect Light sensory deprivation setting and always forces player to be fully blind)",
 		defaultLimit: ConditionsLimit.normal,
@@ -252,7 +252,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_always_slow", {
 		name: "Always leave rooms slowly",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independent of the items she is wearing. WARNING: Due to limitation in Bondage Club itself, only BCX users will be able to stop PLAYER_NAME from leaving the room.",
 		defaultLimit: ConditionsLimit.normal,
@@ -267,7 +267,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_control_orgasms", {
 		name: "Control ability to orgasm",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "adjustable: only-edge, only-ruin, no-resist",
 		longDescription: "This rule impacts PLAYER_NAME's ability to control their orgasms, independent of items. There are three control options, which are: Never cum (always edge, the bar never reaches 100%), force into ruined orgasm (orgasm screen starts, but doesn't let her actually cum) and prevent resisting orgasm (able to enter orgasm screen, but unable to resist it).",
@@ -320,7 +320,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_secret_orgasms", {
 		name: "Secret orgasm progress",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "unable to see the own arousal meter",
 		longDescription: "This rule prevents PLAYER_NAME from seeing their own arousal meter, even while it is active and working. This means, that it is a surprise to them, when the orgasm (quick-time event) happens. Does not effect other characters being able to see the meter, if club settings allow that.",
@@ -346,7 +346,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_room_admin_transfer", {
 		name: "Room admin transfer",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "give admin to defined roles",
 		longDescription: "This rule lets you define a minimum role which PLAYER_NAME will automatically give room admin rights to (if she has admin rights in the room). Also has the option to remove admin rights from PLAYER_NAME afterwards.",
@@ -402,7 +402,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_room_admin_limit", {
 		name: "Limit bound admin power",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "restrict room admin powers while restrained",
 		longDescription: "This rule forbids PLAYER_NAME to do any room admin actions (except for kick/ban), when she is restrained. Note: This rule does not affect an admin's ability to bypass locked rooms. Tip: This rule can be combined with the rule to enforce joining the last room to trap her in it.",
@@ -477,7 +477,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_set_profile_description", {
 		name: "Control profile online description",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "directly sets PLAYER_NAME's description",
 		longDescription: "This rule sets PLAYER_NAME's online description (in her profile) to any text entered in the rule config, blocking changes to it. Warning: This rule is editing the actual profile text. This means that after saving a changed text, the original text is lost!",
@@ -508,7 +508,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_force_suitcase_game", {
 		name: "Always carry a suitcase",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "from the kidnappers league multiplayer game",
 		longDescription: "This rule forces PLAYER_NAME to constantly participate in the kidnappers league's suitcase delivery task, by automatically giving her a new suitcase, whenever the suitcase item slot is empty.",
@@ -525,7 +525,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_restrict_leashability", {
 		name: "Restrict being leashed by others",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule only allows selected roles to leash PLAYER_NAME, responding with a message about unsuccessful leashing to others when they attempt to do so.",
 		defaultLimit: ConditionsLimit.limited,
@@ -556,7 +556,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_hide_friends", {
 		name: "Hide online friends if blind",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "also preventing beeps from the friendlist - exceptions settable",
 		longDescription: "This rule hides persons on PLAYER_NAME's friend list when she is fully blinded, which also makes sending beeps impossible. Received beeps can still be answered. The rule allows to manage a list of members who can be seen normally.",
@@ -593,7 +593,7 @@ export function initRules_bc_alter() {
 
 	registerRule("alt_forced_summoning", {
 		name: "Ready to be summoned",
-		icon: "Icons/Swap.png",
+		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "leash PLAYER_NAME from anywhere using a beep with message",
 		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the summoner after 15 seconds. It works by sending a beep message with the set text or simply the word 'summon' to PLAYER_NAME. Members who are allowed to summon PLAYER_NAME can be set. NOTES: PLAYER_NAME can always be summoned no matter if she has a leash or is prevented from leaving the room (ignoring restraints or locked rooms). However, if the target room is full or locked, she will end up in the lobby. Summoning will not work if the room name is not included with the beep message!",

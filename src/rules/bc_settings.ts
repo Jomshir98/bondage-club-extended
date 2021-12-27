@@ -1,5 +1,5 @@
 import { ConditionsLimit } from "../constants";
-import { registerRule } from "../modules/rules";
+import { registerRule, RuleType } from "../modules/rules";
 
 export function initRules_bc_settings() {
 
@@ -18,7 +18,7 @@ export function initRules_bc_settings() {
 	function settingHelper(setting: string, defaultLimit: ConditionsLimit): RuleDisplayDefinition {
 		return {
 			name: `Force '${setting}'`,
-			icon: "Icons/Preference.png",
+			type: RuleType.Setting,
 			loggable: false,
 			shortDescription: "Existing BC setting",
 			defaultLimit,

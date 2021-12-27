@@ -22,12 +22,31 @@ import { getCurrentSubscreen, setSubscreen } from "./gui";
 import { GuiMemberSelect } from "../gui/member_select";
 import { modStorageSync } from "./storage";
 import { BCX_setInterval } from "../BCXContext";
+import { icon_restrictions, icon_OwnerList } from "../resources";
 
 const RULES_ANTILOOP_RESET_INTERVAL = 60_000;
 const RULES_ANTILOOP_THRESHOLD = 10;
 const RULES_ANTILOOP_SUSPEND_TIME = 600_000;
 
 const STRING_LIST_MAX_LENGTH = 128;
+
+export const enum RuleType {
+	Block = 0,
+	Alt = 1,
+	Setting = 2,
+	RC = 3,
+	Speech = 4,
+	Other = 99
+}
+
+export const RULE_ICONS: Record<RuleType, string> = {
+	[RuleType.Block]: icon_restrictions,
+	[RuleType.Alt]: "Icons/Swap.png",
+	[RuleType.Setting]: "Icons/Preference.png",
+	[RuleType.RC]: icon_OwnerList,
+	[RuleType.Speech]: "Icons/Chat.png",
+	[RuleType.Other]: "Icons/Chest.png"
+};
 
 export function guard_BCX_Rule(name: unknown): name is BCX_Rule {
 	return typeof name === "string" && rules.has(name as BCX_Rule);
@@ -107,7 +126,7 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 	}
 	return {
 		name: data.name,
-		icon: data.icon,
+		type: data.type,
 		shortDescription: data.shortDescription,
 		longDescription: data.longDescription,
 		triggerTexts: data.triggerTexts,

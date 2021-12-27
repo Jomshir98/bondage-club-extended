@@ -1,5 +1,5 @@
 import { ConditionsLimit } from "../constants";
-import { registerRule } from "../modules/rules";
+import { registerRule, RuleType } from "../modules/rules";
 import { ChatRoomSendLocal } from "../utilsClub";
 
 export function initRules_other() {
@@ -12,7 +12,7 @@ export function initRules_other() {
 
 	registerRule("other_forbid_afk", {
 		name: "Forbid going afk",
-		icon: "Icons/Chest.png",
+		type: RuleType.Other,
 		enforceable: false,
 		shortDescription: "logs whenever PLAYER_NAME is inactive",
 		longDescription: "This rule forbids PLAYER_NAME to go afk and logs when the allowed inactivity threshold is overstepped.",
@@ -48,9 +48,9 @@ export function initRules_other() {
 	});
 
 	/* TODO: Implement
-	registerRule("log_online_time", {
+	registerRule("other_log_online_time", {
 		name: "Track online time",
-		icon: "Icons/Chest.png",
+		type: RuleType.Other,
 		enforceable: false,
 		loggable: false,
 		shortDescription: "counts the time PLAYER_NAME spent in the club",
@@ -62,7 +62,7 @@ export function initRules_other() {
 	let lastReminder = 0;
 	registerRule("other_constant_reminder", {
 		name: "Listen to my voice",
-		icon: "Icons/Chest.png",
+		type: RuleType.Other,
 		loggable: false,
 		enforceable: false,
 		shortDescription: "regularily show configurable sentences to PLAYER_NAME",
@@ -88,7 +88,7 @@ export function initRules_other() {
 				Date.now() > lastReminder + state.customData.reminderFrequency * 60 * 1000
 			) {
 				lastReminder = Date.now();
-				ChatRoomSendLocal("[Voice] " + state.customData.reminderText[Math.floor(Math.random()*state.customData.reminderText.length)]);
+				ChatRoomSendLocal("[Voice] " + state.customData.reminderText[Math.floor(Math.random() * state.customData.reminderText.length)]);
 				return true;
 			}
 			return false;
@@ -96,9 +96,9 @@ export function initRules_other() {
 	});
 
 	/* TODO: Idea stage
-	registerRule("restrict_console_usage", {
+	registerRule("other_restrict_console_usage", {
 		name: "Restrict console usage",
-		icon: "Icons/Chest.png",
+		type: RuleType.Other,
 		loggable: false,
 		shortDescription: "to not allow freeing oneself",
 		longDescription: "Makes the player unable to use the browser console to change their own appearance in the club, such as removing restraints.",
@@ -107,9 +107,9 @@ export function initRules_other() {
 	*/
 
 	/* TODO: Idea stage
-	registerRule("track_BCX_activation", {
+	registerRule("other_track_BCX_activation", {
 		name: "Track BCX activation",
-		icon: "Icons/Chest.png",
+		type: RuleType.Other,
 		enforceable: false,
 		shortDescription: "logs if PLAYER_NAME enters the club without BCX",
 		longDescription: "This rule observes PLAYER_NAME, logging it as a rule violation if the club is entered without BCX active.",

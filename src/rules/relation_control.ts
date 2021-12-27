@@ -1,12 +1,11 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
-import { registerRule } from "../modules/rules";
+import { registerRule, RuleType } from "../modules/rules";
 import { hookFunction } from "../patching";
-import { icon_OwnerList } from "../resources";
 
 export function initRules_bc_relation_control() {
 	registerRule("rc_club_owner", {
 		name: "Forbid club owner changes",
-		icon: icon_OwnerList,
+		type: RuleType.RC,
 		shortDescription: "getting or leaving owner",
 		longDescription: "This rule forbids PLAYER_NAME to leave their current club owner or get a new one. Advancing ownership from trial to full ownership is unaffected. Doesn't prevent the club owner from releasing her.",
 		// Logs are not implemented
@@ -43,7 +42,7 @@ export function initRules_bc_relation_control() {
 
 	registerRule("rc_lover_new", {
 		name: "Forbid getting new lovers",
-		icon: icon_OwnerList,
+		type: RuleType.RC,
 		longDescription: "This rule forbids PLAYER_NAME to get a new lover. Advancing lovership from dating to engagement or from engagement to marriage is unaffected.",
 		// Logs are not implemented
 		loggable: false,
@@ -65,7 +64,7 @@ export function initRules_bc_relation_control() {
 
 	registerRule("rc_lover_leave", {
 		name: "Forbid breaking up with lovers",
-		icon: icon_OwnerList,
+		type: RuleType.RC,
 		longDescription: "This rule forbids PLAYER_NAME to leave any of their lovers, independent of lovership stage (leaving dating, engaged and married characters is forbidden). Doesn't prevent her lovers from breaking up with her.",
 		// Logs are not implemented
 		loggable: false,
@@ -89,7 +88,7 @@ export function initRules_bc_relation_control() {
 
 	registerRule("rc_sub_new", {
 		name: "Forbid taking new submissives",
-		icon: icon_OwnerList,
+		type: RuleType.RC,
 		shortDescription: "by offering them an ownership trial",
 		longDescription: "This rule forbids PLAYER_NAME to start a trial with new submissive. Advancing ownership from trial to full ownership is unaffected.",
 		// Logs are not implemented
@@ -112,7 +111,7 @@ export function initRules_bc_relation_control() {
 
 	registerRule("rc_sub_leave", {
 		name: "Forbid disowning submissives",
-		icon: icon_OwnerList,
+		type: RuleType.RC,
 		longDescription: "This rule forbids PLAYER_NAME to let go of any of their subs. (affects both trial and full ownerships). Doesn't prevent her submissives from breaking the bond.",
 		// Logs are not implemented
 		loggable: false,

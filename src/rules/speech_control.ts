@@ -1,5 +1,5 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
-import { registerRule } from "../modules/rules";
+import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { registerSpeechHook, SpeechMessageInfo, falteringSpeech, SpeechHookAllow } from "../modules/speech";
 import { callOriginal, hookFunction } from "../patching";
@@ -11,7 +11,7 @@ import { BCX_setTimeout } from "../BCXContext";
 export function initRules_bc_speech_control() {
 	registerRule("speech_specific_sound", {
 		name: "Allow specific sounds only",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "such as an animal sound",
 		longDescription: "This rule allows PLAYER_NAME to only communicate using a list of specific sound patterns in chat messages and whispers. These patterns cannot be mixed in the same message, though. Only one sound from the list per message is valid. That said, any variation of a sound in the list is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
 		triggerTexts: {
@@ -76,7 +76,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_garble_whispers", {
 		name: "Garble whispers while gagged",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "same as normal messages",
 		longDescription: "This rule alters PLAYER_NAME's outgoing whisper messages while gagged to be garbled the same way normal chat messages are. This means, that strength of the effect depends on the type of gag and (OOC text) is not affected. Note: While the rule is in effect, the BC immersion preference 'Prevent OOC & whispers while gagged' is altered, to allow gagged whispers, since those are now garbled by the rule. OOC prevention is not changed.",
@@ -96,7 +96,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_block_gagged_ooc", {
 		name: "Block OOC chat while gagged",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "no more misuse of OOC for normal chatting while gagged",
 		longDescription: "This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages while she is gagged.",
 		triggerTexts: {
@@ -126,7 +126,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_block_ooc", {
 		name: "Block OOC chat",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "blocks use of OOC in messages",
 		longDescription: "This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages at any moment. This is a very extreme rule and should be used with great caution!",
 		triggerTexts: {
@@ -156,7 +156,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_doll_talk", {
 		name: "Doll talk",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "allows only short sentences with simple words",
 		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text, but does affect whispers. Note: Setting '0' means this part is not limited (∞), as there is another rule to forbid open talking completely.",
 		triggerTexts: {
@@ -209,7 +209,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_ban_words", {
 		name: "Forbid saying certain words in chat",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "based on a configurable blacklist",
 		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect emotes and OOC text, but does affect whispers.",
 		triggerTexts: {
@@ -253,7 +253,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_forbid_open_talking", {
 		name: "Forbid talking openly",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "in a chat room",
 		longDescription: "This rule forbids PLAYER_NAME to send a message to all people inside a chat room. Does not affect whispers or emotes, but does affect OOC.",
 		triggerTexts: {
@@ -283,7 +283,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_limit_open_talking", {
 		name: "Limit talking openly",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "only allow a set number of chat messages per minute",
 		longDescription: "This rule limits PLAYER_NAME's ability to send a message to all people inside a chat room to only the set number per minute. Does not affect whispers or emotes, but does affect OOC. Note: Setting '0' will have no effect, as there is another rule to forbid open talking completely.",
@@ -328,7 +328,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_forbid_emotes", {
 		name: "Forbid using emotes",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "in a chat room",
 		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room.",
 		triggerTexts: {
@@ -358,7 +358,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_limit_emotes", {
 		name: "Limit using emotes",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "only allow a set number of emotes per minute",
 		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room to only the set number per minute. Note: Setting '0' will have no effect, as there is another rule to forbid using emotes completely.",
@@ -399,7 +399,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_restrict_whisper_send", {
 		name: "Restrict sending whispers",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "except to defined roles",
 		longDescription: "This rule forbids PLAYER_NAME to whisper anything to most people inside a chat room, except to the defined roles. Also affects whispered OOC messages.",
 		triggerTexts: {
@@ -439,7 +439,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_restrict_whisper_receive", {
 		name: "Restrict receiving whispers",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "except from defined roles",
 		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set (text field is not empty). PLAYER_NAME won't get any indication that she would have received a whisper. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
@@ -490,7 +490,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_restrict_beep_send", {
 		name: "Restrict sending beep messages",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "except to selected members",
 		longDescription: "This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. Sending beeps without a message is not affected. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
 		triggerTexts: {
@@ -537,7 +537,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_restrict_beep_receive", {
 		name: "Restrict receiving beeps",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
 		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
@@ -594,7 +594,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_greet_order", {
 		name: "Order to greet club",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "when entering it through the login portal",
 		longDescription: "PLAYER_NAME will automatically send all defined member numbers (if they are currently online) a beep the moment PLAYER_NAME joins the club or the moment she start BCX to make her presence known. Disconnects don't count as coming into the club again, as far as detectable. NOTE: Trigger conditions should not be selected when using this rule, as if you for instance select 'when in public room' the rule will only greet when you load BCX in a public room.",
@@ -631,7 +631,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_block_antigarble", {
 		name: "Forbid the antigarble option",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "BCX's .antigarble command",
 		longDescription: "This rule forbids PLAYER_NAME to use the antigarble command. Antigarble is a BCX feature that enables a BCX user to understand muffled voices from other gagged characters or when wearing a deafening item. If PLAYER_NAME should be forbidden to use the command, this rule should be used.",
 		triggerTexts: {
@@ -644,9 +644,9 @@ export function initRules_bc_speech_control() {
 	});
 
 	/* TODO: Implement
-	registerRule("replace_spoken_words", {
+	registerRule("speech_replace_spoken_words", {
 		name: "Replace spoken words",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "with others in all chat, whisper and OOC messages",
 		longDescription: "Automatically replaces specific words PLAYER_NAME uses in chat messages, whispers and OOC with another set word from a defineable a list of words with a special syntax (e.g. [Clare,Lily;Mistress],[Claudia;the maid],[I;this slut]).",
@@ -664,9 +664,9 @@ export function initRules_bc_speech_control() {
 
 	/* TODO: Implement
 	// TODO: { TARGET_PLAYER: `${msg.target ? getCharacterName(msg.target, "[unknown]") : "[unknown]"} (${msg.target})` }
-	registerRule("using_honorifics", {
+	registerRule("speech_using_honorifics", {
 		name: "Using honorifics",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "in front of specific names in all chat, whisper and OOC messages",
 		longDescription: "Define a listing of words (e.g. Miss, Mistress, ...) where one of them always needs to be typed before any one out of a listing of names (e.g. Julia, Eve, ...) in all chat, whisper and OOC messages. Needs a certain syntax (e.g. [Goddess,Mistress;Lily,Clare],[slut;Mona], ...)",
 		triggerTexts: {
@@ -688,7 +688,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_force_retype", {
 		name: "Force to retype",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "if sending a message in chat is rejected by BCX due to a rule violation",
 		longDescription: "This rule forces PLAYER_NAME to retype any chat/whisper/emote/OOC message as a punishment when they try to send it and another enforced BCX speech rule determines that there is any rule violation in that message.",
@@ -700,7 +700,7 @@ export function initRules_bc_speech_control() {
 	let lastRoomName: string = "";
 	registerRule("greet_room_order", {
 		name: "Order to greet room",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "with a settable sentence when entering it newly",
 		longDescription: "Sets a specific sentence that PLAYER_NAME must say loud after entering a room that is not empty. The sentence is autopopulating the chat window text input. When to say it is left to PLAYER_NAME, but when the rule is enforced, it is the only thing that can be said in this room after joining it. Emotes can still be used, though. Disconnects don't count as coming into a new room again, as far as detectable.",
 		triggerTexts: {
@@ -778,7 +778,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("greet_new_guests", {
 		name: "Greet new guests",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "when they join the current room",
 		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in.",
@@ -838,9 +838,9 @@ export function initRules_bc_speech_control() {
 	// to avoid having to rewrite all the sentences. WARNING: a target id and a message id always needs to be specified. Therefore, you will be
 	// softlocked/muted if this mode is enabled and you remove all sentences and/or targets.
 	/* TODO: Implement
-	registerRule("restrained_speech", {
+	registerRule("speech_restrained_speech", {
 		name: "Restrained speech",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "only the set sentences are allowed to be spoken",
 		// TODO: needs an updated describing the special wildcards or placeholders that can be used
 		longDescription: "This rule no longer allows PLAYER_NAME to speak freely, she is given a set of sentences allowed and can only use those in chat and whispers. Does not affect OOC.",
@@ -864,7 +864,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_alter_faltering", {
 		name: "Enforce faltering speech",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "an enhanced studder effect is added to PLAYER_NAME's chat texts",
 		longDescription: "Thus rule converts PLAYER_NAME's messages, so she is only able to speak studdering and with random filler sounds, for some [RP] reason (anxiousness, arousal, fear, etc.). Converts the typed chat text automatically. Affects chat messages and whispers, but not OOC.",
@@ -884,7 +884,7 @@ export function initRules_bc_speech_control() {
 
 	registerRule("speech_mandatory_words", {
 		name: "Establish mandatory words",
-		icon: "Icons/Chat.png",
+		type: RuleType.Speech,
 		shortDescription: "of which at least one needs to always be included when speaking openly",
 		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss'). Doesn't affect whispers, emotes and OOC text.",
 		triggerTexts: {

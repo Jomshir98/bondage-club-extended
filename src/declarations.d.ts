@@ -263,19 +263,19 @@ type BCX_Rule =
 	| "speech_restrict_beep_receive"
 	| "speech_greet_order"
 	| "speech_block_antigarble"
-	// | "replace_spoken_words"
-	// | "using_honorifics"
+	// | "speech_replace_spoken_words"
+	// | "speech_using_honorifics"
 	| "speech_force_retype"
 	| "greet_room_order"
 	| "greet_new_guests"
-	// | "restrained_speech"
+	// | "speech_restrained_speech"
 	| "speech_alter_faltering"
 	| "speech_mandatory_words"
 	| "other_forbid_afk"
-	// | "log_online_time"
+	// | "other_log_online_time"
 	| "other_constant_reminder"
-	// | "restrict_console_usage"
-	// | "track_BCX_activation"
+	// | "other_restrict_console_usage"
+	// | "other_track_BCX_activation"
 	| "setting_item_permission"
 	| "setting_forbid_lockpicking"
 	| "setting_forbid_SP_rooms"
@@ -386,10 +386,10 @@ type RuleCustomData = {
 	speech_limit_emotes: {
 		maxNumberOfEmotes: number;
 	},
-	// replace_spoken_words: {
+	// speech_replace_spoken_words: {
 	// 	stringWithReplacingSyntax: string;
 	// },
-	// using_honorifics: {
+	// speech_using_honorifics: {
 	// 	stringWithRuleSyntax: string;
 	// },
 	greet_room_order: {
@@ -398,7 +398,7 @@ type RuleCustomData = {
 	greet_new_guests: {
 		greetingSentence: string;
 	},
-	// restrained_speech: {
+	// speech_restrained_speech: {
 	// 	listOfAllowedSentences: string[];
 	// },
 	speech_mandatory_words: {
@@ -544,7 +544,7 @@ type RuleCustomDataEntryDefinitionStrict<ID extends keyof RuleCustomData, P exte
 
 interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 	name: string;
-	icon: string;
+	type: import("./modules/rules").RuleType;
 	shortDescription?: string;
 	longDescription: string;
 	/** Texts to use for when rule is broken, set to empty string to disable */

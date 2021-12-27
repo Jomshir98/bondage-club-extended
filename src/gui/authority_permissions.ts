@@ -203,7 +203,11 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						Width: 64
 					});
 					// Permission name
-					DrawButton(200, Y, 1000, 64, "", "White");
+					MainCanvas.beginPath();
+					MainCanvas.rect(200, Y, 1000, 64);
+					MainCanvas.fillStyle = checkPermissionAccessData(e.permissionInfo, this.myAccessLevel) ? "White" : "#ddd";
+					MainCanvas.fill();
+					MainCanvas.stroke();
 					DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
 					// Self checkbox
 					DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#ddd", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);

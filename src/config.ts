@@ -25,6 +25,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	CharacterCanKneel: ["A5A325E3"],
 	CharacterLoadEffect: ["0498693B"],
 	ChatAdminClick: ["6B460E3D"],
+	ChatAdminExit: ["64A8D565"],
 	ChatAdminLoad: ["EB8AF0DB"],
 	ChatAdminRun: ["CBE642C8"],
 	ChatCreateClick: ["765AEBFE"],

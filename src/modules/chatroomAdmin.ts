@@ -150,10 +150,18 @@ export class ModuleChatroomAdmin extends BaseModule {
 				if (MouseIn(124, 147, 90, 90)) DrawButtonHover(34, 70, 64, 64, `More room setup options`);
 			}
 		});
+		hookFunction("ChatAdminExit", 0, (args, next) => {
+			next(args);
+			// needed to auto apply a template correctly again
+			ChatBlockItemReturnData = {};
+		});
 		hookFunction("ChatCreateLoad", 0, (args, next) => {
 			next(args);
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
-			if (template) {
+			if (template &&
+				BackgroundSelectionPreviousScreen !== CurrentScreen &&
+				Object.keys(ChatBlockItemReturnData).length === 0
+			) {
 				const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
 				const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
 				const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
@@ -169,6 +177,9 @@ export class ModuleChatroomAdmin extends BaseModule {
 				if (inputSize) inputSize.value = template.Limit;
 				ChatBlockItemCategory = template.BlockCategory;
 			}
+			// needed to auto apply a template correctly again
+			BackgroundSelectionPreviousScreen = "";
+			ChatBlockItemReturnData = {};
 		});
 		//#endregion
 		hookFunction("ChatCreateClick", 0, (args, next) => {

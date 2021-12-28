@@ -28,6 +28,7 @@ declare var BackgroundSelectionTagList: any[];
 declare var BackgroundSelectionAll: { Name: string; Description: string; Low: string; }[];
 declare var BackgroundSelectionOffset: number;
 declare var BackgroundSelectionView: any[];
+declare var BackgroundSelectionPreviousScreen: string;
 
 // Timer.js
 declare var CurrentTime: number;
@@ -151,6 +152,7 @@ declare var ChatCreateShowBackgroundMode: boolean;
 
 // ChatBlockItem.js
 declare var ChatBlockItemEditable: boolean;
+declare var ChatBlockItemReturnData: { Screen?: string; };
 
 // Server.js
 declare var ServerBeep: {

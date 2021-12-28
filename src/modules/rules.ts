@@ -345,7 +345,7 @@ export const ruleCustomDataHandlers: {
 		},
 		run({ def, Y, key }) {
 			DrawTextFit(def.description, 1050, Y + 0, 850, "Black");
-			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + 26, 850, 60);
+			ElementPositionFix(`BCX_RCDH_${key}`, 40, 1050, Y + 26, 425, 60);
 		},
 		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);

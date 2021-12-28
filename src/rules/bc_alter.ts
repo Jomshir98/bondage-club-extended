@@ -610,6 +610,12 @@ export function initRules_bc_alter() {
 				default: "Come to my room immediately",
 				description: "The text used for summoning:",
 				Y: 715
+			},
+			summonTime: {
+				type: "number",
+				default: 15,
+				description: "Time in seconds before enforcing summon:",
+				Y: 75
 			}
 		},
 		load(state) {
@@ -630,8 +636,8 @@ export function initRules_bc_alter() {
 					ChatRoomActionMessage(`${Player.Name} received a summon: "${state.customData.summoningText}".`);
 					beep = true;
 					BCX_setTimeout(() => {
-						// Check if rule is still in effect!
-						if (!state.isEnforced) return;
+						// Check if rule is still in effect or if we are already there
+						if (!state.isEnforced || ChatRoomData.Name === data.ChatRoomName) return;
 
 						// leave
 						ChatRoomActionMessage(`The demand for ${Player.Name}'s presence is now enforced.`);
@@ -646,7 +652,7 @@ export function initRules_bc_alter() {
 						// join
 						ChatRoomPlayerCanJoin = true;
 						ServerSend("ChatRoomJoin", { Name: data.ChatRoomName });
-					}, 15_000);
+					}, state.customData.summonTime * 1000);
 				}
 				next(args);
 				if (beep) state.triggerAttempt({ SUMMONER: `${data.MemberName} (${data.MemberNumber})` });

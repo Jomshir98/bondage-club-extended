@@ -349,6 +349,7 @@ type RuleCustomData = {
 	alt_forced_summoning: {
 		allowedMembers: number[];
 		summoningText: string;
+		summonTime: number;
 	},
 	speech_specific_sound: {
 		soundWhitelist: string[];

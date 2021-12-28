@@ -4,6 +4,10 @@ import { GuiGlobalDialogClearData } from "./global_dialogClearData";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiGlobalModuleToggling } from "./global_moduleToggling";
 import { GuiSubscreen } from "./subscreen";
+import { capitalizeFirstLetter } from "../utils";
+import { DrawImageEx } from "../utilsClub";
+import { getCurrentPreset } from "../modules/presets";
+import { Preset } from "../constants";
 
 export class GuiGlobal extends GuiSubscreen {
 
@@ -27,9 +31,15 @@ export class GuiGlobal extends GuiSubscreen {
 			return;
 		}
 
+		// preset
+		MainCanvas.fillStyle = "#ddd";
+		MainCanvas.fillRect(840, 200, 950, 90);
+		DrawImageEx("Icons/Introduction.png", 840 + 20, 200 + 20, { Height: 50, Width: 50 });
+		DrawTextFit(`Your initially selected BCX preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
+
 		DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
 
-		DrawButton(1525, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
+		DrawButton(1490, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
 	}
 
 	Click() {
@@ -43,7 +53,7 @@ export class GuiGlobal extends GuiSubscreen {
 			return;
 		}
 
-		if (MouseIn(1525, 800, 300, 90)) {
+		if (MouseIn(1490, 800, 300, 90)) {
 			setSubscreen(new GuiGlobalDialogClearData(this));
 			return;
 		}

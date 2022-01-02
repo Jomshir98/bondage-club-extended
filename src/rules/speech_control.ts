@@ -499,13 +499,16 @@ export function initRules_bc_speech_control() {
 			whitelistedMemberNumbers: {
 				type: "memberNumberList",
 				default: [],
-				description: "Member numbers still allowed to be beeped:"
+				description: "Member numbers still allowed to be beeped:",
+				options: {
+					pageSize: 2
+				}
 			},
 			onlyWhenBound: {
 				type: "toggle",
 				default: false,
 				description: "Only in effect when unable to use hands",
-				Y: 76
+				Y: 700
 			}
 		},
 		load(state) {
@@ -540,19 +543,22 @@ export function initRules_bc_speech_control() {
 				type: "memberNumberList",
 				default: [],
 				description: "Member numbers still allowed to send beeps:",
-				Y: 430
+				Y: 470,
+				options: {
+					pageSize: 2
+				}
 			},
 			autoreplyText: {
 				type: "string",
 				default: "PLAYER_NAME is currently forbidden to receive beeps.",
 				description: "Auto replies blocked sender with this:",
-				Y: 280
+				Y: 300
 			},
 			onlyWhenBound: {
 				type: "toggle",
 				default: false,
 				description: "Only in effect when unable to use hands",
-				Y: 76
+				Y: 740
 			}
 		},
 		load(state) {

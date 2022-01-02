@@ -52,13 +52,16 @@ export function initRules_bc_alter() {
 				type: "memberNumberList",
 				default: [],
 				description: "Members numbers still heard while hearing impaired:",
-				Y: 350
+				Y: 350,
+				options: {
+					pageSize: 3
+				}
 			},
 			ignoreGaggedMembersToggle: {
 				type: "toggle",
 				default: false,
 				description: "Also understand if those are speech impaired",
-				Y: 750
+				Y: 710
 			}
 		},
 		load(state) {
@@ -603,19 +606,22 @@ export function initRules_bc_alter() {
 				type: "memberNumberList",
 				default: [],
 				description: "Members numbers allowed to summon:",
-				Y: 300
+				Y: 325,
+				options: {
+					pageSize: 1
+				}
 			},
 			summoningText: {
 				type: "string",
 				default: "Come to my room immediately",
 				description: "The text used for summoning:",
-				Y: 715
+				Y: 705
 			},
 			summonTime: {
 				type: "number",
 				default: 15,
 				description: "Time in seconds before enforcing summon:",
-				Y: 75
+				Y: 550
 			}
 		},
 		load(state) {

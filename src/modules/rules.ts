@@ -207,6 +207,7 @@ export const ruleCustomDataHandlers: {
 		}
 	},
 	memberNumberList: {
+		validateOptions: options => options === undefined || (Number.isInteger(options?.pageSize)),
 		validate: value => Array.isArray(value) && value.every(Number.isInteger),
 		onDataChange({ active, key, access }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
@@ -229,7 +230,7 @@ export const ruleCustomDataHandlers: {
 		},
 		run({ def, value, Y, key, access }) {
 			Y -= 20;
-			const PAGE_SIZE = 4;
+			const PAGE_SIZE = def.options?.pageSize ? def.options.pageSize : 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
 			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
 			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
@@ -270,9 +271,9 @@ export const ruleCustomDataHandlers: {
 			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
 			MainCanvas.textAlign = "left";
 		},
-		click({ value, Y, key, target }) {
+		click({ value, Y, key, target, def }) {
 			Y -= 20;
-			const PAGE_SIZE = 4;
+			const PAGE_SIZE = def.options?.pageSize ? def.options.pageSize : 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
 			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
 			for (let i = 0; i < PAGE_SIZE; i++) {

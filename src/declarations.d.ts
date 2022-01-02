@@ -519,6 +519,9 @@ type RuleCustomDataTypesMap = {
 type RuleCustomDataTypes = keyof RuleCustomDataTypesMap;
 type RuleCustomDataTypesOptions = {
 	listSelect: [string, string][];
+	memberNumberList?: {
+		pageSize?: number;
+	};
 	string?: RegExp;
 	stringList?: {
 		validate?: RegExp;

@@ -507,9 +507,21 @@ export const ruleCustomDataHandlers: {
 				const e = page * PAGE_SIZE + i;
 				if (e >= value.length)
 					break;
-				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
 				const msg = value[e];
-				DrawTextFit(msg.length > 81 ? msg.substr(0, 80) + "\u2026" : msg, 1060, Y + 26 + i * 70 + 34, 750, "Black");
+				if (MouseIn(1050, Y + 26 + i * 70, 766, 64)) {
+					DrawHoverElements.push(() => {
+						MainCanvas.save();
+						MainCanvas.fillStyle = "rgba(255, 255, 136, 0.9)";
+						MainCanvas.fillRect(1050, Y + 26, 766, 280);
+						MainCanvas.strokeStyle = "Black";
+						MainCanvas.strokeRect(1050, Y + 26, 766, 280);
+						MainCanvas.textAlign = "left";
+						DrawTextWrap(msg + "   -   [click to copy into the empty input text field]", 1050 - 746 / 2, Y + 30, 756, 270, "black", undefined, 5);
+						MainCanvas.restore();
+					});
+				}
+				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
+				DrawTextFit(msg.length > 61 ? msg.substr(0, 60) + "\u2026" : msg, 1060, Y + 26 + i * 70 + 34, 750, "Black");
 				if (access) {
 					MainCanvas.textAlign = "center";
 					DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");
@@ -527,16 +539,19 @@ export const ruleCustomDataHandlers: {
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
 			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
+			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			for (let i = 0; i < PAGE_SIZE; i++) {
 				const e = page * PAGE_SIZE + i;
 				if (e >= value.length)
 					break;
+				if (MouseIn(1050, Y + 26 + i * 70, 766, 64) && input && input.value === "") {
+					input.value = value[e];
+				}
 				if (MouseIn(1836, Y + 26 + i * 70, 64, 64)) {
 					value.splice(e, 1);
 					return value;
 				}
 			}
-			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) &&
 				input && input.value &&
 				(!def.options?.validate || def.options.validate.test(input.value)) &&

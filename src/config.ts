@@ -110,6 +110,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	PreferenceSubscreenDifficultyRun: ["65BF560F"],
 	PrivateRansomStart: ["0E968EDD", "511E91C6"],
 	ServerAccountBeep: ["2D918B69", "D2802EE7", "D93AD698"],
+	ServerPlayerIsInChatRoom: ["E3771112"],
 	ServerSend: ["90A61F57"],
 	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
 	StruggleDrawStrengthProgress: ["4755C02D"],

@@ -190,6 +190,11 @@ export class ModuleMiscPatches extends BaseModule {
 		patchFunction("DrawGetImage", {
 			'Img.src = Source;': 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;'
 		});
+
+		// fixes a bug in BC
+		hookFunction("ServerPlayerIsInChatRoom", 0, (args, next) => {
+			return next(args) || CurrentScreen === "GetUp";
+		});
 	}
 
 	run() {

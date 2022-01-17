@@ -125,6 +125,28 @@ declare function LoseFocus(event: MouseEvent): void;
 
 //#endregion
 
+//#region Server Messages
+
+interface IChatRoomGameResponse {
+	Data: {
+		KinkyDungeon: any;
+		OnlineBounty: any;
+		/* LARP */
+		GameProgress?: "Start"|"Stop"|"Next"|"Skip"|"Action";
+		Action?: undefined;
+		Target?: number;
+		Item?: string;
+
+		/* MagicBattle */
+		Spell?: string;
+		Time?: number; /* ms */
+	}
+	Sender: number;
+	RNG: number
+}
+
+//#endregion
+
 //#region Assets
 
 type IAssetFamily = "Female3DCG";
@@ -298,6 +320,7 @@ interface Asset {
 	AlwaysExtend: boolean;
 	AlwaysInteract: boolean;
 	AllowLock: boolean;
+	LayerVisibility: boolean;
 	IsLock: boolean;
 	PickDifficulty: number;
 	OwnerOnly: boolean;
@@ -764,7 +787,7 @@ interface PlayerCharacter extends Character {
 	FriendNames?: Map<number, string>;
 	SubmissivesList?: Set<number>;
 	KinkyDungeonKeybindings?: any;
-	KinkyDungeonExploredLore: any[];
+	KinkyDungeonExploredLore?: any[];
 	Infiltration?: any;
 	ChatSearchFilterTerms?: string;
 }

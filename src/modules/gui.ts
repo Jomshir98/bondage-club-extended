@@ -125,7 +125,7 @@ export class ModuleGUI extends BaseModule {
 			if (MouseIn(1815, 685, 90, 90)) {
 				if (firstTimeInit) {
 					if (C && C.isPlayer()) {
-						ServerBeep = {};
+						ServerBeep = { Message: "", Timer: 0 };
 						this.currentSubscreen = new GuiTutorial(C, true);
 					}
 				} else if (C && C.BCXVersion !== null && C.playerHasAccessToCharacter()) {

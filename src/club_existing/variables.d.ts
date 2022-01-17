@@ -44,6 +44,7 @@ declare var MouseY: number;
 declare var GameVersion: string;
 declare const CommonGetFont: MemoizedFunction<(size: number) => string>;
 declare const CommonGetFontName: MemoizedFunction<() => string>;
+declare function CommonTime(): number;
 declare function CommonColorsEqual(C1: string | string[], C2: string | string[]): boolean;
 declare function CommonArraysEqual(a1: any[], a2: any[]): boolean;
 declare function CommonSetScreen(NewModule: string, NewScreen: string): void;
@@ -156,8 +157,10 @@ declare var ChatBlockItemReturnData: { Screen?: string; };
 
 // Server.js
 declare var ServerBeep: {
-	Timer?: number;
-	Message?: string;
+	Message: string;
+	Timer: number;
+	ChatRoomName?: string | null;
+	IsMail?: boolean;
 };
 declare var ServerSocket: import("socket.io-client").Socket;
 declare var ServerIsConnected: boolean;

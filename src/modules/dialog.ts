@@ -130,6 +130,19 @@ export class ModuleDialog extends BaseModule {
 			next(args);
 			exitSearchMode(CharacterGetCurrent() ?? Player);
 		});
+
+		// Remove some buttons, if there are too many
+		hookFunction("DialogMenuButtonBuild", 10, (args, next) => {
+			next(args);
+			for (const toRemove of ["ChangeLayersMouth", "Prev"]) {
+				if (DialogMenuButton.length <= 9)
+					break;
+				const index = DialogMenuButton.indexOf(toRemove);
+				if (index >= 0) {
+					DialogMenuButton.splice(index, 1);
+				}
+			}
+		});
 	}
 
 	run() {

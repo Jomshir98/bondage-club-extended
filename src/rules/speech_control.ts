@@ -698,7 +698,7 @@ export function initRules_bc_speech_control() {
 		name: "Order to greet room",
 		icon: "Icons/Chat.png",
 		shortDescription: "with a settable sentence when entering it newly",
-		longDescription: "Sets a specific sentence that PLAYER_NAME must say loud after entering a room that is not empty. The sentence is autopopulating the chat window text input. When to say it is left to PLAYER_NAME, but when the rule is enforced, it is the only thing that can be said in this room after joining it. Disconnects don't count as coming into a new room again, as far as detectable.",
+		longDescription: "Sets a specific sentence that PLAYER_NAME must say loud after entering a room that is not empty. The sentence is autopopulating the chat window text input. When to say it is left to PLAYER_NAME, but when the rule is enforced, it is the only thing that can be said in this room after joining it. Emotes can still be used, though. Disconnects don't count as coming into a new room again, as far as detectable.",
 		triggerTexts: {
 			infoBeep: "You broke the rule to greet this room like taught!",
 			attempt_infoBeep: "You need to greet this room like taught!",
@@ -737,7 +737,7 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced &&
 						state.customData?.greetingSentence.trim() &&
-						!alreadyGreeted
+						!alreadyGreeted && msg.type !== "Emote"
 					) {
 						lastRoomName = ChatRoomData.Name;
 						// 4. set alreadyGreeted to true and overwrite lastRoomName
@@ -753,12 +753,16 @@ export function initRules_bc_speech_control() {
 					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
+					if (msg.type === "Emote") {
+						return;
+					}
 					if (state.inEffect &&
 						state.customData?.greetingSentence.trim() &&
-						!alreadyGreeted &&
-						!check(msg)
+						!alreadyGreeted
 					) {
-						state.trigger();
+						if (!check(msg)) {
+							state.trigger();
+						}
 						alreadyGreeted = true;
 					}
 				}

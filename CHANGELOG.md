@@ -1,5 +1,21 @@
 # BCX Changelog
 
+## 0.7.6
+
+This update includes:
+ - Improves compatibility with BC release R76.
+ - Added information on the initally selected BCX preset to the "Global" main menu module (not being able to change the preset is intended)
+
+Rule changes:
+ - Changed the rule "Order to greet room" to allow using Emotes even before saying the set greeting sentence in the chat.
+ - Changed the rule "Ready to be summoned" to have a configurable summon time and to not trigger if already in the target room when the time is up
+ - Improved readability of long sentences in rules with stringList elements via hover and adds the content back to the input field via clicking the entry
+ - Fixed the rule "Order to greet room" always logging a rule violation, while the rule was only set to log and not to be enforced.
+
+Fixes:
+ - Fixed a bug in BC function `ServerPlayerIsInChatRoom`, which lead to incorrectly resolved trigger conditions during the standing up mini game
+ - Fixed a bug with the page selector button of rules with list of strings/member numbers not working without permission to change the rule
+
 ## 0.7.5
 
 This update includes:

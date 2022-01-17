@@ -159,6 +159,7 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 		Y: number;
 		key: string;
 		target: ChatroomCharacter;
+		access: boolean;
 	}): RuleCustomDataTypesMap[type] | undefined;
 } & (type extends keyof RuleCustomDataTypesOptions ? {
 	validateOptions(options: RuleCustomDataTypesOptions[type]): boolean;
@@ -195,7 +196,9 @@ export const ruleCustomDataHandlers: {
 			);
 			MainCanvas.textAlign = "left";
 		},
-		click({ def, value, Y }) {
+		click({ def, value, Y, access }) {
+			if (!access)
+				return;
 			const index = def.options!.findIndex(i => i[0] === value);
 			if (MouseIn(1050, Y + 36, 125, 60)) {
 				return def.options![clampWrap(index - 1, 0, def.options!.length - 1)][0];
@@ -271,7 +274,7 @@ export const ruleCustomDataHandlers: {
 			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
 			MainCanvas.textAlign = "left";
 		},
-		click({ value, Y, key, target, def }) {
+		click({ value, Y, key, target, def, access }) {
 			Y -= 20;
 			const PAGE_SIZE = def.options?.pageSize ? def.options.pageSize : 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -280,19 +283,19 @@ export const ruleCustomDataHandlers: {
 				const e = page * PAGE_SIZE + i;
 				if (e >= value.length)
 					break;
-				if (MouseIn(1836, Y + 26 + i * 70, 64, 64)) {
+				if (access && MouseIn(1836, Y + 26 + i * 70, 64, 64)) {
 					value.splice(e, 1);
 					return value;
 				}
 			}
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			const screen = getCurrentSubscreen();
-			if (MouseIn(1444, Y + PAGE_SIZE * 70 + 43, 64, 64) && input && screen) {
+			if (access && MouseIn(1444, Y + PAGE_SIZE * 70 + 43, 64, 64) && input && screen) {
 				setSubscreen(new GuiMemberSelect(target, screen, result => {
 					memberNumberListAutoFill = result;
 				}, value.slice()));
 			}
-			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) && input && input.value) {
+			if (access && MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) && input && input.value) {
 				const num = Number.parseInt(input.value, 10);
 				if (Number.isInteger(num) && !value.includes(num)) {
 					value.push(num);
@@ -371,7 +374,9 @@ export const ruleCustomDataHandlers: {
 				}
 			}
 		},
-		click({ value, Y }) {
+		click({ value, Y, access }) {
+			if (!access)
+				return;
 			for (let I = 0; I < DialogActivePoses.length; I++) {
 				const OffsetY = Y + 60 + 140 * I;
 				const PoseGroup: Pose[] = DialogActivePoses[I];
@@ -409,7 +414,9 @@ export const ruleCustomDataHandlers: {
 			);
 			MainCanvas.textAlign = "left";
 		},
-		click({ value, Y }) {
+		click({ value, Y, access }) {
+			if (!access)
+				return;
 			if (MouseIn(1050, Y + 46, 125, 60)) {
 				return value > AccessLevel.clubowner ? value - 1 : AccessLevel.public;
 			}
@@ -534,7 +541,7 @@ export const ruleCustomDataHandlers: {
 			DrawBackNextButton(1650, Y + PAGE_SIZE * 70 + 43, 250, 64, `Page ${page + 1}/${totalPages}`, "White", undefined, () => "", () => "");
 			MainCanvas.textAlign = "left";
 		},
-		click({ value, Y, key, def }) {
+		click({ value, Y, key, def, access }) {
 			Y -= 20;
 			const PAGE_SIZE = 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
@@ -544,15 +551,15 @@ export const ruleCustomDataHandlers: {
 				const e = page * PAGE_SIZE + i;
 				if (e >= value.length)
 					break;
-				if (MouseIn(1050, Y + 26 + i * 70, 766, 64) && input && input.value === "") {
+				if (access && MouseIn(1050, Y + 26 + i * 70, 766, 64) && input && input.value === "") {
 					input.value = value[e];
 				}
-				if (MouseIn(1836, Y + 26 + i * 70, 64, 64)) {
+				if (access && MouseIn(1836, Y + 26 + i * 70, 64, 64)) {
 					value.splice(e, 1);
 					return value;
 				}
 			}
-			if (MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) &&
+			if (access && MouseIn(1530, Y + PAGE_SIZE * 70 + 43, 100, 64) &&
 				input && input.value &&
 				(!def.options?.validate || def.options.validate.test(input.value)) &&
 				!value.includes(input.value)
@@ -625,7 +632,9 @@ export const ruleCustomDataHandlers: {
 		run({ def, value, Y, access }) {
 			DrawCheckbox(1050, Y, 64, 64, def.description, value, !access);
 		},
-		click({ value, Y }) {
+		click({ value, Y, access }) {
+			if (!access)
+				return;
 			if (MouseIn(1050, Y, 64, 64)) {
 				return !value;
 			}

@@ -124,13 +124,12 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		if (super.Click() || this.conditionCategoryData === null || this.conditionData === null)
 			return true;
 
-		if (!this.checkAccess())
-			return false;
+		const access = this.checkAccess();
 
 		let Y = 175;
 
 		if (this.definition.enforceable !== false) {
-			if (MouseIn(1050, Y, 64, 64)) {
+			if (access && MouseIn(1050, Y, 64, 64)) {
 				this.changes = this.makeChangesData();
 				this.changes.data.enforce = !this.changes.data.enforce;
 				return true;
@@ -139,7 +138,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 		}
 
 		if (this.definition.loggable !== false) {
-			if (MouseIn(1050, Y, 64, 64)) {
+			if (access && MouseIn(1050, Y, 64, 64)) {
 				this.changes = this.makeChangesData();
 				this.changes.data.log = !this.changes.data.log;
 				return true;
@@ -159,9 +158,10 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 						value: data.data.customData![k],
 						Y: v.Y ?? Y,
 						key: k,
-						target: this.character
+						target: this.character,
+						access
 					});
-					if (res !== undefined) {
+					if (access && res !== undefined) {
 						this.changes = this.makeChangesData();
 						this.changes.data.customData![k] = res;
 						return true;

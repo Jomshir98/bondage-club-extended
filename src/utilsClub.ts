@@ -1,6 +1,8 @@
 import { icon_Typing_star, icon_Typing_base, icon_Typing_dot } from "./resources";
 import { BCX_setTimeout } from "./BCXContext";
 
+import bcModSDK from 'bondage-club-mod-sdk';
+
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
 	"ItemNeckRestraints": "Collar Restraint",
@@ -148,7 +150,14 @@ export function isNModClient(): boolean {
 
 export function detectOtherMods() {
 	const w = window as any;
+	const ModSDKMods: Record<string, string | boolean> = {};
+	for (const mod of bcModSDK.getModsInfo()) {
+		if (mod.name === 'BCX')
+			continue;
+		ModSDKMods[mod.name] = mod.version || true;
+	}
 	return {
+		...ModSDKMods,
 		NMod: isNModClient(),
 		BondageClubTools: (window as any).BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage")),
 		BCFriendList: ServerSocket.listeners("AccountQueryResult").some(i => i.toString().includes("f_t_body.innerText")),
@@ -158,7 +167,7 @@ export function detectOtherMods() {
 		BcUtil: typeof w.StartBcUtil === "function",
 		QuickAccessMenu: typeof w.OLDmenu === "function" && typeof w.NEWmenu === "function",
 		ImprovedStruggle: typeof w.OLDclick === "function" && typeof w.NEWclick === "function",
-		BCE: w.BCE_VERSION !== undefined ? (w.BCE_VERSION ?? true) : false
+		BCE: w.BCE_VERSION !== undefined ? (`${w.BCE_VERSION}` || true) : false
 	};
 }
 

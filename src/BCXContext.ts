@@ -91,7 +91,9 @@ export function debugMakeContextReport(): string {
 				} catch (error) {
 					extra = "Error processing extra info:\n" + (error instanceof Error ? error.stack : `${error}`);
 				}
-				res += extra.trim().replace(/\n|^/g, m => `${m}| `) + "\n";
+				if (extra) {
+					res += extra.trim().replace(/\n|^/g, m => `${m}| `) + "\n";
+				}
 			}
 		}
 		if (!contextStack[0].root) {

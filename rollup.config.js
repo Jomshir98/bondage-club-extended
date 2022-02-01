@@ -6,6 +6,7 @@ import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
 import json from "@rollup/plugin-json";
+import commonjs from '@rollup/plugin-commonjs';
 import { terser } from "rollup-plugin-terser";
 
 import packageJson from "./package.json";
@@ -52,6 +53,7 @@ console.debug("BCX: Parse start...");
 		resolve({ browser: true }),
 		json(),
 		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
+		commonjs(),
 		copy({
 			targets: [
 				{

@@ -379,7 +379,7 @@ export function initRules_bc_alter() {
 						}
 					}
 				}
-				if (!changed && hasAdmin && ChatRoomData && state.customData.removeAdminToggle) {
+				if (CurrentModule === "Online" && CurrentScreen === "ChatRoom" && !changed && hasAdmin && ChatRoomData && state.customData.removeAdminToggle) {
 					const UpdatedRoom = {
 						Name: ChatRoomData.Name,
 						Description: ChatRoomData.Description,

@@ -405,7 +405,7 @@ export function initRules_bc_alter() {
 		icon: "Icons/Swap.png",
 		loggable: false,
 		shortDescription: "restrict room admin powers while restrained",
-		longDescription: "This rule forbids PLAYER_NAME to do any room admin actions (except for kick/ban), when she is tied (meaning either being unable to use her hands or unable to leave the room). Tip: This rule can be combined with the rule to enforce joining the last room to trap her in it.",
+		longDescription: "This rule forbids PLAYER_NAME to do any room admin actions (except for kick/ban), when she is restrained. Note: This rule does not affect an admin's ability to bypass locked rooms. Tip: This rule can be combined with the rule to enforce joining the last room to trap her in it.",
 		defaultLimit: ConditionsLimit.limited,
 		triggerTexts: {
 			attempt_infoBeep: "You are forbidden from changing room settings while restrained"

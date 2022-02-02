@@ -309,7 +309,6 @@ export function initRules_bc_speech_control() {
 							state.triggerAttempt();
 							return SpeechHookAllow.BLOCK;
 						}
-						currentCount++;
 						BCX_setTimeout(() => {
 							if (currentCount > 0) {
 								currentCount--;
@@ -317,6 +316,11 @@ export function initRules_bc_speech_control() {
 						}, 60_000);
 					}
 					return SpeechHookAllow.ALLOW;
+				},
+				onSend: (msg) => {
+					if (state.customData?.maxNumberOfMsg && state.customData.maxNumberOfMsg !== 0 && state.isEnforced && !check(msg)) {
+						currentCount++;
+					}
 				}
 			});
 		}

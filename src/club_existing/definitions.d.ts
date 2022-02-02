@@ -70,6 +70,8 @@ type VibratorModeSet = "Standard" | "Advanced";
 
 type VibratorModeState = "Default" | "Deny" | "Orgasm" | "Rest";
 
+type VibratorRemoteAvailability = "Available" | "NoRemote" | "NoLoversRemote" | "RemotesBlocked" | "CannotInteract" | "NoAccess" | "InvalidItem";
+
 //#endregion
 
 //#region index.html
@@ -132,7 +134,7 @@ interface IChatRoomGameResponse {
 		KinkyDungeon: any;
 		OnlineBounty: any;
 		/* LARP */
-		GameProgress?: "Start"|"Stop"|"Next"|"Skip"|"Action";
+		GameProgress?: "Start" | "Stop" | "Next" | "Skip" | "Action";
 		Action?: undefined;
 		Target?: number;
 		Item?: string;
@@ -143,6 +145,72 @@ interface IChatRoomGameResponse {
 	}
 	Sender: number;
 	RNG: number
+}
+
+//#endregion
+
+//#region Chat
+
+interface ChatRoom {
+	Name: string;
+	Description: string;
+	Admin: number[];
+	Ban: number[];
+	Limit: number;
+	Game: string;
+	Background: string;
+	Private: boolean;
+	Locked: boolean;
+	BlockCategory: string[];
+	Character?: any[]; /* From server, not really a Character object */
+}
+
+type StimulationAction = "Flash" | "Kneel" | "Walk" | "StruggleAction" | "StruggleFail";
+
+type MessageActionType = "Action" | "Chat" | "Whisper" | "Emote" | "Activity" | "Hidden" | "LocalMessage" | "ServerMessage";
+
+type MessageContentType = string;
+
+interface ChatMessageDictionaryEntry {
+	[k: string]: any;
+	Tag?: string;
+	Text?: string;
+	MemberNumber?: number;
+}
+
+type ChatMessageDictionary = ChatMessageDictionaryEntry[];
+
+interface IChatRoomMessageBasic {
+	Content: MessageContentType;
+	Sender: number;
+	// SourceMemberNumber: number;
+}
+
+interface IChatRoomMessage extends IChatRoomMessageBasic {
+	Type: MessageActionType;
+	Dictionary?: ChatMessageDictionary;
+	Timeout?: number;
+}
+
+interface IChatRoomSyncBasic {
+	SourceMemberNumber: number
+}
+
+interface IChatRoomSyncMessage extends IChatRoomSyncBasic, ChatRoom { }
+
+//#endregion
+
+//#region FriendList
+
+interface IFriendListBeepLogMessage {
+	MemberNumber?: number; /* undefined for NPCs */
+	MemberName: string;
+	ChatRoomName?: string;
+	Private: boolean;
+	ChatRoomSpace?: string;
+	Sent: boolean;
+	Time: Date;
+	Message?: string;
 }
 
 //#endregion
@@ -337,7 +405,7 @@ interface Asset {
 	Audio?: string;
 	Category?: string[];
 	Fetish?: string[];
-	CustomBlindBackground? : string;
+	CustomBlindBackground?: string;
 	ArousalZone: string;
 	IsRestraint: boolean;
 	BodyCosplay: boolean;
@@ -396,15 +464,6 @@ interface Pose {
 	Hide?: string[];
 	MovePosition?: { Group: string; X: number; Y: number; }[];
 }
-
-interface ChatMessageDictionaryEntry {
-	[k: string]: any;
-	Tag?: string;
-	Text?: string;
-	MemberNumber?: number;
-}
-
-type ChatMessageDictionary = ChatMessageDictionaryEntry[];
 
 interface Activity {
 	Name: string;
@@ -638,7 +697,11 @@ interface Character {
 		GameVersion: string;
 		ItemsAffectExpressions: boolean;
 	};
-	Game?: any;
+	Game?: {
+		LARP?: GameLARPParameters,
+		MagicBattle?: GameMagicBattleParameters,
+		GGTS?: GameGGTSParameters,
+	};
 	BlackList: number[];
 	RunScripts?: boolean;
 	HasScriptedAssets?: boolean;
@@ -653,24 +716,42 @@ interface Character {
 	Rule?: LogRecord[];
 }
 
+/** MovieStudio */
+interface Character {
+	Friendship?: string;
+	InterviewCleanCount?: number;
+}
+
+/** Slave market */
+interface Character {
+	ExpectedTraining?: number;
+	CurrentTraining?: number;
+	TrainingIntensity?: number;
+	TrainingCount?: number;
+	TrainingCountLow?: number;
+	TrainingCountHigh?: number;
+	TrainingCountPerfect?: number;
+}
+
 interface PlayerCharacter extends Character {
+	// PreferenceInitPlayer() must be updated with defaults, when adding a new setting
 	ChatSettings?: {
-		ColorTheme: string;
-		EnterLeave: string;
-		MemberNumbers: string;
-		FontSize: string;
-		DisplayTimestamps: boolean;
-		ColorNames: boolean;
 		ColorActions: boolean;
+		ColorActivities: boolean;
 		ColorEmotes: boolean;
+		ColorNames: boolean;
+		ColorTheme: string;
+		DisplayTimestamps: boolean;
+		EnterLeave: string;
+		FontSize: string;
+		MemberNumbers: string;
+		MuStylePoses: boolean;
 		ShowActivities: boolean;
 		ShowAutomaticMessages: boolean;
-		WhiteSpace: string;
-		ColorActivities: boolean;
-		ShrinkNonDialogue: boolean;
-		MuStylePoses: boolean;
-		ShowChatHelp: boolean;
 		ShowBeepChat: boolean;
+		ShowChatHelp: boolean;
+		ShrinkNonDialogue: boolean;
+		WhiteSpace: string;
 	};
 	VisualSettings?: {
 		ForceFullHeight: boolean;
@@ -750,6 +831,7 @@ interface PlayerCharacter extends Character {
 		AnimationQuality: number;
 		StimulationFlash: boolean;
 		SmoothZoom: boolean;
+		CenterChatrooms: boolean;
 	}
 	NotificationSettings?: {
 		/** @deprecated */
@@ -760,6 +842,7 @@ interface PlayerCharacter extends Character {
 		ChatMessage: NotificationSetting & {
 			/** @deprecated */
 			IncludeActions?: any;
+			Mention?: boolean;
 			Normal?: boolean;
 			Whisper?: boolean;
 			Activity?: boolean;
@@ -815,7 +898,7 @@ interface ExtendedItemAssetConfig<Archetype extends ExtendedArchetype, Config> {
 	/** The specific configuration for the item (type will vary based on the item's archetype) */
 	Config?: Config;
 	/** The group name and asset name of a configuration to copy - useful if multiple items share the same config */
-	CopyConfig?: {GroupName?: string, AssetName: string};
+	CopyConfig?: { GroupName?: string, AssetName: string };
 }
 
 /**
@@ -847,7 +930,7 @@ interface ExtendedItemOption {
 	/** The required prerequisites that must be met before this option can be selected */
 	Prerequisite?: string | string[];
 	/** A custom background for this option that overrides the default */
-	CustomBlindBackground? : string;
+	CustomBlindBackground?: string;
 	/**
 	 * Whether or not it should be possible to change from this option to another
 	 * option while the item is locked (if set to `false`, the player must be able to unlock the item to change its type) -
@@ -1023,7 +1106,7 @@ interface ModularItemOption {
 	/** The required prerequisites that must be met before this option can be selected */
 	Prerequisite?: string | string[];
 	/** A custom background for this option that overrides the default */
-	CustomBlindBackground? : string;
+	CustomBlindBackground?: string;
 	/** A list of groups that this option blocks - defaults to [] */
 	Block?: string[];
 	/** A list of groups that this option hides - defaults to [] */
@@ -1041,9 +1124,17 @@ interface ModularItemOption {
 	/** Whether or not the option should open a subscreen in the extended item menu */
 	HasSubscreen?: boolean;
 	/** Override height, uses the highest priority of all modules*/
-	OverrideHeight?: Record<string, { Height: number, Priority: number}>;
+	OverrideHeight?: Record<string, { Height: number, Priority: number }>;
 	/** Whether or not this option can be selected by the wearer */
 	AllowSelfSelect?: boolean;
+	/** Whether that option moves the character up */
+	HeightModifier?: number;
+	/** Whether that option applies effects */
+	Effect?: string[];
+	/** Whether the option forces a given pose */
+	SetPose?: string;
+	/** If set, the option changes the asset's default priority */
+	OverridePriority?: number
 }
 
 /** An object containing modular item configuration for an asset. Contains all of the necessary information for the
@@ -1163,7 +1254,7 @@ interface TypedItemConfig {
 		Click?: (next: () => void) => void,
 		Draw?: (next: () => void) => void,
 		Exit?: () => void,
-		Validate? : ExtendedItemValidateScriptHookCallback<ExtendedItemOption>,
+		Validate?: ExtendedItemValidateScriptHookCallback<ExtendedItemOption>,
 	};
 }
 
@@ -1381,3 +1472,72 @@ interface ICommand {
 	AutoComplete?: (this: Optional<ICommand, 'Tag'>, parsed: string[], low: string, msg: string) => void;
 	Clear?: false;
 }
+
+type PokerPlayerType = "None" | "Set" | "Character";
+type PokerPlayerFamily = "None" | "Player";
+
+interface PokerPlayer {
+	Type: PokerPlayerType;
+	Family: PokerPlayerFamily;
+	Name: string;
+	Chip: number;
+
+	/* Runtime values */
+	Difficulty?: number;
+	Hand?: any[];
+	HandValue?: number;
+	Cloth?: Item;
+	ClothLower?: Item;
+	ClothAccessory?: Item;
+	Panties?: Item;
+	Bra?: Item;
+	Character?: Character;
+	Data?: {
+		cache: Record<any, any>;
+	};
+	Image?: void;
+	TextColor?: string;
+	TextSingle?: string;
+	TextMultiple?: string;
+	WebLink?: string;
+	Alternate?: void;
+}
+
+// #region Online Games
+
+/**
+ * Online game status values.
+ *
+ * @property "" - The game is in the setup phase.
+ * @property "Running" - The game is currently running.
+ *
+ * @fix FIXME: "" should really be renamed Setup
+ */
+type OnlineGameStatus = "" | "Running";
+
+interface GameLARPParameters {
+	Status: OnlineGameStatus;
+	Class: string;
+	Team: string;
+	TimerDelay: number;
+	Level: {
+		Name: string;
+		Level: number;
+		Progress: number;
+	}[];
+}
+
+interface GameMagicBattleParameters {
+	Status: OnlineGameStatus;
+	House: string;
+	TeamType: "FreeForAll" | "House";
+}
+
+interface GameGGTSParameters {
+	Level: number;
+	Time: number;
+	Strike: number;
+	Rule: string[];
+}
+
+// #endregion

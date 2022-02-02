@@ -1,5 +1,19 @@
 # BCX Changelog
 
+## 0.7.7
+
+This update includes:
+ - BCX now includes Jomshir's new Bondage Club Mod Development Kit that can handle compatibility issues between all mods using it.
+   Additionally, it helps users to identify the source of a crash correctly, for reporting it to the correct mod.
+   More info and how to use it in your own mod: https://github.com/Jomshir98/bondage-club-mod-sdk
+
+Rule changes:
+ - Changed the rules "Forbid using remotes on self" and "Forbid using remotes on others" to also forbid usage of the vibrating items remote
+ - Changed the rule "Limit talking openly" to no longer count messages blocked by rules
+ - Changed the rule "Doll talk" to treat an input of zero in the rule configuration as infinity, which enables only restricting either word or character count
+ - Improved the description of the rule "Limit bound admin power"
+ - Fixed a crash with the rule "Room admin transfer" that may happen if triggering while the user is not in the chat screen
+
 ## 0.7.6
 
 This update includes:

@@ -46,6 +46,17 @@ export function initRules_bc_blocks() {
 				}
 				return false;
 			});
+			hookFunction("DialogItemClick", 3, (args, next) => {
+				const C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
+				if (C && C.ID === 0 && state.isEnforced && args[0].Asset.Name === "VibratorRemote") {
+					state.triggerAttempt();
+					return;
+				}
+				if (C && C.ID === 0 && state.isLogged && args[0].Asset.Name === "VibratorRemote") {
+					state.trigger();
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 		}
 	});
 
@@ -84,6 +95,17 @@ export function initRules_bc_blocks() {
 				}
 				return false;
 			});
+			hookFunction("DialogItemClick", 3, (args, next) => {
+				const C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
+				if (C && C.ID !== 0 && state.isEnforced && args[0].Asset.Name === "VibratorRemote") {
+					state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					return;
+				}
+				if (C && C.ID !== 0 && state.isLogged && args[0].Asset.Name === "VibratorRemote") {
+					state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 		}
 	});
 

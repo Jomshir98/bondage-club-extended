@@ -1,5 +1,9 @@
 # BCX Changelog
 
+## 0.7.8
+
+This update improves compatibility with BC release R77.
+
 ## 0.7.7
 
 This update includes:

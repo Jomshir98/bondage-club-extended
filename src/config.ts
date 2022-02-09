@@ -6,7 +6,8 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Game commit: fdf0d0323bf137fbfbaaf8a22ca77f96465beefa
 export const FUNCTION_HASHES: Record<string, string[]> = {
-	"Player.CanChange": ["082287C0", "F7D498F3"],
+	"Player.CanChange": ["082287C0", "F7D498F3"], // Deprecated
+	"Player.CanChangeClothesOn": ["40EF5292"],
 	"Player.GetBlindLevel": ["B0DE4B87"],
 	"Player.GetDeafLevel": ["42CB6D63"],
 	"Player.IsSlow": ["4D9B1713"],
@@ -14,8 +15,8 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9", "B5D882A8"],
 	AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF", "0D1455A9"],
 	AppearanceGetPreviewImageColor: ["C4BDF19F"],
-	AppearanceMenuBuild: ["264DC3C6"],
-	AppearanceMenuClick: ["187B3371"],
+	AppearanceMenuBuild: ["264DC3C6", "718A9867"],
+	AppearanceMenuClick: ["187B3371", "80444418"],
 	AppearanceMenuDraw: ["28FDF65B"],
 	AppearanceRun: ["904E8E84", "45C6BA53", "6D5EFEAA", "6DDA14A1"],
 	AsylumEntranceCanWander: ["3F5F4041", "609FA096", "A85C35F3"],
@@ -36,19 +37,19 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomCanAttemptKneel: ["0AA710FA"],
 	ChatRoomCanAttemptStand: ["026065D0"],
 	ChatRoomCanBeLeashedBy: ["0ADB85BD"],
-	ChatRoomCanChangeClothes: ["87102B7C"],
+	ChatRoomCanChangeClothes: ["87102B7C"], // Deprecated
 	ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8", "7065F82F"],
 	ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED", "C49AA2C1"],
 	ChatRoomClickCharacter: ["21AEE568", "AA9259DF"],
-	ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383", "60A3203E"],
+	ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383", "60A3203E", "AD7CBE68"],
 	ChatRoomDrawCharacterOverlay: ["D58A9AD3", "4AE4AD9E"],
 	ChatRoomFirstTimeHelp: ["078BEEA9"],
 	ChatRoomIsOwnedByPlayer: ["82640FF9"],
 	ChatRoomKeyDown: ["5FD37EC9", "111B6F0C", "33C77F12"],
 	ChatRoomListUpdate: ["D7FA0EC7"],
 	ChatRoomLovershipOptionIs: ["6F5CE6A0"],
-	ChatRoomMenuClick: ["8D9D74CE", "959128FD", "0B1BA9F4", "188B0A8B"],
-	ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61", "60ECCB9B", "4E97FAA5", "434FF2E9", "29F6DE79"],
+	ChatRoomMenuClick: ["8D9D74CE", "959128FD", "0B1BA9F4", "188B0A8B", "900BA084"],
+	ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61", "60ECCB9B", "4E97FAA5", "434FF2E9", "29F6DE79", "3041CEA5"],
 	ChatRoomOwnershipOptionIs: ["FE060F0B"],
 	ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
 	ChatRoomSendEmote: ["30DB56A6"],
@@ -126,7 +127,7 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	ChatAdminLoad: ["BF159B25"],
 	ChatAdminRun: ["F92A0B2E"],
 	ChatRoomAddCharacterToChatRoom: ["3B0DE035"],
-	ChatRoomCanChangeClothes: ["DF8A6550"],
+	ChatRoomCanChangeClothes: ["DF8A6550"], // Deprecated
 	ChatRoomCanLeave: ["B406F3E5"],
 	ChatRoomClearAllElements: ["52F91E02"],
 	ChatRoomCreateElement: ["76299AEC"],

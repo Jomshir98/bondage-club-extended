@@ -25,6 +25,8 @@ export enum ChatRoomStatusManagerStatusType {
 	Afk = 'Afk'
 }
 
+const CharacterStatuses: WeakMap<Character, string> = new WeakMap();
+
 class ChatRoomStatusManager {
 	InputTimeoutMs = 3_000;
 
@@ -43,7 +45,7 @@ class ChatRoomStatusManager {
 	private WhisperTarget: number | null = null;
 
 	GetCharacterStatus(C: Character): string | undefined {
-		return C.ID === 0 ? ChatroomSM.Status : C.Status;
+		return C.ID === 0 ? ChatroomSM.Status : CharacterStatuses.get(C);
 	}
 
 	SetInputElement(elem: HTMLTextAreaElement | null) {
@@ -341,7 +343,7 @@ export class ModuleChatroom extends BaseModule {
 		hiddenMessageHandlers.set("ChatRoomStatusEvent", (src, data: any) => {
 			for (const char of ChatRoomCharacter) {
 				if (char.MemberNumber === src) {
-					char.Status = data.Target == null || data.Target === Player.MemberNumber ? data.Type : "None";
+					CharacterStatuses.set(char, data.Target == null || data.Target === Player.MemberNumber ? data.Type : "None");
 				}
 			}
 		});

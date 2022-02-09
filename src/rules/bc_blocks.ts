@@ -390,9 +390,20 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			hookFunction("Player.CanChange", 2, (args, next) => {
-				return !state.isEnforced && next(args);
-			}, ModuleCategory.Rules);
+			// TODO: Cleanup after R77
+			if (GameVersion === "R76") {
+				hookFunction("Player.CanChange", 2, (args, next) => {
+					return !state.isEnforced && next(args);
+				}, ModuleCategory.Rules);
+			} else {
+				hookFunction("Player.CanChangeClothesOn", 2, (args, next) => {
+					const C = args[0] as Character;
+					if (C.IsPlayer() && state.isEnforced) {
+						return false;
+					}
+					return next(args);
+				}, ModuleCategory.Rules);
+			}
 			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
 				const C = args[0] as Character;
 				if (C.ID === 0 && state.inEffect) {
@@ -415,11 +426,22 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			hookFunction("ChatRoomCanChangeClothes", 5, (args, next) => {
-				if (state.isEnforced)
-					return false;
-				return next(args);
-			}, ModuleCategory.Rules);
+			// TODO: Cleanup after R77
+			if (GameVersion === "R76") {
+				hookFunction("ChatRoomCanChangeClothes", 5, (args, next) => {
+					if (state.isEnforced)
+						return false;
+					return next(args);
+				}, ModuleCategory.Rules);
+			} else {
+				hookFunction("Player.CanChangeClothesOn", 2, (args, next) => {
+					const C = args[0] as Character;
+					if (!C.IsPlayer() && state.isEnforced) {
+						return false;
+					}
+					return next(args);
+				}, ModuleCategory.Rules);
+			}
 			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
 				const C = args[0] as Character;
 				if (C.ID !== 0 && state.inEffect) {

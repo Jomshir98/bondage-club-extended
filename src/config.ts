@@ -54,6 +54,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
 	ChatRoomSendEmote: ["30DB56A6"],
 	ChatRoomShouldBlockGaggedOOCMessage: ["4940C855"],
+	ChatRoomStatusUpdate: ["041D2784"],
 	ChatRoomSync: ["B67D8226", "DF257D5B", "EE15739F"],
 	ChatRoomSyncMemberLeave: ["A95EADE6"],
 	ChatRoomUpdateDisplay: ["8DFC494A"],

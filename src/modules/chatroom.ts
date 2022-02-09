@@ -96,7 +96,10 @@ class ChatRoomStatusManager {
 			this.WhisperTarget = null;
 			if (value.startsWith("*") || value.startsWith("/me ") || value.startsWith("/emote ") || value.startsWith("/action ")) {
 				this.TypingStatus = ChatRoomStatusManagerStatusType.Emote;
-			} else if (value.startsWith("/") || value.startsWith(".")) {
+			} else if (
+				(value.startsWith("/") && !value.startsWith("//")) ||
+				(value.startsWith(".") && !value.startsWith(".."))
+			) {
 				return this.InputEnd();
 			} else if (ChatRoomTargetMemberNumber !== null) {
 				this.TypingStatus = ChatRoomStatusManagerStatusType.Whisper;
@@ -304,6 +307,19 @@ export class ModuleChatroom extends BaseModule {
 
 		window.addEventListener("keydown", DMSKeydown);
 		window.addEventListener("keyup", DMSKeyup);
+
+		// TODO: Cleanup after R77
+		if (GameVersion !== "R76") {
+			hookFunction("ChatRoomStatusUpdate", 10, (args, next) => {
+				if (args[0] === "Talk") {
+					const text = ElementValue("InputChat");
+					if (text && text.startsWith(".") && !text.startsWith("..")) {
+						args[0] = null;
+					}
+				}
+				return next(args);
+			});
+		}
 
 		hookFunction("ChatRoomSendChat", 0, (args, next) => {
 			next(args);

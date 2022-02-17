@@ -322,7 +322,7 @@ export class ModuleCurses extends BaseModule {
 			resolve(true, curseLiftAll(sender));
 		};
 
-		registerWhisperCommand("curses", "- Manage curses", (argv, sender, respond) => {
+		registerWhisperCommand("modules", "curses", "- Manage curses", (argv, sender, respond) => {
 			if (!moduleIsEnabled(ModuleCategory.Curses)) {
 				return respond(`Curses module is disabled.`);
 			}

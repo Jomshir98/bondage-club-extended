@@ -513,7 +513,7 @@ export class ModuleAuthority extends BaseModule {
 			resolve(true, editRole(data.type, data.action, data.target, sender));
 		};
 
-		registerWhisperCommand("role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
+		registerWhisperCommand("modules", "role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
 			if (subcommand === "list") {
 				if (
@@ -576,7 +576,7 @@ export class ModuleAuthority extends BaseModule {
 			return [];
 		});
 
-		registerWhisperCommand("permission", "- Manage permissions", (argv, sender, respond) => {
+		registerWhisperCommand("modules", "permission", "- Manage permissions", (argv, sender, respond) => {
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
 			const permissionsList = getPlayerPermissionSettings();
 			if (subcommand === "list") {

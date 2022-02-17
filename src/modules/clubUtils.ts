@@ -53,7 +53,7 @@ function toggleAntiblind(): boolean {
 export class ModuleClubUtils extends BaseModule {
 	load() {
 		//#region Antiblind
-		registerCommand("antiblind", "- Toggles ability to always see despite items", () => {
+		registerCommand("cheats", "antiblind", "- Toggles ability to always see despite items", () => {
 			if (toggleAntiblind()) {
 				ChatRoomSendLocal(`Antiblind switched ${antiblind ? "on" : "off"}`);
 				return true;
@@ -66,7 +66,7 @@ export class ModuleClubUtils extends BaseModule {
 		});
 		//#endregion
 		//#region Hidden room backgrounds
-		registerCommand("background", "<name> - Changes chat room background", (arg) => {
+		registerCommand("utilities", "background", "<name> - Changes chat room background", (arg) => {
 			if (arg.trim() === "") {
 				ChatRoomSendLocal(`Try pressing the "tab"-key to show autocomplete options`);
 				return false;
@@ -100,7 +100,7 @@ export class ModuleClubUtils extends BaseModule {
 		});
 
 		//#endregion
-		registerCommandParsed("colour", "<source> <item> <target> - Copies color of certain item from source character to target character",
+		registerCommandParsed("utilities", "colour", "<source> <item> <target> - Copies color of certain item from source character to target character",
 			(argv) => {
 				if (argv.length !== 3) {
 					ChatRoomSendLocal(`Expected three arguments: <source> <item> <target>`);
@@ -145,10 +145,10 @@ export class ModuleClubUtils extends BaseModule {
 				return [];
 			}
 		);
-		registerCommandParsed("allowactivities", "<character> <item> - Modifies item to not block activities",
+		registerCommandParsed("cheats", "allowactivities", "<character> <item> - Modifies item to not block activities",
 			(argv) => {
 				if (argv.length !== 2) {
-					ChatRoomSendLocal(`Expected two arguments: <charcater> <item>`);
+					ChatRoomSendLocal(`Expected two arguments: <character> <item>`);
 					return false;
 				}
 				const char = Command_selectCharacter(argv[0]);

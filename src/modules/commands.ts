@@ -9,12 +9,15 @@ import { RulesGetRuleState } from "./rules";
 
 interface ICommandInfo {
 	description: string | null;
+	category: CommandCategory;
 }
 
 export type CommandHandlerRaw = (args: string) => boolean;
 export type CommandHandlerParsed = (argv: string[]) => boolean;
 export type CommandAutocompleterRaw = (args: string) => string[];
 export type CommandAutocompleterParsed = (argv: string[]) => string[];
+export type CommandCategory = "hidden" | "utilities" | "cheats" | "modules" | "commands";
+export const COMMAND_CATEGORIES_VISIBLE: CommandCategory[] = ["utilities", "cheats", "modules", "commands"];
 
 type WhisperCommandHandler = (argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void) => void;
 type WhisperCommandAutocompleter = (argv: string[], sender: ChatroomCharacter) => string[];
@@ -69,7 +72,7 @@ function CommandsCompleteFirstTimeHelp() {
 	}
 }
 
-export function registerCommand(name: string, description: string | null, callback: CommandHandlerRaw, autocomplete: CommandAutocompleterRaw | null = null) {
+export function registerCommand(category: CommandCategory, name: string, description: string | null, callback: CommandHandlerRaw, autocomplete: CommandAutocompleterRaw | null = null) {
 	name = name.toLocaleLowerCase();
 	if (commands.has(name)) {
 		throw new Error(`Command "${name}" already registered!`);
@@ -78,6 +81,7 @@ export function registerCommand(name: string, description: string | null, callba
 		parse: false,
 		callback,
 		autocomplete,
+		category,
 		description
 	});
 }
@@ -92,6 +96,7 @@ export function aliasCommand(originalName: string, alias: string): void {
 	if (original.parse) {
 		commands.set(alias, {
 			parse: true,
+			category: original.category,
 			description: null,
 			callback: original.callback,
 			autocomplete: original.autocomplete
@@ -99,6 +104,7 @@ export function aliasCommand(originalName: string, alias: string): void {
 	} else {
 		commands.set(alias, {
 			parse: false,
+			category: original.category,
 			description: null,
 			callback: original.callback,
 			autocomplete: original.autocomplete
@@ -107,6 +113,7 @@ export function aliasCommand(originalName: string, alias: string): void {
 }
 
 export function registerCommandParsed(
+	category: CommandCategory,
 	name: string,
 	description: string | null,
 	callback: CommandHandlerParsed,
@@ -120,11 +127,13 @@ export function registerCommandParsed(
 		parse: true,
 		callback,
 		autocomplete,
+		category,
 		description
 	});
 }
 
 export function registerWhisperCommand(
+	category: CommandCategory,
 	name: string,
 	description: string | null,
 	callback: WhisperCommandHandler,
@@ -134,6 +143,7 @@ export function registerWhisperCommand(
 	name = name.toLocaleLowerCase();
 	if (registerNormal) {
 		registerCommandParsed(
+			category,
 			name,
 			description,
 			(argv) => { callback(argv, getPlayerCharacter(), (msg) => ChatRoomSendLocal(msg)); return true; },
@@ -146,6 +156,7 @@ export function registerWhisperCommand(
 	whisperCommands.set(name, {
 		callback,
 		autocomplete,
+		category,
 		description
 	});
 }
@@ -633,21 +644,44 @@ export class ModuleCommands extends BaseModule {
 			resolve(true, result);
 		};
 
-		registerCommand("help", "- Display this help [alias: . ]", () => {
+		registerCommand("hidden", "help", "- Display this help [alias: . ]", (arg) => {
 			CommandsCompleteFirstTimeHelp();
-			ChatRoomSendLocal(
-				`Available commands:\n` +
-				Array.from(commands.entries())
-					.filter(c => c[1].description !== null)
-					.map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
-					.sort()
-					.join("\n")
-			);
+			arg = arg.trim().toLocaleLowerCase();
+			if (!arg) {
+				ChatRoomSendLocal(
+					`BCX commands are organized into categories\n` +
+					`To view help texts for all commands in a category, use '.help <category>' (e.g. '.help utilities')\n` +
+					`\n` +
+					`List of categories:\n` +
+					COMMAND_CATEGORIES_VISIBLE.join('\n')
+				);
+			} else {
+				const category = COMMAND_CATEGORIES_VISIBLE.find(c => c.toLocaleLowerCase() === arg);
+				if (category) {
+					ChatRoomSendLocal(
+						`Available commands in category ${category}:\n` +
+						Array.from(commands.entries())
+							.filter(c => c[1].description !== null && c[1].category === category)
+							.map(c => `.${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
+							.sort()
+							.join("\n")
+					);
+				} else {
+					ChatRoomSendLocal(
+						`Unknown category '${arg}'` +
+						`\n` +
+						`List of available categories:\n` +
+						COMMAND_CATEGORIES_VISIBLE.join('\n')
+					);
+				}
+			}
 			return true;
+		}, (args) => {
+			return Command_pickAutocomplete(args.trim(), COMMAND_CATEGORIES_VISIBLE);
 		});
-		aliasCommand("help", "");
+		aliasCommand("help", "?");
 
-		registerCommand("action", "- Send custom (action) [alias: .a ]", (msg) => {
+		registerCommand("utilities", "action", "- Send custom (action) [alias: .a ]", (msg) => {
 			const blockRule = RulesGetRuleState("block_action");
 			if (blockRule.isEnforced) {
 				blockRule.triggerAttempt();
@@ -660,7 +694,7 @@ export class ModuleCommands extends BaseModule {
 		});
 		aliasCommand("action", "a");
 
-		registerWhisperCommand("help", "- Display this help", (argv, sender, respond) => {
+		registerWhisperCommand("hidden", "help", "- Display this help", (argv, sender, respond) => {
 			respond(
 				`Available commands:\n` +
 				Array.from(whisperCommands.entries())

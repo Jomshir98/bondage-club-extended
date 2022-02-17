@@ -50,7 +50,7 @@ export class ModuleCustom extends BaseModule {
 		}
 
 		if (Object.keys(customSubcommands).length > 0) {
-			registerCommandParsed("custom", "", (argv) => {
+			registerCommandParsed("hidden", "custom", "", (argv) => {
 				const cmd = customSubcommands[argv[0] ?? ""];
 				if (cmd) {
 					cmd[0](argv);

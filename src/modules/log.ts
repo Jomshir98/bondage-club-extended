@@ -289,7 +289,7 @@ export function logPraise(value: -1 | 0 | 1, message: string | null, character: 
 	return true;
 }
 
-const logConfigDefaults: LogConfig = {
+const logConfigDefaults: Record<BCX_LogCategory, LogAccessLevel> = {
 	log_config_change: LogAccessLevel.protected,
 	log_deleted: LogAccessLevel.normal,
 	praise: LogAccessLevel.normal,
@@ -435,7 +435,7 @@ export class ModuleLog extends BaseModule {
 			resolve(true, logGetAllowedActions(sender));
 		};
 
-		registerWhisperCommand("log", "- Manage the behaviour log", (argv, sender, respond) => {
+		registerWhisperCommand("modules", "log", "- Manage the behaviour log", (argv, sender, respond) => {
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
 			if (subcommand === "list") {
 				const logEntries = getVisibleLogEntries(sender);

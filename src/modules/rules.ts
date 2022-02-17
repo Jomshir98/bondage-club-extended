@@ -906,7 +906,7 @@ export class ModuleRules extends BaseModule {
 			}
 		};
 
-		registerWhisperCommand("rules", "- Manage rules", (argv, sender, respond) => {
+		registerWhisperCommand("modules", "rules", "- Manage rules", (argv, sender, respond) => {
 			if (!moduleIsEnabled(ModuleCategory.Rules)) {
 				return respond(`Rules module is disabled.`);
 			}

@@ -31,6 +31,7 @@ type BCX_message_hello = {
 	version: string;
 	request: boolean;
 	effects?: Partial<BCX_effects>;
+	typingIndicatorEnable?: boolean;
 };
 
 type BCX_message_query = {

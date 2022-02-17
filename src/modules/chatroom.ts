@@ -166,6 +166,9 @@ export class ModuleChatroom extends BaseModule {
 		if (typeof modStorage.typingIndicatorEnable !== "boolean") {
 			modStorage.typingIndicatorEnable = true;
 		}
+		if (typeof modStorage.typingIndicatorHideBC !== "boolean") {
+			modStorage.typingIndicatorHideBC = true;
+		}
 		if (typeof modStorage.screenIndicatorEnable !== "boolean") {
 			modStorage.screenIndicatorEnable = true;
 		}
@@ -191,6 +194,9 @@ export class ModuleChatroom extends BaseModule {
 				char.Effects.Effect = effects.Effect;
 			}
 			CharacterRefresh(char.Character, false);
+			if (typeof message.typingIndicatorEnable === "boolean") {
+				char.typingIndicatorEnable = message.typingIndicatorEnable;
+			}
 			// Send announcement, if requested
 			if (message.request === true) {
 				announceSelf(false);
@@ -300,8 +306,7 @@ export class ModuleChatroom extends BaseModule {
 				case ChatRoomStatusManagerStatusType.Profile:
 					DrawImageEx("Assets/Female3DCG/Emoticon/Read/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
-						Height: 50 * Zoom,
-						SourcePos: [7, 9, 74, 74]
+						Height: 50 * Zoom
 					});
 					break;
 			}
@@ -318,6 +323,17 @@ export class ModuleChatroom extends BaseModule {
 					if (text && text.startsWith(".") && !text.startsWith("..")) {
 						args[0] = null;
 					}
+				}
+				return next(args);
+			});
+			hookFunction("DrawStatus", 10, (args, next) => {
+				const C = args[0] as Character;
+				const char = getChatroomCharacter(C.MemberNumber!);
+				if (char?.typingIndicatorEnable &&
+					modStorage.typingIndicatorEnable &&
+					C.Status === "Talk"
+				) {
+					return;
 				}
 				return next(args);
 			});
@@ -398,6 +414,7 @@ export function announceSelf(request: boolean = false) {
 	sendHiddenMessage("hello", {
 		version: VERSION,
 		request,
-		effects: player.Effects
+		effects: player.Effects,
+		typingIndicatorEnable: modStorage.typingIndicatorEnable
 	});
 }

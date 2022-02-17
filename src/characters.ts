@@ -27,6 +27,8 @@ export class ChatroomCharacter {
 	Character: Character;
 	Effects: BCX_effects;
 
+	typingIndicatorEnable: boolean = true;
+
 	get MemberNumber(): number {
 		if (typeof this.Character.MemberNumber !== "number") {
 			throw new Error("Character without MemberNumber");

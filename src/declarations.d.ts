@@ -610,6 +610,7 @@ interface ModStorage {
 	log: import("./modules/log").LogEntry[];
 	logConfig: import("./modules/log").LogConfig;
 	typingIndicatorEnable: boolean;
+	typingIndicatorHideBC: boolean;
 	screenIndicatorEnable: boolean;
 	/**
 	 * Maps item group to a cursed item, if there is any, otherwise undefined. Null if the group is cursed to be empty

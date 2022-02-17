@@ -728,6 +728,8 @@ export function initRules_bc_speech_control() {
 				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 				if (chat && state.customData && state.inEffect && !alreadyGreeted && data.Name !== lastRoomName) {
 					chat.value = state.customData.greetingSentence;
+				} else {
+					alreadyGreeted = true;
 				}
 			}, ModuleCategory.Rules);
 		},

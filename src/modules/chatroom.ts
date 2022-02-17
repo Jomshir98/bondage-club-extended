@@ -223,7 +223,8 @@ export class ModuleChatroom extends BaseModule {
 				const [C, Zoom, CharX, CharY] = args as [Character, number, number, number];
 				const Char = getChatroomCharacter(C.MemberNumber!);
 				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
-				if (Char?.BCXVersion && ChatRoomHideIconState === 0) {
+				const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
+				if (Char?.BCXVersion && ChatRoomHideIconState === 0 && !Ghosted) {
 					if (Friend) {
 						drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
 					} else {
@@ -248,7 +249,8 @@ export class ModuleChatroom extends BaseModule {
 				const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
 				const Char = getChatroomCharacter(C.MemberNumber!);
 				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
-				if (Char?.BCXVersion && ChatRoomHideIconState === 0) {
+				const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
+				if (Char?.BCXVersion && ChatRoomHideIconState === 0 && !Ghosted) {
 					if (Friend) {
 						drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
 					} else {

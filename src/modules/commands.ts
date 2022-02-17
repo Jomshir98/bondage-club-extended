@@ -536,7 +536,9 @@ export class ModuleCommands extends BaseModule {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			if (chat && !firstTimeInit) {
 				const msg = chat.value.trim();
-				if (msg.startsWith("..")) {
+				if (/^[.\s]*$/.test(msg)) {
+					// Do not process as command
+				} else if (msg.startsWith("..")) {
 					chat.value = msg.substr(1);
 				} else if (msg.startsWith(".")) {
 					if (RunCommand(msg.substr(1))) {

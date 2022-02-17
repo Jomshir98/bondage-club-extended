@@ -2,7 +2,7 @@ import { Command_pickAutocomplete, Command_selectCharacter, Command_selectCharac
 import { BaseModule } from "./_BaseModule";
 import { ChatRoomSendLocal, updateChatroom } from "../utilsClub";
 import { registerCommand } from "./commands";
-import { hookFunction } from "../patching";
+import { callOriginal, hookFunction } from "../patching";
 import { RulesGetRuleState } from "./rules";
 import backgroundList from "../generated/backgroundList.json";
 import { OverridePlayerDialog } from "./miscPatches";
@@ -179,6 +179,23 @@ export class ModuleClubUtils extends BaseModule {
 					}
 				}
 				return [];
+			}
+		);
+		registerCommand("utilities", "garble", "<level> <message> - Converts the given message to gag talk",
+			(arg) => {
+				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+				if (!chat)
+					return false;
+				const parsed = /^\s*([0-9]+) (.+)$/.exec(arg);
+				if (!parsed) {
+					ChatRoomSendLocal(`Expected two arguments: <level> <message>`);
+					return false;
+				}
+				const level = Number.parseInt(parsed[1], 10);
+				const message = parsed[2].trim();
+				const garbled = callOriginal("SpeechGarbleByGagLevel", [level, message]) as string;
+				chat.value = garbled;
+				return false;
 			}
 		);
 	}

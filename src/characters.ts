@@ -3,11 +3,10 @@ import { ConditionsLimit, defaultBCXEffects, ModuleCategory, TOGGLEABLE_MODULES 
 import { AccessLevel, checkPermissionAccess, editRole, getPermissionDataFromBundle, getPlayerPermissionSettings, getPlayerRoleData, PermissionData, setPermissionMinAccess, setPermissionSelfAccess } from "./modules/authority";
 import { ConditionsCategoryUpdate, ConditionsGetCategoryEnabled, ConditionsGetCategoryPublicData, ConditionsSetLimit, ConditionsUpdate, guard_ConditionsCategoryPublicData } from "./modules/conditions";
 import { curseItem, curseLift, curseBatch, curseLiftAll } from "./modules/curses";
-import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise } from "./modules/log";
+import { getVisibleLogEntries, LogAccessLevel, logClear, LogConfig, logConfigSet, LogEntry, logGetAllowedActions, logGetConfig, logMessageDelete, logPraise, LOG_CONFIG_NAMES } from "./modules/log";
 import { sendQuery } from "./modules/messaging";
 import { getDisabledModules } from "./modules/presets";
 import { RulesCreate, RulesDelete } from "./modules/rules";
-import { modStorage } from "./modules/storage";
 import { isObject } from "./utils";
 import { BaseModule } from "./modules/_BaseModule";
 import { hookFunction } from "./patching";
@@ -191,7 +190,7 @@ export class ChatroomCharacter {
 				throw new Error("Bad data");
 			}
 			for (const k of Object.keys(data) as BCX_LogCategory[]) {
-				if (data[k] == null || modStorage.logConfig?.[k] === undefined || LogAccessLevel[data[k]!] === undefined) {
+				if (data[k] == null || LOG_CONFIG_NAMES[k] === undefined || LogAccessLevel[data[k]!] === undefined) {
 					delete data[k];
 				}
 			}

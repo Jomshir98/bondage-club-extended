@@ -95,7 +95,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	InformationSheetRun: ["58B7879C", "A8A56ACA", "1079019C"],
 	InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech: ["BE1F6406"],
 	LoginMistressItems: ["B58EF410"],
-	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547", "CF1C0400", "17F3A06E", "E117B785"],
+	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547", "CF1C0400", "17F3A06E", "E117B785", "CA1BD40A"],
 	LoginStableItems: ["EA93FBF7"],
 	LogValue: ["6ED63114"],
 	MainHallMaidsDisabledBegForMore: ["EA29F2B3"],

@@ -1,5 +1,19 @@
 # BCX Changelog
 
+## 0.7.9
+
+This update includes:
+ - Improve typing indicator compatibility with BC release R77
+ - Add a toggle to hide BC typing indicator if BCX one is present (default on)
+
+Rule changes:
+ - Fixed the rule "Order to greet room" requiring phrase while already in room when conditions become satisfied
+
+Fixes:
+ - Fixed being unable to configure other's logging if you disabled your own logging module
+ - Hides BCX icon for ghosted players
+ - Updates ModSK to version v1.0.2 including few fixes, see: https://github.com/Jomshir98/bondage-club-mod-sdk/releases/tag/v1.0.2
+
 ## 0.7.8
 
 This update improves compatibility with BC release R77.

@@ -356,10 +356,10 @@ base64-arraybuffer@~1.0.1:
   resolved "https://registry.yarnpkg.com/base64-arraybuffer/-/base64-arraybuffer-1.0.1.tgz#87bd13525626db4a9838e00a508c2b73efcf348c"
   integrity sha512-vFIUq7FdLtjZMhATwDul5RZWv2jpXQ09Pd6jcVEOvIsqCWTRFD/ONHNfyOS8dA/Ippi5dsIgpyKWKZaAKZltbA==
 
-bondage-club-mod-sdk@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/bondage-club-mod-sdk/-/bondage-club-mod-sdk-1.0.1.tgz#0038bced3243a4256c0344dccba408a6a0acc00d"
-  integrity sha512-dWo3Q9aiwktAQmprU3CyHq95Q6QovwXlYpTWCqu7bhHLoLa6y5jB7vUn3w9wc6jiFvpAIaBrkGAYDzDWxLGOYA==
+bondage-club-mod-sdk@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/bondage-club-mod-sdk/-/bondage-club-mod-sdk-1.0.2.tgz#9e6222e8d1030ef83cd229cd84d03ff10cbdcfdb"
+  integrity sha512-QWQwqEFIZnqn5jN58Kn9iAr+kPQlX5NXovtc6HG35352ckCMpw5u0t/tkNUuYdRT/sR4ognVkBoUutdd4KdjHQ==
 
 brace-expansion@^1.1.7:
   version "1.1.11"

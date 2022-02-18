@@ -329,8 +329,9 @@ export class ModuleChatroom extends BaseModule {
 			hookFunction("DrawStatus", 10, (args, next) => {
 				const C = args[0] as Character;
 				const char = getChatroomCharacter(C.MemberNumber!);
-				if (char?.typingIndicatorEnable &&
-					modStorage.typingIndicatorEnable &&
+				if (char?.BCXVersion != null &&
+					char.typingIndicatorEnable &&
+					modStorage.typingIndicatorHideBC &&
 					C.Status === "Talk"
 				) {
 					return;

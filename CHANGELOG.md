@@ -12,7 +12,7 @@ Rule changes:
 Fixes:
  - Fixed being unable to configure other's logging if you disabled your own logging module
  - Hidden BCX icon for ghosted players
- - Updated ModSK to version v1.0.2 including few fixes, see: https://github.com/Jomshir98/bondage-club-mod-sdk/releases/tag/v1.0.2
+ - Updated ModSDK to version v1.0.2 including few fixes, see: https://github.com/Jomshir98/bondage-club-mod-sdk/releases/tag/v1.0.2
 
 ## 0.7.8
 

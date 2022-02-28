@@ -14,6 +14,8 @@ export enum Views {
 	ConditionsGlobalRules = 42,
 	RulesAdd = 43,
 	RulesAddPermissionMode = 44,
+	Commands = 50,
+	CommandsPermissionMode = 51,
 	Misc = 100
 }
 
@@ -79,6 +81,14 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"in the configuration page of the behavior log module.",
 	[Views.RulesAddPermissionMode]: "Here you can cycle rule templates between being not limited, limited and blocked. Blocked means " +
 	"no one can add/use this rule, while limited means only roles that have the permission to establish limited rules can add them. There " +
+	"is no need to save changes as they are instantly in effect.",
+	[Views.Commands]: "On this screen you can see the available commands for the player. " +
+	"Clicking on one shows a more detailed description of it. Greyed out commands indicate " +
+	"that you have no access to them due to being blocked or due to your permission settings. Commands can be limited/blocked " +
+	"via the settings button on the very right. Commands will be used in the chat room's chat by whispering them with a '!' before the command to " +
+	"another player. Note: SOME of the commands can also be used on yourself with a leading '.' instead of '!' (e.g. '.eyes close')",
+	[Views.CommandsPermissionMode]: "Here you can cycle commands between being not limited, limited and blocked. Blocked means " +
+	"no one can use this command, while limited means only roles that have the permission to use limited commands can trigger them in that chat. There " +
 	"is no need to save changes as they are instantly in effect.",
 	[Views.Misc]: "This screen offers various settings to configure your Bondage Club experience in general, such as enabling/disabling the " +
 	"typing indicator that shows other BCX users an icon when you are currently typing something to public chat or whispering something to " +

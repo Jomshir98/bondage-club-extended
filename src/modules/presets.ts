@@ -9,7 +9,7 @@ import { getCurrentSubscreen } from "./gui";
 import { BCX_setTimeout } from "../BCXContext";
 
 const PRESET_DISABLED_MODULES: Record<Preset, ModuleCategory[]> = {
-	[Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses, ModuleCategory.Rules],
+	[Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses, ModuleCategory.Rules, ModuleCategory.Commands],
 	[Preset.switch]: [],
 	[Preset.submissive]: [],
 	[Preset.slave]: []

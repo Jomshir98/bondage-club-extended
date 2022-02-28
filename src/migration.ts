@@ -1,3 +1,4 @@
+import { ModuleCategory, Preset } from "./constants";
 import { firstTimeInit, modStorage } from "./modules/storage";
 import { BCXVersionCompare, BCXVersionToString } from "./utils";
 
@@ -17,6 +18,16 @@ export function runMigration(originalVersion: BCXVersion, currentVersion: BCXVer
 
 	if (BCXVersionCompare(originalVersion, { major: 0, minor: 7, patch: 4 }) < 0) {
 		modStorage.menuShouldDisplayTutorialHelp = true;
+	}
+
+	if (BCXVersionCompare(originalVersion, { major: 0, minor: 8, patch: 0 }) < 0) {
+		if (
+			modStorage.preset === Preset.dominant &&
+			Array.isArray(modStorage.disabledModules) &&
+			!modStorage.disabledModules.includes(ModuleCategory.Commands)
+		) {
+			modStorage.disabledModules.push(ModuleCategory.Commands);
+		}
 	}
 
 	return true;

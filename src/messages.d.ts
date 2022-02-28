@@ -131,4 +131,5 @@ type BCX_queries = {
 	}, boolean];
 	ruleCreate: [BCX_Rule, boolean];
 	ruleDelete: [BCX_Rule, boolean];
+	commandTrigger: [[BCX_Command, ...string[]], boolean];
 };

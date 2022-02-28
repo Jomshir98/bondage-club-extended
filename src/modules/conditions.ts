@@ -108,9 +108,9 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	category: ModuleCategory;
 	permission_normal: BCX_Permissions;
 	permission_limited: BCX_Permissions;
-	permission_configure: BCX_Permissions;
+	permission_configure?: BCX_Permissions;
 	permission_changeLimits: BCX_Permissions;
-	permission_viewOriginator: BCX_Permissions;
+	permission_viewOriginator?: BCX_Permissions;
 	loadValidateConditionKey(key: string): boolean;
 	loadValidateCondition(key: string, data: ConditionsConditionData<C>): boolean;
 	loadCategorySpecificGlobalData(data: ConditionsCategorySpecificGlobalData[C] | undefined): ConditionsCategorySpecificGlobalData[C];
@@ -187,7 +187,7 @@ function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(
 		requirements: conditionData.requirements ? cloneDeep(conditionData.requirements) : null,
 		favorite: conditionData.favorite ?? false
 	};
-	if (requester === null || checkPermissionAccess(handler.permission_viewOriginator, requester)) {
+	if (requester === null || handler.permission_viewOriginator != null && checkPermissionAccess(handler.permission_viewOriginator, requester)) {
 		res.addedBy = conditionData.addedBy;
 	}
 	return res;
@@ -200,7 +200,7 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 	const res: ConditionsCategoryPublicData<ConditionsCategories> = {
 		access_normal: checkPermissionAccess(handler.permission_normal, requester),
 		access_limited: checkPermissionAccess(handler.permission_limited, requester),
-		access_configure: checkPermissionAccess(handler.permission_configure, requester),
+		access_configure: handler.permission_configure != null && checkPermissionAccess(handler.permission_configure, requester),
 		access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
 		highestRoleInRoom: getHighestRoleInRoom(),
 		conditions: {},
@@ -398,7 +398,7 @@ export function ConditionsCategoryUpdate<C extends ConditionsCategories>(categor
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	if (!moduleIsEnabled(handler.category))
 		return false;
-	if (character && !checkPermissionAccess(handler.permission_configure, character))
+	if (character && (handler.permission_configure == null || !checkPermissionAccess(handler.permission_configure, character)))
 		return false;
 	const conditionData = ConditionsGetCategoryData<ConditionsCategories>(category);
 	if (!conditionData)

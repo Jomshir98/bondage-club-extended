@@ -19,8 +19,8 @@ export type CommandAutocompleterParsed = (argv: string[]) => string[];
 export type CommandCategory = "hidden" | "utilities" | "cheats" | "modules" | "commands";
 export const COMMAND_CATEGORIES_VISIBLE: CommandCategory[] = ["utilities", "cheats", "modules", "commands"];
 
-type WhisperCommandHandler = (argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void) => void;
-type WhisperCommandAutocompleter = (argv: string[], sender: ChatroomCharacter) => string[];
+export type WhisperCommandHandler = (argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void) => void;
+export type WhisperCommandAutocompleter = (argv: string[], sender: ChatroomCharacter) => string[];
 
 interface ICommandRaw extends ICommandInfo {
 	parse: false;

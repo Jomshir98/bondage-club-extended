@@ -48,6 +48,9 @@ type BCX_Permissions =
 	| "rules_global_configuration"
 	| "rules_change_limits"
 	| "rules_view_originator"
+	| "commands_normal"
+	| "commands_limited"
+	| "commands_change_limits"
 	| "misc_test";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
@@ -71,6 +74,7 @@ type BCX_LogCategory =
 	| "curse_trigger"
 	| "rule_change"
 	| "rule_trigger"
+	| "command_change"
 	| "had_orgasm"
 	| "entered_public_room"
 	| "entered_private_room"
@@ -88,6 +92,7 @@ interface CursedItemInfo {
 interface ConditionsCategoryKeys {
 	curses: string;
 	rules: BCX_Rule;
+	commands: BCX_Command;
 }
 
 type ConditionsCategories = keyof ConditionsCategoryKeys;
@@ -102,6 +107,7 @@ interface ConditionsCategorySpecificData {
 		/** `RuleInternalData` */
 		internalData?: any;
 	};
+	commands: undefined;
 }
 
 interface ConditionsCategorySpecificGlobalData {
@@ -109,6 +115,7 @@ interface ConditionsCategorySpecificGlobalData {
 		itemRemove: boolean;
 	};
 	rules: undefined;
+	commands: undefined;
 }
 
 interface ConditionsCategorySpecificPublicData {
@@ -123,6 +130,7 @@ interface ConditionsCategorySpecificPublicData {
 		/** `RuleCustomData` */
 		customData?: Record<string, any>;
 	};
+	commands: undefined;
 }
 
 interface ConditionsConditionRequirements {
@@ -580,6 +588,45 @@ interface RuleDefinition<ID extends BCX_Rule = BCX_Rule> extends RuleDisplayDefi
 	tick?: (state: import("./modules/rules").RuleState<ID>) => boolean;
 	internalDataValidate?: ID extends keyof RuleInternalData ? (data: unknown) => boolean : never;
 	internalDataDefault?: ID extends keyof RuleInternalData ? () => RuleInternalData[ID] : never;
+}
+
+type BCX_Command =
+	| "eyes"
+	| "mouth"
+	| "pose"
+	;
+
+interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {
+	init?: (state: import("./modules/commandsModule").CommandState<ID>) => void;
+	load?: (state: import("./modules/commandsModule").CommandState<ID>) => void;
+	unload?: () => void;
+	tick?: (state: import("./modules/commandsModule").CommandState<ID>) => boolean;
+	trigger: (
+		argv: string[],
+		sender: import("./characters").ChatroomCharacter,
+		respond: (msg: string) => void,
+		state: import("./modules/commandsModule").CommandState<ID>
+	) => boolean;
+	autoCompleter?: (
+		argv: string[],
+		sender: import("./characters").ChatroomCharacter
+	) => string[];
+}
+
+interface CommandDisplayDefinition {
+	name: string;
+	shortDescription?: string;
+	/**
+	 * Text shown in GUI when Player checks details of the command
+	 *
+	 * Following text replacements are made:
+	 * - `PLAYER_NAME` by name of viewed character
+	 * - `HELP_DESCRIPTION` by value of `helpDescription`
+	 */
+	longDescription: string;
+	helpDescription: string;
+	playerUsable?: boolean;
+	defaultLimit: import("./constants").ConditionsLimit;
 }
 
 interface RoomTemplate {

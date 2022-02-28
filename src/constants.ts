@@ -13,6 +13,7 @@ export enum ModuleCategory {
 	Log = 2,
 	Curses = 3,
 	Rules = 4,
+	Commands = 5,
 	Misc = 99
 }
 
@@ -22,6 +23,7 @@ export const MODULE_NAMES: Record<ModuleCategory, string> = {
 	[ModuleCategory.Log]: "Behaviour Log",
 	[ModuleCategory.Curses]: "Curses",
 	[ModuleCategory.Rules]: "Rules",
+	[ModuleCategory.Commands]: "Commands",
 	[ModuleCategory.Misc]: "Miscellaneous"
 };
 
@@ -31,13 +33,15 @@ export const MODULE_ICONS: Record<ModuleCategory, string> = {
 	[ModuleCategory.Log]: "Icons/Title.png",
 	[ModuleCategory.Curses]: "Icons/Struggle.png",
 	[ModuleCategory.Rules]: icon_rules,
+	[ModuleCategory.Commands]: "Icons/Use.png",
 	[ModuleCategory.Misc]: "Icons/Random.png"
 };
 
 export const TOGGLEABLE_MODULES: readonly ModuleCategory[] = [
 	ModuleCategory.Log,
 	ModuleCategory.Curses,
-	ModuleCategory.Rules
+	ModuleCategory.Rules,
+	ModuleCategory.Commands
 ];
 
 export enum ModuleInitPhase {

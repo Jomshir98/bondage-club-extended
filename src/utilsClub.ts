@@ -438,3 +438,97 @@ export function drawIcon(
 	ctx.stroke(p);
 	ctx.restore();
 }
+
+/**
+ * Draws a word wrapped text in a rectangle
+ * @param {string} Text - Text to draw
+ * @param {number} X - Position of the rectangle on the X axis
+ * @param {number} Y - Position of the rectangle on the Y axis
+ * @param {number} Width - Width of the rectangle
+ * @param {number} Height - Height of the rectangle
+ * @param {string} ForeColor - Foreground color
+ * @param {string} [BackColor] - Background color
+ * @param {number} [MaxLine] - Maximum of lines the word can wrap for
+ * @returns {void} - Nothing
+ */
+export function BCXDrawTextWrap(Text: string, X: number, Y: number, Width: number, Height: number, ForeColor: string, BackColor?: string, MaxLine?: number): void {
+	MainCanvas.save();
+	// Draw the rectangle if we need too
+	if (BackColor != null) {
+		MainCanvas.fillStyle = BackColor;
+		MainCanvas.fillRect(X, Y, Width, Height);
+		MainCanvas.lineWidth = 2;
+		MainCanvas.strokeStyle = ForeColor;
+		MainCanvas.strokeRect(X, Y, Width, Height);
+	}
+	if (!Text) return;
+
+	if (MainCanvas.textAlign === "center") {
+		X += Math.floor(Width / 2);
+	}
+
+	// Sets the text size if there's a maximum number of lines
+
+	const lines = SubdivideTextSize(Text, Width, MaxLine);
+
+	Y = Math.round(Y + (Height / 2) - ((lines.length - 1) * 23));
+
+	for (const line of lines) {
+		MainCanvas.fillText(line, X, Y);
+		Y += 46;
+	}
+
+	// Resets the font text size
+	MainCanvas.restore();
+}
+
+function SubdivideLine(Text: string, Width: number): string[] {
+	// Don't bother if it fits on one line
+	if (MainCanvas.measureText(Text).width <= Width) return [Text];
+
+	const lines: string[] = [];
+	let line = '';
+
+	// Find the number of lines
+	for (const word of Text.split(" ")) {
+		const testLine = line + ' ' + word;
+		if (line && MainCanvas.measureText(testLine).width > Width) {
+			lines.push(line);
+			line = word;
+		} else line = testLine;
+	}
+	if (line) {
+		lines.push(line);
+	}
+	return lines;
+}
+
+/**
+ * Reduces the font size progressively until the text fits the wrap size
+ * @param {string} Text - Text that will be drawn
+ * @param {number} Width - Width in which the text must fit
+ * @param {number} MaxLine - Maximum of lines the word can wrap for
+ * @returns {void} - Nothing
+ */
+function SubdivideTextSize(Text: string, Width: number, MaxLine?: number): string[] {
+
+	const initialLines = Text.split("\n").map(l => l.trim());
+
+	if (MaxLine && initialLines.length > MaxLine) {
+		MaxLine = undefined;
+	}
+
+	const finalLines: string[] = [];
+
+	for (const line of initialLines) {
+		finalLines.push(...SubdivideLine(line, Width));
+	}
+
+	// If there's too many lines, we launch the function again with size minus 2
+	if (MaxLine && finalLines.length > MaxLine) {
+		MainCanvas.font = (parseInt(MainCanvas.font.substring(0, 2), 10) - 2).toString() + "px arial";
+		return SubdivideTextSize(Text, Width, MaxLine);
+	}
+
+	return finalLines;
+}

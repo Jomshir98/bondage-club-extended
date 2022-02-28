@@ -14,6 +14,7 @@ import { GuiConditionViewRules } from "./conditions_view_rules";
 import { GuiTutorial } from "./tutorial";
 import { versionCheckNewAvailable } from "../modules/versionCheck";
 import { modStorage, modStorageSync } from "../modules/storage";
+import { GuiCommandsModule } from "./commands_module";
 
 const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter) => void; }[] = [
 	{
@@ -44,6 +45,12 @@ const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter)
 		module: ModuleCategory.Rules,
 		onclick: (C) => {
 			setSubscreen(new GuiConditionViewRules(C));
+		}
+	},
+	{
+		module: ModuleCategory.Commands,
+		onclick: (C) => {
+			setSubscreen(new GuiCommandsModule(C));
 		}
 	},
 	{

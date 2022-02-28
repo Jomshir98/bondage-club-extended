@@ -58,6 +58,7 @@ declare function CharacterDeleteAllOnline(): void;
 declare function CharacterGetCurrent(): Character | null;
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
 declare function CharacterLoadCanvas(C: Character): void;
+declare function CharacterSetFacialExpression(C: Character, AssetGroup: string, Expression: string | null, Timer?: number, Color?: string | string[]): void;
 
 // Element.js
 declare function ElementIsScrolledToEnd(ID: string): boolean;

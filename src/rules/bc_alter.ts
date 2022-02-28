@@ -643,7 +643,7 @@ export function initRules_bc_alter() {
 					beep = true;
 					BCX_setTimeout(() => {
 						// Check if rule is still in effect or if we are already there
-						if (!state.isEnforced || ChatRoomData.Name === data.ChatRoomName) return;
+						if (!state.isEnforced || (ServerPlayerIsInChatRoom() && ChatRoomData.Name === data.ChatRoomName)) return;
 
 						// leave
 						ChatRoomActionMessage(`The demand for ${Player.Name}'s presence is now enforced.`);

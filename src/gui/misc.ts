@@ -21,7 +21,9 @@ export class GuiMisc extends GuiSubscreen {
 	}
 
 	Load() {
-		ElementCreateInput("BCX_RoomSearchValueField", "text", modStorage.roomSearchAutoFill || "", "20");
+		if (this.character.isPlayer()) {
+			ElementCreateInput("BCX_RoomSearchValueField", "text", modStorage.roomSearchAutoFill || "", "20");
+		}
 	}
 
 	Run() {

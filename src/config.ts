@@ -2,11 +2,10 @@ export const VERSION = BCX_VERSION;
 
 export const VERSION_CHECK_BOT: number = 37685;
 
-// Server commit: a2e5454d002ed8d93c4009e59fdbd47c800277a9
+// Server commit: 806dcd771d453c82427643abe8fabb4a4a2d1513
 
-// Game commit: fdf0d0323bf137fbfbaaf8a22ca77f96465beefa
+// Game commit: 70bf70b1e7f9ec554649ced7a1e12eda75efebd5
 export const FUNCTION_HASHES: Record<string, string[]> = {
-	"Player.CanChange": ["082287C0", "F7D498F3"], // Deprecated
 	"Player.CanChangeClothesOn": ["40EF5292"],
 	"Player.GetBlindLevel": ["B0DE4B87"],
 	"Player.GetDeafLevel": ["42CB6D63"],
@@ -37,7 +36,6 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomCanAttemptKneel: ["0AA710FA"],
 	ChatRoomCanAttemptStand: ["026065D0"],
 	ChatRoomCanBeLeashedBy: ["0ADB85BD", "A05C6F82"],
-	ChatRoomCanChangeClothes: ["87102B7C"], // Deprecated
 	ChatRoomCanLeave: ["5BEE6F9D", "77FB6CF8", "7065F82F"],
 	ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED", "C49AA2C1"],
 	ChatRoomClickCharacter: ["21AEE568", "AA9259DF"],

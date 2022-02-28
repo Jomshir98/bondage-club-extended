@@ -315,30 +315,34 @@ export class ModuleChatroom extends BaseModule {
 		window.addEventListener("keydown", DMSKeydown);
 		window.addEventListener("keyup", DMSKeyup);
 
-		// TODO: Cleanup after R77
-		if (GameVersion !== "R76") {
-			hookFunction("ChatRoomStatusUpdate", 10, (args, next) => {
-				if (args[0] === "Talk") {
-					const text = ElementValue("InputChat");
-					if (text && text.startsWith(".") && !text.startsWith("..")) {
-						args[0] = null;
-					}
+		hookFunction("ChatRoomStatusUpdate", 10, (args, next) => {
+			if (args[0] === "Talk") {
+				const text = ElementValue("InputChat");
+				if (text && text.startsWith(".") && !text.startsWith("..")) {
+					args[0] = null;
 				}
-				return next(args);
-			});
-			hookFunction("DrawStatus", 10, (args, next) => {
-				const C = args[0] as Character;
-				const char = getChatroomCharacter(C.MemberNumber!);
-				if (char?.BCXVersion != null &&
-					char.typingIndicatorEnable &&
-					modStorage.typingIndicatorHideBC &&
-					C.Status === "Talk"
-				) {
-					return;
-				}
-				return next(args);
-			});
-		}
+			}
+			return next(args);
+		});
+		hookFunction("DrawStatus", 10, (args, next) => {
+			const C = args[0] as Character;
+			const char = getChatroomCharacter(C.MemberNumber!);
+			if (char?.BCXVersion != null &&
+				char.typingIndicatorEnable &&
+				modStorage.typingIndicatorHideBC &&
+				C.Status === "Talk"
+			) {
+				return;
+			}
+			if (char?.BCXVersion != null &&
+				char.screenIndicatorEnable &&
+				modStorage.typingIndicatorHideBC &&
+				C.Status === "Wardrobe"
+			) {
+				return;
+			}
+			return next(args);
+		});
 
 		hookFunction("ChatRoomSendChat", 0, (args, next) => {
 			next(args);

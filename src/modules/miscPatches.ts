@@ -177,12 +177,7 @@ export class ModuleMiscPatches extends BaseModule {
 
 		// Cheats
 
-		// TODO: Cleanup after R77
-		if (GameVersion === "R76") {
-			hookFunction("Player.CanChange", 1, (args, next) => allowMode || next(args));
-		} else {
-			hookFunction("Player.CanChangeClothesOn", 1, (args, next) => (allowMode && (args[0] as Character).IsPlayer()) || next(args));
-		}
+		hookFunction("Player.CanChangeClothesOn", 1, (args, next) => (allowMode && (args[0] as Character).IsPlayer()) || next(args));
 		hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
 
 		// Anti-stupid-null

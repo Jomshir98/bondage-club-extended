@@ -32,6 +32,7 @@ type BCX_message_hello = {
 	request: boolean;
 	effects?: Partial<BCX_effects>;
 	typingIndicatorEnable?: boolean;
+	screenIndicatorEnable?: boolean;
 };
 
 type BCX_message_query = {

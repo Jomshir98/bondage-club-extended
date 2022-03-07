@@ -197,6 +197,9 @@ export class ModuleChatroom extends BaseModule {
 			if (typeof message.typingIndicatorEnable === "boolean") {
 				char.typingIndicatorEnable = message.typingIndicatorEnable;
 			}
+			if (typeof message.screenIndicatorEnable === "boolean") {
+				char.screenIndicatorEnable = message.screenIndicatorEnable;
+			}
 			// Send announcement, if requested
 			if (message.request === true) {
 				announceSelf(false);
@@ -420,6 +423,7 @@ export function announceSelf(request: boolean = false) {
 		version: VERSION,
 		request,
 		effects: player.Effects,
-		typingIndicatorEnable: modStorage.typingIndicatorEnable
+		typingIndicatorEnable: modStorage.typingIndicatorEnable,
+		screenIndicatorEnable: modStorage.screenIndicatorEnable
 	});
 }

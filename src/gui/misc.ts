@@ -44,7 +44,7 @@ export class GuiMisc extends GuiSubscreen {
 		MainCanvas.textAlign = "left";
 
 		DrawCheckbox(125, 200, 64, 64, "Enable typing indicator", !!modStorage.typingIndicatorEnable);
-		DrawCheckbox(800, 200, 64, 64, "Hide BC's typing icon on other BCX users", !!modStorage.typingIndicatorHideBC);
+		DrawCheckbox(700, 200, 64, 64, "Hide BC's typing & wardrobe icon on users showing BCX one", !!modStorage.typingIndicatorHideBC);
 		DrawCheckbox(125, 300, 64, 64, "Enable status indicator showing when you are in any player's BCX menu, biography, or wardrobe", !!modStorage.screenIndicatorEnable);
 		DrawCheckbox(125, 400, 64, 64, "Cheat: Prevent random NPC events (kidnappings, ransoms, asylum, club slaves)", cheatIsEnabled(MiscCheat.BlockRandomEvents));
 		DrawCheckbox(125, 500, 64, 64, "Cheat: Prevent loosing Mistress status when reputation falls below 50 dominance", cheatIsEnabled(MiscCheat.CantLoseMistress));
@@ -74,7 +74,7 @@ export class GuiMisc extends GuiSubscreen {
 			modStorageSync();
 			announceSelf();
 		}
-		if (MouseIn(800, 200, 64, 64)) {
+		if (MouseIn(700, 200, 64, 64)) {
 			modStorage.typingIndicatorHideBC = !modStorage.typingIndicatorHideBC;
 			modStorageSync();
 		}
@@ -82,6 +82,7 @@ export class GuiMisc extends GuiSubscreen {
 		if (MouseIn(125, 300, 64, 64)) {
 			modStorage.screenIndicatorEnable = !modStorage.screenIndicatorEnable;
 			modStorageSync();
+			announceSelf();
 		}
 
 		if (MouseIn(125, 400, 64, 64)) {

@@ -28,6 +28,7 @@ export class ChatroomCharacter {
 	Effects: BCX_effects;
 
 	typingIndicatorEnable: boolean = true;
+	screenIndicatorEnable: boolean = true;
 
 	get MemberNumber(): number {
 		if (typeof this.Character.MemberNumber !== "number") {

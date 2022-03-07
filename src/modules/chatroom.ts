@@ -282,6 +282,8 @@ export class ModuleChatroom extends BaseModule {
 		hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
 			next(args);
 
+			if (ChatRoomHideIconState >= 2)
+				return;
 			const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
 			switch (ChatroomSM.GetCharacterStatus(C)) {
 				case ChatRoomStatusManagerStatusType.Typing:

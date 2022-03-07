@@ -237,6 +237,7 @@ type BCX_Rule =
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"
+	| "alt_field_of_vision"
 	| "alt_blindfolds_fullblind"
 	| "alt_always_slow"
 	| "alt_control_orgasms"
@@ -335,6 +336,10 @@ type RuleCustomData = {
 		affectPlayer: boolean;
 		hideNames: boolean;
 	},
+	alt_field_of_vision: {
+		affectPlayer: boolean;
+		hideNames: boolean;
+	}
 	alt_control_orgasms: {
 		orgasmHandling: string;
 	},

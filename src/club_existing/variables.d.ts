@@ -9,12 +9,16 @@ declare var ActivityOrgasmGameResistCount: number;
 declare var AfkTimerEventsList: string[];
 
 // Appearance.js
+declare const CanvasUpperOverflow: number;
+declare const CanvasLowerOverflow: number;
+declare const CanvasDrawHeight: number;
 declare var CharacterAppearanceSelection: Character | null;
 declare var CharacterAppearanceMode: string;
 declare var CharacterAppearanceWardrobeText: string;
 declare var AppearanceMenu: any[];
 /** NMod ONLY! */
 declare var AppearanceMode: string;
+declare function CharacterAppearanceYOffset(C: Character, HeightRatio: number, IgnoreUpButton?: boolean): number;
 declare function AppearanceMenuBuild(C: Character): void;
 declare function CharacterAppearanceSetItem(C: Character, Group: string, ItemAsset: Asset | null, NewColor?: string | string[], DifficultyFactor?: number, ItemMemberNumber?: number, Refresh?: boolean): void;
 
@@ -58,6 +62,7 @@ declare function CharacterDeleteAllOnline(): void;
 declare function CharacterGetCurrent(): Character | null;
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
 declare function CharacterLoadCanvas(C: Character): void;
+declare function CharacterAppearsInverted(C: Character): boolean;
 declare function CharacterSetFacialExpression(C: Character, AssetGroup: string, Expression: string | null, Timer?: number, Color?: string | string[]): void;
 
 // Element.js
@@ -102,6 +107,7 @@ declare const DrawRunMap: Map<string, () => void>;
 declare var DrawScreen: string;
 declare var DrawHoverElements: (() => void)[];
 declare var MainCanvas: CanvasRenderingContext2D;
+declare var CharacterCanvas: CanvasRenderingContext2D;
 declare function DrawGetImage(Source: string): HTMLImageElement;
 declare function DrawButton(Left: number, Top: number, Width: number, Height: number, Label: string, Color: string, Image?: string, HoveringText?: string, Disabled?: boolean): void;
 declare function DrawCheckbox(Left: number, Top: number, Width: number, Height: number, Text: string, IsChecked: boolean, Disabled?: boolean, TextColor?: string, CheckImage?: string): void;

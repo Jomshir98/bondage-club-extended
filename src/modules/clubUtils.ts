@@ -115,8 +115,57 @@ function showDealersLog() {
 	dealersLog.forEach(entry => { ChatRoomActionMessage(entry); });
 }
 //#endregion
+
+function rollDice(sides: number) {
+	const result = Math.floor(Math.random() * sides) + 1;
+	ChatRoomSendLocal(`You secretly roll a ${sides}-sided dice. The result is: ${result}.`);
+}
+
 export class ModuleClubUtils extends BaseModule {
 	load() {
+		registerCommandParsed("utilities", "dice", "<number of dice sides> <number of rolls> - Shows only you the result of rolling a dice the given number of times",
+			(args) => {
+				let sides: number = 6;
+				let rolls: number = 1;
+				// no argument
+				if (args.length < 1) {
+					rollDice(6);
+					// at least one argument
+				} else {
+					// check first argument
+					if (/^[0-9]+$/.test(args[0])) {
+						sides = Number.parseInt(args[0], 10);
+						if ((sides < 2) || (sides > 100)) {
+							ChatRoomSendLocal(`The <number of dice sides> need to be between 2 and 100`);
+							return false;
+						}
+					} else {
+						ChatRoomSendLocal(`Usage: .dice draw <number of dice sides> <number of rolls> - all parameters are optional`);
+						return false;
+					}
+					if (args.length < 2) {
+						rollDice(sides);
+						// at least two arguments
+					} else {
+						// check second argument
+						if (/^[0-9]+$/.test(args[1])) {
+							rolls = Number.parseInt(args[1], 10);
+							if ((rolls < 1) || (rolls > 50)) {
+								ChatRoomSendLocal(`The <number of rolls> need to be between 1 and 50`);
+								return false;
+							}
+						} else {
+							ChatRoomSendLocal(`Usage: .dice draw <number of dice sides> <number of rolls> - all parameters are optional`);
+							return false;
+						}
+						for (let i = 0; i < rolls; i++) {
+							rollDice(sides);
+						}
+					}
+				}
+				return true;
+			}
+		);
 		//#region card deck
 		registerCommandParsed(
 			"utilities",

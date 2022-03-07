@@ -178,7 +178,7 @@ export class ModuleCommandsModule extends BaseModule {
 			const subcommand = (argv[0] || "").toLocaleLowerCase();
 			if ((subcommand as ConditionsSubcommand) === "setlimit") {
 				return ConditionsRunSubcommand("commands", argv, sender, respond);
-			} else if (subcommand === "list") {
+			} else if (subcommand === "listall") {
 				let result = "List of commands:";
 				for (const [command] of CommandsGetList()) {
 					const resultItem = `\n${command}`;
@@ -196,10 +196,18 @@ export class ModuleCommandsModule extends BaseModule {
 					return respond(result[1]);
 				}
 				const data = CommandsGetDisplayDefinition(result[1]);
-				respond(data.longDescription.replaceAll("PLAYER_NAME", Player.Name));
+				respond(
+					dictionaryProcess(
+						data.longDescription,
+						{
+							PLAYER_NAME: Player.Name,
+							HELP_DESCRIPTION : data.helpDescription
+						}
+					)
+				);
 			} else {
 				respond(Command_fixExclamationMark(sender, `!commands usage:\n` +
-					`!commands list - List all commands\n` +
+					`!commands listall - List all commands\n` +
 					`!commands description <command> - Show the command's description\n` +
 					`!commands setlimit <command> <normal/limited/blocked> - Set a limit on certain <command>\n` +
 					`\nNote: The commands can also be listed with '.help commands'. To use them on other BCX users, whisper the command with a leading '!' instead of '.'`
@@ -210,7 +218,7 @@ export class ModuleCommandsModule extends BaseModule {
 				return [];
 			}
 			if (argv.length <= 1) {
-				return Command_pickAutocomplete(argv[0], ["list", "description", "setlimit"]);
+				return Command_pickAutocomplete(argv[0], ["listall", "description", "setlimit"]);
 			}
 
 			const subcommand = argv[0].toLocaleLowerCase();

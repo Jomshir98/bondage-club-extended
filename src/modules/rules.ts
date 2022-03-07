@@ -928,6 +928,19 @@ export class ModuleRules extends BaseModule {
 					result += resultItem;
 				}
 				respond(result);
+			} else if (subcommand === "listall") {
+				let result = "All existing rules:";
+				for (const [k] of RulesGetList()) {
+					const data = RulesGetDisplayDefinition(k as BCX_Rule);
+					const resultItem = `\n${data.name}`;
+					if (result.length + resultItem.length >= 990) {
+						result += "\n...";
+						respond(result);
+						result = "All rules (continued):";
+					}
+					result += resultItem;
+				}
+				respond(result);
 			} else if (subcommand === "description") {
 				const result = parseRuleName(argv[1] || "");
 				if (!result[0]) {
@@ -943,7 +956,8 @@ export class ModuleRules extends BaseModule {
 				respond(RulesDelete(result[1], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
 				respond(Command_fixExclamationMark(sender, `!rules usage (page 1):\n` +
-					`!rules list - List all currently applied rules\n` +
+					`!rules list - List the currently applied rules\n` +
+					`!rules listall - List all existing rule names in BCX\n` +
 					`!rules description <rule> - Show the rule's description\n` +
 					`!rules remove <rule> - Remove a currently applied rule if permitted to\n` +
 					`\nNote: Adding and setting up rules is only supported via using BCX's graphical user interface yourself.`
@@ -964,7 +978,7 @@ export class ModuleRules extends BaseModule {
 				return [];
 			}
 			if (argv.length <= 1) {
-				return Command_pickAutocomplete(argv[0], ["list", "description", "remove", ...ConditionsSubcommands]);
+				return Command_pickAutocomplete(argv[0], ["list", "listall", "description", "remove", ...ConditionsSubcommands]);
 			}
 
 			const subcommand = argv[0].toLocaleLowerCase();

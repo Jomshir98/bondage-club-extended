@@ -331,6 +331,10 @@ type RuleCustomData = {
 	alt_restrict_sight: {
 		blindnessStrength: string;
 	},
+	alt_eyes_fullblind: {
+		affectPlayer: boolean;
+		hideNames: boolean;
+	},
 	alt_control_orgasms: {
 		orgasmHandling: string;
 	},

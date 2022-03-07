@@ -40,6 +40,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomClearAllElements: ["D1E1F8C3", "D9169281", "AFB1B3ED", "C49AA2C1"],
 	ChatRoomClickCharacter: ["21AEE568", "AA9259DF"],
 	ChatRoomCreateElement: ["4837C2F6", "6C4CCF41", "35D54383", "60A3203E", "AD7CBE68"],
+	ChatRoomDrawCharacter: ["3AE33D9C"],
 	ChatRoomDrawCharacterOverlay: ["D58A9AD3", "4AE4AD9E"],
 	ChatRoomFirstTimeHelp: ["078BEEA9"],
 	ChatRoomIsOwnedByPlayer: ["82640FF9"],

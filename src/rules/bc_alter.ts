@@ -220,6 +220,19 @@ export function initRules_bc_alter() {
 		loggable: false,
 		longDescription: "This rule enforces full blindness when the eyes are closed. (Light sensory deprivation setting is still respected and doesn't blind fully)",
 		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			affectPlayer: {
+				type: "toggle",
+				default: false,
+				description: "Player sees the effect also on herself"
+			},
+			hideNames: {
+				type: "toggle",
+				default: false,
+				description: "Hide names and icons during the effect",
+				Y: 440
+			}
+		},
 		tick(state) {
 			if (state.isEnforced) {
 				DialogFacialExpressionsSelectedBlindnessLevel = 3;
@@ -229,6 +242,42 @@ export function initRules_bc_alter() {
 		load(state) {
 			hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
 				if (state.isEnforced && MouseIn(220, 50, 90, 90))
+					return;
+				return next(args);
+			});
+			hookFunction("ChatRoomDrawCharacter", 1, (args, next) => {
+				if (args[0])
+					return next(args);
+
+				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
+				const eyes1 = InventoryGet(Player, "Eyes");
+				const eyes2 = InventoryGet(Player, "Eyes2");
+				if (
+					state.isEnforced &&
+					state.customData?.hideNames &&
+					eyes1?.Property?.Expression === "Closed" &&
+					eyes2?.Property?.Expression === "Closed"
+				) {
+					ChatRoomHideIconState = 3;
+				}
+
+				next(args);
+
+				ChatRoomHideIconState = ChatRoomHideIconStateBackup;
+			});
+			hookFunction("DrawCharacter", 1, (args, next) => {
+				const eyes1 = InventoryGet(Player, "Eyes");
+				const eyes2 = InventoryGet(Player, "Eyes2");
+				if (
+					state.isEnforced &&
+					Player.GameplaySettings?.SensDepChatLog !== "SensDepLight" &&
+					eyes1?.Property?.Expression === "Closed" &&
+					eyes2?.Property?.Expression === "Closed" &&
+					CurrentModule === "Online" &&
+					CurrentScreen === "ChatRoom" &&
+					args[0].IsPlayer() &&
+					state.customData?.affectPlayer
+				)
 					return;
 				return next(args);
 			});

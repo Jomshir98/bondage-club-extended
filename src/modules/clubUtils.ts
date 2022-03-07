@@ -7,6 +7,8 @@ import { RulesGetRuleState } from "./rules";
 import backgroundList from "../generated/backgroundList.json";
 import { OverridePlayerDialog } from "./miscPatches";
 import remove from "lodash-es/remove";
+import { arrayUnique } from "../utils";
+import { modStorage } from "./storage";
 
 const BACKGROUNDS_BCX_NAME = "[BCX] Hidden";
 
@@ -32,6 +34,27 @@ export function InvisibilityEarbuds() {
 	ChatRoomCharacterUpdate(Player);
 }
 
+//#region Hidden room backgrounds
+function processBackgroundCommand(input: string): boolean {
+	if (input.trim() === "") {
+		ChatRoomSendLocal(`Try pressing the "tab"-key to show autocomplete options`);
+		return false;
+	}
+	const Background = backgroundList.find(i => i.toLocaleLowerCase() === input.toLocaleLowerCase());
+	if (!Background) {
+		ChatRoomSendLocal(`Invalid/unknown background`);
+		return false;
+	}
+	if (!updateChatroom({ Background })) {
+		ChatRoomSendLocal(`Failed to update room. Are you admin?`);
+	}
+	return true;
+}
+function processBackgroundCommand_autocomplete(input: string): string[] {
+	return Command_pickAutocomplete(input, backgroundList);
+}
+//#endregion
+
 //#region Antiblind
 let antiblind: boolean = false;
 
@@ -52,6 +75,142 @@ function toggleAntiblind(): boolean {
 
 export class ModuleClubUtils extends BaseModule {
 	load() {
+		//#region room
+		registerCommandParsed(
+			"utilities",
+			"room",
+			"- Change or administrate the current chat room. Use '.room' for more help",
+			(args) => {
+				const subcommand = (args[0] || "").toLowerCase();
+
+				if (!ChatRoomPlayerIsAdmin()) {
+					ChatRoomSendLocal("You need to be admin in this room to use a .room command");
+					return false;
+				} else if (subcommand === "locked" || subcommand === "private") {
+					if (args.length === 1 || (args[1] !== "yes" && args[1] !== "no")) {
+						ChatRoomSendLocal(`Add 'yes' or 'no' behind '.room locked' or '.room private'`);
+						return false;
+					}
+					if (subcommand === "locked") {
+						const Locked = args[1] === "yes" ? true : false;
+						updateChatroom({ Locked });
+					} else {
+						const Private = args[1] === "yes" ? true : false;
+						updateChatroom({ Private });
+					}
+				} else if (subcommand === "size" || subcommand === "limit" || subcommand === "slots") {
+					const size = args.length === 2 && /^[0-9]+$/.test(args[1]) && Number.parseInt(args[1], 10);
+					if (!size || size < 2 || size > 10) {
+						ChatRoomSendLocal(`Needs a number between 2 and 10 as <number> in '.room size <number>'`);
+						return false;
+					}
+					const Limit = size;
+					updateChatroom({ Limit });
+				} else if (subcommand === "background") {
+					if (args.length !== 2) {
+						ChatRoomSendLocal(`Needs the name of a background (for example: 'MainHall') behind '.room ${subcommand}'`);
+						return false;
+					}
+					return processBackgroundCommand(args[1]);
+				} else if (subcommand === "promote" || subcommand === "demote" || subcommand === "kick" || subcommand === "ban" || subcommand === "permaban") {
+					if (args.length === 1) {
+						ChatRoomSendLocal(`Needs at least one character name oder member number as <target> in '.room ${subcommand} <target1> <target2> <targetN>'`);
+						return false;
+					}
+					const targets: number[] = [];
+
+					for (const target of args.slice(1)) {
+						const character = Command_selectCharacter(target);
+						if (typeof character === "string") {
+							ChatRoomSendLocal(character);
+							return false;
+						}
+						targets.push(character.MemberNumber);
+					}
+					if (subcommand === "promote") {
+						const Admin = arrayUnique(ChatRoomData.Admin.concat(targets));
+						updateChatroom({ Admin });
+					} else if (subcommand === "demote") {
+						const targetsToDemote = new Set(targets);
+						const Admin = ChatRoomData.Admin.filter((target) => {
+							return !targetsToDemote.has(target);
+						});
+						updateChatroom({ Admin });
+					} else if (subcommand === "kick") {
+						for (const target of targets) {
+							ServerSend("ChatRoomAdmin", { MemberNumber: target, Action: "Kick", Publish: false });
+						}
+					} else if (subcommand === "ban") {
+						for (const target of targets) {
+							ServerSend("ChatRoomAdmin", { MemberNumber: target, Action: "Ban", Publish: false });
+						}
+					} else if (subcommand === "permaban") {
+						for (const target of targets) {
+							ServerSend("ChatRoomAdmin", { MemberNumber: target, Action: "Ban", Publish: false });
+							ChatRoomListUpdate(Player.BlackList, true, target);
+						}
+					}
+				} else if (subcommand === "template") {
+					const slot = args.length === 2 && /^[0-9]+$/.test(args[1]) && Number.parseInt(args[1], 10);
+					if (!slot || slot < 1 || slot > 4) {
+						ChatRoomSendLocal(`Needs a template slot number between 1 and 4 behind '.room template'`);
+						return false;
+					}
+					const template = modStorage && modStorage.roomTemplates && modStorage.roomTemplates[slot - 1];
+					if (!template) {
+						ChatRoomSendLocal(`Unable to find a valid room template in slot ${slot}. You likely need to set one in the chat room creation screen.`);
+						return false;
+					}
+					const size = Number.parseInt(template.Limit, 10);
+					updateChatroom({
+						Name: template.Name,
+						Description: template.Description,
+						Background: template.Background,
+						Private: template.Private,
+						Locked: template.Locked,
+						Game: template.Game,
+						Admin: template.Admin,
+						Limit: size,
+						BlockCategory: template.BlockCategory
+					});
+				} else {
+					ChatRoomSendLocal(
+						`Usage:\n` +
+						`.room locked <yes/no> - Locks or unlocks the room\n` +
+						`.room private <yes/no> - Sets the room to be private or public\n` +
+						`.room size <number> - Sets the number of open character slots in the room\n` +
+						`.room background <name> - Changes room background (same as .background)\n` +
+						`.room kick <...targets> - Kicks all space-seperated player names or member numbers\n` +
+						`.room ban <...targets> - Bans all space-seperated player names or member numbers\n` +
+						`.room permaban <...targets> - Bans and blacklists all specified player names or numbers\n` +
+						`.room <promote/demote> <...targets> - Adds or removes admin on all specified player names or numbers\n` +
+						`.room template <1/2/3/4> - Changes the room according to the given BCX room template slot`
+					);
+				}
+
+				return true;
+			},
+			(argv) => {
+				const subcommand = argv[0].toLowerCase();
+				if (argv.length <= 1) {
+					return Command_pickAutocomplete(subcommand, ["locked", "private", "size", "background", "promote", "demote", "kick", "ban", "permaban", "template"]);
+				}
+				if ((subcommand === "locked" || subcommand === "private") && argv.length >= 2) {
+					return Command_pickAutocomplete(argv[1], ["yes", "no"]);
+				}
+				if (
+					(subcommand === "promote" || subcommand === "demote" || subcommand === "kick" || subcommand === "ban" || subcommand === "permaban") &&
+					argv.length >= 2
+				) {
+					return Command_selectCharacterAutocomplete(argv[argv.length - 1]);
+				}
+				if (subcommand === "background" && argv.length === 2) {
+					return processBackgroundCommand_autocomplete(argv[1]);
+				}
+				return [];
+			}
+		);
+		//#endregion
 		//#region Antiblind
 		registerCommand("cheats", "antiblind", "- Toggles ability to always see despite items", () => {
 			if (toggleAntiblind()) {
@@ -66,21 +225,7 @@ export class ModuleClubUtils extends BaseModule {
 		});
 		//#endregion
 		//#region Hidden room backgrounds
-		registerCommand("utilities", "background", "<name> - Changes chat room background", (arg) => {
-			if (arg.trim() === "") {
-				ChatRoomSendLocal(`Try pressing the "tab"-key to show autocomplete options`);
-				return false;
-			}
-			const Background = backgroundList.find(i => i.toLocaleLowerCase() === arg.toLocaleLowerCase());
-			if (!Background) {
-				ChatRoomSendLocal(`Invalid/unknown background`);
-				return false;
-			}
-			if (!updateChatroom({ Background })) {
-				ChatRoomSendLocal(`Failed to update room. Are you admin?`);
-			}
-			return true;
-		}, (arg) => Command_pickAutocomplete(arg, backgroundList));
+		registerCommand("utilities", "background", "<name> - Changes chat room background", processBackgroundCommand, processBackgroundCommand_autocomplete);
 		// Add new backgrounds to the list
 
 		if (!BackgroundsTagList.includes(BACKGROUNDS_BCX_NAME)) {

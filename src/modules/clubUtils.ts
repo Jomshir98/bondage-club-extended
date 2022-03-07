@@ -1,13 +1,13 @@
 import { Command_pickAutocomplete, Command_selectCharacter, Command_selectCharacterAutocomplete, Command_selectWornItem, Command_selectWornItemAutocomplete, registerCommandParsed } from "./commands";
 import { BaseModule } from "./_BaseModule";
-import { ChatRoomSendLocal, updateChatroom } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, updateChatroom } from "../utilsClub";
 import { registerCommand } from "./commands";
 import { callOriginal, hookFunction } from "../patching";
 import { RulesGetRuleState } from "./rules";
 import backgroundList from "../generated/backgroundList.json";
 import { OverridePlayerDialog } from "./miscPatches";
 import remove from "lodash-es/remove";
-import { arrayUnique } from "../utils";
+import { arrayUnique, shuffleArray } from "../utils";
 import { modStorage } from "./storage";
 
 const BACKGROUNDS_BCX_NAME = "[BCX] Hidden";
@@ -73,8 +73,131 @@ function toggleAntiblind(): boolean {
 }
 //#endregion
 
+//#region card deck
+let cardDeck: string[] = [];
+let dealersLog: string[] = [];
+
+function shuffleDeck() {
+	cardDeck = [];
+	dealersLog = [];
+	const cardSuits = ["♥", "♦", "♠", "♣"];
+	const cardRanks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+	cardSuits.forEach(suit => {
+		cardRanks.forEach(rank => {
+			cardDeck.push(rank + suit);
+		});
+	});
+	shuffleArray(cardDeck);
+	ChatRoomActionMessage(`The dealer took the remaining ${cardDeck.length} cards from the deck and shuffled all cards for a new deck.`);
+}
+
+function drawCard(target: number | null) {
+	if (cardDeck.length === 0) shuffleDeck();
+	const card = cardDeck.pop();
+	if (target) {
+		ChatRoomActionMessage(`The dealer dealt you this card face down: ${card}`, target);
+	} else {
+		ChatRoomActionMessage(`The dealer openly drew this card face up: ${card}`, target);
+	}
+	dealersLog.push(`${card} ${target === null ? "was drawn face up" : `was dealt to ${getCharacterName(target, "[unknown name]")} (${target})`}`);
+}
+
+function drawCards(numberOfCards: number, membernumbers?: number[]) {
+	for (const target of membernumbers ?? [null]) {
+		for (let i = 0; i < numberOfCards; i++) {
+			drawCard(target);
+		}
+	}
+}
+
+function showDealersLog() {
+	dealersLog.forEach(entry => { ChatRoomActionMessage(entry); });
+}
+//#endregion
 export class ModuleClubUtils extends BaseModule {
 	load() {
+		//#region card deck
+		registerCommandParsed(
+			"utilities",
+			"deck",
+			"- Draw, deal or shuffle with a 52-card deck. Use '.deck' for more help",
+			(args) => {
+				const subcommand = (args[0] || "").toLowerCase();
+
+				if (subcommand === "shuffle") {
+					shuffleDeck();
+				} else if (subcommand === "showlog") {
+					showDealersLog();
+				} else if (subcommand === "draw" || subcommand === "deal") {
+					let count = 1;
+					if (args.length >= 2) {
+						if (/^[0-9]+$/.test(args[1])) {
+							count = Number.parseInt(args[1], 10);
+						} else {
+							if (subcommand === "draw") {
+								ChatRoomSendLocal(`Usage: .deck draw <number of cards>`);
+							} else {
+								ChatRoomSendLocal(`Usage: .deck deal <number of cards> <...targets>`);
+							}
+							return false;
+						}
+
+						if (count > 52 || count < 1) {
+							ChatRoomSendLocal(`You can ${subcommand} at most 52 cards at once`);
+							return false;
+						}
+					}
+
+					if (args.length > 2 && subcommand === "draw") {
+						ChatRoomSendLocal(`Cards are "drawn" openly. Did you mean to deal instead?`);
+						return false;
+					}
+					if (args.length <= 2 && subcommand === "deal") {
+						ChatRoomSendLocal(`Cards are "dealt" to someone. Did you mean to draw instead?`);
+						return false;
+					}
+
+					let targets: number[] | undefined;
+
+					if (args.length > 2) {
+						targets = [];
+						for (const target of args.slice(2)) {
+							const character = Command_selectCharacter(target);
+							if (typeof character === "string") {
+								ChatRoomSendLocal(character);
+								return false;
+							}
+							targets.push(character.MemberNumber);
+						}
+					}
+
+					drawCards(count, targets);
+				} else {
+					ChatRoomSendLocal(
+						`Usage:\n` +
+						`.deck shuffle - Shuffles all remaining and drawn cards into a new deck\n` +
+						`.deck draw <number of cards> - Draws the < number of cards > from the card deck and reveals them to all players\n` +
+						`.deck deal <number of cards> <...targets> - Deals the < number of cards > to each of the specified player names or member numbers in a hidden way\n` +
+						`.deck showlog - Lists who got each card drawn from the current deck openly in the chat (if proof is needed)\n` +
+						`The deck is a standard 52-card deck. If the deck is empty, it shuffles automatically.`
+					);
+				}
+
+				return true;
+			},
+			(argv) => {
+				const subcommand = argv[0].toLowerCase();
+				if (argv.length <= 1) {
+					return Command_pickAutocomplete(subcommand, ["shuffle", "draw", "deal", "showlog"]);
+				}
+				if (subcommand === "deal" && argv.length >= 3) {
+					return Command_selectCharacterAutocomplete(argv[argv.length - 1]);
+				}
+				return [];
+			}
+		);
+		//#endregion
 		//#region room
 		registerCommandParsed(
 			"utilities",

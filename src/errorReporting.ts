@@ -15,6 +15,11 @@ let firstError = true;
 let lastReceivedMessageType = "";
 let lastSentMessageType = "";
 
+let logServerMessages = false;
+export function debugSetLogServerMessages(value: boolean): void {
+	logServerMessages = value;
+}
+
 export function debugGenerateReport(includeBCX: boolean = true): string {
 	let res = `----- Debug report -----\n`;
 	res += `Location: ${window.location.href.replace(/\d{4,}/g, "<numbers>")}\n`;
@@ -212,7 +217,9 @@ function bcxSocketEmit(this: any, ...args: any[]) {
 	lastReceivedMessageType = message;
 
 	const parameters = Array.isArray(args[0]) ? args[0].slice(1) : [];
-	// console.log("\u2B07 Receive", message, ...parameters);
+	if (logServerMessages) {
+		console.log("\u2B07 Receive", message, ...parameters);
+	}
 
 	const ctx = debugContextStart(`Server message ${message}`, {
 		root: true,
@@ -258,7 +265,9 @@ export function InitErrorReporter() {
 
 	hookFunction("ServerSend", 0, (args, next) => {
 		lastSentMessageType = args[0];
-		// console.log("\u2B06 Send", args[0], ...args.slice(1));
+		if (logServerMessages) {
+			console.log("\u2B06 Send", ...args);
+		}
 		return next(args);
 	});
 }

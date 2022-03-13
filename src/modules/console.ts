@@ -7,7 +7,7 @@ import { unload } from "../main";
 import { modStorage, switchStorageLocation } from "./storage";
 import { sendQuery } from "./messaging";
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
-import { debugGenerateReport, showErrorOverlay } from "../errorReporting";
+import { debugGenerateReport, debugSetLogServerMessages, showErrorOverlay } from "../errorReporting";
 import { VERSION } from "../config";
 
 class ConsoleInterface {
@@ -118,6 +118,14 @@ class ConsoleInterface {
 			"You can use the 'Close' button at the bottom to close this overlay.",
 			debugGenerateReport()
 		);
+	}
+
+	debugSetLogServerMessages(value: boolean): boolean {
+		if (typeof value !== "boolean")
+			return false;
+
+		debugSetLogServerMessages(value);
+		return true;
 	}
 }
 

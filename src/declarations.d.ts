@@ -603,7 +603,8 @@ interface RuleDefinition<ID extends BCX_Rule = BCX_Rule> extends RuleDisplayDefi
 type BCX_Command =
 	| "eyes"
 	| "mouth"
-	| "pose"
+	| "arms"
+	| "legs"
 	;
 
 interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {

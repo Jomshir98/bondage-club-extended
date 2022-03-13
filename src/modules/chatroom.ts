@@ -38,6 +38,7 @@ class ChatRoomStatusManager {
 	private InputTimeout: number | null = null;
 
 	Status: ChatRoomStatusManagerStatusType = ChatRoomStatusManagerStatusType.None;
+	private StatusTarget: number | null = null;
 
 	// Status triggers
 	DMS: boolean = false;
@@ -73,13 +74,17 @@ class ChatRoomStatusManager {
 	}
 
 	UpdateStatus() {
-		const newStatus = this.GetStatus();
-		if (newStatus !== this.Status) {
-			if (this.WhisperTarget !== null && newStatus === ChatRoomStatusManagerStatusType.Whisper) {
-				this.SendUpdate(ChatRoomStatusManagerStatusType.None, null);
+		const oldStatus = this.Status;
+		const oldStatusTarget = this.StatusTarget;
+		this.Status = this.GetStatus();
+		this.StatusTarget = this.Status === ChatRoomStatusManagerStatusType.Whisper ? this.WhisperTarget : null;
+		if (this.Status !== oldStatus || this.StatusTarget !== oldStatusTarget) {
+			if (this.StatusTarget !== oldStatusTarget && oldStatus !== ChatRoomStatusManagerStatusType.None) {
+				this.SendUpdate(ChatRoomStatusManagerStatusType.None, oldStatusTarget);
+				if (this.Status === ChatRoomStatusManagerStatusType.None)
+					return;
 			}
-			this.Status = newStatus;
-			this.SendUpdate(newStatus, newStatus === ChatRoomStatusManagerStatusType.Whisper ? this.WhisperTarget : null);
+			this.SendUpdate(this.Status, this.StatusTarget);
 		}
 	}
 

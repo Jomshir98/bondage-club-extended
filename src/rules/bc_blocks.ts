@@ -785,6 +785,37 @@ export function initRules_bc_blocks() {
 		}
 	});
 
+	registerRule("block_whitelisting", {
+		name: "Prevent whitelisting",
+		type: RuleType.Block,
+		loggable: false,
+		shortDescription: "of roles 'friend' or 'public'",
+		longDescription: "This rule prevents PLAYER_NAME from adding characters with a role lower than a BCX Mistress to their bondage club whitelist.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to whitelist this person!",
+			attempt_announce: "PLAYER_NAME violated a rule by trying to whitelist TARGET_CHARACTER"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		load(state) {
+			// TODO: Fix for NMod
+			if (!NMod) {
+				hookFunction("ChatRoomListUpdate", 6, (args, next) => {
+					const CN = parseInt(args[2], 10);
+					if (state.isEnforced &&
+						args[0] === Player.WhiteList &&
+						args[1] &&
+						typeof CN === "number" &&
+						getCharacterAccessLevel(CN) > AccessLevel.mistress
+					) {
+						state.triggerAttempt({ TARGET_CHARACTER: `${getCharacterName(CN, "[Unknown]")} (${CN})` });
+						return;
+					}
+					return next(args);
+				}, ModuleCategory.Rules);
+			}
+		}
+	});
+
 	registerRule("block_antiblind", {
 		name: "Forbid the antiblind option",
 		type: RuleType.Block,

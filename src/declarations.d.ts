@@ -228,6 +228,7 @@ type BCX_Rule =
 	| "block_freeing_self"
 	| "block_tying_others"
 	| "block_blacklisting"
+	| "block_whitelisting"
 	| "block_antiblind"
 	| "block_difficulty_change"
 	| "block_activities"

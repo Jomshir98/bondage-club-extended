@@ -2,7 +2,8 @@ import { ConditionsLimit } from "../constants";
 import { Command_fixExclamationMark, Command_pickAutocomplete } from "../modules/commands";
 import { registerCommand } from "../modules/commandsModule";
 import { dictionaryProcess } from "../utils";
-import { ChatRoomSendLocal } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
+import backgroundList from "../generated/backgroundList.json";
 import { RulesGetRuleState } from "../modules/rules";
 
 export function initCommands_definitions() {
@@ -261,4 +262,91 @@ export function initCommands_definitions() {
 		}
 	});
 
+	registerCommand("goandwait", {
+		name: "Go and wait",
+		helpDescription: `<public|private> <background name> <room name>`,
+		shortDescription: "Makes PLAYER_NAME leave and wait in another chat room.",
+		longDescription:
+			`This command forces PLAYER_NAME to leave the current room and join an existing chat room or otherwise create a new public or private one with the given background name and room name. PLAYER_NAME is not prevented from leaving that room, if she is able to. Tip: If you want to make PLAYER_NAME wait in a certain way, the pose command could for instance be used before this one.\n` +
+			`Usage:\n` +
+			`!goandwait HELP_DESCRIPTION`,
+		defaultLimit: ConditionsLimit.blocked,
+		playerUsable: false,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length < 1 || (argv[0] !== "public" && argv[0] !== "private")) {
+				respond(Command_fixExclamationMark(sender,
+					`!goandwait usage:\n` +
+					`!goandwait ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			if (argv.length < 2) {
+				respond(`The second argument needs to be the name of a background (for example: 'BDSMRoomRed' or 'BondageBedChamber')`);
+				return false;
+			}
+			const Background = backgroundList.find(i => i.toLocaleLowerCase() === argv[1].toLocaleLowerCase());
+			if (!Background) {
+				respond(`Invalid/unknown background. Example of correct ones: 'BDSMRoomRed' or 'BondageBedChamber'`);
+				return false;
+			}
+			if (argv.length < 3) {
+				respond(`Please add a room name behind the room background name.`);
+				return false;
+			}
+			const Name = argv.slice(2).join(" ");
+			const Private = argv[0] === "private";
+			const playerNumber = Player.MemberNumber;
+			const Admin = [playerNumber, sender.MemberNumber];
+
+			if (!playerNumber) {
+				console.error("Player member number was unexpectedly undefined.");
+				return false;
+			}
+			if (!/^[A-Za-z0-9\s]*$/.test(Name)) {
+				respond(`The room name part of the command contains characters that are not A-Z, numbers or whitespaces.`);
+				return false;
+			} else if (Name.length > 20) {
+				respond(`The room name part of the command cannot be longer than 20 characters.`);
+				return false;
+			}
+
+			// leave
+			InfoBeep(`You got ordered by ${sender} to wait in another room.`, 8_000);
+			ChatRoomActionMessage(`${Player.Name} received an order by ${sender.Name} (${sender.MemberNumber}) to wait in another room.`);
+			DialogLentLockpicks = false;
+			ChatRoomClearAllElements();
+			ServerSend("ChatRoomLeave", "");
+			ChatRoomSetLastChatRoom("");
+			ChatRoomLeashPlayer = null;
+			CommonSetScreen("Online", "ChatSearch");
+			CharacterDeleteAllOnline();
+
+			// join
+			ChatRoomPlayerCanJoin = true;
+			ServerSend("ChatRoomCreate", {
+				Name,
+				Description: "",
+				Background,
+				Private,
+				Locked: false,
+				Space: "",
+				Game: "",
+				Admin,
+				Ban: [],
+				Limit: 10,
+				BlockCategory: []
+			});
+			ServerSend("ChatRoomJoin", { Name });
+			return true;
+		},
+		autoCompleter: (argv) => {
+			if (argv.length === 1) {
+				return Command_pickAutocomplete(argv[0], ["public", "private"]);
+			}
+			if (argv.length === 2) {
+				return Command_pickAutocomplete(argv[1], backgroundList);
+			}
+			return [];
+		}
+	});
 }

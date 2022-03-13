@@ -8,6 +8,32 @@ import { dictionaryProcess, escapeRegExp, isObject } from "../utils";
 import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 
+function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
+	for (let sound of sounds) {
+		sound = sound.toLocaleLowerCase();
+		let ok = true;
+		let i = 0;
+		let fullMatch = allowPartialMatch;
+		for (const c of message) {
+			if (/\p{L}/igu.test(c)) {
+				const nx = sound[(i + 1) % sound.length];
+				if (c === nx) {
+					i = (i + 1) % sound.length;
+					if (i === sound.length - 1) {
+						fullMatch = true;
+					}
+				} else if (c !== sound[i]) {
+					ok = false;
+					break;
+				}
+			}
+		}
+		if (ok && fullMatch)
+			return true;
+	}
+	return false;
+}
+
 export function initRules_bc_speech_control() {
 	registerRule("speech_specific_sound", {
 		name: "Allow specific sounds only",
@@ -35,25 +61,7 @@ export function initRules_bc_speech_control() {
 				const sounds = state.customData?.soundWhitelist;
 				if (sounds && sounds.length > 0 && (msg.type === "Chat" || msg.type === "Whisper")) {
 					const message = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
-					for (let sound of sounds) {
-						sound = sound.toLocaleLowerCase();
-						let ok = true;
-						let i = 0;
-						for (const c of message) {
-							if (/\p{L}/igu.test(c)) {
-								const nx = sound[(i + 1) % sound.length];
-								if (c === nx) {
-									i = (i + 1) % sound.length;
-								} else if (c !== sound[i]) {
-									ok = false;
-									break;
-								}
-							}
-						}
-						if (ok)
-							return true;
-					}
-					return false;
+					return checkMessageForSounds(sounds, message);
 				}
 				return true;
 			};
@@ -891,7 +899,7 @@ export function initRules_bc_speech_control() {
 		name: "Establish mandatory words",
 		type: RuleType.Speech,
 		shortDescription: "of which at least one needs to always be included when speaking openly",
-		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss'). Doesn't affect whispers, emotes and OOC text.",
+		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match). Doesn't affect whispers, emotes and OOC text.",
 		triggerTexts: {
 			infoBeep: "You forgot to include one of the mandatory words!",
 			attempt_log: "PLAYER_NAME almost forgot to use a mandatory word while talking",
@@ -913,6 +921,7 @@ export function initRules_bc_speech_control() {
 				if (msg.type !== "Chat" || !state.customData?.mandatoryWords?.length)
 					return true;
 				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+				const sounds = state.customData?.mandatoryWords.filter(e => /^[\p{L}]*$/iu.test(e));
 				if (checkMsg.trim() === "") {
 					return true;
 				}
@@ -920,7 +929,7 @@ export function initRules_bc_speech_control() {
 					checkMsg.match(
 						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
 					)
-				);
+				) || checkMsg.split(/[^\p{L}]+/u).some(i => checkMessageForSounds(sounds, i, false));
 			};
 			registerSpeechHook({
 				allowSend: (msg) => {

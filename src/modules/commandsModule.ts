@@ -12,6 +12,7 @@ import { BaseModule } from "./_BaseModule";
 import { BCX_setInterval } from "../BCXContext";
 import { dictionaryProcess } from "../utils";
 import { initCommands_definitions } from "../commands/command_definitions";
+import { initCommands_speech } from "../commands/speech_commands";
 
 const COMMANDS_ANTILOOP_RESET_INTERVAL = 60_000;
 const COMMANDS_ANTILOOP_THRESHOLD = 10;
@@ -201,7 +202,7 @@ export class ModuleCommandsModule extends BaseModule {
 						data.longDescription,
 						{
 							PLAYER_NAME: Player.Name,
-							HELP_DESCRIPTION : data.helpDescription
+							HELP_DESCRIPTION: data.helpDescription
 						}
 					)
 				);
@@ -275,6 +276,7 @@ export class ModuleCommandsModule extends BaseModule {
 
 		// Init individual commands
 		initCommands_definitions();
+		initCommands_speech();
 
 		for (const [command, data] of commands.entries()) {
 			if (data.init) {

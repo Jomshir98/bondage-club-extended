@@ -606,6 +606,9 @@ type BCX_Command =
 	| "arms"
 	| "legs"
 	| "goandwait"
+	| "say"
+	| "forcesay"
+	| "typetask"
 	;
 
 interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {

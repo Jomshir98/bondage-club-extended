@@ -33,7 +33,7 @@ export class ModuleCustom extends BaseModule {
 				const a = AssetGet(C.Character.AssetFamily, "ItemVulva", "DoubleEndDildo");
 				const f = AssetGet(C.Character.AssetFamily, "ItemVulva", "FuturisticVibrator");
 				if (c && c.Asset === a && c.Color === "#A7806F" && f) {
-					InventoryRemove(Player, "ItemVulva");
+					InventoryRemove(C.Character, "ItemVulva");
 					C.Character.Appearance.push({
 						Asset: f,
 						Difficulty: 20,
@@ -43,8 +43,8 @@ export class ModuleCustom extends BaseModule {
 					CharacterRefresh(C.Character, false);
 					ChatRoomCharacterUpdate(C.Character);
 				} else if (c && c.Asset === f && isEqual(c.Color, ['#A7806F', 'Default', 'Default']) && a) {
-					CharacterAppearanceSetItem(Player, "ItemVulva", a, "#A7806F");
-					ChatRoomCharacterUpdate(Player);
+					CharacterAppearanceSetItem(C.Character, "ItemVulva", a, "#A7806F");
+					ChatRoomCharacterUpdate(C.Character);
 				}
 			}, (argv) => (argv.length === 2 ? Command_selectCharacterAutocomplete(argv[1]) : [])];
 		}

@@ -35,7 +35,6 @@ export function initRules_bc_settings() {
 		| "setting_forbid_safeword"
 		| "setting_block_vibe_modes"
 		| "setting_show_afk"
-		| "setting_show_wardrobe_use"
 		| "setting_allow_body_mod"
 		| "setting_forbid_cosplay_change"
 		| "setting_hide_non_adjecent"
@@ -270,15 +269,6 @@ export function initRules_bc_settings() {
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSettings?.EnableAfkTimer,
 		set: value => Player.OnlineSettings!.EnableAfkTimer = value
-	});
-
-	toggleSettingHelper({
-		id: "setting_show_wardrobe_use",
-		setting: "Show wardrobe icon",
-		defaultValue: true,
-		defaultLimit: ConditionsLimit.blocked,
-		get: () => Player.OnlineSettings?.EnableWardrobeIcon,
-		set: value => Player.OnlineSettings!.EnableWardrobeIcon = value
 	});
 
 	toggleSettingHelper({

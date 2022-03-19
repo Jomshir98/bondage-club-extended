@@ -8,10 +8,6 @@ interface Window {
 
 declare const LZString: import("lz-string").LZStringStatic;
 
-interface Character {
-	Status?: string;
-}
-
 interface BCXVersion {
 	major: number;
 	minor: number;
@@ -294,7 +290,6 @@ type BCX_Rule =
 	| "setting_block_vibe_modes"
 	| "setting_arousal_stutter"
 	| "setting_show_afk"
-	| "setting_show_wardrobe_use"
 	| "setting_allow_body_mod"
 	| "setting_forbid_cosplay_change"
 	| "setting_sensdep"
@@ -459,10 +454,6 @@ type RuleCustomData = {
 		value: boolean;
 		restore: boolean;
 	},
-	setting_show_wardrobe_use: {
-		value: boolean;
-		restore: boolean;
-	},
 	setting_allow_body_mod: {
 		value: boolean;
 		restore: boolean;
@@ -512,7 +503,6 @@ type RuleInternalData = {
 	setting_forbid_safeword: boolean;
 	setting_block_vibe_modes: boolean;
 	setting_show_afk: boolean;
-	setting_show_wardrobe_use: boolean;
 	setting_allow_body_mod: boolean;
 	setting_forbid_cosplay_change: boolean;
 	setting_hide_non_adjecent: boolean;

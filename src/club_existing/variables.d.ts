@@ -64,6 +64,7 @@ declare function CharacterGetCurrent(): Character | null;
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
 declare function CharacterLoadCanvas(C: Character): void;
 declare function CharacterAppearsInverted(C: Character): boolean;
+declare function CharacterSetActivePose(C: Character, NewPose: string | null, ForceChange?: boolean): void;
 declare function CharacterSetFacialExpression(C: Character, AssetGroup: string, Expression: string | null, Timer?: number, Color?: string | string[]): void;
 
 // Element.js
@@ -146,6 +147,7 @@ declare function ChatRoomSetLastChatRoom(room: string): void;
 declare function ChatRoomShouldBlockGaggedOOCMessage(Message: string, WhisperTarget: Character | undefined): boolean;
 declare function ChatRoomPlayerIsAdmin(): boolean;
 declare function ChatRoomClearAllElements(): void;
+declare function ChatRoomListUpdate(list: number[], adding: boolean, number: number): void;
 
 // ChatAdmin.js
 declare var ChatAdminBackgroundIndex: number;

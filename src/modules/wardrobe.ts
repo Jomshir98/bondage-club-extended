@@ -1,4 +1,4 @@
-import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals } from "../utilsClub";
+import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
 import { arrayUnique, clipboardAvailable } from "../utils";
@@ -8,6 +8,8 @@ import cloneDeep from "lodash-es/cloneDeep";
 import { RedirectGetImage } from "./miscPatches";
 import { curseMakeSavedProperty } from "./curses";
 import { BCX_setTimeout } from "../BCXContext";
+import { Command_pickAutocomplete, Command_selectWornItem, Command_selectWornItemAutocomplete, registerCommandParsed } from "./commands";
+import { getPlayerCharacter } from "../characters";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -328,6 +330,80 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		//#endregion
+
+		registerCommandParsed(
+			"utilities",
+			"wardrobe",
+			"- Several convenience wardrobe shortcuts. Use '.wardrobe' for more help",
+			(args) => {
+				const subcommand = (args[0] || "").toLowerCase();
+
+				if (subcommand === "export") {
+					if (!clipboardAvailable) {
+						ChatRoomSendLocal("Error: Your clipboard is not usable.");
+						return false;
+					}
+					if (!CharacterAppearanceSelection) CharacterAppearanceSelection = Player;
+					BCX_setTimeout(async () => {
+						await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(true));
+						ChatRoomSendLocal("Success: Exported to clipboard");
+					}, 0);
+				} else if (subcommand === "quickload") {
+					if (!Player.CanChangeOwnClothes()) {
+						ChatRoomSendLocal("You are unable to change clothes right now.");
+						return false;
+					}
+					const size = args.length === 2 && /^[0-9]+$/.test(args[1]) && Number.parseInt(args[1], 10);
+					if (!size || size < 1) {
+						ChatRoomSendLocal(`Needs a <number> greater 0 in '.wardrobe ${subcommand} <number>'`);
+						return false;
+					}
+					WardrobeFastLoad(Player, size, true);
+				} else if (subcommand === "strip") {
+					if (!Player.CanInteract()) {
+						ChatRoomSendLocal("You are too restrained to use this right now.");
+						return false;
+					}
+					if (args.length !== 2) {
+						ChatRoomSendLocal(`Needs the name of a currently worn clothing behind '.wardrobe ${subcommand}'`);
+						return false;
+					}
+					const item = Command_selectWornItem(getPlayerCharacter(), args[1], i => isCloth(i, true));
+					if (typeof item === "string") {
+						ChatRoomSendLocal(item);
+						return false;
+					}
+					InventoryRemove(Player, item.Asset.Group.Name);
+					ChatRoomCharacterUpdate(Player);
+				} else if (subcommand === "stripall") {
+					if (!Player.CanInteract()) {
+						ChatRoomSendLocal("You are too restrained to use this right now.");
+						return false;
+					}
+					CharacterAppearanceStripLayer(Player);
+					ChatRoomCharacterUpdate(Player);
+				} else {
+					ChatRoomSendLocal(
+						`Usage:\n` +
+						`.wardrobe export - Exports outfit string to the clipboard (including restraints)\n` +
+						`.wardrobe quickload <number> - Changes current outfit to the according BC wardrobe slot if you can\n` +
+						`.wardrobe strip <clothing> - Removes the named clothing if you can\n` +
+						`.wardrobe stripall - Removes all clothes in layered steps (like the wardrobe button)\n`
+					);
+				}
+				return true;
+			},
+			(argv) => {
+				const subcommand = argv[0].toLowerCase();
+				if (argv.length <= 1) {
+					return Command_pickAutocomplete(subcommand, ["export", "quickload", "strip", "stripall"]);
+				}
+				if (subcommand === "strip" && argv.length === 2) {
+					return Command_selectWornItemAutocomplete(getPlayerCharacter(), argv[1], i => isCloth(i, true));
+				}
+				return [];
+			}
+		);
 	}
 
 	unload() {

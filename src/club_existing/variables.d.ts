@@ -20,6 +20,7 @@ declare var AppearanceMenu: any[];
 declare var AppearanceMode: string;
 declare function CharacterAppearanceYOffset(C: Character, HeightRatio: number, IgnoreUpButton?: boolean): number;
 declare function AppearanceMenuBuild(C: Character): void;
+declare function CharacterAppearanceStripLayer(C: Character): void;
 declare function CharacterAppearanceSetItem(C: Character, Group: string, ItemAsset: Asset | null, NewColor?: string | string[], DifficultyFactor?: number, ItemMemberNumber?: number, Refresh?: boolean): void;
 
 // Backgrounds.js
@@ -188,6 +189,7 @@ declare function AssetGroupGet(Family: string, Group: string): AssetGroup | null
 
 // Wardrobe.js
 declare function WardrobeAssetBundle(A: Item): ItemBundle;
+declare function WardrobeFastLoad(C: Character, W: number, Update: boolean): void;
 
 // Inventory.js
 declare function InventoryAdd(C: Character, NewItemName: string, NewItemGroup: string, Push?: boolean): void;

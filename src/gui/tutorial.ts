@@ -85,6 +85,10 @@ const TUTORIAL_PAGES: TutorialPage[] = [
 		image: "limit_system.png"
 	},
 	{
+		name: "Commands module overview",
+		image: "commands.png"
+	},
+	{
 		name: "Trigger conditions",
 		image: "trigger_conditions.png"
 	},

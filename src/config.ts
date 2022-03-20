@@ -29,6 +29,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatAdminLoad: ["EB8AF0DB"],
 	ChatAdminRun: ["CBE642C8"],
 	ChatCreateClick: ["765AEBFE"],
+	ChatCreateExit: ["6FF19445"],
 	ChatCreateLoad: ["BF403157", "8D735E0E"],
 	ChatCreateRun: ["B0A3D236"],
 	ChatRoomAddCharacterToChatRoom: ["5B72DA3E"],

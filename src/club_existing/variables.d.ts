@@ -34,6 +34,7 @@ declare var BackgroundSelectionAll: { Name: string; Description: string; Low: st
 declare var BackgroundSelectionOffset: number;
 declare var BackgroundSelectionView: any[];
 declare var BackgroundSelectionPreviousScreen: string;
+declare function BackgroundSelectionMake(List: string[], Idx: number, Callback: (name: string) => void, HideDropDown?: boolean): void;
 
 // Timer.js
 declare var CurrentTime: number;

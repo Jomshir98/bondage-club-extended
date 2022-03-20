@@ -602,6 +602,7 @@ type BCX_Command =
 	| "cell"
 	| "asylum"
 	| "keydeposit"
+	| "timeleft"
 	;
 
 interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {

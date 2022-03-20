@@ -499,4 +499,52 @@ export function initCommands_definitions() {
 			return [];
 		}
 	});
+
+	registerCommand("timeleft", {
+		name: "Show remaining time",
+		helpDescription: `asylum | ggts | keydeposit`,
+		shortDescription: "Remaining time of keyhold, asylum stay, or GGTS training",
+		longDescription:
+			`This command shows the remaining time of either having all of PLAYER_NAME's keys deposited, her being locked in the asylum, or having to do GGTS training sessions in the asylum.\n` +
+			`Usage:\n` +
+			`!timeleft HELP_DESCRIPTION`,
+		defaultLimit: ConditionsLimit.normal,
+		playerUsable: true,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length !== 1 || (argv[0] !== "asylum" && argv[0] !== "keydeposit" && argv[0] !== "ggts")) {
+				respond(Command_fixExclamationMark(sender,
+					`!timeleft usage:\n` +
+					`!timeleft ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			let time: number | undefined | null;
+			let response: string;
+			if (argv[0] === "asylum") {
+				time = LogValue("Committed", "Asylum");
+				response = `${Player.Name} can leave the asylum in`;
+			} else if (argv[0] === "ggts") {
+				time = LogValue("ForceGGTS", "Asylum");
+				response = `${Player.Name} still has to undergo this amount of GGTS training time:`;
+			} else {
+				time = LogValue("KeyDeposit", "Cell");
+				response = `${Player.Name} will get her keys back in`;
+			}
+			if (time && time > 0 && argv[0] === "ggts") {
+				respond(`${response} ${formatTimeInterval(time)}.`);
+			} else if (time && CurrentTime < time) {
+				respond(`${response} ${formatTimeInterval(time - CurrentTime)}.`);
+			} else {
+				respond(`${Player.Name} is not under the effect of the '${argv[0]}'-command currently.`);
+				return false;
+			}
+			return true;
+		},
+		autoCompleter: (argv) => {
+			if (argv.length === 1) {
+				return Command_pickAutocomplete(argv[0], ["asylum", "ggts", "keydeposit"]);
+			}
+			return [];
+		}
+	});
 }

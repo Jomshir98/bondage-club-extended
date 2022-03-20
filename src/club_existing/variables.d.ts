@@ -206,6 +206,7 @@ declare function InventoryItemHasEffect(Item: Item, Effect?: string, CheckProper
 declare function LogAdd(NewLogName: string, NewLogGroup: string, NewLogValue: number, Push: boolean): void;
 declare function LogDelete(DelLogName: string, DelLogGroup: string, Push: boolean): void;
 declare function LogQuery(QueryLogName: string, QueryLogGroup: string): boolean;
+declare function LogValue(QueryLogName: string, QueryLogGroup: string): number | null;
 
 // GLDraw.js
 declare var GLVersion: "webgl2" | "webgl" | "No WebGL";

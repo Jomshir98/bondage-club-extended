@@ -261,3 +261,6 @@ declare var ChatCreatePrivate: boolean | null;
 declare var ChatCreateLocked: boolean | null;
 declare var ChatCreateGame: string;
 declare var ChatBlockItemCategory: any[];
+
+// Cell.js
+declare function CellLock(LockTime: number): void;

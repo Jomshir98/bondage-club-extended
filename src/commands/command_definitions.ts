@@ -349,4 +349,39 @@ export function initCommands_definitions() {
 			return [];
 		}
 	});
+
+	registerCommand("cell", {
+		name: "Send to cell",
+		helpDescription: `<minutes>`,
+		shortDescription: "Lock PLAYER_NAME in a singleplayer isolation cell",
+		longDescription:
+			`This command sends PLAYER_NAME to the timer cell for up to 60 minutes. There is no way for you to get her out before the time is up.\n` +
+			`IMPORTANT: The effects of this command is not going away if BCX is turned off or not activated after reloading. This is because this command uses a function present in the base game.\n` +
+			`Usage:\n` +
+			`!cell HELP_DESCRIPTION`,
+		defaultLimit: ConditionsLimit.blocked,
+		playerUsable: false,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length < 1) {
+				respond(Command_fixExclamationMark(sender,
+					`!cell usage:\n` +
+					`!cell ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			const minutes = /^[0-9]+$/.test(argv[0]) && Number.parseInt(argv[0], 10);
+			if (!minutes || minutes < 1 || minutes > 60) {
+				respond(`Needs a number between 1 and 60 after '.cell'`);
+				return false;
+			}
+			InfoBeep(`Two maids locked you into a timer cell, following ${sender.Name}'s (${sender.MemberNumber}) command.`, 8_000);
+			ChatRoomActionMessage(`${Player.Name} gets grabbed by two maids and locked in a timer cell, following ${sender.Name}'s (${sender.MemberNumber}) command.`);
+			DialogLentLockpicks = false;
+			ChatRoomClearAllElements();
+			ServerSend("ChatRoomLeave", "");
+			CharacterDeleteAllOnline();
+			CellLock(minutes);
+			return true;
+		}
+	});
 }

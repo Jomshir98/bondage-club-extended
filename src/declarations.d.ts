@@ -599,6 +599,7 @@ type BCX_Command =
 	| "say"
 	| "forcesay"
 	| "typetask"
+	| "cell"
 	;
 
 interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {

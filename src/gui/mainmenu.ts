@@ -102,14 +102,14 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];
-			const PX = Math.floor(i / 7);
-			const PY = i % 7;
+			const PX = Math.floor(i / 6);
+			const PY = i % 6;
 
 			const isDisabled = this.disabledModules.includes(e.module);
 
-			DrawButton(150 + 420 * PX, 160 + 110 * PY, 400, 90, "", isDisabled ? "#ddd" : "White", MODULE_ICONS[e.module],
+			DrawButton(150 + 430 * PX, 190 + 120 * PY, 400, 90, "", isDisabled ? "#ddd" : "White", MODULE_ICONS[e.module],
 				isDisabled ? "Module is deactivated" : "", isDisabled);
-			DrawTextFit(MODULE_NAMES[e.module], 250 + 420 * PX, 205 + 110 * PY, 310, "Black");
+			DrawTextFit(MODULE_NAMES[e.module], 250 + 430 * PX, 235 + 120 * PY, 310, "Black");
 		}
 
 		MainCanvas.textAlign = "center";
@@ -159,9 +159,9 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];
-			const PX = Math.floor(i / 7);
-			const PY = i % 7;
-			if (MouseIn(150 + 420 * PX, 160 + 110 * PY, 400, 90) && !this.disabledModules.includes(e.module)) {
+			const PX = Math.floor(i / 6);
+			const PY = i % 6;
+			if (MouseIn(150 + 430 * PX, 190 + 120 * PY, 400, 90) && !this.disabledModules.includes(e.module)) {
 				return e.onclick(this.character);
 			}
 		}

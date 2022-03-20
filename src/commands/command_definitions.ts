@@ -1,7 +1,7 @@
 import { ConditionsLimit } from "../constants";
-import { Command_fixExclamationMark, Command_pickAutocomplete } from "../modules/commands";
+import { Command_fixExclamationMark, Command_parseTime, Command_pickAutocomplete } from "../modules/commands";
 import { registerCommand } from "../modules/commandsModule";
-import { dictionaryProcess } from "../utils";
+import { dictionaryProcess, formatTimeInterval } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
 import backgroundList from "../generated/backgroundList.json";
 import { RulesGetRuleState } from "../modules/rules";
@@ -543,6 +543,45 @@ export function initCommands_definitions() {
 		autoCompleter: (argv) => {
 			if (argv.length === 1) {
 				return Command_pickAutocomplete(argv[0], ["asylum", "ggts", "keydeposit"]);
+			}
+			return [];
+		}
+	});
+
+	registerCommand("servedrinks", {
+		name: "Send to serve drinks",
+		helpDescription: "",
+		shortDescription: "Force PLAYER_NAME to do bound maid work",
+		longDescription:
+			`This command sends PLAYER_NAME to sell 5 drinks as a maid in multiplayer chat rooms. She must be a maid recognized by the maid sorority and be able to wald and talk, to be taken in by the maid.\n` +
+			`Usage:\n` +
+			`!servedrinks`,
+		defaultLimit: ConditionsLimit.blocked,
+		playerUsable: false,
+		trigger: (argv, sender, respond) => {
+			if (ReputationCharacterGet(Player, "Maid") < 1) {
+				respond(`${Player.Name} must be a maid recognized by the maid sorority to be taken in for the job.`);
+				return false;
+			}
+			if (!Player.CanWalk() || !Player.CanTalk()) {
+				respond(`${Player.Name} must be able to walk and talk or the maids will not take her in for the job.`);
+				return false;
+			}
+			CharacterSetActivePose(Player, null);
+			const D = `(Two maids grab you and escort you to their quarters.  Another maid addresses you.)  ${sender.Name} sent you here to work.`;
+			ChatRoomActionMessage(`${Player.Name} gets grabbed by two maids and escorted to the maid quarters to serve drinks, following ${sender}'s command.`);
+			ChatRoomClearAllElements();
+			ServerSend("ChatRoomLeave", "");
+			CommonSetScreen("Room", "MaidQuarters");
+			CharacterSetCurrent(MaidQuartersMaid);
+			MaidQuartersMaid.CurrentDialog = D;
+			MaidQuartersMaid.Stage = "205";
+			MaidQuartersOnlineDrinkFromOwner = true;
+			return true;
+		},
+		autoCompleter: (argv) => {
+			if (argv.length === 1) {
+				return Command_pickAutocomplete(argv[0], ["cancel"]);
 			}
 			return [];
 		}

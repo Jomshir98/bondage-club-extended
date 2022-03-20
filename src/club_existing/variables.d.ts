@@ -63,6 +63,7 @@ declare var FriendListBeepTarget: number | null;
 declare function CharacterDeleteAllOnline(): void;
 declare function CharacterGetCurrent(): Character | null;
 declare function CharacterRefresh(C: Character, Push?: boolean, RefreshDialog?: boolean): void;
+declare function CharacterSetCurrent(C: Character): void;
 declare function CharacterLoadCanvas(C: Character): void;
 declare function CharacterAppearsInverted(C: Character): boolean;
 declare function CharacterSetActivePose(C: Character, NewPose: string | null, ForceChange?: boolean): void;
@@ -241,6 +242,10 @@ declare var InformationSheetSelection: Character | null;
 
 // Screens/Room/MainHall/MainHall.js
 declare var MainHallRandomEventOdds: number;
+
+// Screens/Room/MaidQuarters/MaidQuarters.js
+declare var MaidQuartersMaid: Character;
+declare var MaidQuartersOnlineDrinkFromOwner: boolean;
 
 // Screens/Character/ItemColor/ItemColor.js
 declare let ItemColorCharacter: Character | null;

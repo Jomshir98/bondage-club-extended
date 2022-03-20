@@ -123,7 +123,7 @@ function rollDice(sides: number) {
 
 export class ModuleClubUtils extends BaseModule {
 	load() {
-		registerCommandParsed("utilities", "dice", "<number of dice sides> <number of rolls> - Shows only you the result of rolling a dice the given number of times",
+		registerCommandParsed("utility", "dice", "<number of dice sides> <number of rolls> - Shows only you the result of rolling a dice the given number of times",
 			(args) => {
 				let sides: number = 6;
 				let rolls: number = 1;
@@ -168,7 +168,7 @@ export class ModuleClubUtils extends BaseModule {
 		);
 		//#region card deck
 		registerCommandParsed(
-			"utilities",
+			"utility",
 			"deck",
 			"- Draw, deal or shuffle with a 52-card deck. Use '.deck' for more help",
 			(args) => {
@@ -249,7 +249,7 @@ export class ModuleClubUtils extends BaseModule {
 		//#endregion
 		//#region room
 		registerCommandParsed(
-			"utilities",
+			"utility",
 			"room",
 			"- Change or administrate the current chat room. Use '.room' for more help",
 			(args) => {
@@ -397,7 +397,7 @@ export class ModuleClubUtils extends BaseModule {
 		});
 		//#endregion
 		//#region Hidden room backgrounds
-		registerCommand("utilities", "background", "<name> - Changes chat room background", processBackgroundCommand, processBackgroundCommand_autocomplete);
+		registerCommand("utility", "background", "<name> - Changes chat room background", processBackgroundCommand, processBackgroundCommand_autocomplete);
 		// Add new backgrounds to the list
 
 		if (!BackgroundsTagList.includes(BACKGROUNDS_BCX_NAME)) {
@@ -417,7 +417,7 @@ export class ModuleClubUtils extends BaseModule {
 		});
 
 		//#endregion
-		registerCommandParsed("utilities", "colour", "<source> <item> <target> - Copies color of certain item from source character to target character",
+		registerCommandParsed("utility", "colour", "<source> <item> <target> - Copies color of certain item from source character to target character",
 			(argv) => {
 				if (argv.length !== 3) {
 					ChatRoomSendLocal(`Expected three arguments: <source> <item> <target>`);
@@ -498,7 +498,7 @@ export class ModuleClubUtils extends BaseModule {
 				return [];
 			}
 		);
-		registerCommand("utilities", "garble", "<level> <message> - Converts the given message to gag talk",
+		registerCommand("utility", "garble", "<level> <message> - Converts the given message to gag talk",
 			(arg) => {
 				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 				if (!chat)

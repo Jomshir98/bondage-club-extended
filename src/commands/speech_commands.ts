@@ -170,7 +170,7 @@ export function initCommands_speech() {
 	let repCounter: number = 0;
 	registerCommand("typetask", {
 		name: "Typing task",
-		helpDescription: `<number> <text>`,
+		helpDescription: `<number> <text> | cancel`,
 		shortDescription: "Orders PLAYER_NAME to type a text a few times",
 		longDescription:
 			`This command gives PLAYER_NAME the task to type the given text in a whisper to the task giver for the number of times defined in the command. This will block PLAYER_NAME from chatting or whispering to anyone other than the task giver (she can still use emotes). This state lasts until the task giver cancels it with 'typetask cancel' command, leaves the room or until PLAYER_NAME either makes a mistake or leaves the room. The command is intentionally not supporting emotes, whispers or OOC text.\n` +

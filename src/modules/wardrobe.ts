@@ -332,7 +332,7 @@ export class ModuleWardrobe extends BaseModule {
 		//#endregion
 
 		registerCommandParsed(
-			"utilities",
+			"utility",
 			"wardrobe",
 			"- Several convenience wardrobe shortcuts. Use '.wardrobe' for more help",
 			(args) => {

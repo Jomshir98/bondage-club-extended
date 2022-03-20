@@ -16,8 +16,8 @@ export type CommandHandlerRaw = (args: string) => boolean;
 export type CommandHandlerParsed = (argv: string[]) => boolean;
 export type CommandAutocompleterRaw = (args: string) => string[];
 export type CommandAutocompleterParsed = (argv: string[]) => string[];
-export type CommandCategory = "hidden" | "utilities" | "cheats" | "modules" | "commands";
-export const COMMAND_CATEGORIES_VISIBLE: CommandCategory[] = ["utilities", "cheats", "modules", "commands"];
+export type CommandCategory = "hidden" | "utility" | "cheats" | "modules" | "commands";
+export const COMMAND_CATEGORIES_VISIBLE: CommandCategory[] = ["utility", "cheats", "modules", "commands"];
 
 export type WhisperCommandHandler = (argv: string[], sender: ChatroomCharacter, respond: (msg: string) => void) => void;
 export type WhisperCommandAutocompleter = (argv: string[], sender: ChatroomCharacter) => string[];
@@ -652,7 +652,7 @@ export class ModuleCommands extends BaseModule {
 			if (!arg) {
 				ChatRoomSendLocal(
 					`BCX commands are organized into categories\n` +
-					`To view help texts for all commands in a category, use '.help <category>' (e.g. '.help utilities')\n` +
+					`To view help texts for all commands in a category, use '.help <category>' (e.g. '.help utility')\n` +
 					`\n` +
 					`List of categories:\n` +
 					COMMAND_CATEGORIES_VISIBLE.join('\n')
@@ -683,7 +683,7 @@ export class ModuleCommands extends BaseModule {
 		});
 		aliasCommand("help", "?");
 
-		registerCommand("utilities", "action", "- Send custom (action) [alias: .a ]", (msg) => {
+		registerCommand("utility", "action", "- Send custom (action) [alias: .a ]", (msg) => {
 			const blockRule = RulesGetRuleState("block_action");
 			if (blockRule.isEnforced) {
 				blockRule.triggerAttempt();

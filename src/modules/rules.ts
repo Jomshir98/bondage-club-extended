@@ -956,10 +956,10 @@ export class ModuleRules extends BaseModule {
 				respond(RulesDelete(result[1], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else {
 				respond(Command_fixExclamationMark(sender, `!rules usage (page 1):\n` +
-					`!rules list - List the currently applied rules\n` +
+					`!rules list - List the currently added rules\n` +
 					`!rules listall - List all existing rule names in BCX\n` +
 					`!rules description <rule> - Show the rule's description\n` +
-					`!rules remove <rule> - Remove a currently applied rule if permitted to\n` +
+					`!rules remove <rule> - Remove a currently added rule if permitted to\n` +
 					`\nNote: Adding and setting up rules is only supported via using BCX's graphical user interface yourself.`
 				));
 				respond(Command_fixExclamationMark(sender, `!rules usage (page 2):\n` +

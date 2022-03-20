@@ -352,7 +352,7 @@ export function initCommands_definitions() {
 
 	registerCommand("cell", {
 		name: "Send to cell",
-		helpDescription: `<minutes>`,
+		helpDescription: `<time>`,
 		shortDescription: "Lock PLAYER_NAME in a singleplayer isolation cell",
 		longDescription:
 			`This command sends PLAYER_NAME to the timer cell for up to 60 minutes. There is no way for you to get her out before the time is up.\n` +
@@ -369,19 +369,84 @@ export function initCommands_definitions() {
 				));
 				return false;
 			}
-			const minutes = /^[0-9]+$/.test(argv[0]) && Number.parseInt(argv[0], 10);
-			if (!minutes || minutes < 1 || minutes > 60) {
-				respond(`Needs a number between 1 and 60 after '.cell'`);
+			let time = 0;
+			for (const v of argv) {
+				const i = Command_parseTime(v);
+				if (typeof i === "string") {
+					respond(i);
+					return false;
+				}
+				time += i;
+			}
+			const minutes = time / 60_000;
+			if (minutes < 1 || minutes > 60) {
+				respond(`Time needs to be between 1 minute and 1 hour`);
 				return false;
 			}
-			InfoBeep(`Two maids locked you into a timer cell, following ${sender.Name}'s (${sender.MemberNumber}) command.`, 8_000);
-			ChatRoomActionMessage(`${Player.Name} gets grabbed by two maids and locked in a timer cell, following ${sender.Name}'s (${sender.MemberNumber}) command.`);
+			InfoBeep(`Two maids locked you into a timer cell, following ${sender}'s command.`, 8_000);
+			ChatRoomActionMessage(`${Player.Name} gets grabbed by two maids and locked in a timer cell, following ${sender}'s command.`);
 			DialogLentLockpicks = false;
 			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
 			CharacterDeleteAllOnline();
 			CellLock(minutes);
 			return true;
+		}
+	});
+
+	registerCommand("asylum", {
+		name: "Send to asylum",
+		helpDescription: `<time> | cancel`,
+		shortDescription: "Lock PLAYER_NAME into the aslyum",
+		longDescription:
+			`This command sends and locks PLAYER_NAME into the asylum for up to 1 week, where she can freely walk around, but cannot leave the area. You can free PLAYER_NAME early by visiting her in the aslyum and using '.asylum cancel'.\n` +
+			`IMPORTANT: The effects of this command is not going away if BCX is turned off or not activated after reloading. This is because this command uses a function present in the base game.\n` +
+			`Usage:\n` +
+			`!asylum HELP_DESCRIPTION`,
+		defaultLimit: ConditionsLimit.blocked,
+		playerUsable: false,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length < 1) {
+				respond(Command_fixExclamationMark(sender,
+					`!asylum usage:\n` +
+					`!asylum ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			if (argv[0] === "cancel") {
+				LogDelete("Committed", "Asylum", true);
+				respond(`You freed ${Player.Name}. She can now leave the Asylum again.`);
+				ChatRoomSendLocal(`${sender} freed you. You are now able to leave the Asylum again.`);
+				return true;
+			}
+			let time = 0;
+			for (const v of argv) {
+				const i = Command_parseTime(v);
+				if (typeof i === "string") {
+					respond(i);
+					return false;
+				}
+				time += i;
+			}
+			if (time < 60 * 1000 || time > 7 * 24 * 60 * 60 * 1000) {
+				respond(`Time needs to be between 1 minute and 1 week`);
+				return false;
+			}
+			InfoBeep(`Two nurses locked you in the Asylum, following ${sender}'s command.`, 8_000);
+			ChatRoomActionMessage(`${Player.Name} gets grabbed by two nurses and locked in the Asylum, following ${sender}'s command.`);
+			DialogLentLockpicks = false;
+			ChatRoomClearAllElements();
+			ServerSend("ChatRoomLeave", "");
+			CharacterDeleteAllOnline();
+			LogAdd("Committed", "Asylum", CurrentTime + time, true);
+			CommonSetScreen("Room", "AsylumEntrance");
+			return true;
+		},
+		autoCompleter: (argv) => {
+			if (argv.length === 1) {
+				return Command_pickAutocomplete(argv[0], ["cancel"]);
+			}
+			return [];
 		}
 	});
 }

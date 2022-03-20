@@ -203,6 +203,8 @@ declare function InventoryRemove(C: Character, AssetGroup: string, Refresh?: boo
 declare function InventoryItemHasEffect(Item: Item, Effect?: string, CheckProperties?: boolean): boolean;
 
 // GameLog.js
+declare function LogAdd(NewLogName: string, NewLogGroup: string, NewLogValue: number, Push: boolean): void;
+declare function LogDelete(DelLogName: string, DelLogGroup: string, Push: boolean): void;
 declare function LogQuery(QueryLogName: string, QueryLogGroup: string): boolean;
 
 // GLDraw.js

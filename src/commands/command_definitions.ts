@@ -449,4 +449,54 @@ export function initCommands_definitions() {
 			return [];
 		}
 	});
+
+	registerCommand("keydeposit", {
+		name: "Deposit all keys",
+		helpDescription: `<time> | cancel`,
+		shortDescription: "Store away PLAYER_NAME's keys",
+		longDescription:
+			`This command removes all of PLAYER_NAME's keys for up to 1 week. You can give them back to her early by using '.keydeposit cancel'.\n` +
+			`IMPORTANT: The effects of this command is not going away if BCX is turned off or not activated after reloading. This is because this command uses a function present in the base game.\n` +
+			`Usage:\n` +
+			`!keydeposit HELP_DESCRIPTION`,
+		defaultLimit: ConditionsLimit.limited,
+		playerUsable: true,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length < 1) {
+				respond(Command_fixExclamationMark(sender,
+					`!keydeposit usage:\n` +
+					`!keydeposit ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			if (argv[0] === "cancel") {
+				LogDelete("KeyDeposit", "Cell", true);
+				respond(`You let ${Player.Name} have her keys back.`);
+				ChatRoomSendLocal(`${sender} let you have your keys back.`);
+				return true;
+			}
+			let time = 0;
+			for (const v of argv) {
+				const i = Command_parseTime(v);
+				if (typeof i === "string") {
+					respond(i);
+					return false;
+				}
+				time += i;
+			}
+			if (time < 60 * 1000 || time > 7 * 24 * 60 * 60 * 1000) {
+				respond(`Time needs to be between 1 minute and 1 week`);
+				return false;
+			}
+			ChatRoomActionMessage(`A nurse took all keys from ${Player.Name}, following ${sender}'s command. The keys will be deposited for ${formatTimeInterval(time)}.`);
+			LogAdd("KeyDeposit", "Cell", CurrentTime + time, true);
+			return true;
+		},
+		autoCompleter: (argv) => {
+			if (argv.length === 1) {
+				return Command_pickAutocomplete(argv[0], ["cancel"]);
+			}
+			return [];
+		}
+	});
 }

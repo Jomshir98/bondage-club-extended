@@ -8,7 +8,8 @@
 	"scripts": {
 		"build": "rollup -c",
 		"serve": "rollup -c -w",
-		"test": "tsc --noEmit -p . && eslint src"
+		"test": "tsc --noEmit -p . && yarn run lint",
+		"lint": "eslint src"
 	},
 	"dependencies": {
 		"@types/lodash-es": "^4.17.5",

@@ -942,4 +942,40 @@ export function initRules_bc_blocks() {
 		defaultLimit: ConditionsLimit.blocked
 		// Implemented externally
 	});
+
+	registerRule("block_room_admin_UI", {
+		name: "Forbid looking at room admin UI",
+		type: RuleType.Block,
+		loggable: false,
+		shortDescription: "while blindfolded",
+		longDescription: "This rule forbids PLAYER_NAME from opening the room admin screen while blindfolded, as this discloses the room background and the member numbers of admins, potentially in the room right now. If PLAYER_NAME is a room admin, she can still use chat commands for altering the room or kicking/banning.",
+		triggerTexts: {
+			infoBeep: "A BCX rule prevents you from using this while unable to see!"
+		},
+		defaultLimit: ConditionsLimit.normal,
+		load(state) {
+			const active = (): boolean => state.isEnforced && Player.IsBlind();
+
+			hookFunction("ChatRoomMenuDraw", 6, (args, next) => {
+				next(args);
+				const Space = 870 / (ChatRoomMenuButtons.length - 1);
+				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
+					const Button = ChatRoomMenuButtons[B];
+					if (Button === "Admin" && active()) {
+						DrawButton(1005 + Space * B, 2, 120, 60, "", "Pink", "Icons/Rectangle/" + Button + ".png", TextGet("Menu" + Button));
+					}
+				}
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomMenuClick", 6, (args, next) => {
+				const Space = 870 / (ChatRoomMenuButtons.length - 1);
+				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
+					if (MouseXIn(1005 + Space * B, 120) && ChatRoomMenuButtons[B] === "Admin" && active()) {
+						state.triggerAttempt();
+						return false;
+					}
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+		}
+	});
 }

@@ -17,7 +17,8 @@ const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemBoots": "Feet",
 	"ItemMouth": "Mouth (1)",
 	"ItemMouth2": "Mouth (2)",
-	"ItemMouth3": "Mouth (3)"
+	"ItemMouth3": "Mouth (3)",
+	"HairAccessory2": "Ears Accessory"
 };
 
 export let allowMode: boolean = false;

@@ -460,7 +460,7 @@ export function initCommands_definitions() {
 			`Usage:\n` +
 			`!keydeposit HELP_DESCRIPTION`,
 		defaultLimit: ConditionsLimit.limited,
-		playerUsable: true,
+		playerUsable: false,
 		trigger: (argv, sender, respond, state) => {
 			if (argv.length < 1) {
 				respond(Command_fixExclamationMark(sender,
@@ -553,7 +553,7 @@ export function initCommands_definitions() {
 		helpDescription: "",
 		shortDescription: "Force PLAYER_NAME to do bound maid work",
 		longDescription:
-			`This command sends PLAYER_NAME to sell 5 drinks as a maid in multiplayer chat rooms. She must be a maid recognized by the maid sorority and be able to wald and talk, to be taken in by the maid.\n` +
+			`This command sends PLAYER_NAME to sell 5 drinks as a maid in multiplayer chat rooms. She must be a maid recognized by the maid sorority and be able to walk and talk, to be taken in by the maid.\n` +
 			`Usage:\n` +
 			`!servedrinks`,
 		defaultLimit: ConditionsLimit.blocked,

@@ -116,51 +116,49 @@ function showDealersLog() {
 }
 //#endregion
 
-function rollDice(sides: number) {
-	const result = Math.floor(Math.random() * sides) + 1;
-	ChatRoomSendLocal(`You secretly roll a ${sides}-sided dice. The result is: ${result}.`);
+function rollDice(sides: number, rolls: number) {
+	const result: number[] = [];
+	for (let i = 0; i < rolls; i++) {
+		result.push(Math.floor(Math.random() * sides) + 1);
+	}
+	ChatRoomSendLocal(`You secretly roll a ${rolls}D${sides}. The result is: ${result.length === 1 ? result : result.join(",") + " = " + result.reduce((a, b) => a + b, 0)}.`);
 }
 
 export class ModuleClubUtils extends BaseModule {
 	load() {
-		registerCommandParsed("utility", "dice", "<number of dice sides> <number of rolls> - Shows only you the result of rolling a dice the given number of times",
+		registerCommandParsed("utility", "dice", "[dice sides | <rolls>d<dice sides>] - Shows only you the result of rolling a dice the given number of times",
 			(args) => {
 				let sides: number = 6;
 				let rolls: number = 1;
 				// no argument
 				if (args.length < 1) {
-					rollDice(6);
+					rollDice(6, 1);
 					// at least one argument
 				} else {
 					// check first argument
 					if (/^[0-9]+$/.test(args[0])) {
 						sides = Number.parseInt(args[0], 10);
 						if ((sides < 2) || (sides > 100)) {
-							ChatRoomSendLocal(`The <number of dice sides> need to be between 2 and 100`);
+							ChatRoomSendLocal(`The <dice sides> need to be between 2 and 100`);
 							return false;
 						}
+						rollDice(sides, 1);
+					} else if (/^[0-9]+d[0-9]+$/i.test(args[0])) {
+						const split = args[0].split("d");
+						sides = Number.parseInt(split[1], 10);
+						rolls = Number.parseInt(split[0], 10);
+						if ((sides < 2) || (sides > 100)) {
+							ChatRoomSendLocal(`The <dice sides> in <rolls>d<dice sides> need to be between 2 and 100`);
+							return false;
+						}
+						if ((rolls < 1) || (rolls > 100)) {
+							ChatRoomSendLocal(`The <rolls> in <rolls>d<dice sides> need to be between 1 and 100`);
+							return false;
+						}
+						rollDice(sides, rolls);
 					} else {
-						ChatRoomSendLocal(`Usage: .dice draw <number of dice sides> <number of rolls> - all parameters are optional`);
+						ChatRoomSendLocal(`Usage: .dice [dice sides | <rolls>d<dice sides>] - for instance '.dice 4d6' - all parameters are optional`);
 						return false;
-					}
-					if (args.length < 2) {
-						rollDice(sides);
-						// at least two arguments
-					} else {
-						// check second argument
-						if (/^[0-9]+$/.test(args[1])) {
-							rolls = Number.parseInt(args[1], 10);
-							if ((rolls < 1) || (rolls > 50)) {
-								ChatRoomSendLocal(`The <number of rolls> need to be between 1 and 50`);
-								return false;
-							}
-						} else {
-							ChatRoomSendLocal(`Usage: .dice draw <number of dice sides> <number of rolls> - all parameters are optional`);
-							return false;
-						}
-						for (let i = 0; i < rolls; i++) {
-							rollDice(sides);
-						}
 					}
 				}
 				return true;

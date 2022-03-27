@@ -232,6 +232,7 @@ type BCX_Rule =
 	| "block_action"
 	| "block_BCX_permissions"
 	| "block_room_admin_UI"
+	| "block_using_ggts"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"

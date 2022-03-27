@@ -978,4 +978,39 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 		}
 	});
+
+	registerRule("block_using_ggts", {
+		name: "Forbid using GGTS",
+		type: RuleType.Block,
+		shortDescription: "training by GGTS is forbidden",
+		longDescription: "This rule forbids PLAYER_NAME to revieve training by the base club's GGTS feature. If the rule is enforced while PLAYER_NAME has remaining GGTS training time, it is removed the moment PLAYER_NAME enters the GGTS room.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to recieve training by GGTS!",
+			attempt_log: "PLAYER_NAME tried to recieve training by GGTS",
+			log: "PLAYER_NAME started training by GGTS"
+		},
+		defaultLimit: ConditionsLimit.limited,
+		load(state) {
+			hookFunction("AsylumGGTSLoad", 0, (args, next) => {
+				if (state.isEnforced) {
+					const time = LogValue("ForceGGTS", "Asylum");
+					if (time && time > 0) {
+						LogDelete("ForceGGTS", "Asylum", true);
+					}
+					return false;
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("AsylumGGTSClick", 0, (args, next) => {
+				if (state.inEffect && MouseIn(1000, 0, 500, 1000)) {
+					if (state.isEnforced) {
+						state.triggerAttempt();
+						return;
+					}
+					state.trigger();
+				}
+				next(args);
+			}, ModuleCategory.Rules);
+		}
+	});
 }

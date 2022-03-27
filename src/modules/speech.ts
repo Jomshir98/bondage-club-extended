@@ -116,8 +116,10 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 		(msg.type === "Chat" || msg.type === "Whisper") &&
 		ChatRoomShouldBlockGaggedOOCMessage(msg.originalMessage, ChatRoomCharacter.find(C => C.MemberNumber === ChatRoomTargetMemberNumber))
 	) {
-		// The message will be blocked by BC, just return it
-		return msg.rawMessage;
+		// The message is to be blocked by BC, block it ourselves to prevent it from being deleted
+		// @ts-expect-error: Wrong typing of the function, this works
+		ChatRoomMessage({ Content: "ChatRoomBlockGaggedOOC", Type: "Action", Sender: Player.MemberNumber });
+		return null;
 	}
 
 	// Let hooks block the messsage

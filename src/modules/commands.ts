@@ -198,6 +198,7 @@ function CommandQuoteArgument(arg: string, force: boolean = false): string {
 
 let autocompleteMessage: null | HTMLDivElement = null;
 let autocompleteLastQuery: string | null = null;
+let autocompleteLastTarget: number | null = null;
 let autocompleteLastResult: [string, string][] = [];
 let autocompleteNextIndex = 0;
 
@@ -207,6 +208,7 @@ function autocompleteClear() {
 		autocompleteMessage = null;
 	}
 	autocompleteLastQuery = null;
+	autocompleteLastTarget = null;
 }
 
 function autocompleteShow(header: string, options: string[], highlight?: number) {
@@ -269,8 +271,6 @@ function CommandAutocomplete(msg: string): [string, string][] {
 
 	if (msg.length === command.length) {
 		const prefixes = Array.from(commands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
-		if (prefixes.length === 0)
-			return [];
 		return prefixes.map(i => [i, i]);
 	}
 
@@ -312,7 +312,7 @@ function CommandAutocomplete(msg: string): [string, string][] {
 }
 
 function CommandAutocompleteCycle(msg: string): string {
-	if (autocompleteLastQuery === msg && autocompleteNextIndex < autocompleteLastResult.length) {
+	if (autocompleteLastQuery === msg && autocompleteLastTarget === null && autocompleteNextIndex < autocompleteLastResult.length) {
 		autocompleteShow("autocomplete hint", autocompleteLastResult.map(i => i[1]), autocompleteNextIndex);
 		const res = autocompleteLastResult[autocompleteNextIndex][0].trim();
 		autocompleteNextIndex = (autocompleteNextIndex + 1) % autocompleteLastResult.length;
@@ -329,20 +329,18 @@ function CommandAutocompleteCycle(msg: string): string {
 	const best = longestCommonPrefix(autocompleteLastResult.map(i => i[0]));
 	autocompleteShow("autocomplete hint", autocompleteLastResult.map(i => i[1]));
 	autocompleteLastQuery = best;
+	autocompleteLastTarget = null;
 	autocompleteNextIndex = 0;
 	return best;
 }
 
-function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [string, string[] | null] {
+function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [string, string][] {
 	msg = msg.trimStart();
 	const [command, args] = CommandParse(msg);
 
 	if (msg.length === command.length) {
 		const prefixes = Array.from(whisperCommands.entries()).filter(c => c[1].description !== null && c[0].startsWith(command)).map(c => c[0] + " ");
-		if (prefixes.length === 0)
-			return [msg, null];
-		const best = longestCommonPrefix(prefixes);
-		return [best, best === msg ? prefixes.slice().sort() : null];
+		return prefixes.map(i => [i, i]);
 	}
 
 	const commandInfo = whisperCommands.get(command);
@@ -351,21 +349,70 @@ function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [st
 		if (CommandHasEmptyArgument(args)) {
 			argv.push("");
 		}
-		const lastOptions = commandInfo.autocomplete(argv, sender);
-		let opts: string[] | null = null;
-		if (lastOptions.length > 0) {
-			const best = longestCommonPrefix(lastOptions);
-			if (lastOptions.length > 1 && best === argv[argv.length - 1]) {
-				opts = lastOptions.slice().sort();
-			}
-			argv[argv.length - 1] = best;
+		let lastOptions = commandInfo.autocomplete(argv, sender);
+		const fin = lastOptions.length === 1;
+		if (lastOptions.length === 0) {
+			lastOptions = [argv[argv.length - 1]];
 		}
-		return [`${command} ` +
-			argv.map(i => CommandQuoteArgument(i)).join(" ") +
-			(lastOptions.length === 1 ? " " : ""), opts];
+		argv.pop();
+		const needsQuotes = lastOptions.some(CommandArgumentNeedsQuotes);
+		return lastOptions.map(
+			i => [
+				`${command} ` +
+				argv
+					.map(a => CommandQuoteArgument(a))
+					.concat(needsQuotes ? CommandQuoteArgument(i, true) : i)
+					.join(" ") +
+				(fin ? " " : ""),
+				i
+			]
+		);
 	}
 
-	return [msg, null];
+	return [];
+}
+
+async function WhisperCommandAutocompleteCycle(chat: HTMLTextAreaElement): Promise<void> {
+	const currentValue = chat.value;
+	const currentTarget = ChatRoomTargetMemberNumber;
+	if (currentTarget == null)
+		return;
+
+	if (autocompleteLastQuery === currentValue && autocompleteLastTarget === currentTarget && autocompleteNextIndex < autocompleteLastResult.length) {
+		autocompleteShow("remote autocomplete hint", autocompleteLastResult.map(i => i[1]), autocompleteNextIndex);
+		const res = autocompleteLastResult[autocompleteNextIndex][0].trim();
+		autocompleteNextIndex = (autocompleteNextIndex + 1) % autocompleteLastResult.length;
+		autocompleteLastQuery = res;
+		autocompleteLastTarget = currentTarget;
+		chat.value = res;
+		return;
+	}
+	autocompleteClear();
+	const queryResult = await sendQuery("commandHint", currentValue, currentTarget);
+	if (chat.value !== currentValue || ChatRoomTargetMemberNumber !== currentTarget)
+		return;
+	if (!Array.isArray(queryResult) || !queryResult
+		.every(i => Array.isArray(i) &&
+			i.length === 2 &&
+			typeof i[0] === "string" &&
+			typeof i[1] === "string"
+		)
+	) {
+		return;
+	}
+	autocompleteLastResult = queryResult.sort((a, b) => a[1].localeCompare(b[1]));
+	if (autocompleteLastResult.length === 0) {
+		return;
+	} else if (autocompleteLastResult.length === 1) {
+		chat.value = autocompleteLastResult[0][0];
+		return;
+	}
+	const best = longestCommonPrefix(autocompleteLastResult.map(i => i[0]));
+	autocompleteShow("remote autocomplete hint", autocompleteLastResult.map(i => i[1]));
+	autocompleteLastQuery = best;
+	autocompleteLastTarget = currentTarget;
+	autocompleteNextIndex = 0;
+	chat.value = best;
 }
 
 export function Command_fixExclamationMark(sender: ChatroomCharacter, text: string): string {
@@ -549,6 +596,7 @@ export class ModuleCommands extends BaseModule {
 					}
 					return;
 				}
+				autocompleteClear();
 			}
 			return next(args);
 		});
@@ -576,34 +624,12 @@ export class ModuleCommands extends BaseModule {
 				!chat.value.startsWith("!!") &&
 				!firstTimeInit
 			) {
-				const currentValue = chat.value;
-				const currentTarget = ChatRoomTargetMemberNumber;
 				const e = args[0] as KeyboardEvent ?? event;
 				e?.preventDefault();
 				e?.stopImmediatePropagation();
 
-				sendQuery("commandHint", currentValue, currentTarget).then(result => {
-					if (chat.value !== currentValue || ChatRoomTargetMemberNumber !== currentTarget)
-						return;
-					if (!Array.isArray(result) ||
-						result.length !== 2 ||
-						typeof result[0] !== "string" ||
-						(
-							result[1] !== null &&
-							(
-								!Array.isArray(result[1]) ||
-								result[1].some(i => typeof i !== "string")
-							)
-						)
-					) {
-						console.error("BCX: Bad data during 'commandHint' query\n", result);
-						throw new Error("Bad data");
-					}
-					chat.value = result[0];
-					if (result[1]) {
-						ChatRoomSendLocal(`[remote autocomplete hint]\n` + result[1].join('\n'), 10_000, currentTarget);
-					}
-				}, () => { /* NOOP */ });
+				WhisperCommandAutocompleteCycle(chat)
+					.catch(() => { /* NOOP */ });
 			} else {
 				return next(args);
 			}
@@ -641,9 +667,10 @@ export class ModuleCommands extends BaseModule {
 				return resolve(false);
 			}
 
-			const result = WhisperCommandAutocomplete(data.substr(1), sender);
-			result[0] = '!' + result[0];
-			resolve(true, result);
+			resolve(true,
+				WhisperCommandAutocomplete(data.substring(1), sender)
+					.map(i => ["!" + i[0], "!" + i[1]])
+			);
 		};
 
 		registerCommand("hidden", "help", "- Display this help [alias: . ]", (arg) => {
@@ -697,14 +724,22 @@ export class ModuleCommands extends BaseModule {
 		aliasCommand("action", "a");
 
 		registerWhisperCommand("hidden", "help", "- Display this help", (argv, sender, respond) => {
-			respond(
-				`Available commands:\n` +
-				Array.from(whisperCommands.entries())
-					.filter(c => c[1].description !== null)
-					.map(c => `!${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
-					.sort()
-					.join("\n")
-			);
+			const result = Array.from(whisperCommands.entries())
+				.filter(c => c[1].description !== null)
+				.map(c => `!${c[0]}` + (c[1].description ? ` ${c[1].description}` : ""))
+				.sort();
+			let response = `Available commands:`;
+			while (result.length > 0) {
+				const concat = response + '\n' + result[0];
+				if (concat.length > 990) {
+					respond(response);
+					response = result[0];
+				} else {
+					response = concat;
+				}
+				result.shift();
+			}
+			respond(response);
 			return true;
 		}, null, false);
 	}

@@ -65,7 +65,7 @@ type BCX_logAllowedActions = {
 
 type BCX_queries = {
 	disabledModules: [undefined, import("./constants").ModuleCategory[]];
-	commandHint: [string, [string, string[] | null]];
+	commandHint: [string, [string, string][]];
 	permissions: [undefined, PermissionsBundle];
 	myAccessLevel: [undefined, import("./modules/authority").AccessLevel];
 	editPermission: [{

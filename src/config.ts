@@ -121,7 +121,9 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
 	StruggleDrawStrengthProgress: ["4755C02D"],
 	TextGet: ["4DDE5794"],
-	ValidationResolveModifyDiff: ["C2FE52D3"]
+	ValidationResolveModifyDiff: ["C2FE52D3"],
+	WardrobeClick: ["D388FE7D"],
+	WardrobeRun: ["9616EB3A"]
 };
 
 export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {

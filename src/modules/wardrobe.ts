@@ -1,4 +1,4 @@
-import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal } from "../utilsClub";
+import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
 import { arrayUnique, clipboardAvailable } from "../utils";
@@ -159,7 +159,7 @@ const helpText = "BCX's wardrobe export/import works by converting your current 
 	"except collars, neck accessories and neck restraints. Those, as well as the body itself, are ignored.";
 
 function PasteListener(ev: ClipboardEvent) {
-	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe") {
+	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe" || CurrentScreen === "Wardrobe") {
 		ev.preventDefault();
 		ev.stopImmediatePropagation();
 		const data = (ev.clipboardData || (window as any).clipboardData).getData("text");
@@ -225,10 +225,12 @@ export class ModuleWardrobe extends BaseModule {
 				// Help text toggle
 				if (MouseIn(1380, Y, 50, 50) || (MouseIn(30, 190, 1240, 780) && j_ShowHelp)) {
 					j_ShowHelp = !j_ShowHelp;
+					return;
 				}
 				// Restraints toggle
 				if (MouseIn(1457, Y, 50, 50)) {
 					j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+					return;
 				}
 				// Export
 				if (MouseIn(1534, Y, 207, 50)) {
@@ -247,6 +249,65 @@ export class ModuleWardrobe extends BaseModule {
 						}
 						const data = await navigator.clipboard.readText();
 						CharacterAppearanceWardrobeText = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+					}, 0);
+					return;
+				}
+			}
+			next(args);
+		});
+
+		hookFunction("WardrobeRun", 0, (args, next) => {
+			next(args);
+			if (clipboardAvailable) {
+				const Y = 90;
+				DrawButton(1000, Y, 50, 50, "", "White", "", "How does it work?");
+				DrawImageEx("Icons/Question.png", 1000 + 3, Y + 3, { Width: 44, Height: 44 });
+				DrawButton(425, Y, 50, 50, "", "White", "", "Include items/restraints");
+				DrawImageEx("../Icons/Bondage.png", 425 + 6, Y + 6, { Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38 });
+				DrawButton(750, Y, 225, 50, "Export", "White", "");
+				DrawButton(500, Y, 225, 50, "Import", "White", "");
+			}
+			if (j_ShowHelp) {
+				MainCanvas.fillStyle = "#ffff88";
+				MainCanvas.fillRect(30, 190, 1240, 780);
+				MainCanvas.strokeStyle = "Black";
+				MainCanvas.strokeRect(30, 190, 1240, 780);
+				MainCanvas.textAlign = "left";
+				DrawTextWrap(helpText, 30 - 1160 / 2, 210, 1200, 740, "black");
+				MainCanvas.textAlign = "center";
+			}
+		});
+
+		hookFunction("WardrobeClick", 0, (args, next) => {
+			if (clipboardAvailable) {
+				const Y = 90;
+				// Help text toggle
+				if (MouseIn(1000, Y, 50, 50) || (MouseIn(30, 190, 1240, 780) && j_ShowHelp)) {
+					j_ShowHelp = !j_ShowHelp;
+					return;
+				}
+				// Restraints toggle
+				if (MouseIn(425, Y, 50, 50)) {
+					j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+					return;
+				}
+				// Export
+				if (MouseIn(750, Y, 225, 50)) {
+					BCX_setTimeout(async () => {
+						await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
+						InfoBeep("Copied to clipboard!", 5_000);
+					}, 0);
+					return;
+				}
+				// Import
+				if (MouseIn(500, Y, 225, 50)) {
+					BCX_setTimeout(async () => {
+						if (typeof navigator.clipboard.readText !== "function") {
+							InfoBeep("Please press Ctrl+V", 5_000);
+							return;
+						}
+						const data = await navigator.clipboard.readText();
+						InfoBeep(j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode), 5_000);
 					}, 0);
 					return;
 				}

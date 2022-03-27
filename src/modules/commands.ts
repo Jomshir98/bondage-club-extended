@@ -669,7 +669,7 @@ export class ModuleCommands extends BaseModule {
 
 			resolve(true,
 				WhisperCommandAutocomplete(data.substring(1), sender)
-					.map(i => ["!" + i[0], "!" + i[1]])
+					.map(i => ["!" + i[0], i[1]])
 			);
 		};
 

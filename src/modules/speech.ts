@@ -212,7 +212,8 @@ export class ModuleSpeech extends BaseModule {
 				isObject(data) &&
 				data.Type === "Whisper" &&
 				data.Content === lastMessage &&
-				lastMessageOriginal
+				lastMessageOriginal &&
+				data.Content !== lastMessageOriginal
 			) {
 				if (!Array.isArray(data.Dictionary)) {
 					data.Dictionary = [];
@@ -231,7 +232,7 @@ export class ModuleSpeech extends BaseModule {
 				Array.isArray(data.Dictionary)
 			) {
 				const orig = data.Dictionary.find(i => isObject(i) && i.Tag === "BCX_ORIGINAL_MESSAGE" && typeof i.Text === "string");
-				if (orig) {
+				if (orig && data.Content !== orig.Text) {
 					if (antigarble === 2) {
 						data.Content = orig.Text;
 					} else {

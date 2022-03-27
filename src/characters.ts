@@ -106,8 +106,8 @@ export class ChatroomCharacter {
 		});
 	}
 
-	setPermission(permission: BCX_Permissions, type: "self", target: boolean): Promise<boolean>
-	setPermission(permission: BCX_Permissions, type: "min", target: AccessLevel): Promise<boolean>
+	setPermission(permission: BCX_Permissions, type: "self", target: boolean): Promise<boolean>;
+	setPermission(permission: BCX_Permissions, type: "min", target: AccessLevel): Promise<boolean>;
 	setPermission(permission: BCX_Permissions, type: "self" | "min", target: boolean | AccessLevel): Promise<boolean> {
 		return sendQuery("editPermission", {
 			permission,
@@ -385,8 +385,8 @@ export class PlayerCharacter extends ChatroomCharacter {
 		return Promise.resolve(AccessLevel.self);
 	}
 
-	override setPermission(permission: BCX_Permissions, type: "self", target: boolean): Promise<boolean>
-	override setPermission(permission: BCX_Permissions, type: "min", target: AccessLevel): Promise<boolean>
+	override setPermission(permission: BCX_Permissions, type: "self", target: boolean): Promise<boolean>;
+	override setPermission(permission: BCX_Permissions, type: "min", target: AccessLevel): Promise<boolean>;
 	override setPermission(permission: BCX_Permissions, type: "self" | "min", target: boolean | AccessLevel): Promise<boolean> {
 		if (type === "self") {
 			if (typeof target !== "boolean") {

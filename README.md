@@ -17,7 +17,7 @@ The extension is very modular and highly customizable. These are currently plann
 | Behavior Logging | A record book for breaking any rules or other events of interest for yourself or the player's dommes             | Done; More events will be added based on other modules               |
 | Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned (low priority)                                               |
 | Curses           | Cursing an item slot so a restraint or clothing stays on or off very securely                                    | Done                                                                 |
-| Commands         | One time actions such as forcing you into a pose                                                                 | Planned                                                              |
+| Commands         | One time actions such as forcing you into a pose                                                                 | Done                                                                 |
 | Rules            | Over 70 toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage             | Done; More rules being worked on                                     |
 | Speech           | Any commands and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk              | Done as part of "Rules"                                              |
 | Punishment       | Automatic punishments can be set by the dommes for breaking any of your rules                                    | Planned (low priority)                                               |
@@ -29,8 +29,10 @@ The extension is very modular and highly customizable. These are currently plann
 - Chat typing indicator visible between BCX users
 - A search function during item and clothing selection
 - A chat command for switching room backgrounds quickly (also making all single player backgrounds available)
+- Chat commands to administrate your room, play with a card deck or quickly interact with the wardrobe
 - An auto-refresh option for the friendlist
 - Cheats to give special locks/keys, prevent loosing of Mistress status and to prevent random kidnappings, including private NPC ransom
+- A "Create theme room" feature which enables you to give your room a standardized description and an auto-greeting
 
 # Running the script
 

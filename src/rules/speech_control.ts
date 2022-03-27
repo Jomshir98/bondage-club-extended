@@ -948,4 +948,46 @@ export function initRules_bc_speech_control() {
 		}
 	});
 
+	registerRule("speech_partial_hearing", {
+		name: "Partial hearing",
+		type: RuleType.Speech,
+		shortDescription: "of muffled speech - random & word list based",
+		longDescription: "This rule gives PLAYER_NAME ability to understand parts of a muffled sentence ungarbled, based on a white list of words and/or randomly. Doesn't affect emotes and OOC text.",
+		loggable: false,
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			alwaysUnderstandableWords: {
+				type: "stringList",
+				default: [],
+				description: "Words that can always be understood:",
+				options: {
+					validate: /^[\p{L}]*$/iu
+				}
+			},
+			randomUnderstanding: {
+				type: "toggle",
+				default: true,
+				description: "Some words are randomly understood:",
+				Y: 730
+			}
+		},
+		load(state) {
+			hookFunction("SpeechGarble", 2, (args, next) => {
+				if (!state.isEnforced)
+					return next(args);
+				return (args[1] as string).replace(/\([^)]+\)|\p{L}+/gmui, (word) => {
+					if (word.startsWith("(")) {
+						return word;
+					} if (state.customData?.randomUnderstanding && Math.random() < 0.25) {
+						return word;
+					} else if (state.customData?.alwaysUnderstandableWords.some(
+						(str) => word.toLocaleLowerCase() === str.toLocaleLowerCase())) {
+						return word;
+					} else {
+						return callOriginal("SpeechGarble", [args[0], word, args[2]]);
+					}
+				});
+			}, ModuleCategory.Rules);
+		}
+	});
 }

@@ -1,5 +1,60 @@
 # BCX Changelog
 
+## 0.8.0 "Commands update"
+
+This update includes:
+ - New commands module - currently with 13 commands to use:
+   - Each command has a name and a detailed description including the chat command
+   - The commands range from changing poses, manipulating speech or even changing location
+   - A limit system to limit and/or block commands that feel too intense or just not to your liking
+   - Some commands are limited or blocked by default and cannot be used without explicitly unblocking them first
+   - 3 new permissions in the authority module allow you to configure who can use normal and/or limited commands and change limits
+   - Those permissions have default settings according to the BCX user's initially selected preset (e.g. Slave)
+   - Commands cannot be used in the BCX UI, but have to be used as a chat command, e.g. ".wardrobe export"
+   - You can get a convenient list of all commands you are permitted to use by whispering "!help commands" to another BCX user
+   - Some of the commands can also be used by the BCX user on the own character, such as posing commands
+ - Added a "Create theme room" button on the second page of the room create and administration screens (where BCX's room templates are), which ...
+   - enables you to tag your room with a type, setting and several limits
+   - allows you to set an automatic greeting message that only characters newly joining your room will see
+   - offers you import/export of theme room configurations (similar to how BCX's wardrobe import/export works)
+   NOTE: If this will see significant usage inside BC, we could later on add new filter options to the chat room search based on the theme room type/setting
+ - Added BCX's wardrobe import/export buttons also to the regular wardrobe in your singleplayer private room (also when this wardrobe is used by the BCE mod)
+ - Added "Tab"-key autocompletion results cycling also to commands whispered to other BCX users, if you have the same BCX version loaded
+ - Added a utility-command `.garble` that converts a given message to gag talk of the defined strength for usage in roleplays or to counter antigarble
+ - Added a utility-command `.room` that has 9 subcommands to configure or administrate your current chat room (e.g. a permanent ban command)
+ - Added a utility-command `.wardrobe` that has 4 subcommands to export or quickload BC outfits or remove clothing when you should be able to (e.g. unbound on a bed)
+ - Added a utility-command `.dice` that behaves exactly the same as /dice in the base club but does not show the results to the whole room - only to you
+ - Added a utility-command `.deck` that has 4 subcommands to draw, deal or shuffle with a standard 52-card game deck
+   NOTE: Please be reminded that BCX speeds up the process of typing chat commands a lot, if you wildly spam the "Tab"-key for autocompleting command parts
+ - Changed the list of authority module permissions to color permissions you are allowed to change differently than those you cannot
+ - Changed the 'help' chat command to no longer show a long list of all commands - those are now sorted into help categories such as "cheats" or "modules"
+ - Changed a few tutorial pages, with the main addition of adding a new page explaining the new commands module
+ - Changed the misc module option of hiding the BC typing indicator to also hide the BC wardrobe indicator on top, if another BCX user shows the BCX one already
+
+Rules module changes:
+ - Added several filter buttons that can be used to filter and sort the large list of rules that can be added, based on rule categories and availability
+ - Added new subcommand "listall" to the modules-command `.rules` that lists all existing rules in BCX (in contrast to "list" which lists all currently added ones)
+ - Added new rule "Prevent whitelisting" that can prevent the BCX user from newly adding characters with a role lower than "Mistress" to their BC whitelist
+ - Added new rule "Forbid using GGTS" that can forbid using the Good Girl Training System of the base club
+ - Added new rule "Partial hearing" that gives the ability to understand parts of a muffled sentence ungarbled, based on a whitelist of words and/or randomly
+ - Added new rule "Forbid looking at room admin UI" that can forbid the BCX user to open the chat room admin screen while blindfolded to not see the room background
+ - Added new rule "Field of vision for eyes" that blacks out part of the room view when the character's eyes are looking up or down accordingly
+ - Changed the rule "Fully blind when eyes are closed" to also have the two toggles from above new rule: self-effect, hide names/icons
+ - Changed the rule "Forbid saying certain words in chat" to also support adding small sentences and not just single words
+ - Changed the rule "Establish mandatory words" to also support adding small sentences and not just single words
+ - Changed the rule "Establish mandatory words" to accept also sound patterns of single words set (e.g. "nnnyaaaa!~~" matches the word "nya")
+ - Removed the rule "Force'Show wardrobe icon' (Existing BC setting)" as this setting was removed from the base club
+ - Improved the description of the rule "Limit bound admin power"
+ - Improved the description of the rule "Order to greet club"
+ - Fixed the rule "Ready to be summoned" not working again unless entering a different room in the meantime
+
+Fixes:
+ - Changed it so that chat messages consisting of only dots and nothing else afterwards (e.g. "...") no longer have the leading dot removed/escaped
+ - Changed the chatroom status update logic to avoid leaking data to BCX clients in the same room that could be used to deduce that you are currently whispering 
+ - Fixed a random text field being visible somewhere on the screen when looking at another BCX user's miscellaneous module menu
+ - Fixed the BCX typing/status icons not being hidden correctly with the BC button to hide the UI stepwise
+ - Fixed `.antigarble both` showing not garbled whisper messages twice under certain circumstances
+
 ## 0.7.9
 
 This update includes:

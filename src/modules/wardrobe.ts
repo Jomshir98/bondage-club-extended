@@ -414,12 +414,12 @@ export class ModuleWardrobe extends BaseModule {
 						ChatRoomSendLocal("You are unable to change clothes right now.");
 						return false;
 					}
-					const size = args.length === 2 && /^[0-9]+$/.test(args[1]) && Number.parseInt(args[1], 10);
-					if (!size || size < 1) {
+					const slot = args.length === 2 && /^[0-9]+$/.test(args[1]) && Number.parseInt(args[1], 10);
+					if (!slot || slot < 1) {
 						ChatRoomSendLocal(`Needs a <number> greater 0 in '.wardrobe ${subcommand} <number>'`);
 						return false;
 					}
-					WardrobeFastLoad(Player, size, true);
+					WardrobeFastLoad(Player, slot - 1, true);
 				} else if (subcommand === "strip") {
 					if (!Player.CanInteract()) {
 						ChatRoomSendLocal("You are too restrained to use this right now.");

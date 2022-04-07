@@ -148,12 +148,19 @@ hiddenMessageHandlers.set("somethingChanged", (sender) => {
 	changeHandlers.forEach(h => h(sender));
 });
 
+let changeTimer: number | null = null;
+
 export function notifyOfChange(): void {
 	if (moduleInitPhase !== ModuleInitPhase.ready)
 		return;
-	sendHiddenMessage("somethingChanged", undefined);
 	const player = getPlayerCharacter().MemberNumber;
 	changeHandlers.forEach(h => h(player));
+	if (changeTimer === null) {
+		changeTimer = BCX_setTimeout(() => {
+			changeTimer = null;
+			sendHiddenMessage("somethingChanged", undefined);
+		}, 100);
+	}
 }
 
 export class ModuleMessaging extends BaseModule {

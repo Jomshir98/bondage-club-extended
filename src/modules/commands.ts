@@ -1,7 +1,7 @@
 import { ChatRoomActionMessage, ChatRoomSendLocal, getVisibleGroupName, isBind } from "../utilsClub";
 import { ChatroomCharacter, getAllCharactersInRoom, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { hookFunction } from "../patching";
-import { arrayUnique, longestCommonPrefix } from "../utils";
+import { arrayUnique, isObject, longestCommonPrefix } from "../utils";
 import { BaseModule } from "./_BaseModule";
 import { firstTimeInit, modStorage, modStorageSync } from "./storage";
 import { queryHandlers, sendQuery } from "./messaging";
@@ -636,27 +636,32 @@ export class ModuleCommands extends BaseModule {
 		});
 
 		hookFunction("ChatRoomMessage", 9, (args, next) => {
-			const data = args[0];
+			const data = args[0] as Record<string, unknown>;
 
 			const sender = typeof data.Sender === "number" && getChatroomCharacter(data.Sender);
 			if (data?.Type === "Whisper" &&
 				typeof data.Content === "string" &&
-				data.Content.startsWith("!") &&
-				!data.Content.startsWith("!!") &&
+				!firstTimeInit &&
 				sender &&
+				!sender.isPlayer() &&
 				sender.hasAccessToPlayer()
 			) {
-				if (data.Sender === Player.MemberNumber || firstTimeInit)
-					return next(args);
-				console.debug(`BCX: Console command from ${sender}: ${data.Content}`);
-				RunWhisperCommand(data.Content.substr(1), sender, (msg) => {
-					ServerSend("ChatRoomChat", {
-						Content: `[BCX]\n${msg}`,
-						Type: "Whisper",
-						Target: sender.MemberNumber
+				const orig = Array.isArray(data.Dictionary) && (data.Dictionary as unknown[]).find((i): i is { Text: string; } => isObject(i) && i.Tag === "BCX_ORIGINAL_MESSAGE" && typeof i.Text === "string");
+				const text = (orig && orig.Text) || data.Content;
+				if (
+					data.Content.startsWith("!") &&
+					!data.Content.startsWith("!!")
+				) {
+					console.debug(`BCX: Console command from ${sender}: ${text}`, data);
+					RunWhisperCommand(text.substring(1), sender, (msg) => {
+						ServerSend("ChatRoomChat", {
+							Content: `[BCX]\n${msg}`,
+							Type: "Whisper",
+							Target: sender.MemberNumber
+						});
 					});
-				});
-				return;
+					return;
+				}
 			}
 
 			return next(args);

@@ -1,5 +1,22 @@
 # BCX Changelog
 
+## 0.8.1 "Commands update" Release
+
+This update includes:
+ - Renamed the curses clothing slot "Ears" to "Ears Accessory" so it does not conflict with the item slot "Ears"
+ - Whispered commands now internally use anti-garbling to ignore any modifications to whispers
+ - Changes to some of BCX's features to not run into BC's recently added message rate limit:
+   - The curse all buttons
+   - Some messages by the utility-command `.deck`
+ - And additionally **everything from the 0.8.0 update released to every BCX user!**
+
+Commands module changes:
+ - Changed the command `keydeposit` to no longer be usable on your own character
+
+Fixes:
+ - Removed the extra `!` characters in front of the results when "Tab"-cycling in whispers to other BCX users
+ - Fixed the utility-command `.wardrobe quickload` loading the wrong outfit slot
+
 ## 0.8.0 "Commands update"
 
 This update includes:

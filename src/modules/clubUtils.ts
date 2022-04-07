@@ -9,6 +9,7 @@ import { OverridePlayerDialog } from "./miscPatches";
 import remove from "lodash-es/remove";
 import { arrayUnique, shuffleArray } from "../utils";
 import { modStorage } from "./storage";
+import { BCX_setTimeout } from "../BCXContext";
 
 const BACKGROUNDS_BCX_NAME = "[BCX] Hidden";
 
@@ -112,7 +113,16 @@ function drawCards(numberOfCards: number, membernumbers?: number[]) {
 }
 
 function showDealersLog() {
-	dealersLog.forEach(entry => { ChatRoomActionMessage(entry); });
+	// to circumevent BC's rate limit of 50 messages per second
+	const middleIndex = Math.ceil(dealersLog.length / 2);
+	const firstHalf = dealersLog.slice().splice(0, middleIndex);
+	const secondHalf = dealersLog.slice().splice(-middleIndex);
+	firstHalf.forEach(entry => { ChatRoomActionMessage(entry); });
+	secondHalf.forEach(entry => {
+		BCX_setTimeout(() => {
+			ChatRoomActionMessage(entry);
+		}, 1100);
+	});
 }
 //#endregion
 
@@ -190,8 +200,8 @@ export class ModuleClubUtils extends BaseModule {
 							return false;
 						}
 
-						if (count > 52 || count < 1) {
-							ChatRoomSendLocal(`You can ${subcommand} at most 52 cards at once`);
+						if (count > 26 || count < 1) {
+							ChatRoomSendLocal(`You can ${subcommand} at most 26 cards (half the deck) in one go`);
 							return false;
 						}
 					}

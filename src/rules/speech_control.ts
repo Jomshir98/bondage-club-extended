@@ -484,7 +484,7 @@ export function initRules_bc_speech_control() {
 				) {
 					const character = getChatroomCharacter(data.Sender);
 					if (character && getCharacterAccessLevel(character) >= state.customData.minimumPermittedRole) {
-						if (state.customData.autoreplyText) {
+						if (state.customData.autoreplyText && !data.Content?.startsWith("[Automatic reply by BCX]\n")) {
 							const msg = `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`;
 							ServerSend("ChatRoomChat", {
 								Content: msg,
@@ -593,7 +593,7 @@ export function initRules_bc_speech_control() {
 					!state.customData.whitelistedMemberNumbers.includes(data.MemberNumber) &&
 					(!Player.CanInteract() || !state.customData.onlyWhenBound)
 				) {
-					if (state.customData.autoreplyText) {
+					if (state.customData.autoreplyText && !data.Message?.startsWith("[Automatic reply by BCX]\n")) {
 						const msg = `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`;
 						ServerSend("AccountBeep", {
 							MemberNumber: data.MemberNumber,

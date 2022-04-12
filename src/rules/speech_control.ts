@@ -453,7 +453,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "except from defined roles",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set (text field is not empty). PLAYER_NAME won't get any indication that she would have received a whisper. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set (text field is not empty). PLAYER_NAME won't get any indication that she would have received a whisper unless the rule is not enforced, in which case she will see both the whisper and the auto reply. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			minimumPermittedRole: {
@@ -479,16 +479,22 @@ export function initRules_bc_speech_control() {
 					data.Content !== "" &&
 					data.Type === "Whisper" &&
 					typeof data.Sender === "number" &&
+					state.inEffect &&
 					state.customData
 				) {
 					const character = getChatroomCharacter(data.Sender);
 					if (character && getCharacterAccessLevel(character) >= state.customData.minimumPermittedRole) {
 						if (state.customData.autoreplyText) {
+							const msg = `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`;
 							ServerSend("ChatRoomChat", {
-								Content: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`,
+								Content: msg,
 								Type: "Whisper",
 								Target: data.Sender
 							});
+							if (!state.isEnforced)
+							{
+								ChatRoomSendLocal(msg);
+							}
 						}
 						if (state.isEnforced) return;
 					}
@@ -550,7 +556,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep unless the rule is not enforced, in which case she will see both the beep and the auto reply. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {
@@ -582,17 +588,32 @@ export function initRules_bc_speech_control() {
 				if (isObject(data) &&
 					!data.BeepType &&
 					typeof data.MemberNumber === "number" &&
+					state.inEffect &&
 					state.customData &&
 					!state.customData.whitelistedMemberNumbers.includes(data.MemberNumber) &&
 					(!Player.CanInteract() || !state.customData.onlyWhenBound)
 				) {
 					if (state.customData.autoreplyText) {
+						const msg = `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`;
 						ServerSend("AccountBeep", {
 							MemberNumber: data.MemberNumber,
 							BeepType: "",
-							Message: `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`,
+							Message: msg,
 							IsSecret: true
 						});
+						if (!state.isEnforced)
+						{
+							ChatRoomSendLocal(msg);
+							FriendListBeepLog.push({
+								MemberNumber: data.MemberNumber,
+								MemberName: Player.FriendNames?.get(data.MemberNumber) || "Unknown",
+								ChatRoomName: undefined,
+								Sent: true,
+								Private: false,
+								Time: new Date(),
+								Message: msg
+							});
+						}
 					}
 					if (state.isEnforced) return;
 				}

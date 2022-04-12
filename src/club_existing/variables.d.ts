@@ -58,6 +58,7 @@ declare function CommonConvertStringToArray(s: string): number[];
 
 // FriendList.js
 declare var FriendListBeepTarget: number | null;
+declare var FriendListBeepLog: IFriendListBeepLogMessage[];
 
 // Character.js
 declare function CharacterDeleteAllOnline(): void;

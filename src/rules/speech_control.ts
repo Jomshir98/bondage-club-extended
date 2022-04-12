@@ -479,7 +479,6 @@ export function initRules_bc_speech_control() {
 					data.Content !== "" &&
 					data.Type === "Whisper" &&
 					typeof data.Sender === "number" &&
-					state.isEnforced &&
 					state.customData
 				) {
 					const character = getChatroomCharacter(data.Sender);
@@ -491,7 +490,7 @@ export function initRules_bc_speech_control() {
 								Target: data.Sender
 							});
 						}
-						return;
+						if (state.isEnforced) return;
 					}
 				}
 				return next(args);
@@ -583,7 +582,6 @@ export function initRules_bc_speech_control() {
 				if (isObject(data) &&
 					!data.BeepType &&
 					typeof data.MemberNumber === "number" &&
-					state.isEnforced &&
 					state.customData &&
 					!state.customData.whitelistedMemberNumbers.includes(data.MemberNumber) &&
 					(!Player.CanInteract() || !state.customData.onlyWhenBound)
@@ -596,7 +594,7 @@ export function initRules_bc_speech_control() {
 							IsSecret: true
 						});
 					}
-					return;
+					if (state.isEnforced) return;
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

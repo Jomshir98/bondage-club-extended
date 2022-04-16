@@ -28,7 +28,7 @@ export function curseMakeSavedProperty(properties: ItemProperties | undefined): 
 	const result: ItemProperties = {};
 
 	if (isObject(properties)) {
-		for (const key of Object.keys(properties)) {
+		for (const key of Object.keys(properties) as (keyof ItemProperties)[]) {
 			if (key === "Effect") {
 				if (Array.isArray(properties.Effect) && properties.Effect.every(i => typeof i === "string")) {
 					const effect = properties.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i));
@@ -39,6 +39,7 @@ export function curseMakeSavedProperty(properties: ItemProperties | undefined): 
 					console.error(`BCX: Bad effect of properties: `, properties.Effect);
 				}
 			} else if (!CURSE_IGNORED_PROPERTIES.includes(key) && properties[key] !== undefined) {
+				// @ts-expect-error: Copying member between same type objects
 				result[key] = cloneDeep(properties[key]);
 			}
 		}
@@ -795,14 +796,14 @@ export class ModuleCurses extends BaseModule {
 		}, ModuleCategory.Curses);
 
 		hookFunction("ColorPickerDraw", 0, (args, next) => {
-			const Callback = args[5];
+			const Callback = args[5] as (Color: string) => void;
 			if (Callback === ItemColorOnPickerChange) {
 				args[5] = (color: any) => {
 					if (ItemColorCharacter === Player && ItemColorItem) {
 						// Original code
-						const newColors = ItemColorState.colors.slice();
+						const newColors = (ItemColorState.colors as any[]).slice();
 						ItemColorPickerIndices.forEach(i => newColors[i] = color);
-						ItemColorItem.Color = newColors;
+						ItemColorItem.Color = (newColors as string | any[]);
 						CharacterLoadCanvas(ItemColorCharacter);
 						// Curse color change code
 						const condition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
@@ -885,7 +886,6 @@ export class ModuleCurses extends BaseModule {
 			return;
 		}
 
-
 		const asset = AssetGet("Female3DCG", group, curse.Name);
 		if (!asset) {
 			console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
@@ -913,10 +913,9 @@ export class ModuleCurses extends BaseModule {
 			if (!changeType) changeType = "add";
 		}
 
-
 		if (curse.curseProperty) {
-			const itemProperty = currentItem.Property = (currentItem.Property ?? {});
-			const curseProperty = curse.Property ?? {};
+			const itemProperty = currentItem.Property = (currentItem.Property ?? {}) as Record<string, unknown>;
+			const curseProperty = (curse.Property ?? {}) as Record<string, unknown>;
 			for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
 				if (key === "Effect")
 					continue;

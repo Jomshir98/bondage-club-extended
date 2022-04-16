@@ -489,6 +489,7 @@ export class ModuleClubUtils extends BaseModule {
 				if (!item.Property) {
 					item.Property = {};
 				}
+				// @ts-expect-error: The types are too strict, the extra is ignored
 				item.Property.AllowActivityOn = AssetGroup.map(A => A.Name);
 				CharacterRefresh(char.Character);
 				ChatRoomCharacterUpdate(char.Character);

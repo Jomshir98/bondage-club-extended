@@ -97,7 +97,7 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 	let fullMatch = includeBinds;
 	const matchingGroups = new Set<string>();
 	if (includeBinds) {
-		for (const group of arrayUnique(C.Appearance.filter(Allow).map(item => item.Asset.Group.Name).concat(data.map(item => item.Group)))) {
+		for (const group of arrayUnique(C.Appearance.filter(Allow).map<string>(item => item.Asset.Group.Name).concat(data.map(item => item.Group)))) {
 			const wornItem = C.Appearance.find(item => item.Asset.Group.Name === group);
 			const bundleItem = data.find(item => item.Group === group);
 			if (
@@ -162,7 +162,7 @@ function PasteListener(ev: ClipboardEvent) {
 	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe" || CurrentScreen === "Wardrobe") {
 		ev.preventDefault();
 		ev.stopImmediatePropagation();
-		const data = (ev.clipboardData || (window as any).clipboardData).getData("text");
+		const data = ((ev.clipboardData || (window as any).clipboardData) as DataTransfer).getData("text");
 		CharacterAppearanceWardrobeText = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
 	}
 }

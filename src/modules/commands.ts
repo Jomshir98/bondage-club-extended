@@ -492,7 +492,7 @@ export function Command_selectWornItemAutocomplete(character: ChatroomCharacter,
 
 	if (possible.length === 0) {
 		possible = arrayUnique(
-			items.map(A => A.Asset.Group.Name)
+			items.map<string>(A => A.Asset.Group.Name)
 				.concat(items.map(A => A.Asset.Name))
 		).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 	}
@@ -535,7 +535,7 @@ export function Command_selectGroupAutocomplete(selector: string, character: Cha
 		possible = arrayUnique(
 			AssetGroup
 				.filter(G => !filter || filter(G))
-				.map(G => G.Name)
+				.map<string>(G => G.Name)
 				.concat(
 					items
 						.filter(A => !filter || filter(A.Asset.Group))

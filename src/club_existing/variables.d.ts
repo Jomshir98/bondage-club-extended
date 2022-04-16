@@ -176,7 +176,10 @@ declare var ServerBeep: {
 };
 declare var ServerSocket: import("socket.io-client").Socket;
 declare var ServerIsConnected: boolean;
-declare var ServerAccountUpdate: any;
+declare var ServerAccountUpdate: {
+	SyncToServer(): void;
+	QueueData(Data: object, Force?: true): void
+};
 declare function ServerPlayerIsInChatRoom(): boolean;
 declare function ServerSend(Message: string, Data: any): void;
 declare function ServerAppearanceBundle(Appearance: Item[]): AppearanceBundle;
@@ -256,7 +259,7 @@ declare function ItemColorOnPickerChange(color: any): void;
 
 // ChatSearch.js
 declare var ChatSearchResult: any[];
-declare var ChatSearchResultOffset: any;
+declare var ChatSearchResultOffset: number;
 declare function ChatSearchMuffle(inputText: string): string;
 
 // Reputation.js

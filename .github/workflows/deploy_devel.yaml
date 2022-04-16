@@ -15,17 +15,21 @@ jobs:
 
     - uses: actions/setup-node@v2
       with:
-        node-version: '14.x'
+        node-version: '16'
 
-    - run: yarn install
+    - run: yarn install --frozen-lockfile
 
     - run: yarn build
 
-    - run: yarn test
+    - run: yarn typecheck
+
+    - run: yarn lint
 
     - name: Deploy
-      uses: JamesIves/github-pages-deploy-action@4.1.5
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
         folder: dist
         target-folder: devel
+        git-config-name: github-actions[bot]
+        git-config-email: github-actions[bot]@users.noreply.github.com

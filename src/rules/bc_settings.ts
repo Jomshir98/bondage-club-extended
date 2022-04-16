@@ -130,12 +130,13 @@ export function initRules_bc_settings() {
 		},
 		tick(state) {
 			if (state.isEnforced && state.customData) {
-				const wanted = ({
+				const VALUE_CONVERSIONS: Record<string, number> = {
 					everyone: 0,
 					everyoneBlacklist: 1,
 					dominants: 2,
 					whitelist: 3
-				} as Record<string, number>)[state.customData.value] ?? 0;
+				};
+				const wanted = VALUE_CONVERSIONS[state.customData.value] ?? 0;
 				if (Player.ItemPermission !== wanted) {
 					Player.ItemPermission = wanted;
 					state.trigger();

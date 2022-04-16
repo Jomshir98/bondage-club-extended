@@ -53,7 +53,7 @@ export function guard_BCX_Rule(name: unknown): name is BCX_Rule {
 }
 
 export function guard_RuleCustomData(rule: BCX_Rule, data: unknown): boolean {
-	const descriptor = rules.get(rule as BCX_Rule);
+	const descriptor = rules.get(rule);
 	if (!descriptor)
 		return false;
 
@@ -282,7 +282,7 @@ export const ruleCustomDataHandlers: {
 					MainCanvas.fillStyle = "#FFFF88";
 					MainCanvas.fillRect(Left, Top, 450, 65);
 					MainCanvas.lineWidth = 2;
-					MainCanvas.strokeStyle = 'black';
+					MainCanvas.strokeStyle = "black";
 					MainCanvas.strokeRect(Left, Top, 450, 65);
 					DrawTextFit(getCharacterName(val, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
@@ -931,7 +931,7 @@ export class ModuleRules extends BaseModule {
 			} else if (subcommand === "listall") {
 				let result = "All existing rules:";
 				for (const [k] of RulesGetList()) {
-					const data = RulesGetDisplayDefinition(k as BCX_Rule);
+					const data = RulesGetDisplayDefinition(k);
 					const resultItem = `\n${data.name}`;
 					if (result.length + resultItem.length >= 990) {
 						result += "\n...";

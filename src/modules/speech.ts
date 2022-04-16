@@ -220,7 +220,7 @@ export class ModuleSpeech extends BaseModule {
 				if (!Array.isArray(data.Dictionary)) {
 					data.Dictionary = [];
 				}
-				data.Dictionary.push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: lastMessageOriginal });
+				(data.Dictionary as any[]).push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: lastMessageOriginal });
 			}
 			return next(args);
 		});

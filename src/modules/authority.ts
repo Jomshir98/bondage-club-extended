@@ -695,7 +695,7 @@ export class ModuleAuthority extends BaseModule {
 				if (transitionDictionary[k] !== undefined) {
 					console.info(`BCX: Updating permission name "${k}"->"${transitionDictionary[k]}"`);
 				}
-				const perm = permissions.get((transitionDictionary[k] ?? k) as BCX_Permissions);
+				const perm = permissions.get(transitionDictionary[k] ?? k);
 				if (!Array.isArray(v) || typeof v[0] !== "boolean" || typeof v[1] !== "number") {
 					console.warn(`BCX: Storage: bad permission ${k}`);
 				} else if (AccessLevel[v[1]] === undefined) {

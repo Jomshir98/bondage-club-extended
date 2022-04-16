@@ -6,11 +6,13 @@ import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
 import json from "@rollup/plugin-json";
-import commonjs from '@rollup/plugin-commonjs';
+import commonjs from "@rollup/plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
 
 import packageJson from "./package.json";
 import simpleGit from "simple-git";
+
+/* global process */
 
 /** @type {import("rollup").RollupOptions} */
 const config = {
@@ -36,15 +38,15 @@ console.debug("BCX: Parse start...");
 			let BCX_VERSION = packageJson.version;
 			let BCX_DEVEL = "false";
 			if ((await git.status()).modified.length > 0) {
-				BCX_VERSION += `-DEV-${new Date().toISOString().replace(/[-:T]/g, "").replace(/\.[0-9]*Z/, "")}`
+				BCX_VERSION += `-DEV-${new Date().toISOString().replace(/[-:T]/g, "").replace(/\.[0-9]*Z/, "")}`;
 				BCX_DEVEL = "true";
 			} else {
-				BCX_VERSION += `-${(await git.revparse("HEAD")).substr(0, 8)}`
+				BCX_VERSION += `-${(await git.revparse("HEAD")).substr(0, 8)}`;
 			}
 			if (process.env.IS_DEVEL) {
 				BCX_DEVEL = "true";
 			}
-			return `const BCX_VERSION="${BCX_VERSION}";const BCX_DEVEL=${BCX_DEVEL};`
+			return `const BCX_VERSION="${BCX_VERSION}";const BCX_DEVEL=${BCX_DEVEL};`;
 		}
 	},
 	treeshake: false,
@@ -59,18 +61,18 @@ console.debug("BCX: Parse start...");
 				{
 					src: [
 						"static/*",
-						process.env.IS_DEVEL ? 'static_devel/*' : 'static_stable/*'
+						process.env.IS_DEVEL ? "static_devel/*" : "static_stable/*"
 					],
-					dest: 'dist'
+					dest: "dist"
 				},
 				{
 					src: "resources/*",
-					dest: 'dist/resources'
+					dest: "dist/resources"
 				}
 			]
 		})
 	],
-	onwarn: function (warning, warn) {
+	onwarn(warning, warn) {
 		switch (warning.code) {
 			case "EVAL":
 			case "CIRCULAR_DEPENDENCY":

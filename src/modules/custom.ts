@@ -4,7 +4,7 @@ import { BaseModule } from "./_BaseModule";
 import isEqual from "lodash-es/isEqual";
 
 function customIsEnabled(feature: string): boolean {
-	return !!((Player.OnlineSettings as any)?.BCX_Custom?.includes(feature));
+	return !!(((Player.OnlineSettings as any)?.BCX_Custom as undefined | string[])?.includes(feature));
 }
 
 export class ModuleCustom extends BaseModule {
@@ -37,12 +37,12 @@ export class ModuleCustom extends BaseModule {
 					C.Character.Appearance.push({
 						Asset: f,
 						Difficulty: 20,
-						Color: ['#A7806F', 'Default', 'Default'],
+						Color: ["#A7806F", "Default", "Default"],
 						Property: { Mode: "Off", Intensity: -1, Effect: ["Egged"], TriggerValues: "ø,".repeat(7) + "ø", AccessMode: "LockMember" }
 					});
 					CharacterRefresh(C.Character, false);
 					ChatRoomCharacterUpdate(C.Character);
-				} else if (c && c.Asset === f && isEqual(c.Color, ['#A7806F', 'Default', 'Default']) && a) {
+				} else if (c && c.Asset === f && isEqual(c.Color, ["#A7806F", "Default", "Default"]) && a) {
 					CharacterAppearanceSetItem(C.Character, "ItemVulva", a, "#A7806F");
 					ChatRoomCharacterUpdate(C.Character);
 				}

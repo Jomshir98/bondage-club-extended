@@ -63,13 +63,13 @@ export function init() {
 			ServerSocket.off("ChatRoomMessage", ChatRoomMessageForwarder);
 			ServerSocket.on("ChatRoomMessage", data => {
 				if (data?.Type !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
-					ChatRoomMessageForwarder!(data);
+					ChatRoomMessageForwarder(data);
 				}
 			});
 			ServerSocket.off("AccountBeep", AccountBeepForwarder);
 			ServerSocket.on("AccountBeep", data => {
 				if (typeof data?.BeepType !== "string" || !["Leash", "BCX"].includes(data.BeepType) || !isObject(data.Message?.BCX)) {
-					AccountBeepForwarder!(data);
+					AccountBeepForwarder(data);
 				}
 			});
 		}

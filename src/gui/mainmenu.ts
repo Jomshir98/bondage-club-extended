@@ -150,7 +150,7 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		// Changelog
 		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {
-			window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? 'master' : 'stable'}/CHANGELOG.md`, "_blank");
+			window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? "master" : "stable"}/CHANGELOG.md`, "_blank");
 		}
 		// Discord invite
 		if (MouseIn(1450, 810, 400, 90) && this.character.isPlayer()) {

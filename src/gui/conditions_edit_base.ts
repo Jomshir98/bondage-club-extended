@@ -242,7 +242,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		if (data.timer === null) {
 			statusText = "Timer disabled";
 		} else {
-			statusText = `${data.active ? 'Deactivates' : 'Activates'} in: ${formatTimeInterval(data.timer - Date.now())}`;
+			statusText = `${data.active ? "Deactivates" : "Activates"} in: ${formatTimeInterval(data.timer - Date.now())}`;
 		}
 		DrawText(statusText, 530, 311, data.active || !data.timer ? "Black" : "#060");
 
@@ -354,13 +354,12 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 					MainCanvas.fillStyle = "#FFFF88";
 					MainCanvas.fillRect(Left, Top, 450, 65);
 					MainCanvas.lineWidth = 2;
-					MainCanvas.strokeStyle = 'black';
+					MainCanvas.strokeStyle = "black";
 					MainCanvas.strokeRect(Left, Top, 450, 65);
 					DrawTextFit(getCharacterName(requirements.player.memberNumber, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
 			}
 		}
-
 
 		////// global category configuration toggle
 		MainCanvas.beginPath();
@@ -438,7 +437,6 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			this.changes.favorite = !this.changes.favorite;
 			return true;
 		}
-
 
 		////// status and timer area
 		if (data.timer === null) {
@@ -583,7 +581,6 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			}));
 			return true;
 		}
-
 
 		////// global category configuration toggle
 		if (MouseIn(1210, 850, 64, 64)) {

@@ -1,4 +1,3 @@
-
 export enum Views {
 	AuthorityRoles = 10,
 	AuthorityPermissions = 11,

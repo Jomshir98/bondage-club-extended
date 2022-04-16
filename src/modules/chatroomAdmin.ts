@@ -276,7 +276,7 @@ function PasteListener(ev: ClipboardEvent) {
 	if (onThemeRoomSubpage && document.activeElement !== input) {
 		ev.preventDefault();
 		ev.stopImmediatePropagation();
-		const data = (ev.clipboardData || (window as any).clipboardData).getData("text");
+		const data = ((ev.clipboardData || (window as any).clipboardData) as DataTransfer).getData("text");
 		parseThemeRoom(data);
 	}
 }
@@ -287,7 +287,7 @@ function ChatSettingsThemeRoomClick() {
 	if (MouseIn(1480, 75, 420, 245)) {
 		ElementToggleGeneratedElements("ChatCreate", false);
 		BackgroundSelectionMake(ChatCreateBackgroundList,
-			ChatCreateBackgroundList.indexOf(onRoomCreateScreen ? ChatCreateBackgroundSelect : ChatAdminBackgroundSelect), Name => {
+			(ChatCreateBackgroundList as any[]).indexOf(onRoomCreateScreen ? ChatCreateBackgroundSelect : ChatAdminBackgroundSelect), Name => {
 				currentThemeRoom.Background = Name;
 			}
 		);

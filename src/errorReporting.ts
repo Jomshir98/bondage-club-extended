@@ -116,7 +116,7 @@ export function showErrorOverlay(title: string, description: string, contents: s
 	console.info("Error overlay displayed\n", contents);
 
 	if (wrapCodeBlock) {
-		contents = '```\n' + contents.trim() + '\n```';
+		contents = "```\n" + contents.trim() + "\n```";
 	}
 
 	const overlay = document.createElement("div");
@@ -171,7 +171,7 @@ export function showErrorOverlay(title: string, description: string, contents: s
 			navigator.clipboard.writeText(contentElem.value);
 		} else {
 			try {
-				document.execCommand('copy');
+				document.execCommand("copy");
 			} catch (err) {
 				/* Ignore */
 			}
@@ -239,7 +239,7 @@ function bcxClick(this: any, event: MouseEvent) {
 	const ctx = debugContextStart(`Canvas click`, {
 		root: true,
 		bcxArea: false,
-		extraInfo() { return `X: ${MouseX}\nY: ${MouseY}`; }
+		extraInfo: () => `X: ${MouseX}\nY: ${MouseY}`
 	});
 	const res = originalClick?.call(this, event);
 	ctx.end();

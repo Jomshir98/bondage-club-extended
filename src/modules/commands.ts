@@ -146,7 +146,10 @@ export function registerWhisperCommand(
 			category,
 			name,
 			description,
-			(argv) => { callback(argv, getPlayerCharacter(), (msg) => ChatRoomSendLocal(msg)); return true; },
+			(argv) => {
+				callback(argv, getPlayerCharacter(), (msg) => ChatRoomSendLocal(msg));
+				return true;
+			},
 			autocomplete ? (argv) => autocomplete(argv, getPlayerCharacter()) : null
 		);
 	}
@@ -458,7 +461,7 @@ export function Command_selectCharacterMemberNumber(selector: string, allowNotPr
 export function Command_selectCharacterAutocomplete(selector: string): string[] {
 	const characters = getAllCharactersInRoom();
 	if (/^[0-9]+$/.test(selector)) {
-		return characters.map(c => c.MemberNumber?.toString(10)).filter(n => n != null && n.startsWith(selector)) as string[];
+		return characters.map(c => c.MemberNumber?.toString(10)).filter(n => n != null && n.startsWith(selector));
 	}
 	return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 }
@@ -492,7 +495,7 @@ export function Command_selectWornItemAutocomplete(character: ChatroomCharacter,
 
 	if (possible.length === 0) {
 		possible = arrayUnique(
-			items.map(A => A.Asset.Group.Name)
+			items.map<string>(A => A.Asset.Group.Name)
 				.concat(items.map(A => A.Asset.Name))
 		).filter(i => i.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
 	}
@@ -535,7 +538,7 @@ export function Command_selectGroupAutocomplete(selector: string, character: Cha
 		possible = arrayUnique(
 			AssetGroup
 				.filter(G => !filter || filter(G))
-				.map(G => G.Name)
+				.map<string>(G => G.Name)
 				.concat(
 					items
 						.filter(A => !filter || filter(A.Asset.Group))
@@ -687,7 +690,7 @@ export class ModuleCommands extends BaseModule {
 					`To view help texts for all commands in a category, use '.help <category>' (e.g. '.help utility')\n` +
 					`\n` +
 					`List of categories:\n` +
-					COMMAND_CATEGORIES_VISIBLE.join('\n')
+					COMMAND_CATEGORIES_VISIBLE.join("\n")
 				);
 			} else {
 				const category = COMMAND_CATEGORIES_VISIBLE.find(c => c.toLocaleLowerCase() === arg);
@@ -705,7 +708,7 @@ export class ModuleCommands extends BaseModule {
 						`Unknown category '${arg}'` +
 						`\n` +
 						`List of available categories:\n` +
-						COMMAND_CATEGORIES_VISIBLE.join('\n')
+						COMMAND_CATEGORIES_VISIBLE.join("\n")
 					);
 				}
 			}
@@ -735,7 +738,7 @@ export class ModuleCommands extends BaseModule {
 				.sort();
 			let response = `Available commands:`;
 			while (result.length > 0) {
-				const concat = response + '\n' + result[0];
+				const concat = response + "\n" + result[0];
 				if (concat.length > 990) {
 					respond(response);
 					response = result[0];

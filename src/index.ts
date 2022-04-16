@@ -5,7 +5,7 @@ import { isObject } from "./utils";
 
 import "./modules";
 
-async function initWait() {
+function initWait() {
 	console.debug("BCX: Init wait");
 	if (CurrentScreen == null || CurrentScreen === "Login") {
 		hookFunction("LoginResponse", 0, (args, next) => {

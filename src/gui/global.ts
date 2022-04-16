@@ -18,7 +18,6 @@ export class GuiGlobal extends GuiSubscreen {
 		this.character = character;
 	}
 
-
 	Run() {
 		MainCanvas.textAlign = "left";
 		DrawText(`- Global: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");

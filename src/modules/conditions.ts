@@ -160,7 +160,6 @@ export function ConditionsGetCategoryEnabled(category: ConditionsCategories): bo
 	return moduleIsEnabled(ConditionsGetCategoryHandler(category).category);
 }
 
-
 /** Unsafe when category is disabled, check before using */
 export function ConditionsGetCategoryData<C extends ConditionsCategories>(category: C): ConditionsCategoryData<C> {
 	if (!conditionHandlers.has(category)) {
@@ -170,7 +169,7 @@ export function ConditionsGetCategoryData<C extends ConditionsCategories>(catego
 	if (!data) {
 		throw new Error(`Attempt to get data for uninitialized category ${category}`);
 	}
-	return data as ConditionsCategoryData<C>;
+	return data;
 }
 
 function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(
@@ -944,7 +943,6 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 
 	return [];
 }
-
 
 export class ModuleConditions extends BaseModule {
 	private timer: number | null = null;

@@ -22,7 +22,7 @@ export enum ChatRoomStatusManagerStatusType {
 	Profile = "Profile",
 	// NMod
 	Action = "Action",
-	Afk = 'Afk'
+	Afk = "Afk"
 }
 
 const CharacterStatuses: WeakMap<Character, string> = new WeakMap();
@@ -250,7 +250,7 @@ export class ModuleChatroom extends BaseModule {
 			});
 
 			patchFunction("ChatRoomDrawCharacterOverlay", {
-				'switch (C.Status)': 'switch (null)'
+				"switch (C.Status)": "switch (null)"
 			});
 		} else {
 			patchFunction("ChatRoomDrawCharacterOverlay", {

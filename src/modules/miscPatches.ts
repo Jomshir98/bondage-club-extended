@@ -188,7 +188,7 @@ export class ModuleMiscPatches extends BaseModule {
 		});
 
 		patchFunction("DrawGetImage", {
-			'Img.src = Source;': 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;'
+			"Img.src = Source;": 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;'
 		});
 
 		// fixes a bug in BC

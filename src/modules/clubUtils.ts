@@ -117,7 +117,7 @@ function showDealersLog() {
 	const middleIndex = Math.ceil(dealersLog.length / 2);
 	const firstHalf = dealersLog.slice().splice(0, middleIndex);
 	const secondHalf = dealersLog.slice().splice(-middleIndex);
-	firstHalf.forEach(entry => { ChatRoomActionMessage(entry); });
+	firstHalf.forEach(entry => ChatRoomActionMessage(entry));
 	secondHalf.forEach(entry => {
 		BCX_setTimeout(() => {
 			ChatRoomActionMessage(entry);
@@ -131,7 +131,7 @@ function rollDice(sides: number, rolls: number) {
 	for (let i = 0; i < rolls; i++) {
 		result.push(Math.floor(Math.random() * sides) + 1);
 	}
-	ChatRoomSendLocal(`You secretly roll a ${rolls}D${sides}. The result is: ${result.length === 1 ? result : result.join(",") + " = " + result.reduce((a, b) => a + b, 0)}.`);
+	ChatRoomSendLocal(`You secretly roll a ${rolls}D${sides}. The result is: ${result.length === 1 ? result : result.join(",") + " = " + result.reduce((a, b) => a + b, 0).toString()}.`);
 }
 
 export class ModuleClubUtils extends BaseModule {

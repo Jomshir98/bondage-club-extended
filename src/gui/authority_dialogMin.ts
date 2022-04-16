@@ -4,7 +4,6 @@ import { AccessLevel, getPermissionMinDisplayText, PermissionInfo } from "../mod
 import { capitalizeFirstLetter } from "../utils";
 import { setSubscreen } from "../modules/gui";
 
-
 export class GuiAuthorityDialogMin extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
@@ -34,7 +33,6 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 		DrawTextFit(`- Authority: Changing minimum access to permission "${this.permissionData.name}" -`, 125, 125, 1850, "Black", "Gray");
 		MainCanvas.textAlign = "center";
 
-
 		DrawText("Please select the new lowest role that should still have this permission.", 1000, 255, "Black");
 		DrawTextFit(`Info: Currently set role: ${this.permissionData.min === AccessLevel.self ?
 			this.character.Name : capitalizeFirstLetter(AccessLevel[this.permissionData.min])} → ` +
@@ -44,7 +42,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 
 		if (this.myAccessLevel === AccessLevel.self) {
 			const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
-			DrawButton(1000-110, 460, 220, 72, getPermissionMinDisplayText(AccessLevel.self, this.character), this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#ddd", undefined, undefined, !available);
+			DrawButton(1000 - 110, 460, 220, 72, getPermissionMinDisplayText(AccessLevel.self, this.character), this.selectedLevel === AccessLevel.self ? "Cyan" : available ? "White" : "#ddd", undefined, undefined, !available);
 		}
 
 		for (let i = 1; i < 8; i++) {
@@ -70,7 +68,7 @@ export class GuiAuthorityDialogMin extends GuiSubscreen {
 		if (MouseIn(700, 800, 200, 80)) return this.Confirm();
 		if (MouseIn(1120, 800, 200, 80)) return this.Exit();
 
-		if (MouseIn(1000-110, 460, 220, 72) && this.myAccessLevel === AccessLevel.self) {
+		if (MouseIn(1000 - 110, 460, 220, 72) && this.myAccessLevel === AccessLevel.self) {
 			const available = (this.permissionData.min <= AccessLevel.self) || !this.noAccess;
 			if (available) {
 				this.selectedLevel = AccessLevel.self;

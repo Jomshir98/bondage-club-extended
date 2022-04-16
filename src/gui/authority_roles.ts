@@ -204,7 +204,6 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 			showHelp(HELP_TEXTS[Views.AuthorityRoles]);
 		}
 
-
 		MainCanvas.textAlign = "left";
 		DrawText(`- Authority: Role Management for ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";

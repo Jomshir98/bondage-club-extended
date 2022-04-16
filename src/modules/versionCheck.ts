@@ -20,7 +20,7 @@ function sendVersionCheckBeep(): void {
 		version: VERSION,
 		devel: BCX_DEVEL,
 		GameVersion,
-		Source: (BCXSourceExternal ? "E:" : "") + BCXSource,
+		Source: (BCXSourceExternal ? "E:" : "") + (BCXSource ?? "[UNKNOWN]"),
 		UA: window.navigator.userAgent
 	}, VERSION_CHECK_BOT, true);
 

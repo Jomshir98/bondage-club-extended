@@ -1,10 +1,10 @@
 // @ts-check
 
-const fs = require("fs");
-const path = require("path");
+import * as fs from "fs";
+import * as path from "path";
 
 /**
- * @param {string} dir 
+ * @param {string} dir
  * @return {string[]}
  */
 function makeFileList(dir) {
@@ -19,7 +19,7 @@ function makeFileList(dir) {
 		}
 	}
 
-	return result
+	return result;
 }
 
 const list = makeFileList("../Bondage-College/BondageClub/Backgrounds")
@@ -28,7 +28,7 @@ const list = makeFileList("../Bondage-College/BondageClub/Backgrounds")
 	.sort();
 
 fs.writeFileSync("./src/generated/backgroundList.json",
-	JSON.stringify(list, undefined, '\t'),
+	JSON.stringify(list, undefined, "\t"),
 	{ encoding: "utf8" }
 );
 

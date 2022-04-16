@@ -3,12 +3,12 @@ import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
 import { ModuleCategory } from "./constants";
 import { isNModClient } from "./utilsClub";
 
-import bcModSDK from 'bondage-club-mod-sdk';
+import bcModSDK from "bondage-club-mod-sdk";
 
-const modApi = bcModSDK.registerMod('BCX', BCX_VERSION);
+const modApi = bcModSDK.registerMod("BCX", BCX_VERSION);
 
 bcModSDK.errorReporterHooks.hookEnter = (fn, mod) => {
-	const ctx = debugContextStart(`Function ${fn} hook from ${mod}`, { bcxArea: mod === 'BCX' });
+	const ctx = debugContextStart(`Function ${fn} hook from ${mod}`, { bcxArea: mod === "BCX" });
 	return () => {
 		ctx.end();
 	};
@@ -16,8 +16,8 @@ bcModSDK.errorReporterHooks.hookEnter = (fn, mod) => {
 
 bcModSDK.errorReporterHooks.hookChainExit = (fn, mods) => {
 	const ctx = debugContextStart(`Function ${fn} hook chain exit`, {
-		bcxArea: mods.has('BCX'),
-		extraInfo: () => mods.size > 0 ? `Patched by: ${Array.from(mods).join(', ')}` : ''
+		bcxArea: mods.has("BCX"),
+		extraInfo: () => mods.size > 0 ? `Patched by: ${Array.from(mods).join(", ")}` : ""
 	});
 	return () => {
 		ctx.end();

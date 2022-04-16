@@ -1,7 +1,7 @@
 import { icon_Typing_star, icon_Typing_base, icon_Typing_dot } from "./resources";
 import { BCX_setTimeout } from "./BCXContext";
 
-import bcModSDK from 'bondage-club-mod-sdk';
+import bcModSDK from "bondage-club-mod-sdk";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -121,11 +121,11 @@ export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?:
 	const div = document.createElement("div");
 	div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");
 	div.setAttribute("data-time", ChatRoomCurrentTime());
-	div.setAttribute('data-sender', `${sender ?? Player.MemberNumber ?? 0}`);
+	div.setAttribute("data-sender", `${sender ?? Player.MemberNumber ?? 0}`);
 	div.style.background = "#6e6eff54";
 	div.style.margin = "0.15em 0";
 
-	if (typeof msg === 'string')
+	if (typeof msg === "string")
 		div.innerText = msg;
 	else
 		div.appendChild(msg);
@@ -153,7 +153,7 @@ export function detectOtherMods() {
 	const w = window as any;
 	const ModSDKMods: Record<string, string | boolean> = {};
 	for (const mod of bcModSDK.getModsInfo()) {
-		if (mod.name === 'BCX')
+		if (mod.name === "BCX")
 			continue;
 		ModSDKMods[mod.name] = mod.version || true;
 	}
@@ -377,7 +377,7 @@ export function updateChatroom(newData: Partial<RoomInfo>): boolean {
 	if (!ServerPlayerIsInChatRoom() || !ChatRoomPlayerIsAdmin() || !data)
 		return false;
 	const Room: Record<string, any> = { ...data, ...newData };
-	Room.Limit = Room.Limit.toString();
+	Room.Limit = String(Room.Limit);
 	ServerSend("ChatRoomAdmin", { MemberNumber: Player.ID, Action: "Update", Room });
 	return true;
 }
@@ -488,11 +488,11 @@ function SubdivideLine(Text: string, Width: number): string[] {
 	if (MainCanvas.measureText(Text).width <= Width) return [Text];
 
 	const lines: string[] = [];
-	let line = '';
+	let line = "";
 
 	// Find the number of lines
 	for (const word of Text.split(" ")) {
-		const testLine = line + ' ' + word;
+		const testLine = line + " " + word;
 		if (line && MainCanvas.measureText(testLine).width > Width) {
 			lines.push(line);
 			line = word;

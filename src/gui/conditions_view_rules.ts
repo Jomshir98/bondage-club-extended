@@ -113,7 +113,6 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 		setSubscreen(new GuiRulesViewDescription(this.character, this, condition, false));
 	}
 
-
 	protected openEditSubscreen(condition: ConditionsCategoryKeys["rules"]): void {
 		setSubscreen(new GuiConditionEditRules(this.character, condition, this));
 	}

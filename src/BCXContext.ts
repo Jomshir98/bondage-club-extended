@@ -1,4 +1,3 @@
-
 export function BCX_setInterval(handler: () => void, timeout?: number): number {
 	// eslint-disable-next-line no-restricted-globals
 	return setInterval(() => {
@@ -8,7 +7,7 @@ export function BCX_setInterval(handler: () => void, timeout?: number): number {
 	}, timeout);
 }
 
-export function BCX_setTimeout(handler: () => void, timeout?: number): number {
+export function BCX_setTimeout(handler: () => (void | Promise<void>), timeout?: number): number {
 	// eslint-disable-next-line no-restricted-globals
 	return setTimeout(() => {
 		const ctx = debugContextStart("BCX internal timeout", { root: true, bcxArea: true });
@@ -89,7 +88,7 @@ export function debugMakeContextReport(): string {
 				try {
 					extra = ctx.extraInfo();
 				} catch (error) {
-					extra = "Error processing extra info:\n" + (error instanceof Error ? error.stack : `${error}`);
+					extra = "Error processing extra info:\n" + (error instanceof Error ? (error.stack ?? "[stack missing]") : `${error}`);
 				}
 				if (extra) {
 					res += extra.trim().replace(/\n|^/g, m => `${m}| `) + "\n";

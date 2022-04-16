@@ -300,7 +300,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 					MainCanvas.fillStyle = "#FFFF88";
 					MainCanvas.fillRect(Left, Top, 450, 65);
 					MainCanvas.lineWidth = 2;
-					MainCanvas.strokeStyle = 'black';
+					MainCanvas.strokeStyle = "black";
 					MainCanvas.strokeRect(Left, Top, 450, 65);
 					DrawTextFit(getCharacterName(requirements.player.memberNumber, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
@@ -405,79 +405,78 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 			}
 		}
 
-
 		////// condition factors area
 		const requirements = data.requirements;
 
 		if (MouseIn(530, 550, 410, 60)) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.orLogic = this.changes.requirements!.orLogic ? undefined : true;
+			this.changes.requirements.orLogic = this.changes.requirements.orLogic ? undefined : true;
 			return true;
 		}
 
 		// In room
 		if (MouseIn(125, 620, 64, 64)) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.room = this.changes.requirements!.room ? undefined : { type: "public" };
+			this.changes.requirements.room = this.changes.requirements.room ? undefined : { type: "public" };
 			return true;
 		}
 		if (MouseIn(324, 622, 115, 60) && requirements.room) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.room!.inverted = this.changes.requirements!.room!.inverted ? undefined : true;
+			this.changes.requirements.room!.inverted = this.changes.requirements.room!.inverted ? undefined : true;
 			return true;
 		}
 		if (MouseIn(324 + 115 + 14, 622, 130, 60) && requirements.room) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.room!.type = this.changes.requirements!.room!.type === "public" ? "private" : "public";
+			this.changes.requirements.room!.type = this.changes.requirements.room!.type === "public" ? "private" : "public";
 			return true;
 		}
 
 		// In room named
 		if (MouseIn(125, 700, 64, 64)) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.roomName = this.changes.requirements!.roomName ? undefined : { name: "" };
+			this.changes.requirements.roomName = this.changes.requirements.roomName ? undefined : { name: "" };
 			this.onDataChange();
 			return true;
 		}
 		if (MouseIn(324, 702, 115, 60) && requirements.roomName) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.roomName!.inverted = this.changes.requirements!.roomName!.inverted ? undefined : true;
+			this.changes.requirements.roomName!.inverted = this.changes.requirements.roomName!.inverted ? undefined : true;
 			return true;
 		}
 
 		// In presence of role
 		if (MouseIn(125, 780, 64, 64)) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.role = this.changes.requirements!.role ? undefined : { role: AccessLevel.mistress };
+			this.changes.requirements.role = this.changes.requirements.role ? undefined : { role: AccessLevel.mistress };
 			return true;
 		}
 		if (MouseIn(324, 782, 115, 60) && requirements.role) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.role!.inverted = this.changes.requirements!.role!.inverted ? undefined : true;
+			this.changes.requirements.role!.inverted = this.changes.requirements.role!.inverted ? undefined : true;
 			return true;
 		}
 		const roleSelection = requirements.role?.role ?? AccessLevel.mistress;
 		if (MouseIn(324 + 115 + 14 + 274, 782, 106, 60) && requirements.role) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.role!.role = roleSelection > AccessLevel.clubowner ? roleSelection - 1 : AccessLevel.public;
+			this.changes.requirements.role!.role = roleSelection > AccessLevel.clubowner ? roleSelection - 1 : AccessLevel.public;
 			return true;
 		}
 		if (MouseIn(324 + 115 + 14 + 274 + 106, 782, 106, 60) && requirements.role) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.role!.role = roleSelection < AccessLevel.public ? roleSelection + 1 : AccessLevel.clubowner;
+			this.changes.requirements.role!.role = roleSelection < AccessLevel.public ? roleSelection + 1 : AccessLevel.clubowner;
 			return true;
 		}
 
 		// In presence of player
 		if (MouseIn(125, 860, 64, 64)) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.player = this.changes.requirements!.player ? undefined : { memberNumber: 0 };
+			this.changes.requirements.player = this.changes.requirements.player ? undefined : { memberNumber: 0 };
 			this.onDataChange();
 			return true;
 		}
 		if (MouseIn(324, 862, 115, 60) && requirements.player) {
 			this.changes = this.makeChangesData();
-			this.changes.requirements!.player!.inverted = this.changes.requirements!.player!.inverted ? undefined : true;
+			this.changes.requirements.player!.inverted = this.changes.requirements.player!.inverted ? undefined : true;
 			return true;
 		}
 

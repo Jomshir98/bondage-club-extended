@@ -1,4 +1,3 @@
-
 const encoder = new TextEncoder();
 
 /* eslint-disable no-bitwise */
@@ -163,13 +162,13 @@ export function positionElement(element: HTMLElement, X: number, Y: number, W: n
 
 	// Sets the element style
 	Object.assign(element.style, {
-		fontSize: Font + "px",
+		fontSize: `${Font}px`,
 		fontFamily: CommonGetFontName(),
 		position: "fixed",
-		left: Left + "px",
-		top: Top + "px",
-		width: Width + "px",
-		height: Height + "px",
+		left: `${Left}px`,
+		top: `${Top}px`,
+		width: `${Width}px`,
+		height: `${Height}px`,
 		display: "inline"
 	});
 }
@@ -180,7 +179,7 @@ export function positionElement(element: HTMLElement, X: number, Y: number, W: n
  * @returns Escaped version of string
  */
 export function escapeRegExp(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export function parseBCXVersion(version: string): BCXVersion | null {

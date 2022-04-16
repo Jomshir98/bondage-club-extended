@@ -96,7 +96,7 @@ export function initRules_bc_alter() {
 				ignoreDeaf = false;
 			}, ModuleCategory.Rules);
 			// does nothing but uses GetDeafLevel -> needs to be watched
-			hookFunction("PreferenceIsPlayerInSensDep", 4, (args, next) => { return next(args); }, ModuleCategory.Rules);
+			hookFunction("PreferenceIsPlayerInSensDep", 4, (args, next) => next(args), ModuleCategory.Rules);
 			hookFunction("Player.GetDeafLevel", 9, (args, next) => {
 				if (ignoreDeaf) {
 					return 0;
@@ -275,7 +275,7 @@ export function initRules_bc_alter() {
 					eyes2?.Property?.Expression === "Closed" &&
 					CurrentModule === "Online" &&
 					CurrentScreen === "ChatRoom" &&
-					args[0].IsPlayer() &&
+					(args[0] as Character).IsPlayer() &&
 					state.customData?.affectPlayer
 				)
 					return;
@@ -768,13 +768,13 @@ export function initRules_bc_alter() {
 		},
 		load(state) {
 			patchFunction("FriendListLoadFriendList", {
-				'data.forEach(friend => {': 'data.forEach(friend => { if (typeof friend.MemberNumber !== "number") return;'
+				"data.forEach(friend => {": 'data.forEach(friend => { if (typeof friend.MemberNumber !== "number") return;'
 			});
 			patchFunction("FriendListLoadFriendList", {
 				"FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;": "if (typeof friend.MemberNumber === 'number') FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;"
 			});
 			hookFunction("FriendListLoadFriendList", 1, (args, next) => {
-				const data = args[0];
+				const data = args[0] as any[];
 				const allowList = state.customData?.allowedMembers;
 				if (state.isEnforced && allowList && Player.GetBlindLevel() >= 3) {
 					data.forEach((friend: any) => {

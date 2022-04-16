@@ -1,3 +1,4 @@
+/* eslint-disable quote-props */
 export const VERSION = BCX_VERSION;
 
 export const VERSION_CHECK_BOT: number = 37685;

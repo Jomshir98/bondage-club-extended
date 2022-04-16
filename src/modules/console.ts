@@ -187,9 +187,13 @@ export class ModuleConsole extends BaseModule {
 		DialogSelfMenuOptions.forEach(opt => {
 			if (opt.Name === "Pose") {
 				opt.IsAvailable = () => true;
-				opt.Draw = function () { return DialogDrawPoseMenu(); };
+				opt.Draw = function () {
+					return DialogDrawPoseMenu();
+				};
 			} else if (opt.Name === "Expression") {
-				opt.Draw = function () { return DialogDrawExpressionMenu(); };
+				opt.Draw = function () {
+					return DialogDrawExpressionMenu();
+				};
 			}
 		});
 	}

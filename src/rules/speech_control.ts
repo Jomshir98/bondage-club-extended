@@ -491,8 +491,7 @@ export function initRules_bc_speech_control() {
 								Type: "Whisper",
 								Target: data.Sender
 							});
-							if (!state.isEnforced)
-							{
+							if (!state.isEnforced) {
 								ChatRoomSendLocal(msg);
 							}
 						}
@@ -593,7 +592,7 @@ export function initRules_bc_speech_control() {
 					!state.customData.whitelistedMemberNumbers.includes(data.MemberNumber) &&
 					(!Player.CanInteract() || !state.customData.onlyWhenBound)
 				) {
-					if (state.customData.autoreplyText && !data.Message?.startsWith("[Automatic reply by BCX]\n")) {
+					if (state.customData.autoreplyText && typeof data.Message === "string" && !data.Message.startsWith("[Automatic reply by BCX]\n")) {
 						const msg = `[Automatic reply by BCX]\n${dictionaryProcess(state.customData.autoreplyText, {})}`;
 						ServerSend("AccountBeep", {
 							MemberNumber: data.MemberNumber,
@@ -601,8 +600,7 @@ export function initRules_bc_speech_control() {
 							Message: msg,
 							IsSecret: true
 						});
-						if (!state.isEnforced)
-						{
+						if (!state.isEnforced) {
 							ChatRoomSendLocal(msg);
 							FriendListBeepLog.push({
 								MemberNumber: data.MemberNumber,

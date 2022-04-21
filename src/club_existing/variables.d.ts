@@ -98,6 +98,7 @@ declare var DialogInventory: DialogInventoryItem[];
 declare var DialogItemPermissionMode: boolean;
 declare var CurrentCharacter: Character | null;
 declare var DialogFacialExpressionsSelectedBlindnessLevel: number;
+declare function DialogIntro(): string;
 declare function DialogLeave(): void;
 declare function DialogInventoryBuild(C: Character, Offset?: number, redrawPreviews?: boolean): void;
 declare function DialogFindPlayer(KeyWord: string): string;

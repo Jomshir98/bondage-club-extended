@@ -3,14 +3,27 @@ import { HookDialogMenuButtonClick, OverridePlayerDialog, RedirectGetImage } fro
 import { BaseModule } from "./_BaseModule";
 
 let searchBar: HTMLInputElement | null = null;
-let searchBarAutoCloase = false;
+let searchBarAutoClose = false;
 let struggleCooldown: number = 0;
 const STRUGGLE_COOLDOWN_TIME = 2_000;
 
 function allowSearchMode(): boolean {
-	return DialogColor == null && StruggleProgress < 0 &&
-		!StruggleLockPickOrder && DialogFocusItem == null &&
-		!DialogActivityMode && DialogItemToLock == null;
+	return CurrentCharacter != null &&
+		(
+			Player.FocusGroup != null ||
+			(
+				CurrentCharacter != null &&
+				CurrentCharacter.FocusGroup != null &&
+				CurrentCharacter.AllowItem
+			)
+		) &&
+		DialogIntro() !== "" &&
+		DialogFocusItem == null &&
+		!DialogActivityMode &&
+		DialogColor == null &&
+		StruggleProgress < 0 &&
+		!StruggleLockPickOrder &&
+		DialogItemToLock == null;
 }
 
 function enterSearchMode(C: Character) {
@@ -18,7 +31,7 @@ function enterSearchMode(C: Character) {
 		searchBar = ElementCreateInput("BCXSearch", "text", "", "40");
 		searchBar.oninput = () => {
 			if (searchBar) {
-				if (searchBarAutoCloase && !searchBar.value) {
+				if (searchBarAutoClose && !searchBar.value) {
 					exitSearchMode(C);
 					MainCanvas.canvas.focus();
 				} else {
@@ -35,7 +48,7 @@ function exitSearchMode(C: Character) {
 	if (searchBar) {
 		searchBar.remove();
 		searchBar = null;
-		searchBarAutoCloase = false;
+		searchBarAutoClose = false;
 		DialogInventoryBuild(C);
 	}
 }
@@ -80,7 +93,7 @@ export class ModuleDialog extends BaseModule {
 				(struggleCooldown <= Date.now() || !["a", "s"].includes(ev.key.toLowerCase()))
 			) {
 				enterSearchMode(CurrentCharacter);
-				searchBarAutoCloase = true;
+				searchBarAutoClose = true;
 				if (searchBar) {
 					searchBar.value = ev.key;
 					ev.preventDefault();
@@ -128,7 +141,9 @@ export class ModuleDialog extends BaseModule {
 
 		hookFunction("DialogItemClick", 0, (args, next) => {
 			next(args);
-			exitSearchMode(CharacterGetCurrent() ?? Player);
+			if (!DialogItemPermissionMode) {
+				exitSearchMode(CharacterGetCurrent() ?? Player);
+			}
 		});
 
 		// Remove some buttons, if there are too many

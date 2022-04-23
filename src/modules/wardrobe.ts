@@ -38,6 +38,9 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 		return "Import error: No character";
 	}
 
+	const playerNumber = getPlayerCharacter().MemberNumber;
+	const validationParams = ValidationCreateDiffParams(C, playerNumber);
+
 	const Allow = (a: Item | Asset) => isCloth(a, CharacterAppearanceSelection!.ID === 0) || (includeBinds && isBind(a));
 
 	if (includeBinds && !force && C.Appearance.some(a => isBind(a) && a.Property?.Effect?.includes("Lock"))) {
@@ -108,7 +111,6 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(bundleItem.Property))
 			) {
 				fullMatch = false;
-				break;
 			} else {
 				matchingGroups.add(group);
 			}
@@ -117,9 +119,19 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 
 	if (!fullMatch) {
 		// If there is item change we only apply items, not locks
-		C.Appearance = C.Appearance.filter(a => !Allow(a) || matchingGroups.has(a.Asset.Group.Name));
+		const dataGroups = new Set<string>();
+		data.forEach(a => dataGroups.add(a.Group));
+		C.Appearance = C.Appearance.filter(a => !ValidationCanRemoveItem(a, validationParams, dataGroups.has(a.Asset.Group.Name)) || !Allow(a) || matchingGroups.has(a.Asset.Group.Name));
 		for (const cloth of data) {
-			if (C.Appearance.some(a => a.Asset.Group.Name === cloth.Group)) continue;
+			if (
+				C.Appearance.some(a => a.Asset.Group.Name === cloth.Group) ||
+				ValidationIsItemBlockedOrLimited(C, playerNumber, cloth.Group, cloth.Name, cloth.Property?.Type) ||
+				ValidationIsItemBlockedOrLimited(C, playerNumber, cloth.Group, cloth.Name) ||
+				C.IsPlayer() && InventoryIsPermissionBlocked(C, cloth.Name, cloth.Group, cloth.Property?.Type ?? undefined) ||
+				C.IsPlayer() && InventoryIsPermissionBlocked(C, cloth.Name, cloth.Group)
+			) {
+				continue;
+			}
 			const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
 			if (A != null) {
 				CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);

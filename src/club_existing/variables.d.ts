@@ -207,6 +207,7 @@ declare function InventoryGet(C: Character, AssetGroup: string): Item | null;
 declare function InventoryGetLock(Item: Item): Item | null;
 declare function InventoryRemove(C: Character, AssetGroup: string, Refresh?: boolean): void;
 declare function InventoryItemHasEffect(Item: Item, Effect?: string, CheckProperties?: boolean): boolean;
+declare function InventoryIsPermissionBlocked(C: Character, AssetName: string, AssetGroup: string, AssetType?: string): boolean;
 
 // GameLog.js
 declare function LogAdd(NewLogName: string, NewLogGroup: string, NewLogValue: number, Push: boolean): void;
@@ -231,6 +232,10 @@ declare function LoginStableItems(): void;
 
 // Validation.js
 declare const ValidationModifiableProperties: string[];
+declare function ValidationCreateDiffParams(C: Character, sourceMemberNumber: number): AppearanceUpdateParameters;
+declare function ValidationCanRemoveItem(previousItem: Item, params: AppearanceUpdateParameters, isSwap: boolean): boolean;
+declare function ValidationCanAddItem(newItem: Item, params: AppearanceUpdateParameters): boolean;
+declare function ValidationIsItemBlockedOrLimited(C: Character, sourceMemberNumber: any, groupName: string, assetName: string, type?: string | null): boolean;
 
 // Text.js
 declare function TextGet(TextTag: string): string;

@@ -23,6 +23,8 @@ const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 
 const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 const CURSE_IGNORED_EFFECTS = ["Lock"];
+// Ignore slave collars, as they are forced by BC
+const CURSE_IGNORED_ITEMS = ["SlaveCollar", "ClubSlaveCollar"];
 
 export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
 	const result: ItemProperties = {};
@@ -873,14 +875,22 @@ export class ModuleCurses extends BaseModule {
 			return;
 
 		const curse = condition.data;
+		let currentItem = InventoryGet(Player, group);
+
+		// Ignore slave collars
+		if (
+			(currentItem && CURSE_IGNORED_ITEMS.includes(currentItem.Asset.Name)) ||
+			(curse && CURSE_IGNORED_ITEMS.includes(curse.Name))
+		) {
+			return;
+		}
 
 		if (curse === null) {
-			const current = InventoryGet(Player, group);
-			if (current) {
+			if (currentItem) {
 				InventoryRemove(Player, group, false);
 				CharacterRefresh(Player, true);
 				ChatRoomCharacterUpdate(Player);
-				this.pendingMessages.remove.push(current.Asset.Description);
+				this.pendingMessages.remove.push(currentItem.Asset.Description);
 				return;
 			}
 			return;
@@ -893,8 +903,6 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		let changeType: "" | cursedChange = "";
-
-		let currentItem = InventoryGet(Player, group);
 
 		if (currentItem && currentItem.Asset.Name !== curse.Name) {
 			InventoryRemove(Player, group, false);

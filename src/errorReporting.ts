@@ -13,7 +13,9 @@ const MAX_STACK_SIZE = 15;
 let firstError = true;
 
 let lastReceivedMessageType = "";
+let lastReceivedMessageTime = 0;
 let lastSentMessageType = "";
+let lastSentMessageTime = 0;
 
 let logServerMessages = false;
 export function debugSetLogServerMessages(value: boolean): void {
@@ -37,14 +39,18 @@ export function debugGenerateReport(includeBCX: boolean = true): string {
 		res += `No other mods detected.\n`;
 	}
 
+	const now = Date.now();
+
 	res += `\n----- BC state report -----\n`;
 	res += `Mouse position: ${MouseX} ${MouseY}\n`;
 	res += `Connected to server: ${ServerIsConnected}\n`;
+	res += `Local time: ${now}\n`;
+	res += `Server time: ${CurrentTime} (diff: ${(CurrentTime - now).toFixed(2)})\n`;
 	res += `Screen: ${CurrentModule}/${CurrentScreen}\n`;
 	res += `In chatroom: ${ServerPlayerIsInChatRoom()}\n`;
 	res += `GLVersion: ${GLVersion}\n`;
-	res += `Last received message: ${lastReceivedMessageType}\n`;
-	res += `Last sent message: ${lastSentMessageType}\n`;
+	res += `Last received message: ${lastReceivedMessageType} (${lastReceivedMessageTime})\n`;
+	res += `Last sent message: ${lastSentMessageType} (${lastSentMessageTime})\n`;
 
 	if (includeBCX) {
 		res += `\n----- BCX report -----\n`;
@@ -215,6 +221,7 @@ let originalSocketEmit: undefined | ((...args: any[]) => any);
 function bcxSocketEmit(this: any, ...args: any[]) {
 	const message = Array.isArray(args[0]) && typeof args[0][0] === "string" ? args[0][0] : "[unknown]";
 	lastReceivedMessageType = message;
+	lastReceivedMessageTime = Date.now();
 
 	const parameters = Array.isArray(args[0]) ? args[0].slice(1) : [];
 	if (logServerMessages) {
@@ -265,6 +272,7 @@ export function InitErrorReporter() {
 
 	hookFunction("ServerSend", 0, (args, next) => {
 		lastSentMessageType = args[0];
+		lastSentMessageTime = Date.now();
 		if (logServerMessages) {
 			console.log("\u2B06 Send", ...args);
 		}

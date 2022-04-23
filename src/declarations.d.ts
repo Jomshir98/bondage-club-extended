@@ -612,6 +612,7 @@ type BCX_Command =
 	| "keydeposit"
 	| "timeleft"
 	| "servedrinks"
+	| "orgasm"
 	;
 
 interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {

@@ -578,10 +578,70 @@ export function initCommands_definitions() {
 			MaidQuartersMaid.Stage = "205";
 			MaidQuartersOnlineDrinkFromOwner = true;
 			return true;
+		}
+	});
+
+	registerCommand("orgasm", {
+		name: "Manipulate the arousal meter",
+		helpDescription: "<number from 1 to 100> | forced | ruined | stop",
+		shortDescription: "Controls PLAYER_NAME's orgasms directly",
+		longDescription:
+			`This command controls PLAYER_NAME's arousal meter directly, allowing four things:\n1. Setting the bar directly to a number from 1 to 100, whereas 100 triggers a normal orgasm.\n2. Triggering a forced orgasm that cannot be resisted.\n3. Triggering an orgasm that gets ruined.\n4. Stopping an orgasm already triggered (e.g. by a toy).\n` +
+			`Usage:\n` +
+			`!orgasm HELP_DESCRIPTION`,
+		defaultLimit: ConditionsLimit.limited,
+		playerUsable: false,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length < 1) {
+				respond(Command_fixExclamationMark(sender,
+					`!orgasm usage:\n` +
+					`!orgasm ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			if (argv[0] === "stop") {
+				if (!Player.ArousalSettings || !Player.ArousalSettings.OrgasmTimer) {
+					respond("There is no orgasm to stop currently.");
+					return false;
+				}
+				ActivityOrgasmRuined = true;
+				return true;
+			}
+			if (Player.ArousalSettings && Player.ArousalSettings.OrgasmTimer) {
+				respond("This is not possible right now.");
+				return false;
+			}
+			if (argv[0] === "forced") {
+				ActivitySetArousal(Player, 99);
+				ActivityOrgasmGameResistCount = 496.5;
+				ActivityOrgasmPrepare(Player);
+				return true;
+			}
+			if (argv[0] === "ruined") {
+				ActivitySetArousal(Player, 99);
+				const backup = Player.Effect;
+				Player.Effect = backup.concat("DenialMode", "RuinOrgasms");
+				ActivityOrgasmPrepare(Player, true);
+				Player.Effect = backup;
+				return true;
+			}
+			const progress = /^[0-9]+$/.test(argv[0]) && Number.parseInt(argv[0], 10);
+			if (!progress || progress < 0 || progress > 100) {
+				respond(Command_fixExclamationMark(sender,
+					`!orgasm usage:\n` +
+					`!orgasm ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			ActivitySetArousal(Player, progress);
+			if (progress > 99) {
+				ActivityOrgasmPrepare(Player);
+			}
+			return true;
 		},
 		autoCompleter: (argv) => {
 			if (argv.length === 1) {
-				return Command_pickAutocomplete(argv[0], ["cancel"]);
+				return Command_pickAutocomplete(argv[0], ["forced", "ruined", "stop"]);
 			}
 			return [];
 		}

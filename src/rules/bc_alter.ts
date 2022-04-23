@@ -834,7 +834,7 @@ export function initRules_bc_alter() {
 					state.customData &&
 					state.customData.allowedMembers.includes(data.MemberNumber) &&
 					typeof data.Message === "string" &&
-					(data.Message.toLocaleLowerCase().startsWith(state.customData.summoningText.toLocaleLowerCase()) || data.Message.toLocaleLowerCase() === "summon") &&
+					(data.Message.toLocaleLowerCase().startsWith(state.customData.summoningText.trim().toLocaleLowerCase()) || data.Message.trim().toLocaleLowerCase() === "summon") &&
 					data.ChatRoomName
 				) {
 					ChatRoomActionMessage(`${Player.Name} received a summon: "${state.customData.summoningText}".`);

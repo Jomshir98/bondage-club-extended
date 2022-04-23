@@ -606,6 +606,7 @@ type BCX_Command =
 	| "say"
 	| "forcesay"
 	| "typetask"
+	| "forcetypetask"
 	| "cell"
 	| "asylum"
 	| "keydeposit"

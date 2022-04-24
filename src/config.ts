@@ -106,6 +106,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	LogValue: ["6ED63114"],
 	MainHallMaidsDisabledBegForMore: ["EA29F2B3"],
 	MainHallWalk: ["E52553C4"],
+	ManagementCanBeClubSlave: ["EB05C417"],
 	ManagementCanBeReleased: ["A2E2CA35"],
 	ManagementCanBeReleasedOnline: ["3374263B"],
 	ManagementCanBreakDatingLoverOnline: ["366AECAE"],

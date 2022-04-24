@@ -233,6 +233,7 @@ type BCX_Rule =
 	| "block_BCX_permissions"
 	| "block_room_admin_UI"
 	| "block_using_ggts"
+	| "block_club_slave_work"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"

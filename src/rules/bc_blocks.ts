@@ -1013,4 +1013,21 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 		}
 	});
+
+	registerRule("block_club_slave_work", {
+		name: "Prevent working as club slave",
+		type: RuleType.Block,
+		loggable: false,
+		shortDescription: "the task from the mistress room",
+		longDescription: "This rule prevents PLAYER_NAME to work as a club slave by picking up a club slave collar from the club management room.",
+		defaultLimit: ConditionsLimit.limited,
+		load(state) {
+			hookFunction("ManagementCanBeClubSlave", 0, (args, next) => {
+				if (state.isEnforced) {
+					return false;
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+		}
+	});
 }

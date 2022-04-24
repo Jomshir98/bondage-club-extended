@@ -9,8 +9,8 @@ This update includes:
  - This update improves compatibility with BC release R79
 
 Commands module changes:
-- Added new command "forcetypetask" that is a variation of the "typetask" command, not aborting after a mistake
-- Added new command "orgasm" that allows to directly control the BCX user's arousal meter and the way to orgasm
+- Added new command `forcetypetask` that is a variation of the `typetask` command, not aborting after a mistake
+- Added new command `orgasm` that allows to directly control the BCX user's arousal meter and the way to orgasm
 
 Rules module changes:
  - Added new rule "Prevent working as club slave" that, when enforced, will lead to the Club Mistresses not offering this task

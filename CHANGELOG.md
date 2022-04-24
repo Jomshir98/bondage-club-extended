@@ -1,5 +1,27 @@
 # BCX Changelog
 
+## 0.8.2
+
+This update includes:
+ - The curses module was changed to no longer affect BC slave and club slave collars
+ - Importing an outfit-string in the wardrobe on yourself now checks for items you have blacklisted and does not apply those
+ - [technical] BCX's error reporter now shows timestamps for the last few messages
+ - This update improves compatibility with BC release R79
+
+Commands module changes:
+- Added new command "forcetypetask" that is a variation of the "typetask" command, not aborting after a mistake
+- Added new command "orgasm" that allows to directly control the BCX user's arousal meter and the way to orgasm
+
+Rules module changes:
+ - Added new rule "Prevent working as club slave" that, when enforced, will lead to the Club Mistresses not offering this task
+ - Changed the rule "Restrict receiving whispers" to see both the whisper and the sent auto reply while not enforced [by Candi(ChandraHild)]
+ - Changed the rule "Restrict receiving beeps" to see both the beep and the sent auto reply while not enforced [by Candi(ChandraHild)]
+
+Fixes:
+ - Fixed a bug with the rule "Ready to be summoned" that prevented summoning with the default "summon" message
+ - Fixed item search opening without a group selected
+ - Fixed item search closing in permission mode
+
 ## 0.8.1 "Commands update" Release
 
 This update includes:

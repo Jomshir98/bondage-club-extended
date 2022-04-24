@@ -13,10 +13,11 @@
 // @grant        none
 // ==/UserScript==
 
+// eslint-disable-next-line no-restricted-globals
 setTimeout(
 	function () {
 		if (window.BCX_Loaded === undefined) {
-			let n = document.createElement("script");
+			const n = document.createElement("script");
 			n.setAttribute("language", "JavaScript");
 			n.setAttribute("crossorigin", "anonymous");
 			n.setAttribute("src", "https://jomshir98.github.io/bondage-club-extended/bcx.js?_=" + Date.now());

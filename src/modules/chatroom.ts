@@ -384,7 +384,7 @@ export class ModuleChatroom extends BaseModule {
 		hookFunction("ChatSearchLoad", 5, (args, next) => {
 			next(args);
 			const field = document.getElementById("InputSearch") as HTMLInputElement | undefined;
-			if (field && modStorage.roomSearchAutoFill) {
+			if (field && modStorage.roomSearchAutoFill && ChatSearchMode === "") {
 				field.value = modStorage.roomSearchAutoFill;
 			}
 		});

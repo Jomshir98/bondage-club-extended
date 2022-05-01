@@ -113,7 +113,7 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 		throw new Error(`Default internal data for rule ${name} without internal data validation`);
 	}
 	rules.set(name, {
-		...(data as RuleDefinition<BCX_Rule>),
+		...(data as unknown as RuleDefinition<BCX_Rule>),
 		state: new RuleState<BCX_Rule>(name, data)
 	});
 	rulesList.push(name);

@@ -285,6 +285,7 @@ type BCX_Rule =
 	| "other_forbid_afk"
 	// | "other_log_online_time"
 	| "other_constant_reminder"
+	| "other_log_money"
 	// | "other_restrict_console_usage"
 	// | "other_track_BCX_activation"
 	| "setting_item_permission"
@@ -433,6 +434,9 @@ type RuleCustomData = {
 		reminderText: string[];
 		reminderFrequency: number;
 	},
+	other_log_money: {
+		logEarnings: boolean;
+	},
 	setting_item_permission: {
 		value: string;
 	},
@@ -520,6 +524,7 @@ type RuleInternalData = {
 	setting_leashed_roomchange: boolean;
 	setting_plug_vibe_events: boolean;
 	setting_upsidedown_view: boolean;
+	other_log_money: number;
 };
 
 type RuleCustomDataTypesMap = {

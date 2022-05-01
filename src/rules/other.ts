@@ -95,6 +95,55 @@ export function initRules_other() {
 		}
 	});
 
+	registerRule("other_log_money", {
+		name: "Log money changes",
+		type: RuleType.Other,
+		enforceable: false,
+		shortDescription: "spending and/or getting money",
+		longDescription: "This rule logs whenever money is used to buy something. It also shows how much money PLAYER_NAME currently has in the log entry. Optionally, earning money can also be logged. Note: Please be aware that this last option can potentially fill the whole behaviour log rapidly.",
+		triggerTexts: {
+			infoBeep: "A BCX rule has logged this financial transaction!",
+			log: "PLAYER_NAME TYPE money: AMOUNT $ | new balance: BALANCE $",
+			announce: ""
+		},
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			logEarnings: {
+				type: "toggle",
+				default: false,
+				description: "Also log getting money"
+			}
+		},
+		internalDataValidate: (data) => typeof data === "number",
+		internalDataDefault: () => -1,
+		stateChange(state, newState) {
+			if (!newState) {
+				state.internalData = -1;
+			}
+		},
+		tick(state) {
+			if (!state.internalData || !Number.isFinite(Player.Money))
+				return false;
+			let returnValue = false;
+			if (state.inEffect) {
+				if (state.internalData < 0) {
+					state.internalData = Player.Money;
+				}
+				if (state.internalData > Player.Money) {
+					state.trigger({ TYPE: "spent", AMOUNT: `${state.internalData - Player.Money}`, BALANCE: `${Player.Money}` });
+					returnValue = true;
+				} else if (state.internalData < Player.Money && state.customData && state.customData.logEarnings) {
+					state.trigger({ TYPE: "earned", AMOUNT: `${Player.Money - state.internalData}`, BALANCE: `${Player.Money}` });
+					returnValue = true;
+				}
+				if (state.internalData !== Player.Money) {
+					state.internalData = Player.Money;
+				}
+			}
+			return returnValue;
+		}
+	});
+
 	/* TODO: Idea stage
 	registerRule("other_restrict_console_usage", {
 		name: "Restrict console usage",

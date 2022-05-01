@@ -1,3 +1,11 @@
+export let BCXLoadedBeforeLogin: boolean = false;
+export let BCXLoginTimedata: Record<string, unknown> = {};
+
+export function SetLoadedBeforeLogin(loginData: Record<string, unknown>) {
+	BCXLoadedBeforeLogin = true;
+	BCXLoginTimedata = JSON.parse(JSON.stringify(loginData));
+}
+
 export function BCX_setInterval(handler: () => void, timeout?: number): number {
 	// eslint-disable-next-line no-restricted-globals
 	return setInterval(() => {

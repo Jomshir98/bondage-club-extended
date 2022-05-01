@@ -4,10 +4,11 @@ import { init_modules, unload_modules } from "./moduleManager";
 import { unload_patches } from "./patching";
 import { isObject } from "./utils";
 import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
-import { debugContextStart } from "./BCXContext";
+import { debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
 
 export function loginInit(C: any) {
 	if (window.BCX_Loaded) return;
+	SetLoadedBeforeLogin(C);
 	init();
 }
 

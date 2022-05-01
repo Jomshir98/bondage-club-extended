@@ -287,7 +287,7 @@ type BCX_Rule =
 	| "other_constant_reminder"
 	| "other_log_money"
 	// | "other_restrict_console_usage"
-	// | "other_track_BCX_activation"
+	| "other_track_BCX_activation"
 	| "setting_item_permission"
 	| "setting_forbid_lockpicking"
 	| "setting_forbid_SP_rooms"
@@ -525,6 +525,7 @@ type RuleInternalData = {
 	setting_plug_vibe_events: boolean;
 	setting_upsidedown_view: boolean;
 	other_log_money: number;
+	other_track_BCX_activation: number;
 };
 
 type RuleCustomDataTypesMap = {

@@ -1,5 +1,7 @@
+import { BCXLoadedBeforeLogin, BCXLoginTimedata, BCX_setTimeout } from "../BCXContext";
 import { ConditionsLimit } from "../constants";
 import { registerRule, RuleType } from "../modules/rules";
+import { isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 
 export function initRules_other() {
@@ -155,14 +157,78 @@ export function initRules_other() {
 	});
 	*/
 
-	/* TODO: Idea stage
+	const removeTrackingEntry = (hiddenItems: any[]) => {
+		for (; ;) {
+			const index = hiddenItems.findIndex(a => isObject(a) && typeof a.Name === "string" && a.Name.startsWith("GoodGirl") && a.Group === "BCX");
+			if (index < 0)
+				break;
+			hiddenItems.splice(index, 1);
+			ServerPlayerBlockItemsSync();
+		}
+	};
+
+	const hasTrackingEntry = (hiddenItems: any[], token: number) => {
+		return hiddenItems.some(a => isObject(a) && a.Name === `GoodGirl${token}` && a.Group === "BCX");
+	};
+
+	const addTrackingEntry = (hiddenItems: any[], token: number) => {
+		removeTrackingEntry(hiddenItems);
+		hiddenItems.push({ Name: `GoodGirl${token}`, Group: "BCX" });
+	};
+
 	registerRule("other_track_BCX_activation", {
 		name: "Track BCX activation",
 		type: RuleType.Other,
 		enforceable: false,
 		shortDescription: "logs if PLAYER_NAME enters the club without BCX",
-		longDescription: "This rule observes PLAYER_NAME, logging it as a rule violation if the club is entered without BCX active.",
-		defaultLimit: ConditionsLimit.blocked
+		longDescription: "This rule observes PLAYER_NAME, logging it as a rule violation if the club was previously entered at least once without BCX active.",
+		triggerTexts: {
+			infoBeep: "You logged in without starting BCX beforehand!",
+			log: "PLAYER_NAME logged in without starting BCX beforehand at least once",
+			announce: ""
+		},
+		internalDataValidate: (v) => typeof v === "number",
+		internalDataDefault: () => Math.floor(Math.random() * 1_000_000),
+		defaultLimit: ConditionsLimit.blocked,
+		load(state) {
+			if (state.inEffect && state.internalData !== undefined) {
+				if (
+					!BCXLoadedBeforeLogin ||
+					!Array.isArray(BCXLoginTimedata.HiddenItems) ||
+					!hasTrackingEntry(BCXLoginTimedata.HiddenItems, state.internalData)
+				) {
+					BCX_setTimeout(() => {
+						state.trigger();
+						state.internalData = Math.floor(Math.random() * 1_000_000);
+						addTrackingEntry(Player.HiddenItems, state.internalData);
+						ServerPlayerBlockItemsSync();
+					}, 3_500);
+				} else {
+					state.internalData = Math.floor(Math.random() * 1_000_000);
+					addTrackingEntry(Player.HiddenItems, state.internalData);
+					ServerPlayerBlockItemsSync();
+				}
+			}
+		},
+		stateChange(state, newState) {
+			if (newState) {
+				state.internalData = Math.floor(Math.random() * 1_000_000);
+				addTrackingEntry(Player.HiddenItems, state.internalData);
+				ServerPlayerBlockItemsSync();
+			} else {
+				removeTrackingEntry(Player.HiddenItems);
+				ServerPlayerBlockItemsSync();
+			}
+		},
+		tick(state) {
+			if (state.inEffect && state.internalData !== undefined) {
+				if (!hasTrackingEntry(Player.HiddenItems, state.internalData) || Math.random() < 0.01) {
+					state.internalData = Math.floor(Math.random() * 1_000_000);
+					addTrackingEntry(Player.HiddenItems, state.internalData);
+					ServerPlayerBlockItemsSync();
+				}
+			}
+			return false;
+		}
 	});
-	*/
 }

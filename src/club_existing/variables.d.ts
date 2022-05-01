@@ -190,6 +190,7 @@ declare function ServerAppearanceBundle(Appearance: Item[]): AppearanceBundle;
 declare function ServerPlayerInventorySync(): void;
 declare function ServerAccountBeep(data: any): void;
 declare function ServerChatRoomGetAllowItem(Source: Character, Target: Character): boolean;
+declare function ServerPlayerBlockItemsSync(): void;
 
 // Asset.js
 declare var Asset: Asset[];

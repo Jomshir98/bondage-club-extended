@@ -234,6 +234,7 @@ type BCX_Rule =
 	| "block_room_admin_UI"
 	| "block_using_ggts"
 	| "block_club_slave_work"
+	| "block_using_unowned_items"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"

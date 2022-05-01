@@ -1030,4 +1030,27 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 		}
 	});
+
+	registerRule("block_using_unowned_items", {
+		name: "Prevent using items of others",
+		type: RuleType.Block,
+		loggable: false,
+		shortDescription: "items not bought",
+		longDescription: "This rule prevents PLAYER_NAME to use items she does not own herself, but can use on someone because this person owns them.",
+		defaultLimit: ConditionsLimit.normal,
+		load(state) {
+			hookFunction("DialogInventoryBuild", 1, (args, next) => {
+				const C = args[0] as Character;
+				const inventoryBackup = C.Inventory;
+				try {
+					if (state.isEnforced && !C.IsPlayer()) {
+						C.Inventory = [];
+					}
+					next(args);
+				} finally {
+					C.Inventory = inventoryBackup;
+				}
+			}, ModuleCategory.Rules);
+		}
+	});
 }

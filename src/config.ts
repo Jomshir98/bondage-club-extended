@@ -80,6 +80,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DialogDrawPoseMenu: ["4B146E82"],
 	DialogFindPlayer: ["32851FF2"],
 	DialogInventoryAdd: ["FD9268E1"],
+	DialogInventoryBuild: ["7F55676B"],
 	DialogItemClick: ["7039462A", "A08AC13E", "0E0D1707", "8B284B90", "5EB7C0D2"],
 	DialogLeaveItemMenu: ["B369F7C0"],
 	DialogMenuButtonBuild: ["1D4265E4", "75E8CCCD", "BC5B2A8A", "6B6C875D", "B169C773", "0B270ED5"],

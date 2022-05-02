@@ -1,7 +1,9 @@
 import { BCXLoadedBeforeLogin, BCXLoginTimedata, BCX_setTimeout } from "../BCXContext";
 import { ConditionsLimit } from "../constants";
+import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
+import { registerWhisperCommand } from "../modules/commands";
 import { registerRule, RuleType } from "../modules/rules";
-import { isObject } from "../utils";
+import { formatTimeInterval, isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 
 export function initRules_other() {
@@ -49,17 +51,58 @@ export function initRules_other() {
 		}
 	});
 
-	/* TODO: Implement
-	registerRule("other_log_online_time", {
-		name: "Track online time",
+	let lastUpdate: number = 0;
+	registerRule("other_track_time", {
+		name: "Track rule effect time",
 		type: RuleType.Other,
 		enforceable: false,
 		loggable: false,
-		shortDescription: "counts the time PLAYER_NAME spent in the club",
-		longDescription: "This rule shows the constantly updated amount of minutes, hours and days PLAYER_NAME spent (online) in the club since the rule was added. The value is shown inside the configuration screen of this rule. To reset the counter, remove and add the rule again.",
-		defaultLimit: ConditionsLimit.blocked
+		shortDescription: "counts the time this rule's trigger conditions were fulfilled",
+		longDescription: "This rule shows the amount of time that PLAYER_NAME spent (online) in the club, since the rule was added, while all of the rule's trigger conditions were fulfilled. So it can for instance log the time spent in public rooms / in the club in general, or in a specific room or with some person as part of a roleplayed task or order. The currently tracked time can be inquired by whispering '!ruletime' to PLAYER_NAME. To reset the counter, remove and add the rule again.",
+		internalDataValidate: (v) => typeof v === "number",
+		internalDataDefault: () => 0,
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			minimumPermittedRole: {
+				type: "roleSelector",
+				default: AccessLevel.lover,
+				description: "Minimum role allowed to request the counted time:"
+			}
+		},
+		init(state) {
+			registerWhisperCommand("hidden", "ruletime", null, (argv, sender, respond) => {
+				if (state.condition && state.customData && state.internalData !== undefined && getCharacterAccessLevel(sender) >= state.customData.minimumPermittedRole) {
+					const fixup = state.inEffect ? (Date.now() - lastUpdate) : 0;
+					const msg = `Since the time tracking rule was added, ${formatTimeInterval(state.internalData + fixup)} were counted, where all trigger conditions were true.`;
+					respond(msg);
+					return true;
+				}
+				return false;
+			}, null, false);
+		},
+		load() {
+			lastUpdate = Date.now();
+		},
+		tick(state) {
+			if (state.inEffect && state.internalData !== undefined) {
+				const change = Math.floor(Date.now() - lastUpdate);
+				if (change >= 60_000) {
+					state.internalData += change;
+					lastUpdate = Date.now();
+				}
+			}
+			return false;
+		},
+		stateChange(state, newState) {
+			if (newState) {
+				lastUpdate = Date.now();
+			} else if (state.internalData !== undefined) {
+				const change = Math.floor(Date.now() - lastUpdate);
+				state.internalData += change;
+				lastUpdate = Date.now();
+			}
+		}
 	});
-	*/
 
 	let lastReminder = 0;
 	registerRule("other_constant_reminder", {

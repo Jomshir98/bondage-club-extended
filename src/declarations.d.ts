@@ -283,7 +283,7 @@ type BCX_Rule =
 	| "speech_mandatory_words"
 	| "speech_partial_hearing"
 	| "other_forbid_afk"
-	// | "other_log_online_time"
+	| "other_track_time"
 	| "other_constant_reminder"
 	| "other_log_money"
 	// | "other_restrict_console_usage"
@@ -437,6 +437,9 @@ type RuleCustomData = {
 	other_log_money: {
 		logEarnings: boolean;
 	},
+	other_track_time: {
+		minimumPermittedRole: import("./modules/authority").AccessLevel;
+	},
 	setting_item_permission: {
 		value: string;
 	},
@@ -526,6 +529,7 @@ type RuleInternalData = {
 	setting_upsidedown_view: boolean;
 	other_log_money: number;
 	other_track_BCX_activation: number;
+	other_track_time: number;
 };
 
 type RuleCustomDataTypesMap = {

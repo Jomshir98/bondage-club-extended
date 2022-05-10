@@ -542,6 +542,7 @@ export function initRules_bc_alter() {
 		}
 	});
 
+	const gaveAdminTo: Set<number> = new Set();
 	registerRule("alt_room_admin_transfer", {
 		name: "Room admin transfer",
 		type: RuleType.Alt,
@@ -563,6 +564,19 @@ export function initRules_bc_alter() {
 				Y: 470
 			}
 		},
+		load() {
+			hookFunction("ChatRoomSyncMemberLeave", 3, (args, next) => {
+				next(args);
+				const R = args[0] as Record<string, number>;
+				if (gaveAdminTo.has(R.SourceMemberNumber)) {
+					gaveAdminTo.delete(R.SourceMemberNumber);
+				}
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomClearAllElements", 3, (args, next) => {
+				gaveAdminTo.clear();
+				next(args);
+			}, ModuleCategory.Rules);
+		},
 		tick(state) {
 			let changed = false;
 			if (state.isEnforced && state.customData && ChatRoomPlayerIsAdmin() && ServerPlayerIsInChatRoom()) {
@@ -571,9 +585,10 @@ export function initRules_bc_alter() {
 					if (!character.isPlayer() && getCharacterAccessLevel(character) <= state.customData.minimumRole) {
 						if (ChatRoomData?.Admin?.includes(character.MemberNumber)) {
 							hasAdmin = true;
-						} else {
+						} else if (!gaveAdminTo.has(character.MemberNumber)) {
 							ServerSend("ChatRoomAdmin", { MemberNumber: character.MemberNumber, Action: "Promote" });
 							changed = true;
+							gaveAdminTo.add(character.MemberNumber);
 						}
 					}
 				}

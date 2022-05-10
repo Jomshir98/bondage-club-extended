@@ -1,5 +1,23 @@
 # BCX Changelog
 
+## 0.8.3
+
+This update includes:
+ - Added a utility-command `.room promoteall` that gives admin to all non-admin players in the room
+ - This update improves compatibility with BC release R80
+
+Rules module changes:
+ - Added new rule "Prevent using items of others" to only allow using bought items
+ - Added new rule "Log money changes" to log spending money or optionally earning money
+ - Added new rule "Track BCX activation" to log if the club was entered without BCX previously
+ - Added new rule "Track rule effect time" to count the time the rule was in effect
+ - Changed the rule "Greet new guests" to support setting emotes as greeting
+ - Changed the rule "Room admin transfer" to only try giving admin to someone else once per visit
+
+Fixes:
+ - Fixed a bug with the default chat search value being used to block a room of this name when switching to room permission mode
+ - Removed extra colon in the description of "Partial hearing" rule
+
 ## 0.8.2
 
 This update includes:

@@ -636,8 +636,9 @@ export function initRules_bc_alter() {
 			hookFunction("ChatAdminRun", 0, (args, next) => {
 				next(args);
 				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {
-					DrawButton(100, 770, 250, 65, TextGet("AddOwnerAdminList"), "#ebebe4", "", "", true);
-					DrawButton(365, 770, 250, 65, TextGet("AddLoverAdminList"), "#ebebe4", "", "", true);
+					DrawButton(505, 172, 300, 60, TextGet("Language" + ChatAdminLanguage), "#ebebe4", "", "", true);
+					DrawButton(125, 770, 250, 65, TextGet("AddOwnerAdminList"), "#ebebe4", "", "", true);
+					DrawButton(390, 770, 250, 65, TextGet("AddLoverAdminList"), "#ebebe4", "", "", true);
 					DrawBackNextButton(1300, 450, 500, 60, DialogFindPlayer(ChatAdminBackgroundSelect), "#ebebe4", "",
 						() => DialogFindPlayer((ChatAdminBackgroundIndex === 0) ? ChatCreateBackgroundList[ChatCreateBackgroundList.length - 1] : ChatCreateBackgroundList[ChatAdminBackgroundIndex - 1]),
 						() => DialogFindPlayer((ChatAdminBackgroundIndex >= ChatCreateBackgroundList.length - 1) ? ChatCreateBackgroundList[0] : ChatCreateBackgroundList[ChatAdminBackgroundIndex + 1]),
@@ -656,14 +657,15 @@ export function initRules_bc_alter() {
 			});
 			hookFunction("ChatAdminClick", 5, (args, next) => {
 				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained() && (
+					MouseIn(505, 172, 300, 60) ||
 					MouseIn(1300, 75, 600, 350) ||
 					MouseIn(1840, 450, 60, 60) ||
 					MouseIn(1300, 450, 500, 60) ||
 					MouseIn(1625, 575, 275, 60) ||
 					MouseIn(1486, 708, 64, 64) ||
 					MouseIn(1786, 708, 64, 64) ||
-					MouseIn(100, 770, 250, 65) ||
-					MouseIn(365, 770, 250, 65)
+					MouseIn(125, 770, 250, 65) ||
+					MouseIn(390, 770, 250, 65)
 				))
 					return;
 				return next(args);

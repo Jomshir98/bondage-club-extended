@@ -162,6 +162,7 @@ declare var ChatAdminPrivate: boolean;
 declare var ChatAdminLocked: boolean;
 declare var ChatAdminGame: string;
 declare var ChatAdminBlockCategory: any[];
+declare var ChatAdminLanguage: string;
 
 // ChatCreate.js
 declare var ChatCreateBackgroundList: any;

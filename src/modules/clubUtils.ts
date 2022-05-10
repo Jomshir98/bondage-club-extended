@@ -10,6 +10,7 @@ import remove from "lodash-es/remove";
 import { arrayUnique, shuffleArray } from "../utils";
 import { modStorage } from "./storage";
 import { BCX_setTimeout } from "../BCXContext";
+import { getAllCharactersInRoom } from "../characters";
 
 const BACKGROUNDS_BCX_NAME = "[BCX] Hidden";
 
@@ -292,6 +293,12 @@ export class ModuleClubUtils extends BaseModule {
 						return false;
 					}
 					return processBackgroundCommand(args[1]);
+				} else if (subcommand === "promoteall") {
+					for (const character of getAllCharactersInRoom()) {
+						if (!character.isPlayer() && !ChatRoomData?.Admin?.includes(character.MemberNumber)) {
+							ServerSend("ChatRoomAdmin", { MemberNumber: character.MemberNumber, Action: "Promote" });
+						}
+					}
 				} else if (subcommand === "promote" || subcommand === "demote" || subcommand === "kick" || subcommand === "ban" || subcommand === "permaban") {
 					if (args.length === 1) {
 						ChatRoomSendLocal(`Needs at least one character name oder member number as <target> in '.room ${subcommand} <target1> <target2> <targetN>'`);
@@ -364,6 +371,7 @@ export class ModuleClubUtils extends BaseModule {
 						`.room ban <...targets> - Bans all space-seperated player names or member numbers\n` +
 						`.room permaban <...targets> - Bans and blacklists all specified player names or numbers\n` +
 						`.room <promote/demote> <...targets> - Adds or removes admin on all specified player names or numbers\n` +
+						`.room promoteall - Gives admin to all non-admin players in the room\n` +
 						`.room template <1/2/3/4> - Changes the room according to the given BCX room template slot`
 					);
 				}
@@ -373,7 +381,7 @@ export class ModuleClubUtils extends BaseModule {
 			(argv) => {
 				const subcommand = argv[0].toLowerCase();
 				if (argv.length <= 1) {
-					return Command_pickAutocomplete(subcommand, ["locked", "private", "size", "background", "promote", "demote", "kick", "ban", "permaban", "template"]);
+					return Command_pickAutocomplete(subcommand, ["locked", "private", "size", "background", "promoteall", "promote", "demote", "kick", "ban", "permaban", "template"]);
 				}
 				if ((subcommand === "locked" || subcommand === "private") && argv.length >= 2) {
 					return Command_pickAutocomplete(argv[1], ["yes", "no"]);

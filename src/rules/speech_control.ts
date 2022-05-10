@@ -984,7 +984,7 @@ export function initRules_bc_speech_control() {
 			randomUnderstanding: {
 				type: "toggle",
 				default: true,
-				description: "Some words are randomly understood:",
+				description: "Some words are randomly understood",
 				Y: 730
 			}
 		},

@@ -66,7 +66,7 @@ export function initRules_other() {
 			minimumPermittedRole: {
 				type: "roleSelector",
 				default: AccessLevel.lover,
-				description: "Minimum role allowed to request the counted time:"
+				description: "Minimum role able to request counted time:"
 			}
 		},
 		init(state) {

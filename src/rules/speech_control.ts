@@ -809,14 +809,14 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "when they join the current room",
-		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in.",
+		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in. Setting an emote as a greeting is also supported by starting the set message with one or two '*' characters.",
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			greetingSentence: {
 				type: "string",
 				default: "",
 				description: "The sentence that will be used to greet new guests:",
-				options: /^([^/.*].*)?$/
+				options: /^([^/.].*)?$/
 			}
 		},
 		load(state) {
@@ -851,8 +851,14 @@ export function initRules_bc_speech_control() {
 							)
 						) return;
 						nextGreet.set(C.MemberNumber, 0);
-						ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: C.MemberNumber });
-						ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: Player.MemberNumber });
+						if (state.customData.greetingSentence.startsWith("*")) {
+							const message = state.customData.greetingSentence.slice(1);
+							ServerSend("ChatRoomChat", { Content: message, Type: "Emote", Target: C.MemberNumber });
+							ServerSend("ChatRoomChat", { Content: message, Type: "Emote", Target: Player.MemberNumber });
+						} else {
+							ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: C.MemberNumber });
+							ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: Player.MemberNumber });
+						}
 					}, 5_000);
 				}
 			}, ModuleCategory.Rules);

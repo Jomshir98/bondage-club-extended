@@ -433,11 +433,15 @@ export function drawIcon(
 	ctx.translate(x, y);
 	ctx.scale(width / baseSize, height / baseSize);
 	ctx.fillStyle = fillColor;
-	ctx.strokeStyle = strokeColor;
+	if (strokeColor) {
+		ctx.strokeStyle = strokeColor;
+	}
 	ctx.lineWidth = lineWidth;
 	const p = new Path2D(icon);
 	ctx.fill(p);
-	ctx.stroke(p);
+	if (strokeColor) {
+		ctx.stroke(p);
+	}
 	ctx.restore();
 }
 

@@ -246,6 +246,7 @@ type BCX_Rule =
 	| "alt_room_admin_transfer"
 	| "alt_room_admin_limit"
 	| "alt_set_profile_description"
+	| "alt_set_nickname"
 	| "alt_force_suitcase_game"
 	| "alt_hearing_whitelist"
 	| "alt_seeing_whitelist"
@@ -351,6 +352,9 @@ type RuleCustomData = {
 	},
 	alt_set_profile_description: {
 		playersProfileDescription: string;
+	},
+	alt_set_nickname: {
+		nickname: string;
 	},
 	alt_hearing_whitelist: {
 		whitelistedMembers: number[];

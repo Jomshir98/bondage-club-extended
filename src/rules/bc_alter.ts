@@ -732,6 +732,38 @@ export function initRules_bc_alter() {
 		}
 	});
 
+	registerRule("alt_set_nickname", {
+		name: "Control nickname",
+		type: RuleType.Alt,
+		loggable: false,
+		shortDescription: "directly sets PLAYER_NAME's nickname",
+		longDescription: "This rule sets PLAYER_NAME's nickname (replacing her name in most cases) to any text entered in the rule config, blocking changes to it.",
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			nickname: {
+				type: "string",
+				default: () => (Player.Nickname || Player.Name),
+				description: "Set this player's nickname:",
+				options: /^[a-zA-Z\s]{0,20}$/
+			}
+		},
+		tick(state) {
+			if (state.isEnforced && state.customData) {
+				let nick = state.customData.nickname.trim();
+				if (nick === Player.Name) {
+					nick = "";
+				}
+				if (Player.Nickname !== nick) {
+					Player.Nickname = nick;
+					ServerAccountUpdate.QueueData({ Nickname: nick }, true);
+					state.trigger();
+					return true;
+				}
+			}
+			return false;
+		}
+	});
+
 	registerRule("alt_force_suitcase_game", {
 		name: "Always carry a suitcase",
 		type: RuleType.Alt,

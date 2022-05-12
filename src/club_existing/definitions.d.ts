@@ -47,10 +47,20 @@ interface HTMLElement {
 	setAttribute(qualifiedName: string, value: string | number): void;
 }
 
+interface RGBColor {
+	r: number;
+	g: number;
+	b: number;
+}
+
+interface RGBAColor extends RGBColor {
+	a: number;
+}
+
 //#endregion
 
 //#region Enums
-type ExtendedArchetype = "modular" | "typed" | "vibrating";
+type ExtendedArchetype = "modular" | "typed" | "vibrating" | "variableheight";
 
 type TypedItemChatSetting = "toOnly" | "fromTo" | "silent";
 type ModularItemChatSetting = "perModule" | "perOption";
@@ -107,6 +117,7 @@ type EffectName =
 	"GagVeryLight" | "GagEasy" | "GagLight" | "GagNormal" | "GagMedium" | "GagHeavy" | "GagVeryHeavy" | "GagTotal" | "GagTotal2" |
 
 	"BlindLight" | "BlindNormal" | "BlindHeavy" |
+	"BlurLight" | "BlurNormal" | "BlurHeavy" | "BlurTotal" |
 	"DeafLight" | "DeafNormal" | "DeafHeavy" | "DeafTotal" |
 
 	"VR" | "VRAvatars" | "KinkyDungeonParty" |
@@ -122,6 +133,7 @@ type EffectName =
 	"Unlock-MistressPadlock" | "Unlock-MistressTimerPadlock" |
 	"Unlock-PandoraPadlock" | "Unlock-MetalCuffs" | "Unlock-" |
 
+	"ProtrudingMouth" |
 	""
 	;
 
@@ -268,7 +280,7 @@ type MessageContentType = string;
 
 interface ChatMessageDictionaryEntry {
 	[k: string]: any;
-	Tag?: string;
+	Tag?: CommonChatTags | string;
 	Text?: string;
 	MemberNumber?: number;
 }
@@ -334,12 +346,12 @@ interface AssetGroup {
 	Underwear: boolean;
 	BodyCosplay: boolean;
 	Hide?: string[];
-	Block?: string[];
+	Block?: AssetGroupItemName[];
 	Zone?: [number, number, number, number][];
 	SetPose?: string[];
 	AllowPose: string[];
 	AllowExpression?: string[];
-	Effect?: string[];
+	Effect?: EffectName[];
 	MirrorGroup: string;
 	RemoveItemOnRemove: { Group: string; Name: string; Type?: string }[];
 	DrawingPriority: number;
@@ -351,7 +363,7 @@ interface AssetGroup {
 	FreezeActivePose: string[];
 	PreviewZone?: [number, number, number, number];
 	DynamicGroupName: string;
-	MirrorActivitiesFrom?: string;
+	MirrorActivitiesFrom: string | null;
 }
 
 /** An object defining a drawable layer of an asset */
@@ -407,7 +419,7 @@ interface AssetLayer {
 	been created prior to drawing */
 	GroupAlpha?: AlphaDefinition[];
 	/** A module for which the layer can have types. */
-	ModuleType?: string[];
+	ModuleType: string[] | null;
 }
 
 /** An object defining a group of alpha masks to be applied when drawing an asset layer */
@@ -426,6 +438,16 @@ a rectangle and the rectangle's width and height - e.g. [left, top, width, heigh
 	Masks: [number, number, number, number][];
 }
 
+interface TintDefinition {
+	Color: number | string;
+	Strength: number;
+	DefaultColor?: string;
+}
+
+interface ResolvedTintDefinition extends TintDefinition {
+	Item: Item;
+}
+
 interface ExpressionTrigger {
 	Group: string;
 	Name: string;
@@ -437,18 +459,18 @@ interface Asset {
 	Description: string;
 	Group: AssetGroup;
 	ParentItem?: string;
-	ParentGroupName?: string;
+	ParentGroupName?: string | null;
 	Enable: boolean;
 	Visible: boolean;
 	Wear: boolean;
-	Activity?: string;
+	Activity: string | null;
 	AllowActivity?: string[];
 	AllowActivityOn?: string[];
 	BuyGroup?: string;
 	PrerequisiteBuyGroups?: string[];
-	Effect?: string[];
+	Effect?: EffectName[];
 	Bonus?: string;
-	Block?: string[];
+	Block?: AssetGroupItemName[];
 	Expose: string[];
 	Hide?: string[];
 	HideItem?: string[];
@@ -456,7 +478,7 @@ interface Asset {
 	HideItemAttribute: string[];
 	Require?: string[];
 	SetPose?: string[];
-	AllowPose: string[];
+	AllowPose: string[] | null;
 	HideForPose: string[];
 	PoseMapping?: { [index: string]: string };
 	AllowActivePose?: string[];
@@ -490,8 +512,8 @@ interface Asset {
 	LoverOnly: boolean;
 	ExpressionTrigger?: ExpressionTrigger[];
 	RemoveItemOnRemove: { Name: string; Group: string; Type?: string; }[];
-	AllowEffect?: string[];
-	AllowBlock?: string[];
+	AllowEffect?: EffectName[];
+	AllowBlock?: AssetGroupItemName[];
 	AllowType?: string[];
 	DefaultColor?: string | string[];
 	Opacity: number;
@@ -535,6 +557,9 @@ interface Asset {
 	Archetype?: string;
 	Attribute: string[];
 	PreviewIcons: string[];
+	Tint: TintDefinition[];
+	AllowTint: boolean;
+	DefaultTint?: string;
 }
 
 //#endregion
@@ -682,6 +707,7 @@ interface Character {
 	Skill: Skill[];
 	Pose: string[];
 	Effect: string[];
+	Tints: ResolvedTintDefinition[];
 	FocusGroup: AssetGroup | null;
 	Canvas: HTMLCanvasElement | null;
 	CanvasBlink: HTMLCanvasElement | null;
@@ -740,6 +766,7 @@ interface Character {
 	HasHiddenItems: boolean;
 	SavedColors: HSVColor[];
 	GetBlindLevel: (eyesOnly?: boolean) => number;
+	GetBlurLevel: () => number;
 	IsLocked: () => boolean;
 	IsMounted: () => boolean;
 	IsPlugged: () => boolean;
@@ -763,6 +790,9 @@ interface Character {
 	IsInverted: () => boolean;
 	CanChangeToPose: (Pose: string) => boolean;
 	GetClumsiness: () => number;
+	HasEffect: (Effect: string) => boolean;
+	HasTints: () => boolean;
+	GetTints: () => RGBAColor[];
 	DrawPose?: string[];
 	DrawAppearance?: Item[];
 	AppearanceLayers?: AssetLayer[];
@@ -926,11 +956,13 @@ interface PlayerCharacter extends Character {
 		SenseDepMessages: boolean;
 		ChatRoomMuffle: boolean;
 		BlindAdjacent: boolean;
+		AllowTints: boolean;
 	};
 	LastChatRoom?: string;
 	LastChatRoomBG?: string;
 	LastChatRoomPrivate?: boolean;
 	LastChatRoomSize?: number;
+	LastChatRoomLanguage?: string;
 	LastChatRoomDesc?: string;
 	LastChatRoomAdmin?: any[];
 	LastChatRoomBan?: any[];
@@ -960,6 +992,7 @@ interface PlayerCharacter extends Character {
 		StimulationFlash: boolean;
 		SmoothZoom: boolean;
 		CenterChatrooms: boolean;
+		AllowBlur: boolean;
 	}
 	NotificationSettings?: {
 		/** @deprecated */
@@ -1048,6 +1081,8 @@ interface ItemPropertiesBase {
 	Effect?: EffectName[];
 	OverrideAssetEffect?: boolean;
 
+	Tint?: TintDefinition[];
+
 	/* Pose-related properties */
 
 	SetPose?: AssetPoseName[];
@@ -1071,17 +1106,41 @@ interface ItemPropertiesBase {
 interface ItemPropertiesCustom {
 	ItemMemberNumber?: number;
 
-	RemoveTimer?: unknown;
-	Password?: string;
-	LockPickSeed?: string;
-	CombinationNumber?: string;
-	LockMemberNumber?: number | string;
 	MemberNumber?: number;
-	MemberNumberListKeys?: unknown;
+
 	AllowLock?: boolean;
+
 	SelfUnlock?: boolean;
+
+	//#region Lock properties
+	/** Asset name of the lock */
 	LockedBy?: AssetLockType;
+	LockMemberNumber?: number | string;
+	/** @see BC_Asset.MaxTimer */
+	RemoveTimer?: number;
+	/** `/^[A-Z]{1,8}$/`, Used by `PasswordPadlock`, `SafewordPadlock` and `TimerPasswordPadlock` lock */
+	Password?: string;
+	/** Comma separated numbers */
+	LockPickSeed?: string;
+	/** `/^[0-9]{4}$/`, Used by `CombinationPadlock` lock */
+	CombinationNumber?: string;
+	/** Comma separated numbers; used by `HighSecurityPadlock` */
+	MemberNumberListKeys?: string;
+	/** Used by `PasswordPadlock`, `SafewordPadlock` and `TimerPasswordPadlock` locks */
+	Hint?: string;
+	/** Used by `PasswordPadlock`, `SafewordPadlock` and `TimerPasswordPadlock` locks; if the lock has been set with password */
+	LockSet?: boolean;
+	/** Whether to remove item on timer lock unlock; used by `LoversTimerPadlock`, `MistressTimerPadlock`, `OwnerTimerPadlock`, `TimerPadlock`, `TimerPasswordPadlock` */
 	RemoveItem?: boolean;
+	/** Only for `PasswordPadlock` */
+	RemoveOnUnlock?: boolean;
+	/** Whether time is shown or "Unknown time left"; used by `LoversTimerPadlock`, `MistressTimerPadlock`, `OwnerTimerPadlock`, `TimerPasswordPadlock` */
+	ShowTimer?: boolean;
+	/** Enable input; used by `LoversTimerPadlock`, `MistressTimerPadlock`, `OwnerTimerPadlock`, `TimerPasswordPadlock` */
+	EnableRandomInput?: boolean;
+	/** List of people who publicly modified time on lock; used by `LoversTimerPadlock`, `MistressTimerPadlock`, `OwnerTimerPadlock`, `TimerPasswordPadlock` */
+	MemberNumberList?: number[];
+	//#endregion
 
 	InflateLevel?: number;
 
@@ -1161,6 +1220,9 @@ interface ItemPropertiesCustom {
 
 	/** Number of times the suitcase got cracked */
 	Iterations?: number;
+
+	/** Allows reverting back to these properties on exiting an extended menu */
+	Revert?: boolean;
 }
 
 interface ItemProperties extends ItemPropertiesBase, ItemPropertiesCustom { }
@@ -1181,7 +1243,7 @@ interface ExtendedItemAssetConfig<Archetype extends ExtendedArchetype, Config> {
 /**
  * Valid extended item configuration types
  */
-type AssetArchetypeConfig = TypedItemAssetConfig | ModularItemAssetConfig | VibratingItemAssetConfig;
+type AssetArchetypeConfig = TypedItemAssetConfig | ModularItemAssetConfig | VibratingItemAssetConfig | VariableHeightAssetConfig;
 
 /**
  * An object containing extended item definitions for a group.
@@ -1228,6 +1290,10 @@ interface ExtendedItemOption {
 	Random?: boolean;
 	/** Whether or not this option can be selected by the wearer */
 	AllowSelfSelect?: boolean;
+	/** If the option has a subscreen, this can set a particular archetype to use */
+	Archetype?: ExtendedArchetype;
+	/** If the option has an archetype, sets the config to use */
+	ArchetypeConfig?: TypedItemConfig | ModularItemConfig | VibratingItemConfig | VariableHeightConfig
 }
 
 /**
@@ -1736,6 +1802,90 @@ interface StateAndIntensity {
 	State: VibratorModeState;
 	/** The vibrator intensity */
 	Intensity: VibratorIntensity;
+}
+
+//#endregion
+
+//#region Variable Height items
+
+/** An object containing the extended item definition for a variable height asset. */
+type VariableHeightAssetConfig = ExtendedItemAssetConfig<"variableheight", VariableHeightConfig>;
+
+interface VariableHeightConfig {
+	/** The highest Y co-ordinate that can be set  */
+	MaxHeight: number;
+	/** The lowest Y co-ordinate that can be set  */
+	MinHeight: number;
+	/** The name of the image from "\BondageClub\Icons" that will show the current position on the slider */
+	SliderIcon: string;
+	/** A record containing various dialog keys used by the extended item screen */
+	Dialog: VariableHeightDialogConfig;
+	/**
+	 * An array of the chat message tags that should be included in the item's
+	 * chatroom messages. Defaults to [{@link CommonChatTags.SOURCE_CHAR}, {@link CommonChatTags.DEST_CHAR}]
+	 */
+	ChatTags?: CommonChatTags[];
+	/** Name of the function that handles finding the current variable height setting */
+	GetHeightFunction?: string;
+	/** Name of the function that handles applying the height setting to the character */
+	SetHeightFunction?: string;
+	/** The default properties for the item, if not provided from an extended item option */
+	Property?: ItemProperties;
+}
+
+interface VariableHeightDialogConfig {
+	/**
+	 * A prefix for text keys for chat messages triggered by the item. Chat message keys
+	 * will include the name of the new option, and depending on the chat setting, the name of the previous option:
+	 * - For chat setting `FROM_TO`: `<chatPrefix><oldOptionName>To<newOptionName>`
+	 * - For chat setting `TO_ONLY`: `<chatPrefix><newOptionName>`
+	 * Defaults to `"<GroupName><AssetName>Set"`
+	 */
+	ChatPrefix?: string | ExtendedItemChatCallback<ExtendedItemOption>;
+	/**
+	 * A prefix for text keys for NPC dialog. This will be suffixed with the option name
+	 * to get the final NPC dialogue key (i.e. `"<npcPrefix><optionName>"`. Defaults to `"<groupName><assetName>"`
+	 */
+	NpcPrefix?: string;
+}
+
+/**
+ * An object containing typed item configuration for an asset. Contains all of the necessary information for the item's
+ * load, draw & click handlers.
+ */
+interface VariableHeightData {
+	/** The asset reference */
+	asset: Asset;
+	/** A key uniquely identifying the asset */
+	key: string;
+	/** The common prefix used for all extended item functions associated with the asset */
+	functionPrefix: string;
+	/** The highest Y co-ordinate that can be set  */
+	maxHeight: number;
+	/** The lowest Y co-ordinate that can be set  */
+	minHeight: number;
+	/** The name of the image from "\BondageClub\Icons" that will show the current position on the slider */
+	sliderIcon: string;
+	/** The initial property to apply */
+	defaultProperty: ItemProperties;
+	/** A record containing various dialog keys used by the extended item screen */
+	dialog: {
+		/** The prefix used for dialog keys representing the item's chatroom messages when its type is changed */
+		chatPrefix: string | ExtendedItemChatCallback<ExtendedItemOption>;
+		/** The prefix used for dialog keys representing an NPC's reactions to item type changes */
+		npcPrefix: string;
+	};
+	/**
+	 * An array of the chat message tags that should be included in the item's
+	 * chatroom messages. Defaults to [{@link CommonChatTags.SOURCE_CHAR}, {@link CommonChatTags.DEST_CHAR}]
+	 */
+	chatTags: CommonChatTags[];
+	/** The function that handles finding the current variable height setting */
+	getHeight: Function;
+	/** The function that handles applying the height setting to the character */
+	setHeight: Function;
+	/** The list of extended item options the current option was selected from, if applicable */
+	parentOptions: ExtendedItemOption[];
 }
 
 //#endregion

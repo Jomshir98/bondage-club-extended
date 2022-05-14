@@ -227,7 +227,7 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 export class ModuleCurses extends BaseModule {
 	private resetTimer: number | null = null;
 	private triggerCounts: Map<string, number> = new Map();
-	private suspendedUntil: number | null = null;
+	private suspendedUntil: Map<string, number> = new Map();
 
 	private pendingMessages: Record<cursedChange | "autoremove", string[]> = {
 		remove: [],
@@ -854,20 +854,20 @@ export class ModuleCurses extends BaseModule {
 	}
 
 	curseTick(group: string, condition: ConditionsConditionData<"curses">): void {
-		if (this.suspendedUntil !== null) {
-			if (Date.now() >= this.suspendedUntil) {
-				this.suspendedUntil = null;
-				this.triggerCounts.clear();
-				ChatRoomActionMessage(`The dormant curse on ${Player.Name}'s body wakes up again.`);
-			} else {
-				return;
-			}
-		}
-
 		const assetGroup = AssetGroupGet(Player.AssetFamily, group);
 		if (!assetGroup) {
 			console.error(`BCX: AssetGroup not found for curse ${group}`, condition);
 			return;
+		}
+
+		if (this.suspendedUntil.has(group)) {
+			if (Date.now() >= this.suspendedUntil.get(group)!) {
+				this.suspendedUntil.delete(group);
+				this.triggerCounts.clear();
+				ChatRoomActionMessage(`The dormant curse on ${Player.Name}'s ${getVisibleGroupName(assetGroup)} wakes up again.`);
+			} else {
+				return;
+			}
 		}
 
 		// Pause curses of clothes while in appearance menu
@@ -978,8 +978,8 @@ export class ModuleCurses extends BaseModule {
 			this.triggerCounts.set(group, counter);
 
 			if (counter >= CURSES_ANTILOOP_THRESHOLD) {
-				ChatRoomActionMessage("Protection triggered: Curses have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.");
-				this.suspendedUntil = Date.now() + CURSES_ANTILOOP_SUSPEND_TIME;
+				ChatRoomActionMessage(`Protection triggered: Curses on ${Player.Name}'s ${getVisibleGroupName(assetGroup)} have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.`);
+				this.suspendedUntil.set(group, Date.now() + CURSES_ANTILOOP_SUSPEND_TIME);
 			}
 		}
 	}

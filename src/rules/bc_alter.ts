@@ -7,6 +7,7 @@ import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
+import { queryHandlers, sendQuery } from "../modules/messaging";
 
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
@@ -921,6 +922,78 @@ export function initRules_bc_alter() {
 				next(args);
 				if (beep) state.triggerAttempt({ SUMMONER: `${data.MemberName} (${data.MemberNumber})` });
 				beep = false;
+			}, ModuleCategory.Rules);
+		}
+	});
+
+	registerRule("alt_allow_changing_appearance", {
+		name: "Allow changing the whole appearance",
+		type: RuleType.Alt,
+		loggable: false,
+		shortDescription: "of PLAYER_NAME - for the defined roles",
+		longDescription: "This rule lets you define a minimum role which (and all higher roles) has permission to fully change the whole appearance of PLAYER_NAME (body and cosplay items), ignoring the settings of the BC online preferences 'Allow others to alter your whole appearance' and 'Prevent others from changing cosplay items'. So this rule can define a group of people which is allowed, while everyone else is not. IMPORTANT: Only other BCX users will be able to change PLAYER_NAME's appearance if this rule allows them to, while the BC settings would forbid them to.",
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			minimumRole: {
+				type: "roleSelector",
+				default: AccessLevel.owner,
+				description: "Minimum role that is allowed:"
+			}
+		},
+		init(state) {
+			queryHandlers.rule_alt_allow_changing_appearance = (sender, resolve) => {
+				resolve(true, state.inEffect && !!state.customData && getCharacterAccessLevel(sender) <= state.customData.minimumRole);
+			};
+			let appearanceCharacterAllowed: null | number = null;
+			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
+				appearanceCharacterAllowed = null;
+				const C = args[0] as Character;
+				const char = C.MemberNumber && getChatroomCharacter(C.MemberNumber);
+				if (char && char.BCXVersion) {
+					sendQuery("rule_alt_allow_changing_appearance", undefined, char.MemberNumber).then(res => {
+						if (res) {
+							appearanceCharacterAllowed = char.MemberNumber;
+						}
+					});
+				}
+				return next(args);
+			}, null);
+			hookFunction("WardrobeGroupAccessible", 4, (args, next) => {
+				const C = args[0] as Character;
+				if (C.MemberNumber && C.MemberNumber === appearanceCharacterAllowed && C.OnlineSharedSettings) {
+					const AllowFullWardrobeAccess = C.OnlineSharedSettings.AllowFullWardrobeAccess;
+					const BlockBodyCosplay = C.OnlineSharedSettings.BlockBodyCosplay;
+					try {
+						C.OnlineSharedSettings.AllowFullWardrobeAccess = true;
+						C.OnlineSharedSettings.BlockBodyCosplay = false;
+						return next(args);
+					} finally {
+						C.OnlineSharedSettings.AllowFullWardrobeAccess = AllowFullWardrobeAccess;
+						C.OnlineSharedSettings.BlockBodyCosplay = BlockBodyCosplay;
+					}
+				}
+				return next(args);
+			}, null);
+		},
+		load(state) {
+			const allow = (memberNumber: number): boolean => {
+				return state.inEffect && !!state.customData && getCharacterAccessLevel(memberNumber) <= state.customData.minimumRole;
+			};
+			hookFunction("ValidationCanAddOrRemoveItem", 4, (args, next) => {
+				const params = args[1] as AppearanceUpdateParameters;
+				if (allow(params.sourceMemberNumber) && params.C.IsPlayer() && params.C.OnlineSharedSettings) {
+					const AllowFullWardrobeAccess = params.C.OnlineSharedSettings.AllowFullWardrobeAccess;
+					const BlockBodyCosplay = params.C.OnlineSharedSettings.BlockBodyCosplay;
+					try {
+						params.C.OnlineSharedSettings.AllowFullWardrobeAccess = true;
+						params.C.OnlineSharedSettings.BlockBodyCosplay = false;
+						return next(args);
+					} finally {
+						params.C.OnlineSharedSettings.AllowFullWardrobeAccess = AllowFullWardrobeAccess;
+						params.C.OnlineSharedSettings.BlockBodyCosplay = BlockBodyCosplay;
+					}
+				}
+				return next(args);
 			}, ModuleCategory.Rules);
 		}
 	});

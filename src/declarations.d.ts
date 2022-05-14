@@ -253,6 +253,7 @@ type BCX_Rule =
 	| "alt_restrict_leashability"
 	| "alt_hide_friends"
 	| "alt_forced_summoning"
+	| "alt_allow_changing_appearance"
 	| "rc_club_owner"
 	| "rc_lover_new"
 	| "rc_lover_leave"
@@ -373,6 +374,9 @@ type RuleCustomData = {
 		allowedMembers: number[];
 		summoningText: string;
 		summonTime: number;
+	},
+	alt_allow_changing_appearance: {
+		minimumRole: import("./modules/authority").AccessLevel;
 	},
 	speech_specific_sound: {
 		soundWhitelist: string[];

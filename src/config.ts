@@ -5,7 +5,7 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Server commit: 806dcd771d453c82427643abe8fabb4a4a2d1513
 
-// Game commit: 70bf70b1e7f9ec554649ced7a1e12eda75efebd5
+// Game commit: 966b6f6081961920b585408b37aa757b14b9cdd5
 export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.CanChangeClothesOn": ["40EF5292"],
 	"Player.GetBlindLevel": ["B0DE4B87"],
@@ -58,7 +58,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomOwnershipOptionIs: ["FE060F0B"],
 	ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
 	ChatRoomSendEmote: ["30DB56A6", "6EF53CBA"],
-	ChatRoomShouldBlockGaggedOOCMessage: ["4940C855"],
+	ChatRoomShouldBlockGaggedOOCMessage: ["4940C855", "16D6AED5"],
 	ChatRoomStatusUpdate: ["041D2784", "35DA12E0"],
 	ChatRoomSync: ["B67D8226", "DF257D5B", "EE15739F"],
 	ChatRoomSyncMemberLeave: ["A95EADE6"],
@@ -99,7 +99,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	InfiltrationStealItems: ["1F601756"],
 	InformationSheetClick: ["E535609B"],
 	InformationSheetExit: ["75521907"],
-	InformationSheetRun: ["58B7879C", "A8A56ACA", "1079019C", "FAE6ED88"],
+	InformationSheetRun: ["58B7879C", "A8A56ACA", "1079019C", "FAE6ED88", "EE8678A4"],
 	InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech: ["BE1F6406"],
 	LoginMistressItems: ["B58EF410"],
 	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547", "CF1C0400", "17F3A06E", "E117B785", "CA1BD40A", "C3BA7C45"],

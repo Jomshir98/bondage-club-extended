@@ -307,6 +307,8 @@ type BCX_Rule =
 	| "setting_leashed_roomchange"
 	| "setting_room_rejoin"
 	| "setting_plug_vibe_events"
+	| "setting_allow_tint_effects"
+	| "setting_allow_blur_effects"
 	| "setting_upsidedown_view"
 	;
 
@@ -515,6 +517,14 @@ type RuleCustomData = {
 		value: boolean;
 		restore: boolean;
 	},
+	setting_allow_tint_effects: {
+		value: boolean;
+		restore: boolean;
+	},
+	setting_allow_blur_effects: {
+		value: boolean;
+		restore: boolean;
+	},
 	setting_upsidedown_view: {
 		value: boolean;
 		restore: boolean;
@@ -534,6 +544,8 @@ type RuleInternalData = {
 	setting_relog_keeps_restraints: boolean;
 	setting_leashed_roomchange: boolean;
 	setting_plug_vibe_events: boolean;
+	setting_allow_tint_effects: boolean;
+	setting_allow_blur_effects: boolean;
 	setting_upsidedown_view: boolean;
 	other_log_money: number;
 	other_track_BCX_activation: number;

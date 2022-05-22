@@ -11,6 +11,7 @@ import { isObject } from "../utils";
 import { icon_heart, icon_BCX_cross } from "../resources";
 import { BCX_setTimeout } from "../BCXContext";
 import { getCurrentSubscreen } from "./gui";
+import { supporterSecret, supporterStatus, updateOtherSupporterStatus } from "./versionCheck";
 
 export enum ChatRoomStatusManagerStatusType {
 	None = "None",
@@ -178,13 +179,17 @@ export class ModuleChatroom extends BaseModule {
 			modStorage.screenIndicatorEnable = true;
 		}
 
-		hiddenMessageHandlers.set("hello", (sender, message) => {
+		hiddenMessageHandlers.set("hello", (sender, message: BCX_message_hello) => {
 			const char = getChatroomCharacter(sender);
 			if (!char) {
 				console.warn(`BCX: Hello from character not found in room`, sender);
 				return;
 			}
-			if (typeof message?.version !== "string") {
+			if (
+				typeof message?.version !== "string" ||
+				(message.supporterStatus !== undefined && typeof message.supporterStatus !== "string") ||
+				(message.supporterSecret !== undefined && typeof message.supporterSecret !== "string")
+			) {
 				console.warn(`BCX: Invalid hello`, sender, message);
 				return;
 			}
@@ -205,7 +210,10 @@ export class ModuleChatroom extends BaseModule {
 			if (typeof message.screenIndicatorEnable === "boolean") {
 				char.screenIndicatorEnable = message.screenIndicatorEnable;
 			}
+			// Supporter status
+			updateOtherSupporterStatus(sender, message.supporterStatus, message.supporterSecret);
 			// Send announcement, if requested
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
 			if (message.request === true) {
 				announceSelf(false);
 			}
@@ -426,11 +434,16 @@ export class ModuleChatroom extends BaseModule {
 
 export function announceSelf(request: boolean = false) {
 	const player = getPlayerCharacter();
-	sendHiddenMessage("hello", {
+	const msg: BCX_message_hello = {
 		version: VERSION,
 		request,
 		effects: player.Effects,
 		typingIndicatorEnable: modStorage.typingIndicatorEnable,
 		screenIndicatorEnable: modStorage.screenIndicatorEnable
-	});
+	};
+	if (supporterStatus && supporterSecret && !modStorage.supporterHidden) {
+		msg.supporterStatus = supporterStatus;
+		msg.supporterSecret = supporterSecret;
+	}
+	sendHiddenMessage("hello", msg);
 }

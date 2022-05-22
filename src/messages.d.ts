@@ -8,11 +8,22 @@ type BCX_beep_versionCheck = {
 
 type BCX_beep_versionResponse = {
 	status: "unsupported" | "deprecated" | "newAvailable" | "current";
+	supporterStatus?: BCXSupporterType;
+	supporterSecret?: string;
 };
 
 type BCX_beeps = {
 	versionCheck: BCX_beep_versionCheck;
 	versionResponse: BCX_beep_versionResponse;
+	supporterCheck: {
+		memberNumber: number;
+		status: BCXSupporterType;
+		secret: string;
+	};
+	supporterCheckResult: {
+		memberNumber: number;
+		status: BCXSupporterType;
+	};
 	clearData: true;
 };
 
@@ -33,6 +44,8 @@ type BCX_message_hello = {
 	effects?: Partial<BCX_effects>;
 	typingIndicatorEnable?: boolean;
 	screenIndicatorEnable?: boolean;
+	supporterStatus?: BCXSupporterType;
+	supporterSecret?: string;
 };
 
 type BCX_message_query = {

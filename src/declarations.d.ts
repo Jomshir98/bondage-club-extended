@@ -16,6 +16,8 @@ interface BCXVersion {
 	dev?: boolean;
 }
 
+type BCXSupporterType = undefined | "supporter" | "developer";
+
 // Player.OnlineSettings.BCX?: string;
 
 type BCX_Permissions =
@@ -700,6 +702,8 @@ interface ModStorage {
 	chatShouldDisplayFirstTimeHelp?: true;
 	/** Toggle, if friendlist autorefresh is enabled */
 	FLAutorefresh?: true;
+	/** Toggle, if player chose to hide the supporter status */
+	supporterHidden?: true;
 	cheats: import("./constants").MiscCheat[];
 	disabledModules: import("./constants").ModuleCategory[];
 	permissions: PermissionsBundle;

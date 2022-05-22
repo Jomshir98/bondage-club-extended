@@ -5,10 +5,56 @@ import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
 import { BCXSource, BCXSourceExternal, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
 import { unload } from "../main";
+import { modStorage } from "./storage";
+import { announceSelf } from "./chatroom";
 
 let nextCheckTimer: number | null = null;
 export let versionCheckNewAvailable: boolean | null = null;
 let versionCheckDidNotify = false;
+
+export let supporterStatus: BCXSupporterType = "developer";
+export let supporterSecret: undefined | string;
+
+export function setSupporterVisible(visible: boolean): void {
+	if (visible === !modStorage.supporterHidden)
+		return;
+	if (visible) {
+		delete modStorage.supporterHidden;
+	} else {
+		modStorage.supporterHidden = true;
+	}
+	announceSelf();
+}
+
+export const otherSupporterStatus: Map<number, {
+	verified: boolean;
+	status: BCXSupporterType;
+	secret: string | undefined;
+}> = new Map();
+
+export function updateOtherSupporterStatus(memberNumber: number, status: BCXSupporterType, secret: string | undefined): void {
+	if (memberNumber === Player.MemberNumber)
+		return;
+	const current = otherSupporterStatus.get(memberNumber);
+	if (current && current.secret === status && current.secret === secret && current.verified)
+		return;
+	if (status && secret) {
+		otherSupporterStatus.set(memberNumber, {
+			verified: status === undefined,
+			status,
+			secret
+		});
+		if (status && secret) {
+			sendHiddenBeep("supporterCheck", {
+				memberNumber,
+				status,
+				secret
+			}, VERSION_CHECK_BOT, true);
+		}
+	} else {
+		otherSupporterStatus.delete(memberNumber);
+	}
+}
 
 function sendVersionCheckBeep(): void {
 	if (nextCheckTimer !== null) {
@@ -48,67 +94,66 @@ export class ModuleVersionCheck extends BaseModule {
 
 			if (message.status === "current") {
 				versionCheckNewAvailable = false;
-				return;
 			} else if (message.status === "newAvailable") {
 				versionCheckNewAvailable = true;
-				if (versionCheckDidNotify)
-					return;
-				versionCheckDidNotify = true;
+				if (!versionCheckDidNotify) {
+					versionCheckDidNotify = true;
 
-				if (ServerPlayerIsInChatRoom()) {
-					ChatRoomSendLocal("New BCX version is available! You can upgrade by logging in again.");
-				} else {
-					InfoBeep("New BCX version is available! You can upgrade by logging in again.", 10_000);
+					if (ServerPlayerIsInChatRoom()) {
+						ChatRoomSendLocal("New BCX version is available! You can upgrade by logging in again.");
+					} else {
+						InfoBeep("New BCX version is available! You can upgrade by logging in again.", 10_000);
+					}
 				}
 			} else if (message.status === "deprecated") {
 				versionCheckNewAvailable = true;
 
-				if (versionCheckDidNotify)
-					return;
-				versionCheckDidNotify = true;
+				if (!versionCheckDidNotify) {
+					versionCheckDidNotify = true;
 
-				const overlay = document.createElement("div");
-				overlay.style.position = "fixed";
-				overlay.style.top = "0px";
-				overlay.style.right = "0px";
-				overlay.style.bottom = "0px";
-				overlay.style.left = "0px";
-				overlay.style.background = "#00000090";
-				overlay.style.display = "flex";
-				overlay.style.alignItems = "center";
-				overlay.style.justifyContent = "center";
+					const overlay = document.createElement("div");
+					overlay.style.position = "fixed";
+					overlay.style.top = "0px";
+					overlay.style.right = "0px";
+					overlay.style.bottom = "0px";
+					overlay.style.left = "0px";
+					overlay.style.background = "#00000090";
+					overlay.style.display = "flex";
+					overlay.style.alignItems = "center";
+					overlay.style.justifyContent = "center";
 
-				// Nice window
-				const win = document.createElement("div");
-				overlay.appendChild(win);
-				win.style.background = "white";
-				win.style.display = "flex";
-				win.style.flexDirection = "column";
-				win.style.padding = "1em";
+					// Nice window
+					const win = document.createElement("div");
+					overlay.appendChild(win);
+					win.style.background = "white";
+					win.style.display = "flex";
+					win.style.flexDirection = "column";
+					win.style.padding = "1em";
 
-				// Title
-				const titleElem = document.createElement("h1");
-				win.appendChild(titleElem);
-				titleElem.innerText = "Deprecated BCX version";
+					// Title
+					const titleElem = document.createElement("h1");
+					win.appendChild(titleElem);
+					titleElem.innerText = "Deprecated BCX version";
 
-				// Description
-				const descriptionElement = document.createElement("p");
-				win.appendChild(descriptionElement);
-				descriptionElement.innerText = "The BCX version you are using is too old and either contains critical bugs or " +
-					"is no longer compatible with the current Bondage Club release version.\n" +
-					"Unless you are using additional mods preventing this, please refresh the page and log into the club again to load the newest version.";
+					// Description
+					const descriptionElement = document.createElement("p");
+					win.appendChild(descriptionElement);
+					descriptionElement.innerText = "The BCX version you are using is too old and either contains critical bugs or " +
+						"is no longer compatible with the current Bondage Club release version.\n" +
+						"Unless you are using additional mods preventing this, please refresh the page and log into the club again to load the newest version.";
 
-				// Close button
-				const close = document.createElement("button");
-				win.appendChild(close);
-				close.innerText = "Close";
-				close.onclick = () => {
-					overlay.remove();
-				};
+					// Close button
+					const close = document.createElement("button");
+					win.appendChild(close);
+					close.innerText = "Close";
+					close.onclick = () => {
+						overlay.remove();
+					};
 
-				// Display it
-				(document.activeElement as HTMLElement)?.blur?.();
-				window.document.body.appendChild(overlay);
+					// Display it
+					(document.activeElement as HTMLElement)?.blur?.();
+					window.document.body.appendChild(overlay);
+				}
 			} else if (message.status === "unsupported") {
 				unload();
 				alert("The BCX version you are trying to load is too old and either contains critical bugs or " +
@@ -116,6 +161,30 @@ export class ModuleVersionCheck extends BaseModule {
 			} else {
 				console.warn(`BCX: bad versionResponse status "${message.status}"`);
 			}
+
+			if (supporterStatus !== message.supporterStatus || supporterSecret !== message.supporterSecret) {
+				supporterStatus = message.supporterStatus;
+				supporterSecret = message.supporterSecret;
+				announceSelf();
+			}
+		});
+
+		hiddenBeepHandlers.set("supporterCheckResult", (sender, message: BCX_beeps["supporterCheckResult"]) => {
+			if (sender !== VERSION_CHECK_BOT) {
+				console.warn(`BCX: got supporterCheckResult from unexpected sender ${sender}, ignoring`);
+				return;
+			}
+			if (!isObject(message) || typeof message.memberNumber !== "number" || (message.status !== undefined && typeof message.status !== "string")) {
+				console.warn(`BCX: bad supporterCheckResult`, message);
+				return;
+			}
+			const status = otherSupporterStatus.get(message.memberNumber);
+			if (!status) {
+				console.warn(`BCX: supporterCheckResult unknown memberNumber`, message);
+				return;
+			}
+			status.status = message.status;
+			status.verified = true;
 		});
 	}
 

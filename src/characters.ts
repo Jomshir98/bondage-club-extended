@@ -12,6 +12,7 @@ import { BaseModule } from "./modules/_BaseModule";
 import { hookFunction } from "./patching";
 import { announceSelf } from "./modules/chatroom";
 import { BCX_setInterval } from "./BCXContext";
+import { otherSupporterStatus, supporterStatus } from "./modules/versionCheck";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -39,6 +40,11 @@ export class ChatroomCharacter {
 
 	get Name(): string {
 		return this.Character.Name;
+	}
+
+	get supporterStatus(): BCXSupporterType {
+		const status = otherSupporterStatus.get(this.MemberNumber);
+		return status?.verified ? status.status : undefined;
 	}
 
 	toString(): string {
@@ -364,6 +370,10 @@ export class ChatroomCharacter {
 export class PlayerCharacter extends ChatroomCharacter {
 	/** HACK: Otherwise TS wrongly assumes PlayerCharacter to be identical to ChatroomCharacter */
 	public readonly playerObject = true;
+
+	override get supporterStatus(): BCXSupporterType {
+		return supporterStatus;
+	}
 
 	override isPlayer(): this is PlayerCharacter {
 		return true;

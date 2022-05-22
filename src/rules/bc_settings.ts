@@ -42,6 +42,8 @@ export function initRules_bc_settings() {
 		| "setting_relog_keeps_restraints"
 		| "setting_leashed_roomchange"
 		| "setting_plug_vibe_events"
+		| "setting_allow_tint_effects"
+		| "setting_allow_blur_effects"
 		| "setting_upsidedown_view";
 	function toggleSettingHelper({
 		id,
@@ -431,7 +433,25 @@ export function initRules_bc_settings() {
 		set: value => Player.ImmersionSettings!.StimulationEvents = value
 	});
 
+	toggleSettingHelper({
+		id: "setting_allow_tint_effects",
+		setting: "Allow item tint effects",
+		defaultValue: true,
+		defaultLimit: ConditionsLimit.limited,
+		get: () => Player.ImmersionSettings?.AllowTints,
+		set: value => Player.ImmersionSettings!.AllowTints = value
+	});
+
 	// "Graphics" settings
+
+	toggleSettingHelper({
+		id: "setting_allow_blur_effects",
+		setting: "Allow item blur effects",
+		defaultValue: true,
+		defaultLimit: ConditionsLimit.blocked,
+		get: () => Player.GraphicsSettings?.AllowBlur,
+		set: value => Player.GraphicsSettings!.AllowBlur = value
+	});
 
 	toggleSettingHelper({
 		id: "setting_upsidedown_view",

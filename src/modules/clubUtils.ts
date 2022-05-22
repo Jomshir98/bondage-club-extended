@@ -411,6 +411,14 @@ export class ModuleClubUtils extends BaseModule {
 			if (antiblind) return 0;
 			return next(args);
 		});
+		hookFunction("Player.GetBlurLevel", 9, (args, next) => {
+			if (antiblind) return 0;
+			return next(args);
+		});
+		hookFunction("Player.HasTints", 9, (args, next) => {
+			if (antiblind) return false;
+			return next(args);
+		});
 		//#endregion
 		//#region Hidden room backgrounds
 		registerCommand("utility", "background", "<name> - Changes chat room background", processBackgroundCommand, processBackgroundCommand_autocomplete);

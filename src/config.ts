@@ -126,8 +126,10 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],
 	StruggleDrawStrengthProgress: ["4755C02D"],
 	TextGet: ["4DDE5794"],
+	ValidationCanAddOrRemoveItem: ["62A8266A"],
 	ValidationResolveModifyDiff: ["C2FE52D3"],
 	WardrobeClick: ["D388FE7D"],
+	WardrobeGroupAccessible: ["C7F71B8D"],
 	WardrobeRun: ["9616EB3A"]
 };
 

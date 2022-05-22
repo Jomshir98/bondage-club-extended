@@ -949,7 +949,7 @@ export function initRules_bc_alter() {
 				appearanceCharacterAllowed = null;
 				const C = args[0] as Character;
 				const char = C.MemberNumber && getChatroomCharacter(C.MemberNumber);
-				if (char && char.BCXVersion) {
+				if (!C.IsPlayer() && char && char.BCXVersion) {
 					sendQuery("rule_alt_allow_changing_appearance", undefined, char.MemberNumber).then(res => {
 						if (res) {
 							appearanceCharacterAllowed = char.MemberNumber;
@@ -960,7 +960,7 @@ export function initRules_bc_alter() {
 			}, null);
 			hookFunction("WardrobeGroupAccessible", 4, (args, next) => {
 				const C = args[0] as Character;
-				if (C.MemberNumber && C.MemberNumber === appearanceCharacterAllowed && C.OnlineSharedSettings) {
+				if (!C.IsPlayer() && C.MemberNumber && C.MemberNumber === appearanceCharacterAllowed && C.OnlineSharedSettings) {
 					const AllowFullWardrobeAccess = C.OnlineSharedSettings.AllowFullWardrobeAccess;
 					const BlockBodyCosplay = C.OnlineSharedSettings.BlockBodyCosplay;
 					try {

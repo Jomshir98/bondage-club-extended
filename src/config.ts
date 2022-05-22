@@ -11,6 +11,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.GetBlindLevel": ["B0DE4B87", "E193DF2C"],
 	"Player.GetBlurLevel": ["F6930456"],
 	"Player.GetDeafLevel": ["42CB6D63"],
+	"Player.HasTints": ["E09CA942"],
 	"Player.IsSlow": ["4D9B1713"],
 	ActivityOrgasmPrepare: ["E4EE085D"],
 	ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9", "B5D882A8", "936CB457"],

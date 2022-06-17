@@ -10,3 +10,7 @@ type VibratorMode = "Off" | "Low" | "Medium" | "High" | "Maximum" | "Random" | "
 interface Character {
 	Nickname: string;
 }
+
+interface ItemProperties {
+	AllowActivityOn_BCXBackup?: AssetGroupItemName[];
+}

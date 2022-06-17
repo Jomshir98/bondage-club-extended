@@ -817,7 +817,7 @@ export function initRules_bc_blocks() {
 	});
 
 	registerRule("block_antiblind", {
-		name: "Forbid the antiblind option",
+		name: "Forbid the antiblind command",
 		type: RuleType.Block,
 		shortDescription: "BCX's .antiblind command",
 		longDescription: "This rule forbids PLAYER_NAME to use the antiblind command. Antiblind is a BCX feature that enables a BCX user to see the whole chat room and all other characters at all times, even when wearing a blinding item. If PLAYER_NAME should be forbidden to use the command, this rule should be used.",
@@ -825,6 +825,20 @@ export function initRules_bc_blocks() {
 			infoBeep: "You are not allowed to use the antiblind command!",
 			attempt_log: "PLAYER_NAME tried to use the antiblind command",
 			log: "PLAYER_NAME used the antiblind command"
+		},
+		defaultLimit: ConditionsLimit.normal
+		// Implemented externally
+	});
+
+	registerRule("block_allowactivities", {
+		name: "Forbid the allowactivities command",
+		type: RuleType.Block,
+		shortDescription: "for just PLAYER_NAME",
+		longDescription: "This rule forbids PLAYER_NAME to use the allowactivities command on herself. Allowactivities is a BCX feature that enables a BCX user to make more activities available to use on a specific item, until the command is used on that item again or the item is replaced. If PLAYER_NAME should be forbidden to use the command, this rule should be used. If other BCX users should be forbidden to use the allowactivities command, then the command should be limited/blocked in BCX's commands module.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to use the allowactivities command!",
+			attempt_log: "PLAYER_NAME tried to use the allowactivities command",
+			log: "PLAYER_NAME used the allowactivities command"
 		},
 		defaultLimit: ConditionsLimit.normal
 		// Implemented externally

@@ -228,6 +228,7 @@ type BCX_Rule =
 	| "block_blacklisting"
 	| "block_whitelisting"
 	| "block_antiblind"
+	| "block_allowactivities"
 	| "block_difficulty_change"
 	| "block_activities"
 	| "block_mainhall_maidrescue"
@@ -647,6 +648,7 @@ type BCX_Command =
 	| "timeleft"
 	| "servedrinks"
 	| "orgasm"
+	| "allowactivities"
 	;
 
 interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {

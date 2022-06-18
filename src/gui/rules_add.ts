@@ -89,7 +89,8 @@ export class GuiRulesAdd extends GuiSubscreen {
 			if (filter.some(i =>
 				!entry[0].toLocaleLowerCase().includes(i) &&
 				!entry[1].name.toLocaleLowerCase().includes(i) &&
-				!entry[1].shortDescription?.toLocaleLowerCase().includes(i)
+				!entry[1].shortDescription?.toLocaleLowerCase().includes(i) &&
+				!entry[1].keywords?.some(k => k.toLocaleLowerCase().includes(i))
 			)) continue;
 			this.ruleList.push({
 				name: entry[0],

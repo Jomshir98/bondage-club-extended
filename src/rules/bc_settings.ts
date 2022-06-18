@@ -21,6 +21,7 @@ export function initRules_bc_settings() {
 			type: RuleType.Setting,
 			loggable: false,
 			shortDescription: "Existing BC setting",
+			keywords: ["control", "settings", "configure", "change"],
 			defaultLimit,
 			longDescription: `This rule forces PLAYER_NAME's base game setting '${setting}' to configurable value and prevents her from changing it.`,
 			triggerTexts: {

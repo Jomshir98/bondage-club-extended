@@ -95,6 +95,7 @@ declare var DialogSelfMenuOptions: any[];
 declare var DialogMenuButton: string[];
 declare var DialogActivePoses: Pose[][];
 declare var DialogActivityMode: boolean;
+declare var DialogCraftingMenu: boolean;
 declare var DialogItemToLock: any;
 declare var DialogInventory: DialogInventoryItem[];
 declare var DialogItemPermissionMode: boolean;

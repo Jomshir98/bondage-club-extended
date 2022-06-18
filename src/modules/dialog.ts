@@ -20,6 +20,7 @@ function allowSearchMode(): boolean {
 		DialogIntro() !== "" &&
 		DialogFocusItem == null &&
 		!DialogActivityMode &&
+		!DialogCraftingMenu &&
 		DialogColor == null &&
 		StruggleProgress < 0 &&
 		!StruggleLockPickOrder &&

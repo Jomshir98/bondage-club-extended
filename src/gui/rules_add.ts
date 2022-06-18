@@ -16,6 +16,7 @@ type RuleListItem = {
 
 const PER_PAGE_COUNT = 6;
 
+let alphabeticalSort: boolean = false;
 let availabilitySort: boolean = false;
 
 export class GuiRulesAdd extends GuiSubscreen {
@@ -99,6 +100,9 @@ export class GuiRulesAdd extends GuiSubscreen {
 		}
 
 		const data = this.rulesData;
+		if (alphabeticalSort) {
+			this.ruleList.sort((a, b) => a.definition.name.localeCompare(b.definition.name));
+		}
 		if (availabilitySort) {
 			this.ruleList.sort((a, b) => (
 				(
@@ -176,6 +180,10 @@ export class GuiRulesAdd extends GuiSubscreen {
 		// sort toggle
 		DrawButton(1483, 132, 64, 64, "", "White", undefined, "Toggle availability-based sorting");
 		DrawImageEx("Icons/LockMenu.png", 1483 + 3, 132 + 3, { Alpha: availabilitySort ? 1 : 0.2, Width: 58, Height: 58 });
+
+		// A-Z toggle
+		DrawButton(1583, 132, 64, 64, "", "white", undefined, "Toggle alphabetical sorting");
+		DrawTextFit("A-Z", 1583 + 32, 132 + 32 + 1, 64 - 4, alphabeticalSort ? "black" : "#bbb");
 
 		// Actual rules
 		MainCanvas.textAlign = "left";
@@ -308,6 +316,12 @@ export class GuiRulesAdd extends GuiSubscreen {
 		// sort toggle
 		if (MouseIn(1483, 132, 64, 64)) {
 			availabilitySort = !availabilitySort;
+			this.rebuildList();
+		}
+
+		// A-Z toggle
+		if (MouseIn(1583, 132, 64, 64)) {
+			alphabeticalSort = !alphabeticalSort;
 			this.rebuildList();
 		}
 

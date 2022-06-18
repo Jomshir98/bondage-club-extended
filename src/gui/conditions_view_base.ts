@@ -2,7 +2,7 @@ import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
-import { clamp, formatTimeInterval } from "../utils";
+import { clamp, createInputElement, formatTimeInterval, positionElement } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { ConditionsLimit } from "../constants";
 
@@ -17,6 +17,9 @@ export interface ConditionEntry<CAT extends ConditionsCategories, ExtraData> {
 	extra: ExtraData
 }
 
+let alphabeticalSort: boolean = false;
+let activeSort: boolean = false;
+
 export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraData> extends GuiSubscreen {
 
 	readonly character: ChatroomCharacter;
@@ -30,6 +33,8 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 	protected showHelp: boolean = false;
 
+	private filterInput = createInputElement("text", 30);
+
 	constructor(character: ChatroomCharacter,
 		conditionCategory: CAT
 	) {
@@ -37,6 +42,9 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		this.character = character;
 		this.conditionCategory = conditionCategory;
 		this.conditionCategorySingular = conditionCategory.slice(0, -1);
+		this.filterInput.addEventListener("input", ev => {
+			this.onDataChange();
+		});
 	}
 
 	Load() {
@@ -69,8 +77,16 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 		this.conditionEntries = [];
 
-		if (this.conditionCategoryData === null)
+		if (this.conditionCategoryData === null) {
+			this.filterInput.remove();
 			return;
+		}
+
+		if (!this.filterInput.parentElement) {
+			document.body.appendChild(this.filterInput);
+		}
+
+		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
 
 		for (const [condition, data] of Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)) {
 			const res = this.loadCondition(condition as ConditionsCategoryKeys[CAT], data);
@@ -78,6 +94,11 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 				continue;
 
 			const access = [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][this.conditionCategoryData.limits[condition as ConditionsCategoryKeys[CAT]] ?? ConditionsLimit.normal];
+
+			if (filter.some(i =>
+				!condition.toLocaleLowerCase().includes(i) &&
+				!res[0].toLocaleLowerCase().includes(i)
+			)) continue;
 
 			this.conditionEntries.push({
 				condition,
@@ -88,9 +109,25 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			});
 		}
 
-		this.conditionEntries.sort((a, b) => (!a.data.favorite && b.data.favorite) ? 1 : ((a.data.favorite && !b.data.favorite) ? -1 : 0));
+		this.conditionEntries = this.sortEntries(this.conditionEntries);
 
 		this.page = clamp(this.page, 0, Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT));
+	}
+
+	protected sortEntries(entries: ConditionEntry<CAT, ExtraData>[]): ConditionEntry<CAT, ExtraData>[] {
+		entries.sort((a, b) => (!a.data.favorite && b.data.favorite) ? 1 : ((a.data.favorite && !b.data.favorite) ? -1 : 0));
+		if (alphabeticalSort) {
+			entries.sort((a, b) => a.displayName.localeCompare(b.displayName));
+		}
+		if (activeSort) {
+			entries.sort((a, b) => (
+				(
+					(b.data.active ? 1 : 0) -
+					(a.data.active ? 1 : 0)
+				)
+			));
+		}
+		return entries;
 	}
 
 	Run(): boolean {
@@ -196,6 +233,24 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			Width: 70
 		});
 
+		// filter
+		MainCanvas.textAlign = "left";
+		positionElement(this.filterInput, 1200, 110, 500, 64);
+
+		// reset button
+		MainCanvas.textAlign = "center";
+		if (this.filterInput.value) {
+			DrawButton(1470, 82, 64, 64, "X", "White");
+		}
+
+		// sort toggle
+		DrawButton(1583, 82, 64, 64, "", "White");
+		DrawImageEx("Icons/Accept.png", 1583 + 3, 82 + 3, { Alpha: activeSort ? 1 : 0.2, Width: 58, Height: 58 });
+
+		// A-Z toggle
+		DrawButton(1683, 82, 64, 64, "", "White");
+		DrawTextFit("A-Z", 1683 + 32, 82 + 32 + 1, 64 - 4, alphabeticalSort ? "black" : "#bbb");
+
 		// Pagination
 		const totalPages = Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT);
 		DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
@@ -249,6 +304,24 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			return true;
 		}
 
+		// reset button
+		if (MouseIn(1470, 82, 64, 64)) {
+			this.filterInput.value = "";
+			this.onDataChange();
+		}
+
+		// sort toggle
+		if (MouseIn(1583, 82, 64, 64)) {
+			activeSort = !activeSort;
+			this.onDataChange();
+		}
+
+		// A-Z toggle
+		if (MouseIn(1683, 82, 64, 64)) {
+			alphabeticalSort = !alphabeticalSort;
+			this.onDataChange();
+		}
+
 		// Pagination
 		const totalPages = Math.ceil(this.conditionEntries.length / PER_PAGE_COUNT);
 		if (MouseIn(1605, 800, 150, 90)) {
@@ -269,6 +342,10 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 	Exit() {
 		setSubscreen(new GuiMainMenu(this.character));
+	}
+
+	Unload() {
+		this.filterInput.remove();
 	}
 
 	protected abstract removeLabel: string;

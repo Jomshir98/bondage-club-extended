@@ -8,6 +8,7 @@ export function initRules_bc_relation_control() {
 		type: RuleType.RC,
 		shortDescription: "getting or leaving owner",
 		longDescription: "This rule forbids PLAYER_NAME to leave their current club owner or get a new one. Advancing ownership from trial to full ownership is unaffected. Doesn't prevent the club owner from releasing her.",
+		keywords: ["prevent", "ownership", "collaring", "break"],
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -44,6 +45,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid getting new lovers",
 		type: RuleType.RC,
 		longDescription: "This rule forbids PLAYER_NAME to get a new lover. Advancing lovership from dating to engagement or from engagement to marriage is unaffected.",
+		keywords: ["prevent", "lovership", "dating"],
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -66,6 +68,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid breaking up with lovers",
 		type: RuleType.RC,
 		longDescription: "This rule forbids PLAYER_NAME to leave any of their lovers, independent of lovership stage (leaving dating, engaged and married characters is forbidden). Doesn't prevent her lovers from breaking up with her.",
+		keywords: ["prevent", "lovership", "dating", "leave", "leaving"],
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -91,6 +94,7 @@ export function initRules_bc_relation_control() {
 		type: RuleType.RC,
 		shortDescription: "by offering them an ownership trial",
 		longDescription: "This rule forbids PLAYER_NAME to start a trial with new submissive. Advancing ownership from trial to full ownership is unaffected.",
+		keywords: ["prevent", "subbies", "collaring"],
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {
@@ -113,6 +117,7 @@ export function initRules_bc_relation_control() {
 		name: "Forbid disowning submissives",
 		type: RuleType.RC,
 		longDescription: "This rule forbids PLAYER_NAME to let go of any of their subs. (affects both trial and full ownerships). Doesn't prevent her submissives from breaking the bond.",
+		keywords: ["prevent", "subbies", "collar", "freeing", "releasing", "release"],
 		// Logs are not implemented
 		loggable: false,
 		// triggerTexts: {

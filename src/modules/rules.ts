@@ -128,6 +128,7 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 		name: data.name,
 		type: data.type,
 		shortDescription: data.shortDescription,
+		keywords: data.keywords,
 		longDescription: data.longDescription,
 		triggerTexts: data.triggerTexts,
 		defaultLimit: data.defaultLimit,

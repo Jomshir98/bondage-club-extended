@@ -597,6 +597,7 @@ interface RuleDisplayDefinition<ID extends BCX_Rule = BCX_Rule> {
 	type: import("./modules/rules").RuleType;
 	shortDescription?: string;
 	longDescription: string;
+	keywords?: string[];
 	/** Texts to use for when rule is broken, set to empty string to disable */
 	triggerTexts?: {
 		/** When rule is broken */

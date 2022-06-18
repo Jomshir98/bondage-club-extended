@@ -40,6 +40,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "such as an animal sound",
 		longDescription: "This rule allows PLAYER_NAME to only communicate using a list of specific sound patterns in chat messages and whispers. These patterns cannot be mixed in the same message, though. Only one sound from the list per message is valid. That said, any variation of a sound in the list is allowed as long as the letters are in order. (Example: if the set sound is 'Meow', then this is a valid message: 'Me..ow? meeeow! mmeooowwwwwww?! meow. me.. oo..w ~')",
+		keywords: ["filter", "speech", "talking", "letters"],
 		triggerTexts: {
 			infoBeep: "You are allowed to speak only using one of the defined sounds!",
 			attempt_log: "PLAYER_NAME tried to break a rule to only speak using specific sound patterns",
@@ -88,6 +89,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "same as normal messages",
 		longDescription: "This rule alters PLAYER_NAME's outgoing whisper messages while gagged to be garbled the same way normal chat messages are. This means, that strength of the effect depends on the type of gag and (OOC text) is not affected. Note: While the rule is in effect, the BC immersion preference 'Prevent OOC & whispers while gagged' is altered, to allow gagged whispers, since those are now garbled by the rule. OOC prevention is not changed.",
+		keywords: ["garbling", "whispering"],
 		defaultLimit: ConditionsLimit.limited,
 		init(state) {
 			registerSpeechHook({
@@ -107,6 +109,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "no more misuse of OOC for normal chatting while gagged",
 		longDescription: "This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages while she is gagged.",
+		keywords: ["parentheses", "prevent", "forbid"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use OOC in messages while gagged.",
 			attempt_log: "PLAYER_NAME tried to use OOC in a message while gagged",
@@ -137,6 +140,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "blocks use of OOC in messages",
 		longDescription: "This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages at any moment. This is a very extreme rule and should be used with great caution!",
+		keywords: ["parentheses", "prevent", "forbid"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use OOC in messages!",
 			attempt_log: "PLAYER_NAME tried to use OOC in a message",
@@ -167,6 +171,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "allows only short sentences with simple words",
 		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text, but does affect whispers. Note: Setting '0' means this part is not limited (∞), as there is another rule to forbid open talking completely.",
+		keywords: ["limit", "restrict", "length", "count"],
 		triggerTexts: {
 			infoBeep: "You broke the doll talk rule!",
 			attempt_log: "PLAYER_NAME tried to break the doll talk rule",
@@ -220,6 +225,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "based on a configurable blacklist",
 		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect emotes and OOC text, but does affect whispers.",
+		keywords: ["limit", "restrict", "blacklist", "blocklist", "forbidden"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
 			attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",
@@ -267,6 +273,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "in a chat room",
 		longDescription: "This rule forbids PLAYER_NAME to send a message to all people inside a chat room. Does not affect whispers or emotes, but does affect OOC.",
+		keywords: ["limit", "restrict", "loud", "saying", "speaking", "chatting"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to talk openly in chatrooms!",
 			attempt_log: "PLAYER_NAME tried to openly speak in a room",
@@ -298,6 +305,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "only allow a set number of chat messages per minute",
 		longDescription: "This rule limits PLAYER_NAME's ability to send a message to all people inside a chat room to only the set number per minute. Does not affect whispers or emotes, but does affect OOC. Note: Setting '0' will have no effect, as there is another rule to forbid open talking completely.",
+		keywords: ["limit", "restrict", "loud", "saying", "speaking", "chatting", "slow", "fast"],
 		triggerTexts: {
 			infoBeep: "You exceeded the number of allowed chat messages per minute!"
 		},
@@ -342,6 +350,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "in a chat room",
 		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room.",
+		keywords: ["limit", "restrict", "emoting", "acting"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use emotes in chatrooms!",
 			attempt_log: "PLAYER_NAME tried to use an emote in a room",
@@ -373,6 +382,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "only allow a set number of emotes per minute",
 		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room to only the set number per minute. Note: Setting '0' will have no effect, as there is another rule to forbid using emotes completely.",
+		keywords: ["restrict", "emoting", "acting", "slow", "fast"],
 		triggerTexts: {
 			infoBeep: "You exceeded the number of allowed emotes per minute!"
 		},
@@ -413,6 +423,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "except to defined roles",
 		longDescription: "This rule forbids PLAYER_NAME to whisper anything to most people inside a chat room, except to the defined roles. Also affects whispered OOC messages.",
+		keywords: ["limit", "forbid", "whispering", "allowlist", "block", "whitelist"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to whisper to TARGET_PLAYER!",
 			attempt_log: "PLAYER_NAME tried to whisper to TARGET_PLAYER",
@@ -454,6 +465,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "except from defined roles",
 		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set (text field is not empty). PLAYER_NAME won't get any indication that she would have received a whisper unless the rule is not enforced, in which case she will see both the whisper and the auto reply. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
+		keywords: ["limit", "forbid", "prevent", "whispering", "hearing", "listening", "allowlist", "block", "whitelist"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			minimumPermittedRole: {
@@ -513,6 +525,7 @@ export function initRules_bc_speech_control() {
 			attempt_log: "PLAYER_NAME broke a rule by trying to send a beep message to TARGET_PLAYER",
 			log: "PLAYER_NAME broke a rule by sending a beep message to TARGET_PLAYER"
 		},
+		keywords: ["limit", "forbid", "prevent", "whitelist", "allowlist"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {
@@ -556,6 +569,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
 		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep unless the rule is not enforced, in which case she will see both the beep and the auto reply. Optionally, the rule can be set to only activate while PLAYER_NAME is unable to use her hands (e.g. fixed to a cross).",
+		keywords: ["limit", "forbid", "prevent", "reading", "whitelist", "allowlist"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {
@@ -626,6 +640,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "when entering it through the login portal",
 		longDescription: "PLAYER_NAME will automatically send all defined member numbers (if they are currently online and friends with PLAYER_NAME) a beep the moment PLAYER_NAME joins the club or the moment she start BCX to make her presence known. Disconnects don't count as coming into the club again, as far as detectable. NOTE: Trigger conditions should not be selected when using this rule, as if you for instance select 'when in public room' the rule will only greet when you load BCX in a public room.",
+		keywords: ["beep", "loging", "in", "online"],
 		triggerTexts: {
 			infoBeep: "A BCX rule made you greet one or more people (if currently online) with a beep.",
 			attempt_log: "",
@@ -662,6 +677,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "BCX's .antigarble command",
 		longDescription: "This rule forbids PLAYER_NAME to use the antigarble command. Antigarble is a BCX feature that enables a BCX user to understand muffled voices from other gagged characters or when wearing a deafening item. If PLAYER_NAME should be forbidden to use the command, this rule should be used.",
+		keywords: ["limit", "forbid", "prevent", "garbling", "deafness", "gagged", "gagtalk"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the antigarble command!",
 			attempt_log: "PLAYER_NAME tried to use the antigarble command",
@@ -720,6 +736,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "if sending a message in chat is rejected by BCX due to a rule violation",
 		longDescription: "This rule forces PLAYER_NAME to retype any chat/whisper/emote/OOC message as a punishment when they try to send it and another enforced BCX speech rule determines that there is any rule violation in that message.",
+		keywords: ["punish", "retry", "clear", "input", "blocked", "forbidden"],
 		defaultLimit: ConditionsLimit.limited
 		// Implemented externally
 	});
@@ -731,6 +748,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "with a settable sentence when entering it newly",
 		longDescription: "Sets a specific sentence that PLAYER_NAME must say loud after entering a room that is not empty. The sentence is autopopulating the chat window text input. When to say it is left to PLAYER_NAME, but when the rule is enforced, it is the only thing that can be said in this room after joining it. Emotes can still be used, though. Disconnects don't count as coming into a new room again, as far as detectable.",
+		keywords: ["say", "present", "introduce"],
 		triggerTexts: {
 			infoBeep: "You broke the rule to greet this room like taught!",
 			attempt_infoBeep: "You need to greet this room like taught!",
@@ -810,6 +828,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "when they join the current room",
 		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in. Setting an emote as a greeting is also supported by starting the set message with one or two '*' characters.",
+		keywords: ["say", "present", "introduce"],
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			greetingSentence: {
@@ -904,6 +923,7 @@ export function initRules_bc_speech_control() {
 		loggable: false,
 		shortDescription: "an enhanced studder effect is added to PLAYER_NAME's chat texts",
 		longDescription: "Thus rule converts PLAYER_NAME's messages, so she is only able to speak studdering and with random filler sounds, for some [RP] reason (anxiousness, arousal, fear, etc.). Converts the typed chat text automatically. Affects chat messages and whispers, but not OOC.",
+		keywords: ["garble", "saying", "talking"],
 		defaultLimit: ConditionsLimit.limited,
 		init(state) {
 			registerSpeechHook({
@@ -923,6 +943,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "of which at least one needs to always be included when speaking openly",
 		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match). Doesn't affect whispers, emotes and OOC text.",
+		keywords: ["force", "require", "talking", "saying", "certain", "specific"],
 		triggerTexts: {
 			infoBeep: "You forgot to include one of the mandatory words!",
 			attempt_log: "PLAYER_NAME almost forgot to use a mandatory word while talking",
@@ -976,6 +997,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		shortDescription: "of muffled speech - random & word list based",
 		longDescription: "This rule gives PLAYER_NAME ability to understand parts of a muffled sentence ungarbled, based on a white list of words and/or randomly. Doesn't affect emotes and OOC text.",
+		keywords: ["deafness", "garbling", "antigarble", "understand", "ungarble", "specific", "words", "whitelist", "allowlist"],
 		loggable: false,
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {

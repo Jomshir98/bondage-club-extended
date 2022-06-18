@@ -16,6 +16,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "impacts PLAYER_NAME's hearing; adjustable",
 		longDescription: "This rule impacts PLAYER_NAME's natural ability to hear in the same way items do, independent of them (strength of deafening can be adjusted).",
+		keywords: ["deafness", "limit", "permanent", "ears"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			deafeningStrength: {
@@ -47,6 +48,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "of members whom PLAYER_NAME can always understand",
 		longDescription: "This rule defines a list of members whose voice can always be understood by PLAYER_NAME - independent of any sensory deprivation items or hearing impairing BCX rules on PLAYER_NAME. There is an additional option to toggle whether PLAYER_NAME can still understand a white-listed member's voice if that member is speech impaired herself (e.g. by being gagged).",
+		keywords: ["deafness", "bypass", "ignore", "antigarble", "ears", "exception", "understanding"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			whitelistedMembers: {
@@ -119,6 +121,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "impacts PLAYER_NAME's sight; adjustable",
 		longDescription: "This rule impacts PLAYER_NAME's natural ability to see in the same way items do, independent of them (strength of blindness can be adjusted).",
+		keywords: ["seeing", "blindfold", "limit", "permanent", "eyes"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			blindnessStrength: {
@@ -150,6 +153,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "of members whom PLAYER_NAME can always see",
 		longDescription: "This rule defines a list of members whose appearance can always be seen normally by PLAYER_NAME - independent of any blinding items or seeing impairing BCX rules on PLAYER_NAME.",
+		keywords: ["sight", "blindness", "bypass", "ignore", "antiblind", "blindfold", "eyes", "seeing"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			whitelistedMembers: {
@@ -226,6 +230,7 @@ export function initRules_bc_alter() {
 		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule enforces full blindness when the eyes are closed. (Light sensory deprivation setting is still respected and doesn't blind fully)",
+		keywords: ["seeing", "blindness", "eyes", "blindfold", "realistic", "room"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			affectPlayer: {
@@ -296,6 +301,7 @@ export function initRules_bc_alter() {
 		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule blacks out the bottom half of the room view when eyes are looking up and the upper half when eyes are looking down.",
+		keywords: ["seeing", "limit", "angle", "room", "blindfold", "partially", "movement", "gaze", "gazing", "teasing"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			affectPlayer: {
@@ -445,6 +451,7 @@ export function initRules_bc_alter() {
 		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule enforces full blindness when wearing any item that limits sight in any way. (This rules does NOT respect Light sensory deprivation setting and always forces player to be fully blind)",
+		keywords: ["seeing", "blindness", "limit", "eyes", "realistic", "room", "light"],
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("Player.GetBlindLevel", 2, (args, next) => {
@@ -460,6 +467,7 @@ export function initRules_bc_alter() {
 		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independent of the items she is wearing. WARNING: Due to limitation in Bondage Club itself, only BCX users will be able to stop PLAYER_NAME from leaving the room. This rule will ignore BC's roleplay difficulty setting 'Cannot be slowed down' and slow down PLAYER_NAME regardless!",
+		keywords: ["slowness", "limit", "leaving", "permanent", "stopping", "exit", "blocking"],
 		defaultLimit: ConditionsLimit.normal,
 		init(state) {
 			registerEffectBuilder(PlayerEffects => {
@@ -481,6 +489,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "adjustable: only-edge, only-ruin, no-resist",
 		longDescription: "This rule impacts PLAYER_NAME's ability to control their orgasms, independent of items. There are three control options, which are: Never cum (always edge, the bar never reaches 100%), force into ruined orgasm (orgasm screen starts, but doesn't let her actually cum) and prevent resisting orgasm (able to enter orgasm screen, but unable to resist it).",
+		keywords: ["deny", "denial", "prevent", "edging", "hypno", "cumming"],
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			orgasmHandling: {
@@ -534,6 +543,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "unable to see the own arousal meter",
 		longDescription: "This rule prevents PLAYER_NAME from seeing their own arousal meter, even while it is active and working. This means, that it is a surprise to them, when the orgasm (quick-time event) happens. Does not effect other characters being able to see the meter, if club settings allow that.",
+		keywords: ["hide", "hidden", "control", "cumming"],
 		defaultLimit: ConditionsLimit.limited,
 		load(state) {
 			hookFunction("DrawArousalMeter", 5, (args, next) => {
@@ -561,6 +571,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "give admin to defined roles",
 		longDescription: "This rule lets you define a minimum role which PLAYER_NAME will automatically give room admin rights to (if she has admin rights in the room). Also has the option to remove admin rights from PLAYER_NAME afterwards.",
+		keywords: ["automatic", "authority", "power", "exchange", "loss", "control"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			minimumRole: {
@@ -631,6 +642,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "restrict room admin powers while restrained",
 		longDescription: "This rule forbids PLAYER_NAME to do any room admin actions (except for kick/ban), when she is restrained. Note: This rule does not affect an admin's ability to bypass locked rooms, if restraints allow it. Tip: This rule can be combined with the rule 'Force ´Return to chatrooms on relog´' to trap PLAYER_NAME in it.",
+		keywords: ["restraints", "authority", "suppressing", "bindings", "helpless"],
 		defaultLimit: ConditionsLimit.limited,
 		triggerTexts: {
 			attempt_infoBeep: "You are forbidden from changing room settings while restrained"
@@ -708,6 +720,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "directly sets PLAYER_NAME's description",
 		longDescription: "This rule sets PLAYER_NAME's online description (in her profile) to any text entered in the rule config, blocking changes to it. Warning: This rule is editing the actual profile text. This means that after saving a changed text, the original text is lost!",
+		keywords: ["edit", "change", "force", "biography", "information", "story", "control"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			playersProfileDescription: {
@@ -739,6 +752,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "directly sets PLAYER_NAME's nickname",
 		longDescription: "This rule sets PLAYER_NAME's nickname (replacing her name in most cases) to any text entered in the rule config, blocking changes to it.",
+		keywords: ["edit", "change", "force", "petname", "naming"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			nickname: {
@@ -771,6 +785,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "from the kidnappers league multiplayer game",
 		longDescription: "This rule forces PLAYER_NAME to constantly participate in the kidnappers league's suitcase delivery task, by automatically giving her a new suitcase, whenever the suitcase item slot is empty.",
+		keywords: ["permanent", "money", "tasks"],
 		defaultLimit: ConditionsLimit.normal,
 		tick(state) {
 			const misc = InventoryGet(Player, "ItemMisc");
@@ -787,6 +802,7 @@ export function initRules_bc_alter() {
 		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule only allows selected roles to leash PLAYER_NAME, responding with a message about unsuccessful leashing to others when they attempt to do so.",
+		keywords: ["limit", "prevent", "leashing", "room"],
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			minimumRole: {
@@ -819,6 +835,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "also preventing beeps from the friendlist - exceptions settable",
 		longDescription: "This rule hides persons on PLAYER_NAME's friend list when she is fully blinded, which also makes sending beeps impossible. Received beeps can still be answered. The rule allows to manage a list of members who can be seen normally.",
+		keywords: ["blindfold", "control"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			allowedMembers: {
@@ -856,6 +873,7 @@ export function initRules_bc_alter() {
 		loggable: false,
 		shortDescription: "leash PLAYER_NAME from anywhere using a beep with message",
 		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the summoner after 15 seconds. It works by sending a beep message with the set text or simply the word 'summon' to PLAYER_NAME. Members who are allowed to summon PLAYER_NAME can be set. NOTES: PLAYER_NAME can always be summoned no matter if she has a leash or is prevented from leaving the room (ignoring restraints or locked rooms). However, if the target room is full or locked, she will end up in the lobby. Summoning will not work if the room name is not included with the beep message!",
+		keywords: ["leashing", "room", "calling", "ordering", "move", "moving", "movement", "warping", "beaming", "transporting"],
 		triggerTexts: {
 			infoBeep: "You are summoned by SUMMONER!"
 		},
@@ -931,6 +949,7 @@ export function initRules_bc_alter() {
 		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "of PLAYER_NAME - for the defined roles",
+		keywords: ["force", "setting", "wardrobe", "body", "modifications"],
 		longDescription: "This rule lets you define a minimum role which (and all higher roles) has permission to fully change the whole appearance of PLAYER_NAME (body and cosplay items), ignoring the settings of the BC online preferences 'Allow others to alter your whole appearance' and 'Prevent others from changing cosplay items'. So this rule can define a group of people which is allowed, while everyone else is not. IMPORTANT: Only other BCX users will be able to change PLAYER_NAME's appearance if this rule allows them to, while the BC settings would forbid them to.",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {

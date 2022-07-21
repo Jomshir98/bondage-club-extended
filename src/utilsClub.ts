@@ -111,6 +111,7 @@ export function ChatRoomActionMessage(msg: string, target: null | number = null)
 			{ Tag: "Beep", Text: "msg" },
 			{ Tag: "Biep", Text: "msg" },
 			{ Tag: "Sonner", Text: "msg" },
+			{ Tag: "发送私聊", Text: "msg" },
 			{ Tag: "msg", Text: msg }
 		]
 	});

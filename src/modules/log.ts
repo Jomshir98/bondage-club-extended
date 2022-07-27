@@ -86,7 +86,7 @@ function logMessageAdd<Type extends LogEntryType>(access: LogAccessLevel, type: 
 	notifyOfChange();
 }
 
-export function logMessageDelete(time: number, character: ChatroomCharacter | null): boolean {
+export function logMessageDelete(time: number | number[], character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Log))
 		return false;
 
@@ -101,9 +101,11 @@ export function logMessageDelete(time: number, character: ChatroomCharacter | nu
 	if (!modStorage.log) {
 		throw new Error("Mod storage log not initialized");
 	}
-	for (let i = 0; i < modStorage.log.length; i++) {
+	let changed = false;
+	for (let i = modStorage.log.length - 1; i >= 0; i--) {
 		const e = modStorage.log[i];
-		if (e[0] === time) {
+		if ((Array.isArray(time) && time.includes(e[0])) || e[0] === time) {
+			changed = true;
 			if (access === LogAccessLevel.none) {
 				modStorage.log.splice(i, 1);
 			} else {
@@ -111,12 +113,13 @@ export function logMessageDelete(time: number, character: ChatroomCharacter | nu
 				e[2] = LogEntryType.deleted;
 				e[3] = null;
 			}
-			modStorageSync();
-			notifyOfChange();
-			return true;
 		}
 	}
-	return false;
+	if (changed) {
+		modStorageSync();
+		notifyOfChange();
+	}
+	return changed;
 }
 
 export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLevel, character: ChatroomCharacter | null): boolean {
@@ -397,7 +400,7 @@ export class ModuleLog extends BaseModule {
 			resolve(true, getVisibleLogEntries(sender));
 		};
 		queryHandlers.logDelete = (sender, resolve, data) => {
-			if (typeof data === "number") {
+			if (typeof data === "number" || (Array.isArray(data) && data.every(item => typeof item === "number"))) {
 				resolve(true, logMessageDelete(data, sender));
 			} else {
 				resolve(false);

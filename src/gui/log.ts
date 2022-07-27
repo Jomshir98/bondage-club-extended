@@ -111,10 +111,13 @@ export class GuiLog extends GuiSubscreen {
 			DrawText("Filter:", 130, 215, "Black");
 			positionElement(this.filterInput, 550, 210, 600, 64);
 
-			//reset button
+			//reset and delete all button
 			if (this.filterInput.value) {
 				MainCanvas.textAlign = "center";
 				DrawButton(870, 182, 64, 64, "X", "White");
+				if (this.allowDeletion) {
+					DrawButton(1270, 182, 420, 64, "Delete all filtered log entries", "White");
+				}
 			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {
@@ -220,6 +223,12 @@ export class GuiLog extends GuiSubscreen {
 			if (MouseIn(870, 182, 64, 64)) {
 				this.filterInput.value = "";
 				this.refreshScreen();
+			}
+
+			// Clear all filtered logs button
+			if (MouseIn(1270, 182, 420, 64) && this.allowDeletion) {
+				this.character.logMessageDelete(this.logEntries.map(e => e[0]));
+				return;
 			}
 
 			for (let off = 0; off < PER_PAGE_COUNT; off++) {

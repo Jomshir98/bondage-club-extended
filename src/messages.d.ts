@@ -97,7 +97,7 @@ type BCX_queries = {
 		boolean
 	];
 	logData: [undefined, import("./modules/log").LogEntry[]];
-	logDelete: [number, boolean];
+	logDelete: [number | number[], boolean];
 	logConfigGet: [undefined, import("./modules/log").LogConfig];
 	logConfigEdit: [{
 		category: BCX_LogCategory;

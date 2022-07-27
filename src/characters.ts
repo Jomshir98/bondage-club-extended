@@ -180,7 +180,7 @@ export class ChatroomCharacter {
 		});
 	}
 
-	logMessageDelete(time: number): Promise<boolean> {
+	logMessageDelete(time: number | number[]): Promise<boolean> {
 		return sendQuery("logDelete", time, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'logDelete' query\n", data);
@@ -423,7 +423,7 @@ export class PlayerCharacter extends ChatroomCharacter {
 		return Promise.resolve(getVisibleLogEntries(this));
 	}
 
-	override logMessageDelete(time: number): Promise<boolean> {
+	override logMessageDelete(time: number | number[]): Promise<boolean> {
 		return Promise.resolve(logMessageDelete(time, this));
 	}
 

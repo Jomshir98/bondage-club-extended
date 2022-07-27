@@ -555,7 +555,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep unless the rule is not enforced, in which case she will see both the beep and the auto reply. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
+		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep unless the rule is not enforced, in which case she will see both the beep and the auto reply. Optionally, the rule can be set to only activate while PLAYER_NAME is unable to use her hands (e.g. fixed to a cross).",
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			whitelistedMemberNumbers: {

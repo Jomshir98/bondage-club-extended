@@ -7,7 +7,7 @@
 	"private": true,
 	"scripts": {
 		"build": "rollup -c",
-		"serve": "rollup -c -w",
+		"dev": "rollup -c -w",
 		"typecheck": "tsc --noEmit -p .",
 		"lint": "eslint --max-warnings 0 .",
 		"lint:fix": "eslint --fix ."

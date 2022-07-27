@@ -98,7 +98,7 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 		rawMessage,
 		originalMessage: msg,
 		target: ChatRoomTargetMemberNumber,
-		noOOCMessage: msg.replace(/\([^)]*\)?\s?/gs, ""),
+		noOOCMessage: msg.replace(/\([^)]*\)*\s?/gs, ""),
 		hasOOC: msg.includes("(")
 	};
 }

@@ -526,7 +526,7 @@ export const ruleCustomDataHandlers: {
 		},
 		run({ def, value, Y, key, access }) {
 			Y -= 20;
-			const PAGE_SIZE = 4;
+			const PAGE_SIZE = def.options?.pageSize ?? 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
 			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
 			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
@@ -539,11 +539,11 @@ export const ruleCustomDataHandlers: {
 					DrawHoverElements.push(() => {
 						MainCanvas.save();
 						MainCanvas.fillStyle = "rgba(255, 255, 136, 0.9)";
-						MainCanvas.fillRect(1050, Y + 26, 766, 280);
+						MainCanvas.fillRect(1050, Y + 26, 766, 70 * PAGE_SIZE);
 						MainCanvas.strokeStyle = "Black";
-						MainCanvas.strokeRect(1050, Y + 26, 766, 280);
+						MainCanvas.strokeRect(1050, Y + 26, 766, 70 * PAGE_SIZE);
 						MainCanvas.textAlign = "left";
-						DrawTextWrap(msg + "   -   [click to copy into the empty input text field]", 1050 - 746 / 2, Y + 30, 756, 270, "black", undefined, 5);
+						DrawTextWrap(msg + "   -   [click to copy into the empty input text field]", 1050 - 746 / 2, Y + 30, 756, 70 * PAGE_SIZE - 10, "black", undefined, 5);
 						MainCanvas.restore();
 					});
 				}
@@ -563,7 +563,7 @@ export const ruleCustomDataHandlers: {
 		},
 		click({ value, Y, key, def, access }) {
 			Y -= 20;
-			const PAGE_SIZE = 4;
+			const PAGE_SIZE = def.options?.pageSize ?? 4;
 			const totalPages = Math.max(1, Math.ceil(value.length / PAGE_SIZE));
 			const page = clamp(ruleCustomDataHandlerPage.get(key) ?? 0, 0, totalPages - 1);
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;

@@ -575,6 +575,7 @@ type RuleCustomDataTypesOptions = {
 	string?: RegExp;
 	stringList?: {
 		validate?: RegExp;
+		pageSize?: number;
 	}
 };
 

@@ -1,5 +1,22 @@
 # BCX Changelog
 
+## 0.8.4
+
+This update includes:
+ - The `.antiblind` command now also removes tint and blur effects
+ - Changed treatment of extra OOC closing brackets as OOC
+ - This update improves compatibility with BC release R82
+
+Rules module changes:
+ - Changed the rule "Always leave rooms slowly" to ignore BC's roleplay difficulty setting 'Cannot be slowed down'
+ - Fixed a bug with the rule "Track rule effect time", that made the settable role a maximum allowed role instead of a minimum one
+ - Fixed the rule "Hearing whitelist" to correctly handle garbled whispers from rules such as "Garble whispers while gagged"
+ - Improved the description of the rule "Restrict receiving beeps"
+
+Fixes:
+ - Fixed certain BCX messages appearing as "(Beep)" for users of the Chinese language [by dynilath]
+ - Fixed item search triggering in the crafting details menu
+
 ## 0.8.3
 
 This update includes:

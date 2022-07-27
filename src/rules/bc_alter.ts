@@ -452,7 +452,7 @@ export function initRules_bc_alter() {
 		name: "Always leave rooms slowly",
 		type: RuleType.Alt,
 		loggable: false,
-		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independent of the items she is wearing. WARNING: Due to limitation in Bondage Club itself, only BCX users will be able to stop PLAYER_NAME from leaving the room.",
+		longDescription: "This rule forces PLAYER_NAME to always leave the room slowly, independent of the items she is wearing. WARNING: Due to limitation in Bondage Club itself, only BCX users will be able to stop PLAYER_NAME from leaving the room. Also, this rule will have no effect for players on BC's roleplay difficulty, who have 'cannot be slowed down' set on.",
 		defaultLimit: ConditionsLimit.normal,
 		init(state) {
 			registerEffectBuilder(PlayerEffects => {

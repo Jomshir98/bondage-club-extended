@@ -57,6 +57,8 @@ interface RGBAColor extends RGBColor {
 	a: number;
 }
 
+type RectTuple = [number, number, number, number];
+
 //#endregion
 
 //#region Enums
@@ -92,7 +94,7 @@ type EffectName =
 
 	"CuffedFeet" | "CuffedLegs" | "CuffedArms" | "IsChained" | "FixedHead" |
 
-	"Shackled" | "Tethered" | "Enclose" | "OneWayEnclose" | "OnBed" | "Lifted" |
+	"Shackled" | "Tethered" | "Enclose" | "OneWayEnclose" | "OnBed" | "Lifted" | "Suspended" |
 
 	"Slow" | "FillVulva" | "IsPlugged" |
 
@@ -143,7 +145,7 @@ type AssetGroupItemName =
 	'ItemHood' | 'ItemLegs' | 'ItemMisc' | 'ItemMouth' | 'ItemMouth2' |
 	'ItemMouth3' | 'ItemNeck' | 'ItemNeckAccessories' | 'ItemNeckRestraints' |
 	'ItemNipples' | 'ItemNipplesPiercings' | 'ItemNose' | 'ItemPelvis' |
-	'ItemTorso' | 'ItemVulva' | 'ItemVulvaPiercings' |
+	'ItemTorso' | 'ItemTorso2'| 'ItemVulva' | 'ItemVulvaPiercings' |
 
 	'ItemHidden' /* TODO: investigate, not a real group */
 	;
@@ -151,7 +153,7 @@ type AssetGroupItemName =
 type AssetGroupBodyName =
 	'Blush' | 'BodyLower' | 'BodyUpper' | 'Bra' | 'Bracelet' | 'Cloth' |
 	'ClothAccessory' | 'ClothLower' | 'Corset' | 'Emoticon' | 'Eyebrows' |
-	'Ears' | 'Eyes' | 'Eyes2' | 'Fluids' | 'Garters' | 'Glasses' | 'Gloves' |
+	'Eyes' | 'Eyes2' | 'Fluids' | 'Garters' | 'Glasses' | 'Gloves' |
 	'HairAccessory1' | 'HairAccessory2' | 'HairAccessory3' | 'HairBack' |
 	'HairFront' | 'Hands' | 'Hat' | 'Head' | 'Height' | 'LeftAnklet' | 'Mask' |
 	'Mouth' | 'Necklace' | 'Nipples' | 'Panties' | 'Pussy' | 'RightAnklet' |
@@ -269,6 +271,7 @@ interface ChatRoom {
 	Private: boolean;
 	Locked: boolean;
 	BlockCategory: string[];
+	Language: string;
 	Character?: any[]; /* From server, not really a Character object */
 }
 
@@ -361,8 +364,8 @@ interface AssetGroup {
 	DrawingBlink: boolean;
 	InheritColor?: string;
 	FreezeActivePose: string[];
-	PreviewZone?: [number, number, number, number];
-	DynamicGroupName: string;
+	PreviewZone?: RectTuple;
+	DynamicGroupName: AssetGroupName;
 	MirrorActivitiesFrom: string | null;
 }
 
@@ -435,7 +438,7 @@ masks will be applied regardless of the extended type. */
 	Type?: string[];
 	/** A list of alpha mask definitions. A definition is a 4-tuple of numbers defining the top left coordinate of
 a rectangle and the rectangle's width and height - e.g. [left, top, width, height] */
-	Masks: [number, number, number, number][];
+	Masks: RectTuple[];
 }
 
 interface TintDefinition {
@@ -465,7 +468,7 @@ interface Asset {
 	Wear: boolean;
 	Activity: string | null;
 	AllowActivity?: string[];
-	AllowActivityOn?: string[];
+	AllowActivityOn?: AssetGroupName[];
 	BuyGroup?: string;
 	PrerequisiteBuyGroups?: string[];
 	Effect?: EffectName[];
@@ -515,7 +518,7 @@ interface Asset {
 	AllowEffect?: EffectName[];
 	AllowBlock?: AssetGroupItemName[];
 	AllowType?: string[];
-	DefaultColor?: string | string[];
+	DefaultColor?: ItemColor;
 	Opacity: number;
 	MinOpacity: number;
 	MaxOpacity: number;
@@ -533,7 +536,7 @@ interface Asset {
 	DynamicAllowInventoryAdd: (C: Character) => boolean;
 	DynamicExpressionTrigger: (C: Character) => ExpressionTrigger[] | null | undefined;
 	DynamicName: (C: Character) => string;
-	DynamicGroupName: string;
+	DynamicGroupName: AssetGroupName;
 	DynamicActivity: (C: Character) => string | null | undefined;
 	DynamicAudio: ((C: Character) => string) | null;
 	CharacterRestricted: boolean;
@@ -556,7 +559,7 @@ interface Asset {
 	ColorableLayerCount: number;
 	Archetype?: string;
 	Attribute: string[];
-	PreviewIcons: string[];
+	PreviewIcons: InventoryIcon[];
 	Tint: TintDefinition[];
 	AllowTint: boolean;
 	DefaultTint?: string;
@@ -569,8 +572,9 @@ interface ItemBundle {
 	Group: string;
 	Name: string;
 	Difficulty?: number;
-	Color?: string | string[];
+	Color?: ItemColor;
 	Property?: ItemProperties;
+	Craft?: CraftedItemProperties;
 }
 
 /** An AppearanceBundle is whole minified appearance of a character */
@@ -601,17 +605,32 @@ interface LogRecord {
 	Value: number;
 }
 
+type ItemColor = string | string[];
+
 /** An item is a pair of asset and its dynamic properties that define a worn asset. */
 interface Item {
 	Asset: Asset;
-	Color?: string | string[];
+	Color?: ItemColor;
 	Difficulty?: number;
+	Craft?: CraftedItemProperties;
 	Property?: ItemProperties;
 }
 
+interface CraftedItemProperties {
+	Name: string;
+	MemberName?: string;
+	MemberNumber?: number;
+	Description: string;
+	Property: string;
+}
+
+type FavoriteIcon = "Favorite" | "FavoriteBoth" | "FavoritePlayer";
+
+type InventoryIcon = FavoriteIcon | "AllowedLimited" | "Handheld" | "Locked" | "LoverOnly" | "OwnerOnly" | "Unlocked";
+
 interface DialogInventoryItem extends Item {
 	Worn: boolean;
-	Icons: string[];
+	Icons: InventoryIcon[];
 	SortOrder: string;
 	Hidden: boolean;
 	Vibrating: boolean;
@@ -621,6 +640,14 @@ interface InventoryItem {
 	Group: string;
 	Name: string;
 	Asset: Asset;
+}
+
+interface FavoriteState {
+	TargetFavorite: boolean;
+	PlayerFavorite: boolean;
+	Icon: FavoriteIcon;
+	UsableOrder: DialogSortOrder;
+	UnusableOrder: DialogSortOrder;
 }
 
 interface Skill {
@@ -693,6 +720,7 @@ interface Character {
 	OnlineID?: string;
 	Type: CharacterType;
 	Name: string;
+	Nickname?: string;
 	AssetFamily: IAssetFamily | string;
 	AccountName: string;
 	Owner: string;
@@ -787,6 +815,7 @@ interface Character {
 	IsNpc: () => boolean;
 	IsSimple: () => boolean;
 	GetDifficulty: () => number;
+	IsSuspended: () => boolean;
 	IsInverted: () => boolean;
 	CanChangeToPose: (Pose: string) => boolean;
 	GetClumsiness: () => number;
@@ -823,8 +852,6 @@ interface Character {
 		DisableAdvancedVibes: boolean;
 	};
 	AppearanceFull?: Item[];
-	Trait?: NPCTrait[];
-	Event?: any[];
 	// Online character properties
 	Title?: string;
 	ActivePose?: any;
@@ -848,7 +875,6 @@ interface Character {
 	RunScripts?: boolean;
 	HasScriptedAssets?: boolean;
 	Cage?: true | null;
-	Love?: number;
 	Difficulty?: {
 		Level: number;
 		LastChange?: number;
@@ -858,6 +884,86 @@ interface Character {
 	Rule?: LogRecord[];
 	Status?: string | null;
 	StatusTimer?: number;
+	Crafting?: {
+		Name: string;
+		Description: string;
+		Property: string;
+		Color: string;
+		Lock: AssetLockType;
+		Item: string;
+	}[];
+}
+
+type NPCArchetype =
+	/* Pandora NPCs */
+	"MemberNew"|"MemberOld"|"Cosplay"|"Mistress"|"Slave"|"Maid"|"Guard"|
+	/* Pandora Special */
+	"Victim"|"Target"|"Chest";
+
+/** NPC Character extension */
+// FIXME: That one should find its way down to NPCCharacter, but
+// there's too many accesses to those properties from Character
+// to do so.
+interface Character {
+	/** NPC type: Slave, Maid, etc. */
+	Archetype?: NPCArchetype;
+	Love?: number; /** The NPC's love value */
+	WillRelease?(): boolean; /** Shop NPC-only: will it release the player when asked */
+}
+
+/** NPC-only */
+interface NPCCharacter extends Character {
+	Archetype?: NPCArchetype;
+	Trait?: NPCTrait[];
+	Event?: NPCTrait[];
+	Love?: number;
+}
+
+/** College */
+interface NPCCharacter {
+	GoneAway?: boolean;
+}
+
+/** Asylum */
+interface NPCCharacter {
+	RunAway?: boolean;
+}
+
+/** Sarah */
+interface Character {
+	OrgasmMeter?: number;
+	OrgasmDone?: boolean;
+}
+
+interface KidnapCard {
+	Move: number;
+	Value?: number;
+}
+
+/** Kidnap minigame */
+interface Character {
+	KidnapWillpower?: number;
+	KidnapMaxWillpower?: number;
+	KidnapCard?: KidnapCard[];
+	KidnapStat?: [number, number, number, number];
+}
+
+/** Pandora NPCs */
+interface Character {
+	Recruit?: number;
+	RecruitOdds?: number;
+	RandomOdds?: number;
+	QuizLog?: number[];
+	QuizFail?: number;
+	AllowMove?: boolean;
+	DrinkValue?: number;
+	TriggerIntro?: boolean;
+	FromPandora?: boolean;
+}
+
+/** Magic School */
+interface Character {
+	House?: string;
 }
 
 /** MovieStudio */
@@ -1030,10 +1136,27 @@ interface PlayerCharacter extends Character {
 	FriendList?: number[];
 	FriendNames?: Map<number, string>;
 	SubmissivesList?: Set<number>;
+	ChatSearchFilterTerms?: string;
+}
+
+/** Pandora Player extension */
+interface PlayerCharacter {
+	Infiltration?: {
+		Punishment?: {
+			Minutes: number;
+			Timer?: number;
+			Background: string;
+			Difficulty: number;
+			FightDone?: boolean;
+		}
+		Perks?: string;
+	}
+}
+
+/** Kinky Dungeon Player extension */
+interface PlayerCharacter {
 	KinkyDungeonKeybindings?: any;
 	KinkyDungeonExploredLore?: any[];
-	Infiltration?: any;
-	ChatSearchFilterTerms?: string;
 }
 
 interface NPCTrait {
@@ -1068,7 +1191,7 @@ interface ItemPropertiesBase {
 	Attribute?: string[];
 
 	AllowActivity?: string[];
-	AllowActivityOn?: AssetGroupItemName[];
+	AllowActivityOn?: AssetGroupName[];
 
 	/** Items hidden by this one */
 	HideItem?: string[];
@@ -1107,8 +1230,6 @@ interface ItemPropertiesCustom {
 	ItemMemberNumber?: number;
 
 	MemberNumber?: number;
-
-	AllowLock?: boolean;
 
 	SelfUnlock?: boolean;
 
@@ -1270,6 +1391,8 @@ interface ExtendedItemOption {
 	Prerequisite?: string | string[];
 	/** A custom background for this option that overrides the default */
 	CustomBlindBackground?: string;
+	/** Whether the option permits locking - if not set, defaults to the AllowLock property of the parent asset */
+	AllowLock?: boolean;
 	/**
 	 * Whether or not it should be possible to change from this option to another
 	 * option while the item is locked (if set to `false`, the player must be able to unlock the item to change its type) -
@@ -1458,6 +1581,8 @@ interface ModularItemOption {
 	HideItem?: string[];
 	/** The Property object to be applied when this option is used */
 	Property?: ItemProperties;
+	/** Whether the option permits locking - if not set, defaults to the AllowLock property of the parent asset */
+	AllowLock?: boolean;
 	/**
 	 * Whether or not it should be possible to change from this option to another
 	 * option while the item is locked (if set to `false`, the player must be able to unlock the item to change its type) -
@@ -1499,6 +1624,8 @@ interface ModularItemData {
 	chatTags: CommonChatTags[];
 	/** The identifying key for the asset, in the format "<GroupName><AssetName>" */
 	key: string;
+	/** The total number of types permitted by the item */
+	typeCount: number;
 	/** The prefix for generated functions */
 	functionPrefix: string;
 	/** The dialogue prefix for the player prompt that is displayed on each module's menu screen */
@@ -1816,8 +1943,8 @@ interface VariableHeightConfig {
 	MaxHeight: number;
 	/** The lowest Y co-ordinate that can be set  */
 	MinHeight: number;
-	/** The name of the image from "\BondageClub\Icons" that will show the current position on the slider */
-	SliderIcon: string;
+	/** Settings for the range input element the user can use to change the height */
+	Slider: VariableHeightSliderConfig;
 	/** A record containing various dialog keys used by the extended item screen */
 	Dialog: VariableHeightDialogConfig;
 	/**
@@ -1825,12 +1952,21 @@ interface VariableHeightConfig {
 	 * chatroom messages. Defaults to [{@link CommonChatTags.SOURCE_CHAR}, {@link CommonChatTags.DEST_CHAR}]
 	 */
 	ChatTags?: CommonChatTags[];
-	/** Name of the function that handles finding the current variable height setting */
-	GetHeightFunction?: string;
-	/** Name of the function that handles applying the height setting to the character */
-	SetHeightFunction?: string;
+	/** The function that handles finding the current variable height setting */
+	GetHeightFunction?: Function;
+	/** The function that handles applying the height setting to the character */
+	SetHeightFunction?: Function;
 	/** The default properties for the item, if not provided from an extended item option */
 	Property?: ItemProperties;
+}
+
+interface VariableHeightSliderConfig {
+	/** The name of a supported thumbnail image in \CSS\Styles.css that will show the current position on the slider */
+	Icon: string;
+	/** The Y co-ordinate of the topmost point of the slider */
+	Top: number;
+	/** The height in pixels of the slider */
+	Height: number;
 }
 
 interface VariableHeightDialogConfig {
@@ -1864,8 +2000,8 @@ interface VariableHeightData {
 	maxHeight: number;
 	/** The lowest Y co-ordinate that can be set  */
 	minHeight: number;
-	/** The name of the image from "\BondageClub\Icons" that will show the current position on the slider */
-	sliderIcon: string;
+	/** Settings for the range input element the user can use to change the height */
+	slider: VariableHeightSliderConfig;
 	/** The initial property to apply */
 	defaultProperty: ItemProperties;
 	/** A record containing various dialog keys used by the extended item screen */
@@ -1995,3 +2131,188 @@ interface AudioChatAction {
 }
 
 // #endregion
+
+// #region Character drawing
+
+/**
+ * A callback function used for clearing a rectangular area of a canvas
+ * @param {number} x - The x coordinate of the left of the rectangle to clear
+ * @param {number} y - The y coordinate of the top of the rectangle to clear
+ * @param {number} w - The width of the rectangle to clear
+ * @param {number} h - The height of the rectangle to clear
+ */
+type ClearRectCallback = (x: number, y: number, w: number, h: number) => void;
+
+/**
+ * A callback function used to draw a canvas on a canvas
+ * @param {HTMLImageElement | HTMLCanvasElement} Img - The canvas to draw
+ * @param {number} x - The x coordinate to draw the canvas at
+ * @param {number} y - The y coordinate to draw the canvas at
+ */
+type DrawCanvasCallback = (
+	img: HTMLImageElement | HTMLCanvasElement,
+	x: number,
+	y: number,
+	alphaMasks?: RectTuple[],
+) => void;
+
+/**
+ * A callback function used to draw an image to a canvas
+ * @param {string} src - The URL of the image to draw
+ * @param {number} x - The x coordinate to draw the image at
+ * @param {number} y - The y coordinate to draw the image at
+ * @param {RectTuple[]} [alphaMasks] - A list of alpha masks to apply to the image when drawing
+ * @param {number} [opacity=1] - The opacity at which to draw the image with
+ * @param {boolean} [rotate=false] - If the image should be rotated by 180 degrees
+ */
+type DrawImageCallback = (
+	src: string,
+	x: number,
+	y: number,
+	alphasMasks: RectTuple[],
+	opacity?: number,
+	rotate?: boolean,
+) => void;
+
+/**
+ * A callback function used to draw a colorized image to a canvas
+ * @callback drawImageColorize
+ * @param {string} src - The URL of the image to draw
+ * @param {number} x - The x coordinate to draw the image at
+ * @param {number} y - The y coordinate to draw the image at
+ * @param {string} color - The color to apply to the image
+ * @param {boolean} fullAlpha - Whether or not to apply color to the entire image
+ * @param {RectTuple[]} [alphaMasks] - A list of alpha masks to apply to the image when drawing
+ * @param {number} [opacity=1] - The opacity at which to draw the image with
+ * @param {boolean} [rotate=false] - If the image should be rotated by 180 degrees
+ */
+type DrawImageColorizeCallback = (
+	src: string,
+	x: number,
+	y: number,
+	color: string,
+	fullAlpha: boolean,
+	alphaMasks?: RectTuple[],
+	opacity?: number,
+	rotate?: boolean,
+) => void;
+
+interface CommonDrawCallbacks {
+	/**
+	 * A callback to clear an area of the main character canvas
+	 */
+	clearRect: ClearRectCallback;
+	/**
+	 * A callback to clear an area of the blink character canvas
+	 */
+	clearRectBlink: ClearRectCallback;
+	/**
+	 * Function used to draw a canvas on top of the normal canvas
+	 */
+	drawCanvas: DrawCanvasCallback;
+	/**
+	 * Function used to draw a canvas on top of the blink canvas
+	 */
+	drawCanvasBlink: DrawCanvasCallback;
+	/**
+	 * A callback to draw an image to the main character canvas
+	 */
+	drawImage: DrawImageCallback;
+	/**
+	 * A callback to draw an image to the blink character canvas
+	 */
+	drawImageBlink: DrawImageCallback;
+	/**
+	 * A callback to draw a colorized image to the main character canvas
+	 */
+	drawImageColorize: DrawImageColorizeCallback;
+	/**
+	 * A callback to draw a colorized image to the blink character canvas
+	 */
+	drawImageColorizeBlink: DrawImageColorizeCallback;
+}
+
+interface DynamicDrawingData {
+	C: Character;
+	X: number;
+	Y: number;
+	CA: Item;
+	GroupName: AssetGroupName;
+	Color: string;
+	Opacity: number;
+	Property: ItemProperties;
+	A: Asset;
+	G: string;
+	AG: AssetGroup;
+	L: string;
+	Pose: string;
+	LayerType: string;
+	BlinkExpression: string;
+	drawCanvas: DrawCanvasCallback;
+	drawCanvasBlink: DrawCanvasCallback;
+	AlphaMasks: RectTuple[];
+	PersistentData: <T>() => T;
+}
+
+/**
+ * Drawing overrides that can be returned by a dynamic BeforeDraw function
+ */
+interface DynamicBeforeDrawOverrides {
+	Property?: ItemProperties;
+	CA?: Item;
+	GroupName?: AssetGroupName;
+	Color?: ItemColor;
+	Opacity?: number;
+	X?: number;
+	Y?: number;
+	LayerType?: number;
+	L?: string;
+	AlphaMasks?: RectTuple[];
+}
+
+// #endregion
+
+//#region Infiltration/Pandora
+
+type InfiltrationTargetType = "NPC" | "USBKey" | "BDSMPainting" | "GoldCollar" | "GeneralLedger" | "SilverVibrator" | "DiamondRing" | "SignedPhoto" | "PandoraPadlockKeys";
+
+interface InfiltrationMissionTarget {
+	Type: InfiltrationTargetType;
+	Found: boolean;
+	Fail: boolean;
+	Name: string;
+	PrivateRoom: boolean;
+}
+
+type PandoraDirection = "North" | "South" | "East" | "West";
+type PandoraFloorDirection = "StairsUp" | "StairsDown" | PandoraDirection;
+type PandoraFloors = "Ground" | "Second" | "Underground";
+
+interface PandoraSpecialRoom {
+	Floor: "Exit" | "Search" | "Rest" | "Paint";
+}
+
+interface PandoraBaseRoom {
+	Floor: PandoraFloors;
+	Background: string;
+	Character: NPCCharacter[];
+	Path: (PandoraBaseRoom | PandoraSpecialRoom)[];
+	PathMap: PandoraBaseRoom[];
+	Direction: string[];
+	DirectionMap: string[];
+
+	/* SearchRoom */
+	SearchSquare?: {
+		X: number;
+		Y: number;
+		W: number;
+		H: number;
+	}[];
+	ItemX?: number;
+	ItemY?: number;
+
+	/* PaintRoom */
+	Graffiti?: number;
+}
+
+//#endregion

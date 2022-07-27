@@ -71,7 +71,7 @@ export function initRules_other() {
 		},
 		init(state) {
 			registerWhisperCommand("hidden", "ruletime", null, (argv, sender, respond) => {
-				if (state.condition && state.customData && state.internalData !== undefined && getCharacterAccessLevel(sender) >= state.customData.minimumPermittedRole) {
+				if (state.condition && state.customData && state.internalData !== undefined && getCharacterAccessLevel(sender) <= state.customData.minimumPermittedRole) {
 					const fixup = state.inEffect ? (Date.now() - lastUpdate) : 0;
 					const msg = `Since the time tracking rule was added, ${formatTimeInterval(state.internalData + fixup)} were counted, where all trigger conditions were true.`;
 					respond(msg);

@@ -439,6 +439,7 @@ type RuleCustomData = {
 	speech_partial_hearing: {
 		alwaysUnderstandableWords: string[];
 		randomUnderstanding: boolean;
+		affectGaggedMembersToggle: boolean;
 	},
 	other_forbid_afk: {
 		minutesBeforeAfk: number;

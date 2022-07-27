@@ -996,8 +996,8 @@ export function initRules_bc_speech_control() {
 		name: "Partial hearing",
 		type: RuleType.Speech,
 		shortDescription: "of muffled speech - random & word list based",
-		longDescription: "This rule gives PLAYER_NAME ability to understand parts of a muffled sentence ungarbled, based on a white list of words and/or randomly. Doesn't affect emotes and OOC text.",
-		keywords: ["deafness", "garbling", "antigarble", "understand", "ungarble", "specific", "words", "whitelist", "allowlist"],
+		longDescription: "This rule gives PLAYER_NAME ability to understand parts of a muffled sentence ungarbled, based on a white list of words and/or randomly. On default, applies only to muffled hearing from deafening effects on PLAYER_NAME, but optionally can be enhanced to allow also partially understanding the muffled speech of other persons who are speech impaired. Doesn't affect emotes and OOC text.",
+		keywords: ["deafness", "garbling", "antigarble", "understanding", "ungarble", "specific", "words", "whitelist", "allowlist"],
 		loggable: false,
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
@@ -1006,19 +1006,33 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "Words that can always be understood:",
 				options: {
-					validate: /^[\p{L}]*$/iu
+					validate: /^[\p{L}]*$/iu,
+					pageSize: 3
 				}
 			},
 			randomUnderstanding: {
 				type: "toggle",
 				default: true,
 				description: "Some words are randomly understood",
-				Y: 730
+				Y: 650
+			},
+			affectGaggedMembersToggle: {
+				type: "toggle",
+				default: false,
+				description: "Can also understand gagged persons",
+				Y: 740
 			}
 		},
 		load(state) {
 			hookFunction("SpeechGarble", 2, (args, next) => {
-				if (!state.isEnforced)
+				const C = args[0] as Character;
+				if (!state.isEnforced ||
+					(
+						!C.CanTalk() &&
+						state.customData &&
+						!state.customData.affectGaggedMembersToggle
+					)
+				)
 					return next(args);
 				return (args[1] as string).replace(/\([^)]+\)?|\p{L}+/gmui, (word) => {
 					if (word.startsWith("(")) {

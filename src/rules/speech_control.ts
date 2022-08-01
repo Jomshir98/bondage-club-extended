@@ -998,7 +998,7 @@ export function initRules_bc_speech_control() {
 			hookFunction("SpeechGarble", 2, (args, next) => {
 				if (!state.isEnforced)
 					return next(args);
-				return (args[1] as string).replace(/\([^)]+\)|\p{L}+/gmui, (word) => {
+				return (args[1] as string).replace(/\([^)]+\)?|\p{L}+/gmui, (word) => {
 					if (word.startsWith("(")) {
 						return word;
 					} if (state.customData?.randomUnderstanding && Math.random() < 0.25) {

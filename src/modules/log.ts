@@ -407,7 +407,7 @@ export class ModuleLog extends BaseModule {
 			}
 		};
 		queryHandlers.logConfigGet = (sender, resolve) => {
-			if (checkPermissionAccess("log_configure", sender)) {
+			if (sender.isPlayer() || checkPermissionAccess("log_configure", sender)) {
 				resolve(true, logGetConfig());
 			} else {
 				resolve(false);

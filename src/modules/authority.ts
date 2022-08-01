@@ -486,6 +486,7 @@ export class ModuleAuthority extends BaseModule {
 
 		queryHandlers.rolesData = (sender, resolve) => {
 			if (
+				!sender.isPlayer() &&
 				!checkPermissionAccess("authority_view_roles", sender) &&
 				!checkPermissionAccess("authority_mistress_add", sender) &&
 				!checkPermissionAccess("authority_mistress_remove", sender) &&

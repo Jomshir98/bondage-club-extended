@@ -337,7 +337,16 @@ export const ruleCustomDataHandlers: {
 		}
 	},
 	number: {
-		validate: value => typeof value === "number" && Number.isInteger(value),
+		validateOptions: options => options === undefined || (
+			isObject(options) &&
+			(options.min === undefined || Number.isInteger(options.min)) &&
+			(options.max === undefined || Number.isInteger(options.max))
+		),
+		validate: (value, def) => (
+			typeof value === "number" && Number.isInteger(value) &&
+			(def.options?.min === undefined || value >= def.options.min) &&
+			(def.options?.max === undefined || value <= def.options.max)
+		),
 		onDataChange({ active, key, onInput, value, access }) {
 			let input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (!active) {
@@ -354,13 +363,22 @@ export const ruleCustomDataHandlers: {
 			} else {
 				input.value = value.toString(10);
 			}
+			input.onblur = () => {
+				if (input) {
+					input.value = value.toString(10);
+				}
+			};
 			input.disabled = !access;
 		},
-		processInput({ key, value }) {
+		processInput({ key, value, def }) {
 			const input = document.getElementById(`BCX_RCDH_${key}`) as HTMLInputElement | undefined;
 			if (input && input.value) {
 				if (/^[0-9]+$/.test(input.value)) {
-					return Number.parseInt(input.value, 10);
+					const res = clamp(Number.parseInt(input.value, 10), def.options?.min ?? -Infinity, def.options?.max ?? Infinity);
+					input.onblur = () => {
+						input.value = res.toString(10);
+					};
+					return res;
 				} else {
 					input.value = value.toString(10);
 				}

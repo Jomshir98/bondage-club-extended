@@ -246,6 +246,7 @@ type BCX_Rule =
 	| "alt_field_of_vision"
 	| "alt_blindfolds_fullblind"
 	| "alt_always_slow"
+	| "alt_set_leave_slowing"
 	| "alt_control_orgasms"
 	| "alt_secret_orgasms"
 	| "alt_room_admin_transfer"
@@ -347,6 +348,9 @@ type RuleCustomData = {
 		affectPlayer: boolean;
 		hideNames: boolean;
 	},
+	alt_set_leave_slowing: {
+		leaveTime: number;
+	}
 	alt_field_of_vision: {
 		affectPlayer: boolean;
 		hideNames: boolean;
@@ -574,6 +578,10 @@ type RuleCustomDataTypesOptions = {
 	listSelect: [string, string][];
 	memberNumberList?: {
 		pageSize?: number;
+	};
+	number?: {
+		min?: number;
+		max?: number;
 	};
 	string?: RegExp;
 	stringList?: {

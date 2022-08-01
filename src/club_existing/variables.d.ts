@@ -147,6 +147,7 @@ declare var ChatRoomMenuButtons: string[];
 declare var ChatRoomPlayerCanJoin: boolean;
 declare var ChatRoomSenseDepBypass: boolean;
 declare var DialogLentLockpicks: boolean;
+declare var ChatRoomSlowtimer: number;
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomCharacterUpdate(C: Character): void;
 declare function ChatRoomMessage(data: IChatRoomMessage): void;

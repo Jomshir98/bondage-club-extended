@@ -483,6 +483,38 @@ export function initRules_bc_alter() {
 		}
 	});
 
+	registerRule("alt_set_leave_slowing", {
+		name: "Set slowed leave time",
+		type: RuleType.Alt,
+		loggable: false,
+		longDescription: "This rule can set the time PLAYER_NAME needs to leave the current room, when items or a rule force her to leave it slowly. The time can be set between 1 and 600 seconds (10 mins).",
+		keywords: ["slowness", "limit", "leaving", "customized", "increase", "higher", "stopping", "exit", "blocking", "room"],
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			leaveTime: {
+				type: "number",
+				default: 10,
+				options: {
+					min: 1,
+					max: 600
+				},
+				description: "New leave time in seconds:"
+			}
+		},
+		init(state) {
+			hookFunction("ChatRoomMenuClick", 2, (args, next) => {
+				if (!state.isEnforced)
+					return next(args);
+
+				const oldSlowTimer = ChatRoomSlowtimer;
+				next(args);
+				if (state.customData && oldSlowTimer === 0 && ChatRoomSlowtimer > 0) {
+					ChatRoomSlowtimer = CurrentTime + state.customData.leaveTime * 1000;
+				}
+			});
+		}
+	});
+
 	registerRule("alt_control_orgasms", {
 		name: "Control ability to orgasm",
 		type: RuleType.Alt,

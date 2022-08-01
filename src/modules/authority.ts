@@ -438,20 +438,20 @@ export class ModuleAuthority extends BaseModule {
 			}
 		});
 
-		queryHandlers.permissions = (sender, resolve) => {
-			resolve(true, permissionsMakeBundle());
+		queryHandlers.permissions = () => {
+			return permissionsMakeBundle();
 		};
-		queryHandlers.permissionAccess = (sender, resolve, data) => {
+		queryHandlers.permissionAccess = (sender, data) => {
 			if (typeof data === "string") {
-				resolve(true, checkPermissionAccess(data, sender));
+				return checkPermissionAccess(data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
-		queryHandlers.myAccessLevel = (sender, resolve) => {
-			resolve(true, getCharacterAccessLevel(sender));
+		queryHandlers.myAccessLevel = (sender) => {
+			return getCharacterAccessLevel(sender);
 		};
-		queryHandlers.editPermission = (sender, resolve, data) => {
+		queryHandlers.editPermission = (sender, data) => {
 			if (!isObject(data) ||
 				typeof data.permission !== "string" ||
 				(data.edit !== "min" && data.edit !== "self") ||
@@ -459,32 +459,32 @@ export class ModuleAuthority extends BaseModule {
 				(data.edit === "self" && typeof data.target !== "boolean")
 			) {
 				console.warn(`BCX: Bad editPermission query from ${sender}`, data);
-				return resolve(false);
+				return undefined;
 			}
 
 			if (!permissions.has(data.permission)) {
 				console.warn(`BCX: editPermission query from ${sender}; unknown permission`, data);
-				return resolve(false);
+				return undefined;
 			}
 
 			if (data.edit === "self") {
 				if (typeof data.target !== "boolean") {
 					throw new Error("Assertion failed");
 				}
-				return resolve(true, setPermissionSelfAccess(data.permission, data.target, sender));
+				return setPermissionSelfAccess(data.permission, data.target, sender);
 			} else {
 				if (typeof data.target !== "number") {
 					throw new Error("Assertion failed");
 				}
 				if (AccessLevel[data.target] === undefined) {
 					console.warn(`BCX: editPermission query from ${sender}; unknown access level`, data);
-					return resolve(true, false);
+					return false;
 				}
-				return resolve(true, setPermissionMinAccess(data.permission, data.target, sender));
+				return setPermissionMinAccess(data.permission, data.target, sender);
 			}
 		};
 
-		queryHandlers.rolesData = (sender, resolve) => {
+		queryHandlers.rolesData = (sender) => {
 			if (
 				!sender.isPlayer() &&
 				!checkPermissionAccess("authority_view_roles", sender) &&
@@ -495,23 +495,23 @@ export class ModuleAuthority extends BaseModule {
 				!modStorage.mistresses?.includes(sender.MemberNumber) &&
 				!modStorage.owners?.includes(sender.MemberNumber)
 			) {
-				return resolve(false);
+				return undefined;
 			}
 
-			resolve(true, getPlayerRoleData(sender));
+			return getPlayerRoleData(sender);
 		};
 
-		queryHandlers.editRole = (sender, resolve, data) => {
+		queryHandlers.editRole = (sender, data) => {
 			if (!isObject(data) ||
 				data.type !== "owner" && data.type !== "mistress" ||
 				data.action !== "add" && data.action !== "remove" ||
 				typeof data.target !== "number"
 			) {
 				console.warn(`BCX: Bad editRole query from ${sender}`, data);
-				return resolve(false);
+				return undefined;
 			}
 
-			resolve(true, editRole(data.type, data.action, data.target, sender));
+			return editRole(data.type, data.action, data.target, sender);
 		};
 
 		registerWhisperCommand("modules", "role", "- Manage Owner & Mistress roles", (argv, sender, respond) => {

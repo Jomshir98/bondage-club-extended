@@ -61,8 +61,8 @@ export function moduleIsEnabled(module: ModuleCategory): boolean {
 
 export class ModulePresets extends BaseModule {
 	init() {
-		queryHandlers.disabledModules = (sender, resolve) => {
-			return resolve(true, getDisabledModules());
+		queryHandlers.disabledModules = () => {
+			return getDisabledModules();
 		};
 	}
 

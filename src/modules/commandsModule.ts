@@ -160,15 +160,15 @@ export class ModuleCommandsModule extends BaseModule {
 			}
 		});
 
-		queryHandlers.commandTrigger = (sender, resolve, data) => {
+		queryHandlers.commandTrigger = (sender, data) => {
 			if (!Array.isArray(data) || !data.every(i => typeof i === "string") || data.length < 1) {
-				return resolve(false);
+				return undefined;
 			}
 			const command = data.shift();
 			if (guard_BCX_Command(command)) {
-				resolve(true, CommandsTrigger(command, data, sender, () => { /* NOOP */ }));
+				return CommandsTrigger(command, data, sender, () => { /* NOOP */ });
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
 

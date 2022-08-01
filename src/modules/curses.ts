@@ -300,29 +300,29 @@ export class ModuleCurses extends BaseModule {
 			}
 		});
 
-		queryHandlers.curseItem = (sender, resolve, data) => {
+		queryHandlers.curseItem = (sender, data) => {
 			if (isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
-				resolve(true, curseItem(data.Group, data.curseProperties, sender));
+				return curseItem(data.Group, data.curseProperties, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
-		queryHandlers.curseLift = (sender, resolve, data) => {
+		queryHandlers.curseLift = (sender, data) => {
 			if (typeof data === "string") {
-				resolve(true, curseLift(data, sender));
+				return curseLift(data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
-		queryHandlers.curseBatch = (sender, resolve, data) => {
+		queryHandlers.curseBatch = (sender, data) => {
 			if (isObject(data) && typeof data.mode === "string" && typeof data.includingEmpty === "boolean") {
-				resolve(true, curseBatch(data.mode, data.includingEmpty, sender));
+				return curseBatch(data.mode, data.includingEmpty, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
-		queryHandlers.curseLiftAll = (sender, resolve) => {
-			resolve(true, curseLiftAll(sender));
+		queryHandlers.curseLiftAll = (sender) => {
+			return curseLiftAll(sender);
 		};
 
 		registerWhisperCommand("modules", "curses", "- Manage curses", (argv, sender, respond) => {

@@ -8,6 +8,8 @@ interface Window {
 
 declare const LZString: import("lz-string").LZStringStatic;
 
+type Satisfies<T extends U, U> = T;
+
 interface BCXVersion {
 	major: number;
 	minor: number;

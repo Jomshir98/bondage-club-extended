@@ -670,15 +670,13 @@ export class ModuleCommands extends BaseModule {
 			return next(args);
 		});
 
-		queryHandlers.commandHint = (sender, resolve, data) => {
+		queryHandlers.commandHint = (sender, data) => {
 			if (typeof data !== "string" || !data.startsWith("!") || data.startsWith("!!")) {
-				return resolve(false);
+				return undefined;
 			}
 
-			resolve(true,
-				WhisperCommandAutocomplete(data.substring(1), sender)
-					.map(i => ["!" + i[0], i[1]])
-			);
+			return WhisperCommandAutocomplete(data.substring(1), sender)
+				.map(i => ["!" + i[0], i[1]]);
 		};
 
 		registerCommand("hidden", "help", "- Display this help [alias: . ]", (arg) => {

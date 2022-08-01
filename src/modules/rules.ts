@@ -892,18 +892,18 @@ export class ModuleRules extends BaseModule {
 			}
 		});
 
-		queryHandlers.ruleCreate = (sender, resolve, data) => {
+		queryHandlers.ruleCreate = (sender, data) => {
 			if (guard_BCX_Rule(data)) {
-				resolve(true, RulesCreate(data, sender));
+				return RulesCreate(data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
-		queryHandlers.ruleDelete = (sender, resolve, data) => {
+		queryHandlers.ruleDelete = (sender, data) => {
 			if (guard_BCX_Rule(data)) {
-				resolve(true, RulesDelete(data, sender));
+				return RulesDelete(data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
 

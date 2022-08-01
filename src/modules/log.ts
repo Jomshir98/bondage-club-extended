@@ -396,48 +396,48 @@ export class ModuleLog extends BaseModule {
 			}
 		});
 
-		queryHandlers.logData = (sender, resolve) => {
-			resolve(true, getVisibleLogEntries(sender));
+		queryHandlers.logData = (sender) => {
+			return getVisibleLogEntries(sender);
 		};
-		queryHandlers.logDelete = (sender, resolve, data) => {
+		queryHandlers.logDelete = (sender, data) => {
 			if (typeof data === "number" || (Array.isArray(data) && data.every(item => typeof item === "number"))) {
-				resolve(true, logMessageDelete(data, sender));
+				return logMessageDelete(data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
-		queryHandlers.logConfigGet = (sender, resolve) => {
+		queryHandlers.logConfigGet = (sender) => {
 			if (sender.isPlayer() || checkPermissionAccess("log_configure", sender)) {
-				resolve(true, logGetConfig());
+				return logGetConfig();
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
-		queryHandlers.logConfigEdit = (sender, resolve, data) => {
+		queryHandlers.logConfigEdit = (sender, data) => {
 			if (!isObject(data) ||
 				typeof data.category !== "string" ||
 				typeof data.target !== "number"
 			) {
 				console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
-				return resolve(false);
+				return undefined;
 			}
-			resolve(true, logConfigSet(data.category, data.target, sender));
+			return logConfigSet(data.category, data.target, sender);
 		};
-		queryHandlers.logClear = (sender, resolve) => {
-			resolve(true, logClear(sender));
+		queryHandlers.logClear = (sender) => {
+			return logClear(sender);
 		};
-		queryHandlers.logPraise = (sender, resolve, data) => {
+		queryHandlers.logPraise = (sender, data) => {
 			if (!isObject(data) ||
 				(data.message !== null && typeof data.message !== "string") ||
 				![-1, 0, 1].includes(data.value)
 			) {
 				console.warn(`BCX: Bad logPraise query from ${sender}`, data);
-				return resolve(false);
+				return undefined;
 			}
-			resolve(true, logPraise(data.value, data.message, sender));
+			return logPraise(data.value, data.message, sender);
 		};
-		queryHandlers.logGetAllowedActions = (sender, resolve) => {
-			resolve(true, logGetAllowedActions(sender));
+		queryHandlers.logGetAllowedActions = (sender) => {
+			return logGetAllowedActions(sender);
 		};
 
 		registerWhisperCommand("modules", "log", "- Manage the behaviour log", (argv, sender, respond) => {

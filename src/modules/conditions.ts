@@ -1070,15 +1070,15 @@ export class ModuleConditions extends BaseModule {
 			}
 		}
 
-		queryHandlers.conditionsGet = (sender, resolve, data) => {
+		queryHandlers.conditionsGet = (sender, data) => {
 			if (typeof data === "string" && conditionHandlers.has(data) && ConditionsGetCategoryEnabled(data)) {
-				resolve(true, ConditionsGetCategoryPublicData(data, sender));
+				return ConditionsGetCategoryPublicData(data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
 
-		queryHandlers.conditionSetLimit = (sender, resolve, data) => {
+		queryHandlers.conditionSetLimit = (sender, data) => {
 			if (isObject(data) &&
 				typeof data.category === "string" &&
 				conditionHandlers.has(data.category) &&
@@ -1086,26 +1086,26 @@ export class ModuleConditions extends BaseModule {
 				typeof data.limit === "number" &&
 				ConditionsLimit[data.limit] !== undefined
 			) {
-				resolve(true, ConditionsSetLimit(data.category, data.condition, data.limit, sender));
+				return ConditionsSetLimit(data.category, data.condition, data.limit, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
 
-		queryHandlers.conditionUpdate = (sender, resolve, data) => {
+		queryHandlers.conditionUpdate = (sender, data) => {
 			if (isObject(data) &&
 				typeof data.category === "string" &&
 				conditionHandlers.has(data.category) &&
 				typeof data.condition === "string" &&
 				guard_ConditionsConditionPublicData(data.category, data.condition, data.data)
 			) {
-				resolve(true, ConditionsUpdate(data.category, data.condition, data.data, sender));
+				return ConditionsUpdate(data.category, data.condition, data.data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
 
-		queryHandlers.conditionCategoryUpdate = (sender, resolve, data) => {
+		queryHandlers.conditionCategoryUpdate = (sender, data) => {
 			if (isObject(data) &&
 				typeof data.category === "string" &&
 				conditionHandlers.has(data.category) &&
@@ -1114,9 +1114,9 @@ export class ModuleConditions extends BaseModule {
 				typeof data.data.timerRemove === "boolean" &&
 				guard_ConditionsConditionRequirements(data.data.requirements)
 			) {
-				resolve(true, ConditionsCategoryUpdate(data.category, data.data, sender));
+				return ConditionsCategoryUpdate(data.category, data.data, sender);
 			} else {
-				resolve(false);
+				return undefined;
 			}
 		};
 	}

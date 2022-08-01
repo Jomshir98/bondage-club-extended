@@ -148,3 +148,9 @@ type BCX_queries = {
 	rule_alt_allow_changing_appearance: [undefined, boolean];
 	commandTrigger: [[BCX_Command, ...string[]], boolean];
 };
+
+type __BCX_queries_satisfies = Satisfies<BCX_queries, Record<string, [any, any]>>;
+type __BCX_queires_no_undefined_result = {
+	[key in keyof BCX_queries]: undefined extends BCX_queries[key][1] ? false : true;
+};
+type __BCX_queries_no_undefined_result_satisfies = Satisfies<__BCX_queires_no_undefined_result, Record<string, true>>;

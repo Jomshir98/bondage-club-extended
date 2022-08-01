@@ -960,8 +960,8 @@ export function initRules_bc_alter() {
 			}
 		},
 		init(state) {
-			queryHandlers.rule_alt_allow_changing_appearance = (sender, resolve) => {
-				resolve(true, state.inEffect && !!state.customData && getCharacterAccessLevel(sender) <= state.customData.minimumRole);
+			queryHandlers.rule_alt_allow_changing_appearance = (sender) => {
+				return state.inEffect && !!state.customData && getCharacterAccessLevel(sender) <= state.customData.minimumRole;
 			};
 			let appearanceCharacterAllowed: null | number = null;
 			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {

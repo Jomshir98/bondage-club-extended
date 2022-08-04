@@ -14,6 +14,7 @@ export enum ModuleCategory {
 	Curses = 3,
 	Rules = 4,
 	Commands = 5,
+	ExportImport = 88,
 	Misc = 99
 }
 
@@ -24,6 +25,7 @@ export const MODULE_NAMES: Record<ModuleCategory, string> = {
 	[ModuleCategory.Curses]: "Curses",
 	[ModuleCategory.Rules]: "Rules",
 	[ModuleCategory.Commands]: "Commands",
+	[ModuleCategory.ExportImport]: "Export-Import",
 	[ModuleCategory.Misc]: "Miscellaneous"
 };
 
@@ -34,6 +36,7 @@ export const MODULE_ICONS: Record<ModuleCategory, string> = {
 	[ModuleCategory.Curses]: "Icons/Struggle.png",
 	[ModuleCategory.Rules]: icon_rules,
 	[ModuleCategory.Commands]: "Icons/Use.png",
+	[ModuleCategory.ExportImport]: "Icons/Save.png",
 	[ModuleCategory.Misc]: "Icons/Random.png"
 };
 

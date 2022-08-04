@@ -16,6 +16,7 @@ import { BCX_setInterval } from "../BCXContext";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
+import zod, { ZodType } from "zod";
 
 const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
 const CURSES_ANTILOOP_THRESHOLD = 10;
@@ -762,7 +763,46 @@ export class ModuleCurses extends BaseModule {
 				}
 			},
 			getDefaultLimits: () => ({}),
-			commandConditionSelectorHelp: "group"
+			commandConditionSelectorHelp: "group",
+			currentExportImport: {
+				export(condition, data) {
+					return data;
+				},
+				import(condition, data, character) {
+					const validator: ZodType<CursedItemInfo | null> = zod.object({
+						Name: zod.string(),
+						curseProperty: zod.boolean(),
+						Color: zod.union([zod.string(), zod.array(zod.string())]).optional(),
+						Difficulty: zod.number().optional(),
+						Property: zod.custom<ItemProperties>(isObject).optional(),
+						itemRemove: zod.literal(true).optional()
+					}).nullable();
+					const validationResult = validator.safeParse(data);
+					if (!validationResult.success) {
+						return [false, JSON.stringify(validationResult.error.format(), undefined, "\t")];
+					}
+					const validatedData = validationResult.data;
+					if (validatedData != null && AssetGet("Female3DCG", condition, validatedData.Name) == null) {
+						return [false, `Unknown item "${condition}:${validatedData.Name}"`];
+					}
+					return [true, validatedData];
+				},
+				importLog(condition, data, character) {
+					const group = AssetGroupGet(Player.AssetFamily, condition);
+					if (!character || !group)
+						return;
+					logMessage("curse_change", LogEntryType.plaintext, `${character} imported a curse on ${Player.Name}'s ${getVisibleGroupName(group)}`);
+					if (!character.isPlayer()) {
+						ChatRoomSendLocal(`${character} imported a curse on your ${getVisibleGroupName(group)}`);
+					}
+				},
+				importRemove(condition, character) {
+					if (!curseLift(condition, character)) {
+						return "Failed.";
+					}
+					return true;
+				}
+			}
 		});
 	}
 

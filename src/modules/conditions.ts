@@ -8,13 +8,36 @@ import { BaseModule } from "./_BaseModule";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
+import pick from "lodash-es/pick";
+import zod, { ZodType } from "zod";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { AccessLevel, checkPermissionAccess, getHighestRoleInRoom } from "./authority";
 import { COMMAND_GENERIC_ERROR, Command_parseTime, Command_pickAutocomplete, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber } from "./commands";
 import { getCharacterName } from "../utilsClub";
 import { BCX_setInterval } from "../BCXContext";
+import { ExportImportRegisterCategory } from "./export_import";
 
 const CONDITIONS_CHECK_INTERVAL = 2_000;
+
+export const schema_ConditionsConditionRequirements: ZodType<ConditionsConditionRequirements> = zod.lazy(() => zod.object({
+	orLogic: zod.literal(true).optional(),
+	room: zod.object({
+		type: zod.enum(["public", "private"]),
+		inverted: zod.literal(true).optional()
+	}).optional(),
+	roomName: zod.object({
+		name: zod.string(),
+		inverted: zod.literal(true).optional()
+	}).optional(),
+	role: zod.object({
+		role: zod.nativeEnum(AccessLevel),
+		inverted: zod.literal(true).optional()
+	}).optional(),
+	player: zod.object({
+		memberNumber: zod.number(),
+		inverted: zod.literal(true).optional()
+	}).optional()
+}));
 
 export function guard_ConditionsConditionRequirements(data: unknown): data is ConditionsConditionRequirements {
 	return isObject(data) &&
@@ -134,6 +157,12 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	parseConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): [boolean, string | ConditionsCategoryKeys[C]];
 	autocompleteConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): string[];
 	commandConditionSelectorHelp: string;
+	currentExportImport?: {
+		export(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificData[C]): unknown;
+		importRemove(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter | null): true | string;
+		import(condition: ConditionsCategoryKeys[C], data: unknown, character: ChatroomCharacter | null): [true, ConditionsCategorySpecificData[C]] | [false, string];
+		importLog(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificData[C], character: ChatroomCharacter | null): void;
+	}
 }
 
 const conditionHandlers: Map<ConditionsCategories, ConditionsHandler<ConditionsCategories>> = new Map();
@@ -146,6 +175,139 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 		throw new Error(`Conditions categories "${category}" already defined!`);
 	}
 	conditionHandlers.set(category, handler);
+
+	if (handler.permission_configure != null && handler.currentExportImport) {
+		const currentExportImport = handler.currentExportImport;
+		ExportImportRegisterCategory<{
+			categoryConfig: ConditionsCategoryConfigurableData;
+			conditions: Record<string, ConditionsConditionPublicDataBase & {
+				data?: unknown;
+			}>;
+		}>({
+			category: `${category}Current`,
+			name: `${MODULE_NAMES[handler.category]}`,
+			module: handler.category,
+			export: () => {
+				const categoryConfig = ConditionsGetCategoryConfigurableData(category);
+
+				const conditionsData = ConditionsGetCategoryData(category).conditions;
+				const conditions: Record<string, ConditionsConditionPublicDataBase & {
+					data?: unknown;
+				}> = {};
+
+				for (const [condition, data] of Object.entries(conditionsData)) {
+					const publicData = ConditionsMakeConditionPublicData(handler, condition as ConditionsCategoryKeys[C], data, null);
+					conditions[condition] = {
+						...pick(publicData, "active", "timer", "timerRemove", "requirements", "favorite"),
+						data: currentExportImport.export(condition as ConditionsCategoryKeys[C], data.data)
+					};
+				}
+
+				return {
+					categoryConfig,
+					conditions
+				};
+			},
+			import: (data, character) => {
+				let res = "";
+				if (!ConditionsCategoryUpdate(category, data.categoryConfig, character)) {
+					res += `Failed to set global config!\n`;
+				}
+				// Remove old ones
+				const conditionsData = ConditionsGetCategoryData(category).conditions;
+				for (const condition of Object.keys(conditionsData)) {
+					if (data.conditions[condition] == null) {
+						const removeResult = currentExportImport.importRemove(condition as ConditionsCategoryKeys[C], character);
+						if (removeResult !== true) {
+							return res
+								+ `Failed to remove ${handler.commandConditionSelectorHelp} "${condition}": ${removeResult}\n`
+								+ `Failed!\n`;
+						}
+					}
+				}
+				// Import conditions
+				for (const [c, conditionData] of Object.entries(data.conditions)) {
+					const condition = c as ConditionsCategoryKeys[C];
+					if (conditionData == null)
+						continue;
+					if (!handler.loadValidateConditionKey(condition)) {
+						res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${condition}"\n`;
+						continue;
+					}
+					const [result, resultData] = currentExportImport.import(condition, conditionData.data, character);
+					if (!result) {
+						res += `Failed to load ${handler.commandConditionSelectorHelp} "${condition}": ${resultData}\n`;
+						continue;
+					}
+					let oldData = cloneDeep(ConditionsGetCondition(category, condition));
+					if (!oldData || !isEqual(oldData.data, resultData)) {
+						ConditionsSetCondition(category, condition, resultData, character);
+						currentExportImport.importLog(condition, resultData, character);
+						oldData = cloneDeep(ConditionsGetCondition(category, condition));
+					}
+					if (!ConditionsUpdateBase(category, condition, conditionData)) {
+						res += `Failed to load ${handler.commandConditionSelectorHelp} "${condition}": Error updating base data\n`;
+						continue;
+					}
+					const newData = ConditionsGetCondition(category, condition);
+					if (oldData && newData && character) {
+						handler.logConditionUpdate(
+							condition,
+							character,
+							ConditionsMakeConditionPublicData(handler, condition, newData, null),
+							ConditionsMakeConditionPublicData(handler, condition, oldData, null)
+						);
+					}
+				}
+
+				return res + `Done!`;
+			},
+			importPermissions: [handler.permission_configure, handler.permission_normal, handler.permission_limited],
+			importValidator: zod.object({
+				categoryConfig: zod.object({
+					requirements: schema_ConditionsConditionRequirements,
+					timer: zod.number().nullable(),
+					timerRemove: zod.boolean(),
+					data: zod.custom((data) => handler.validateCategorySpecificGlobalData(data as ConditionsCategorySpecificGlobalData[C]))
+				}) as ZodType<ConditionsCategoryConfigurableData>,
+				conditions: zod.record(zod.object({
+					active: zod.boolean(),
+					data: zod.unknown().optional(),
+					timer: zod.number().nullable(),
+					timerRemove: zod.boolean(),
+					requirements: schema_ConditionsConditionRequirements.nullable(),
+					favorite: zod.boolean()
+				}))
+			})
+		});
+	}
+
+	ExportImportRegisterCategory<ConditionsCategoryData<ConditionsCategories>["limits"]>({
+		category: `${category}Limits`,
+		name: `${MODULE_NAMES[handler.category]} - Limits`,
+		module: handler.category,
+		export: () => {
+			const data = ConditionsGetCategoryData<ConditionsCategories>(category);
+			return data.limits;
+		},
+		import: (data, character) => {
+			let res = "";
+			for (const [k, v] of Object.entries(data)) {
+				if (v == null)
+					continue;
+				if (!handler.loadValidateConditionKey(k)) {
+					res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${k}"\n`;
+					continue;
+				}
+				if (!ConditionsSetLimit(category, k as ConditionsCategoryKeys[C], v, character)) {
+					res += `Failed to set limit for "${k}"\n`;
+				}
+			}
+			return res + `Done!`;
+		},
+		importPermissions: [handler.permission_changeLimits],
+		importValidator: zod.record(zod.nativeEnum(ConditionsLimit))
+	});
 }
 
 export function ConditionsGetCategoryHandler<C extends ConditionsCategories>(category: C): ConditionsHandler<C> {
@@ -193,6 +355,18 @@ function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(
 }
 
 /** Unsafe when category is disabled, check before using */
+export function ConditionsGetCategoryConfigurableData<C extends ConditionsCategories>(category: C): ConditionsCategoryConfigurableData<C> {
+	const data = ConditionsGetCategoryData<ConditionsCategories>(category);
+	const res: ConditionsCategoryConfigurableData<ConditionsCategories> = {
+		timer: data.timer ?? null,
+		timerRemove: data.timerRemove ?? false,
+		data: cloneDeep(data.data),
+		requirements: cloneDeep(data.requirements)
+	};
+	return res as ConditionsCategoryConfigurableData<C>;
+}
+
+/** Unsafe when category is disabled, check before using */
 export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(category: C, requester: ChatroomCharacter): ConditionsCategoryPublicData<C> {
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	const data = ConditionsGetCategoryData<ConditionsCategories>(category);
@@ -203,14 +377,11 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
 		highestRoleInRoom: getHighestRoleInRoom(),
 		conditions: {},
-		timer: data.timer ?? null,
-		timerRemove: data.timerRemove ?? false,
-		data: cloneDeep(data.data),
+		...ConditionsGetCategoryConfigurableData(category),
 		limits: {
 			...handler.getDefaultLimits(),
 			...data.limits
-		},
-		requirements: cloneDeep(data.requirements)
+		}
 	};
 	for (const [condition, conditionData] of Object.entries(data.conditions)) {
 		res.conditions[condition] = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData, requester);
@@ -324,15 +495,19 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 		return false;
 	}
 	const data = ConditionsGetCategoryData(category);
+	// No permission is failure
 	if (character && !checkPermissionAccess(handler.permission_changeLimits, character)) {
 		return false;
 	}
-	if (data.conditions[condition] !== undefined)
-		return false;
+
 	const defaultLimit = handler.getDefaultLimits()[condition] ?? ConditionsLimit.normal;
 	const oldLimit = data.limits[condition] ?? defaultLimit;
+	// Exit early if no change needed
 	if (oldLimit === limit)
 		return true;
+	// Condition must not exist to change limit
+	if (data.conditions[condition] !== undefined)
+		return false;
 	if (limit === defaultLimit) {
 		delete data.limits[condition];
 	} else {
@@ -346,17 +521,12 @@ export function ConditionsSetLimit<C extends ConditionsCategories>(category: C, 
 	return true;
 }
 
-export function ConditionsUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>, character: ChatroomCharacter | null): boolean {
+function ConditionsUpdateBase<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicDataBase): boolean {
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	if (!moduleIsEnabled(handler.category))
 		return false;
-	if (character && !ConditionsCheckAccess(category, condition, character))
-		return false;
 	const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);
 	if (!conditionData)
-		return false;
-	const oldData = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData, character);
-	if (!handler.updateCondition(condition, conditionData, data.data, character, data))
 		return false;
 	conditionData.active = data.active;
 	if (data.favorite) {
@@ -385,6 +555,25 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	} else {
 		delete conditionData.timerRemove;
 	}
+	notifyOfChange();
+	modStorageSync();
+	return true;
+}
+
+export function ConditionsUpdate<C extends ConditionsCategories>(category: C, condition: ConditionsCategoryKeys[C], data: ConditionsConditionPublicData<C>, character: ChatroomCharacter | null): boolean {
+	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
+	if (!moduleIsEnabled(handler.category))
+		return false;
+	if (character && !ConditionsCheckAccess(category, condition, character))
+		return false;
+	const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);
+	if (!conditionData)
+		return false;
+	const oldData = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData, character);
+	if (!handler.updateCondition(condition, conditionData, data.data, character, data))
+		return false;
+	if (!ConditionsUpdateBase(category, condition, data))
+		return false;
 	if (character) {
 		handler.logConditionUpdate(condition, character, data, oldData);
 	}

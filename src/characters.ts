@@ -355,6 +355,32 @@ export class ChatroomCharacter {
 		});
 	}
 
+	exportImportDoExport(category: string, compress: boolean = true): Promise<string> {
+		return sendQuery("export_import_do_export", {
+			category,
+			compress
+		}, this.MemberNumber).then(res => {
+			if (typeof res !== "string") {
+				console.error("BCX: Bad data during 'export_import_do_export' query\n", res);
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
+	exportImportDoImport(category: string, data: string): Promise<string> {
+		return sendQuery("export_import_do_import", {
+			category,
+			data
+		}, this.MemberNumber).then(res => {
+			if (typeof res !== "string") {
+				console.error("BCX: Bad data during 'export_import_do_import' query\n", res);
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
 	hasAccessToPlayer(): boolean {
 		return ServerChatRoomGetAllowItem(this.Character, Player);
 	}

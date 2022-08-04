@@ -147,6 +147,14 @@ type BCX_queries = {
 	ruleDelete: [BCX_Rule, boolean];
 	rule_alt_allow_changing_appearance: [undefined, boolean];
 	commandTrigger: [[BCX_Command, ...string[]], boolean];
+	export_import_do_export: [{
+		category: string;
+		compress: boolean;
+	}, string];
+	export_import_do_import: [{
+		category: string;
+		data: string;
+	}, string];
 };
 
 type __BCX_queries_satisfies = Satisfies<BCX_queries, Record<string, [any, any]>>;

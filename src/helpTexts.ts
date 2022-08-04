@@ -15,6 +15,8 @@ export enum Views {
 	RulesAddPermissionMode = 44,
 	Commands = 50,
 	CommandsPermissionMode = 51,
+	ExportImportMain = 91,
+	ExportImportSelect = 92,
 	Misc = 100
 }
 
@@ -91,5 +93,15 @@ export const HELP_TEXTS: Record<Views, string> = {
 	"is no need to save changes as they are instantly in effect.",
 	[Views.Misc]: "This screen offers various settings to configure your Bondage Club experience in general, such as enabling/disabling the " +
 	"typing indicator that shows other BCX users an icon when you are currently typing something to public chat or whispering something to " +
-	"only them. The cheats are only temporarily active as long as they are set; items that were only given via a cheat are then also gone again."
+	"only them. The cheats are only temporarily active as long as they are set; items that were only given via a cheat are then also gone again.",
+	[Views.ExportImportMain]: "Please select the module feature you want to backup or import from a previous export. After storing the " +
+		"exported texts, you can later on use them again, e.g. for switching between cursed outfits or different rule sets. These exports " +
+	"are compatible between different BCX users and can be used by everyone with BCX who is permitted to make changes to the according module. For instance, " +
+	"if an owner has the permission to control limited AND non-limited rules on the sub, she is with that also allowed to import previously exported " +
+	"rules that are not blocked.",
+	[Views.ExportImportSelect]: "Export/import works by converting the current configuration of the selected module feature into a long code word that is " +
+	"copied to your device's clipboard. You can then paste it anywhere you like, for instance a text file on your device. " +
+	"Functionality of this feature depends on the device you are using and if the clipboard can be used on it. " +
+		"This field will also show you status information while you try to export or import.\n" +
+		"Compressing the export will save you some space when storing it, as the text length will be shorter, although the exported string will no longer be human readable. "
 };

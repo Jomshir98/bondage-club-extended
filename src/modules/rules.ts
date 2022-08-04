@@ -1,5 +1,6 @@
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
+import zod, { ZodType } from "zod";
 import { ChatroomCharacter } from "../characters";
 import { ModuleCategory, ModuleInitPhase, Preset, ConditionsLimit } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
@@ -1267,7 +1268,67 @@ export class ModuleRules extends BaseModule {
 				}
 				return res;
 			},
-			commandConditionSelectorHelp: "rule"
+			commandConditionSelectorHelp: "rule",
+			currentExportImport: {
+				export(condition, data) {
+					return {
+						enforce: data.enforce ?? true,
+						log: data.log ?? true,
+						customData: cloneDeep(data.customData)
+					};
+				},
+				import(condition, data, character) {
+					const validator: ZodType<ConditionsCategorySpecificPublicData["rules"]> = zod.object({
+						enforce: zod.boolean(),
+						log: zod.boolean(),
+						customData: zod.record(zod.any()).optional()
+					});
+					const validationResult = validator.safeParse(data);
+					if (!validationResult.success) {
+						return [false, JSON.stringify(validationResult.error.format(), undefined, "\t")];
+					}
+					const validatedData = validationResult.data;
+					const definition = rules.get(condition);
+					if (!definition) {
+						return [false, `Unknown rule '${condition}'`];
+					}
+
+					if (!guard_RuleCustomData(condition, validatedData.customData)) {
+						return [false, `Invalid rule configuration`];
+					}
+
+					const current = ConditionsGetCondition("rules", condition);
+
+					const internalData = current ? current.data.internalData :
+						definition.internalDataDefault?.();
+
+					if (definition.internalDataValidate && !definition.internalDataValidate(internalData)) {
+						return [false, `Failed to validate internal data`];
+					}
+
+					return [true, {
+						enforce: !validatedData.enforce && definition.enforceable ? false : undefined,
+						log: !validatedData.log && definition.loggable ? false : undefined,
+						customData: validatedData.customData,
+						internalData
+					}];
+				},
+				importLog(condition, data, character) {
+					const definition = rules.get(condition);
+					if (!character || !definition)
+						return;
+					logMessage("rule_change", LogEntryType.plaintext, `${character} imported rule '${definition.name}'`);
+					if (!character.isPlayer()) {
+						ChatRoomSendLocal(`${character} imported rule '${definition.name}'`);
+					}
+				},
+				importRemove(condition, character) {
+					if (!RulesDelete(condition, character)) {
+						return "Failed.";
+					}
+					return true;
+				}
+			}
 		});
 
 		// Init individual rules

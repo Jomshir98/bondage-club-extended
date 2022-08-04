@@ -51,6 +51,7 @@ type BCX_Permissions =
 	| "commands_normal"
 	| "commands_limited"
 	| "commands_change_limits"
+	| "exportimport_export"
 	| "misc_test";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
@@ -165,13 +166,16 @@ interface ConditionsConditionData<category extends ConditionsCategories = Condit
 	addedBy?: number;
 }
 
-interface ConditionsConditionPublicData<category extends ConditionsCategories = ConditionsCategories> {
+interface ConditionsConditionPublicDataBase {
 	active: boolean;
-	data: ConditionsCategorySpecificPublicData[category];
 	timer: number | null;
 	timerRemove: boolean;
 	requirements: ConditionsConditionRequirements | null;
 	favorite: boolean;
+}
+
+interface ConditionsConditionPublicData<category extends ConditionsCategories = ConditionsCategories> extends ConditionsConditionPublicDataBase {
+	data: ConditionsCategorySpecificPublicData[category];
 	addedBy?: number;
 }
 

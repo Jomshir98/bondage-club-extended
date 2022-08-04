@@ -39,7 +39,7 @@ export class GuiExportImportMain extends GuiSubscreen {
 	Run() {
 
 		DrawText("- Export / Import of BCX module configurations -", 125, 125, "Black", "Gray");
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		for (let i = 0; i < ExportImportCategories.length; i++) {

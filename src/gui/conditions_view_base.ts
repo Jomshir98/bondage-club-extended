@@ -134,7 +134,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		MainCanvas.textAlign = "left";
 		DrawText(`- ${this.headerText()} -`, 125, 125, "Black", "Gray");
 		MainCanvas.textAlign = "center";
-		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		if (this.conditionCategoryData === null) {

@@ -49,9 +49,9 @@ export class GuiExportImportMain extends GuiSubscreen {
 
 			const isDisabled = this.disabledModules.includes(e.module);
 
-			DrawButton(150 + 430 * PX, 190 + 120 * PY, 400, 90, "", isDisabled ? "#ddd" : "White", MODULE_ICONS[e.module],
+			DrawButton(150 + 530 * PX, 190 + 120 * PY, 500, 90, "", isDisabled ? "#ddd" : "White", MODULE_ICONS[e.module],
 				isDisabled ? "Module is deactivated" : "", isDisabled);
-			DrawTextFit(e.name, 250 + 430 * PX, 235 + 120 * PY, 310, "Black");
+			DrawTextFit(e.name, 250 + 530 * PX, 235 + 120 * PY, 390, "Black");
 		}
 
 		MainCanvas.textAlign = "left";
@@ -74,8 +74,7 @@ export class GuiExportImportMain extends GuiSubscreen {
 
 			const PX = Math.floor(i / 6);
 			const PY = i % 6;
-			// TODO: check for disabled modules
-			if (MouseIn(150 + 430 * PX, 190 + 120 * PY, 400, 90) && !this.disabledModules.includes(e.module)) {
+			if (MouseIn(150 + 530 * PX, 190 + 120 * PY, 500, 90) && !this.disabledModules.includes(e.module)) {
 				setSubscreen(new GuiExportImportSelected(this.character, e));
 			}
 		}

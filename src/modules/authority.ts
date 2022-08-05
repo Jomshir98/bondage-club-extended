@@ -10,6 +10,8 @@ import { moduleIsEnabled } from "./presets";
 import { RulesGetRuleState } from "./rules";
 import { ModuleCategory, ModuleInitPhase, MODULE_NAMES, Preset } from "../constants";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber, registerWhisperCommand } from "./commands";
+import { ExportImportRegisterCategory } from "./export_import";
+import zod from "zod";
 
 export enum AccessLevel {
 	self = 0,
@@ -140,7 +142,7 @@ export function getPermissionDataFromBundle(bundle: PermissionsBundle): Permissi
 	return res;
 }
 
-export function setPermissionSelfAccess(permission: BCX_Permissions, self: boolean, characterToCheck: ChatroomCharacter | null): boolean {
+export function setPermissionSelfAccess(permission: BCX_Permissions, self: boolean, characterToCheck: ChatroomCharacter | null, forceAllow: boolean = false): boolean {
 	const permData = permissions.get(permission);
 	if (!permData) {
 		throw new Error(`Attempt to edit unknown permission "${permission}"`);
@@ -153,10 +155,13 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 
 	if (permData.self === self) return true;
 
-	if (characterToCheck) {
-		if (!checkPermissionAccess(self ? "authority_grant_self" : "authority_revoke_self", characterToCheck) ||
-			!characterToCheck.isPlayer() && !checkPermissionAccess(permission, characterToCheck)
-		) {
+	if (characterToCheck && !forceAllow) {
+		const allowed = checkPermissionAccess(self ? "authority_grant_self" : "authority_revoke_self", characterToCheck) &&
+			(
+				characterToCheck.isPlayer() ||
+				checkPermissionAccess(permission, characterToCheck)
+			);
+		if (!allowed) {
 			console.warn(`BCX: Unauthorized self permission edit attempt for "${permission}" by ${characterToCheck}`);
 			return false;
 		}
@@ -179,7 +184,7 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 	return true;
 }
 
-export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessLevel, characterToCheck: ChatroomCharacter | null): boolean {
+export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessLevel, characterToCheck: ChatroomCharacter | null, forceAllow: boolean = false): boolean {
 	const permData = permissions.get(permission);
 	if (!permData) {
 		throw new Error(`Attempt to edit unknown permission "${permission}"`);
@@ -190,22 +195,18 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 
 	if (permData.min === min) return true;
 
-	if (characterToCheck) {
+	if (characterToCheck && !forceAllow) {
 		const allowed =
 			// Exception: Player can always lower permissions "Self"->"Owner"
 			(characterToCheck.isPlayer() && permData.min < min && min <= AccessLevel.owner) ||
 			(
 				// Character must have access to "allow lowest access modification"
 				checkPermissionAccess("authority_edit_min", characterToCheck) &&
-				(
-					// Character must have access to target rule
-					checkPermissionAccess(permission, characterToCheck) ||
-					// Exception: Player bypasses this check when lowering "lowest access"
-					characterToCheck.isPlayer() && min >= permData.min
-				) &&
+				// Character must have access to target rule
+				checkPermissionAccess(permission, characterToCheck) &&
 				(
 					// Not player must have access to target level
-					!characterToCheck.isPlayer() ||
+					characterToCheck.isPlayer() ||
 					getCharacterAccessLevel(characterToCheck) <= min
 				)
 			);
@@ -670,6 +671,51 @@ export class ModuleAuthority extends BaseModule {
 			}
 
 			return [];
+		});
+
+		ExportImportRegisterCategory<PermissionsBundle>({
+			category: `authorityPermissions`,
+			name: `Authority - Permissions`,
+			module: ModuleCategory.Authority,
+			export: () => permissionsMakeBundle(),
+			import: (data, character) => {
+				let res = "";
+
+				for (const [k, v] of Object.entries(data)) {
+					const perm = k as BCX_Permissions;
+					const permData = permissions.get(perm);
+					if (!permData) {
+						res += `Skipped unknown permission '${k}'\n`;
+						continue;
+					}
+					// Silently skip permissions from disabled modules
+					if (!moduleIsEnabled(permData.category))
+						continue;
+
+					if (!v[0] && v[1] === AccessLevel.self) {
+						res += `Error importing permission '${permData.name}': Inconsistent data\n`;
+						continue;
+					}
+
+					if (character && !character.isPlayer() && !checkPermissionAccessData(permData, getCharacterAccessLevel(character))) {
+						res += `Skipped importing permission '${permData.name}': No access\n`;
+						continue;
+					}
+
+					if (character && !character.isPlayer() && getCharacterAccessLevel(character) > v[1]) {
+						res += `Skipped importing permission '${permData.name}' min access: No access to target level\n`;
+					} if (!setPermissionMinAccess(perm, v[1], character, true)) {
+						res += `Error setting minimal access for '${permData.name}'\n`;
+					}
+
+					if (!setPermissionSelfAccess(perm, v[0], character, true)) {
+						res += `Error setting self access for '${permData.name}'\n`;
+					}
+				}
+				return res + `Done!`;
+			},
+			importPermissions: ["authority_grant_self", "authority_revoke_self", "authority_edit_min"],
+			importValidator: zod.record(zod.tuple([zod.boolean(), zod.nativeEnum(AccessLevel)]))
 		});
 	}
 

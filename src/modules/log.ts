@@ -11,6 +11,8 @@ import { ModuleCategory, Preset } from "../constants";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, registerWhisperCommand } from "./commands";
 import { guard_BCX_Rule, RulesGetDisplayDefinition } from "./rules";
 import { cursedChange, CURSES_TRIGGER_LOGS, CURSES_TRIGGER_LOGS_BATCH } from "./cursesConstants";
+import { ExportImportRegisterCategory } from "./export_import";
+import zod from "zod";
 
 export const LOG_ENTRIES_LIMIT = 256;
 
@@ -136,6 +138,10 @@ export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLe
 
 	if (![LogAccessLevel.none, LogAccessLevel.normal, LogAccessLevel.protected].includes(accessLevel)) {
 		return false;
+	}
+
+	if (modStorage.logConfig[category] === accessLevel) {
+		return true;
 	}
 
 	if (character) {
@@ -538,6 +544,32 @@ export class ModuleLog extends BaseModule {
 			}
 
 			return [];
+		});
+
+		ExportImportRegisterCategory<LogConfig>({
+			category: `logConfig`,
+			name: `Behaviour Log - Configuration`,
+			module: ModuleCategory.Log,
+			export: () => logGetConfig(),
+			import: (data, character) => {
+				let res = "";
+
+				for (const [k, v] of Object.entries(data)) {
+					const category = k as BCX_LogCategory;
+					if (modStorage.logConfig?.[category] === undefined || LOG_CONFIG_NAMES[category] === undefined) {
+						res += `Skipped unknown log config category '${category}'\n`;
+						continue;
+					}
+
+					if (!logConfigSet(category, v, character)) {
+						res += `Error setting category '${LOG_CONFIG_NAMES[category]}'\n`;
+					}
+				}
+
+				return res + `Done!`;
+			},
+			importPermissions: ["log_configure"],
+			importValidator: zod.record(zod.nativeEnum(LogAccessLevel))
 		});
 	}
 

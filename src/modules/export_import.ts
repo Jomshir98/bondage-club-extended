@@ -121,6 +121,8 @@ export class ModuleExportImport extends BaseModule {
 	}
 
 	load() {
+		exportImportCategories.sort((a, b) => a.module - b.module);
+
 		queryHandlers.export_import_do_export = (sender, data) => {
 			if (isObject(data) &&
 				typeof data.category === "string" &&

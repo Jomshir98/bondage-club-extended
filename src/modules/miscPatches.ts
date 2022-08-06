@@ -195,6 +195,14 @@ export class ModuleMiscPatches extends BaseModule {
 		hookFunction("ServerPlayerIsInChatRoom", 0, (args, next) => {
 			return next(args) || CurrentScreen === "GetUp";
 		});
+
+		// fixes possible crash with consoled data
+		hookFunction("ServerAppearanceLoadFromBundle", 100, (args, next) => {
+			if (!Array.isArray(args[2])) {
+				args[2] = [];
+			}
+			return next(args);
+		});
 	}
 
 	run() {

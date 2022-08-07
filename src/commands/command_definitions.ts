@@ -25,7 +25,7 @@ export function initCommands_definitions() {
 
 	registerCommand("eyes", {
 		name: "Eyes",
-		helpDescription: `<${Object.keys(eyesExpressions).join("|")}>`,
+		helpDescription: `<${Object.keys(eyesExpressions).join(" | ")}>`,
 		shortDescription: "Control PLAYER_NAME's eyes",
 		longDescription:
 			`This command forces PLAYER_NAME's eyes into the specified state, but they can still manually change it.\n` +
@@ -84,7 +84,7 @@ export function initCommands_definitions() {
 
 	registerCommand("mouth", {
 		name: "Mouth",
-		helpDescription: `<${Object.keys(mouthExpressions).join("|")}>`,
+		helpDescription: `<${Object.keys(mouthExpressions).join(" | ")}>`,
 		shortDescription: "Control PLAYER_NAME's mouth",
 		longDescription:
 			`This command forces PLAYER_NAME's mouth into the specified state, but they can still manually change it.\n` +
@@ -159,7 +159,7 @@ export function initCommands_definitions() {
 
 	registerCommand("arms", {
 		name: "Arms",
-		helpDescription: `<${Object.keys(posesArms).join("|")}>`,
+		helpDescription: `<${Object.keys(posesArms).join(" | ")}>`,
 		shortDescription: "Control PLAYER_NAME's arm poses",
 		longDescription:
 			`This command forces PLAYER_NAME's arms into the specified pose, but they can still manually change it. Some may be unavailable, due to restricting items, etc.\n` +
@@ -212,7 +212,7 @@ export function initCommands_definitions() {
 
 	registerCommand("legs", {
 		name: "Legs",
-		helpDescription: `<${Object.keys(posesLegs).join("|")}>`,
+		helpDescription: `<${Object.keys(posesLegs).join(" | ")}>`,
 		shortDescription: "Control PLAYER_NAME's leg poses",
 		longDescription:
 			`This command forces PLAYER_NAME's legs into the specified pose, but they can still manually change it. Some may be unavailable, due to restricting items, etc.\n` +
@@ -724,6 +724,70 @@ export function initCommands_definitions() {
 		autoCompleter: (argv) => {
 			if (argv.length === 1) {
 				return Command_selectWornItemAutocomplete(getPlayerCharacter(), argv[0]);
+			}
+			return [];
+		}
+	});
+
+	const emoticonExpressions: Record<string, string | null> = {
+		none: null,
+		afk: "Afk",
+		whisper: "Whisper",
+		sleep: "Sleep",
+		hearts: "Hearts",
+		sweatdrop: "Tear",
+		ear: "Hearing",
+		question: "Confusion",
+		exclamation: "Exclamation",
+		angry: "Annoyed",
+		book: "Read",
+		hand: "RaisedHand",
+		eye: "Spectator",
+		thumbsdown: "ThumbsDown",
+		thumbsup: "ThumbsUp",
+		rope: "LoveRope",
+		gag: "LoveGag",
+		lock: "LoveLock",
+		wardrobe: "Wardrobe",
+		game: "Gaming"
+	};
+
+	registerCommand("emoticon", {
+		name: "Emoticon",
+		helpDescription: `<${Object.keys(emoticonExpressions).join(" | ")}>`,
+		shortDescription: "Control PLAYER_NAME's emoticon",
+		longDescription:
+			`This command changes PLAYER_NAME's emoticon into the specified state, but the player can still manually change it.\n` +
+			`Usage:\n` +
+			`!emoticon HELP_DESCRIPTION`,
+		defaultLimit: ConditionsLimit.normal,
+		playerUsable: true,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length !== 1) {
+				respond(Command_fixExclamationMark(sender,
+					`!emoticon usage:\n` +
+					`!emoticon ${state.commandDefinition.helpDescription}`
+				));
+				return false;
+			}
+			const expression = emoticonExpressions[argv[0].toLowerCase()];
+			if (expression === undefined) {
+				respond(`Bad value: ${argv[0].toLowerCase()} is not one of '${Object.keys(emoticonExpressions).join("', '")}'`);
+				return false;
+			}
+			CharacterSetFacialExpression(Player, "Emoticon", expression);
+			if (!sender.isPlayer()) {
+				const text = "SENDER_NAME (SENDER_NUMBER) changed your emoticon.";
+				ChatRoomSendLocal(dictionaryProcess(text, {
+					SENDER_NAME: sender.Name,
+					SENDER_NUMBER: `${sender.MemberNumber}`
+				}), undefined, sender.MemberNumber);
+			}
+			return true;
+		},
+		autoCompleter: (argv) => {
+			if (argv.length === 1) {
+				return Command_pickAutocomplete(argv[0], Object.keys(emoticonExpressions));
 			}
 			return [];
 		}

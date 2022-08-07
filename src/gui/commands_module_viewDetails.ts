@@ -29,7 +29,7 @@ export class GuiCommandsModuleViewDetails extends GuiSubscreen {
 
 	Run() {
 		MainCanvas.textAlign = "left";
-		DrawText(`- Commands: Description of the command: "${this.commandDefinition.name}"-`, 125, 125, "Black", "Gray");
+		DrawText(`- Commands: Description of the command: "${this.commandDefinition.name}" -`, 125, 125, "Black", "Gray");
 
 		BCXDrawTextWrap(
 			dictionaryProcess(

@@ -669,6 +669,7 @@ type BCX_Command =
 	| "servedrinks"
 	| "orgasm"
 	| "allowactivities"
+	| "emoticon"
 	;
 
 interface CommandDefinition<ID extends BCX_Command = BCX_Command> extends CommandDisplayDefinition {

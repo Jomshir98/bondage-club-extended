@@ -16,6 +16,7 @@ type CommandListItem = {
 
 const PER_PAGE_COUNT = 6;
 
+let alphabeticalSort: boolean = false;
 let availabilitySort: boolean = false;
 
 export class GuiCommandsModule extends GuiSubscreen {
@@ -94,6 +95,9 @@ export class GuiCommandsModule extends GuiSubscreen {
 		}
 
 		const data = this.commandsData;
+		if (alphabeticalSort) {
+			this.commandList.sort((a, b) => a.definition.name.localeCompare(b.definition.name));
+		}
 		if (availabilitySort) {
 			this.commandList.sort((a, b) => (
 				(
@@ -150,6 +154,10 @@ export class GuiCommandsModule extends GuiSubscreen {
 		// sort toggle
 		DrawButton(1483, 182, 64, 64, "", "White", undefined, "Toggle availability-based sorting");
 		DrawImageEx("Icons/LockMenu.png", 1483 + 3, 182 + 3, { Alpha: availabilitySort ? 1 : 0.2, Width: 58, Height: 58 });
+
+		// A-Z toggle
+		DrawButton(1583, 182, 64, 64, "", "white", undefined, "Toggle alphabetical sorting");
+		DrawTextFit("A-Z", 1583 + 32, 182 + 32 + 1, 64 - 4, alphabeticalSort ? "black" : "#bbb");
 
 		// Actual commands
 		MainCanvas.textAlign = "left";
@@ -239,6 +247,12 @@ export class GuiCommandsModule extends GuiSubscreen {
 		// sort toggle
 		if (MouseIn(1483, 182, 64, 64)) {
 			availabilitySort = !availabilitySort;
+			this.rebuildList();
+		}
+
+		// A-Z toggle
+		if (MouseIn(1583, 182, 64, 64)) {
+			alphabeticalSort = !alphabeticalSort;
 			this.rebuildList();
 		}
 

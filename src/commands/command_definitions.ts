@@ -313,7 +313,10 @@ export function initCommands_definitions() {
 
 			// leave
 			InfoBeep(`You got ordered by ${sender} to wait in another room.`, 8_000);
-			ChatRoomActionMessage(`${Player.Name} received an order by ${sender.Name} (${sender.MemberNumber}) to wait in another room.`);
+			ChatRoomActionMessage(`TargetCharacterName received an order by SourceCharacter (${sender.MemberNumber}) to wait in another room.`, null, [
+				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) }
+			]);
 			DialogLentLockpicks = false;
 			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
@@ -385,7 +388,10 @@ export function initCommands_definitions() {
 				return false;
 			}
 			InfoBeep(`Two maids locked you into a timer cell, following ${sender}'s command.`, 8_000);
-			ChatRoomActionMessage(`${Player.Name} gets grabbed by two maids and locked in a timer cell, following ${sender}'s command.`);
+			ChatRoomActionMessage(`TargetCharacterName gets grabbed by two maids and locked in a timer cell, following SourceCharacter's (${sender.MemberNumber}) command.`, null, [
+				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) }
+			]);
 			DialogLentLockpicks = false;
 			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
@@ -434,7 +440,10 @@ export function initCommands_definitions() {
 				return false;
 			}
 			InfoBeep(`Two nurses locked you in the Asylum, following ${sender}'s command.`, 8_000);
-			ChatRoomActionMessage(`${Player.Name} gets grabbed by two nurses and locked in the Asylum, following ${sender}'s command.`);
+			ChatRoomActionMessage(`TargetCharacterName gets grabbed by two nurses and locked in the Asylum, following SourceCharacter's (${sender.MemberNumber}) command.`, null, [
+				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) }
+			]);
 			DialogLentLockpicks = false;
 			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
@@ -489,7 +498,10 @@ export function initCommands_definitions() {
 				respond(`Time needs to be between 1 minute and 1 week`);
 				return false;
 			}
-			ChatRoomActionMessage(`A nurse took all keys from ${Player.Name}, following ${sender}'s command. The keys will be deposited for ${formatTimeInterval(time)}.`);
+			ChatRoomActionMessage(`A nurse took all keys from TargetCharacterName, following SourceCharacter's (${sender.MemberNumber}) command. The keys will be deposited for ${formatTimeInterval(time)}.`, null, [
+				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) }
+			]);
 			LogAdd("KeyDeposit", "Cell", CurrentTime + time, true);
 			return true;
 		},
@@ -570,7 +582,10 @@ export function initCommands_definitions() {
 			}
 			CharacterSetActivePose(Player, null);
 			const D = `(Two maids grab you and escort you to their quarters.  Another maid addresses you.)  ${sender.Name} sent you here to work.`;
-			ChatRoomActionMessage(`${Player.Name} gets grabbed by two maids and escorted to the maid quarters to serve drinks, following ${sender}'s command.`);
+			ChatRoomActionMessage(`TargetCharacterName gets grabbed by two maids and escorted to the maid quarters to serve drinks, following SourceCharacter's (${sender.MemberNumber}) command.`, null, [
+				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) }
+			]);
 			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
 			CommonSetScreen("Room", "MaidQuarters");

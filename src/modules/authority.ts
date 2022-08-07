@@ -328,8 +328,11 @@ export function editRole(role: "owner" | "mistress", action: "add" | "remove", t
 			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
 		}
 		if (action === "add" && character.MemberNumber !== target) {
-			const user = character.isPlayer() ? "her" : `${Player.Name}'s (${Player.MemberNumber})`;
-			ChatRoomActionMessage(`${character} added you as ${user} BCX ${role}.`, target);
+			const user = character.isPlayer() ? "her" : `TargetCharacterName's (${Player.MemberNumber})`;
+			ChatRoomActionMessage(`SourceCharacter (${character.MemberNumber}) added you as ${user} BCX ${role}.`, target, [
+				{ Tag: "SourceCharacter", MemberNumber: character.MemberNumber, Text: CharacterNickname(character.Character) },
+				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+			]);
 		}
 	}
 

@@ -155,6 +155,14 @@ type BCX_queries = {
 		category: string;
 		data: string;
 	}, string];
+	relatonshipsGet: [undefined, {
+		relationships: import("./modules/relationships").RelationshipData[];
+		access_view_all: boolean;
+		access_modify_self: boolean;
+		access_modify_others: boolean;
+	}];
+	relationshipsRemove: [number, boolean];
+	relationshipsSet: [import("./modules/relationships").RelationshipData, boolean];
 };
 
 type __BCX_queries_satisfies = Satisfies<BCX_queries, Record<string, [any, any]>>;

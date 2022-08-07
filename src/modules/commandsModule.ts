@@ -362,7 +362,9 @@ export class ModuleCommandsModule extends BaseModule {
 			if (Date.now() >= this.suspendedUntil) {
 				this.suspendedUntil = null;
 				this.triggerCounts.clear();
-				ChatRoomActionMessage(`All of ${Player.Name}'s temporarily blocked commands can be used again.`);
+				ChatRoomActionMessage(`All of SourceCharacter's temporarily blocked commands can be used again.`, null, [
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+				]);
 			} else {
 				return;
 			}

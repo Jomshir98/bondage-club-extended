@@ -1,5 +1,6 @@
 import { icon_Typing_star, icon_Typing_base, icon_Typing_dot } from "./resources";
 import { BCX_setTimeout } from "./BCXContext";
+import { getChatroomCharacter } from "./characters";
 
 import bcModSDK from "bondage-club-mod-sdk";
 
@@ -101,7 +102,7 @@ export function InfoBeep(msg: string, timer: number = 3000) {
 	};
 }
 
-export function ChatRoomActionMessage(msg: string, target: null | number = null) {
+export function ChatRoomActionMessage(msg: string, target: null | number = null, dictionary: ChatMessageDictionaryEntry[] = []) {
 	if (!msg) return;
 	ServerSend("ChatRoomChat", {
 		Content: "Beep",
@@ -112,7 +113,8 @@ export function ChatRoomActionMessage(msg: string, target: null | number = null)
 			{ Tag: "Biep", Text: "msg" },
 			{ Tag: "Sonner", Text: "msg" },
 			{ Tag: "发送私聊", Text: "msg" },
-			{ Tag: "msg", Text: msg }
+			{ Tag: "msg", Text: msg },
+			...dictionary
 		]
 	});
 }
@@ -296,6 +298,10 @@ export function isBind(item: Item | Asset | AssetGroup): boolean {
 export function getCharacterName(memberNumber: number, defaultText: string): string;
 export function getCharacterName(memberNumber: number, defaultText: string | null): string | null;
 export function getCharacterName(memberNumber: number, defaultText: string | null = null): string | null {
+	const c = getChatroomCharacter(memberNumber);
+	if (c) {
+		return c.Name;
+	}
 	if (Player.MemberNumber === memberNumber) {
 		return Player.Name;
 	}
@@ -334,12 +340,16 @@ export function itemColorsEquals(color1: null | undefined | string | string[], c
 }
 
 export function showHelp(helpText: string) {
-	MainCanvas.fillStyle = "#ffff88";
-	MainCanvas.fillRect(1000, 190, 800, 600);
-	MainCanvas.strokeStyle = "Black";
-	MainCanvas.strokeRect(1000, 190, 800, 600);
-	MainCanvas.textAlign = "left";
-	DrawTextWrap(helpText, 1020 - 760 / 2, 210, 760, 560, "black");
+	DrawHoverElements.push(() => {
+		MainCanvas.save();
+		MainCanvas.fillStyle = "#ffff88";
+		MainCanvas.fillRect(1000, 190, 800, 600);
+		MainCanvas.strokeStyle = "Black";
+		MainCanvas.strokeRect(1000, 190, 800, 600);
+		MainCanvas.textAlign = "left";
+		DrawTextWrap(helpText, 1020 - 760 / 2, 210, 760, 560, "black");
+		MainCanvas.restore();
+	});
 }
 
 interface RoomInfo {

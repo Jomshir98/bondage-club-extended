@@ -2,7 +2,7 @@ import { ModuleCategory, ConditionsLimit } from "../constants";
 import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerDialog, RedirectGetImage } from "../modules/miscPatches";
 import { registerRule, RuleType } from "../modules/rules";
 import { hookFunction } from "../patching";
-import { isNModClient, getCharacterName } from "../utilsClub";
+import { isNModClient } from "../utilsClub";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
 
@@ -86,24 +86,24 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 			hookDialogMenuButtonClick("Remote", (C) => {
 				if (C.ID !== 0 && state.inEffect) {
-					state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.trigger(C.MemberNumber);
 				}
 				return false;
 			});
 			hookDialogMenuButtonClick("BCX_RemoteDisabled", (C) => {
 				if (C.ID !== 0 && state.inEffect) {
-					state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.triggerAttempt(C.MemberNumber);
 				}
 				return false;
 			});
 			hookFunction("DialogItemClick", 3, (args, next) => {
 				const C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
 				if (C && C.ID !== 0 && state.isEnforced && args[0].Asset.Name === "VibratorRemote") {
-					state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.triggerAttempt(C.MemberNumber);
 					return;
 				}
 				if (C && C.ID !== 0 && state.isLogged && args[0].Asset.Name === "VibratorRemote") {
-					state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.trigger(C.MemberNumber);
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
@@ -213,13 +213,13 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 			hookDialogMenuButtonClick("Unlock", (C) => {
 				if (!ignore && C.ID !== 0 && state.inEffect) {
-					state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.trigger(C.MemberNumber);
 				}
 				return false;
 			});
 			hookDialogMenuButtonClick("BCX_UnlockDisabled", (C) => {
 				if (!ignore && C.ID !== 0 && state.inEffect) {
-					state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.triggerAttempt(C.MemberNumber);
 				}
 				return false;
 			});
@@ -292,13 +292,13 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 			hookDialogMenuButtonClick("PickLock", (C) => {
 				if (C.ID !== 0 && state.inEffect) {
-					state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.trigger(C.MemberNumber);
 				}
 				return false;
 			});
 			hookDialogMenuButtonClick("BCX_PickLockDisabled", (C) => {
 				if (C.ID !== 0 && state.inEffect) {
-					state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.triggerAttempt(C.MemberNumber);
 				}
 				return false;
 			});
@@ -371,13 +371,13 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 			hookDialogMenuButtonClick("Lock", (C) => {
 				if (C.ID !== 0 && state.inEffect) {
-					state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.trigger(C.MemberNumber);
 				}
 				return false;
 			});
 			hookDialogMenuButtonClick("BCX_LockDisabled", (C) => {
 				if (C.ID !== 0 && state.inEffect) {
-					state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+					state.triggerAttempt(C.MemberNumber);
 				}
 				return false;
 			});
@@ -741,10 +741,10 @@ export function initRules_bc_blocks() {
 					const C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
 					if (C && C.ID !== 0 && (toggleOn ? ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") : true)) {
 						if (state.isEnforced) {
-							state.triggerAttempt({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+							state.triggerAttempt(C.MemberNumber);
 							return;
 						} else {
-							state.trigger({ TARGET_PLAYER: `${C.Name} (${C.MemberNumber})` });
+							state.trigger(C.MemberNumber);
 						}
 					}
 				}
@@ -793,7 +793,7 @@ export function initRules_bc_blocks() {
 						typeof CN === "number" &&
 						getCharacterAccessLevel(CN) <= state.customData.minimumRole
 					) {
-						state.triggerAttempt({ TARGET_CHARACTER: `${getCharacterName(CN, "[Unknown]")} (${CN})` });
+						state.triggerAttempt(CN);
 						return;
 					}
 					return next(args);
@@ -825,7 +825,7 @@ export function initRules_bc_blocks() {
 						typeof CN === "number" &&
 						getCharacterAccessLevel(CN) > AccessLevel.mistress
 					) {
-						state.triggerAttempt({ TARGET_CHARACTER: `${getCharacterName(CN, "[Unknown]")} (${CN})` });
+						state.triggerAttempt(CN);
 						return;
 					}
 					return next(args);

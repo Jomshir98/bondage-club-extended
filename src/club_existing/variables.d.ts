@@ -71,6 +71,7 @@ declare function CharacterLoadCanvas(C: Character): void;
 declare function CharacterAppearsInverted(C: Character): boolean;
 declare function CharacterSetActivePose(C: Character, NewPose: string | null, ForceChange?: boolean): void;
 declare function CharacterSetFacialExpression(C: Character, AssetGroup: string, Expression: string | null, Timer?: number, Color?: string | string[]): void;
+declare function CharacterNickname(C: Character): string;
 
 // Element.js
 declare function ElementIsScrolledToEnd(ID: string): boolean;

@@ -1,7 +1,7 @@
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
 import zod, { ZodType } from "zod";
-import { ChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { ModuleCategory, ModuleInitPhase, Preset, ConditionsLimit } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
 import { initRules_bc_alter } from "../rules/bc_alter";
@@ -24,6 +24,7 @@ import { GuiMemberSelect } from "../gui/member_select";
 import { modStorageSync } from "./storage";
 import { BCX_setInterval } from "../BCXContext";
 import { icon_restrictions, icon_OwnerList } from "../resources";
+import { RelationshipsGetNickname } from "./relationships";
 
 const RULES_ANTILOOP_RESET_INTERVAL = 60_000;
 const RULES_ANTILOOP_THRESHOLD = 10;
@@ -814,11 +815,20 @@ export class RuleState<ID extends BCX_Rule> {
 		this.ruleDefinition = definition;
 	}
 
-	trigger(dictionary: Record<string, string> = {}): void {
+	trigger(targetCharacter: number | null = null, dictionary: Record<string, string> = {}): void {
 		const texts = this.ruleDefinition.triggerTexts;
 		if (texts) {
+			let targetName = CharacterNickname(Player);
+			if (targetCharacter != null) {
+				const targetChar = getChatroomCharacter(targetCharacter);
+				targetName = targetChar ? CharacterNickname(targetChar.Character) : getCharacterName(targetCharacter, "[unknown]");
+			}
 			if (texts.infoBeep) {
-				InfoBeep("BCX: " + dictionaryProcess(texts.infoBeep, dictionary), 7_000);
+				InfoBeep("BCX: " + dictionaryProcess(texts.infoBeep, {
+					PLAYER_NAME: RelationshipsGetNickname(Player.MemberNumber) ?? CharacterNickname(Player),
+					TARGET_PLAYER: RelationshipsGetNickname(targetCharacter ?? Player.MemberNumber) ?? targetName,
+					...dictionary
+				}), 7_000);
 			}
 			if (this.isLogged) {
 				const log = texts.log;
@@ -827,18 +837,34 @@ export class RuleState<ID extends BCX_Rule> {
 				}
 				const announce = texts.announce ?? texts.log;
 				if (announce) {
-					ChatRoomActionMessage(`${dictionaryProcess(announce, dictionary)}.`);
+					ChatRoomActionMessage(`${dictionaryProcess(announce, {
+						PLAYER_NAME: "SourceCharacter",
+						TARGET_PLAYER: `TargetCharacterName (${targetCharacter ?? Player.MemberNumber})`,
+						...dictionary
+					})}.`, null, [
+						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+						{ Tag: "TargetCharacterName", MemberNumber: targetCharacter ?? Player.MemberNumber, Text: targetName }
+					]);
 				}
 			}
 		}
 	}
 
-	triggerAttempt(dictionary: Record<string, string> = {}): void {
+	triggerAttempt(targetCharacter: number | null = null, dictionary: Record<string, string> = {}): void {
 		const texts = this.ruleDefinition.triggerTexts;
 		if (texts) {
+			let targetName = CharacterNickname(Player);
+			if (targetCharacter != null) {
+				const targetChar = getChatroomCharacter(targetCharacter);
+				targetName = targetChar ? CharacterNickname(targetChar.Character) : getCharacterName(targetCharacter, "[unknown]");
+			}
 			const infoBeep = texts.attempt_infoBeep ?? texts.infoBeep;
 			if (infoBeep) {
-				InfoBeep("BCX: " + dictionaryProcess(infoBeep, dictionary), 7_000);
+				InfoBeep("BCX: " + dictionaryProcess(infoBeep, {
+					PLAYER_NAME: RelationshipsGetNickname(Player.MemberNumber) ?? CharacterNickname(Player),
+					TARGET_PLAYER: RelationshipsGetNickname(targetCharacter ?? Player.MemberNumber) ?? targetName,
+					...dictionary
+				}), 7_000);
 			}
 			if (this.isLogged) {
 				const log = texts.attempt_log;
@@ -847,7 +873,14 @@ export class RuleState<ID extends BCX_Rule> {
 				}
 				const announce = texts.attempt_announce ?? texts.attempt_log;
 				if (announce) {
-					ChatRoomActionMessage(`${dictionaryProcess(announce, dictionary)}.`);
+					ChatRoomActionMessage(`${dictionaryProcess(announce, {
+						PLAYER_NAME: "SourceCharacter",
+						TARGET_PLAYER: `TargetCharacterName (${targetCharacter ?? Player.MemberNumber})`,
+						...dictionary
+					})}.`, null, [
+						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+						{ Tag: "TargetCharacterName", MemberNumber: targetCharacter ?? Player.MemberNumber, Text: targetName }
+					]);
 				}
 			}
 		}
@@ -1400,7 +1433,9 @@ export class ModuleRules extends BaseModule {
 			if (Date.now() >= this.suspendedUntil) {
 				this.suspendedUntil = null;
 				this.triggerCounts.clear();
-				ChatRoomActionMessage(`All of ${Player.Name}'s temporarily suspended rules are in effect again.`);
+				ChatRoomActionMessage(`All of SourceCharacter's temporarily suspended rules are in effect again.`, null, [
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+				]);
 			} else {
 				return;
 			}

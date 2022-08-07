@@ -52,6 +52,9 @@ type BCX_Permissions =
 	| "commands_limited"
 	| "commands_change_limits"
 	| "exportimport_export"
+	| "relationships_view_all"
+	| "relationships_modify_self"
+	| "relationships_modify_others"
 	| "misc_test";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
@@ -741,4 +744,5 @@ interface ModStorage {
 	conditions: ConditionsStorage;
 	roomTemplates: (RoomTemplate | null)[];
 	roomSearchAutoFill: string;
+	relationships: import("./modules/relationships").RelationshipData[];
 }

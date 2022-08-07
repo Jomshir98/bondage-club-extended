@@ -853,7 +853,11 @@ export function initRules_bc_alter() {
 					state.customData &&
 					getCharacterAccessLevel(sourceMemberNumber) > state.customData.minimumRole
 				) {
-					ChatRoomActionMessage(`${Player.Name}'s leash seems to be cursed and slips out of ${getCharacterName(sourceMemberNumber, "[unknown]")}'s hand.`);
+					const character = getChatroomCharacter(sourceMemberNumber);
+					ChatRoomActionMessage(`SourceCharacter's leash seems to be cursed and slips out of TargetCharacterName's hand.`, null, [
+						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
+						{ Tag: "TargetCharacterName", MemberNumber: sourceMemberNumber, Text: character ? CharacterNickname(character.Character) : getCharacterName(sourceMemberNumber, "[unknown]") }
+					]);
 					return false;
 				}
 				return next(args);
@@ -907,7 +911,7 @@ export function initRules_bc_alter() {
 		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the summoner after 15 seconds. It works by sending a beep message with the set text or simply the word 'summon' to PLAYER_NAME. Members who are allowed to summon PLAYER_NAME can be set. NOTES: PLAYER_NAME can always be summoned no matter if she has a leash or is prevented from leaving the room (ignoring restraints or locked rooms). However, if the target room is full or locked, she will end up in the lobby. Summoning will not work if the room name is not included with the beep message!",
 		keywords: ["leashing", "room", "calling", "ordering", "move", "moving", "movement", "warping", "beaming", "transporting"],
 		triggerTexts: {
-			infoBeep: "You are summoned by SUMMONER!"
+			infoBeep: "You are summoned by TARGET_PLAYER!"
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
@@ -948,14 +952,18 @@ export function initRules_bc_alter() {
 					(data.Message.toLocaleLowerCase().startsWith(state.customData.summoningText.trim().toLocaleLowerCase()) || data.Message.trim().toLocaleLowerCase() === "summon") &&
 					data.ChatRoomName
 				) {
-					ChatRoomActionMessage(`${Player.Name} received a summon: "${state.customData.summoningText}".`);
+					ChatRoomActionMessage(`SourceCharacter received a summon: "${state.customData.summoningText}".`, null, [
+						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+					]);
 					beep = true;
 					BCX_setTimeout(() => {
 						// Check if rule is still in effect or if we are already there
 						if (!state.isEnforced || (ServerPlayerIsInChatRoom() && ChatRoomData.Name === data.ChatRoomName)) return;
 
 						// leave
-						ChatRoomActionMessage(`The demand for ${Player.Name}'s presence is now enforced.`);
+						ChatRoomActionMessage(`The demand for SourceCharacter's presence is now enforced.`, null, [
+							{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+						]);
 						DialogLentLockpicks = false;
 						ChatRoomClearAllElements();
 						ServerSend("ChatRoomLeave", "");
@@ -970,7 +978,7 @@ export function initRules_bc_alter() {
 					}, state.customData.summonTime * 1000);
 				}
 				next(args);
-				if (beep) state.triggerAttempt({ SUMMONER: `${data.MemberName} (${data.MemberNumber})` });
+				if (beep) state.triggerAttempt(data.MemberNumber);
 				beep = false;
 			}, ModuleCategory.Rules);
 		}

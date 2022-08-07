@@ -5,7 +5,7 @@ import { registerSpeechHook, SpeechMessageInfo, falteringSpeech, SpeechHookAllow
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
 import { dictionaryProcess, escapeRegExp, isObject } from "../utils";
-import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
+import { ChatRoomSendLocal } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
@@ -254,14 +254,14 @@ export function initRules_bc_speech_control() {
 			registerSpeechHook({
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg) && transgression !== undefined) {
-						state.triggerAttempt({ USED_WORD: transgression });
+						state.triggerAttempt(null, { USED_WORD: transgression });
 						return SpeechHookAllow.BLOCK;
 					}
 					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
 					if (state.inEffect && !check(msg) && transgression !== undefined) {
-						state.trigger({ USED_WORD: transgression });
+						state.trigger(null, { USED_WORD: transgression });
 					}
 				}
 			});
@@ -439,20 +439,20 @@ export function initRules_bc_speech_control() {
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
-				const target = msg.target && getChatroomCharacter(msg.target);
+				const target = msg.target != null && getChatroomCharacter(msg.target);
 				return msg.type !== "Whisper" || !target || !state.customData?.minimumPermittedRole || getCharacterAccessLevel(target) <= state.customData.minimumPermittedRole;
 			};
 			registerSpeechHook({
 				allowSend: (msg) => {
-					if (state.isEnforced && !check(msg)) {
-						state.triggerAttempt({ TARGET_PLAYER: `${msg.target ? getCharacterName(msg.target, "[unknown]") : "[unknown]"} (${msg.target})` });
+					if (state.isEnforced && !check(msg) && msg.target != null) {
+						state.triggerAttempt(msg.target);
 						return SpeechHookAllow.BLOCK;
 					}
 					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
-					if (state.inEffect && !check(msg)) {
-						state.trigger({ TARGET_PLAYER: `${msg.target ? getCharacterName(msg.target, "[unknown]") : "[unknown]"} (${msg.target})` });
+					if (state.inEffect && !check(msg) && msg.target != null) {
+						state.trigger(msg.target);
 					}
 				}
 			});
@@ -553,10 +553,10 @@ export function initRules_bc_speech_control() {
 					(!Player.CanInteract() || !state.customData.onlyWhenBound)
 				) {
 					if (state.isEnforced) {
-						state.triggerAttempt({ TARGET_PLAYER: `${getCharacterName(FriendListBeepTarget, "[unknown]")} (${FriendListBeepTarget})` });
+						state.triggerAttempt(FriendListBeepTarget);
 						return;
 					}
-					state.trigger({ TARGET_PLAYER: `${getCharacterName(FriendListBeepTarget, "[unknown]")} (${FriendListBeepTarget})` });
+					state.trigger(FriendListBeepTarget);
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

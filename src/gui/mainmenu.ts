@@ -5,6 +5,7 @@ import { GuiGlobal } from "./global";
 import { GuiLog } from "./log";
 import { GuiMisc } from "./misc";
 import { GuiExportImportMain } from "./export_import_main";
+import { GuiRelationships } from "./relationships";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";
 import { VERSION } from "../config";
@@ -52,6 +53,12 @@ const MAIN_MENU_ITEMS: { module: ModuleCategory; onclick: (C: ChatroomCharacter)
 		module: ModuleCategory.Commands,
 		onclick: (C) => {
 			setSubscreen(new GuiCommandsModule(C));
+		}
+	},
+	{
+		module: ModuleCategory.Relationships,
+		onclick: (C) => {
+			setSubscreen(new GuiRelationships(C));
 		}
 	},
 	{

@@ -10,6 +10,7 @@ import { hookFunction } from "./patching";
 import { announceSelf } from "./modules/chatroom";
 import { BCX_setInterval } from "./BCXContext";
 import { otherSupporterStatus, supporterStatus } from "./modules/versionCheck";
+import { guard_RelationshipData, RelationshipData } from "./modules/relationships";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -375,6 +376,43 @@ export class ChatroomCharacter {
 		}, this.MemberNumber).then(res => {
 			if (typeof res !== "string") {
 				console.error("BCX: Bad data during 'export_import_do_import' query\n", res);
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
+	relatonshipsGet(): Promise<BCX_queries["relatonshipsGet"][1]> {
+		return sendQuery("relatonshipsGet", undefined, this.MemberNumber).then(res => {
+			if (
+				!isObject(res) ||
+				!Array.isArray(res.relationships) ||
+				!res.relationships.every(guard_RelationshipData) ||
+				typeof res.access_view_all !== "boolean" ||
+				typeof res.access_modify_self !== "boolean" ||
+				typeof res.access_modify_others !== "boolean"
+			) {
+				console.error("BCX: Bad data during 'relatonshipsGet' query\n", res);
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
+	relationshipsRemove(memberNumber: number): Promise<boolean> {
+		return sendQuery("relationshipsRemove", memberNumber, this.MemberNumber).then(res => {
+			if (typeof res !== "boolean") {
+				console.error("BCX: Bad data during 'relationshipsRemove' query\n", res);
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
+	relationshipsSet(data: RelationshipData): Promise<boolean> {
+		return sendQuery("relationshipsSet", data, this.MemberNumber).then(res => {
+			if (typeof res !== "boolean") {
+				console.error("BCX: Bad data during 'relationshipsSet' query\n", res);
 				throw new Error("Bad data");
 			}
 			return res;

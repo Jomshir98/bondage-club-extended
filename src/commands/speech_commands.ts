@@ -89,8 +89,10 @@ export function initCommands_speech() {
 						}
 						if (check(msg)) {
 							if (senderNumber && sayText.length >= count) {
-								ChatRoomActionMessage(`Note: ${Player.Name} did not type out the text '${sayText}' fully and likely ` +
-									`used copy & paste or the chat history instead.`, senderNumber);
+								ChatRoomActionMessage(`Note: SourceCharacter did not type out the text '${sayText}' fully and likely ` +
+									`used copy & paste or the chat history instead.`, senderNumber, [
+									{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+								]);
 								ChatRoomSendLocal(`Note: It appears you didn't type out the text '${sayText}' fully and likely` +
 									`used copy & paste or the chat history instead. The giver of the command has been notified of this.`);
 							}
@@ -209,19 +211,25 @@ export function initCommands_speech() {
 						if (senderNumber && typeTaskText.length >= count) {
 							// failure 1.1: typeTaskText.length > count (forced mode) -> iteration not counted
 							if (typeTaskForce) {
-								ChatRoomActionMessage(`${Player.Name} failed one instance of her typing task, since she did not type out the required text fully and likely ` +
-								`used copy & paste or the chat history instead.`, senderNumber);
+								ChatRoomActionMessage(`SourceCharacter failed one instance of her typing task, since she did not type out the required text fully and likely ` +
+									`used copy & paste or the chat history instead.`, senderNumber, [
+									{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+								]);
 								ChatRoomSendLocal(`You are required to type the text out fully yourself. This try did not count!`);
 								return SpeechHookAllow.BLOCK;
 							}
 							// failure 1.2: typeTaskText.length > count  -> task failed
-							ChatRoomActionMessage(`${Player.Name} failed the typing task as she did not type out the required text '${typeTaskText}' fully and likely ` +
-								`used copy & paste or the chat history instead.`, senderNumber);
+							ChatRoomActionMessage(`SourceCharacter failed the typing task as she did not type out the required text '${typeTaskText}' fully and likely ` +
+								`used copy & paste or the chat history instead.`, senderNumber, [
+								{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+							]);
 							ChatRoomSendLocal(`You failed the typing task as you did not type out the text fully`);
 							resetTypeTask();
 						} else if (repCounter >= repetitions) {
 							// successful all: whole task
-							ChatRoomActionMessage(`${Player.Name} completed the typing task successfully`, senderNumber);
+							ChatRoomActionMessage(`SourceCharacter completed the typing task successfully`, senderNumber, [
+								{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+							]);
 							ChatRoomSendLocal(`You completed the typing task successfully.`);
 							resetTypeTask();
 						} else {
@@ -244,12 +252,16 @@ export function initCommands_speech() {
 						}
 						// failure 4.1: whispered incorrect text to the task giver (forced mode) -> iteration not counted
 						if (typeTaskForce) {
-							ChatRoomActionMessage(`${Player.Name} typed the required text incorrectly. This try did not count.`, senderNumber);
+							ChatRoomActionMessage(`SourceCharacter typed the required text incorrectly. This try did not count.`, senderNumber, [
+								{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+							]);
 							ChatRoomSendLocal(`You did not type out the correct text '${typeTaskText}'. This try did not count!`);
 							return SpeechHookAllow.BLOCK;
 						}
 						// failure 4.2: whispered incorrect text to the task giver -> task failed
-						ChatRoomActionMessage(`${Player.Name} typed the required text incorrectly and failed her task after ${repCounter} ${repCounter === 1 ? "time" : "times"} out of ${repetitions}.`, senderNumber);
+						ChatRoomActionMessage(`SourceCharacter typed the required text incorrectly and failed her task after ${repCounter} ${repCounter === 1 ? "time" : "times"} out of ${repetitions}.`, senderNumber, [
+							{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+						]);
 						ChatRoomSendLocal(`You typed the required text incorrectly and failed your task after ${repCounter} ${repCounter === 1 ? "time" : "times"} out of ${repetitions}.`);
 						resetTypeTask();
 						return SpeechHookAllow.ALLOW;

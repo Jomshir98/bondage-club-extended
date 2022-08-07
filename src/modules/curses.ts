@@ -904,7 +904,9 @@ export class ModuleCurses extends BaseModule {
 			if (Date.now() >= this.suspendedUntil.get(group)!) {
 				this.suspendedUntil.delete(group);
 				this.triggerCounts.clear();
-				ChatRoomActionMessage(`The dormant curse on ${Player.Name}'s ${getVisibleGroupName(assetGroup)} wakes up again.`);
+				ChatRoomActionMessage(`The dormant curse on SourceCharacter's ${getVisibleGroupName(assetGroup)} wakes up again.`, null, [
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+				]);
 			} else {
 				return;
 			}
@@ -1018,7 +1020,9 @@ export class ModuleCurses extends BaseModule {
 			this.triggerCounts.set(group, counter);
 
 			if (counter >= CURSES_ANTILOOP_THRESHOLD) {
-				ChatRoomActionMessage(`Protection triggered: Curses on ${Player.Name}'s ${getVisibleGroupName(assetGroup)} have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.`);
+				ChatRoomActionMessage(`Protection triggered: Curses on SourceCharacter's ${getVisibleGroupName(assetGroup)} have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.`, null, [
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+				]);
 				this.suspendedUntil.set(group, Date.now() + CURSES_ANTILOOP_SUSPEND_TIME);
 			}
 		}
@@ -1030,13 +1034,17 @@ export class ModuleCurses extends BaseModule {
 			if (list.length === 0)
 				continue;
 			if (list.length >= 3) {
-				ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS_BATCH[changeType], {}));
+				ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS_BATCH[changeType], { PLAYER_NAME: "SourceCharacter" }), null, [
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+				]);
 				if (changeType !== "autoremove") {
 					logMessage("curse_trigger", LogEntryType.curseTriggerBatch, changeType);
 				}
 			} else {
 				for (const item of list) {
-					ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS[changeType], { ASSET_NAME: item }));
+					ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS[changeType], { PLAYER_NAME: "SourceCharacter", ASSET_NAME: item }), null, [
+						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+					]);
 					if (changeType !== "autoremove") {
 						logMessage("curse_trigger", LogEntryType.curseTrigger, [changeType, item]);
 					}

@@ -179,10 +179,10 @@ export function initRules_other() {
 					state.internalData = Player.Money;
 				}
 				if (state.internalData > Player.Money) {
-					state.trigger({ TYPE: "spent", AMOUNT: `${state.internalData - Player.Money}`, BALANCE: `${Player.Money}` });
+					state.trigger(null, { TYPE: "spent", AMOUNT: `${state.internalData - Player.Money}`, BALANCE: `${Player.Money}` });
 					returnValue = true;
 				} else if (state.internalData < Player.Money && state.customData && state.customData.logEarnings) {
-					state.trigger({ TYPE: "earned", AMOUNT: `${Player.Money - state.internalData}`, BALANCE: `${Player.Money}` });
+					state.trigger(null, { TYPE: "earned", AMOUNT: `${Player.Money - state.internalData}`, BALANCE: `${Player.Money}` });
 					returnValue = true;
 				}
 				if (state.internalData !== Player.Money) {

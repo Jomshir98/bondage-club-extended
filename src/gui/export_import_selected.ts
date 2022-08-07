@@ -43,7 +43,7 @@ export class GuiExportImportSelected extends GuiSubscreen {
 
 	Run() {
 
-		DrawText(`- Export / Import of ${this.category.name} -`, 125, 125, "Black", "Gray");
+		DrawText(`- Export / Import of ${this.category.name} on ${this.character.Name} -`, 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 
 		MainCanvas.textAlign = "center";

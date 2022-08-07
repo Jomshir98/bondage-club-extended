@@ -1,6 +1,7 @@
 import { icon_Typing_star, icon_Typing_base, icon_Typing_dot } from "./resources";
 import { BCX_setTimeout } from "./BCXContext";
 import { getChatroomCharacter } from "./characters";
+import { RelationshipsGetNickname } from "./modules/relationships";
 
 import bcModSDK from "bondage-club-mod-sdk";
 
@@ -321,6 +322,18 @@ export function getCharacterName(memberNumber: number, defaultText: string | nul
 	if (friendName)
 		return friendName;
 	return defaultText;
+}
+
+export function getCharacterNickname(memberNumber: number, defaultText: string): string;
+export function getCharacterNickname(memberNumber: number, defaultText: string | null): string | null;
+export function getCharacterNickname(memberNumber: number, defaultText: string | null = null): string | null {
+	const relNickname = RelationshipsGetNickname(memberNumber);
+	if (relNickname != null)
+		return relNickname;
+	const c = getChatroomCharacter(memberNumber);
+	if (c)
+		return c.Nickname;
+	return getCharacterName(memberNumber, defaultText);
 }
 
 export function itemColorsEquals(color1: null | undefined | string | string[], color2: null | undefined | string | string[]): boolean {

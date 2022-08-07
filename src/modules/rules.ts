@@ -741,7 +741,7 @@ export function RulesCreate(rule: BCX_Rule, character: ChatroomCharacter | null)
 		if (character) {
 			logMessage("rule_change", LogEntryType.plaintext, `${character} added a new rule: ${definition.name}`);
 			if (!character.isPlayer()) {
-				ChatRoomSendLocal(`${character} gave you a new rule: "${definition.name}"`);
+				ChatRoomSendLocal(`${character.toNicknamedString()} gave you a new rule: "${definition.name}"`);
 			}
 		}
 	}
@@ -761,7 +761,7 @@ export function RulesDelete(rule: BCX_Rule, character: ChatroomCharacter | null)
 	if (ConditionsRemoveCondition("rules", rule) && character) {
 		logMessage("rule_change", LogEntryType.plaintext, `${character} removed the rule: ${display.name}`);
 		if (!character.isPlayer()) {
-			ChatRoomSendLocal(`${character} removed your rule "${display.name}"`);
+			ChatRoomSendLocal(`${character.toNicknamedString()} removed your rule "${display.name}"`);
 		}
 	}
 
@@ -1157,7 +1157,7 @@ export class ModuleRules extends BaseModule {
 				logMessage("rule_change", LogEntryType.plaintext,
 					`${character} changed ${Player.Name}'s '${definition.name}' rule permission to ${ConditionsLimit[newLimit]}`);
 				if (!character.isPlayer()) {
-					ChatRoomSendLocal(`${character} changed '${definition.name}' rule permission to ${ConditionsLimit[newLimit]}`, undefined, character.MemberNumber);
+					ChatRoomSendLocal(`${character.toNicknamedString()} changed '${definition.name}' rule permission to ${ConditionsLimit[newLimit]}`, undefined, character.MemberNumber);
 				}
 			},
 			logConditionUpdate: (rule, character, newData, oldData) => {
@@ -1197,19 +1197,19 @@ export class ModuleRules extends BaseModule {
 				}
 				if (!character.isPlayer()) {
 					if (didActiveChange) {
-						ChatRoomSendLocal(`${character} ${newData.active ? "reactivated" : "deactivated"} the '${visibleName}' rule`, undefined, character.MemberNumber);
+						ChatRoomSendLocal(`${character.toNicknamedString()} ${newData.active ? "reactivated" : "deactivated"} the '${visibleName}' rule`, undefined, character.MemberNumber);
 					}
 					if (newData.timer !== oldData.timer)
 						if (newData.timer === null) {
-							ChatRoomSendLocal(`${character} disabled the timer of the '${visibleName}' rule`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character.toNicknamedString()} disabled the timer of the '${visibleName}' rule`, undefined, character.MemberNumber);
 						} else {
-							ChatRoomSendLocal(`${character} changed the remaining time of the timer of the '${visibleName}' rule to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character.toNicknamedString()} changed the remaining time of the timer of the '${visibleName}' rule to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
 						}
 					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
-						ChatRoomSendLocal(`${character} changed the timer behavior of the '${visibleName}' rule to ${newData.timerRemove ? "remove" : "disable"} the rule when time runs out`, undefined, character.MemberNumber);
+						ChatRoomSendLocal(`${character.toNicknamedString()} changed the timer behavior of the '${visibleName}' rule to ${newData.timerRemove ? "remove" : "disable"} the rule when time runs out`, undefined, character.MemberNumber);
 					if (didTriggerChange)
 						if (newData.requirements === null) {
-							ChatRoomSendLocal(`${character} set the triggers of '${visibleName}' rule to the global rules configuration`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character.toNicknamedString()} set the triggers of '${visibleName}' rule to the global rules configuration`, undefined, character.MemberNumber);
 						} else {
 							const triggers: string[] = [];
 							const r = newData.requirements;
@@ -1228,21 +1228,21 @@ export class ModuleRules extends BaseModule {
 								triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
 							}
 							if (triggers.length > 0) {
-								ChatRoomSendLocal(`${character} set the '${visibleName}' rule to trigger under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+								ChatRoomSendLocal(`${character.toNicknamedString()} set the '${visibleName}' rule to trigger under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
 							} else {
-								ChatRoomSendLocal(`${character} deactivated all trigger conditions of the '${visibleName}' rule. The rule will now always trigger, while it is active`, undefined, character.MemberNumber);
+								ChatRoomSendLocal(`${character.toNicknamedString()} deactivated all trigger conditions of the '${visibleName}' rule. The rule will now always trigger, while it is active`, undefined, character.MemberNumber);
 							}
 						}
 					if (didEnforcementChange) {
-						ChatRoomSendLocal(`${character} ${newData.data.enforce ? "enabled enforcement" : "stopped enforcement"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
+						ChatRoomSendLocal(`${character.toNicknamedString()} ${newData.data.enforce ? "enabled enforcement" : "stopped enforcement"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
 					}
 					if (didLoggingChange) {
-						ChatRoomSendLocal(`${character} ${newData.data.log ? "enabled logging" : "stopped logging"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
+						ChatRoomSendLocal(`${character.toNicknamedString()} ${newData.data.log ? "enabled logging" : "stopped logging"} of the '${visibleName}' rule`, undefined, character.MemberNumber);
 					}
 					if (definition.dataDefinition) {
 						for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(definition.dataDefinition)) {
 							if (!isEqual(oldData.data.customData?.[k], newData.data.customData?.[k])) {
-								ChatRoomSendLocal(`${character} changed the '${visibleName}' rule's setting '${def.description}' from '${oldData.data.customData?.[k]}' to '${newData.data.customData?.[k]}'`, undefined, character.MemberNumber);
+								ChatRoomSendLocal(`${character.toNicknamedString()} changed the '${visibleName}' rule's setting '${def.description}' from '${oldData.data.customData?.[k]}' to '${newData.data.customData?.[k]}'`, undefined, character.MemberNumber);
 							}
 						}
 					}
@@ -1263,12 +1263,12 @@ export class ModuleRules extends BaseModule {
 				if (!character.isPlayer()) {
 					if (newData.timer !== oldData.timer)
 						if (newData.timer === null) {
-							ChatRoomSendLocal(`${character} removed the default timer of the global rules configuration`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character.toNicknamedString()} removed the default timer of the global rules configuration`, undefined, character.MemberNumber);
 						} else {
-							ChatRoomSendLocal(`${character} changed the default timer of the global rules configuration to ${formatTimeInterval(newData.timer)}`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character.toNicknamedString()} changed the default timer of the global rules configuration to ${formatTimeInterval(newData.timer)}`, undefined, character.MemberNumber);
 						}
 					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
-						ChatRoomSendLocal(`${character} changed the default timeout behavior of the global rules configuration to ${newData.timerRemove ? "removal of rules" : "disabling rules"} when time runs out`, undefined, character.MemberNumber);
+						ChatRoomSendLocal(`${character.toNicknamedString()} changed the default timeout behavior of the global rules configuration to ${newData.timerRemove ? "removal of rules" : "disabling rules"} when time runs out`, undefined, character.MemberNumber);
 					if (didTriggerChange) {
 						const triggers: string[] = [];
 						const r = newData.requirements;
@@ -1287,9 +1287,9 @@ export class ModuleRules extends BaseModule {
 							triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
 						}
 						if (triggers.length > 0) {
-							ChatRoomSendLocal(`${character} set the global rules configuration to trigger rules under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character.toNicknamedString()} set the global rules configuration to trigger rules under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
 						} else {
-							ChatRoomSendLocal(`${character} deactivated all trigger conditions for the global rules configuration. Rules set to this default configuration will now always trigger, while active`, undefined, character.MemberNumber);
+							ChatRoomSendLocal(`${character.toNicknamedString()} deactivated all trigger conditions for the global rules configuration. Rules set to this default configuration will now always trigger, while active`, undefined, character.MemberNumber);
 						}
 					}
 				}
@@ -1352,7 +1352,7 @@ export class ModuleRules extends BaseModule {
 						return;
 					logMessage("rule_change", LogEntryType.plaintext, `${character} imported rule '${definition.name}'`);
 					if (!character.isPlayer()) {
-						ChatRoomSendLocal(`${character} imported rule '${definition.name}'`);
+						ChatRoomSendLocal(`${character.toNicknamedString()} imported the rule '${definition.name}'`);
 					}
 				},
 				importRemove(condition, character) {

@@ -10,7 +10,7 @@ import { hookFunction } from "./patching";
 import { announceSelf } from "./modules/chatroom";
 import { BCX_setInterval } from "./BCXContext";
 import { otherSupporterStatus, supporterStatus } from "./modules/versionCheck";
-import { guard_RelationshipData, RelationshipData } from "./modules/relationships";
+import { guard_RelationshipData, RelationshipData, RelationshipsGetNickname } from "./modules/relationships";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -40,6 +40,10 @@ export class ChatroomCharacter {
 		return this.Character.Name;
 	}
 
+	get Nickname(): string {
+		return RelationshipsGetNickname(this) ?? CharacterNickname(this.Character);
+	}
+
 	get supporterStatus(): BCXSupporterType {
 		const status = otherSupporterStatus.get(this.MemberNumber);
 		return status?.verified ? status.status : undefined;
@@ -47,6 +51,10 @@ export class ChatroomCharacter {
 
 	toString(): string {
 		return `${this.Name} (${this.MemberNumber})`;
+	}
+
+	toNicknamedString(): string {
+		return `${this.Nickname} (${this.MemberNumber})`;
 	}
 
 	constructor(character: Character) {

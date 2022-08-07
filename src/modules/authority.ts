@@ -5,7 +5,7 @@ import { ChatroomCharacter, getAllCharactersInRoom, getPlayerCharacter } from ".
 import { modStorage, modStorageSync } from "./storage";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { LogEntryType, logMessage } from "./log";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getCharacterNickname } from "../utilsClub";
 import { moduleIsEnabled } from "./presets";
 import { RulesGetRuleState } from "./rules";
 import { ModuleCategory, ModuleInitPhase, MODULE_NAMES, Preset } from "../constants";
@@ -168,12 +168,16 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 	}
 
 	if (characterToCheck) {
-		const msg = `${characterToCheck} ` +
+		logMessage("permission_change", LogEntryType.plaintext, `${characterToCheck} ` +
 			(self ? `gave ${characterToCheck.isPlayer() ? "herself" : Player.Name}` : `removed ${characterToCheck?.isPlayer() ? "her" : Player.Name + "'s"}`) +
-			` control over permission "${permData.name}"`;
-		logMessage("permission_change", LogEntryType.plaintext, msg);
+			` control over permission "${permData.name}"`);
 		if (!characterToCheck.isPlayer()) {
-			ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+			ChatRoomSendLocal(
+				`${characterToCheck.toNicknamedString()} ` +
+				(self ? `gave ${characterToCheck.isPlayer() ? "herself" : getPlayerCharacter().Nickname}` : `removed ${characterToCheck?.isPlayer() ? "her" : getPlayerCharacter().Nickname + "'s"}`) +
+				` control over permission "${permData.name}"`,
+				undefined, characterToCheck.MemberNumber
+			);
 		}
 	}
 
@@ -217,11 +221,14 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 	}
 
 	if (characterToCheck) {
-		const msg = `${characterToCheck} changed permission "${permData.name}" from ` +
-			`"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`;
-		logMessage("permission_change", LogEntryType.plaintext, msg);
+		logMessage("permission_change", LogEntryType.plaintext, `${characterToCheck} changed permission "${permData.name}" from ` +
+			`"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`);
 		if (!characterToCheck.isPlayer()) {
-			ChatRoomSendLocal(msg, undefined, characterToCheck.MemberNumber);
+			ChatRoomSendLocal(
+				`${characterToCheck.toNicknamedString()} changed permission "${permData.name}" from ` +
+				`"${getPermissionMinDisplayText(permData.min, characterToCheck)}" to "${getPermissionMinDisplayText(min, characterToCheck)}"`,
+				undefined, characterToCheck.MemberNumber
+			);
 		}
 	}
 
@@ -319,13 +326,19 @@ export function editRole(role: "owner" | "mistress", action: "add" | "remove", t
 	}
 
 	if (character) {
-		const targetDescriptor = character.MemberNumber === target ? "herself" : `${getCharacterName(target, "[unknown name]")} (${target})`;
-		const msg = action === "add" ?
+		let targetDescriptor = character.MemberNumber === target ? "herself" : `${getCharacterName(target, "[unknown name]")} (${target})`;
+		logMessage("authority_roles_change", LogEntryType.plaintext, action === "add" ?
 			`${character} added ${targetDescriptor} as ${role}.` :
-			`${character} removed ${targetDescriptor} from being ${role}.`;
-		logMessage("authority_roles_change", LogEntryType.plaintext, msg);
+			`${character} removed ${targetDescriptor} from being ${role}.`
+		);
 		if (!character.isPlayer()) {
-			ChatRoomSendLocal(msg, undefined, character.MemberNumber);
+			targetDescriptor = character.MemberNumber === target ? "herself" : `${getCharacterNickname(target, "[unknown name]")} (${target})`;
+			ChatRoomSendLocal(
+				action === "add" ?
+					`${character.toNicknamedString()} added ${targetDescriptor} as ${role}.` :
+					`${character.toNicknamedString()} removed ${targetDescriptor} from being ${role}.`,
+				undefined, character.MemberNumber
+			);
 		}
 		if (action === "add" && character.MemberNumber !== target) {
 			const user = character.isPlayer() ? "her" : `TargetCharacterName's (${Player.MemberNumber})`;

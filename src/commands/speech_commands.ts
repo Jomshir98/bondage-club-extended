@@ -1,6 +1,6 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerCommand } from "../modules/commandsModule";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getCharacterNickname } from "../utilsClub";
 import { hookFunction } from "../patching";
 import { registerSpeechHook, SpeechHookAllow, SpeechMessageInfo } from "../modules/speech";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
@@ -111,7 +111,7 @@ export function initCommands_speech() {
 		trigger: (argv, sender, respond, state) => {
 			if (sayText && argv.length === 1 && argv[0].toLowerCase() === "cancel") {
 				respond(`You canceled ${Player.Name}'s say-command. She is now able to chat normally again.`);
-				ChatRoomSendLocal(`${sender} canceled your say-command. You are now able to chat normally again.`);
+				ChatRoomSendLocal(`${sender.toNicknamedString()} canceled your say-command. You are now able to chat normally again.`);
 				sayText = "";
 				senderNumber = null;
 				return true;
@@ -145,7 +145,7 @@ export function initCommands_speech() {
 			count = 0;
 			sayText = sentence;
 			senderNumber = sender.MemberNumber;
-			ChatRoomSendLocal(`${sender} orders you to loudly say '${sayText}'.`);
+			ChatRoomSendLocal(`${sender.toNicknamedString()} orders you to loudly say '${sayText}'.`);
 			return true;
 		},
 		autoCompleter: (argv) => {
@@ -242,7 +242,7 @@ export function initCommands_speech() {
 					} else {
 						// failure 2: whispered to the wrong target -> block
 						if (ChatRoomTargetMemberNumber !== senderNumber) {
-							ChatRoomSendLocal(`You are not allowed to whisper to someone else than ${getCharacterName(senderNumber, "[unknown name]")} (${senderNumber}) while you have not finished your typing task.`);
+							ChatRoomSendLocal(`You are not allowed to whisper to someone else than ${getCharacterNickname(senderNumber, "[unknown name]")} (${senderNumber}) while you have not finished your typing task.`);
 							return SpeechHookAllow.BLOCK;
 						}
 						// failure 3: tried to speak in chat -> block
@@ -279,7 +279,7 @@ export function initCommands_speech() {
 		}
 		if (typeTaskText && argv.length === 1 && argv[0] === "cancel") {
 			respond(`You canceled ${Player.Name}'s typetask-command. She is now able to chat normally again.`);
-			ChatRoomSendLocal(`${sender} canceled your typetask-command. You are now able to chat normally again.`);
+			ChatRoomSendLocal(`${sender.toNicknamedString()} canceled your typetask-command. You are now able to chat normally again.`);
 			resetTypeTask();
 			return true;
 		}
@@ -324,7 +324,7 @@ export function initCommands_speech() {
 		typeTaskForce = isForced;
 		senderNumber = sender.MemberNumber;
 		respond(`Successfully gave a new typing task to ${Player.Name}.`);
-		ChatRoomSendLocal(`${sender} gives you the task of typing '${typeTaskText}' ${repetitions} times in a whisper to her.`);
+		ChatRoomSendLocal(`${sender.toNicknamedString()} gives you the task of typing '${typeTaskText}' ${repetitions} times in a whisper to her.`);
 		return true;
 	}
 	function TypeTaskAutoCompleter(argv: string[], isForced: boolean) {

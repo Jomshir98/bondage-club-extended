@@ -51,7 +51,7 @@ export function initCommands_definitions() {
 				const text = eyesTexts[argv[0].toLowerCase()];
 				if (text) {
 					ChatRoomSendLocal(dictionaryProcess(text, {
-						SENDER_NAME: sender.Name,
+						SENDER_NAME: sender.Nickname,
 						SENDER_NUMBER: `${sender.MemberNumber}`
 					}), undefined, sender.MemberNumber);
 				}
@@ -110,7 +110,7 @@ export function initCommands_definitions() {
 				const text = mouthTexts[argv[0].toLowerCase()];
 				if (text) {
 					ChatRoomSendLocal(dictionaryProcess(text, {
-						SENDER_NAME: sender.Name,
+						SENDER_NAME: sender.Nickname,
 						SENDER_NUMBER: `${sender.MemberNumber}`
 					}), undefined, sender.MemberNumber);
 				}
@@ -195,7 +195,7 @@ export function initCommands_definitions() {
 				const text = armsTexts[argv[0].toLowerCase()];
 				if (text) {
 					ChatRoomSendLocal(dictionaryProcess(text, {
-						SENDER_NAME: sender.Name,
+						SENDER_NAME: sender.Nickname,
 						SENDER_NUMBER: `${sender.MemberNumber}`
 					}), undefined, sender.MemberNumber);
 				}
@@ -248,7 +248,7 @@ export function initCommands_definitions() {
 				const text = legsTexts[argv[0].toLowerCase()];
 				if (text) {
 					ChatRoomSendLocal(dictionaryProcess(text, {
-						SENDER_NAME: sender.Name,
+						SENDER_NAME: sender.Nickname,
 						SENDER_NUMBER: `${sender.MemberNumber}`
 					}), undefined, sender.MemberNumber);
 				}
@@ -423,7 +423,7 @@ export function initCommands_definitions() {
 			if (argv[0] === "cancel") {
 				LogDelete("Committed", "Asylum", true);
 				respond(`You freed ${Player.Name}. She can now leave the Asylum again.`);
-				ChatRoomSendLocal(`${sender} freed you. You are now able to leave the Asylum again.`);
+				ChatRoomSendLocal(`${sender.toNicknamedString()} freed you. You are now able to leave the Asylum again.`);
 				return true;
 			}
 			let time = 0;
@@ -482,7 +482,7 @@ export function initCommands_definitions() {
 			if (argv[0] === "cancel") {
 				LogDelete("KeyDeposit", "Cell", true);
 				respond(`You let ${Player.Name} have her keys back.`);
-				ChatRoomSendLocal(`${sender} let you have your keys back.`);
+				ChatRoomSendLocal(`${sender.toNicknamedString()} let you have your keys back.`);
 				return true;
 			}
 			let time = 0;
@@ -779,7 +779,7 @@ export function initCommands_definitions() {
 			if (!sender.isPlayer()) {
 				const text = "SENDER_NAME (SENDER_NUMBER) changed your emoticon.";
 				ChatRoomSendLocal(dictionaryProcess(text, {
-					SENDER_NAME: sender.Name,
+					SENDER_NAME: sender.Nickname,
 					SENDER_NUMBER: `${sender.MemberNumber}`
 				}), undefined, sender.MemberNumber);
 			}

@@ -259,7 +259,7 @@ export class ModuleCommandsModule extends BaseModule {
 				logMessage("command_change", LogEntryType.plaintext,
 					`${character} changed ${Player.Name}'s '${definition.name}' command permission to ${ConditionsLimit[newLimit]}`);
 				if (!character.isPlayer()) {
-					ChatRoomSendLocal(`${character} changed '${definition.name}' command permission to ${ConditionsLimit[newLimit]}`, undefined, character.MemberNumber);
+					ChatRoomSendLocal(`${character.toNicknamedString()} changed '${definition.name}' command permission to ${ConditionsLimit[newLimit]}`, undefined, character.MemberNumber);
 				}
 			},
 			logConditionUpdate: () => { /* NOOP */ },

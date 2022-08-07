@@ -82,7 +82,8 @@ type BCX_LogCategory =
 	| "had_orgasm"
 	| "entered_public_room"
 	| "entered_private_room"
-	| "authority_roles_change";
+	| "authority_roles_change"
+	| "relationships_change";
 
 interface CursedItemInfo {
 	Name: string;

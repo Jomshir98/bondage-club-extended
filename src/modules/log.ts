@@ -315,7 +315,8 @@ const logConfigDefaults: Record<BCX_LogCategory, LogAccessLevel> = {
 	rule_change: LogAccessLevel.none,
 	rule_trigger: LogAccessLevel.none,
 	command_change: LogAccessLevel.none,
-	authority_roles_change: LogAccessLevel.protected
+	authority_roles_change: LogAccessLevel.protected,
+	relationships_change: LogAccessLevel.none
 };
 
 export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
@@ -332,7 +333,8 @@ export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	rule_change: "Log each addition, removal or change of rules",
 	rule_trigger: "Log every rule violation",
 	command_change: "Log each change of commands limit",
-	authority_roles_change: "Log getting or losing a BCX owner/mistress"
+	authority_roles_change: "Log getting or losing a BCX owner/mistress",
+	relationships_change: "Log each change in relationships module"
 };
 
 export const LOG_LEVEL_NAMES: Record<LogAccessLevel, string> = {

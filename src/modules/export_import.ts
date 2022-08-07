@@ -14,7 +14,7 @@ export interface ExportImportCategoryDefinition<T> {
 	name: string;
 	module: ModuleCategory;
 	importPermissions: BCX_Permissions[];
-	export(): T;
+	export(character: ChatroomCharacter | null): T;
 	importValidator: ZodType<T>;
 	import(value: T, character: ChatroomCharacter | null): string;
 }
@@ -32,14 +32,19 @@ export function ExportImportRegisterCategory<T>(definition: ExportImportCategory
 	exportImportCategories.push(definition);
 }
 
-export function ExportImportDoExport(category: string, compress: boolean): string {
+export function ExportImportDoExport(category: string, compress: boolean, character: ChatroomCharacter | null): string {
 	const definition = exportImportCategories.find(c => c.category === category);
 	if (!definition) {
 		throw new Error(`Unknown export category "${category}"`);
 	}
+
+	if (character && !checkPermissionAccess("exportimport_export", character)) {
+		throw new Error("No access");
+	}
+
 	let result = JSON.stringify({
 		__bcxExport: EXPORT_IMPORT_FORMAT_VERSION,
-		[category]: definition.export()
+		[category]: definition.export(character)
 	});
 	if (compress) {
 		result = LZString.compressToBase64(result);
@@ -129,10 +134,7 @@ export class ModuleExportImport extends BaseModule {
 				exportImportCategories.some(c => c.category === data.category) &&
 				typeof data.compress === "boolean"
 			) {
-				if (!checkPermissionAccess("exportimport_export", sender)) {
-					throw new Error("No access");
-				}
-				return ExportImportDoExport(data.category, data.compress);
+				return ExportImportDoExport(data.category, data.compress, sender);
 			} else {
 				return undefined;
 			}

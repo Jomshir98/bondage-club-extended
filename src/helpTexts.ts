@@ -104,6 +104,10 @@ export const HELP_TEXTS: Record<Views, string> = {
 		"copied to your device's clipboard. You can then paste it anywhere you like, for instance a text file on your device. " +
 		"Functionality of this feature depends on the device you are using and if the clipboard can be used on it. " +
 		"This field will also show you status information while you try to export or import.\n" +
-		"Compressing the export will save you some space when storing it, as the text length will be shorter, although the exported string will no longer be human readable. ",
-	[Views.Relationships]: "TODO: To be added"
+		"Compressing the export will save you some space when storing it, as the text length will be shorter, although the exported string will no longer be " +
+		"human readable. ",
+	[Views.Relationships]: "This screen lets you add custom nicknames for other club members, only shown to the player. " +
+		"The set custom name replaces the added character's name/BC-nickname in the player's chat, except within chat commands, which are " +
+		"considered strictly OOC. You can also optionally enforce a custom name so that the player is blocked from sending a chat message/whisper that uses an " +
+		"added character's name/BC-nickname without using the set custom one instead. The player cannot have multiple custom names set for a single character."
 };

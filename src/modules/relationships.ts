@@ -1,19 +1,30 @@
-import { cloneDeep, isEqual, pick } from "lodash-es";
-import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { cloneDeep, isEqual, pick, uniqBy } from "lodash-es";
+import { ChatroomCharacter, getAllCharactersInRoom, getChatroomCharacter } from "../characters";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction, patchFunction, removeAllHooksByModule } from "../patching";
-import { isObject } from "../utils";
+import { escapeRegExp, isObject } from "../utils";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
+import { ExportImportRegisterCategory } from "./export_import";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
 import { BaseModule } from "./_BaseModule";
+import zod from "zod";
+import { LogEntryType, logMessage } from "./log";
+import { ChatRoomSendLocal, getCharacterName, getCharacterNickname } from "../utilsClub";
+import { registerSpeechHook, SpeechHookAllow } from "./speech";
 
 export interface RelationshipData {
 	memberNumber: number;
 	nickname: string;
 	enforceNickname: boolean;
 }
+
+export const RelationshipData_schema = zod.object({
+	memberNumber: zod.number(),
+	nickname: zod.string().refine(isValidNickname),
+	enforceNickname: zod.boolean()
+});
 
 // TODO: check if 20 or not
 export const NICKNAME_LENGTH_MAX = 20;
@@ -114,7 +125,10 @@ export class ModuleRelationhips extends BaseModule {
 
 			modStorage.relationships.splice(index, 1);
 
-			// TODO: Log
+			logMessage("relationships_change", LogEntryType.plaintext, `${sender} removed the set custom name for ${getCharacterName(data, "[unknown name]")} (${data})`);
+			if (!sender.isPlayer()) {
+				ChatRoomSendLocal(`${sender.toNicknamedString()} removed the set custom name for ${getCharacterNickname(data, "[unknown name]")} (${data})`, undefined, sender.MemberNumber);
+			}
 
 			modStorageSync();
 			notifyOfChange();
@@ -138,18 +152,110 @@ export class ModuleRelationhips extends BaseModule {
 			if (!checkPermissionAccess(sender.MemberNumber === data.memberNumber ? "relationships_modify_self" : "relationships_modify_others", sender))
 				return false;
 
+			const oldData = index >= 0 ? modStorage.relationships[index] : null;
+
 			if (index >= 0) {
 				modStorage.relationships[index] = data;
 			} else {
 				modStorage.relationships.push(data);
 			}
 
-			// TODO: Log
+			if (oldData?.nickname !== data.nickname) {
+				logMessage("relationships_change", LogEntryType.plaintext, `${sender} changed the custom name for ${getCharacterName(data.memberNumber, "[unknown name]")} (${data.memberNumber}) to '${data.nickname}'`);
+				if (!sender.isPlayer()) {
+					ChatRoomSendLocal(`${sender.toNicknamedString()} changed the custom name for character ${data.memberNumber} to '${data.nickname}'`, undefined, sender.MemberNumber);
+				}
+			}
+
+			if ((oldData?.enforceNickname ?? false) !== data.enforceNickname) {
+				logMessage("relationships_change", LogEntryType.plaintext, `${sender} ${data.enforceNickname ? "started" : "stopped"} custom name enforcement for ${getCharacterName(data.memberNumber, "[unknown name]")} (${data.memberNumber})`);
+				if (!sender.isPlayer()) {
+					ChatRoomSendLocal(`${sender.toNicknamedString()} ${data.enforceNickname ? "now requires" : "no longer requires"} you to only use ${getCharacterNickname(data.memberNumber, "[unknown name]")}'s (${data.memberNumber}) custom name.`, undefined, sender.MemberNumber);
+				}
+			}
 
 			modStorageSync();
 			notifyOfChange();
 			return true;
 		};
+
+		registerSpeechHook({
+			allowSend: (msg) => {
+				if (
+					moduleIsEnabled(ModuleCategory.Relationships) &&
+					modStorage.relationships &&
+					(msg.type === "Chat" || msg.type === "Whisper")
+				) {
+					// Build the dictionary of allowed and forbidden names
+					const allowed = new Set<string>();
+					const forbiden = new Set<string>();
+
+					for (const char of getAllCharactersInRoom()) {
+						const rel = modStorage.relationships.find(r => r.memberNumber === char.MemberNumber);
+						if (rel) {
+							allowed.add(rel.nickname.toLowerCase());
+						}
+
+						if (rel && rel.enforceNickname) {
+							forbiden.add(char.Character.Name.toLowerCase());
+							if (char.Character.Nickname && isValidNickname(char.Character.Nickname)) {
+								forbiden.add(char.Character.Nickname.toLowerCase());
+							}
+						} else {
+							allowed.add(char.Character.Name.toLowerCase());
+							if (char.Character.Nickname && isValidNickname(char.Character.Nickname)) {
+								allowed.add(char.Character.Nickname.toLowerCase());
+							}
+						}
+					}
+
+					// Allow has higher priority than forbid
+					for (const a of allowed) {
+						forbiden.delete(a);
+					}
+
+					// Find if bad name was used
+					const transgression = Array.from(forbiden).find(i =>
+						(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
+							new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+						)
+					);
+					if (transgression !== undefined) {
+						ChatRoomSendLocal(`You are not allowed to use the name '${transgression}'! You need to use the name for her that was given to you!`, 7_000);
+						return SpeechHookAllow.BLOCK;
+					}
+
+				}
+				return SpeechHookAllow.ALLOW;
+			}
+		});
+
+		ExportImportRegisterCategory<RelationshipData[]>({
+			category: `relationships`,
+			name: `Relationships`,
+			module: ModuleCategory.Relationships,
+			export: (character) => {
+				if (character && !checkPermissionAccess("relationships_view_all", character)) {
+					throw new Error("No access: Missing required permission 'relationships_view_all'");
+				}
+				return modStorage.relationships ?? [];
+			},
+			import: (data, character) => {
+				data = uniqBy(data, r => r.memberNumber);
+				modStorage.relationships = data;
+
+				if (character) {
+					logMessage("relationships_change", LogEntryType.plaintext, `${character} imported settings for relationships module`);
+					if (!character.isPlayer()) {
+						ChatRoomSendLocal(`${character.toNicknamedString()} settings for relationships module`, undefined, character.MemberNumber);
+					}
+				}
+
+				return `Done!`;
+			},
+			importPermissions: ["relationships_view_all", "relationships_modify_self", "relationships_modify_others"],
+			importValidator: zod.array(RelationshipData_schema)
+		});
 	}
 
 	override load() {

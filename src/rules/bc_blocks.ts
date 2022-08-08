@@ -1095,4 +1095,31 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 		}
 	});
+
+	registerRule("block_changing_emoticon", {
+		name: "Prevent changing own emoticon",
+		type: RuleType.Block,
+		shortDescription: "for just PLAYER_NAME",
+		longDescription: "This rule prevents PLAYER_NAME from showing, removing or changing an emoticon (afk, zZZ, etc.) over her head. It also blocks her from using the emoticon command on herself.",
+		triggerTexts: {
+			infoBeep: "You are not allowed to change the emoticon!",
+			attempt_log: "PLAYER_NAME tried to use the emoticon command",
+			log: "PLAYER_NAME used the emoticon command"
+		},
+		defaultLimit: ConditionsLimit.normal,
+		load(state) {
+			// Partially implemented externally
+			hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
+				const I = DialogFacialExpressions.findIndex(a => a.Appearance.Asset.Group.Name === "Emoticon");
+				if (state.inEffect && MouseIn(20, 185 + 100 * I, 90, 90)) {
+					if (state.isEnforced) {
+						state.triggerAttempt();
+						return;
+					}
+					state.trigger();
+				}
+				return next(args);
+			});
+		}
+	});
 }

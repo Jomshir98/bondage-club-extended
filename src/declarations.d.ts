@@ -248,6 +248,7 @@ type BCX_Rule =
 	| "block_using_ggts"
 	| "block_club_slave_work"
 	| "block_using_unowned_items"
+	| "block_changing_emoticon"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"

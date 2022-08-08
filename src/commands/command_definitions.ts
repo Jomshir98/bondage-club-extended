@@ -770,6 +770,16 @@ export function initCommands_definitions() {
 				));
 				return false;
 			}
+
+			// tied to rule "Prevent changing own emoticon"
+			const blockRule = RulesGetRuleState("block_changing_emoticon");
+			if (blockRule.isEnforced && sender.isPlayer()) {
+				blockRule.triggerAttempt();
+				return false;
+			} else if (blockRule.inEffect && sender.isPlayer()) {
+				blockRule.trigger();
+			}
+
 			const expression = emoticonExpressions[argv[0].toLowerCase()];
 			if (expression === undefined) {
 				respond(`Bad value: ${argv[0].toLowerCase()} is not one of '${Object.keys(emoticonExpressions).join("', '")}'`);

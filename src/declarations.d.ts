@@ -55,7 +55,7 @@ type BCX_Permissions =
 	| "relationships_view_all"
 	| "relationships_modify_self"
 	| "relationships_modify_others"
-	| "misc_test";
+	| "misc_wardrobe_item_import";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
 

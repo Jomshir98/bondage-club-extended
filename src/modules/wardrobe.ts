@@ -9,7 +9,9 @@ import { RedirectGetImage } from "./miscPatches";
 import { curseMakeSavedProperty } from "./curses";
 import { BCX_setTimeout } from "../BCXContext";
 import { Command_pickAutocomplete, Command_selectWornItem, Command_selectWornItemAutocomplete, registerCommandParsed } from "./commands";
-import { getPlayerCharacter } from "../characters";
+import { getChatroomCharacter, getPlayerCharacter } from "../characters";
+import { AccessLevel, registerPermission } from "./authority";
+import { ModuleCategory, Preset } from "../constants";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -36,6 +38,9 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 	const C = CharacterAppearanceSelection;
 	if (!C) {
 		return "Import error: No character";
+	}
+	if (C.MemberNumber !== j_WardrobeBindsAllowedCharacter && includeBinds) {
+		return "Import error: Not allowed to import items";
 	}
 
 	const playerNumber = getPlayerCharacter().MemberNumber;
@@ -160,6 +165,7 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 }
 
 let j_WardrobeIncludeBinds = false;
+let j_WardrobeBindsAllowedCharacter = -1;
 let j_ShowHelp = false;
 // FUTURE: "Importing must not change any locked item or item blocked by locked item"
 const helpText = "BCX's wardrobe export/import works by converting your current appearance into a long code word that is copied to your device's clipboard. " +
@@ -205,9 +211,44 @@ function exitSearchMode(C: Character) {
 
 export class ModuleWardrobe extends BaseModule {
 
+	override init(): void {
+		registerPermission("misc_wardrobe_item_import", {
+			name: "Allow importing items using wardrobe",
+			category: ModuleCategory.Misc,
+			defaults: {
+				[Preset.dominant]: [true, AccessLevel.whitelist],
+				[Preset.switch]: [true, AccessLevel.friend],
+				[Preset.submissive]: [true, AccessLevel.friend],
+				[Preset.slave]: [true, AccessLevel.friend]
+			}
+		});
+	}
+
 	load() {
 		const NMod = isNModClient();
 		const NModWardrobe = NMod && typeof AppearanceMode !== "undefined";
+
+		hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
+			const C = args[0] as Character;
+			const char = C.MemberNumber && getChatroomCharacter(C.MemberNumber);
+			if (char && char.BCXVersion != null) {
+				char.getPermissionAccess("misc_wardrobe_item_import")
+					.then(res => {
+						if (res) {
+							j_WardrobeBindsAllowedCharacter = char.MemberNumber;
+						} else {
+							j_WardrobeBindsAllowedCharacter = -1;
+						}
+					})
+					.catch(err => {
+						console.warn("BCX: Failed to get permission to import wardrobe restraints:", err);
+						j_WardrobeBindsAllowedCharacter = -1;
+					});
+			} else {
+				j_WardrobeBindsAllowedCharacter = -1;
+			}
+			return next(args);
+		});
 
 		hookFunction("AppearanceRun", 0, (args, next) => {
 			next(args);
@@ -215,10 +256,12 @@ export class ModuleWardrobe extends BaseModule {
 				const Y = NModWardrobe ? 265 : 125;
 				DrawButton(1380, Y, 50, 50, "", "White", "", "How does it work?");
 				DrawImageEx("Icons/Question.png", 1380 + 3, Y + 3, { Width: 44, Height: 44 });
-				DrawButton(1457, Y, 50, 50, "", "White", "", "Include items/restraints");
+				const C = CharacterAppearanceSelection;
+				const allowBinds = C != null && j_WardrobeBindsAllowedCharacter === C.MemberNumber;
+				DrawButton(1457, Y, 50, 50, "", allowBinds ? "White" : j_WardrobeIncludeBinds ? "pink" : "#ddd", "", "Include items/restraints");
 				DrawImageEx("../Icons/Bondage.png", 1457 + 6, Y + 6, { Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38 });
 				DrawButton(1534, Y, 207, 50, "Export", "White", "");
-				DrawButton(1768, Y, 207, 50, "Import", "White", "");
+				DrawButton(1768, Y, 207, 50, "Import", (!allowBinds && j_WardrobeIncludeBinds) ? "#ddd" : "White", "", undefined, !allowBinds && j_WardrobeIncludeBinds);
 			}
 			if (j_ShowHelp && (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe")) {
 				MainCanvas.fillStyle = "#ffff88";
@@ -274,10 +317,12 @@ export class ModuleWardrobe extends BaseModule {
 				const Y = 90;
 				DrawButton(1000, Y, 50, 50, "", "White", "", "How does it work?");
 				DrawImageEx("Icons/Question.png", 1000 + 3, Y + 3, { Width: 44, Height: 44 });
-				DrawButton(425, Y, 50, 50, "", "White", "", "Include items/restraints");
+				const C = CharacterAppearanceSelection;
+				const allowBinds = C != null && j_WardrobeBindsAllowedCharacter === C.MemberNumber;
+				DrawButton(425, Y, 50, 50, "", allowBinds ? "White" : j_WardrobeIncludeBinds ? "pink" : "#ddd", "", "Include items/restraints");
 				DrawImageEx("../Icons/Bondage.png", 425 + 6, Y + 6, { Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38 });
 				DrawButton(750, Y, 225, 50, "Export", "White", "");
-				DrawButton(500, Y, 225, 50, "Import", "White", "");
+				DrawButton(500, Y, 225, 50, "Import", (!allowBinds && j_WardrobeIncludeBinds) ? "#ddd" : "White", "", undefined, !allowBinds && j_WardrobeIncludeBinds);
 			}
 			if (j_ShowHelp) {
 				MainCanvas.fillStyle = "#ffff88";

@@ -422,8 +422,20 @@ export class ModuleClubUtils extends BaseModule {
 		//#endregion
 		//#region Hidden room backgrounds
 		registerCommand("utility", "background", "<name> - Changes chat room background", processBackgroundCommand, processBackgroundCommand_autocomplete);
-		// Add new backgrounds to the list
 
+		// Add missing tags to tag list
+		const availableTags = new Set<string>();
+		for (const background of BackgroundsList) {
+			background.Tag.forEach(t => availableTags.add(t));
+		}
+		for (const tag of availableTags) {
+			if (!BackgroundsTagList.includes(tag)) {
+				console.log("Adding tag", tag);
+				BackgroundsTagList.push(tag);
+			}
+		}
+
+		// Add new backgrounds to the list
 		if (!BackgroundsTagList.includes(BACKGROUNDS_BCX_NAME)) {
 			BackgroundsTagList.push(BACKGROUNDS_BCX_NAME);
 		}

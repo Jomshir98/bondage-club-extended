@@ -210,7 +210,6 @@ export function initRules_other() {
 			if (index < 0)
 				break;
 			hiddenItems.splice(index, 1);
-			ServerPlayerBlockItemsSync();
 		}
 	};
 

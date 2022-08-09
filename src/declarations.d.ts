@@ -337,6 +337,9 @@ type RuleCustomData = {
 	block_leaving_room: {
 		minimumRole: import("./modules/authority").AccessLevel;
 	},
+	block_freeing_self: {
+		allowEasyItemsToggle: boolean;
+	},
 	block_tying_others: {
 		onlyMoreDominantsToggle: boolean;
 	},

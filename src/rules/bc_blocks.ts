@@ -653,7 +653,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid freeing self",
 		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME removing any items from PLAYER_NAME's body",
-		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them.",
+		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score, such as hand-held items, plushies, etc.",
 		keywords: ["limiting", "untying", "unbinding", "bondage"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to remove an item from your body!",
@@ -661,7 +661,15 @@ export function initRules_bc_blocks() {
 			log: "PLAYER_NAME removed a worn item, which was forbidden"
 		},
 		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			allowEasyItemsToggle: {
+				type: "toggle",
+				default: false,
+				description: "Still allow removing low difficulty items"
+			}
+		},
 		load(state) {
+			let score: number = 999;
 			OverridePlayerDialog("BCX_RemoveDisabled", "Usage blocked by BCX");
 			OverridePlayerDialog("BCX_StruggleDisabled", "Usage blocked by BCX");
 			OverridePlayerDialog("BCX_DismountDisabled", "Usage blocked by BCX");
@@ -673,7 +681,14 @@ export function initRules_bc_blocks() {
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
 				const C = args[0] as Character;
-				if (C.ID === 0 && state.isEnforced) {
+				if (C.ID === 0 && C.FocusGroup && state.isEnforced) {
+					const Item = InventoryGet(C, C.FocusGroup.Name);
+					if (Item && state.customData?.allowEasyItemsToggle) {
+						score = (Item.Asset.Difficulty ?? 0) + (typeof Item.Property?.Difficulty === "number" ? Item.Property.Difficulty : 0);
+						if (score <= 1) {
+							return;
+						}
+					}
 					const index_remove = DialogMenuButton.indexOf("Remove");
 					const index_struggle = DialogMenuButton.indexOf("Struggle");
 					const index_dismount = DialogMenuButton.indexOf("Dismount");
@@ -693,13 +708,13 @@ export function initRules_bc_blocks() {
 				}
 			}, ModuleCategory.Rules);
 			const trigger = (C: Character): boolean => {
-				if (C.ID === 0 && state.inEffect) {
+				if (C.ID === 0 && state.inEffect && score > 1) {
 					state.trigger();
 				}
 				return false;
 			};
 			const attempt = (C: Character): boolean => {
-				if (C.ID === 0 && state.inEffect) {
+				if (C.ID === 0 && state.inEffect && score > 1) {
 					state.triggerAttempt();
 				}
 				return false;

@@ -43,7 +43,7 @@ export const HELP_TEXTS: Record<Views, string> = {
 		"has normal visibility, while 'protected' means only roles who have permission to view protected entries can view them. 'No' means that " +
 		"this log type is not logged at all. In the permission settings view of the authority module, the permissions of this log module can be configured.",
 	[Views.ConditionsViewCurses]: "This screen shows all active curses on the player, including many information, such as duration, if it is " +
-		"a cursed item or a blocked item or clothing slot that forces to stay unrestrained or naked there. Clicking on the button with the cog icon " +
+		"a cursed item/clothing/body slot or a blocked item or clothing slot that forces to stay unrestrained or naked there. Clicking on the button with the cog icon " +
 		"in the middle of each row moves you to a new screen that allows to configure the curse (if you have permission). When the cog icon has a blue " +
 		"aura, that means that the curse's conditions are the same as the global config. If permitted, you can remove single curses with the 'X' button.",
 	[Views.ConditionsEditCurses]: "Here you can switch the curse on/off, set a timer for activating/deactivating/deleting the curse and " +

@@ -55,11 +55,11 @@ export const HELP_TEXTS: Record<Views, string> = {
 	[Views.ConditionsGlobalCurses]: "The settings on this page are the global/default settings for all newly added curses. Changes to the trigger " +
 		"conditions are also applied to existing curses that are (still) set to global curses configuration, though. Exception is if a timer is set here. " +
 		"Such a timer only applies to newly created curses.",
-	[Views.CursesAdd]: "On this screen you can add a curse to any empty slot (white) which will keep it empty or on any worn item (gold) " +
-		"that then will be hard to remove. You add the curse by simply clicking the slot which then becomes purple to indicate that " +
-		"it is now cursed. You can switch the curse's configuration from the default globale configuration on the previous screen. Grey slots indicate " +
-		"that you have no access to them, due to it being blocked or due to your permission settings. Slots can be limited/blocked via the settings button " +
-		"on the very right.",
+	[Views.CursesAdd]: "Here, you can add a curse to any empty slot (white) which will keep it empty or on any worn item (gold) " +
+		"which will prevent removal. You add the curse by simply clicking the slot which then becomes purple to indicate that " +
+		"it is now cursed. Grey slots indicate " +
+		"that you have no access to them, due to them being blocked or due to your permission settings. Slots can be limited/blocked via the settings button " +
+		"on the very right. The screen has a second page for the character's body slots.",
 	[Views.CursesAddPermissionMode]: "Here you can cycle item and clothing slots between being not limited, limited and blocked. Blocked means " +
 		"no one can add a curse to it, while limited means only roles that have the permission to curse limited slots can curse them. There " +
 		"is no need to save changes as they are instantly in effect.",

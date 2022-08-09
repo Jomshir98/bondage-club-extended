@@ -504,7 +504,7 @@ export function Command_selectWornItemAutocomplete(character: ChatroomCharacter,
 }
 
 export function Command_selectGroup(selector: string, character: ChatroomCharacter | null, filter?: (group: AssetGroup) => boolean): AssetGroup | string {
-	let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase() && (!filter || filter(G)));
+	let targets = AssetGroup.filter(G => G.Name.toLocaleLowerCase() === selector.toLocaleLowerCase() && G.AllowCustomize && (!filter || filter(G)));
 	if (targets.length === 0)
 		targets = AssetGroup.filter(G => getVisibleGroupName(G).toLocaleLowerCase() === selector.toLocaleLowerCase() && (!filter || filter(G)));
 
@@ -525,7 +525,7 @@ export function Command_selectGroupAutocomplete(selector: string, character: Cha
 
 	let possible = arrayUnique(
 		AssetGroup
-			.filter(G => !filter || filter(G))
+			.filter(G => G.AllowCustomize && (!filter || filter(G)))
 			.map(G => getVisibleGroupName(G))
 			.concat(
 				items
@@ -537,7 +537,7 @@ export function Command_selectGroupAutocomplete(selector: string, character: Cha
 	if (possible.length === 0) {
 		possible = arrayUnique(
 			AssetGroup
-				.filter(G => !filter || filter(G))
+				.filter(G => G.AllowCustomize && (!filter || filter(G)))
 				.map<string>(G => G.Name)
 				.concat(
 					items

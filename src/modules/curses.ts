@@ -92,8 +92,8 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 		return false;
 	}
 
-	if (group.Category === "Appearance" && !group.Clothing) {
-		console.warn(`BCX: Attempt to curse body`, Group);
+	if (group.Category === "Appearance" && !group.AllowCustomize) {
+		console.warn(`BCX: Attempt to curse non-customizable slot`, Group);
 		return false;
 	}
 
@@ -102,6 +102,11 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 	}
 
 	const currentItem = InventoryGet(Player, Group);
+
+	if (!currentItem && !group.AllowNone) {
+		console.error(`BCX: Refusing to curse empty group that doesn't allow none`);
+		return false;
+	}
 
 	if (currentItem) {
 
@@ -120,14 +125,14 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 		if (curseProperty) {
 			newCurse.curseProperty = true;
 		}
-		if (ConditionsGetCategoryData("curses").data?.itemRemove) {
+		if (ConditionsGetCategoryData("curses").data?.itemRemove && group.AllowNone) {
 			newCurse.itemRemove = true;
 		}
 		ConditionsSetCondition("curses", Group, newCurse, character);
 		if (character) {
-			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${currentItem.Asset.Description}`);
+			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${group.AllowNone ? currentItem.Asset.Description : group.Description}`);
 			if (!character.isPlayer()) {
-				ChatRoomSendLocal(`${character.toNicknamedString()} cursed the ${currentItem.Asset.Description} on you`);
+				ChatRoomSendLocal(`${character.toNicknamedString()} cursed the ${group.AllowNone ? currentItem.Asset.Description : group.Description} on you`);
 			}
 		}
 	} else {
@@ -145,7 +150,7 @@ export function curseItem(Group: string, curseProperty: boolean | null, characte
 	return true;
 }
 
-export function curseBatch(mode: "items" | "clothes", includingEmpty: boolean, character: ChatroomCharacter | null): boolean {
+export function curseBatch(mode: "items" | "clothes" | "body", includingEmpty: boolean, character: ChatroomCharacter | null): boolean {
 	if (character && !checkPermissionAccess("curses_normal", character) && !checkPermissionAccess("curses_limited", character))
 		return false;
 
@@ -154,6 +159,8 @@ export function curseBatch(mode: "items" | "clothes", includingEmpty: boolean, c
 		assetGroups = AssetGroup.filter(i => i.Category === "Item" && (includingEmpty || InventoryGet(Player, i.Name)));
 	} else if (mode === "clothes") {
 		assetGroups = AssetGroup.filter(i => i.Category === "Appearance" && i.Clothing && (includingEmpty || InventoryGet(Player, i.Name)));
+	} else if (mode === "body") {
+		assetGroups = AssetGroup.filter(i => i.Category === "Appearance" && !i.Clothing && i.AllowCustomize && (includingEmpty || InventoryGet(Player, i.Name)));
 	} else {
 		console.error(`BCX: Attempt to curse in invalid mode`, mode);
 		return false;
@@ -161,9 +168,9 @@ export function curseBatch(mode: "items" | "clothes", includingEmpty: boolean, c
 
 	if (character) {
 		logMessage("curse_change", LogEntryType.plaintext, `${character} cursed all of ${Player.Name}'s ` +
-			`${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : "clothing"} slots`);
+			`${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : mode === "clothes" ? "clothing" : "body"} slots`);
 		if (!character.isPlayer()) {
-			ChatRoomSendLocal(`${character.toNicknamedString()} cursed all of your ${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : "clothing"} slots`);
+			ChatRoomSendLocal(`${character.toNicknamedString()} cursed all of your ${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : mode === "clothes" ? "clothing" : "body"} slots`);
 		}
 	}
 
@@ -343,7 +350,7 @@ export class ModuleCurses extends BaseModule {
 						continue;
 					}
 
-					let resultItem = `\n[${group.Clothing ? "Clothing" : "Item"}] `;
+					let resultItem = `\n[${group.Category === "Item" ? "Item" : group.Clothing ? "Clothing" : "Body"}] `;
 
 					if (v.data === null) {
 						resultItem += `Blocked: ${getVisibleGroupName(group)}`;
@@ -389,14 +396,28 @@ export class ModuleCurses extends BaseModule {
 						}
 					}
 					respond(result);
+				} else if (listgroup === "body") {
+					let result = `List of body groups:`;
+					const AssetGroupBody = AssetGroup.filter(g => g.Category === "Appearance" && !g.Clothing && g.AllowCustomize);
+					for (const group of AssetGroupBody) {
+						const currentItem = InventoryGet(Player, group.Name);
+						const bodyIsCursed = cursesInfo[group.Name] !== undefined;
+
+						result += `\n${getVisibleGroupName(group)}: ${currentItem ? currentItem.Asset.Description : "[Nothing]"}`;
+						if (bodyIsCursed) {
+							result += ` [cursed]`;
+						}
+					}
+					respond(result);
 				} else {
 					respond(Command_fixExclamationMark(sender, `Expected one of:\n` +
 						`!curses listgroups items\n` +
-						`!curses listgroups clothes`
+						`!curses listgroups clothes\n` +
+						`!curses listgroups body`
 					));
 				}
 			} else if (subcommand === "curse") {
-				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter());
 				if (typeof group === "string") {
 					return respond(group);
 				}
@@ -406,15 +427,16 @@ export class ModuleCurses extends BaseModule {
 				respond(curseItem(group.Name, null, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else if (subcommand === "curseworn" || subcommand === "curseall") {
 				const group = (argv[1] || "").toLocaleLowerCase();
-				if (group === "items" || group === "clothes") {
+				if (group === "items" || group === "clothes" || group === "body") {
 					return respond(curseBatch(group, subcommand === "curseall", sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 				}
 				respond(Command_fixExclamationMark(sender, `Expected one of:\n` +
 					`!curses ${subcommand} items\n` +
-					`!curses ${subcommand} clothes`
+					`!curses ${subcommand} clothes\n` +
+					`!curses ${subcommand} body`
 				));
 			} else if (subcommand === "lift") {
-				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter());
 				if (typeof group === "string") {
 					return respond(group);
 				}
@@ -425,7 +447,7 @@ export class ModuleCurses extends BaseModule {
 			} else if (subcommand === "liftall") {
 				respond(curseLiftAll(sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else if (subcommand === "configuration") {
-				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter());
 				if (typeof group === "string") {
 					return respond(group);
 				}
@@ -447,7 +469,7 @@ export class ModuleCurses extends BaseModule {
 				curse.data.curseProperties = target === "yes";
 				respond(ConditionsUpdate("curses", group.Name, curse, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 			} else if (subcommand === "autoremove") {
-				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+				const group = Command_selectGroup(argv[1] || "", getPlayerCharacter());
 				if (typeof group === "string") {
 					return respond(group);
 				}
@@ -470,10 +492,10 @@ export class ModuleCurses extends BaseModule {
 			} else {
 				respond(Command_fixExclamationMark(sender, `!curses usage (page 1):\n` +
 					`!curses list - List all cursed <group>s and related info (eg. cursed items)\n` +
-					`!curses listgroups <items|clothes> - Lists all possible item or cloth <group> slots and worn items\n` +
+					`!curses listgroups <items|clothes|body> - Lists all possible item or cloth <group> slots and worn items\n` +
 					`!curses curse <group> - Places a curse on the specified item/cloth <group>\n` +
-					`!curses curseworn <items|clothes> - Place a curse on all currently worn items/clothes\n` +
-					`!curses curseall <items|clothes> - Place a curse on all item/cloth slots, both used and empty\n` +
+					`!curses curseworn <items|clothes|body> - Place a curse on all currently worn items/clothes\n` +
+					`!curses curseall <items|clothes|body> - Place a curse on all item/cloth slots, both used and empty\n` +
 					`!curses lift <group> - Lifts (removes) the curse from the specified item/cloth <group>\n` +
 					`!curses liftall - Lifts (removes) all curses\n` +
 					`!curses configuration <group> <yes|no> - Curses or uncurses the item configuration of an item/cloth in <group>\n` +
@@ -509,7 +531,7 @@ export class ModuleCurses extends BaseModule {
 				}
 			} else if (subcommand === "curse") {
 				if (argv.length === 2) {
-					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter(), G => G.Category !== "Appearance" || G.Clothing);
+					return Command_selectGroupAutocomplete(argv[1] || "", getPlayerCharacter());
 				}
 			} else if (subcommand === "curseworn" || subcommand === "curseall") {
 				if (argv.length === 2) {
@@ -543,18 +565,32 @@ export class ModuleCurses extends BaseModule {
 			permission_configure: "curses_global_configuration",
 			permission_changeLimits: "curses_change_limits",
 			permission_viewOriginator: "curses_view_originator",
-			loadValidateConditionKey: (group) => AssetGroup.some(g => g.Name === group),
+			loadValidateConditionKey: (group) => AssetGroup.some(g => g.Name === group && g.AllowCustomize),
 			loadValidateCondition: (group, data) => {
 				const info = data.data;
+				const assetGroup = AssetGroupGet(Player.AssetFamily, group);
 
-				if (info === null)
+				if (!assetGroup || !assetGroup.AllowCustomize)
+					return false;
+
+				if (info === null) {
+					if (!assetGroup.AllowNone) {
+						console.warn(`BCX: Invalid empty cursed slot without none allowed for '${group}', removing it`, info);
+						return false;
+					}
 					return true;
+				}
 
 				if (!isObject(info) ||
 					typeof info.Name !== "string" ||
 					typeof info.curseProperty !== "boolean"
 				) {
 					console.error(`BCX: Bad data for cursed item in group ${group}, removing it`, info);
+					return false;
+				}
+
+				if (info.itemRemove && !assetGroup.AllowNone) {
+					console.warn(`BCX: Invalid itemRemove for curse ${group}:${info.Name}, removing it`, info);
 					return false;
 				}
 
@@ -595,8 +631,12 @@ export class ModuleCurses extends BaseModule {
 				isObject(data) &&
 				typeof data.Name === "string" &&
 				typeof data.curseProperties === "boolean" &&
-				typeof data.itemRemove === "boolean",
+				typeof data.itemRemove === "boolean" &&
+				(!data.itemRemove || !!AssetGroupGet(Player.AssetFamily, group)?.AllowNone),
 			updateCondition: (condition, data, updateData, character, rawData) => {
+				const group = AssetGroupGet(Player.AssetFamily, condition);
+				if (!group)
+					return false;
 				// Update cannot change cursed item
 				if (data.data?.Name !== updateData?.Name)
 					return false;
@@ -616,7 +656,7 @@ export class ModuleCurses extends BaseModule {
 					data.data.curseProperty = false;
 				}
 
-				if (updateData.itemRemove && rawData.requirements) {
+				if (updateData.itemRemove && rawData.requirements && group.AllowNone) {
 					data.data.itemRemove = true;
 				} else {
 					delete data.data.itemRemove;
@@ -625,14 +665,14 @@ export class ModuleCurses extends BaseModule {
 				return true;
 			},
 			parseConditionName: (selector, onlyExisting) => {
-				const group = Command_selectGroup(selector, getPlayerCharacter(), G => (G.Category !== "Appearance" || G.Clothing) && (!onlyExisting || onlyExisting.includes(G.Name)));
+				const group = Command_selectGroup(selector, getPlayerCharacter(), G => !onlyExisting || onlyExisting.includes(G.Name));
 				if (typeof group === "string") {
 					return [false, group];
 				}
 				return [true, group.Name];
 			},
 			autocompleteConditionName: (selector, onlyExisting) => {
-				return Command_selectGroupAutocomplete(selector, getPlayerCharacter(), G => (G.Category !== "Appearance" || G.Clothing) && (!onlyExisting || onlyExisting.includes(G.Name)));
+				return Command_selectGroupAutocomplete(selector, getPlayerCharacter(), G => !onlyExisting || onlyExisting.includes(G.Name));
 			},
 			logLimitChange: (group, character, newLimit) => {
 				logMessage("curse_change", LogEntryType.plaintext,
@@ -762,7 +802,15 @@ export class ModuleCurses extends BaseModule {
 					}
 				}
 			},
-			getDefaultLimits: () => ({}),
+			getDefaultLimits: () => {
+				const result: Record<string, ConditionsLimit> = {};
+				for (const group of AssetGroup) {
+					if (group.Category === "Appearance" && !group.Clothing && group.AllowCustomize) {
+						result[group.Name] = ConditionsLimit.limited;
+					}
+				}
+				return result;
+			},
 			commandConditionSelectorHelp: "group",
 			currentExportImport: {
 				export(condition, data) {
@@ -928,7 +976,7 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		if (curse === null) {
-			if (currentItem) {
+			if (currentItem && currentItem.Asset.Group.AllowNone) {
 				InventoryRemove(Player, group, false);
 				CharacterRefresh(Player, true);
 				ChatRoomCharacterUpdate(Player);
@@ -1055,9 +1103,11 @@ export class ModuleCurses extends BaseModule {
 	}
 
 	private curseStateChange(curse: string, data: ConditionsConditionData<"curses">, newState: boolean): void {
+		const group = AssetGroupGet(Player.AssetFamily, curse);
 		if (!newState &&
 			data.data &&
-			(data.requirements ? data.data.itemRemove : ConditionsGetCategoryData("curses").data?.itemRemove)
+			(data.requirements ? data.data.itemRemove : ConditionsGetCategoryData("curses").data?.itemRemove) &&
+			group?.AllowNone
 		) {
 			// Removal of cursed item when curse becomes inactive
 			const currentItem = InventoryGet(Player, curse);

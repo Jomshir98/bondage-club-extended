@@ -123,7 +123,7 @@ type BCX_queries = {
 	curseLiftAll: [undefined, boolean];
 	curseBatch: [
 		{
-			mode: "items" | "clothes";
+			mode: "items" | "clothes" | "body";
 			includingEmpty: boolean;
 		},
 		boolean

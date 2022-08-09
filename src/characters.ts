@@ -284,7 +284,7 @@ export class ChatroomCharacter {
 		});
 	}
 
-	curseBatch(mode: "items" | "clothes", includingEmpty: boolean): Promise<boolean> {
+	curseBatch(mode: "items" | "clothes" | "body", includingEmpty: boolean): Promise<boolean> {
 		return sendQuery("curseBatch", { mode, includingEmpty }, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'curseBatch' query\n", data);

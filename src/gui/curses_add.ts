@@ -5,6 +5,30 @@ import { GuiSubscreen } from "./subscreen";
 import { ConditionsLimit } from "../constants";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { Views, HELP_TEXTS } from "../helpTexts";
+import { clampWrap } from "../utils";
+
+const CATEGORIES: {
+	title: string;
+	filter: (group: AssetGroup) => boolean;
+	batchType: "items" | "clothes" | "body";
+}[] =
+	[
+		{
+			title: "Items",
+			filter: g => g.Category === "Item",
+			batchType: "items"
+		},
+		{
+			title: "Clothing",
+			filter: g => g.Category === "Appearance" && g.Clothing,
+			batchType: "clothes"
+		},
+		{
+			title: "Body",
+			filter: g => g.Category === "Appearance" && !g.Clothing && g.AllowCustomize,
+			batchType: "body"
+		}
+	];
 
 export class GuiCursesAdd extends GuiSubscreen {
 
@@ -13,6 +37,7 @@ export class GuiCursesAdd extends GuiSubscreen {
 	private curseData: ConditionsCategoryPublicData<"curses"> | null = null;
 	private failed: boolean = false;
 	private permissionMode: boolean = false;
+	private page: number = 0;
 
 	private showHelp: boolean = false;
 
@@ -65,99 +90,54 @@ export class GuiCursesAdd extends GuiSubscreen {
 			!this.curseData.access_changeLimits
 		);
 
-		// items
-		MainCanvas.textAlign = "left";
-		MainCanvas.beginPath();
-		MainCanvas.rect(105, 165, 830, 64);
-		MainCanvas.fillStyle = "#cccccc";
-		MainCanvas.fill();
-		DrawText(`Items`, 120, 165 + 34, "Black");
-		MainCanvas.textAlign = "center";
+		for (let ciOffset = 0; ciOffset < 2; ciOffset++) {
+			const ci = this.page * 2 + ciOffset;
+			if (ci >= CATEGORIES.length)
+				break;
+			const category = CATEGORIES[ci];
+			const xOffset = ciOffset % 2 ? 845 : 0;
 
-		if (!this.permissionMode) {
-			DrawButton(440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
-			DrawButton(720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
-		}
+			MainCanvas.textAlign = "left";
+			MainCanvas.fillStyle = "#cccccc";
+			MainCanvas.fillRect(xOffset + 105, 165, 830, 64);
+			DrawText(category.title, xOffset + 120, 165 + 34, "Black");
+			MainCanvas.textAlign = "center";
 
-		const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
-		for (let i = 0; i < AssetGroupItems.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
-			const group = AssetGroupItems[i];
-
-			const currentItem = InventoryGet(this.character.Character, group.Name);
-
-			const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
-			const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
-			const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
-			let color: string;
-			let text: string;
-			if (this.permissionMode) {
-				color = ["#50ff56", "#f6fe78", "#ffa7a7 "][accessLevel];
-				text = ["Normal", "Limited", "Blocked"][accessLevel];
-			} else {
-				color = itemIsCursed ? "#88c" :
-					!allowCurse ? "#ccc" :
-						(currentItem ? "Gold" : "White");
-				text = itemIsCursed ? "Already cursed" :
-					!allowCurse ? "You have no permission to curse this" :
-						(currentItem ? currentItem.Asset.Description : "Nothing");
+			if (!this.permissionMode) {
+				DrawButton(xOffset + 440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
+				DrawButton(xOffset + 720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
 			}
 
-			DrawButton(106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
-				color, undefined,
-				text, itemIsCursed || !allowCurse || this.permissionMode);
-		}
+			const AssetGroups = AssetGroup.filter(category.filter);
+			for (let i = 0; i < AssetGroups.length; i++) {
+				const row = i % 10;
+				const column = Math.floor(i / 10);
+				const group = AssetGroups[i];
 
-		// clothing
-		MainCanvas.textAlign = "left";
-		MainCanvas.beginPath();
-		MainCanvas.rect(950, 165, 830, 64);
-		MainCanvas.fillStyle = "#cccccc";
-		MainCanvas.fill();
-		DrawText(`Clothing`, 965, 165 + 34, "Black");
-		MainCanvas.textAlign = "center";
+				const currentItem = InventoryGet(this.character.Character, group.Name);
 
-		if (!this.permissionMode) {
-			DrawButton(1285, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all clothes on the body at once");
-			DrawButton(1565, 173, 200, 48, "Curse all", "White", undefined, "Curse all clothing slots at once");
-		}
+				const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
+				const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
+				const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
+				let color: string;
+				let text: string;
+				if (this.permissionMode) {
+					color = ["#50ff56", "#f6fe78", "#ffa7a7"][accessLevel];
+					text = ["Normal", "Limited", "Blocked"][accessLevel];
+				} else {
+					color = itemIsCursed ? "#88c" :
+						!allowCurse ? "#ccc" :
+							(currentItem ? "Gold" : "White");
+					text = itemIsCursed ? "Already cursed" :
+						!allowCurse ? "You have no permission to curse this" :
+							(currentItem ? currentItem.Asset.Description : "Nothing");
+				}
 
-		const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
-		for (let i = 0; i < AssetGroupClothings.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
-			const group = AssetGroupClothings[i];
-
-			const currentItem = InventoryGet(this.character.Character, group.Name);
-
-			const clothingIsCursed = this.curseData.conditions[group.Name] !== undefined;
-			const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
-			const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
-			let color: string;
-			let text: string;
-			if (this.permissionMode) {
-				color = ["#50ff56", "#f6fe78", "#ffa7a7 "][accessLevel];
-				text = ["Normal", "Limited", "Blocked"][accessLevel];
-			} else {
-				color = clothingIsCursed ? "#88c" :
-					!allowCurse ? "#ccc" :
-						(currentItem ? "Gold" : "White");
-				text = clothingIsCursed ? "Already cursed" :
-					!allowCurse ? "You have no permission to curse this" :
-						(currentItem ? currentItem.Asset.Description : "Nothing");
+				DrawButton(xOffset + 106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
+					color, undefined,
+					text, itemIsCursed || !allowCurse || this.permissionMode);
 			}
-			DrawButton(951 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
-				color, undefined,
-				text, clothingIsCursed || !allowCurse || this.permissionMode);
 		}
-
-		//Body
-		// TODO: Actual data
-
-		// const bodyIsCursed = false;
-		// DrawButton(1600, 750, 300, 140, "Character Body", bodyIsCursed ? "#ccc" : "White", undefined,
-		//	bodyIsCursed ? "Already cursed" : "Size, skin color, eyes, etc.", bodyIsCursed);
 
 		// permission mode legend
 		if (this.permissionMode) {
@@ -178,6 +158,10 @@ export class GuiCursesAdd extends GuiSubscreen {
 		if (this.showHelp) {
 			showHelp(HELP_TEXTS[this.permissionMode ? Views.CursesAddPermissionMode : Views.CursesAdd]);
 		}
+
+		// Pagination
+		const totalPages = Math.ceil(CATEGORIES.length / 2);
+		DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
 	}
 
 	Click() {
@@ -196,66 +180,52 @@ export class GuiCursesAdd extends GuiSubscreen {
 			return;
 		}
 
-		// items
+		for (let ciOffset = 0; ciOffset < 2; ciOffset++) {
+			const ci = this.page * 2 + ciOffset;
+			if (ci >= CATEGORIES.length)
+				break;
+			const category = CATEGORIES[ci];
+			const xOffset = ciOffset % 2 ? 845 : 0;
 
-		const AssetGroupItems = AssetGroup.filter(g => g.Category === "Item");
-		for (let i = 0; i < AssetGroupItems.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
-			const group = AssetGroupItems[i];
-
-			const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
-
-			if (MouseIn(106 + 281 * column, 240 + 69 * row, 265, 54)) {
-				if (this.permissionMode) {
-					const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
-					this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
-				} else if (!itemIsCursed) {
-					this.character.curseItem(group.Name, null);
-				}
+			if (MouseIn(xOffset + 440, 173, 265, 48) && !this.permissionMode) {
+				this.character.curseBatch(category.batchType, false);
 				return;
+			}
+
+			if (MouseIn(xOffset + 720, 173, 200, 48) && !this.permissionMode) {
+				this.character.curseBatch(category.batchType, true);
+				return;
+			}
+
+			const AssetGroups = AssetGroup.filter(category.filter);
+			for (let i = 0; i < AssetGroups.length; i++) {
+				const row = i % 10;
+				const column = Math.floor(i / 10);
+				const group = AssetGroups[i];
+
+				const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
+				const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
+				const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
+
+				if (MouseIn(xOffset + 106 + 281 * column, 240 + 69 * row, 265, 54)) {
+					if (this.permissionMode) {
+						this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
+					} else if (!itemIsCursed && allowCurse) {
+						this.character.curseItem(group.Name, null);
+					}
+					return;
+				}
 			}
 		}
 
-		if (MouseIn(440, 173, 265, 48) && !this.permissionMode) {
-			this.character.curseBatch("items", false);
-			return;
-		}
-
-		if (MouseIn(720, 173, 200, 48) && !this.permissionMode) {
-			this.character.curseBatch("items", true);
-			return;
-		}
-
-		// clothing
-
-		const AssetGroupClothings = AssetGroup.filter(g => g.Category === "Appearance" && g.Clothing);
-		for (let i = 0; i < AssetGroupClothings.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
-			const group = AssetGroupClothings[i];
-
-			const clothingIsCursed = this.curseData.conditions[group.Name] !== undefined;
-
-			if (MouseIn(951 + 281 * column, 240 + 69 * row, 265, 54)) {
-				if (this.permissionMode) {
-					const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
-					this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
-				} else if (!clothingIsCursed) {
-					this.character.curseItem(group.Name, null);
-				}
-				return;
-			}
-		}
-
-		if (MouseIn(1285, 173, 265, 48) && !this.permissionMode) {
-			this.character.curseBatch("clothes", false);
-			return;
-		}
-
-		if (MouseIn(1565, 173, 200, 48) && !this.permissionMode) {
-			this.character.curseBatch("clothes", true);
-			return;
+		// Pagination
+		const totalPages = Math.ceil(CATEGORIES.length / 2);
+		if (MouseIn(1605, 800, 150, 90)) {
+			this.page = clampWrap(this.page - 1, 0, totalPages - 1);
+			return true;
+		} else if (MouseIn(1755, 800, 150, 90)) {
+			this.page = clampWrap(this.page + 1, 0, totalPages - 1);
+			return true;
 		}
 	}
 

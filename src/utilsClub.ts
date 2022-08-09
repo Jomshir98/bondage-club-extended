@@ -20,7 +20,10 @@ const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemMouth": "Mouth (1)",
 	"ItemMouth2": "Mouth (2)",
 	"ItemMouth3": "Mouth (3)",
-	"HairAccessory2": "Ears Accessory"
+	"HairAccessory2": "Ears Accessory",
+	"Height": "Character Height",
+	"Mouth": "Mouth Style",
+	"Pussy": "Pussy Style"
 };
 
 export let allowMode: boolean = false;

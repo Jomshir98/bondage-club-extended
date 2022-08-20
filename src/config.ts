@@ -28,6 +28,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	CharacterAppearanceLoadCharacter: ["3641512F", "387F9BEF"],
 	CharacterCanChangeToPose: ["F55FE4B0"],
 	CharacterCanKneel: ["A5A325E3"],
+	CharacterLoadCanvas: ["678F3155"],
 	CharacterLoadEffect: ["0498693B", "D9ECD497", "6AC161A6", "27893941"],
 	CharacterNickname: ["EB452E5E"],
 	ChatAdminClick: ["6B460E3D", "D4354B95"],

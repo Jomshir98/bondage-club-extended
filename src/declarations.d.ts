@@ -249,6 +249,7 @@ type BCX_Rule =
 	| "block_club_slave_work"
 	| "block_using_unowned_items"
 	| "block_changing_emoticon"
+	| "block_ui_icons_names"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"
@@ -349,6 +350,10 @@ type RuleCustomData = {
 	},
 	block_blacklisting: {
 		minimumRole: import("./modules/authority").AccessLevel;
+	},
+	block_ui_icons_names: {
+		hidingStrength: string;
+		alsoHideEmoticons: boolean;
 	},
 	alt_restrict_hearing: {
 		deafeningStrength: string;

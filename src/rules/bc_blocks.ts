@@ -1137,4 +1137,77 @@ export function initRules_bc_blocks() {
 			});
 		}
 	});
+
+	let changed = false;
+	registerRule("block_ui_icons_names", {
+		name: "Force-hide UI elements",
+		type: RuleType.Block,
+		loggable: false,
+		shortDescription: "e.g., icons, bars, or names",
+		longDescription: "This rule enforces hiding of certain UI elements for PLAYER_NAME over all characters inside the room. Different levels of the effect can be set which follow exactly the behavior of the 'eye'-toggle in the button row above the chat. There is also an option to hide emoticon bubbles over all characters' heads.",
+		keywords: ["seeing", "room", "viewing", "looking", "eye", "emoticons"],
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			hidingStrength: {
+				type: "listSelect",
+				default: "icons",
+				options: [["icons", "Icons"], ["arousal", "Icons/Bar"], ["names", "Icons/Bar/Names"]],
+				description: "Select what shall be hidden:"
+			},
+			alsoHideEmoticons: {
+				type: "toggle",
+				default: false,
+				description: "Also hide emoticons during the effect",
+				Y: 440
+			}
+		},
+		load(state) {
+			hookFunction("ChatRoomDrawCharacter", 1, (args, next) => {
+				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
+
+				if (state.isEnforced && state.customData) {
+					if (state.customData.hidingStrength === "icons") {
+						ChatRoomHideIconState = 1;
+					} else if (state.customData.hidingStrength === "arousal") {
+						ChatRoomHideIconState = 2;
+					} else if (state.customData.hidingStrength === "names") {
+						ChatRoomHideIconState = 3;
+					} else {
+						console.error(`Rule block_ui_icons_names state.customData.hidingStrength has illegal value: ${state.customData.hidingStrength}`);
+					}
+
+				}
+				next(args);
+
+				ChatRoomHideIconState = ChatRoomHideIconStateBackup;
+			});
+			hookFunction("CharacterLoadCanvas", 2, (args, next) => {
+				const Emoticon = InventoryGet(args[0], "Emoticon");
+				if (!Emoticon || !Emoticon.Property || Emoticon.Property.Expression === undefined)
+					return next(args);
+				const EmoticonStateBackup = Emoticon.Property.Expression;
+
+				if (state.isEnforced && state.customData && state.customData.alsoHideEmoticons) {
+					Emoticon.Property.Expression = null;
+				}
+				next(args);
+
+				Emoticon.Property.Expression = EmoticonStateBackup;
+			});
+		},
+		tick(state) {
+			if (state.customData && state.customData.alsoHideEmoticons !== changed) {
+				changed = state.customData.alsoHideEmoticons;
+				for (const c of ChatRoomCharacter) {
+					CharacterLoadCanvas(c);
+				}
+			}
+			return false;
+		},
+		stateChange(state, newState) {
+			for (const c of ChatRoomCharacter) {
+				CharacterLoadCanvas(c);
+			}
+		}
+	});
 }

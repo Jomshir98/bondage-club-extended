@@ -1181,7 +1181,7 @@ interface AssetOverrideHeight {
  */
 interface ItemPropertiesBase {
 	Type?: string | null;
-	Expression?: string;
+	Expression?: string | null;
 	Difficulty?: number;
 	OverrideHeight?: AssetOverrideHeight;
 	HeightModifier?: number;

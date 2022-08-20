@@ -345,7 +345,7 @@ export function initRules_bc_alter() {
 					MainCanvas.fillRect(0, bottomY, 1000, limitBottom * height);
 				}
 			});
-			hookFunction("ChatRoomDrawCharacter", 1, (args, next) => {
+			hookFunction("ChatRoomDrawCharacter", 2, (args, next) => {
 				if (args[0])
 					return next(args);
 

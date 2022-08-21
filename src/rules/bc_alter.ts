@@ -450,7 +450,7 @@ export function initRules_bc_alter() {
 		name: "Fully blind when blindfolded",
 		type: RuleType.Alt,
 		loggable: false,
-		longDescription: "This rule enforces full blindness when wearing any item that limits sight in any way. (This rules does NOT respect Light sensory deprivation setting and always forces player to be fully blind)",
+		longDescription: "This rule enforces full blindness when wearing any item that limits sight in any way. (This rules does NOT respect Light sensory deprivation setting and always forces player to be fully blind. The crafting property 'thin' is not factored in either due to technical limitations. )",
 		keywords: ["seeing", "blindness", "limit", "eyes", "realistic", "room", "light"],
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {

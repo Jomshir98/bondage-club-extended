@@ -149,7 +149,7 @@ export function initRules_other() {
 		enforceable: false,
 		shortDescription: "spending and/or getting money",
 		longDescription: "This rule logs whenever money is used to buy something. It also shows how much money PLAYER_NAME currently has in the log entry. Optionally, earning money can also be logged. Note: Please be aware that this last option can potentially fill the whole behaviour log rapidly.",
-		keywords: ["record", "balance", "earning", "using"],
+		keywords: ["record", "balance", "earnings", "using", "tracking", "logging", "entry", "financial", "findom"],
 		triggerTexts: {
 			infoBeep: "A BCX rule has logged this financial transaction!",
 			log: "PLAYER_NAME TYPE money: AMOUNT $ | new balance: BALANCE $",

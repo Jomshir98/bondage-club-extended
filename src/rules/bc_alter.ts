@@ -301,7 +301,7 @@ export function initRules_bc_alter() {
 		type: RuleType.Alt,
 		loggable: false,
 		longDescription: "This rule blacks out the bottom half of the room view when eyes are looking up and the upper half when eyes are looking down.",
-		keywords: ["seeing", "limit", "angle", "room", "blindfold", "partially", "movement", "gaze", "gazing", "teasing"],
+		keywords: ["seeing", "limit", "angle", "room", "blindfold", "partially", "movement", "gaze", "gazing", "teasing", "viewing", "looking"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			affectPlayer: {

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/indent */
 
 //#region Common
 
@@ -135,7 +136,7 @@ type EffectName =
 	"Unlock-MistressPadlock" | "Unlock-MistressTimerPadlock" |
 	"Unlock-PandoraPadlock" | "Unlock-MetalCuffs" | "Unlock-" |
 
-	"ProtrudingMouth" |
+	"ProtrudingMouth" | "Wiggling" |
 	""
 	;
 
@@ -145,7 +146,7 @@ type AssetGroupItemName =
 	'ItemHood' | 'ItemLegs' | 'ItemMisc' | 'ItemMouth' | 'ItemMouth2' |
 	'ItemMouth3' | 'ItemNeck' | 'ItemNeckAccessories' | 'ItemNeckRestraints' |
 	'ItemNipples' | 'ItemNipplesPiercings' | 'ItemNose' | 'ItemPelvis' |
-	'ItemTorso' | 'ItemTorso2'| 'ItemVulva' | 'ItemVulvaPiercings' |
+	'ItemTorso' | 'ItemTorso2' | 'ItemVulva' | 'ItemVulvaPiercings' |
 
 	'ItemHidden' /* TODO: investigate, not a real group */
 	;
@@ -275,9 +276,23 @@ interface ChatRoom {
 	Character?: any[]; /* From server, not really a Character object */
 }
 
-type StimulationAction = "Flash" | "Kneel" | "Walk" | "StruggleAction" | "StruggleFail" | "Gag";
+type StimulationAction = "Kneel" | "Walk" | "Struggle" | "StruggleFail" | "Talk";
 
-type MessageActionType = "Action" | "Chat" | "Whisper" | "Emote" | "Activity" | "Hidden" | "LocalMessage" | "ServerMessage" | "Status";
+interface StimulationEvent {
+	/** The chance that this event will trigger at 0 arousal */
+	Chance: number;
+	/** Scaling factor for chance, depending on the arousal */
+	ArousalScaling?: number;
+	/** Scaling factor for chance, depending on the vibe intensity */
+	VibeScaling?: number;
+	/** Scaling factor for chance, depending on the inflation amount */
+	InflationScaling?: number;
+	/** The chance that this event will trigger when talking */
+	TalkChance?: number;
+}
+
+type MessageActionType = "Action" | "Chat" | "Whisper" | "Emote" | "Activity" | "Hidden" |
+	"LocalMessage" | "ServerMessage" | "Status";
 
 type MessageContentType = string;
 
@@ -597,6 +612,8 @@ interface Activity {
 	TargetSelf?: string[] | true;
 	/** used for setting AutoPunishGagActionFlag */
 	MakeSound?: boolean;
+	/** An action that trigger when that activity is used */
+	StimulationAction?: StimulationAction;
 }
 
 interface LogRecord {
@@ -896,9 +913,9 @@ interface Character {
 
 type NPCArchetype =
 	/* Pandora NPCs */
-	"MemberNew"|"MemberOld"|"Cosplay"|"Mistress"|"Slave"|"Maid"|"Guard"|
+	"MemberNew" | "MemberOld" | "Cosplay" | "Mistress" | "Slave" | "Maid" | "Guard" |
 	/* Pandora Special */
-	"Victim"|"Target"|"Chest";
+	"Victim" | "Target" | "Chest";
 
 /** NPC Character extension */
 // FIXME: That one should find its way down to NPCCharacter, but

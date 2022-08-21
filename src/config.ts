@@ -3,9 +3,9 @@ export const VERSION = BCX_VERSION;
 
 export const VERSION_CHECK_BOT: number = 37685;
 
-// Server commit: 806dcd771d453c82427643abe8fabb4a4a2d1513
+// Server commit: b894fce7856593d16850721febc44b09c2ec94f7
 
-// Game commit: 966b6f6081961920b585408b37aa757b14b9cdd5
+// Game commit: bade0bb88fd0a1b7cfb127a9a8a592486c019544
 export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.CanChangeClothesOn": ["40EF5292"],
 	"Player.GetBlindLevel": ["B0DE4B87", "E193DF2C"],
@@ -32,7 +32,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	CharacterLoadEffect: ["0498693B", "D9ECD497", "6AC161A6", "27893941"],
 	CharacterNickname: ["EB452E5E"],
 	ChatAdminClick: ["6B460E3D", "D4354B95"],
-	ChatAdminExit: ["64A8D565"],
+	ChatAdminExit: ["64A8D565", "EC263A9C"],
 	ChatAdminLoad: ["EB8AF0DB", "BC01235B"],
 	ChatAdminRun: ["CBE642C8", "1E16EBC7"],
 	ChatCreateClick: ["765AEBFE", "E01A5C84", "8794FE74"],
@@ -58,9 +58,9 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomLovershipOptionIs: ["6F5CE6A0"],
 	ChatRoomMenuClick: ["8D9D74CE", "959128FD", "0B1BA9F4", "188B0A8B", "900BA084", "0F32BA38"],
 	ChatRoomMenuDraw: ["0B8B0944"],
-	ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61", "60ECCB9B", "4E97FAA5", "434FF2E9", "29F6DE79", "3041CEA5", "D355B2C4", "48A4F3CC", "F9414B8C", "BA549E5F"],
+	ChatRoomMessage: ["2C6E4EC3", "4340BC41", "6026A4B6", "E3EE1C77", "58EAAE61", "60ECCB9B", "4E97FAA5", "434FF2E9", "29F6DE79", "3041CEA5", "D355B2C4", "48A4F3CC", "F9414B8C", "BA549E5F", "F6D15264"],
 	ChatRoomOwnershipOptionIs: ["FE060F0B"],
-	ChatRoomRun: ["861854FF"],
+	ChatRoomRun: ["861854FF", "685FF69C"],
 	ChatRoomSendChat: ["39B06D87", "9019F7EF", "D64CCA1D", "7F540ED0"],
 	ChatRoomSendEmote: ["30DB56A6", "6EF53CBA"],
 	ChatRoomShouldBlockGaggedOOCMessage: ["4940C855", "16D6AED5"],
@@ -70,12 +70,12 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomUpdateDisplay: ["8DFC494A"],
 	ChatSearchJoin: ["22514B80"],
 	ChatSearchLoad: ["F5CC9CAE", "8AF12D1C"],
-	ChatSearchNormalDraw: ["6BEDBABB"],
-	ChatSearchRun: ["4C56AC68", "06BFF877", "7909670E", "B679E840"],
+	ChatSearchNormalDraw: ["6BEDBABB", "0C7BF5F6"],
+	ChatSearchRun: ["4C56AC68", "06BFF877", "7909670E", "B679E840", "64BCF8FB"],
 	CheatFactor: ["594CFC45"],
 	CheatImport: ["412422CC", "26C67608"],
 	ColorPickerDraw: ["D1E82FB3"],
-	CommandParse: ["12DC018B", "534545CD", "CEA28651"],
+	CommandParse: ["12DC018B", "534545CD", "CEA28651", "B398E685"],
 	CommonKeyDown: ["A8EC46AB"],
 	CommonSetScreen: ["17692CD7"],
 	DialogCanUnlock: ["634C862B", "B849E6BC"],
@@ -127,7 +127,6 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	PreferenceSubscreenDifficultyRun: ["65BF560F"],
 	PrivateRansomStart: ["0E968EDD", "511E91C6"],
 	ServerAccountBeep: ["2D918B69", "D2802EE7", "D93AD698", "6A6EC803"],
-	ServerAppearanceLoadFromBundle: ["76D1CC95"],
 	ServerPlayerIsInChatRoom: ["E3771112"],
 	ServerSend: ["90A61F57"],
 	SpeechGarble: ["1BC8E005", "15C3B50B", "9D669F73"],

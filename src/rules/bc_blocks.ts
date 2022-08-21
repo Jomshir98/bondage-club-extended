@@ -508,8 +508,8 @@ export function initRules_bc_blocks() {
 			if (!NMod) {
 				hookFunction("ChatSearchRun", 0, (args, next) => {
 					next(args);
-					if (state.isEnforced) {
-						DrawButton(1280, 898, 280, 64, TextGet("CreateRoom"), "Gray", undefined, "Blocked by BCX", true);
+					if (state.isEnforced && ChatSearchMode === "") {
+						DrawButton(1685, 885, 90, 90, "", "Gray", "Icons/Plus.png", TextGet("CreateRoom") + "(Blocked by BCX)", true);
 					}
 				}, ModuleCategory.Rules);
 			}

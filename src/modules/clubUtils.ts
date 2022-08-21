@@ -430,7 +430,6 @@ export class ModuleClubUtils extends BaseModule {
 		}
 		for (const tag of availableTags) {
 			if (!BackgroundsTagList.includes(tag)) {
-				console.log("Adding tag", tag);
 				BackgroundsTagList.push(tag);
 			}
 		}

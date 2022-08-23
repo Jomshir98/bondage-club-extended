@@ -24,6 +24,8 @@ declare function CharacterAppearanceYOffset(C: Character, HeightRatio: number, I
 declare function AppearanceMenuBuild(C: Character): void;
 declare function CharacterAppearanceStripLayer(C: Character): void;
 declare function CharacterAppearanceSetItem(C: Character, Group: string, ItemAsset: Asset | null, NewColor?: string | string[], DifficultyFactor?: number, ItemMemberNumber?: number, Refresh?: boolean): void;
+declare function CharacterAppearanceRestore(C: Character, backup: string): void;
+declare function CharacterAppearanceStringify(C: Character): string;
 
 // Backgrounds.js
 declare var BackgroundsTagList: string[];

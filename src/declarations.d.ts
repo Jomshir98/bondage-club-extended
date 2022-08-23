@@ -756,4 +756,5 @@ interface ModStorage {
 	roomTemplates: (RoomTemplate | null)[];
 	roomSearchAutoFill: string;
 	relationships: import("./modules/relationships").RelationshipData[];
+	wardrobeDefaultExtended: boolean;
 }

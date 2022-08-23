@@ -16,6 +16,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ActivityOrgasmPrepare: ["E4EE085D"],
 	ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9", "B5D882A8", "936CB457"],
 	AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF", "0D1455A9"],
+	AppearanceExit: ["AA300341"],
 	AppearanceGetPreviewImageColor: ["C4BDF19F", "06F02ADE"],
 	AppearanceMenuBuild: ["264DC3C6", "718A9867", "436C6417"],
 	AppearanceMenuClick: ["187B3371", "80444418"],

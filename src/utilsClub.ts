@@ -293,10 +293,20 @@ export function isCloth(item: Item | Asset | AssetGroup, allowCosplay: boolean =
 	return group.Category === "Appearance" && group.AllowNone && group.Clothing && (allowCosplay || !group.BodyCosplay);
 }
 
-export function isBind(item: Item | Asset | AssetGroup): boolean {
+export function isCosplay(item: Item | Asset | AssetGroup): boolean {
+	const group = smartGetAssetGroup(item);
+	return group.Category === "Appearance" && group.AllowNone && group.Clothing && group.BodyCosplay;
+}
+
+export function isBody(item: Item | Asset | AssetGroup): boolean {
+	const group = smartGetAssetGroup(item);
+	return group.Category === "Appearance" && !group.Clothing;
+}
+
+export function isBind(item: Item | Asset | AssetGroup, excludeSlots: AssetGroupName[] = ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"]): boolean {
 	const group = smartGetAssetGroup(item);
 	if (group.Category !== "Item" || group.BodyCosplay) return false;
-	return !["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(group.Name);
+	return !excludeSlots.includes(group.Name);
 }
 
 export function getCharacterName(memberNumber: number, defaultText: string): string;

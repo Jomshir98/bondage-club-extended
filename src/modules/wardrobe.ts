@@ -1,7 +1,7 @@
-import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
+import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal, InfoBeep, isCosplay, isBody, smartGetAssetGroup } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction } from "../patching";
-import { arrayUnique, clipboardAvailable } from "../utils";
+import { arrayUnique, clipboardAvailable, isObject } from "../utils";
 
 import isEqual from "lodash-es/isEqual";
 import cloneDeep from "lodash-es/cloneDeep";
@@ -12,43 +12,42 @@ import { Command_pickAutocomplete, Command_selectWornItem, Command_selectWornIte
 import { getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { AccessLevel, registerPermission } from "./authority";
 import { ModuleCategory, Preset } from "../constants";
+import { ExtendedWardrobeInit, GuiWardrobeExtended } from "../gui/wardrobe_extended";
+import { modStorage } from "./storage";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
 	const save = CharacterAppearanceSelection.Appearance
-		.filter(a => isCloth(a, true) || (includeBinds && isBind(a)))
+		.filter(WardrobeImportMakeFilterFunction({
+			cloth: true,
+			cosplay: true,
+			body: true, // TODO: Toggle
+			binds: includeBinds,
+			collar: includeBinds
+		}))
 		.map(WardrobeAssetBundle);
 	return LZString.compressToBase64(JSON.stringify(save));
 }
 
-export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], includeBinds: boolean, force: boolean = false): string {
-	if (typeof data !== "string" || data.length < 1) return "Import error: No data";
+export function parseWardrobeImportData(data: string): string | ItemBundle[] {
+	if (typeof data !== "string" || !data.trim()) return "Import error: No data";
 	try {
 		if (data[0] !== "[") {
 			const decompressed = LZString.decompressFromBase64(data);
 			if (!decompressed) return "Import error: Bad data";
 			data = decompressed;
 		}
-		data = JSON.parse(data) as ItemBundle[];
-		if (!Array.isArray(data)) return "Import error: Bad data";
+		const parsedData = JSON.parse(data) as ItemBundle[];
+		if (!Array.isArray(parsedData)) return "Import error: Bad data";
+		return parsedData;
 	} catch (error) {
 		console.warn(error);
 		return "Import error: Bad data";
 	}
-	const C = CharacterAppearanceSelection;
-	if (!C) {
-		return "Import error: No character";
-	}
-	if (C.MemberNumber !== j_WardrobeBindsAllowedCharacter && includeBinds) {
-		return "Import error: Not allowed to import items";
-	}
+}
 
-	const playerNumber = getPlayerCharacter().MemberNumber;
-	const validationParams = ValidationCreateDiffParams(C, playerNumber);
-
-	const Allow = (a: Item | Asset) => isCloth(a, CharacterAppearanceSelection!.ID === 0) || (includeBinds && isBind(a));
-
-	if (includeBinds && !force && C.Appearance.some(a => isBind(a) && a.Property?.Effect?.includes("Lock"))) {
+export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBundle[], allowReplace: (a: Item | Asset) => boolean): boolean {
+	if (C.Appearance.some(a => isBind(a) && a.Property?.Effect?.includes("Lock"))) {
 		// Looks for all locked items and items blocked by locked items and checks, that none of those change by the import
 		// First find which groups should match
 		const matchedGroups: Set<string> = new Set();
@@ -73,19 +72,17 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 			}
 		}
 		// Then test all required groups to match
-		let success = true;
 		for (const testedGroup of matchedGroups) {
 			const currentItem = C.Appearance.find(a => a.Asset.Group.Name === testedGroup);
 			const newItem = data.find(b => b.Group === testedGroup);
 			if (!currentItem) {
 				if (newItem) {
-					success = false;
-					break;
+					return true;
 				} else {
 					continue;
 				}
 			}
-			if (!Allow(currentItem))
+			if (!allowReplace(currentItem))
 				continue;
 			if (
 				!newItem ||
@@ -93,17 +90,114 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 				!itemColorsEquals(currentItem.Color, newItem.Color) ||
 				!isEqual(currentItem.Property, newItem.Property)
 			) {
-				success = false;
-				break;
+				return true;
 			}
 		}
-		if (!success)
-			return "Refusing to change locked item!";
 	}
+	return false;
+}
+
+export function WardrobeImportMakeFilterFunction({
+	cloth,
+	cosplay,
+	body,
+	binds,
+	collar
+}: {
+	cloth: boolean;
+	cosplay: boolean;
+	body: boolean;
+	binds: boolean;
+	collar: boolean;
+}): (a: Item | Asset) => boolean {
+	return (a: Item | Asset) => (
+		(cloth && isCloth(a, false)) ||
+		(cosplay && isCosplay(a)) ||
+		(body && isBody(a)) ||
+		(binds && isBind(a, ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"])) ||
+		(collar && isBind(a, []) && ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(smartGetAssetGroup(a).Name))
+	);
+}
+
+export function ValidationCanAccessCheck(character: Character, group: AssetGroupName, item: string, type: string | undefined | null): boolean {
+	const playerNumber = getPlayerCharacter().MemberNumber;
+	return (
+		(type == null || ValidationCanAccessCheck(character, group, item, undefined)) &&
+		!ValidationIsItemBlockedOrLimited(character, playerNumber, group, item) &&
+		(!character.IsPlayer() || !InventoryIsPermissionBlocked(character, item, group))
+	);
+}
+
+export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: Item | Asset) => boolean, includeLocks: boolean | ReadonlySet<string>): void {
+	const playerNumber = getPlayerCharacter().MemberNumber;
+	const validationParams = ValidationCreateDiffParams(C, playerNumber);
+
+	const dataGroups = new Set<string>();
+	data.forEach(a => dataGroups.add(a.Group));
+	C.Appearance = C.Appearance.filter(a => !ValidationCanRemoveItem(a, validationParams, dataGroups.has(a.Asset.Group.Name)) || !filter(a));
+	for (const cloth of data) {
+		if (
+			C.Appearance.some(a => a.Asset.Group.Name === cloth.Group) ||
+			!ValidationCanAccessCheck(C, cloth.Group as AssetGroupName, cloth.Name, cloth.Property?.Type)
+		) {
+			continue;
+		}
+		const A = AssetGet(C.AssetFamily, cloth.Group, cloth.Name);
+		if (A != null) {
+			if (filter(A)) {
+				CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
+				const item = InventoryGet(C, cloth.Group);
+				if (cloth.Property && item) {
+					if (
+						!isObject(cloth.Property) ||
+						typeof cloth.Property.LockedBy !== "string" ||
+						(
+							ValidationCanAccessCheck(C, "ItemMisc", cloth.Property.LockedBy, undefined) &&
+							(!C.IsPlayer() || !InventoryIsPermissionBlocked(C, cloth.Property.LockedBy, "ItemMisc")) &&
+							(includeLocks === true || (typeof includeLocks !== "boolean" && includeLocks.has(cloth.Property.LockedBy)))
+						)
+					) {
+						item.Property = cloneDeep(cloth.Property);
+					} else {
+						item.Property = cloneDeep(curseMakeSavedProperty(cloth.Property));
+					}
+				}
+			}
+		} else {
+			console.warn(`Clothing not found: `, cloth);
+		}
+	}
+
+	CharacterRefresh(C, true);
+}
+
+export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], includeBinds: boolean, force: boolean = false): string {
+	if (!Array.isArray(data)) {
+		data = parseWardrobeImportData(data);
+		if (typeof data === "string")
+			return data;
+	}
+	const C = CharacterAppearanceSelection;
+	if (!C) {
+		return "Import error: No character";
+	}
+	if (C.MemberNumber !== j_WardrobeBindsAllowedCharacter && includeBinds) {
+		return "Import error: Not allowed to import items";
+	}
+
+	const Allow = WardrobeImportMakeFilterFunction({
+		cloth: true,
+		cosplay: C.OnlineSharedSettings?.BlockBodyCosplay !== true || C.IsPlayer(),
+		body: false,
+		binds: includeBinds,
+		collar: false
+	});
+
+	if (includeBinds && !force && WardrobeImportCheckChangesLockedItem(C, data, Allow))
+		return "Refusing to change locked item!";
 
 	// Check if everything (except ignored properties) matches
 	let fullMatch = includeBinds;
-	const matchingGroups = new Set<string>();
 	if (includeBinds) {
 		for (const group of arrayUnique(C.Appearance.filter(Allow).map<string>(item => item.Asset.Group.Name).concat(data.map(item => item.Group)))) {
 			const wornItem = C.Appearance.find(item => item.Asset.Group.Name === group);
@@ -116,48 +210,12 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(bundleItem.Property))
 			) {
 				fullMatch = false;
-			} else {
-				matchingGroups.add(group);
 			}
 		}
 	}
 
-	if (!fullMatch) {
-		// If there is item change we only apply items, not locks
-		const dataGroups = new Set<string>();
-		data.forEach(a => dataGroups.add(a.Group));
-		C.Appearance = C.Appearance.filter(a => !ValidationCanRemoveItem(a, validationParams, dataGroups.has(a.Asset.Group.Name)) || !Allow(a) || matchingGroups.has(a.Asset.Group.Name));
-		for (const cloth of data) {
-			if (
-				C.Appearance.some(a => a.Asset.Group.Name === cloth.Group) ||
-				ValidationIsItemBlockedOrLimited(C, playerNumber, cloth.Group, cloth.Name, cloth.Property?.Type) ||
-				ValidationIsItemBlockedOrLimited(C, playerNumber, cloth.Group, cloth.Name) ||
-				C.IsPlayer() && InventoryIsPermissionBlocked(C, cloth.Name, cloth.Group, cloth.Property?.Type ?? undefined) ||
-				C.IsPlayer() && InventoryIsPermissionBlocked(C, cloth.Name, cloth.Group)
-			) {
-				continue;
-			}
-			const A = Asset.find(a => a.Group.Name === cloth.Group && a.Name === cloth.Name && Allow(a));
-			if (A != null) {
-				CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
-				const item = InventoryGet(C, cloth.Group);
-				if (cloth.Property && item) {
-					item.Property = cloneDeep(curseMakeSavedProperty(cloth.Property));
-				}
-			} else {
-				console.warn(`Clothing not found: `, cloth);
-			}
-		}
-	} else {
-		// Import locks on top
-		for (const cloth of data) {
-			const item = InventoryGet(C, cloth.Group);
-			if (cloth.Property && item) {
-				item.Property = cloneDeep(cloth.Property);
-			}
-		}
-	}
-	CharacterRefresh(C);
+	WardrobeDoImport(C, data, Allow, fullMatch);
+
 	return (!fullMatch &&
 		includeBinds &&
 		data.some(i => Array.isArray(i.Property?.Effect) && i.Property?.Effect.includes("Lock"))
@@ -167,22 +225,32 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 let j_WardrobeIncludeBinds = false;
 let j_WardrobeBindsAllowedCharacter = -1;
 let j_ShowHelp = false;
-// FUTURE: "Importing must not change any locked item or item blocked by locked item"
-const helpText = "BCX's wardrobe export/import works by converting your current appearance into a long code word that is copied to your device's clipboard. " +
-	"You can then paste it anywhere you like, for instance a text file with all your outfits. At any time, you can wear the look again by copying the outfit code word to " +
+let holdingShift = false;
+
+const helpText = "BCX's wardrobe export/import works by converting your appearance into a long code word that is copied to your device's clipboard. " +
+	"You can then paste it anywhere you like, for instance a text file. You can wear the look again by copying the code word to " +
 	"the clipboard and importing it with the according button. Functionality of this feature depends on the device you " +
-	"are using and if the clipboard can be used on it. The button to the left of the 'Export'-button toggles whether items/restraints on your character should also " +
-	"be exported/imported. Importing with items has two stages: First usage adds no locks, second one also imports locks from the exported items. " +
-	"That said, importing an outfit with restraints will fail if it would change any item that is locked (or blocked by a locked item), " +
-	"except collars, neck accessories and neck restraints. Those, as well as the body itself, are ignored.";
+	"are using and if the clipboard can be used on it. Importing has two modes: quick and extended. The default behavior when importing is the extended mode, " +
+	"but you can use the quick one when you hold the 'Shift' button while importing. This behavior can be switched around in the misc module settings. " +
+	"The button to the left of the 'Export'-button toggles whether items/restraints on your character should also " +
+	"be exported or imported while using quick mode. Using quick mode, importing with items has two stages: First usage adds no locks, second one also " +
+	"imports locks from the exported items. Importing an outfit with restraints will fail if it would change any item that is locked (or blocked by a locked item), " +
+	"except collars, neck accessories/restraints. Those, as well as the body itself, are ignored.";
 
 function PasteListener(ev: ClipboardEvent) {
 	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe" || CurrentScreen === "Wardrobe") {
 		ev.preventDefault();
 		ev.stopImmediatePropagation();
 		const data = ((ev.clipboardData || (window as any).clipboardData) as DataTransfer).getData("text");
-		CharacterAppearanceWardrobeText = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+		const res = useExtendedImport() ? openExtendedImport(data) : j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+		if (res) {
+			CharacterAppearanceWardrobeText = res;
+		}
 	}
+}
+
+function KeyChangeListener(ev: KeyboardEvent) {
+	holdingShift = ev.shiftKey;
 }
 
 let searchBar: HTMLInputElement | null = null;
@@ -209,6 +277,42 @@ function exitSearchMode(C: Character) {
 	}
 }
 
+let appearanceOverrideScreen: GuiWardrobeExtended | null = null;
+function useExtendedImport(): boolean {
+	return (modStorage.wardrobeDefaultExtended ?? false) !== holdingShift;
+}
+
+function openExtendedImport(data: string): string | null {
+	const parsedData = parseWardrobeImportData(data);
+	if (typeof parsedData === "string")
+		return parsedData;
+
+	const C = CharacterAppearanceSelection;
+	if (!C) {
+		return "Import error: No character";
+	}
+	const allowBinds = C.MemberNumber === j_WardrobeBindsAllowedCharacter;
+
+	setAppearanceOverrideScreen(new GuiWardrobeExtended(
+		setAppearanceOverrideScreen,
+		C,
+		allowBinds,
+		parsedData
+	));
+	return null;
+}
+
+function setAppearanceOverrideScreen(newScreen: GuiWardrobeExtended | null): void {
+	if (appearanceOverrideScreen) {
+		appearanceOverrideScreen.Unload();
+		appearanceOverrideScreen = null;
+	}
+	appearanceOverrideScreen = newScreen;
+	if (newScreen) {
+		newScreen.Load();
+	}
+}
+
 export class ModuleWardrobe extends BaseModule {
 
 	override init(): void {
@@ -222,9 +326,16 @@ export class ModuleWardrobe extends BaseModule {
 				[Preset.slave]: [true, AccessLevel.friend]
 			}
 		});
+
+		ExtendedWardrobeInit();
 	}
 
 	load() {
+
+		if (typeof modStorage.wardrobeDefaultExtended !== "boolean") {
+			modStorage.wardrobeDefaultExtended = true;
+		}
+
 		const NMod = isNModClient();
 		const NModWardrobe = NMod && typeof AppearanceMode !== "undefined";
 
@@ -251,6 +362,10 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		hookFunction("AppearanceRun", 0, (args, next) => {
+			if (appearanceOverrideScreen) {
+				return appearanceOverrideScreen.Run();
+			}
+
 			next(args);
 			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
 				const Y = NModWardrobe ? 265 : 125;
@@ -275,6 +390,10 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		hookFunction("AppearanceClick", 0, (args, next) => {
+			if (appearanceOverrideScreen) {
+				return appearanceOverrideScreen.Click();
+			}
+
 			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
 				const Y = NModWardrobe ? 265 : 125;
 				// Help text toggle
@@ -303,7 +422,10 @@ export class ModuleWardrobe extends BaseModule {
 							return;
 						}
 						const data = await navigator.clipboard.readText();
-						CharacterAppearanceWardrobeText = j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+						const res = useExtendedImport() ? openExtendedImport(data) : j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+						if (res) {
+							CharacterAppearanceWardrobeText = res;
+						}
 					}, 0);
 					return;
 				}
@@ -311,7 +433,19 @@ export class ModuleWardrobe extends BaseModule {
 			next(args);
 		});
 
+		hookFunction("AppearanceExit", 0, (args, next) => {
+			if (appearanceOverrideScreen) {
+				return appearanceOverrideScreen.Exit();
+			}
+
+			return next(args);
+		});
+
 		hookFunction("WardrobeRun", 0, (args, next) => {
+			if (appearanceOverrideScreen) {
+				return appearanceOverrideScreen.Run();
+			}
+
 			next(args);
 			if (clipboardAvailable) {
 				const Y = 90;
@@ -336,6 +470,10 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		hookFunction("WardrobeClick", 0, (args, next) => {
+			if (appearanceOverrideScreen) {
+				return appearanceOverrideScreen.Click();
+			}
+
 			if (clipboardAvailable) {
 				const Y = 90;
 				// Help text toggle
@@ -364,7 +502,10 @@ export class ModuleWardrobe extends BaseModule {
 							return;
 						}
 						const data = await navigator.clipboard.readText();
-						InfoBeep(j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode), 5_000);
+						const res = useExtendedImport() ? openExtendedImport(data) : j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+						if (res) {
+							InfoBeep(res, 5_000);
+						}
 					}, 0);
 					return;
 				}
@@ -373,6 +514,8 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		document.addEventListener("paste", PasteListener);
+		document.addEventListener("keydown", KeyChangeListener, { capture: true, passive: true });
+		document.addEventListener("keyup", KeyChangeListener, { capture: true, passive: true });
 
 		//#region Search bar
 
@@ -526,7 +669,10 @@ export class ModuleWardrobe extends BaseModule {
 
 	unload() {
 		document.removeEventListener("paste", PasteListener);
+		document.removeEventListener("keydown", KeyChangeListener, { capture: true });
+		document.removeEventListener("keyup", KeyChangeListener, { capture: true });
 		exitSearchMode(CharacterAppearanceSelection ?? Player);
+		setAppearanceOverrideScreen(null);
 		AppearanceMenuBuild(CharacterAppearanceSelection ?? Player);
 	}
 }

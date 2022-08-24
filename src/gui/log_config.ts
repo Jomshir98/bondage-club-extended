@@ -50,8 +50,6 @@ export class GuiLogConfig extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.config = null;
-		this.rebuildList();
 		Promise.all([
 			this.character.getLogConfig(),
 			this.character.getPermissionAccess("log_delete"),
@@ -60,10 +58,15 @@ export class GuiLogConfig extends GuiSubscreen {
 			this.config = res[0];
 			this.allowDelete = res[1];
 			this.allowConfigure = res[2];
+			this.failed = false;
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get log config for ${this.character}`, err);
+			this.config = null;
+			this.allowDelete = false;
+			this.allowConfigure = false;
 			this.failed = true;
+			this.rebuildList();
 		});
 	}
 

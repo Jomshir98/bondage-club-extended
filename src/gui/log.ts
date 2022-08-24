@@ -46,8 +46,6 @@ export class GuiLog extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.logData = null;
-		this.refreshScreen();
 		Promise.all([
 			this.character.getLogEntries(),
 			this.character.logGetAllowedActions()
@@ -57,10 +55,13 @@ export class GuiLog extends GuiSubscreen {
 			this.allowConfiguration = res[1].configure || this.character.isPlayer();
 			this.allowPraise = res[1].praise;
 			this.allowLeaveMessage = res[1].leaveMessage;
+			this.failed = false;
 			this.refreshScreen();
 		}, err => {
 			console.error(`BCX: Failed to get log data for ${this.character}`, err);
+			this.logData = null;
 			this.failed = true;
+			this.refreshScreen();
 		});
 	}
 

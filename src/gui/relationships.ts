@@ -48,17 +48,17 @@ export class GuiRelationships extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.relationshipsData = null;
-		this.failed = false;
-		this.onDataChange();
 		this.character.relatonshipsGet().then(res => {
 			if (!this.active)
 				return;
 			this.relationshipsData = res;
+			this.failed = false;
 			this.onDataChange();
 		}, err => {
 			console.error(`BCX: Failed to get relationships data from ${this.character}`, err);
+			this.relationshipsData = null;
 			this.failed = true;
+			this.onDataChange();
 		});
 	}
 

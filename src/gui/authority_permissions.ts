@@ -61,15 +61,16 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.permissionData = null;
-		this.rebuildList();
 		Promise.all([this.character.getPermissions(), this.character.getMyAccessLevel()]).then(res => {
 			this.permissionData = res[0];
 			this.myAccessLevel = res[1];
+			this.failed = false;
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get permission info for ${this.character}`, err);
+			this.permissionData = null;
 			this.failed = true;
+			this.rebuildList();
 		});
 	}
 

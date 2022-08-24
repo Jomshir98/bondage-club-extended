@@ -57,10 +57,6 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 	}
 
 	private requestData() {
-		this.conditionCategoryData = null;
-		this.conditionData = null;
-		this.failed = false;
-		this.onDataChange();
 		this.character.conditionsGetByCategory(this.conditionCategory).then(res => {
 			if (!this.active)
 				return;
@@ -71,10 +67,14 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 				if (!this.checkAccess()) {
 					this.changes = null;
 				}
+				this.failed = false;
 				this.onDataChange();
 			} else {
 				console.warn(`BCX: Condition ${this.conditionCategory}:${this.conditionName} not found in list from ${this.character}`);
+				this.conditionCategoryData = null;
+				this.conditionData = null;
 				this.failed = true;
+				this.onDataChange();
 				this.Exit();
 			}
 		}, err => {

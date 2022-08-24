@@ -42,14 +42,15 @@ export class GuiMemberSelect extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.roleData = null;
-		this.refreshScreen();
 		Promise.all([this.character.getRolesData()]).then(res => {
 			this.roleData = res[0];
+			this.failed = false;
 			this.refreshScreen();
 		}, err => {
 			console.error(`BCX: Failed to get role info for ${this.character}`, err);
+			this.roleData = null;
 			this.failed = true;
+			this.refreshScreen();
 		});
 	}
 

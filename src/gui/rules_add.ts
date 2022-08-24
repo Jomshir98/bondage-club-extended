@@ -54,17 +54,18 @@ export class GuiRulesAdd extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.rulesData = null;
-		this.rebuildList();
 		this.character.conditionsGetByCategory("rules").then(res => {
 			this.rulesData = res;
 			if (!this.rulesData.access_changeLimits) {
 				this.permissionMode = false;
 			}
+			this.failed = false;
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get rules info for ${this.character}`, err);
+			this.rulesData = null;
 			this.failed = true;
+			this.rebuildList();
 		});
 	}
 

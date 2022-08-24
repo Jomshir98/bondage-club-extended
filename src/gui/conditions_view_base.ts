@@ -58,17 +58,17 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 	}
 
 	private requestData() {
-		this.conditionCategoryData = null;
-		this.failed = false;
-		this.onDataChange();
 		this.character.conditionsGetByCategory(this.conditionCategory).then(res => {
 			if (!this.active)
 				return;
 			this.conditionCategoryData = res;
+			this.failed = false;
 			this.onDataChange();
 		}, err => {
 			console.error(`BCX: Failed to get condition info for ${this.conditionCategory} from ${this.character}`, err);
+			this.conditionCategoryData = null;
 			this.failed = true;
+			this.onDataChange();
 		});
 	}
 

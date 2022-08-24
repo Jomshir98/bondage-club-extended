@@ -68,14 +68,15 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.roleData = null;
-		this.rebuildList();
 		Promise.all([this.character.getRolesData()]).then(res => {
 			this.roleData = res[0];
+			this.failed = false;
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get role info for ${this.character}`, err);
+			this.roleData = null;
 			this.failed = true;
+			this.rebuildList();
 		});
 	}
 

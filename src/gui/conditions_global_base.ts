@@ -55,9 +55,6 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 	}
 
 	private requestData() {
-		this.conditionCategoryData = null;
-		this.failed = false;
-		this.onDataChange();
 		this.character.conditionsGetByCategory(this.conditionCategory).then(res => {
 			if (!this.active)
 				return;
@@ -65,10 +62,13 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 			if (!this.checkAccess()) {
 				this.changes = null;
 			}
+			this.failed = false;
 			this.onDataChange();
 		}, err => {
 			console.error(`BCX: Failed to get condition info for ${this.conditionCategory} from ${this.character}`, err);
+			this.conditionCategoryData = null;
 			this.failed = true;
+			this.onDataChange();
 		});
 	}
 

@@ -53,17 +53,18 @@ export class GuiCommandsModule extends GuiSubscreen {
 	}
 
 	private requestData() {
-		this.commandsData = null;
-		this.rebuildList();
 		this.character.conditionsGetByCategory("commands").then(res => {
 			this.commandsData = res;
 			if (!this.commandsData.access_changeLimits) {
 				this.permissionMode = false;
 			}
+			this.failed = false;
 			this.rebuildList();
 		}, err => {
 			console.error(`BCX: Failed to get commands info for ${this.character}`, err);
+			this.commandsData = null;
 			this.failed = true;
+			this.rebuildList();
 		});
 	}
 

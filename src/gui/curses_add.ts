@@ -104,8 +104,8 @@ export class GuiCursesAdd extends GuiSubscreen {
 			MainCanvas.textAlign = "center";
 
 			if (!this.permissionMode) {
-				DrawButton(xOffset + 440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all items on the body at once");
-				DrawButton(xOffset + 720, 173, 200, 48, "Curse all", "White", undefined, "Curse all item slots at once");
+				DrawButton(xOffset + 440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all occupied slots at once");
+				DrawButton(xOffset + 720, 173, 200, 48, "Curse all", "White", undefined, "Curse all slots at once");
 			}
 
 			const AssetGroups = AssetGroup.filter(category.filter);

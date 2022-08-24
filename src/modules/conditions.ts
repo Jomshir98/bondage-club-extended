@@ -582,6 +582,50 @@ export function ConditionsUpdate<C extends ConditionsCategories>(category: C, co
 	return true;
 }
 
+export function ConditionsUpdateMultiple<C extends ConditionsCategories>(category: C, conditions: ConditionsCategoryKeys[C][], data: Partial<ConditionsConditionPublicDataBase>, character: ChatroomCharacter | null): boolean {
+	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
+	if (!moduleIsEnabled(handler.category))
+		return false;
+	let didChange = false;
+	for (const condition of conditions) {
+		const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);
+		if (!conditionData)
+			continue;
+		const mergedData = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData, character);
+		let conditionHasChange = false;
+
+		if (data.active !== undefined && data.active !== mergedData.active) {
+			mergedData.active = data.active;
+			conditionHasChange = true;
+		}
+
+		if (data.timer !== undefined && data.timer !== mergedData.timer) {
+			mergedData.timer = data.timer;
+			conditionHasChange = true;
+		}
+
+		if (data.timerRemove !== undefined && data.timerRemove !== mergedData.timerRemove) {
+			mergedData.timerRemove = data.timerRemove;
+			conditionHasChange = true;
+		}
+
+		if (data.requirements !== undefined && data.requirements !== mergedData.requirements) {
+			mergedData.requirements = data.requirements;
+			conditionHasChange = true;
+		}
+
+		if (data.favorite !== undefined && data.favorite !== mergedData.favorite) {
+			mergedData.favorite = data.favorite;
+			conditionHasChange = true;
+		}
+
+		if (conditionHasChange) {
+			didChange = ConditionsUpdate(category, condition, mergedData, character) || didChange;
+		}
+	}
+	return didChange;
+}
+
 export function ConditionsCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData, character: ChatroomCharacter | null): boolean {
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	if (!moduleIsEnabled(handler.category))
@@ -1289,6 +1333,25 @@ export class ModuleConditions extends BaseModule {
 				guard_ConditionsConditionPublicData(data.category, data.condition, data.data)
 			) {
 				return ConditionsUpdate(data.category, data.condition, data.data, sender);
+			} else {
+				return undefined;
+			}
+		};
+
+		queryHandlers.conditionUpdateMultiple = (sender, data) => {
+			if (isObject(data) &&
+				typeof data.category === "string" &&
+				conditionHandlers.has(data.category) &&
+				Array.isArray(data.conditions) &&
+				data.conditions.every(c => typeof c === "string" && conditionHandlers.get(data.category)?.loadValidateConditionKey(c)) &&
+				isObject(data.data) &&
+				(data.data.active === undefined || typeof data.data.active === "boolean") &&
+				(data.data.timer === undefined || data.data.timer === null || typeof data.data.timer === "number") &&
+				(data.data.timerRemove === undefined || typeof data.data.timerRemove === "boolean") &&
+				(data.data.requirements === undefined || data.data.requirements === null || guard_ConditionsConditionRequirements(data.data.requirements)) &&
+				(data.data.favorite === undefined || typeof data.data.favorite === "boolean")
+			) {
+				return ConditionsUpdateMultiple(data.category, data.conditions, data.data, sender);
 			} else {
 				return undefined;
 			}

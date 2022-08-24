@@ -334,6 +334,16 @@ export class ChatroomCharacter {
 		});
 	}
 
+	conditionUpdateMultiple<C extends ConditionsCategories>(category: C, conditions: ConditionsCategoryKeys[C][], data: Partial<ConditionsConditionPublicDataBase>): Promise<boolean> {
+		return sendQuery("conditionUpdateMultiple", { category, conditions, data }, this.MemberNumber).then(res => {
+			if (typeof res !== "boolean") {
+				console.error("BCX: Bad data during 'conditionUpdateMultiple' query\n", res);
+				throw new Error("Bad data");
+			}
+			return res;
+		});
+	}
+
 	conditionCategoryUpdate<C extends ConditionsCategories>(category: C, data: ConditionsCategoryConfigurableData): Promise<boolean> {
 		return sendQuery("conditionCategoryUpdate", { category, data }, this.MemberNumber).then(res => {
 			if (typeof res !== "boolean") {

@@ -139,6 +139,11 @@ type BCX_queries = {
 		condition: string;
 		data: ConditionsConditionPublicData;
 	}, boolean];
+	conditionUpdateMultiple: [{
+		category: ConditionsCategories;
+		conditions: string[];
+		data: Partial<ConditionsConditionPublicDataBase>;
+	}, boolean];
 	conditionCategoryUpdate: [{
 		category: ConditionsCategories;
 		data: ConditionsCategoryConfigurableData;

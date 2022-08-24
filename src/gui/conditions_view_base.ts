@@ -221,14 +221,46 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 		MainCanvas.textAlign = "center";
 
-		DrawButton(968, 820, 605, 90, "", this.conditionCategoryData.access_configure ? "White" : "#ddd", "",
-			this.conditionCategoryData.access_configure ? `Existing ${this.conditionCategory} set to global ${this.conditionCategory} config are also changed` : "You have no permission to use this", !this.conditionCategoryData.access_configure);
-		DrawText(`Change global ${this.conditionCategory} config`, 968 + 680 / 2, 865, "Black", "");
+		// activate/deactivate buttons
+		const accessFull = this.conditionCategoryData.access_normal && this.conditionCategoryData.access_limited;
+		DrawButton(678, 820, 170, 50, "", accessFull ? "White" : "#ddd", "",
+			accessFull ? `Switch all added ${this.conditionCategory} to active` : "You have no permission to use this", !accessFull);
+		DrawTextFit(`Activate all`, 680 + 170 / 2, 820 + 25, 145, "Black", "");
+		DrawButton(678, 885, 170, 46, "", accessFull ? "White" : "#ddd", "",
+			accessFull ? `Activate only global config ${this.conditionCategory}` : "You have no permission to use this", !accessFull);
+		DrawTextFit(`A. only`, 684 + 115 / 2, 885 + 25, 90, "Black", "");
 		MainCanvas.beginPath();
-		MainCanvas.ellipse(968 + 10 + 35, 820 + 44, 34, 34, 360, 0, 360);
+		MainCanvas.ellipse(675 + 120 + 22, 885 + 23, 21, 21, 360, 0, 360);
 		MainCanvas.fillStyle = "#0052A3";
 		MainCanvas.fill();
-		DrawImageEx("Icons/General.png", 968 + 10, 820 + 10, {
+		DrawImageEx("Icons/General.png", 675 + 120, 885 + 1, {
+			Height: 44,
+			Width: 44
+		});
+
+		DrawButton(870, 820, 170, 50, "Deactivate all", accessFull ? "White" : "#ddd", "",
+			accessFull ? `Switch all added ${this.conditionCategory} to inactive` : "You have no permission to use this", !accessFull);
+		DrawButton(870, 885, 170, 46, "", accessFull ? "White" : "#ddd", "",
+			accessFull ? `Deactivate only global config ${this.conditionCategory}` : "You have no permission to use this", !accessFull);
+		DrawTextFit(`D. only`, 876 + 115 / 2, 885 + 25, 90, "Black", "");
+		MainCanvas.beginPath();
+		MainCanvas.ellipse(868 + 120 + 22, 885 + 23, 21, 21, 360, 0, 360);
+		MainCanvas.fillStyle = "#0052A3";
+		MainCanvas.fill();
+		DrawImageEx("Icons/General.png", 868 + 120, 885 + 1, {
+			Height: 44,
+			Width: 44
+		});
+
+		// change global config button
+		DrawButton(1068, 820, 505, 90, "", this.conditionCategoryData.access_configure ? "White" : "#ddd", "",
+			this.conditionCategoryData.access_configure ? `Existing ${this.conditionCategory} set to global ${this.conditionCategory} config are also changed` : "You have no permission to use this", !this.conditionCategoryData.access_configure);
+		DrawTextFit(`Change global ${this.conditionCategory} config`, 1018 + 680 / 2, 865, 400, "Black", "");
+		MainCanvas.beginPath();
+		MainCanvas.ellipse(1068 + 10 + 35, 820 + 44, 34, 34, 360, 0, 360);
+		MainCanvas.fillStyle = "#0052A3";
+		MainCanvas.fill();
+		DrawImageEx("Icons/General.png", 1068 + 10, 820 + 10, {
 			Height: 70,
 			Width: 70
 		});
@@ -299,7 +331,54 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 		}
 
-		if (this.conditionCategoryData.access_configure && MouseIn(968, 820, 605, 90)) {
+		// activate/deactivate buttons
+		const accessFull = this.conditionCategoryData.access_normal && this.conditionCategoryData.access_limited;
+		if (accessFull && MouseIn(678, 820, 170, 50)) {
+			this.character.conditionUpdateMultiple(
+				this.conditionCategory,
+				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => !d.active)
+					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				{ active: true }
+			);
+			return true;
+		}
+
+		if (accessFull && MouseIn(678, 885, 170, 46)) {
+			this.character.conditionUpdateMultiple(
+				this.conditionCategory,
+				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => !d.active && d.requirements === null)
+					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				{ active: true }
+			);
+			return true;
+		}
+
+		if (accessFull && MouseIn(870, 820, 170, 50)) {
+			this.character.conditionUpdateMultiple(
+				this.conditionCategory,
+				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => d.active)
+					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				{ active: false }
+			);
+			return true;
+		}
+
+		if (accessFull && MouseIn(870, 885, 170, 46)) {
+			this.character.conditionUpdateMultiple(
+				this.conditionCategory,
+				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => d.active && d.requirements === null)
+					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				{ active: false }
+			);
+			return true;
+		}
+
+		// change global config button
+		if (this.conditionCategoryData.access_configure && MouseIn(1068, 820, 505, 90)) {
 			this.openGlobalConfig();
 			return true;
 		}

@@ -13,6 +13,7 @@ import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomp
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
 import { BCX_setInterval } from "../BCXContext";
+import { CraftedItemProperties_schema, ValidationVerifyCraftData } from "./wardrobe";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -57,7 +58,8 @@ function curseCreateCurseItemInfo(item: Item): CursedItemInfo {
 		curseProperty: false,
 		Difficulty: item.Difficulty || undefined,
 		Color: (item.Color && item.Color !== "Default") ? cloneDeep(item.Color) : undefined,
-		Property: curseMakeSavedProperty(item.Property)
+		Property: curseMakeSavedProperty(item.Property),
+		Craft: ValidationVerifyCraftData(item.Craft)
 	};
 
 	if (Object.keys(result.Property!).length === 0) {
@@ -823,6 +825,7 @@ export class ModuleCurses extends BaseModule {
 						Color: zod.union([zod.string(), zod.array(zod.string())]).optional(),
 						Difficulty: zod.number().optional(),
 						Property: zod.custom<ItemProperties>(isObject).optional(),
+						Craft: CraftedItemProperties_schema.optional(),
 						itemRemove: zod.literal(true).optional()
 					}).nullable();
 					const validationResult = validator.safeParse(data);
@@ -1005,6 +1008,7 @@ export class ModuleCurses extends BaseModule {
 				Asset: asset,
 				Color: curse.Color != null ? cloneDeep(curse.Color) : "Default",
 				Property: curse.Property != null ? cloneDeep(curse.Property) : {},
+				Craft: ValidationVerifyCraftData(curse.Craft),
 				Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
 			};
 			Player.Appearance.push(currentItem);
@@ -1048,6 +1052,20 @@ export class ModuleCurses extends BaseModule {
 			}
 		} else {
 			curse.Property = curseCreateCurseItemInfo(currentItem).Property;
+		}
+
+		// Crafted properties are always cursed
+		const validatedCurseCraft = ValidationVerifyCraftData(curse.Craft);
+		if (!isEqual(ValidationVerifyCraftData(currentItem.Craft), validatedCurseCraft)) {
+			if (validatedCurseCraft === undefined) {
+				delete currentItem.Craft;
+			} else {
+				currentItem.Craft = {
+					...(isObject(currentItem.Craft) ? currentItem.Craft : {}),
+					...validatedCurseCraft
+				};
+			}
+			if (!changeType) changeType = "update";
 		}
 
 		if (!itemColorsEquals(curse.Color, currentItem.Color)) {

@@ -14,6 +14,7 @@ import { AccessLevel, registerPermission } from "./authority";
 import { ModuleCategory, Preset } from "../constants";
 import { ExtendedWardrobeInit, GuiWardrobeExtended } from "../gui/wardrobe_extended";
 import { modStorage } from "./storage";
+import zod, { ZodType } from "zod";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -25,7 +26,10 @@ export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false):
 			binds: includeBinds,
 			collar: includeBinds
 		}))
-		.map(WardrobeAssetBundle);
+		.map((i) => ({
+			...WardrobeAssetBundle(i),
+			Craft: ValidationVerifyCraftData(i.Craft)
+		}));
 	return LZString.compressToBase64(JSON.stringify(save));
 }
 
@@ -128,6 +132,21 @@ export function ValidationCanAccessCheck(character: Character, group: AssetGroup
 	);
 }
 
+export const CraftedItemProperties_schema: ZodType<CraftedItemProperties> = zod.object({
+	Name: zod.string(),
+	MemberName: zod.string().optional(),
+	MemberNumber: zod.number().int().optional(),
+	Description: zod.string(),
+	Property: zod.string()
+});
+export function ValidationVerifyCraftData(Craft: unknown): CraftedItemProperties | undefined {
+	try {
+		return CraftedItemProperties_schema.parse(Craft);
+	} catch (_) {
+		return undefined;
+	}
+}
+
 export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: Item | Asset) => boolean, includeLocks: boolean | ReadonlySet<string>): void {
 	const playerNumber = getPlayerCharacter().MemberNumber;
 	const validationParams = ValidationCreateDiffParams(C, playerNumber);
@@ -161,6 +180,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 					} else {
 						item.Property = cloneDeep(curseMakeSavedProperty(cloth.Property));
 					}
+					item.Craft = ValidationVerifyCraftData(cloth.Craft);
 				}
 			}
 		} else {

@@ -304,7 +304,7 @@ export class ModuleSpeech extends BaseModule {
 			return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
 		});
 
-		hookFunction("SpeechGarble", 0, (args, next) => {
+		hookFunction("SpeechGarble", 6, (args, next) => {
 			if (antigarble === 2) return args[1];
 			let res = next(args);
 			if (typeof res === "string" && res !== args[1] && antigarble === 1) res += ` <> ${args[1]}`;

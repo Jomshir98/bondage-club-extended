@@ -179,7 +179,7 @@ export class GuiRelationships extends GuiSubscreen {
 		DrawButton(1375, 815, 90, 64, "Add", allowAdd ? "White" : "#ddd", undefined, undefined, !allowAdd);
 
 		// Pagination
-		const totalPages = Math.ceil(this.relationshipsList.length / PER_PAGE_COUNT);
+		const totalPages = Math.max(Math.ceil(this.relationshipsList.length / PER_PAGE_COUNT), 1);
 		DrawBackNextButton(1605, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 	}
 

@@ -195,6 +195,12 @@ export class ModuleMiscPatches extends BaseModule {
 		hookFunction("ServerPlayerIsInChatRoom", 0, (args, next) => {
 			return next(args) || CurrentScreen === "GetUp";
 		});
+
+		// Widen possible nicknames
+		patchFunction("CharacterNickname", {
+			"/^[a-zA-Z\\s]*$/": "/^[\\p{L}0-9\\p{Z}'-]+$/u"
+		});
+		ServerCharacterNicknameRegex = /^[\p{L}0-9\p{Z}'-]+$/u;
 	}
 
 	run() {

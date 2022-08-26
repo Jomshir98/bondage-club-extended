@@ -191,6 +191,7 @@ declare var ServerAccountUpdate: {
 	SyncToServer(): void;
 	QueueData(Data: object, Force?: true): void
 };
+declare var ServerCharacterNicknameRegex: RegExp;
 declare function ServerPlayerIsInChatRoom(): boolean;
 declare function ServerSend(Message: string, Data: any): void;
 declare function ServerAppearanceBundle(Appearance: Item[]): AppearanceBundle;

@@ -14,17 +14,18 @@ The extension is very modular and highly customizable. These are currently plann
 | Module name      | Description                                                                                                      | Development status                                                   |
 |------------------|------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
 | Basic            | The base configuration of the extension, including managing permissions for other players                        | Done                                                                 |
-| Behavior Logging | A record book for breaking any rules or other events of interest for yourself or the player's dommes             | Done; More events will be added based on other modules               |
-| Nicknaming       | Giving yourself or others a nickname, that you will see in the chat, profile, etc.                               | Planned (low priority)                                               |
+| Behavior Logging | A record book for breaking any rules or other events of interest for yourself or the player's dommes             | Done                                                                 |
+| Relationships    | Giving others a nickname, that you will see in the chat, etc.                                                    | Done                                                                 |
 | Curses           | Cursing an item slot so a restraint or clothing stays on or off very securely                                    | Done                                                                 |
 | Commands         | One time actions such as forcing you into a pose                                                                 | Done                                                                 |
-| Rules            | Over 70 toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage             | Done; More rules being worked on                                     |
+| Rules            | Over 70 toggleable rules with customizable conditions that can be enforced/monitored, e.g. key usage             | Done                                                                 |
 | Speech           | Any commands and rules about altering or enforcing speech, e.g. doll talk or understanding gag talk              | Done as part of "Rules"                                              |
 | Punishment       | Automatic punishments can be set by the dommes for breaking any of your rules                                    | Planned (low priority)                                               |
+| Export-Import    | Allows permitted roles to export/import the state of most BCX modules                                            | Done                                                                 |
 | Miscellaneous    | Other nifty features.                                                                                            | Various features not fitting the previous categories are added here. |
 
 ### Miscellaneous module currently includes:
-- Wardrobe outfit import/export (optionally also with worn restraints)
+- Wardrobe outfit import/export (with detailed selection, such as body, cosplay items, restraints, ...)
 - Room creation templates, to save and load frequently used chat rooms
 - Chat typing indicator visible between BCX users
 - A search function during item and clothing selection

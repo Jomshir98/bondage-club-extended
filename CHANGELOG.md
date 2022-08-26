@@ -1,5 +1,59 @@
 # BCX Changelog
 
+## 0.9.0 "Utility abound"
+
+This update includes:
+ - Added a new extended mode to BCX's wardrobe import/export that allows selecting in greater detail what to import
+   - This feature is available by default while importing a BCX string (hold "Shift" for the old behavior - "quick mode")
+   - This feature can also be used while selecting a stored BC outfit by clicking the small config button to the left of it
+   - Added a toggle on a second page of the miscellaneous module to toggle the default mode for the wardrobe (extended or quick)
+ - Added support for crafted items to BCX's wardrobe import/export feature
+ - Added support for crafted items to the curses module
+ - Added a new BCX module "Relationships" that:
+   - Enables permitted roles to set nicknames for other characters, specific to only the BCX user
+   - Allows enforcing the BCX user to only use the set nickname for the character, if present in the room
+   - Has multiple permissions configurable in the authority module
+ - Added a new BCX module "Export-Import" that allows permitted roles to export/import the state of most BCX modules [partially by AR2000]
+   - Has a permission to export the state of a module configuration in the "Export-Import" menu
+     Note: Importing requirements depend on the permissions of the module you are importing
+ - Added a second page to the add curse screen for also cursing the character's body slots
+ - Added hidden search keywords to rules, allowing you to find them easier when searching for them
+   - If you make a search and expect a rule to appear but it doesn't, feel free to send us a suggestion for a keyword to add to the rule!
+ - Added alphabetical sort toggle to add-rules screen and the commands module's command list
+ - Added a filter/search field and two toggles (alphabetical sort and sort according to activation state) to the added rules/curses screens
+ - Added a button to delete all currently filtered log entries over all page results at once in the "Behaviour Log" module
+ - Added all hidden asylum backgrounds to the room background selection
+ - Added new permission "Allow importing items using wardrobe" to the authority module, to no longer allow everyone to import outfits
+ - Added four buttons on the added curses/rules screen to bulk-activate/deactivate curses/rules
+ - Added an animated title to some users' BCX main menu to show that they are supporting BCX as a tier 2 Patreon supporter or BCX Developer
+ - Improved the link to the BCX Discord in the BCX main menu and added a link to Patreon
+ - Improved various screens to now no longer show a "Loading..." text on changes, instead showing the old data until new data is received
+ - Changed the curse trigger flooding detection to temporarily disable the affected curse slot and no longer the whole module
+ - Changed BCX's local messages to use any set nickname from BC or BCX's relationships module
+ - Changed nicknames from BC as well as BCX's relationshops module to support a wider set of characters allowed to be used (compatible with BCE)
+ - This update improves compatibility with BC release R83
+
+Commands module changes:
+ - Added new command `emoticon` that allows to set/change the BCX user's emoticon
+ - Moved `allowactivities` command to the commands module as "Allow more activities on item"
+
+Rules module changes:
+ - Added new rule "Prevent changing own emoticon" that forbids the player from changing the currently showing emoticon
+ - Added new rule "Forbid the allowactivities command" that forbids only the player's self-usage of the "Allow more activities on item" command
+ - Added new rule "Control nickname" that allows directly setting the player's nickname
+ - Added new rule "Allow changing the whole appearance" of the player character for defined roles, overruling the player's BC settings
+ - Added new rule "Set slowed leave time" to set the time it takes to leave a room when slowed
+ - Added new rule "Force-hide UI elements" that enforces hiding of certain UI elements for the BCX user over all characters in a room
+ - Added new BC setting rule "Allow item tint effects"
+ - Added new BC setting rule "Allow item blur effects"
+ - Added a new toggle to the rule "Partial hearing" to set whether it allows to also partially understand gagged persons
+ - Added a new toggle to the rule "Forbid tying up others", to only forbid tying more dominant players
+ - Added a new toggle to the rule "Forbid freeing self", that still allows to remove items which have a low difficulty score
+ - Improved description of the rule "Fully blind when blindfolded"
+
+Fixes:
+ - Fixed an incompatibility between the rule "Partial hearing" and the antigarble command
+
 ## 0.8.4
 
 This update includes:

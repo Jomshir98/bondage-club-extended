@@ -1,9 +1,9 @@
 {
 	"name": "bondage-club-extended",
-	"version": "0.8.4",
+	"version": "0.9.0",
 	"repository": "git@github.com:jomshir98/bondage-club-extended.git",
 	"author": "jomshir98 <jomshir98@protonmail.com>",
-	"license": "MIT",
+	"license": "GPL-3.0",
 	"private": true,
 	"scripts": {
 		"build": "rollup -c",

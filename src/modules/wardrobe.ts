@@ -1,6 +1,6 @@
 import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal, InfoBeep, isCosplay, isBody, smartGetAssetGroup } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
-import { hookFunction } from "../patching";
+import { hookFunction, patchFunction } from "../patching";
 import { arrayUnique, clipboardAvailable, isObject } from "../utils";
 
 import isEqual from "lodash-es/isEqual";
@@ -302,8 +302,8 @@ function useExtendedImport(): boolean {
 	return (modStorage.wardrobeDefaultExtended ?? false) !== holdingShift;
 }
 
-function openExtendedImport(data: string): string | null {
-	const parsedData = parseWardrobeImportData(data);
+function openExtendedImport(data: string | ItemBundle[], baseAllowBinds: boolean = true): string | null {
+	const parsedData = Array.isArray(data) ? data : parseWardrobeImportData(data);
 	if (typeof parsedData === "string")
 		return parsedData;
 
@@ -311,7 +311,7 @@ function openExtendedImport(data: string): string | null {
 	if (!C) {
 		return "Import error: No character";
 	}
-	const allowBinds = C.MemberNumber === j_WardrobeBindsAllowedCharacter;
+	const allowBinds = baseAllowBinds && C.MemberNumber === j_WardrobeBindsAllowedCharacter;
 
 	setAppearanceOverrideScreen(new GuiWardrobeExtended(
 		setAppearanceOverrideScreen,
@@ -381,22 +381,42 @@ export class ModuleWardrobe extends BaseModule {
 			return next(args);
 		});
 
+		patchFunction("AppearanceRun", {
+			'DrawButton(1820, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 160, 65, "Save"': 'DrawButton(1860, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 120, 65, "Save"'
+		});
+
+		patchFunction("AppearanceRun", {
+			"DrawButton(1300, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 500,": "DrawButton(1385, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 455,"
+		});
+
+		patchFunction("AppearanceRun", {
+			"1550, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 496,": "1614, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 446,"
+		});
+
 		hookFunction("AppearanceRun", 0, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Run();
 			}
 
 			next(args);
-			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-				const Y = NModWardrobe ? 265 : 125;
-				DrawButton(1380, Y, 50, 50, "", "White", "", "How does it work?");
-				DrawImageEx("Icons/Question.png", 1380 + 3, Y + 3, { Width: 44, Height: 44 });
-				const C = CharacterAppearanceSelection;
-				const allowBinds = C != null && j_WardrobeBindsAllowedCharacter === C.MemberNumber;
-				DrawButton(1457, Y, 50, 50, "", allowBinds ? "White" : j_WardrobeIncludeBinds ? "pink" : "#ddd", "", "Include items/restraints");
-				DrawImageEx("../Icons/Bondage.png", 1457 + 6, Y + 6, { Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38 });
-				DrawButton(1534, Y, 207, 50, "Export", "White", "");
-				DrawButton(1768, Y, 207, 50, "Import", (!allowBinds && j_WardrobeIncludeBinds) ? "#ddd" : "White", "", undefined, !allowBinds && j_WardrobeIncludeBinds);
+			if (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") {
+				if (clipboardAvailable) {
+					const Y = NModWardrobe ? 265 : 125;
+					DrawButton(1380, Y, 50, 50, "", "White", "", "How does it work?");
+					DrawImageEx("Icons/Question.png", 1380 + 3, Y + 3, { Width: 44, Height: 44 });
+					const C = CharacterAppearanceSelection;
+					const allowBinds = C != null && j_WardrobeBindsAllowedCharacter === C.MemberNumber;
+					DrawButton(1457, Y, 50, 50, "", allowBinds ? "White" : j_WardrobeIncludeBinds ? "pink" : "#ddd", "", "Include items/restraints");
+					DrawImageEx("../Icons/Bondage.png", 1457 + 6, Y + 6, { Alpha: j_WardrobeIncludeBinds ? 1 : 0.2, Width: 38, Height: 38 });
+					DrawButton(1534, Y, 207, 50, "Export", "White", "");
+					DrawButton(1768, Y, 207, 50, "Import", (!allowBinds && j_WardrobeIncludeBinds) ? "#ddd" : "White", "", undefined, !allowBinds && j_WardrobeIncludeBinds);
+				}
+				if (Player.Wardrobe) {
+					for (let W = CharacterAppearanceWardrobeOffset; W < Player.Wardrobe.length && W < CharacterAppearanceWardrobeOffset + 6; W++) {
+						DrawButton(1300, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 65, 65, "", "White", "");
+						DrawImageEx("./Icons/DialogPermissionMode.png", 1300 + 6, 430 + (W - CharacterAppearanceWardrobeOffset) * 95 + 6, { Width: 53, Height: 53 });
+					}
+				}
 			}
 			if (j_ShowHelp && (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe")) {
 				MainCanvas.fillStyle = "#ffff88";
@@ -409,45 +429,73 @@ export class ModuleWardrobe extends BaseModule {
 			}
 		});
 
+		patchFunction("AppearanceClick", {
+			"(MouseX >= 1300) && (MouseX < 1800)": "(MouseX >= 1385) && (MouseX < 1385 + 455)"
+		});
+
+		patchFunction("AppearanceClick", {
+			"(MouseX >= 1820) && (MouseX < 1975)": "(MouseX >= 1860) && (MouseX < 1980)"
+		});
+
 		hookFunction("AppearanceClick", 0, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Click();
 			}
 
-			if ((CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") && clipboardAvailable) {
-				const Y = NModWardrobe ? 265 : 125;
-				// Help text toggle
-				if (MouseIn(1380, Y, 50, 50) || (MouseIn(30, 190, 1240, 780) && j_ShowHelp)) {
-					j_ShowHelp = !j_ShowHelp;
-					return;
+			if (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") {
+				if (clipboardAvailable) {
+					const Y = NModWardrobe ? 265 : 125;
+					// Help text toggle
+					if (MouseIn(1380, Y, 50, 50) || (MouseIn(30, 190, 1240, 780) && j_ShowHelp)) {
+						j_ShowHelp = !j_ShowHelp;
+						return;
+					}
+					// Restraints toggle
+					if (MouseIn(1457, Y, 50, 50)) {
+						j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
+						return;
+					}
+					// Export
+					if (MouseIn(1534, Y, 207, 50)) {
+						BCX_setTimeout(async () => {
+							await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
+							CharacterAppearanceWardrobeText = "Copied to clipboard!";
+						}, 0);
+						return;
+					}
+					// Import
+					if (MouseIn(1768, Y, 207, 50)) {
+						BCX_setTimeout(async () => {
+							if (typeof navigator.clipboard.readText !== "function") {
+								CharacterAppearanceWardrobeText = "Please press Ctrl+V";
+								return;
+							}
+							const data = await navigator.clipboard.readText();
+							const res = useExtendedImport() ? openExtendedImport(data) : j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
+							if (res) {
+								CharacterAppearanceWardrobeText = res;
+							}
+						}, 0);
+						return;
+					}
 				}
-				// Restraints toggle
-				if (MouseIn(1457, Y, 50, 50)) {
-					j_WardrobeIncludeBinds = !j_WardrobeIncludeBinds;
-					return;
-				}
-				// Export
-				if (MouseIn(1534, Y, 207, 50)) {
-					BCX_setTimeout(async () => {
-						await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(j_WardrobeIncludeBinds));
-						CharacterAppearanceWardrobeText = "Copied to clipboard!";
-					}, 0);
-					return;
-				}
-				// Import
-				if (MouseIn(1768, Y, 207, 50)) {
-					BCX_setTimeout(async () => {
-						if (typeof navigator.clipboard.readText !== "function") {
-							CharacterAppearanceWardrobeText = "Please press Ctrl+V";
+				if (Array.isArray(Player.Wardrobe) && MouseIn(1300, 430, 65, 540)) {
+					for (let W = CharacterAppearanceWardrobeOffset; W < Player.Wardrobe.length && W < CharacterAppearanceWardrobeOffset + 6; W++) {
+						if (MouseYIn(430 + (W - CharacterAppearanceWardrobeOffset) * 95, 65)) {
+
+							let slot = Player.Wardrobe[W];
+							if (Array.isArray(slot)) {
+								// NMod unpack
+								if (slot.some(i => Array.isArray(i)) && typeof WardrobeExtractBundle === "function") {
+									slot = slot.map(i => Array.isArray(i) ? WardrobeExtractBundle(i) : i);
+								}
+								if (slot.every(i => isObject(i)) && openExtendedImport(slot, false) === null) {
+									return;
+								}
+							}
 							return;
 						}
-						const data = await navigator.clipboard.readText();
-						const res = useExtendedImport() ? openExtendedImport(data) : j_WardrobeImportSelectionClothes(data, j_WardrobeIncludeBinds, allowMode);
-						if (res) {
-							CharacterAppearanceWardrobeText = res;
-						}
-					}, 0);
-					return;
+					}
 				}
 			}
 			next(args);

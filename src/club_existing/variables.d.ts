@@ -18,6 +18,7 @@ declare var CharacterAppearanceSelection: Character | null;
 declare var CharacterAppearanceMode: string;
 declare var CharacterAppearanceWardrobeText: string;
 declare var AppearanceMenu: any[];
+declare var CharacterAppearanceWardrobeOffset: number;
 /** NMod ONLY! */
 declare var AppearanceMode: string;
 declare function CharacterAppearanceYOffset(C: Character, HeightRatio: number, IgnoreUpButton?: boolean): number;
@@ -208,6 +209,13 @@ declare function AssetGroupGet(Family: string, Group: string): AssetGroup | null
 // Wardrobe.js
 declare function WardrobeAssetBundle(A: Item): ItemBundle;
 declare function WardrobeFastLoad(C: Character, W: number, Update: boolean): void;
+// NMod
+declare function WardrobeExtractBundle(B: any[]): {
+	Name: string;
+	Group: string;
+	Color?: string | string[];
+	Property?: any;
+};
 
 // Inventory.js
 declare function InventoryAdd(C: Character, NewItemName: string, NewItemGroup: string, Push?: boolean): void;
@@ -230,6 +238,7 @@ declare var GLVersion: "webgl2" | "webgl" | "No WebGL";
 // Mouse.js
 declare function MouseIn(Left: number, Top: number, Width: number, Height: number): boolean;
 declare function MouseXIn(Left: number, Width: number): boolean;
+declare function MouseYIn(Top: number, Height: number): boolean;
 
 // Preference.js
 declare var PreferenceDifficultyLevel: any;

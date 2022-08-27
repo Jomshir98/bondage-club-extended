@@ -256,15 +256,15 @@ function bcxClick(this: any, event: MouseEvent) {
 export function InitErrorReporter() {
 	window.addEventListener("error", onUnhandledError);
 	// Server message origin
-	originalSocketEmit = (ServerSocket as any).__proto__.emitEvent;
-	if (typeof originalSocketEmit === "function") {
+	if (originalSocketEmit === undefined && typeof (ServerSocket as any)?.__proto__?.emitEvent === "function") {
+		originalSocketEmit = (ServerSocket as any).__proto__.emitEvent;
 		(ServerSocket as any).__proto__.emitEvent = bcxSocketEmit;
 	}
 
 	const canvas = document.getElementById("MainCanvas") as (HTMLCanvasElement | undefined);
 	if (canvas) {
 		// Click origin
-		if (typeof canvas.onclick === "function") {
+		if (originalClick === undefined && typeof canvas.onclick === "function") {
 			originalClick = canvas.onclick;
 			canvas.onclick = bcxClick;
 		}
@@ -283,12 +283,14 @@ export function InitErrorReporter() {
 export function UnloadErrorReporter() {
 	window.removeEventListener("error", onUnhandledError);
 	// Server message origin
-	if ((ServerSocket as any).__proto__.emitEvent === bcxSocketEmit) {
+	if (originalSocketEmit && (ServerSocket as any).__proto__.emitEvent === bcxSocketEmit) {
 		(ServerSocket as any).__proto__.emitEvent = originalSocketEmit;
+		originalSocketEmit = undefined;
 	}
 	const canvas = document.getElementById("MainCanvas") as (HTMLCanvasElement | undefined);
 	// Click origin
-	if (canvas && originalClick) {
+	if (canvas && originalClick && canvas.onclick === bcxClick) {
 		canvas.onclick = originalClick;
+		originalClick = undefined;
 	}
 }

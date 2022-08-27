@@ -467,7 +467,7 @@ export function Command_selectCharacterAutocomplete(selector: string): string[] 
 }
 
 export function Command_selectWornItem(character: ChatroomCharacter, selector: string, filter: (item: Item) => boolean = isBind): Item | string {
-	const items = character.Character.Appearance.filter(filter);
+	const items = character.Character.Appearance.filter((i) => filter(i));
 	let targets = items.filter(A => A.Asset.Group.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
 	if (targets.length === 0)
 		targets = items.filter(A => getVisibleGroupName(A.Asset.Group).toLocaleLowerCase() === selector.toLocaleLowerCase());
@@ -486,7 +486,7 @@ export function Command_selectWornItem(character: ChatroomCharacter, selector: s
 }
 
 export function Command_selectWornItemAutocomplete(character: ChatroomCharacter, selector: string, filter: (item: Item) => boolean = isBind): string[] {
-	const items = character.Character.Appearance.filter(filter);
+	const items = character.Character.Appearance.filter((i) => filter(i));
 
 	let possible = arrayUnique(
 		items.map(A => getVisibleGroupName(A.Asset.Group))

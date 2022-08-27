@@ -8,6 +8,7 @@ import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
 import { queryHandlers, sendQuery } from "../modules/messaging";
+import { isValidNickname } from "../modules/relationships";
 
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
@@ -789,9 +790,13 @@ export function initRules_bc_alter() {
 		dataDefinition: {
 			nickname: {
 				type: "string",
-				default: () => (Player.Nickname || Player.Name),
+				default: () => (
+					(Player.Nickname && isValidNickname(Player.Nickname)) ? Player.Nickname :
+						isValidNickname(Player.Name) ? Player.Name :
+							""
+				),
 				description: "Set this player's nickname:",
-				options: /^[a-zA-Z\s]{0,20}$/
+				options: /^[\p{L}0-9\p{Z}'-]{0,20}$/u
 			}
 		},
 		tick(state) {

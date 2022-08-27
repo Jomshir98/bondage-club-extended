@@ -509,7 +509,7 @@ export class ModuleWardrobe extends BaseModule {
 			return next(args);
 		});
 
-		hookFunction("WardrobeRun", 0, (args, next) => {
+		hookFunction("WardrobeRun", 10, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Run();
 			}
@@ -537,7 +537,7 @@ export class ModuleWardrobe extends BaseModule {
 			}
 		});
 
-		hookFunction("WardrobeClick", 0, (args, next) => {
+		hookFunction("WardrobeClick", 10, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Click();
 			}

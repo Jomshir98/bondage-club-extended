@@ -29,6 +29,12 @@ This update includes:
  - Added an animated title to some users' BCX main menu to show that they are supporting BCX as a tier 2 Patreon supporter or BCX Developer
  - Improved the link to the BCX Discord in the BCX main menu and added a link to Patreon
  - Improved various screens to now no longer show a "Loading..." text on changes, instead showing the old data until new data is received
+ - Changed the `allowactivities` command in a major way:
+   - Added new permission "Allow using the allowactivities command on this player" to the authority module (default: self | friends)
+   - If you or someone else (that person needs BCX, too) uses the command on you, this person can use all activities universally on you
+   - This state lasts until that person uses the command again to toggle it off or until that person reloads BC
+   - The command is now no longer item based but applies at once for all slots, independent of changes in items/clothings
+   - The effect only applies to persons who used the command, all other persons in the same room cannot use more activities
  - Changed the curse trigger flooding detection to temporarily disable the affected curse slot and no longer the whole module
  - Changed BCX's local messages to use any set nickname from BC or BCX's relationships module
  - Changed nicknames from BC as well as BCX's relationships module to support a wider set of characters allowed to be used (compatible with BCE)
@@ -36,11 +42,9 @@ This update includes:
 
 Commands module changes:
  - Added new command `emoticon` that allows to set/change the BCX user's emoticon
- - Moved `allowactivities` command to the commands module as "Allow more activities on item"
 
 Rules module changes:
  - Added new rule "Prevent changing own emoticon" that forbids the player from changing the currently showing emoticon
- - Added new rule "Forbid the allowactivities command" that forbids only the player's self-usage of the "Allow more activities on item" command
  - Added new rule "Control nickname" that allows directly setting the player's nickname
  - Added new rule "Allow changing the whole appearance" of the player character for defined roles, overruling the player's BC settings
  - Added new rule "Set slowed leave time" to set the time it takes to leave a room when slowed

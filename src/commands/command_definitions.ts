@@ -1,11 +1,10 @@
 import { ConditionsLimit } from "../constants";
-import { Command_fixExclamationMark, Command_parseTime, Command_pickAutocomplete, Command_selectWornItem, Command_selectWornItemAutocomplete } from "../modules/commands";
+import { Command_fixExclamationMark, Command_parseTime, Command_pickAutocomplete } from "../modules/commands";
 import { registerCommand } from "../modules/commandsModule";
 import { dictionaryProcess, formatTimeInterval } from "../utils";
 import { ChatRoomActionMessage, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
 import backgroundList from "../generated/backgroundList.json";
 import { RulesGetRuleState } from "../modules/rules";
-import { getPlayerCharacter } from "../characters";
 
 export function initCommands_definitions() {
 
@@ -658,72 +657,6 @@ export function initCommands_definitions() {
 		autoCompleter: (argv) => {
 			if (argv.length === 1) {
 				return Command_pickAutocomplete(argv[0], ["forced", "ruined", "stop"]);
-			}
-			return [];
-		}
-	});
-
-	registerCommand("allowactivities", {
-		name: "Allow more activities on item",
-		helpDescription: `<item>`,
-		shortDescription: "Toggles one of PLAYER_NAME's items to not block activities",
-		longDescription:
-			`This command enables a permitted BCX user to make more (sexual) activities available to use on the specific item on PLAYER_NAME. The command does not work on clothing. PLAYER_NAME can use the command on herself. If that is not desired, there is a rule named "Forbid the antiblind command" to forbid PLAYER_NAME to use the command on her items.\n` +
-			`IMPORTANT: The effects of this command are not going away if BCX is turned off or not activated after reloading. The unblocked activities are available for everyone with item permission to use (also users without BCX) until the command is used on that item again or the item is removed/replaced.\n` +
-			`Usage:\n` +
-			`!allowactivities HELP_DESCRIPTION`,
-		defaultLimit: ConditionsLimit.normal,
-		playerUsable: true,
-		trigger: (argv, sender, respond, state) => {
-			if (argv.length < 1) {
-				respond(Command_fixExclamationMark(sender,
-					`!allowactivities usage:\n` +
-					`!allowactivities ${state.commandDefinition.helpDescription}`
-				));
-				return false;
-			}
-			const item = Command_selectWornItem(getPlayerCharacter(), argv[0]);
-			if (typeof item === "string") {
-				respond(item);
-				return false;
-			}
-
-			// tied to rule "Forbid the allowactivities command"
-			const blockRule = RulesGetRuleState("block_allowactivities");
-			if (blockRule.isEnforced && sender.isPlayer()) {
-				blockRule.triggerAttempt();
-				return false;
-			} else if (blockRule.inEffect && sender.isPlayer()) {
-				blockRule.trigger();
-			}
-
-			if (!item.Property) {
-				item.Property = {};
-			}
-			if (
-				Array.isArray(item.Property.AllowActivityOn) &&
-				// @ts-expect-error: The types are too strict, the extra is ignored
-				item.Property.AllowActivityOn.includes("BCX_EDITED")
-			) {
-				item.Property.AllowActivityOn = item.Property.AllowActivityOn_BCXBackup;
-				delete item.Property.AllowActivityOn_BCXBackup;
-				respond("Restored item to original configuration");
-			} else {
-				if (Array.isArray(item.Property.AllowActivityOn)) {
-					item.Property.AllowActivityOn_BCXBackup = item.Property.AllowActivityOn;
-				}
-				// @ts-expect-error: The types are too strict, the extra is ignored
-				item.Property.AllowActivityOn = AssetGroup.map(A => A.Name).concat("BCX_EDITED");
-				respond("Modified the item not to block any activities");
-			}
-			const char = getPlayerCharacter().Character;
-			CharacterRefresh(char);
-			ChatRoomCharacterUpdate(char);
-			return true;
-		},
-		autoCompleter: (argv) => {
-			if (argv.length === 1) {
-				return Command_selectWornItemAutocomplete(getPlayerCharacter(), argv[0]);
 			}
 			return [];
 		}

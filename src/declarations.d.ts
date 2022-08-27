@@ -55,6 +55,7 @@ type BCX_Permissions =
 	| "relationships_view_all"
 	| "relationships_modify_self"
 	| "relationships_modify_others"
+	| "misc_cheat_allowactivities"
 	| "misc_wardrobe_item_import";
 
 type PermissionsBundle = Record<string, [boolean, number]>;
@@ -239,7 +240,6 @@ type BCX_Rule =
 	| "block_blacklisting"
 	| "block_whitelisting"
 	| "block_antiblind"
-	| "block_allowactivities"
 	| "block_difficulty_change"
 	| "block_activities"
 	| "block_mainhall_maidrescue"
@@ -679,7 +679,6 @@ type BCX_Command =
 	| "timeleft"
 	| "servedrinks"
 	| "orgasm"
-	| "allowactivities"
 	| "emoticon"
 	;
 

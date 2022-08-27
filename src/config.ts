@@ -13,6 +13,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.GetDeafLevel": ["42CB6D63"],
 	"Player.HasTints": ["E09CA942"],
 	"Player.IsSlow": ["4D9B1713", "6E60F118"],
+	ActivityCheckPrerequisite: ["FADD5685"],
 	ActivityOrgasmPrepare: ["E4EE085D"],
 	ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9", "B5D882A8", "936CB457"],
 	AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF", "0D1455A9"],

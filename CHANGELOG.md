@@ -6,6 +6,7 @@ This update includes:
  - Added a new extended mode to BCX's wardrobe import/export that allows selecting in greater detail what to import
    - This feature is available by default while importing a BCX string (hold "Shift" for the old behavior - "quick mode")
    - This feature can also be used while selecting a stored BC outfit by clicking the small config button to the left of it
+   - Changed the export to also newly include the body slots. Note: Your old outfit strings may not yet support importing body slots.
    - Added a toggle on a second page of the miscellaneous module to toggle the default mode for the wardrobe (extended or quick)
  - Added support for crafted items to BCX's wardrobe import/export feature
  - Added support for crafted items to the curses module
@@ -14,14 +15,14 @@ This update includes:
    - Allows enforcing the BCX user to only use the set nickname for the character, if present in the room
    - Has multiple permissions configurable in the authority module
  - Added a new BCX module "Export-Import" that allows permitted roles to export/import the state of most BCX modules [partially by AR2000]
-   - Has a permission to export the state of a module configuration in the "Export-Import" menu
+   - Has a permission to export the state of a module configuration in the "Export-Import" menu\
      Note: Importing requirements depend on the permissions of the module you are importing
  - Added a second page to the add curse screen for also cursing the character's body slots
  - Added hidden search keywords to rules, allowing you to find them easier when searching for them
    - If you make a search and expect a rule to appear but it doesn't, feel free to send us a suggestion for a keyword to add to the rule!
  - Added alphabetical sort toggle to add-rules screen and the commands module's command list
  - Added a filter/search field and two toggles (alphabetical sort and sort according to activation state) to the added rules/curses screens
- - Added a button to delete all currently filtered log entries over all page results at once in the "Behaviour Log" module
+ - Added a button to delete all currently filtered log entries over all page results at once in the behaviour log module
  - Added all hidden asylum backgrounds to the room background selection
  - Added new permission "Allow importing items using wardrobe" to the authority module, to no longer allow everyone to import outfits
  - Added four buttons on the added curses/rules screen to bulk-activate/deactivate curses/rules
@@ -30,7 +31,7 @@ This update includes:
  - Improved various screens to now no longer show a "Loading..." text on changes, instead showing the old data until new data is received
  - Changed the curse trigger flooding detection to temporarily disable the affected curse slot and no longer the whole module
  - Changed BCX's local messages to use any set nickname from BC or BCX's relationships module
- - Changed nicknames from BC as well as BCX's relationshops module to support a wider set of characters allowed to be used (compatible with BCE)
+ - Changed nicknames from BC as well as BCX's relationships module to support a wider set of characters allowed to be used (compatible with BCE)
  - This update improves compatibility with BC release R83
 
 Commands module changes:

@@ -39,7 +39,7 @@ export function ExportImportDoExport(category: string, compress: boolean, charac
 	}
 
 	if (character && !checkPermissionAccess("exportimport_export", character)) {
-		throw new Error("No access");
+		throw new Error("Missing the following permission required to export:\nAllow exporting BCX module configurations");
 	}
 
 	let result = JSON.stringify({
@@ -101,7 +101,7 @@ export function ExportImportDoImport(category: string, data: string, character: 
 	if (character) {
 		const missingPermissions = definition.importPermissions.filter(p => !checkPermissionAccess(p, character));
 		if (missingPermissions.length > 0) {
-			return "Missing following permissions required to import:\n" +
+			return "Missing the following permissions required to import:\n" +
 				missingPermissions
 					.map(p => getPlayerPermissionSettings()[p]?.name ?? p)
 					.join("\n");

@@ -236,7 +236,7 @@ export class ModuleRelationhips extends BaseModule {
 			module: ModuleCategory.Relationships,
 			export: (character) => {
 				if (character && !checkPermissionAccess("relationships_view_all", character)) {
-					throw new Error("No access: Missing required permission 'relationships_view_all'");
+					throw new Error("Missing the following permission required to export:\nAllow viewing others in relationship list");
 				}
 				return modStorage.relationships ?? [];
 			},

@@ -779,24 +779,53 @@ export function initRules_bc_alter() {
 		}
 	});
 
+	function getValidNickname(): string {
+		return (Player.Nickname && isValidNickname(Player.Nickname)) ? Player.Nickname :
+			isValidNickname(Player.Name) ? Player.Name :
+				"";
+	}
+
 	registerRule("alt_set_nickname", {
 		name: "Control nickname",
 		type: RuleType.Alt,
 		loggable: false,
 		shortDescription: "directly sets PLAYER_NAME's nickname",
-		longDescription: "This rule sets PLAYER_NAME's nickname (replacing her name in most cases) to any text entered in the rule config, blocking changes to it.",
-		keywords: ["edit", "change", "force", "petname", "naming"],
+		longDescription: "This rule sets PLAYER_NAME's nickname (replacing her name in most cases) to any text entered in the rule config, blocking changes to it from BC's nickname menu. You can optionally choose whether the previous BC nickname will be restored while the rule is not in effect.",
+		keywords: ["edit", "change", "force", "petname", "naming", "alias"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			nickname: {
 				type: "string",
-				default: () => (
-					(Player.Nickname && isValidNickname(Player.Nickname)) ? Player.Nickname :
-						isValidNickname(Player.Name) ? Player.Name :
-							""
-				),
+				default: getValidNickname,
 				description: "Set this player's nickname:",
 				options: /^[\p{L}0-9\p{Z}'-]{0,20}$/u
+			},
+			restore: {
+				type: "toggle",
+				description: "Restore the previous nickname at rule end",
+				default: true,
+				Y: 470
+			}
+		},
+		internalDataValidate: (data) => typeof data === "string",
+		internalDataDefault: getValidNickname,
+		stateChange(state, newState) {
+			if (newState) {
+				const current = getValidNickname();
+				if (current !== undefined) {
+					state.internalData = current;
+				}
+			} else if (state.customData?.restore) {
+				let old = state.internalData;
+				if (old !== undefined) {
+					if (old === Player.Name) {
+						old = "";
+					}
+					if (Player.Nickname !== old) {
+						Player.Nickname = old;
+						ServerAccountUpdate.QueueData({ Nickname: old }, true);
+					}
+				}
 			}
 		},
 		tick(state) {

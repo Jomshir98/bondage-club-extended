@@ -385,6 +385,7 @@ type RuleCustomData = {
 	},
 	alt_set_nickname: {
 		nickname: string;
+		restore: boolean;
 	},
 	alt_hearing_whitelist: {
 		whitelistedMembers: number[];
@@ -560,6 +561,7 @@ type RuleCustomData = {
 };
 
 type RuleInternalData = {
+	alt_set_nickname: string;
 	setting_forbid_lockpicking: boolean;
 	setting_forbid_SP_rooms: boolean;
 	setting_forbid_safeword: boolean;

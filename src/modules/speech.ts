@@ -117,8 +117,7 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 		ChatRoomShouldBlockGaggedOOCMessage(msg.originalMessage, ChatRoomCharacter.find(C => C.MemberNumber === ChatRoomTargetMemberNumber))
 	) {
 		// The message is to be blocked by BC, block it ourselves to prevent it from being deleted
-		// @ts-expect-error: Wrong typing of the function, this works
-		ChatRoomMessage({ Content: "ChatRoomBlockGaggedOOC", Type: "Action", Sender: Player.MemberNumber });
+		ChatRoomMessage({ Content: "ChatRoomBlockGaggedOOC", Type: "Action", Sender: Player.MemberNumber! });
 		return null;
 	}
 
@@ -182,45 +181,60 @@ function setAntigarble(value: number): boolean {
 
 export class ModuleSpeech extends BaseModule {
 	load() {
-		let lastMessage: string = "";
-		let lastMessageOriginal: string = "";
-		hookFunction("ChatRoomSendChat", 5, (args, next) => {
-			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
-			if (chat) {
-				const msg = chat.value.trim();
-				if (msg) {
-					const info = parseMsg(msg);
-					if (info) {
-						const msg2 = processMsg(info);
-						if (msg2 === null) {
-							if (RulesGetRuleState("speech_force_retype").isEnforced) {
-								chat.value = "";
+
+		let currentlyProcessedMessage: {
+			result: string;
+			original: string;
+			target: number | null;
+		} | null = null;
+
+		hookFunction("CommandParse", 5, (args, next) => {
+			const msg = (args[0] as string).trim();
+			if (msg) {
+				const info = parseMsg(msg);
+				if (info) {
+					const msg2 = processMsg(info);
+					// Message is rejected
+					if (msg2 === null) {
+						// There is rule to force retype of rejected message
+						if (RulesGetRuleState("speech_force_retype").isEnforced) {
+							// Clear chat
+							ElementValue("InputChat", "");
+							// Clear message history if matches
+							if (ChatRoomLastMessage.length > 0 && ChatRoomLastMessage.at(-1) === msg) {
+								ChatRoomLastMessage.splice(ChatRoomLastMessage.length - 1, 1);
+								ChatRoomLastMessageIndex = Math.min(ChatRoomLastMessageIndex, ChatRoomLastMessage.length);
 							}
-							return;
 						}
-						chat.value = msg2;
-						lastMessage = msg2.startsWith("//") ? msg2.substring(1) : msg2;
-						lastMessageOriginal = info.originalMessage.startsWith("//") ? info.originalMessage.substring(1) : info.originalMessage;
+						return;
 					}
+					args[0] = msg2;
+					currentlyProcessedMessage = {
+						result: msg2.startsWith("//") ? msg2.substring(1) : msg2,
+						original: info.originalMessage.startsWith("//") ? info.originalMessage.substring(1) : info.originalMessage,
+						target: info.target
+					};
 				}
 			}
-			return next(args);
+			const res = next(args);
+			currentlyProcessedMessage = null;
+			return res;
 		});
 
 		//#region Antigarble for pre-garbled whispers
 		hookFunction("ServerSend", 1, (args, next) => {
 			const data = args[1];
 			if (args[0] === "ChatRoomChat" &&
+				currentlyProcessedMessage &&
 				isObject(data) &&
-				data.Type === "Whisper" &&
-				data.Content === lastMessage &&
-				lastMessageOriginal &&
-				data.Content !== lastMessageOriginal
+				(data.Type === "Whisper" || data.Type === "Chat") &&
+				(typeof data.Target === "number" ? data.Target : null) === currentlyProcessedMessage.target &&
+				data.Content !== currentlyProcessedMessage.original
 			) {
 				if (!Array.isArray(data.Dictionary)) {
 					data.Dictionary = [];
 				}
-				(data.Dictionary as any[]).push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: lastMessageOriginal });
+				(data.Dictionary as any[]).push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: currentlyProcessedMessage.original });
 			}
 			return next(args);
 		});

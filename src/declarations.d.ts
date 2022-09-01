@@ -10,14 +10,6 @@ declare const LZString: import("lz-string").LZStringStatic;
 
 type Satisfies<T extends U, U> = T;
 
-interface BCXVersion {
-	major: number;
-	minor: number;
-	patch: number;
-	extra?: string;
-	dev?: boolean;
-}
-
 type BCXSupporterType = undefined | "supporter" | "developer";
 
 // Player.OnlineSettings.BCX?: string;

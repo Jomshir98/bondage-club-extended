@@ -2,6 +2,8 @@ import { icon_Typing_star, icon_Typing_base, icon_Typing_dot } from "./resources
 import { BCX_setTimeout } from "./BCXContext";
 import { getChatroomCharacter } from "./characters";
 import { RelationshipsGetNickname } from "./modules/relationships";
+import { BCX_VERSION_PARSED } from "./utils";
+import { supporterStatus } from "./modules/versionCheck";
 
 import bcModSDK from "bondage-club-mod-sdk";
 import { omit } from "lodash-es";
@@ -32,6 +34,11 @@ export let developmentMode: boolean = false;
 
 export function setAllowMode(allow: boolean): boolean {
 	if (allow) {
+		if (!BCX_VERSION_PARSED.dev && supporterStatus !== "developer") {
+			console.info("Cheats are only allowed in developer version");
+			return false;
+		}
+
 		console.warn("Cheats enabled; please be careful not to break things");
 	} else {
 		if (!setDevelopmentMode(false))

@@ -1,3 +1,12 @@
+interface BCXVersion {
+	major: number;
+	minor: number;
+	patch: number;
+	extra?: string;
+	dev?: boolean;
+}
+
+//#region Rules
 interface BCX_RuleStateAPI_Generic {
 	/** The name of the rule */
 	readonly rule: string;
@@ -49,6 +58,8 @@ interface BCX_RuleStateAPI<ID extends BCX_Rule> extends BCX_RuleStateAPI_Generic
 // type BCX_Rule = string;
 // type BCX_RuleStateAPI<ID extends BCX_Rule> = BCX_RuleStateAPI_Generic;
 
+//#endregion
+
 interface BCX_ModAPI {
 	/** Name of the mod this API was requested for */
 	readonly modName: string;
@@ -60,6 +71,9 @@ interface BCX_ModAPI {
 interface BCX_ConsoleInterface {
 	/** Version of loaded BCX */
 	readonly version: string;
+
+	/** Version parsed to components */
+	readonly versionParsed: Readonly<BCXVersion>;
 
 	/**
 	 * Gets BCX version of another character in room

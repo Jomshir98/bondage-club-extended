@@ -12,7 +12,7 @@ let nextCheckTimer: number | null = null;
 export let versionCheckNewAvailable: boolean | null = null;
 let versionCheckDidNotify = false;
 
-export let supporterStatus: BCXSupporterType = "developer";
+export let supporterStatus: BCXSupporterType;
 export let supporterSecret: undefined | string;
 
 export function setSupporterVisible(visible: boolean): void {

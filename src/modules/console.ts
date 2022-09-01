@@ -10,12 +10,18 @@ import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../
 import { debugGenerateReport, debugSetLogServerMessages, showErrorOverlay } from "../errorReporting";
 import { VERSION } from "../config";
 import { ModAPI } from "./console_modApi";
+import { BCX_VERSION_PARSED } from "../utils";
 
 import bcModSDK from "bondage-club-mod-sdk";
+import { cloneDeep } from "lodash-es";
 
 class ConsoleInterface implements BCX_ConsoleInterface {
 	get version(): string {
 		return VERSION;
+	}
+
+	get versionParsed(): Readonly<BCXVersion> {
+		return cloneDeep(BCX_VERSION_PARSED);
 	}
 
 	getCharacterVersion(target?: number): string | null {

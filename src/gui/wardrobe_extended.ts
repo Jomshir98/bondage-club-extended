@@ -1,9 +1,8 @@
 import { isEqual } from "lodash-es";
 import { BCX_setTimeout } from "../BCXContext";
 import { getChatroomCharacter } from "../characters";
-import { curseMakeSavedProperty } from "../modules/curses";
 import { sendQuery } from "../modules/messaging";
-import { parseWardrobeImportData, ValidationCanAccessCheck, WardrobeDoImport, WardrobeImportCheckChangesLockedItem, WardrobeImportMakeFilterFunction } from "../modules/wardrobe";
+import { itemMergeProperties, parseWardrobeImportData, ValidationCanAccessCheck, WardrobeDoImport, WardrobeImportCheckChangesLockedItem, WardrobeImportMakeFilterFunction } from "../modules/wardrobe";
 import { arrayUnique, clampWrap, isObject } from "../utils";
 import { DrawImageEx, getVisibleGroupName, InfoBeep, isBind, isBody, isCloth, isCosplay, itemColorsEquals, smartGetAssetGroup } from "../utilsClub";
 import { GuiSubscreen } from "./subscreen";
@@ -847,7 +846,10 @@ function checkImportItemNoChange(group: AssetGroupName, a: ItemBundle[], b: Item
 		item1.Name === item2.Name &&
 		itemColorsEquals(item1.Color, item2.Color) &&
 		(item1.Difficulty ?? 0) === (item2.Difficulty ?? 0) &&
-		isEqual(curseMakeSavedProperty(item1.Property), curseMakeSavedProperty(item2.Property)) &&
+		isEqual(
+			item1.Property ?? {},
+			itemMergeProperties(item1.Property, item2.Property, { includeNoncursableProperties: true, lockAssignMemberNumber: Player.MemberNumber }) ?? {}
+		) &&
 		isEqual(item1.Craft, item2.Craft)
 	);
 }

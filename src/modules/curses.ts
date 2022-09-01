@@ -23,8 +23,8 @@ const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
 const CURSES_ANTILOOP_THRESHOLD = 10;
 const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 
-const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
-const CURSE_IGNORED_EFFECTS = ["Lock"];
+export const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
+export const CURSE_IGNORED_EFFECTS = ["Lock"];
 // Ignore slave collars, as they are forced by BC
 const CURSE_IGNORED_ITEMS = ["SlaveCollar", "ClubSlaveCollar"];
 

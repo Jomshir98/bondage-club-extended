@@ -6,7 +6,7 @@ import { arrayUnique, clipboardAvailable, isObject } from "../utils";
 import isEqual from "lodash-es/isEqual";
 import cloneDeep from "lodash-es/cloneDeep";
 import { RedirectGetImage } from "./miscPatches";
-import { curseMakeSavedProperty } from "./curses";
+import { curseMakeSavedProperty, CURSE_IGNORED_EFFECTS, CURSE_IGNORED_PROPERTIES } from "./curses";
 import { BCX_setTimeout } from "../BCXContext";
 import { Command_pickAutocomplete, Command_selectWornItem, Command_selectWornItemAutocomplete, registerCommandParsed } from "./commands";
 import { getChatroomCharacter, getPlayerCharacter } from "../characters";
@@ -48,6 +48,71 @@ export function parseWardrobeImportData(data: string): string | ItemBundle[] {
 		console.warn(error);
 		return "Import error: Bad data";
 	}
+}
+
+export function itemMergeProperties(sourceProperty: Partial<ItemProperties> | undefined, targetProperty: Partial<ItemProperties> | undefined, {
+	includeNoncursableProperties = false,
+	lockAssignMemberNumber
+}: {
+	includeNoncursableProperties?: boolean;
+	lockAssignMemberNumber?: number;
+} = {}): Partial<ItemProperties> | undefined {
+
+	const itemProperty = cloneDeep(sourceProperty ?? {});
+	targetProperty = cloneDeep(targetProperty ?? {});
+
+	// Lock assignment MemberNumber can be overridden if locks are being applied
+	if (lockAssignMemberNumber != null) {
+		if (targetProperty.LockedBy) {
+			if (itemProperty.LockedBy === targetProperty.LockedBy && typeof itemProperty.LockMemberNumber === "number") {
+				targetProperty.LockMemberNumber = itemProperty.LockMemberNumber;
+			} else {
+				targetProperty.LockMemberNumber = lockAssignMemberNumber;
+			}
+		} else {
+			delete targetProperty.LockMemberNumber;
+		}
+	}
+
+	for (const key of arrayUnique(Object.keys(targetProperty).concat(Object.keys(itemProperty))) as (keyof ItemProperties)[]) {
+		// Effects are handled separately
+		if (key === "Effect")
+			continue;
+
+		// Curses skip some properties
+		if (!includeNoncursableProperties && CURSE_IGNORED_PROPERTIES.includes(key))
+			continue;
+
+		// Update base properties
+		if (targetProperty[key] === undefined) {
+			if (itemProperty[key] !== undefined) {
+				delete itemProperty[key];
+			}
+		} else if (typeof targetProperty[key] !== typeof itemProperty[key] ||
+			!isEqual(targetProperty[key], itemProperty[key])
+		) {
+			itemProperty[key] = cloneDeep(targetProperty[key]) as any;
+		}
+	}
+
+	// Update effects
+	const itemIgnoredEffects = !Array.isArray(itemProperty.Effect) ? [] :
+		itemProperty.Effect.filter(i => !includeNoncursableProperties && CURSE_IGNORED_EFFECTS.includes(i));
+
+	const itemEffects = !Array.isArray(itemProperty.Effect) ? [] :
+		itemProperty.Effect.filter(i => includeNoncursableProperties || !CURSE_IGNORED_EFFECTS.includes(i)).sort();
+
+	const curseEffects = !Array.isArray(targetProperty.Effect) ? [] :
+		targetProperty.Effect.filter(i => includeNoncursableProperties || !CURSE_IGNORED_EFFECTS.includes(i)).sort();
+
+	if (!isEqual(new Set(itemEffects), new Set(curseEffects))) {
+		itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
+	}
+
+	if (Object.keys(targetProperty).length === 0) {
+		return undefined;
+	}
+	return itemProperty;
 }
 
 export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBundle[], allowReplace: (a: Item | Asset) => boolean): boolean {
@@ -92,7 +157,10 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 				!newItem ||
 				currentItem.Asset.Name !== newItem.Name ||
 				!itemColorsEquals(currentItem.Color, newItem.Color) ||
-				!isEqual(currentItem.Property, newItem.Property)
+				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, newItem.Property, {
+					includeNoncursableProperties: true,
+					lockAssignMemberNumber: Player.MemberNumber
+				}) ?? {})
 			) {
 				return true;
 			}
@@ -167,18 +235,18 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 				CharacterAppearanceSetItem(C, cloth.Group, A, cloth.Color, 0, undefined, false);
 				const item = InventoryGet(C, cloth.Group);
 				if (cloth.Property && item) {
-					if (
-						!isObject(cloth.Property) ||
-						typeof cloth.Property.LockedBy !== "string" ||
-						(
-							ValidationCanAccessCheck(C, "ItemMisc", cloth.Property.LockedBy, undefined) &&
-							(!C.IsPlayer() || !InventoryIsPermissionBlocked(C, cloth.Property.LockedBy, "ItemMisc")) &&
-							(includeLocks === true || (typeof includeLocks !== "boolean" && includeLocks.has(cloth.Property.LockedBy)))
-						)
-					) {
+					if (!isObject(cloth.Property)) {
 						item.Property = cloneDeep(cloth.Property);
 					} else {
-						item.Property = cloneDeep(curseMakeSavedProperty(cloth.Property));
+						item.Property = itemMergeProperties(item.Property, cloth.Property, {
+							includeNoncursableProperties: (
+								typeof cloth.Property.LockedBy === "string" &&
+								ValidationCanAccessCheck(C, "ItemMisc", cloth.Property.LockedBy, undefined) &&
+								(!C.IsPlayer() || !InventoryIsPermissionBlocked(C, cloth.Property.LockedBy, "ItemMisc")) &&
+								(includeLocks === true || (typeof includeLocks !== "boolean" && includeLocks.has(cloth.Property.LockedBy)))
+							),
+							lockAssignMemberNumber: Player.MemberNumber
+						});
 					}
 					item.Craft = ValidationVerifyCraftData(cloth.Craft);
 				}

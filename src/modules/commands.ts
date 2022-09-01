@@ -6,6 +6,7 @@ import { BaseModule } from "./_BaseModule";
 import { firstTimeInit, modStorage, modStorageSync } from "./storage";
 import { queryHandlers, sendQuery } from "./messaging";
 import { RulesGetRuleState } from "./rules";
+import { isValidNickname } from "./relationships";
 
 interface ICommandInfo {
 	description: string | null;
@@ -437,9 +438,9 @@ export function Command_selectCharacter(selector: string): ChatroomCharacter | s
 		}
 		return target;
 	}
-	let targets = characters.filter(c => c.Name === selector);
+	let targets = characters.filter(c => c.Name === selector || isValidNickname(c.Nickname) && c.Nickname === selector);
 	if (targets.length === 0)
-		targets = characters.filter(c => c.Name.toLocaleLowerCase() === selector.toLocaleLowerCase());
+		targets = characters.filter(c => c.Name.toLowerCase() === selector.toLowerCase() || isValidNickname(c.Nickname) && c.Name.toLowerCase() === selector.toLowerCase());
 
 	if (targets.length === 1) {
 		return targets[0];
@@ -463,7 +464,9 @@ export function Command_selectCharacterAutocomplete(selector: string): string[] 
 	if (/^[0-9]+$/.test(selector)) {
 		return characters.map(c => c.MemberNumber?.toString(10)).filter(n => n != null && n.startsWith(selector));
 	}
-	return characters.map(c => c.Name).filter(n => n.toLocaleLowerCase().startsWith(selector.toLocaleLowerCase()));
+	return characters
+		.flatMap(c => isValidNickname(c.Nickname) && c.Nickname.toLowerCase() !== c.Name.toLowerCase() ? [c.Nickname, c.Name] : [c.Name])
+		.filter(n => n.toLocaleLowerCase().startsWith(selector.toLowerCase()));
 }
 
 export function Command_selectWornItem(character: ChatroomCharacter, selector: string, filter: (item: Item) => boolean = isBind): Item | string {

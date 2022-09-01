@@ -4,6 +4,7 @@ import { getChatroomCharacter } from "./characters";
 import { RelationshipsGetNickname } from "./modules/relationships";
 
 import bcModSDK from "bondage-club-mod-sdk";
+import { omit } from "lodash-es";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -378,35 +379,12 @@ export function showHelp(helpText: string) {
 	});
 }
 
-interface RoomInfo {
-	Name: string;
-	// Space: string;
-	Description: string;
-	Background: string;
-	Limit: number;
-	Admin: number[];
-	Ban: number[];
-	Game: string;
-	Private: boolean;
-	Locked: boolean;
-	BlockCategory: any[];
-}
+type RoomInfo = Omit<ChatRoom, "Character">;
 
 export function getCurrentRoomData(): RoomInfo | null {
 	if (!ChatRoomData)
 		return null;
-	return ({
-		Name: ChatRoomData.Name,
-		Description: ChatRoomData.Description,
-		Background: ChatRoomData.Background,
-		Limit: ChatRoomData.Limit,
-		Admin: ChatRoomData.Admin.slice(),
-		Ban: ChatRoomData.Ban.slice(),
-		BlockCategory: ChatRoomData.BlockCategory.slice(),
-		Game: ChatRoomGame,
-		Private: ChatRoomData.Private,
-		Locked: ChatRoomData.Locked
-	});
+	return omit(ChatRoomData, "Character");
 }
 
 export function updateChatroom(newData: Partial<RoomInfo>): boolean {

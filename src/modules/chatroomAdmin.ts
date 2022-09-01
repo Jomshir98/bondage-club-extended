@@ -561,6 +561,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 				Game: create ? ChatCreateGame : ChatAdminGame,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList")!.trim()) : [],
 				Limit: ElementValue("InputSize") ? ElementValue("InputSize")!.trim() : "",
+				Language: create ? ChatCreateLanguage : ChatAdminLanguage,
 				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory),
 				AutoApply: modStorage.roomTemplates[i]?.AutoApply
 			};
@@ -667,6 +668,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 				ChatCreateGame = template.Game;
 				if (inputAdminList) inputAdminList.value = template.Admin.toString();
 				if (inputSize) inputSize.value = template.Limit;
+				if (template.Language) ChatCreateLanguage = template.Language;
 				ChatBlockItemCategory = template.BlockCategory;
 			}
 			// needed to auto apply a template correctly again
@@ -690,6 +692,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 					ChatCreateGame = data.Game;
 					if (inputAdminList) inputAdminList.value = data.Admin.toString();
 					if (inputSize) inputSize.value = data.Limit;
+					if (data.Language) ChatCreateLanguage = data.Language;
 					ChatBlockItemCategory = data.BlockCategory;
 				});
 			}
@@ -759,6 +762,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 					ChatAdminGame = data.Game;
 					if (inputAdminList) inputAdminList.value = data.Admin.toString();
 					if (inputSize) inputSize.value = data.Limit;
+					if (data.Language) ChatAdminLanguage = data.Language;
 					ChatAdminBlockCategory = data.BlockCategory;
 				});
 			}

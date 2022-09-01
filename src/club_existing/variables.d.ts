@@ -298,6 +298,7 @@ declare var ChatCreateBackgroundSelect: string;
 declare var ChatCreatePrivate: boolean | null;
 declare var ChatCreateLocked: boolean | null;
 declare var ChatCreateGame: string;
+declare var ChatCreateLanguage: string;
 declare var ChatBlockItemCategory: any[];
 
 // Cell.js

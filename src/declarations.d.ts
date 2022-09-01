@@ -713,6 +713,7 @@ interface RoomTemplate {
 	Name: string;
 	Description: string;
 	Background: string;
+	Language: string;
 	Limit: string;
 	Admin: number[];
 	Game: string;

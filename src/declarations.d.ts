@@ -274,6 +274,7 @@ type BCX_Rule =
 	| "speech_block_ooc"
 	| "speech_doll_talk"
 	| "speech_ban_words"
+	| "speech_ban_words_in_emotes"
 	| "speech_forbid_open_talking"
 	| "speech_limit_open_talking"
 	| "speech_forbid_emotes"
@@ -292,6 +293,7 @@ type BCX_Rule =
 	// | "speech_restrained_speech"
 	| "speech_alter_faltering"
 	| "speech_mandatory_words"
+	| "speech_mandatory_words_in_emotes"
 	| "speech_partial_hearing"
 	| "other_forbid_afk"
 	| "other_track_time"
@@ -410,6 +412,9 @@ type RuleCustomData = {
 	speech_ban_words: {
 		bannedWords: string[];
 	},
+	speech_ban_words_in_emotes: {
+		bannedWords: string[];
+	},
 	speech_restrict_whisper_send: {
 		minimumPermittedRole: import("./modules/authority").AccessLevel;
 	},
@@ -443,6 +448,7 @@ type RuleCustomData = {
 	// },
 	greet_room_order: {
 		greetingSentence: string;
+		affectEmotes: boolean;
 	},
 	greet_new_guests: {
 		greetingSentence: string;
@@ -451,6 +457,10 @@ type RuleCustomData = {
 	// 	listOfAllowedSentences: string[];
 	// },
 	speech_mandatory_words: {
+		mandatoryWords: string[];
+		affectWhispers: boolean;
+	},
+	speech_mandatory_words_in_emotes: {
 		mandatoryWords: string[];
 	},
 	speech_partial_hearing: {

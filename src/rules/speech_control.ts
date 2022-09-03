@@ -236,13 +236,67 @@ export function initRules_bc_speech_control() {
 			bannedWords: {
 				type: "stringList",
 				default: [],
-				description: "All forbidden words:"
+				description: "All forbidden words:",
+				options: {
+					validate: /^[\p{L} ]*$/iu
+				}
 			}
 		},
 		init(state) {
 			let transgression: undefined | string;
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.bannedWords)
+					return true;
+				transgression = state.customData?.bannedWords.find(i =>
+					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
+						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+					)
+				);
+				return transgression === undefined;
+			};
+			registerSpeechHook({
+				allowSend: (msg) => {
+					if (state.isEnforced && !check(msg) && transgression !== undefined) {
+						state.triggerAttempt(null, { USED_WORD: transgression });
+						return SpeechHookAllow.BLOCK;
+					}
+					return SpeechHookAllow.ALLOW;
+				},
+				onSend: (msg) => {
+					if (state.inEffect && !check(msg) && transgression !== undefined) {
+						state.trigger(null, { USED_WORD: transgression });
+					}
+				}
+			});
+		}
+	});
+
+	registerRule("speech_ban_words_in_emotes", {
+		name: "Forbid saying certain words in emotes",
+		type: RuleType.Speech,
+		shortDescription: "based on a configurable blacklist",
+		longDescription: "This rule forbids PLAYER_NAME to use certain words as part of any emote messages. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No').",
+		keywords: ["limit", "restrict", "blacklist", "blocklist", "forbidden"],
+		triggerTexts: {
+			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
+			attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",
+			log: "PLAYER_NAME used the banned word 'USED_WORD'"
+		},
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			bannedWords: {
+				type: "stringList",
+				default: [],
+				description: "All forbidden words:",
+				options: {
+					validate: /^[\p{L} ]*$/iu
+				}
+			}
+		},
+		init(state) {
+			let transgression: undefined | string;
+			const check = (msg: SpeechMessageInfo): boolean => {
+				if (msg.type !== "Emote" || !state.customData?.bannedWords)
 					return true;
 				transgression = state.customData?.bannedWords.find(i =>
 					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
@@ -747,7 +801,7 @@ export function initRules_bc_speech_control() {
 		name: "Order to greet room",
 		type: RuleType.Speech,
 		shortDescription: "with a settable sentence when entering it newly",
-		longDescription: "Sets a specific sentence that PLAYER_NAME must say loud after entering a room that is not empty. The sentence is autopopulating the chat window text input. When to say it is left to PLAYER_NAME, but when the rule is enforced, it is the only thing that can be said in this room after joining it. Emotes can still be used, though. Disconnects don't count as coming into a new room again, as far as detectable.",
+		longDescription: "Sets a specific sentence that PLAYER_NAME must say loud after entering a room that is not empty. The sentence is autopopulating the chat window text input. When to say it is left to PLAYER_NAME, but when the rule is enforced, it is the only thing that can be said in this room after joining it. Emotes can still be used, though, unless toggled to be forbidden. Disconnects don't count as coming into a new room again, as far as detectable.",
 		keywords: ["say", "present", "introduce"],
 		triggerTexts: {
 			infoBeep: "You broke the rule to greet this room like taught!",
@@ -762,6 +816,12 @@ export function initRules_bc_speech_control() {
 				default: "",
 				description: "The sentence that has to be used to greet any joined room:",
 				options: /^([^/.*()\s][^()]*)?$/
+			},
+			affectEmotes: {
+				type: "toggle",
+				default: false,
+				description: "Also forbid emote messages before greeting",
+				Y: 560
 			}
 		},
 		load(state) {
@@ -789,7 +849,8 @@ export function initRules_bc_speech_control() {
 				allowSend: (msg) => {
 					if (state.isEnforced &&
 						state.customData?.greetingSentence.trim() &&
-						!alreadyGreeted && msg.type !== "Emote"
+						!alreadyGreeted &&
+						(msg.type !== "Emote" || (msg.type === "Emote" && state.customData.affectEmotes))
 					) {
 						lastRoomName = ChatRoomData.Name;
 						// 4. set alreadyGreeted to true and overwrite lastRoomName
@@ -941,8 +1002,8 @@ export function initRules_bc_speech_control() {
 	registerRule("speech_mandatory_words", {
 		name: "Establish mandatory words",
 		type: RuleType.Speech,
-		shortDescription: "of which at least one needs to always be included when speaking openly",
-		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match). Doesn't affect whispers, emotes and OOC text.",
+		shortDescription: "of which at least one needs to always be included when speaking",
+		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match). Doesn't affect whispers, emotes and OOC text. There is a toggle for affecting whispers, too.",
 		keywords: ["force", "require", "talking", "saying", "certain", "specific"],
 		triggerTexts: {
 			infoBeep: "You forgot to include one of the mandatory words!",
@@ -956,13 +1017,79 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "At least one of these words always needs to be used:",
 				options: {
+					validate: /^[\p{L} ]*$/iu,
+					pageSize: 3
+				}
+			},
+			affectWhispers: {
+				type: "toggle",
+				default: false,
+				description: "Also affect whispered messages",
+				Y: 740
+			}
+		},
+		init(state) {
+			const check = (msg: SpeechMessageInfo): boolean => {
+				if (
+					(msg.type !== "Chat" &&
+						!(
+							(msg.type === "Whisper" && !(msg.originalMessage.startsWith("!") && !msg.originalMessage.startsWith("!!"))) && state.customData?.affectWhispers
+						)
+					) || !state.customData?.mandatoryWords?.length)
+					return true;
+				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+				const sounds = state.customData?.mandatoryWords.filter(e => /^[\p{L}]*$/iu.test(e));
+				if (checkMsg.trim() === "") {
+					return true;
+				}
+				return state.customData?.mandatoryWords.some(i =>
+					checkMsg.match(
+						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+					)
+				) || checkMsg.split(/[^\p{L}]+/u).some(i => checkMessageForSounds(sounds, i, false));
+			};
+			registerSpeechHook({
+				allowSend: (msg) => {
+					if (state.isEnforced && !check(msg)) {
+						state.triggerAttempt();
+						return SpeechHookAllow.BLOCK;
+					}
+					return SpeechHookAllow.ALLOW;
+				},
+				onSend: (msg) => {
+					if (state.inEffect && !check(msg)) {
+						state.trigger();
+					}
+				}
+			});
+		}
+	});
+
+	registerRule("speech_mandatory_words_in_emotes", {
+		name: "Establish mandatory words in emotes",
+		type: RuleType.Speech,
+		shortDescription: "of which at least one needs to always be included",
+		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any emote message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match).",
+		keywords: ["force", "require", "talking", "saying", "certain", "specific"],
+		triggerTexts: {
+			infoBeep: "You forgot to include one of the mandatory words!",
+			attempt_log: "PLAYER_NAME almost forgot to use a mandatory word while talking",
+			log: "PLAYER_NAME did not use a mandatory word while talking"
+		},
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			mandatoryWords: {
+				type: "stringList",
+				default: [],
+				description: "At least one of these words always needs to be used:",
+				options: {
 					validate: /^[\p{L} ]*$/iu
 				}
 			}
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
-				if (msg.type !== "Chat" || !state.customData?.mandatoryWords?.length)
+				if (msg.type !== "Emote" || !state.customData?.mandatoryWords?.length)
 					return true;
 				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
 				const sounds = state.customData?.mandatoryWords.filter(e => /^[\p{L}]*$/iu.test(e));

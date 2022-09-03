@@ -461,11 +461,15 @@ export class ModuleWardrobe extends BaseModule {
 			"1550, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 496,": "1614, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 446,"
 		});
 
-		hookFunction("AppearanceRun", 0, (args, next) => {
+		hookFunction("AppearanceRun", 7, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Run();
 			}
 
+			return next(args);
+		});
+
+		hookFunction("AppearanceRun", 2, (args, next) => {
 			next(args);
 			if (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") {
 				if (clipboardAvailable) {
@@ -505,11 +509,15 @@ export class ModuleWardrobe extends BaseModule {
 			"(MouseX >= 1820) && (MouseX < 1975)": "(MouseX >= 1860) && (MouseX < 1980)"
 		});
 
-		hookFunction("AppearanceClick", 0, (args, next) => {
+		hookFunction("AppearanceClick", 7, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Click();
 			}
 
+			return next(args);
+		});
+
+		hookFunction("AppearanceClick", 2, (args, next) => {
 			if (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") {
 				if (clipboardAvailable) {
 					const Y = NModWardrobe ? 265 : 125;
@@ -569,7 +577,7 @@ export class ModuleWardrobe extends BaseModule {
 			next(args);
 		});
 
-		hookFunction("AppearanceExit", 0, (args, next) => {
+		hookFunction("AppearanceExit", 7, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Exit();
 			}
@@ -577,11 +585,15 @@ export class ModuleWardrobe extends BaseModule {
 			return next(args);
 		});
 
-		hookFunction("WardrobeRun", 10, (args, next) => {
+		hookFunction("WardrobeRun", 7, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Run();
 			}
 
+			return next(args);
+		});
+
+		hookFunction("WardrobeRun", 2, (args, next) => {
 			next(args);
 			if (clipboardAvailable) {
 				const Y = 90;
@@ -605,11 +617,15 @@ export class ModuleWardrobe extends BaseModule {
 			}
 		});
 
-		hookFunction("WardrobeClick", 10, (args, next) => {
+		hookFunction("WardrobeClick", 7, (args, next) => {
 			if (appearanceOverrideScreen) {
 				return appearanceOverrideScreen.Click();
 			}
 
+			return next(args);
+		});
+
+		hookFunction("WardrobeClick", 2, (args, next) => {
 			if (clipboardAvailable) {
 				const Y = 90;
 				// Help text toggle

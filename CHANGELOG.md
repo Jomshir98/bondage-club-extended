@@ -1,5 +1,29 @@
 # BCX Changelog
 
+## 0.9.1 "Utility abound" Release
+
+This update includes:
+ - Changed BCX's chat room templates to also store the chosen room language from now on
+ - All BCX commands which require a character target are now supporting not only the character name or the member number but also the set BC nickname
+   Note: Custom names from the relationships module are not supported as a valid target for such commands
+ - More work on improving compatibility and integration with BCE features
+ - And additionally **everything from the 0.9.0 update released to every BCX user!**
+
+Rules module changes:
+ - Added new rule "Forbid saying certain words in emotes" that forbids using blacklisted words in emote messages
+ - Added new rule "Establish mandatory words in emotes" that establishes a list of required words for usage in emote messages
+ - Added a new toggle to the rule "Control nickname" for restoring the previous BC nickname while the rule is not in effect
+ - Added a new toggle to the rule "Establish mandatory words" to also affect whispers
+ - Added a new toggle to the rule "Order to greet room" to also forbid using emotes before greeting the room
+
+Fixes:
+ - Fixed an instance of garbled whispers not working as intended while using BCE alongside BCX
+ - Fixed a crash that could happen while using commands that target items
+ - Fixed that certain commands could break a chat room's language property
+ - Fixed a bug in the BCX wardrobe import that prevented importing just the locks, after first importing without locks
+ - Fixed the BCX wardrobe import to now restore locks with the importer's member number instead of the exported member number on the lock
+ - Made BCX's universal crash reporter more robust
+
 ## 0.9.0 "Utility abound"
 
 This update includes:

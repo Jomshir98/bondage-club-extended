@@ -400,11 +400,16 @@ export const ruleCustomDataHandlers: {
 		validate: value => Array.isArray(value) && value.every(i => typeof i === "string"),
 		run({ def, value, Y, access }) {
 			DrawTextFit(def.description, 1050, Y + 0, 900, "Black");
-			if (!DialogActivePoses || !DialogActivePoses.length) DialogActivePoseMenuBuild();
 
-			for (let I = 0; I < DialogActivePoses.length; I++) {
+			const poses = PoseFemale3DCG
+				.filter(P => (P.AllowMenu || P.AllowMenuTransient))
+				.map(P => P.Category)
+				.filter((C, I, Categories) => C && Categories.indexOf(C) === I)
+				.map(Category => PoseFemale3DCG.filter(P => (P.AllowMenu || P.AllowMenuTransient) && P.Category === Category));
+
+			for (let I = 0; I < poses.length; I++) {
 				const OffsetY = Y + 60 + 140 * I;
-				const PoseGroup: Pose[] = DialogActivePoses[I];
+				const PoseGroup: Pose[] = poses[I];
 
 				for (let P = 0; P < PoseGroup.length; P++) {
 					const OffsetX = 1070 + 100 * P;
@@ -417,9 +422,16 @@ export const ruleCustomDataHandlers: {
 		click({ value, Y, access }) {
 			if (!access)
 				return;
-			for (let I = 0; I < DialogActivePoses.length; I++) {
+
+			const poses = PoseFemale3DCG
+				.filter(P => (P.AllowMenu || P.AllowMenuTransient))
+				.map(P => P.Category)
+				.filter((C, I, Categories) => C && Categories.indexOf(C) === I)
+				.map(Category => PoseFemale3DCG.filter(P => (P.AllowMenu || P.AllowMenuTransient) && P.Category === Category));
+
+			for (let I = 0; I < poses.length; I++) {
 				const OffsetY = Y + 60 + 140 * I;
-				const PoseGroup: Pose[] = DialogActivePoses[I];
+				const PoseGroup: Pose[] = poses[I];
 
 				for (let P = 0; P < PoseGroup.length; P++) {
 					const OffsetX = 1070 + 100 * P;

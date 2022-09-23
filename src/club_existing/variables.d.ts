@@ -1,6 +1,9 @@
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-shadow */
 
+// Female3DCG.js
+declare var PoseFemale3DCG: Pose[];
+
 // Activity.js
 declare var ActivityOrgasmRuined: boolean;
 declare var ActivityOrgasmGameResistCount: number;
@@ -97,7 +100,6 @@ declare var DialogFacialExpressionsSelected: number;
 declare var DialogFocusItem: Item;
 declare var DialogSelfMenuOptions: any[];
 declare var DialogMenuButton: string[];
-declare var DialogActivePoses: Pose[][];
 declare var DialogActivityMode: boolean;
 declare var DialogCraftingMenu: boolean;
 declare var DialogItemToLock: any;
@@ -111,7 +113,6 @@ declare function DialogInventoryBuild(C: Character, Offset?: number, redrawPrevi
 declare function DialogFindPlayer(KeyWord: string): string;
 declare function DialogDrawPoseMenu(): void;
 declare function DialogDrawExpressionMenu(): void;
-declare function DialogActivePoseMenuBuild(): void;
 
 // Drawing.js
 /** @deprecated */

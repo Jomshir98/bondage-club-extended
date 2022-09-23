@@ -5,7 +5,7 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Server commit: b894fce7856593d16850721febc44b09c2ec94f7
 
-// Game commit: bade0bb88fd0a1b7cfb127a9a8a592486c019544
+// Game commit: c5f6cb7539a1507ba45c1e8e1efb936547c7b11e
 export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.CanChangeClothesOn": ["40EF5292"],
 	"Player.GetBlindLevel": ["B0DE4B87", "E193DF2C"],
@@ -13,7 +13,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.GetDeafLevel": ["42CB6D63"],
 	"Player.HasTints": ["E09CA942"],
 	"Player.IsSlow": ["4D9B1713", "6E60F118"],
-	ActivityCheckPrerequisite: ["FADD5685"],
+	ActivityCheckPrerequisite: ["FADD5685", "46414546"],
 	ActivityOrgasmPrepare: ["E4EE085D"],
 	ActivityOrgasmStart: ["5C3627D7", "1F7E8FF9", "B5D882A8", "936CB457"],
 	AppearanceClick: ["48FA3705", "BA17EA90", "F0B11F43", "CCD4AC31", "EECC190D", "19A126DF", "0D1455A9"],
@@ -87,7 +87,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DialogDrawPoseMenu: ["4B146E82"],
 	DialogFindPlayer: ["32851FF2"],
 	DialogInventoryAdd: ["FD9268E1", "777C6B40", "B00897D4"],
-	DialogInventoryBuild: ["7F55676B", "F779D30F"],
+	DialogInventoryBuild: ["7F55676B", "F779D30F", "CFB24231"],
 	DialogItemClick: ["7039462A", "A08AC13E", "0E0D1707", "8B284B90", "5EB7C0D2", "542E1B06"],
 	DialogLeaveItemMenu: ["B369F7C0", "B54FD195"],
 	DialogMenuButtonBuild: ["1D4265E4", "75E8CCCD", "BC5B2A8A", "6B6C875D", "B169C773", "0B270ED5", "D5E32886"],
@@ -110,7 +110,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	InformationSheetRun: ["58B7879C", "A8A56ACA", "1079019C", "FAE6ED88", "EE8678A4"],
 	InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech: ["BE1F6406", "441EAEBF"],
 	LoginMistressItems: ["B58EF410"],
-	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547", "CF1C0400", "17F3A06E", "E117B785", "CA1BD40A", "C3BA7C45", "4FC31CA2"],
+	LoginResponse: ["16C2C651", "FA9EFD03", "02E9D246", "548405C8", "4FE91547", "CF1C0400", "17F3A06E", "E117B785", "CA1BD40A", "C3BA7C45", "4FC31CA2", "22A81B90"],
 	LoginStableItems: ["EA93FBF7"],
 	LogValue: ["6ED63114"],
 	MainHallMaidsDisabledBegForMore: ["EA29F2B3"],
@@ -148,8 +148,8 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	AppearanceRun: ["6BEDF1D5"],
 	BackgroundSelectionRun: ["F605602A"],
 	CharacterLoadEffect: ["74D62AA1"],
-	ChatAdminClick: ["3355D63D"],
-	ChatAdminLoad: ["BF159B25"],
+	ChatAdminClick: ["4BA1B803"],
+	ChatAdminLoad: ["62FB992F"],
 	ChatAdminRun: ["F92A0B2E"],
 	ChatRoomAddCharacterToChatRoom: ["1C43D1C1"],
 	ChatRoomCanChangeClothes: ["DF8A6550"], // Deprecated
@@ -174,7 +174,7 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	DialogDrawItemMenu: ["05301080"],
 	DialogFindPlayer: ["44A7263C"],
 	DialogInventoryAdd: ["A6DED236"],
-	DialogItemClick: ["66E9FF24"],
+	DialogItemClick: ["1A6D14C0"],
 	DialogMenuButtonBuild: ["AC45F4CF"],
 	DialogMenuButtonClick: ["A4CE0C1C"],
 	DrawCharacter: ["CFEDEF08"],
@@ -184,9 +184,9 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	FriendListClick: ["E08BFE66"],
 	FriendListLoadFriendList: ["428B288B"],
 	FriendListRun: ["96BCBB6E"],
-	InformationSheetRun: ["D8719F4D"],
+	InformationSheetRun: ["08EF8A57"],
 	LoginMistressItems: ["984A6AD9"],
-	LoginResponse: ["41A6A55C"],
+	LoginResponse: ["9F59AEF1"],
 	LoginStableItems: ["C3F50DD1"],
 	ServerAccountBeep: ["0A2C7C78"],
 	ServerSend: ["F8627678"],

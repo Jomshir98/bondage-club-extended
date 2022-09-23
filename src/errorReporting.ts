@@ -139,20 +139,15 @@ export function showErrorOverlay(title: string, description: string, contents: s
 
 	const overlay = document.createElement("div");
 	overlay.style.position = "fixed";
-	overlay.style.top = "0px";
-	overlay.style.right = "0px";
-	overlay.style.bottom = "0px";
-	overlay.style.left = "0px";
+	overlay.style.inset = "0px";
+	overlay.style.zIndex = "999999";
 	overlay.style.background = "#00000090";
 
 	// Nice window
 	const win = document.createElement("div");
 	overlay.appendChild(win);
 	win.style.position = "absolute";
-	win.style.top = "5%";
-	win.style.right = "5%";
-	win.style.bottom = "5%";
-	win.style.left = "5%";
+	win.style.inset = "5%";
 	win.style.background = "white";
 	win.style.display = "flex";
 	win.style.flexDirection = "column";

@@ -106,11 +106,6 @@ export class ModuleMiscPatches extends BaseModule {
 
 		hookFunction("AsylumEntranceCanWander", 0, () => true);
 
-		hookFunction("ElementIsScrolledToEnd", 0, (args) => {
-			const element = document.getElementById(args[0]);
-			return element != null && element.scrollHeight - element.scrollTop - element.clientHeight <= 1;
-		});
-
 		hookFunction("CheatFactor", 1, (args, next) => {
 			const [CheatName, Factor] = args as [string, number];
 

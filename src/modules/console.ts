@@ -1,4 +1,4 @@
-import { allowMode, isNModClient, developmentMode, setAllowMode, setDevelopmentMode } from "../utilsClub";
+import { allowMode, developmentMode, setAllowMode, setDevelopmentMode } from "../utilsClub";
 import { hookFunction, patchFunction } from "../patching";
 import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } from "./wardrobe";
 import { InvisibilityEarbuds } from "./clubUtils";
@@ -151,13 +151,8 @@ export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
 
-		const NMod = isNModClient();
-
-		patchFunction("ChatRoomMessage", NMod ? {
-			"A.DynamicDescription(Source).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(Source).toLowerCase() )`,
-			"G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
-		} : {
-			"Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? Asset[A].Description : Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase() )`,
+		patchFunction("ChatRoomMessageDefaultMetadataExtractor", {
+			"A.DynamicDescription(meta.SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(meta.SourceCharacter || Player).toLowerCase() )`,
 			"G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
 		});
 

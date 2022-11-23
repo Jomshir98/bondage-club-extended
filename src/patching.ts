@@ -116,6 +116,7 @@ export function removeAllHooksByModule(module: ModuleCategory): boolean {
 }
 
 export function patchFunction(target: string, patches: Record<string, string>): void {
+	initPatchableFunction(target);
 	modApi.patchFunction(target, patches);
 }
 

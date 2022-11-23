@@ -18,7 +18,9 @@ export enum ChatRoomStatusManagerStatusType {
 	Typing = "Typing",
 	Emote = "Emote",
 	Whisper = "Whisper",
-	DMS = "DMS",
+	DMS1 = "DMS1",
+	DMS2 = "DMS2",
+	Color = "Color",
 	Wardrobe = "Wardrobe",
 	Profile = "Profile",
 	// NMod
@@ -42,7 +44,8 @@ class ChatRoomStatusManager {
 	private StatusTarget: number | null = null;
 
 	// Status triggers
-	DMS: boolean = false;
+	DMS: 0 | 1 | 2 = 0;
+	DMSUnlock = false;
 	private TypingStatus: ChatRoomStatusManagerStatusType = ChatRoomStatusManagerStatusType.None;
 	private WhisperTarget: number | null = null;
 
@@ -61,13 +64,19 @@ class ChatRoomStatusManager {
 	}
 
 	GetStatus(): ChatRoomStatusManagerStatusType {
-		if (this.DMS)
-			return ChatRoomStatusManagerStatusType.DMS;
+		if (this.DMS === 2) {
+			this.DMSUnlock = true;
+			return ChatRoomStatusManagerStatusType.DMS2;
+		}
+		if (this.DMS === 1 && this.DMSUnlock)
+			return ChatRoomStatusManagerStatusType.DMS1;
 		if (modStorage.screenIndicatorEnable) {
 			if (CurrentScreen === "Appearance")
 				return ChatRoomStatusManagerStatusType.Wardrobe;
 			if (CurrentScreen === "OnlineProfile" || getCurrentSubscreen() != null)
 				return ChatRoomStatusManagerStatusType.Profile;
+			if (ItemColorItem != null)
+				return ChatRoomStatusManagerStatusType.Color;
 		}
 		if (modStorage.typingIndicatorEnable)
 			return this.TypingStatus;
@@ -131,7 +140,7 @@ class ChatRoomStatusManager {
 	}
 
 	unload() {
-		this.DMS = false;
+		this.DMS = 0;
 		this.InputEnd();
 	}
 }
@@ -143,14 +152,17 @@ function DMSKeydown(ev: KeyboardEvent) {
 		if (document.activeElement instanceof HTMLElement) {
 			document.activeElement.blur();
 		}
-		ChatroomSM.DMS = true;
+		ChatroomSM.DMS = 2;
+		ChatroomSM.UpdateStatus();
+	} else if (ev.altKey && ChatroomSM.DMS === 0) {
+		ChatroomSM.DMS = 1;
 		ChatroomSM.UpdateStatus();
 	}
 }
 
 function DMSKeyup(ev: KeyboardEvent) {
-	if (ChatroomSM.DMS && (ev.key === "Alt" || ev.code === "NumpadEnter")) {
-		ChatroomSM.DMS = false;
+	if (ChatroomSM.DMS > 0 && (ev.key === "Alt" || ev.code === "NumpadEnter")) {
+		ChatroomSM.DMS = ev.altKey ? 1 : 0;
 		ChatroomSM.UpdateStatus();
 	}
 }
@@ -308,11 +320,24 @@ export class ModuleChatroom extends BaseModule {
 				case ChatRoomStatusManagerStatusType.Emote:
 					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 1, true);
 					break;
-				case ChatRoomStatusManagerStatusType.DMS:
+				case ChatRoomStatusManagerStatusType.DMS1:
+					DrawRect(CharX + 380 * Zoom, CharY + 53 * Zoom, 40 * Zoom, 40 * Zoom, "White");
+					break;
+				case ChatRoomStatusManagerStatusType.DMS2:
 					DrawRect(CharX + 380 * Zoom, CharY + 53 * Zoom, 40 * Zoom, 40 * Zoom, "White");
 					DrawImageEx("Icons/Import.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom
+					});
+					break;
+				case ChatRoomStatusManagerStatusType.Color:
+					DrawImageEx("Assets/Female3DCG/Emoticon/Spectator/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+						Width: 50 * Zoom,
+						Height: 50 * Zoom
+					});
+					DrawImageEx("Icons/ColorPick.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
+						Width: 40 * Zoom,
+						Height: 40 * Zoom
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Wardrobe:
@@ -374,6 +399,14 @@ export class ModuleChatroom extends BaseModule {
 
 		// Screen indicator
 		hookFunction("CommonSetScreen", 0, (args, next) => {
+			next(args);
+			ChatroomSM.UpdateStatus();
+		});
+		hookFunction("ItemColorStateBuild", 0, (args, next) => {
+			next(args);
+			ChatroomSM.UpdateStatus();
+		});
+		hookFunction("ItemColorReset", 0, (args, next) => {
 			next(args);
 			ChatroomSM.UpdateStatus();
 		});

@@ -1064,7 +1064,7 @@ export class ModuleCurses extends BaseModule {
 
 		// Crafted properties are always cursed
 		const validatedCurseCraft = ValidationVerifyCraftData(curse.Craft, asset).result;
-		if (!isEqual(ValidationVerifyCraftData(currentItem.Craft, currentItem.Asset), validatedCurseCraft)) {
+		if (!isEqual(ValidationVerifyCraftData(currentItem.Craft, currentItem.Asset).result, validatedCurseCraft)) {
 			if (validatedCurseCraft === undefined) {
 				delete currentItem.Craft;
 			} else {

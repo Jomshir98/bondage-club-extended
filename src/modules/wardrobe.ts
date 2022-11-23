@@ -359,13 +359,28 @@ function KeyChangeListener(ev: KeyboardEvent) {
 }
 
 let searchBar: HTMLInputElement | null = null;
+let searchBarAutoClose = false;
+
+function allowSearchMode(): boolean {
+	return CurrentScreen === "Appearance" &&
+		CharacterAppearanceSelection != null &&
+		CharacterAppearanceMode === "Cloth" &&
+		DialogFocusItem == null
+}
 
 function enterSearchMode(C: Character) {
 	if (!searchBar) {
 		searchBar = ElementCreateInput("BCXSearch", "text", "", "40");
 		searchBar.oninput = () => {
-			DialogInventoryBuild(C);
-			AppearanceMenuBuild(C);
+			if (searchBar) {
+				if (searchBarAutoClose && !searchBar.value) {
+					exitSearchMode(C);
+					MainCanvas.canvas.focus();
+				} else {
+					DialogInventoryBuild(C);
+					AppearanceMenuBuild(C);
+				}
+			}
 		};
 		searchBar.focus();
 		DialogInventoryBuild(C);
@@ -377,6 +392,7 @@ function exitSearchMode(C: Character) {
 	if (searchBar) {
 		searchBar.remove();
 		searchBar = null;
+		searchBarAutoClose = false;
 		DialogInventoryBuild(C);
 		AppearanceMenuBuild(C);
 	}
@@ -703,7 +719,7 @@ export class ModuleWardrobe extends BaseModule {
 		hookFunction("AppearanceMenuBuild", 5, (args, next) => {
 			next(args);
 			const C = args[0] as Character;
-			if (CharacterAppearanceMode !== "Cloth") {
+			if (!allowSearchMode()) {
 				exitSearchMode(C);
 			} else if (searchBar) {
 				AppearanceMenu = [];
@@ -730,6 +746,22 @@ export class ModuleWardrobe extends BaseModule {
 						return;
 					}
 				}
+			}
+			next(args);
+		});
+
+		hookFunction("CommonKeyDown", 5, (args, next) => {
+			const ev = args[0] as KeyboardEvent;
+			const sb = searchBar;
+			if (!sb &&
+				CharacterAppearanceSelection &&
+				allowSearchMode() &&
+				ev.key.length === 1 &&
+				!ev.altKey && !ev.ctrlKey && !ev.metaKey
+			) {
+				enterSearchMode(CharacterAppearanceSelection);
+				searchBarAutoClose = true;
+				return;
 			}
 			next(args);
 		});

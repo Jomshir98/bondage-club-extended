@@ -91,14 +91,11 @@ export class ModuleDialog extends BaseModule {
 				CurrentCharacter &&
 				allowSearchMode() &&
 				ev.key.length === 1 &&
+				!ev.altKey && !ev.ctrlKey && !ev.metaKey &&
 				(struggleCooldown <= Date.now() || !["a", "s"].includes(ev.key.toLowerCase()))
 			) {
 				enterSearchMode(CurrentCharacter);
 				searchBarAutoClose = true;
-				if (searchBar) {
-					searchBar.value = ev.key;
-					ev.preventDefault();
-				}
 				return;
 			}
 			next(args);

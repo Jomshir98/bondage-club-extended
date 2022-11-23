@@ -70,6 +70,11 @@ function initPatchableFunction(target: string): IPatchedFunctionData {
 	return result;
 }
 
+/** Track function without adding any hooks - only checking hash */
+export function trackFunction(target: string): void {
+	initPatchableFunction(target);
+}
+
 export function hookFunction(target: string, priority: number, hook: PatchHook, module: ModuleCategory | null = null): void {
 	const data = initPatchableFunction(target);
 

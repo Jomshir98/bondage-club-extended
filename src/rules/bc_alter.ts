@@ -1,7 +1,7 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
-import { patchFunction, hookFunction } from "../patching";
+import { patchFunction, hookFunction, trackFunction } from "../patching";
 import { ChatRoomActionMessage, getCharacterName, InfoBeep } from "../utilsClub";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
@@ -105,8 +105,7 @@ export function initRules_bc_alter() {
 				next(args);
 				ignoreDeaf = false;
 			}, ModuleCategory.Rules);
-			// does nothing but uses GetDeafLevel -> needs to be watched
-			hookFunction("PreferenceIsPlayerInSensDep", 4, (args, next) => next(args), ModuleCategory.Rules);
+			trackFunction("PreferenceIsPlayerInSensDep");
 			hookFunction("Player.GetDeafLevel", 9, (args, next) => {
 				if (ignoreDeaf) {
 					return 0;

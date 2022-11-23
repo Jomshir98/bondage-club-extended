@@ -27,6 +27,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	AsylumGGTSClick: ["E5660C8C"],
 	AsylumGGTSLoad: ["DAB62F12"],
 	BackgroundSelectionRun: ["F7AF6FF2"],
+	CharacterAppearanceGenderAllowed: ["8A2D647F"],
 	CharacterAppearanceLoadCharacter: ["387F9BEF"],
 	CharacterCanChangeToPose: ["F55FE4B0"],
 	CharacterCanKneel: ["A5A325E3"],

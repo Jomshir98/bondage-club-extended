@@ -8,7 +8,7 @@ import { modStorageSync } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset, ConditionsLimit } from "../constants";
-import { hookFunction, removeAllHooksByModule } from "../patching";
+import { callOriginal, hookFunction, removeAllHooksByModule, trackFunction } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
@@ -27,6 +27,13 @@ export const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.slice();
 export const CURSE_IGNORED_EFFECTS = ["Lock"];
 // Ignore slave collars, as they are forced by BC
 const CURSE_IGNORED_ITEMS = ["SlaveCollar", "ClubSlaveCollar"];
+
+/** Screens on which curses don't trigger at all */
+const CURSE_INACTIVE_SCREENS: string[] = [
+	"ChatSelect",
+	"ChatSearch",
+	"ChatCreate"
+];
 
 export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
 	const result: ItemProperties = {};
@@ -927,6 +934,8 @@ export class ModuleCurses extends BaseModule {
 			}
 			return next(args);
 		});
+
+		trackFunction("CharacterAppearanceGenderAllowed");
 	}
 
 	run() {
@@ -971,6 +980,10 @@ export class ModuleCurses extends BaseModule {
 			}
 		}
 
+		// Pause curses on certain screens altogether
+		if (CURSE_INACTIVE_SCREENS.includes(CurrentScreen))
+			return;
+
 		// Pause curses of clothes while in appearance menu
 		if (CurrentScreen === "Appearance" && !isBind(assetGroup))
 			return;
@@ -1002,6 +1015,10 @@ export class ModuleCurses extends BaseModule {
 			console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
 			return;
 		}
+
+		// Check we are not bypassing limits
+		if (!callOriginal("CharacterAppearanceGenderAllowed", [asset]))
+			return;
 
 		let changeType: "" | cursedChange = "";
 

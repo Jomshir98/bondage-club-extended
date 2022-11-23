@@ -14,7 +14,6 @@ import { AccessLevel, registerPermission } from "./authority";
 import { ModuleCategory, Preset } from "../constants";
 import { ExtendedWardrobeInit, GuiWardrobeExtended } from "../gui/wardrobe_extended";
 import { modStorage } from "./storage";
-import zod, { ZodType } from "zod";
 
 export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
 	if (!CharacterAppearanceSelection) return "";
@@ -28,7 +27,7 @@ export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false):
 		}))
 		.map((i) => ({
 			...WardrobeAssetBundle(i),
-			Craft: ValidationVerifyCraftData(i.Craft)
+			Craft: ValidationVerifyCraftData(i.Craft, i.Asset).result
 		}));
 	return LZString.compressToBase64(JSON.stringify(save));
 }
@@ -200,18 +199,36 @@ export function ValidationCanAccessCheck(character: Character, group: AssetGroup
 	);
 }
 
-export const CraftedItemProperties_schema: ZodType<CraftedItemProperties> = zod.object({
-	Name: zod.string(),
-	MemberName: zod.string().optional(),
-	MemberNumber: zod.number().int().optional(),
-	Description: zod.string(),
-	Property: zod.string()
-});
-export function ValidationVerifyCraftData(Craft: unknown): CraftedItemProperties | undefined {
+export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): {
+	result: CraftingItem | undefined;
+	messages: string[];
+} {
+	if (!isObject(Craft)) {
+		return {
+			result: undefined,
+			messages: [`Expected object, got ${typeof Craft}`]
+		};
+	}
+	const saved = console.warn;
 	try {
-		return CraftedItemProperties_schema.parse(Craft);
-	} catch (_) {
-		return undefined;
+		const messages: string[] = [];
+		console.warn = (m: unknown) => {
+			if (typeof m === "string") {
+				messages.push(m);
+			}
+		};
+		const result = CraftingValidate(Craft as CraftingItem, Asset, true);
+		return {
+			result: result > CraftingStatusCode.CRITICAL_ERROR ? Craft as CraftingItem : undefined,
+			messages
+		};
+	} catch (error) {
+		return {
+			result: undefined,
+			messages: [`Validation failed: ${error}`]
+		};
+	} finally {
+		console.warn = saved;
 	}
 }
 
@@ -248,7 +265,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 							lockAssignMemberNumber: Player.MemberNumber
 						});
 					}
-					item.Craft = ValidationVerifyCraftData(cloth.Craft);
+					item.Craft = ValidationVerifyCraftData(cloth.Craft, A).result;
 				}
 			}
 		} else {

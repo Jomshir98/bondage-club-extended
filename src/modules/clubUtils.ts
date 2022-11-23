@@ -556,7 +556,7 @@ export class ModuleClubUtils extends BaseModule {
 		hookFunction("ActivityCheckPrerequisite", 6, (args, next) => {
 			const prereq = args[0] as string;
 			const acted = args[2] as Character;
-			if (!prereq.startsWith("Needs-") && acted.MemberNumber != null && activitiesAllowed.has(acted.MemberNumber))
+			if (!prereq.startsWith("Has") && !prereq.startsWith("TargetHas") && acted.MemberNumber != null && activitiesAllowed.has(acted.MemberNumber))
 				return true;
 			return next(args);
 		}, null);

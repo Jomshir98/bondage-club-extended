@@ -549,7 +549,7 @@ export function initRules_bc_alter() {
 			});
 			hookFunction("ActivityOrgasmPrepare", 5, (args, next) => {
 				const C = args[0] as Character;
-				if (state.isEnforced && state.customData && C.ID === 0) {
+				if (state.isEnforced && state.customData && C.IsPlayer()) {
 					if (state.customData.orgasmHandling === "edge") {
 						if (C.ArousalSettings) {
 							C.ArousalSettings.Progress = 95;

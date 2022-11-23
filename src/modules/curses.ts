@@ -13,7 +13,7 @@ import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomp
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
 import { BCX_setInterval } from "../BCXContext";
-import { CraftedItemProperties_schema, ValidationVerifyCraftData } from "./wardrobe";
+import { ValidationVerifyCraftData } from "./wardrobe";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -59,7 +59,7 @@ function curseCreateCurseItemInfo(item: Item): CursedItemInfo {
 		Difficulty: item.Difficulty || undefined,
 		Color: (item.Color && item.Color !== "Default") ? cloneDeep(item.Color) : undefined,
 		Property: curseMakeSavedProperty(item.Property),
-		Craft: ValidationVerifyCraftData(item.Craft)
+		Craft: ValidationVerifyCraftData(item.Craft, item.Asset).result
 	};
 
 	if (Object.keys(result.Property!).length === 0) {
@@ -825,7 +825,7 @@ export class ModuleCurses extends BaseModule {
 						Color: zod.union([zod.string(), zod.array(zod.string())]).optional(),
 						Difficulty: zod.number().optional(),
 						Property: zod.custom<ItemProperties>(isObject).optional(),
-						Craft: CraftedItemProperties_schema.optional(),
+						Craft: zod.any(),
 						itemRemove: zod.literal(true).optional()
 					}).nullable();
 					const validationResult = validator.safeParse(data);
@@ -835,6 +835,14 @@ export class ModuleCurses extends BaseModule {
 					const validatedData = validationResult.data;
 					if (validatedData != null && AssetGet("Female3DCG", condition, validatedData.Name) == null) {
 						return [false, `Unknown item "${condition}:${validatedData.Name}"`];
+					}
+					if (validatedData?.Craft != null) {
+						const craftValidationResult = ValidationVerifyCraftData(validatedData.Craft, AssetGet("Female3DCG", condition, validatedData.Name));
+						if (craftValidationResult.result) {
+							validatedData.Craft = craftValidationResult.result;
+						} else {
+							return [false, "Crafting validation failed:\n" + craftValidationResult.messages.join("\n")];
+						}
 					}
 					return [true, validatedData];
 				},
@@ -1008,7 +1016,7 @@ export class ModuleCurses extends BaseModule {
 				Asset: asset,
 				Color: curse.Color != null ? cloneDeep(curse.Color) : "Default",
 				Property: curse.Property != null ? cloneDeep(curse.Property) : {},
-				Craft: ValidationVerifyCraftData(curse.Craft),
+				Craft: ValidationVerifyCraftData(curse.Craft, asset).result,
 				Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
 			};
 			Player.Appearance.push(currentItem);
@@ -1055,8 +1063,8 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		// Crafted properties are always cursed
-		const validatedCurseCraft = ValidationVerifyCraftData(curse.Craft);
-		if (!isEqual(ValidationVerifyCraftData(currentItem.Craft), validatedCurseCraft)) {
+		const validatedCurseCraft = ValidationVerifyCraftData(curse.Craft, asset).result;
+		if (!isEqual(ValidationVerifyCraftData(currentItem.Craft, currentItem.Asset), validatedCurseCraft)) {
 			if (validatedCurseCraft === undefined) {
 				delete currentItem.Craft;
 			} else {

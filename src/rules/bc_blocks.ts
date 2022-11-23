@@ -1174,6 +1174,7 @@ export function initRules_bc_blocks() {
 				const EmoticonStateBackup = Emoticon.Property.Expression;
 
 				if (state.isEnforced && state.customData && state.customData.alsoHideEmoticons) {
+					// @ts-expect-error: Expression can be both `undefined` and `null`
 					Emoticon.Property.Expression = null;
 				}
 				next(args);

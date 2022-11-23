@@ -79,6 +79,14 @@ declare function CharacterSetActivePose(C: Character, NewPose: string | null, Fo
 declare function CharacterSetFacialExpression(C: Character, AssetGroup: string, Expression: string | null, Timer?: number, Color?: string | string[]): void;
 declare function CharacterNickname(C: Character): string;
 
+// Crafting.js
+declare const CraftingStatusCode: {
+	OK: 2;
+	ERROR: 1;
+	CRITICAL_ERROR: 0;
+};
+declare function CraftingValidate(Craft: CraftingItem, Asset?: Asset | null, Warn?: boolean): CraftingStatusType;
+
 // Element.js
 declare function ElementIsScrolledToEnd(ID: string): boolean;
 declare function ElementScrollToEnd(ID: string): void;

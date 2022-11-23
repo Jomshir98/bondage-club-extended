@@ -151,12 +151,13 @@ export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
 
+		// TODO: This patch doesn't apply properly, as original reference is kept in array of extractors
 		patchFunction("ChatRoomMessageDefaultMetadataExtractor", {
 			"A.DynamicDescription(meta.SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(meta.SourceCharacter || Player).toLowerCase() )`,
 			"G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
 		});
 
-		patchFunction("ExtendedItemDraw", {
+		patchFunction("ExtendedItemDrawButton", {
 			"DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
 		});
 

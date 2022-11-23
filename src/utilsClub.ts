@@ -117,15 +117,11 @@ export function InfoBeep(msg: string, timer: number = 3000) {
 export function ChatRoomActionMessage(msg: string, target: null | number = null, dictionary: ChatMessageDictionaryEntry[] = []) {
 	if (!msg) return;
 	ServerSend("ChatRoomChat", {
-		Content: "Beep",
+		Content: "BCX_PLAYER_CUSTOM_DIALOG",
 		Type: "Action",
 		Target: target,
 		Dictionary: [
-			{ Tag: "Beep", Text: "msg" },
-			{ Tag: "Biep", Text: "msg" },
-			{ Tag: "Sonner", Text: "msg" },
-			{ Tag: "发送私聊", Text: "msg" },
-			{ Tag: "msg", Text: msg },
+			{ Tag: "MISSING PLAYER DIALOG: BCX_PLAYER_CUSTOM_DIALOG", Text: msg },
 			...dictionary
 		]
 	});

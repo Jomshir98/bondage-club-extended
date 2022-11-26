@@ -321,6 +321,7 @@ type BCX_Rule =
 	| "setting_allow_tint_effects"
 	| "setting_allow_blur_effects"
 	| "setting_upsidedown_view"
+	| "setting_random_npc_events"
 	;
 
 type RuleCustomData = {

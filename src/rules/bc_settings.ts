@@ -1,4 +1,5 @@
-import { ConditionsLimit } from "../constants";
+import { ConditionsLimit, MiscCheat } from "../constants";
+import { cheatIsEnabled, cheatSetEnabled } from "../modules/miscPatches";
 import { registerRule, RuleType } from "../modules/rules";
 
 export function initRules_bc_settings() {
@@ -15,12 +16,12 @@ export function initRules_bc_settings() {
 		});
 	}
 
-	function settingHelper(setting: string, defaultLimit: ConditionsLimit): RuleDisplayDefinition {
+	function settingHelper(setting: string, defaultLimit: ConditionsLimit, shortDescription: string = "Existing BC setting"): RuleDisplayDefinition {
 		return {
 			name: `Force '${setting}'`,
 			type: RuleType.Setting,
 			loggable: false,
-			shortDescription: "Existing BC setting",
+			shortDescription,
 			keywords: ["control", "settings", "configure", "change"],
 			defaultLimit,
 			longDescription: `This rule forces PLAYER_NAME's base game setting '${setting}' to configurable value and prevents her from changing it.`,
@@ -45,10 +46,12 @@ export function initRules_bc_settings() {
 		| "setting_plug_vibe_events"
 		| "setting_allow_tint_effects"
 		| "setting_allow_blur_effects"
-		| "setting_upsidedown_view";
+		| "setting_upsidedown_view"
+		| "setting_random_npc_events";
 	function toggleSettingHelper({
 		id,
 		setting,
+		shortDescription,
 		defaultValue,
 		defaultLimit,
 		get,
@@ -56,14 +59,15 @@ export function initRules_bc_settings() {
 	}: {
 		id: BooleanRule;
 		setting: string;
+		shortDescription?: string;
 		defaultValue: boolean;
 		defaultLimit: ConditionsLimit;
 		get: () => boolean | undefined;
 		set: (value: boolean) => void;
 	}) {
 		return registerRule<BooleanRule>(id, {
-			...settingHelper(setting, defaultLimit),
-			longDescription: `This rule forces PLAYER_NAME's base game setting '${setting}' to configurable value and prevents her from changing it. ` +
+			...settingHelper(setting, defaultLimit, shortDescription),
+			longDescription: `This rule forces PLAYER_NAME's base game or BCX setting '${setting}' to the configured value and prevents her from changing it. ` +
 				`There is also an option to restore the setting to the state it was in before the rule changed it. The restoration happens either when the rule becomes ` +
 				`inactive (for instance through toggle or unfulfilled trigger conditions) or when it is removed.`,
 			dataDefinition: {
@@ -462,4 +466,17 @@ export function initRules_bc_settings() {
 		get: () => Player.GraphicsSettings?.InvertRoom,
 		set: value => Player.GraphicsSettings!.InvertRoom = value
 	});
+
+	// "Misc" module settings
+
+	toggleSettingHelper({
+		id: "setting_random_npc_events",
+		setting: "Prevent random NPC events",
+		shortDescription: "from BCX's Misc module",
+		defaultValue: true,
+		defaultLimit: ConditionsLimit.normal,
+		get: () => cheatIsEnabled(MiscCheat.BlockRandomEvents),
+		set: value => cheatSetEnabled(MiscCheat.BlockRandomEvents, value)
+	});
+
 }

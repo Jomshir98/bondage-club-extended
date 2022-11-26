@@ -1,13 +1,15 @@
 import { detectOtherMods, InfoBeep } from "./utilsClub";
 import { VERSION } from "./config";
-import { init_modules, unload_modules } from "./moduleManager";
-import { unload_patches } from "./patching";
+import { init_modules, moduleInitPhase, unload_modules } from "./moduleManager";
+import { hookFunction, unload_patches } from "./patching";
 import { isObject } from "./utils";
 import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
 import { debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
+import { ModuleInitPhase } from "./constants";
 
 export function loginInit(C: any) {
-	if (window.BCX_Loaded) return;
+	if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
+		return;
 	SetLoadedBeforeLogin(C);
 	init();
 }
@@ -32,6 +34,8 @@ function clearCaches() {
 }
 
 export function init() {
+	if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
+		return;
 
 	const ctx = debugContextStart("BCX init", { bcxArea: true });
 
@@ -42,6 +46,20 @@ export function init() {
 		unload();
 		return;
 	}
+
+	const currentAccount = Player.MemberNumber;
+	if (currentAccount == null) {
+		throw new Error("No player MemberNumber");
+	}
+
+	hookFunction("LoginResponse", 0, (args, next) => {
+		const response = args[0];
+		if (isObject(response) && typeof response.Name === "string" && typeof response.AccountName === "string" && response.MemberNumber !== currentAccount) {
+			alert(`Attempting to load BCX with different account than already loaded (${response.MemberNumber} vs ${currentAccount}). This is not supported, please refresh the page.`);
+			throw new Error("Attempting to load BCX with different account");
+		}
+		return next(args);
+	});
 
 	// Loading into already loaded club - clear some caches
 	clearCaches();

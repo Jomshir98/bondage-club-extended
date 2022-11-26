@@ -7,6 +7,7 @@ import { BCXSource, BCXSourceExternal, ChatRoomSendLocal, InfoBeep } from "../ut
 import { unload } from "../main";
 import { modStorage } from "./storage";
 import { announceSelf } from "./chatroom";
+import { hookFunction } from "../patching";
 
 let nextCheckTimer: number | null = null;
 export let versionCheckNewAvailable: boolean | null = null;
@@ -70,8 +71,8 @@ function sendVersionCheckBeep(): void {
 		UA: window.navigator.userAgent
 	}, VERSION_CHECK_BOT, true);
 
-	// Set check retry timer to 5 minutes
-	nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, 5 * 60_000);
+	// Set check retry timer to 5 minutes + up to minute random delay
+	nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (5 + Math.random()) * 60_000);
 }
 
 export class ModuleVersionCheck extends BaseModule {
@@ -86,11 +87,12 @@ export class ModuleVersionCheck extends BaseModule {
 				return;
 			}
 
-			// Got valid version response, reset timer to 15 minutes
+			// Got valid version response, reset timer to 15 minutes + up to 5 minutes random delay
 			if (nextCheckTimer !== null) {
 				clearTimeout(nextCheckTimer);
+				nextCheckTimer = null;
 			}
-			nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, 15 * 60_000);
+			nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (15 + 5 * Math.random()) * 60_000);
 
 			if (message.status === "current") {
 				versionCheckNewAvailable = false;
@@ -185,6 +187,15 @@ export class ModuleVersionCheck extends BaseModule {
 			}
 			status.status = message.status;
 			status.verified = true;
+		});
+
+		hookFunction("LoginResponse", 0, (args, next) => {
+			next(args);
+
+			const response = args[0];
+			if (isObject(response) && typeof response.Name === "string" && typeof response.AccountName === "string") {
+				sendVersionCheckBeep();
+			}
 		});
 	}
 

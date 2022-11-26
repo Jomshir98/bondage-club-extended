@@ -209,15 +209,15 @@ export class ModuleRelationhips extends BaseModule {
 						}
 					}
 
-					// Allow has higher priority than forbid
-					for (const a of allowed) {
-						forbiden.delete(a);
-					}
-
-					// Find if bad name was used
+					// Find if bad name was used, but allow has higher priority than forbid
 					const transgression = Array.from(forbiden).find(i =>
 						(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
 							new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+						) &&
+						!Array.from(allowed).some(allow =>
+							findMatch(i, allow) && (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
+								new RegExp(`([^\\p{L}]|^)${escapeRegExp(allow.trim())}([^\\p{L}]|$)`, "iu")
+							)
 						)
 					);
 					if (transgression !== undefined) {
@@ -355,4 +355,26 @@ export class ModuleRelationhips extends BaseModule {
 		removeAllHooksByModule(ModuleCategory.Relationships);
 		this.load();
 	}
+}
+
+function findMatch(name: string | readonly string[], sentence: string | readonly string[]): boolean {
+	if (typeof name === "string") {
+		name = name.split(" ").map(i => i.trim()).filter(Boolean);
+	}
+	if (typeof sentence === "string") {
+		sentence = sentence.split(" ").map(i => i.trim()).filter(Boolean);
+	}
+	for (let j = 0; j < sentence.length; j++) {
+		let matches = true;
+		for (let i = 0; i < name.length; i++) {
+			if (j + i >= sentence.length || name[i] !== sentence[j + i]) {
+				matches = false;
+				break;
+			}
+		}
+		if (matches) {
+			return true;
+		}
+	}
+	return false;
 }

@@ -169,6 +169,7 @@ declare function ChatRoomShouldBlockGaggedOOCMessage(Message: string, WhisperTar
 declare function ChatRoomPlayerIsAdmin(): boolean;
 declare function ChatRoomClearAllElements(): void;
 declare function ChatRoomListUpdate(list: number[], adding: boolean, number: number): void;
+declare function ChatRoomStart(Space: ChatRoomSpaceType, Game: string, LeaveRoom: string, LeaveSpace: string, Background: string, BackgroundTagList: any[]): void;
 
 // ChatAdmin.js
 declare var ChatAdminBackgroundIndex: number;
@@ -186,6 +187,9 @@ declare var ChatCreateShowBackgroundMode: boolean;
 // ChatBlockItem.js
 declare var ChatBlockItemEditable: boolean;
 declare var ChatBlockItemReturnData: { Screen?: string; };
+
+// ChatSelect.js
+declare function ChatSelectGendersAllowed(space: string, genders: string[]): boolean;
 
 // Server.js
 declare var ServerBeep: {

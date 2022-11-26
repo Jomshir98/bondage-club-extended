@@ -976,14 +976,19 @@ export function initRules_bc_alter() {
 				const data = args[0];
 
 				if (isObject(data) &&
+					// Check it is beep from person
 					!data.BeepType &&
 					typeof data.MemberNumber === "number" &&
+					// Check rule is active
 					state.isEnforced &&
 					state.customData &&
 					state.customData.allowedMembers.includes(data.MemberNumber) &&
+					// Check the message matches summon message
 					typeof data.Message === "string" &&
 					(data.Message.toLocaleLowerCase().startsWith(state.customData.summoningText.trim().toLocaleLowerCase()) || data.Message.trim().toLocaleLowerCase() === "summon") &&
-					data.ChatRoomName
+					data.ChatRoomName &&
+					// Check we are allowed into target space
+					ChatSelectGendersAllowed(data.ChatRoomSpace, Player.GetGenders())
 				) {
 					ChatRoomActionMessage(`SourceCharacter received a summon: "${state.customData.summoningText}".`, null, [
 						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
@@ -1002,7 +1007,7 @@ export function initRules_bc_alter() {
 						ServerSend("ChatRoomLeave", "");
 						ChatRoomSetLastChatRoom("");
 						ChatRoomLeashPlayer = null;
-						CommonSetScreen("Online", "ChatSearch");
+						ChatRoomStart(data.ChatRoomSpace, "", "", "", "Introduction", BackgroundsTagList);
 						CharacterDeleteAllOnline();
 
 						// join

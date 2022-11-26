@@ -9,7 +9,7 @@ export function SetLoadedBeforeLogin(loginData: Record<string, unknown>) {
 export function BCX_setInterval(handler: () => void, timeout?: number): number {
 	// eslint-disable-next-line no-restricted-globals
 	return setInterval(() => {
-		const ctx = debugContextStart("BCX internal interval", { root: true, bcxArea: true });
+		const ctx = debugContextStart("BCX internal interval", { root: true, modArea: "BCX" });
 		handler();
 		ctx.end();
 	}, timeout);
@@ -18,7 +18,7 @@ export function BCX_setInterval(handler: () => void, timeout?: number): number {
 export function BCX_setTimeout(handler: () => (void | Promise<void>), timeout?: number): number {
 	// eslint-disable-next-line no-restricted-globals
 	return setTimeout(() => {
-		const ctx = debugContextStart("BCX internal timeout", { root: true, bcxArea: true });
+		const ctx = debugContextStart("BCX internal timeout", { root: true, modArea: "BCX" });
 		handler();
 		ctx.end();
 	}, timeout);
@@ -30,28 +30,33 @@ export interface DebugContextHandle {
 
 interface DebugContext {
 	name: string;
-	bcxArea: boolean;
+	/** Name of mod this context can be traced to, `""` for BC itself */
+	modArea: string;
 	root: boolean;
 	extraInfo?: () => string;
 }
 
 let contextStack: DebugContext[] = [];
 
-export function contextInBCXArea(): boolean {
+/**
+ * @returns Name of mod current context can be traced to, `""` for BC itself, `null` for unknown origin
+ */
+export function contextCurrentModArea(): string | null {
 	if (contextStack.length === 0)
-		return false;
-	return contextStack[contextStack.length - 1].bcxArea;
+		return null;
+	return contextStack[contextStack.length - 1].modArea;
 }
 
-export function debugContextStart(name: string, { root = false, bcxArea, extraInfo }: {
+export function debugContextStart(name: string, { root = false, modArea, extraInfo }: {
 	root?: boolean,
-	bcxArea?: boolean,
+	/** Name of mod this context can be traced to, `""` for BC itself */
+	modArea?: string,
 	extraInfo?: () => string
 } = {}): DebugContextHandle {
 
 	const context: DebugContext = {
 		name,
-		bcxArea: bcxArea ?? contextInBCXArea(),
+		modArea: modArea !== undefined ? modArea : (contextCurrentModArea() ?? ""),
 		root,
 		extraInfo
 	};

@@ -5,7 +5,11 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Server commit: b894fce7856593d16850721febc44b09c2ec94f7
 
-// Game commit: c5f6cb7539a1507ba45c1e8e1efb936547c7b11e
+// Game commit: b08ceef0b1dbdaba05aa717fb3978196921a7269
+export const SUPPORTED_BC_VERSIONS: readonly string[] = [
+	"R86"
+];
+
 export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.CanChangeClothesOn": ["40EF5292"],
 	"Player.GetBlindLevel": ["32BC83FD"],

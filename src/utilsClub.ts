@@ -5,7 +5,6 @@ import { RelationshipsGetNickname } from "./modules/relationships";
 import { BCX_VERSION_PARSED } from "./utils";
 import { supporterStatus } from "./modules/versionCheck";
 
-import bcModSDK from "bondage-club-mod-sdk";
 import { omit } from "lodash-es";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
@@ -162,14 +161,7 @@ export function isNModClient(): boolean {
 
 export function detectOtherMods() {
 	const w = window as any;
-	const ModSDKMods: Record<string, string | boolean> = {};
-	for (const mod of bcModSDK.getModsInfo()) {
-		if (mod.name === "BCX")
-			continue;
-		ModSDKMods[mod.name] = mod.version || true;
-	}
 	return {
-		...ModSDKMods,
 		NMod: isNModClient(),
 		BondageClubTools: (window as any).BCX_BondageClubToolsPatch === true || ServerSocket.listeners("ChatRoomMessage").some(i => i.toString().includes("window.postMessage")),
 		BCFriendList: ServerSocket.listeners("AccountQueryResult").some(i => i.toString().includes("f_t_body.innerText")),

@@ -47,7 +47,7 @@ export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
 			Object.values(dictionary).every(v => typeof v === "string")
 		) {
 			const context = debugContextStart("ModApiRuleTrigger", {
-				bcxArea: false,
+				modArea: this.modName,
 				extraInfo: () => `mod: ${this.modName}; rule: ${this.rule}`
 			});
 			this.#ruleState.trigger(targetCharacter, dictionary);
@@ -64,7 +64,7 @@ export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
 			Object.values(dictionary).every(v => typeof v === "string")
 		) {
 			const context = debugContextStart("ModApiRuleTriggerAttempt", {
-				bcxArea: false,
+				modArea: this.modName,
 				extraInfo: () => `mod: ${this.modName}; rule: ${this.rule}`
 			});
 			this.#ruleState.triggerAttempt(targetCharacter, dictionary);

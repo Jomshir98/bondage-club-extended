@@ -385,9 +385,9 @@ balanced-match@^1.0.0:
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
 bondage-club-mod-sdk@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/bondage-club-mod-sdk/-/bondage-club-mod-sdk-1.0.2.tgz#9e6222e8d1030ef83cd229cd84d03ff10cbdcfdb"
-  integrity sha512-QWQwqEFIZnqn5jN58Kn9iAr+kPQlX5NXovtc6HG35352ckCMpw5u0t/tkNUuYdRT/sR4ognVkBoUutdd4KdjHQ==
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/bondage-club-mod-sdk/-/bondage-club-mod-sdk-1.1.0.tgz#a967a392c2166fab131bd0a818639c10e895ea0d"
+  integrity sha512-q+bmQejD1aQI9hkOqGbD8B562QsjA6YicGb3WVwYR8sN9/U9plwG5F0fjmS9BB5VFi2UYqAb4bSeCKC0r6LKBA==
 
 brace-expansion@^1.1.7:
   version "1.1.11"

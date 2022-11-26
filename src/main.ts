@@ -37,7 +37,7 @@ export function init() {
 	if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
 		return;
 
-	const ctx = debugContextStart("BCX init", { bcxArea: true });
+	const ctx = debugContextStart("BCX init", { modArea: "BCX" });
 
 	InitErrorReporter();
 

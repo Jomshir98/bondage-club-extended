@@ -365,7 +365,7 @@ function allowSearchMode(): boolean {
 	return CurrentScreen === "Appearance" &&
 		CharacterAppearanceSelection != null &&
 		CharacterAppearanceMode === "Cloth" &&
-		DialogFocusItem == null
+		DialogFocusItem == null;
 }
 
 function enterSearchMode(C: Character) {

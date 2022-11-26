@@ -97,7 +97,7 @@ export function debugGenerateSDKReport(verbose: boolean = false): string {
 	if (overwrittenFunctions.length > 0) {
 		hadWarnings = true;
 		res += `Functions overwritten by non-ModSDK mods:\n` +
-			overwrittenFunctions.map(fn => `  - ${fn.name}: ${crc32(fn.currentEntrypoint?.toString().replaceAll('\r\n', '\n') ?? "")}\n`).join("");
+			overwrittenFunctions.map(fn => `  - ${fn.name}: ${crc32(fn.currentEntrypoint?.toString().replaceAll("\r\n", "\n") ?? "")}\n`).join("");
 	}
 
 	if (!hadWarnings) {
@@ -297,7 +297,7 @@ export function detectCompatibilityProblems(): void {
 				`If you are author of the mod triggering this warning, please modify your mod to use ModSDK: https://github.com/Jomshir98/bondage-club-mod-sdk. Feel free to ask for help doing that on the above-mentioned Discord server.\n` +
 				`Detected modifications:\n` +
 				(unexpectedHashes.length > 0 ? `Patched functions with unknown checksums:\n` + unexpectedHashes.map(i => `  - ${i[0]}: ${i[1]}\n`).join("") : "") +
-				(overwrittenFunctions.length > 0 ? `Overwritten functions:\n` + overwrittenFunctions.map(fn => `  - ${fn.name}: ${crc32(fn.currentEntrypoint?.toString().replaceAll('\r\n', '\n') ?? "")}\n`).join("") : "") +
+				(overwrittenFunctions.length > 0 ? `Overwritten functions:\n` + overwrittenFunctions.map(fn => `  - ${fn.name}: ${crc32(fn.currentEntrypoint?.toString().replaceAll("\r\n", "\n") ?? "")}\n`).join("") : "") +
 				`\n`;
 		}
 	}

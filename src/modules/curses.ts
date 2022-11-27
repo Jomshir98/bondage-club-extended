@@ -980,8 +980,8 @@ export class ModuleCurses extends BaseModule {
 			}
 		}
 
-		// Pause curses on certain screens altogether
-		if (CURSE_INACTIVE_SCREENS.includes(CurrentScreen))
+		// Pause curses on certain screens and when talking with NPC altogether
+		if (CURSE_INACTIVE_SCREENS.includes(CurrentScreen) || CurrentCharacter?.IsNpc())
 			return;
 
 		// Pause curses of clothes while in appearance menu

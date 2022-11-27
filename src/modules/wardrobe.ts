@@ -273,7 +273,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 		}
 	}
 
-	CharacterRefresh(C, true);
+	CharacterRefresh(C, false);
 }
 
 export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], includeBinds: boolean, force: boolean = false): string {

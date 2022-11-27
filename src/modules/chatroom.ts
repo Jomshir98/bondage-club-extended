@@ -162,7 +162,16 @@ function DMSKeydown(ev: KeyboardEvent) {
 
 function DMSKeyup(ev: KeyboardEvent) {
 	if (ChatroomSM.DMS > 0 && (ev.key === "Alt" || ev.code === "NumpadEnter")) {
+		ev.preventDefault();
+		ev.stopImmediatePropagation();
 		ChatroomSM.DMS = ev.altKey ? 1 : 0;
+		ChatroomSM.UpdateStatus();
+	}
+}
+
+function DMSBlur() {
+	if (ChatroomSM.DMS > 0) {
+		ChatroomSM.DMS = 0;
 		ChatroomSM.UpdateStatus();
 	}
 }
@@ -357,6 +366,7 @@ export class ModuleChatroom extends BaseModule {
 
 		window.addEventListener("keydown", DMSKeydown);
 		window.addEventListener("keyup", DMSKeyup);
+		window.addEventListener("blur", DMSBlur);
 
 		hookFunction("ChatRoomStatusUpdate", 10, (args, next) => {
 			if (args[0] === "Talk") {
@@ -462,6 +472,7 @@ export class ModuleChatroom extends BaseModule {
 
 		window.removeEventListener("keydown", DMSKeydown);
 		window.removeEventListener("keyup", DMSKeyup);
+		window.removeEventListener("blur", DMSBlur);
 	}
 }
 

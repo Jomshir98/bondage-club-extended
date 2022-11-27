@@ -673,6 +673,7 @@ type BCX_Command =
 	| "mouth"
 	| "arms"
 	| "legs"
+	| "allfours"
 	| "goandwait"
 	| "say"
 	| "forcesay"

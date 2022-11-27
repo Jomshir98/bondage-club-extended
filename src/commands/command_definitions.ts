@@ -262,6 +262,52 @@ export function initCommands_definitions() {
 		}
 	});
 
+	registerCommand("allfours", {
+		name: "Allfours",
+		helpDescription: ``,
+		shortDescription: "Make PLAYER_NAME get on all fours",
+		longDescription:
+			`This command forces PLAYER_NAME's to get on all fours, but they can still manually change their pose. This pose requires specific items to work.\n` +
+			`Usage:\n` +
+			`!allfours`,
+		defaultLimit: ConditionsLimit.normal,
+		playerUsable: true,
+		trigger: (argv, sender, respond, state) => {
+			if (argv.length !== 0) {
+				respond(Command_fixExclamationMark(sender,
+					`!allfours expects no arguments.`
+				));
+				return false;
+			}
+			const pose = "AllFours";
+			if ((typeof Player.ActivePose === "string" && Player.ActivePose === pose) || (Array.isArray(Player.ActivePose) && Player.ActivePose.includes(pose))) {
+				respond(`This character is already in the chosen pose.`);
+				return false;
+			}
+			if (!Player.AllowedActivePose.includes(pose)) {
+				respond(`You cannot change into this pose as this pose requires items that support it to work.`);
+				return false;
+			}
+			const ruleState = RulesGetRuleState("block_restrict_allowed_poses");
+			if (sender.isPlayer() && ruleState.isEnforced && ruleState.customData?.poseButtons.includes(pose)) {
+				respond(`You cannot change into this pose as the rule '${ruleState.ruleDefinition.name}' forbids it.`);
+				return false;
+			}
+			CharacterSetActivePose(Player, pose);
+			ServerSend("ChatRoomCharacterPoseUpdate", { Pose: Player.ActivePose });
+			if (!sender.isPlayer()) {
+				const text = "SENDER_NAME (SENDER_NUMBER) made you get on all fours";
+				if (text) {
+					ChatRoomSendLocal(dictionaryProcess(text, {
+						SENDER_NAME: sender.Nickname,
+						SENDER_NUMBER: `${sender.MemberNumber}`
+					}), undefined, sender.MemberNumber);
+				}
+			}
+			return true;
+		}
+	});
+
 	registerCommand("goandwait", {
 		name: "Go and wait",
 		helpDescription: `<public|private> <background name> <room name>`,

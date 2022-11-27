@@ -1,5 +1,29 @@
 # BCX Changelog
 
+## 0.9.2
+
+This update includes:
+ - Changed the wardrobe import/export feature to include a separate category for piercings
+ - BCX now checks if you are using any incompatible mods and warns about those
+ - Item search inside the wardrobe starts when you start typing while having a category selected without having to open the search field yourself
+ - New typing indicator variant when you are coloring an item (controlled using toggle for showing indicator in wardrobe)
+ - Lots of improvements to internal patching code, new version of ModSDK and improvements to error reporter
+ - This update improves compatibility with BC release R86
+
+Commands module changes:
+ - Added new command `allfours` that makes the BCX user get on all fours, if possible
+
+Rules module changes:
+ - Added new rule "Force 'Prevent random NPC events' setting" from BCX's Miscellaneous module as these could let the Player escape restraints
+ - Changed the rule "Ready to be summoned" to be compatible with the three new room lobbies in BC
+
+Fixes:
+ - Curses will temporarily be suspended while you are interacting with some NPC to avoid getting stuck
+ - Curses will not apply items that are not allowed in your current lobby
+ - Fixed enforced nicknames not working on names with spaces and names that are an extension of the original name
+ - Fixed an issue in wardrobe import that caused changes to be shown to others in the same chatroom before confirming
+ - Fixed some cases where relogin after a disconnect could cause issues
+
 ## 0.9.1 "Utility abound" Release
 
 This update includes:

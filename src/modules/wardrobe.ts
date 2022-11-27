@@ -23,7 +23,8 @@ export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false):
 			cosplay: true,
 			body: true, // TODO: Toggle
 			binds: includeBinds,
-			collar: includeBinds
+			collar: includeBinds,
+			piercings: includeBinds
 		}))
 		.map((i) => ({
 			...WardrobeAssetBundle(i),
@@ -173,20 +174,23 @@ export function WardrobeImportMakeFilterFunction({
 	cosplay,
 	body,
 	binds,
-	collar
+	collar,
+	piercings
 }: {
 	cloth: boolean;
 	cosplay: boolean;
 	body: boolean;
 	binds: boolean;
 	collar: boolean;
+	piercings: boolean;
 }): (a: Item | Asset) => boolean {
 	return (a: Item | Asset) => (
 		(cloth && isCloth(a, false)) ||
 		(cosplay && isCosplay(a)) ||
 		(body && isBody(a)) ||
-		(binds && isBind(a, ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"])) ||
-		(collar && isBind(a, []) && ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(smartGetAssetGroup(a).Name))
+		(binds && isBind(a, ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints", "ItemNipplesPiercings", "ItemVulvaPiercings"])) ||
+		(collar && isBind(a, []) && ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(smartGetAssetGroup(a).Name)) ||
+		(piercings && isBind(a, []) && ["ItemNipplesPiercings", "ItemVulvaPiercings"].includes(smartGetAssetGroup(a).Name))
 	);
 }
 
@@ -295,7 +299,8 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 		cosplay: C.OnlineSharedSettings?.BlockBodyCosplay !== true || C.IsPlayer(),
 		body: false,
 		binds: includeBinds,
-		collar: false
+		collar: false,
+		piercings: includeBinds
 	});
 
 	if (includeBinds && !force && WardrobeImportCheckChangesLockedItem(C, data, Allow))
@@ -340,7 +345,7 @@ const helpText = "BCX's wardrobe export/import works by converting your appearan
 	"The button to the left of the 'Export'-button toggles whether items/restraints on your character should also " +
 	"be exported or imported while using quick mode. Using quick mode, importing with items has two stages: First usage adds no locks, second one also " +
 	"imports locks from the exported items. Importing an outfit with restraints will fail if it would change any item that is locked (or blocked by a locked item), " +
-	"except collars, neck accessories/restraints. Those, as well as the body itself, are ignored.";
+	"except collars, neck accessories/restraints, and piercings. Those, as well as the body itself, are ignored.";
 
 function PasteListener(ev: ClipboardEvent) {
 	if (CurrentScreen === "Appearance" && CharacterAppearanceMode === "Wardrobe" || CurrentScreen === "Wardrobe") {

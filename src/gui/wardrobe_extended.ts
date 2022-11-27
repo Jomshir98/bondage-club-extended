@@ -31,7 +31,11 @@ const CATEGORIES_BASE =
 		},
 		items: {
 			title: "items",
-			filter: (g: AssetGroup) => isBind(g)
+			filter: (g: AssetGroup) => isBind(g, ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints", "ItemNipplesPiercings", "ItemVulvaPiercings"])
+		},
+		piercings: {
+			title: "piercings",
+			filter: (g: AssetGroup) => isBind(g, []) && ["ItemNipplesPiercings", "ItemVulvaPiercings"].includes(g.Name)
 		},
 		collar: {
 			title: "collar and accessories",
@@ -90,9 +94,11 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 	private allowBindsBase: boolean;
 	private allowBinds: boolean;
 	private bindsBlockedByLock: boolean;
+	private allowPiercings: boolean;
+	private piercingsBlockedByLock: boolean;
 	private allowCollar: boolean;
 	private collarBlockedByLock: boolean;
-	private allowCosply: boolean;
+	private allowCosplay: boolean;
 	private allowBody: boolean;
 
 	private allowLocks: boolean = false;
@@ -109,17 +115,19 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		this.allowBindsBase = allowBinds;
 		this.allowBinds = allowBinds;
 		this.bindsBlockedByLock = false;
+		this.allowPiercings = allowBinds;
+		this.piercingsBlockedByLock = false;
 		this.allowCollar = allowBinds;
 		this.collarBlockedByLock = false;
 		this.data = data;
 
 		const chatroomCharacter = character.MemberNumber && getChatroomCharacter(character.MemberNumber);
-		this.allowCosply = character.IsPlayer() || character.OnlineSharedSettings?.BlockBodyCosplay === false;
+		this.allowCosplay = character.IsPlayer() || character.OnlineSharedSettings?.BlockBodyCosplay === false;
 		this.allowBody = character.IsPlayer() || character.OnlineSharedSettings?.AllowFullWardrobeAccess === true;
-		if (chatroomCharacter && chatroomCharacter.BCXVersion && (!this.allowCosply || !this.allowBody)) {
+		if (chatroomCharacter && chatroomCharacter.BCXVersion && (!this.allowCosplay || !this.allowBody)) {
 			sendQuery("rule_alt_allow_changing_appearance", undefined, chatroomCharacter.MemberNumber).then(res => {
 				if (res) {
-					this.allowCosply = true;
+					this.allowCosplay = true;
 					this.allowBody = true;
 				}
 			});
@@ -164,17 +172,30 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			cosplay: false,
 			body: false,
 			binds: true,
-			collar: false
+			collar: false,
+			piercings: false
 		}))) {
 			this.allowBinds = false;
 			this.bindsBlockedByLock = true;
+		}
+		if (this.allowPiercings && WardrobeImportCheckChangesLockedItem(this.character, this.data, WardrobeImportMakeFilterFunction({
+			cloth: false,
+			cosplay: false,
+			body: false,
+			binds: true,
+			collar: false,
+			piercings: true
+		}))) {
+			this.allowPiercings = false;
+			this.piercingsBlockedByLock = true;
 		}
 		if (this.allowCollar && WardrobeImportCheckChangesLockedItem(this.character, this.data, WardrobeImportMakeFilterFunction({
 			cloth: false,
 			cosplay: false,
 			body: false,
 			binds: false,
-			collar: true
+			collar: true,
+			piercings: false
 		}))) {
 			this.allowCollar = false;
 			this.collarBlockedByLock = true;
@@ -254,7 +275,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			MainCanvas.fillStyle = "#ffffffcc";
 
 			MainCanvas.beginPath();
-			MainCanvas.rect(1000 - 30, 250 - 30, 750 + 60, 550 + 60);
+			MainCanvas.rect(1000 - 30, 250 - 30, 750 + 60, 650 + 60);
 			MainCanvas.fill();
 			MainCanvas.stroke();
 
@@ -328,26 +349,46 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 
 			{
 				MainCanvas.textAlign = "left";
-				const { checked, color, disabled } = this.getLocksState();
+				const { checked, color, disabled } = this.getGlobalSelectorState("piercings");
 				DrawButton(1000, 750, 50, 50, "", color, undefined, undefined, disabled);
-				DrawTextFit("Locks", 1100, 775, 300, "black");
+				DrawTextFit("Piercings", 1100, 775, 300, "black");
 				if (checked === "partial") {
 					MainCanvas.fillRect(1000 + 8, 750 + 8, 34, 34);
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 750 + 6, { Width: 38, Height: 38 });
 				}
-				MainCanvas.textAlign = "center";
-				DrawButton(1400, 750, 350, 50, "Select individually", disabled ? "#ccc" : "White", undefined, undefined, disabled);
 			}
 
+			{
+				MainCanvas.textAlign = "left";
+				const { checked, color, disabled } = this.getLocksState();
+				DrawButton(1000, 850, 50, 50, "", color, undefined, undefined, disabled);
+				DrawTextFit("Locks", 1100, 875, 300, "black");
+				if (checked === "partial") {
+					MainCanvas.fillRect(1000 + 8, 850 + 8, 34, 34);
+				} else if (checked === "yes") {
+					DrawImageEx("./Icons/Checked.png", 1000 + 6, 850 + 6, { Width: 38, Height: 38 });
+				}
+				MainCanvas.textAlign = "center";
+				DrawButton(1400, 850, 350, 50, "Select individually", disabled ? "#ccc" : "White", undefined, undefined, disabled);
+			}
+
+			let warning: string | undefined;
+
 			if (this.skippedBlockedCount > 0) {
+				warning = `Skipped ${this.skippedBlockedCount} blocked/limited item${this.skippedBlockedCount > 1 ? "s" : ""}`;
+			} else if (!this.allowBindsBase) {
+				warning = `You do not have permission to import items.`;
+			}
+
+			if (warning) {
 				MainCanvas.fillStyle = "Pink";
 				MainCanvas.strokeStyle = "Black";
 				MainCanvas.beginPath();
 				MainCanvas.rect(1000 - 30, 180 - 40, 750 + 60, 70);
 				MainCanvas.fill();
 				MainCanvas.stroke();
-				DrawText(`Skipped ${this.skippedBlockedCount} blocked/limited item${this.skippedBlockedCount > 1 ? "s" : ""}`, 1370, 177, "Black");
+				DrawTextFit(warning, 1370, 177, 800, "Black");
 			}
 
 		} else if (this.screenState === ScreenState.clothSelect) {
@@ -664,6 +705,23 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			}
 
 			if (MouseIn(1000, 750, 50, 50)) {
+				const current = this.getGlobalSelectorState("piercings");
+				if (!current.disabled) {
+					AssetGroup
+						.filter(CATEGORIES.piercings.filter)
+						.forEach(g => {
+							if (current.checked === "no") {
+								enabledSlots.add(g.Name);
+							} else {
+								enabledSlots.delete(g.Name);
+							}
+						});
+					this.refresh();
+				}
+				return;
+			}
+
+			if (MouseIn(1000, 850, 50, 50)) {
 				const current = this.getLocksState();
 				if (!current.disabled) {
 					LOCK_TYPES_LIST
@@ -679,7 +737,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				return;
 			}
 
-			if (MouseIn(1400, 750, 350, 50) && !this.getLocksState().disabled) {
+			if (MouseIn(1400, 850, 350, 50) && !this.getLocksState().disabled) {
 				this.screenState = ScreenState.lockSelect;
 			}
 		} else if (this.screenState === ScreenState.clothSelect) {
@@ -708,10 +766,12 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 	private refresh(): void {
 		const itemsState = this.getGlobalSelectorState("items");
 		const collarState = this.getGlobalSelectorState("collar");
+		const piercingsState = this.getGlobalSelectorState("piercings");
 
 		this.allowLocks =
 			this.data.some(a => a.Property?.Effect?.includes("Lock")) &&
 			(this.allowBinds && itemsState.checked !== "no" && !itemsState.disabled ||
+				this.allowPiercings && piercingsState.checked !== "no" && !piercingsState.disabled ||
 				this.allowCollar && collarState.checked !== "no" && !collarState.disabled);
 
 		CharacterAppearanceRestore(this.character, this.originalAppearance);
@@ -719,13 +779,16 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 	}
 
 	private checkAllowChange(group: AssetGroup): boolean {
-		if (!this.allowCosply && CATEGORIES.cosplay.filter(group))
+		if (!this.allowCosplay && CATEGORIES.cosplay.filter(group))
 			return false;
 
 		if (!this.allowBody && CATEGORIES.body.filter(group))
 			return false;
 
 		if (!this.allowBinds && CATEGORIES.items.filter(group))
+			return false;
+
+		if (!this.allowPiercings && CATEGORIES.piercings.filter(group))
 			return false;
 
 		if (!this.allowCollar && CATEGORIES.collar.filter(group))
@@ -752,16 +815,18 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 
 		const allowed =
 			type === "clothes" ? true :
-				type === "cosplay" ? this.allowCosply :
+				type === "cosplay" ? this.allowCosplay :
 					type === "body" ? this.allowBody :
 						type === "items" ? this.allowBinds :
-							type === "collar" ? this.allowCollar :
-								false;
+							type === "piercings" ? this.allowPiercings :
+								type === "collar" ? this.allowCollar :
+									false;
 
 		const blockedByLock = !allowed && (
 			type === "items" ? this.bindsBlockedByLock :
-				type === "collar" ? this.collarBlockedByLock :
-					false
+				type === "piercings" ? this.piercingsBlockedByLock :
+					type === "collar" ? this.collarBlockedByLock :
+						false
 		);
 
 		if (!allowed)

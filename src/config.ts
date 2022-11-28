@@ -13,9 +13,9 @@ export const SUPPORTED_BC_VERSIONS: readonly string[] = [
 export const FUNCTION_HASHES: Record<string, string[]> = {
 	"Player.CanChangeClothesOn": ["40EF5292"],
 	"Player.GetBlindLevel": ["32BC83FD"],
-	"Player.GetBlurLevel": ["F6930456"],
+	"Player.GetBlurLevel": ["F6930456", "BFF08A45"],
 	"Player.GetDeafLevel": ["42CB6D63"],
-	"Player.HasTints": ["E09CA942"],
+	"Player.HasTints": ["E09CA942", "F1F63BF9"],
 	"Player.IsSlow": ["6E60F118"],
 	ActivityCheckPrerequisite: ["2B10C903"],
 	ActivityOrgasmPrepare: ["D49DAC9B"],

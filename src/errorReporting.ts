@@ -158,7 +158,14 @@ export function debugGenerateReportErrorEvent(event: ErrorEvent): string {
 	return res;
 }
 
-export function showErrorOverlay(title: string, description: string, contents: string, wrapCodeBlock: boolean = true, minTimeout?: number): void {
+export function showErrorOverlay(
+	title: string,
+	description: string,
+	contents: string,
+	wrapCodeBlock: boolean = true,
+	minTimeout?: number,
+	preContentHook?: (win: HTMLDivElement) => void
+): void {
 	console.info("Error overlay displayed\n", contents);
 
 	if (wrapCodeBlock) {
@@ -191,33 +198,38 @@ export function showErrorOverlay(title: string, description: string, contents: s
 	win.appendChild(descriptionElement);
 	descriptionElement.innerHTML = description;
 
+	const contentElem = document.createElement("textarea");
+
 	// Copy button
-	const copy = document.createElement("button");
-	win.appendChild(copy);
-	copy.innerText = "Copy report";
+	if (preContentHook) {
+		preContentHook(win);
+	} else {
+		const copy = document.createElement("button");
+		win.appendChild(copy);
+		copy.innerText = "Copy report";
+
+		copy.onclick = () => {
+			contentElem.focus();
+			contentElem.select();
+
+			if (navigator.clipboard) {
+				navigator.clipboard.writeText(contentElem.value);
+			} else {
+				try {
+					document.execCommand("copy");
+				} catch (err) {
+					/* Ignore */
+				}
+			}
+		};
+	}
 
 	// Content
-	const contentElem = document.createElement("textarea");
 	win.appendChild(contentElem);
 	contentElem.readOnly = true;
 	contentElem.value = contents;
 	contentElem.style.flex = "1";
 	contentElem.style.margin = "0.5em 0";
-
-	copy.onclick = () => {
-		contentElem.focus();
-		contentElem.select();
-
-		if (navigator.clipboard) {
-			navigator.clipboard.writeText(contentElem.value);
-		} else {
-			try {
-				document.execCommand("copy");
-			} catch (err) {
-				/* Ignore */
-			}
-		}
-	};
 
 	// Close button
 	let timeout = minTimeout ?? 0;
@@ -312,7 +324,8 @@ export function detectCompatibilityProblems(): void {
 			"You can use the 'Close' button at the bottom to continue anyway.",
 			result,
 			false,
-			wait
+			wait,
+			() => undefined
 		);
 	}
 }

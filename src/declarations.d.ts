@@ -764,4 +764,5 @@ interface ModStorage {
 	roomSearchAutoFill: string;
 	relationships: import("./modules/relationships").RelationshipData[];
 	wardrobeDefaultExtended: boolean;
+	compatibilityCheckerWarningIgnore?: string;
 }

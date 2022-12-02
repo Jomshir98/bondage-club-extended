@@ -4,7 +4,7 @@ import { ModuleCategory, ModuleInitPhase } from "./constants";
 import { moduleInitPhase } from "./moduleManager";
 import { ConditionsGetCategoryData, ConditionsGetCategoryEnabled } from "./modules/conditions";
 import { getDisabledModules } from "./modules/presets";
-import { firstTimeInit } from "./modules/storage";
+import { firstTimeInit, modStorage, modStorageSync } from "./modules/storage";
 import { getPatchedFunctionsHashes, hookFunction } from "./patching";
 import { detectOtherMods } from "./utilsClub";
 import { crc32 } from "./utils";
@@ -205,6 +205,7 @@ export function showErrorOverlay(
 		preContentHook(win);
 	} else {
 		const copy = document.createElement("button");
+		copy.style.cursor = "pointer";
 		win.appendChild(copy);
 		copy.innerText = "Copy report";
 
@@ -248,6 +249,8 @@ export function showErrorOverlay(
 				timeout--;
 				updateCloseButton();
 			}, 1000);
+		} else {
+			close.style.cursor = "pointer";
 		}
 	};
 	updateCloseButton();
@@ -262,7 +265,7 @@ const COMPATIBILITY_CHECK_INTERVAL = 60_000;
 let didReportCompatibilityIssues = false;
 
 export function detectCompatibilityProblems(): void {
-	if (didReportCompatibilityIssues)
+	if (didReportCompatibilityIssues || moduleInitPhase !== ModuleInitPhase.ready)
 		return;
 
 	const legacyMods = detectOtherMods();
@@ -283,7 +286,7 @@ export function detectCompatibilityProblems(): void {
 		result += `----- Quick Access Menu (QAM) -----\n` +
 			`BCX detected the presence of the incompatible mod Quick Access Menu.\n` +
 			`Besides not using ModSDK to support compatibility with other mods, it also modifies parts of the game such that it can break parts of BCX's functionality.\n` +
-			`It is also known to be a cheat tool able to negatively affect the experience of other players. Please be considerate if you continue using it.\n` +
+			`Its author has refused multiple times to make the mod more compatible with other mods, causing a fair amount of extra work for other moders (for example BCX & FBC).\n` +
 			`Error reports while using QAM will not be acted upon.\n` +
 			`\n`;
 	}
@@ -296,37 +299,62 @@ export function detectCompatibilityProblems(): void {
 			`\n`;
 	}
 
-	if (Array.from(Object.values(legacyMods)).every(v => !v)) {
-		// If no known legacy mods are detected, look for unknown ones where it matters
-		const patchingInfo = Array.from(bcModSDK.getPatchingInfo().values());
-		const unexpectedHashes = SUPPORTED_BC_VERSIONS.includes(GameVersion) ? getPatchedFunctionsHashes(false) : [];
-		const overwrittenFunctions = patchingInfo.filter(fn => fn.currentEntrypoint !== fn.sdkEntrypoint);
+	const patchingInfo = Array.from(bcModSDK.getPatchingInfo().values());
+	const unexpectedHashes = SUPPORTED_BC_VERSIONS.includes(GameVersion) ? getPatchedFunctionsHashes(false) : [];
+	const overwrittenFunctions = patchingInfo.filter(fn => fn.currentEntrypoint !== fn.sdkEntrypoint);
 
-		if (unexpectedHashes.length > 0 || overwrittenFunctions.length > 0) {
-			result += `----- Unknown mod not using ModSDK -----\n` +
-				`BCX detected the presence of modifications not done using ModSDK or any known legacy mod.\n` +
-				`If you are not author of the mod, please report what mod caused this warning on the BC Scripting Community Discord server: https://discord.gg/SHJMjEh9VH\n` +
-				`If you are author of the mod triggering this warning, please modify your mod to use ModSDK: https://github.com/Jomshir98/bondage-club-mod-sdk. Feel free to ask for help doing that on the above-mentioned Discord server.\n` +
-				`Detected modifications:\n` +
-				(unexpectedHashes.length > 0 ? `Patched functions with unknown checksums:\n` + unexpectedHashes.map(i => `  - ${i[0]}: ${i[1]}\n`).join("") : "") +
-				(overwrittenFunctions.length > 0 ? `Overwritten functions:\n` + overwrittenFunctions.map(fn => `  - ${fn.name}: ${crc32(fn.currentEntrypoint?.toString().replaceAll("\r\n", "\n") ?? "")}\n`).join("") : "") +
-				`\n`;
-		}
+	// If no known legacy mods are detected, look for unknown ones where it matters
+	if (Array.from(Object.values(legacyMods)).every(v => !v) && (unexpectedHashes.length > 0 || overwrittenFunctions.length > 0)) {
+		result += `----- Unknown mod not using ModSDK -----\n` +
+			`BCX detected the presence of modifications not done using ModSDK or any known legacy mod.\n` +
+			`If you are not author of the mod, please report what mod caused this warning on the BC Scripting Community Discord server: https://discord.gg/SHJMjEh9VH\n` +
+			`If you are author of the mod triggering this warning, please modify your mod to use ModSDK: https://github.com/Jomshir98/bondage-club-mod-sdk. Feel free to ask for help doing that on the above-mentioned Discord server.\n` +
+			`\n`;
+
+	}
+
+	// If there is a result, attach extra info to trace it
+	if (result) {
+		result += `----- Detected modifications -----\n` +
+			(unexpectedHashes.length > 0 ? `Patched functions with unknown checksums:\n` + unexpectedHashes.map(i => `  - ${i[0]}: ${i[1]}\n`).join("") : "") +
+			(overwrittenFunctions.length > 0 ? `Overwritten functions:\n` + overwrittenFunctions.map(fn => `  - ${fn.name}: ${crc32(fn.currentEntrypoint?.toString().replaceAll("\r\n", "\n") ?? "")}\n`).join("") : "") +
+			`\n`;
 	}
 
 	if (result) {
+		// Checksum the result and check against already seen one
+		const checksum = crc32(result);
+		if (modStorage.compatibilityCheckerWarningIgnore === checksum)
+			return;
+
 		didReportCompatibilityIssues = true;
 		showErrorOverlay(
 			"BCX Compatibility checker",
 			"BCX's Compatibility checker detected problems with other mods you appear to be using.<br />" +
 			"For reasons stated below please reconsider using mentioned mods.<br />" +
+			"Please note, that this is a warning for you, not meant to be reported. It says that some features are likely to be broken.<br />" +
 			"If you have any questions or think this message is an error, please get in touch with us on <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community</a> Discord server.<br />" +
 			"You can use the 'Close' button at the bottom to continue anyway.",
-			result,
+			result + `Report signature: ${checksum}`,
 			false,
 			wait,
-			() => undefined
+			(win) => {
+				const doNotShowAgain = document.createElement("button");
+				doNotShowAgain.style.cursor = "pointer";
+				win.appendChild(doNotShowAgain);
+				doNotShowAgain.innerText = "Do not show this report again unless something changes";
+
+				doNotShowAgain.onclick = () => {
+					doNotShowAgain.innerText = "This report won't show again unless something changes.";
+					doNotShowAgain.disabled = true;
+					modStorage.compatibilityCheckerWarningIgnore = checksum;
+					modStorageSync();
+				};
+			}
 		);
+	} else if (modStorage.compatibilityCheckerWarningIgnore != null) {
+		delete modStorage.compatibilityCheckerWarningIgnore;
+		modStorageSync();
 	}
 }
 

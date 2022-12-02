@@ -146,6 +146,7 @@ export class ModuleVersionCheck extends BaseModule {
 
 					// Close button
 					const close = document.createElement("button");
+					close.style.cursor = "pointer";
 					win.appendChild(close);
 					close.innerText = "Close";
 					close.onclick = () => {

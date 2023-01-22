@@ -91,6 +91,7 @@ export class ModuleDialog extends BaseModule {
 				CurrentCharacter &&
 				allowSearchMode() &&
 				ev.key.length === 1 &&
+				document.activeElement === MainCanvas.canvas &&
 				!ev.altKey && !ev.ctrlKey && !ev.metaKey &&
 				(struggleCooldown <= Date.now() || !["a", "s"].includes(ev.key.toLowerCase()))
 			) {

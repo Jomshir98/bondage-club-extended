@@ -151,11 +151,18 @@ export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
 
-		// TODO: This patch doesn't apply properly, as original reference is kept in array of extractors
 		patchFunction("ChatRoomMessageDefaultMetadataExtractor", {
-			"A.DynamicDescription(meta.SourceCharacter || Player).toLowerCase()": `( bcx.isDevel ? A.Description : A.DynamicDescription(meta.SourceCharacter || Player).toLowerCase() )`,
-			"G.Description.toLowerCase()": `( bcx.isDevel ? G.Description : G.Description.toLowerCase() )`
+			"asset.DynamicDescription(character).toLowerCase()": `( bcx.isDevel ? asset.Description : asset.DynamicDescription(character).toLowerCase() )`
 		});
+		patchFunction("ChatRoomGetFocusGroupSubstitutions", {
+			"DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase()": `( bcx.isDevel ? focusGroup.Description : DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase() )`
+		});
+
+		for (let i = 0; i < ChatRoomMessageExtractors.length; i++) {
+			if (ChatRoomMessageExtractors[i] === bcModSDK.getPatchingInfo().get("ChatRoomMessageDefaultMetadataExtractor")?.original) {
+				ChatRoomMessageExtractors[i] = ChatRoomMessageDefaultMetadataExtractor;
+			}
+		}
 
 		patchFunction("ExtendedItemDrawButton", {
 			"DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`

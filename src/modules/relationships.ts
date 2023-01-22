@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual, pick, uniqBy } from "lodash-es";
-import { ChatroomCharacter, getAllCharactersInRoom, getChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { ModuleCategory, Preset } from "../constants";
 import { hookFunction, patchFunction, removeAllHooksByModule } from "../patching";
 import { escapeRegExp, isObject } from "../utils";
@@ -310,21 +310,6 @@ export class ModuleRelationhips extends BaseModule {
 				["Action", "Chat", "Whisper", "Emote", "Activity", "ServerMessage"].includes(data.Type) &&
 				modStorage.relationships
 			) {
-				shouldReplaceNickname = false;
-				for (const entry of Array.isArray(data.Dictionary) ? data.Dictionary : []) {
-					if (
-						isObject(entry) &&
-						typeof entry.MemberNumber === "number" &&
-						typeof entry.Text === "string"
-					) {
-						const relationship = modStorage.relationships.find(r => r.memberNumber === entry.MemberNumber);
-						const character = getChatroomCharacter(entry.MemberNumber);
-						if (relationship && character) {
-							const originalName = CharacterNickname(character.Character);
-							entry.Text = entry.Text.replace(originalName, relationship.nickname);
-						}
-					}
-				}
 				shouldReplaceNickname = true;
 			}
 			const res = next(args);

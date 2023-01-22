@@ -587,12 +587,13 @@ export class ModuleCommands extends BaseModule {
 
 		hookFunction("ChatRoomSendChat", 10, (args, next) => {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+			let substituteBack: string | null = null;
 			if (chat && !firstTimeInit) {
 				const msg = chat.value.trim();
 				if (/^[.\s]*$/.test(msg)) {
 					// Do not process as command
 				} else if (msg.startsWith("..")) {
-					chat.value = msg.substr(1);
+					chat.value = substituteBack = msg.substr(1);
 				} else if (msg.startsWith(".")) {
 					if (RunCommand(msg.substr(1))) {
 						// Keeps the chat log in memory so it can be accessed with pageup/pagedown
@@ -604,7 +605,12 @@ export class ModuleCommands extends BaseModule {
 				}
 				autocompleteClear();
 			}
-			return next(args);
+			const result = next(args);
+			// Reverse substitution for starting with ..
+			if (ChatRoomLastMessage.length > 0 && ChatRoomLastMessage[ChatRoomLastMessage.length - 1] === substituteBack) {
+				ChatRoomLastMessage[ChatRoomLastMessage.length - 1] = "." + ChatRoomLastMessage[ChatRoomLastMessage.length - 1];
+			}
+			return result;
 		});
 
 		hookFunction("ChatRoomKeyDown", 10, (args, next) => {
@@ -670,6 +676,13 @@ export class ModuleCommands extends BaseModule {
 				}
 			}
 
+			return next(args);
+		});
+
+		hookFunction("PropertyAutoPunishParseMessage", 6, (args, next) => {
+			const msg = args[1] as unknown;
+			if (typeof msg === "string" && msg.startsWith(".") && !msg.startsWith(".."))
+				return false;
 			return next(args);
 		});
 

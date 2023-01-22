@@ -234,6 +234,11 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 						res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${condition}"\n`;
 						continue;
 					}
+					const limit = ConditionsGetConditionLimit(category, condition);
+					if (limit === ConditionsLimit.blocked) {
+						res += `Skipped blocked ${handler.commandConditionSelectorHelp} "${condition}"\n`;
+						continue;
+					}
 					const [result, resultData] = currentExportImport.import(condition, conditionData.data, character);
 					if (!result) {
 						res += `Failed to load ${handler.commandConditionSelectorHelp} "${condition}": ${resultData}\n`;

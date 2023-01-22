@@ -207,6 +207,12 @@ export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): 
 	result: CraftingItem | undefined;
 	messages: string[];
 } {
+	if (Craft === undefined) {
+		return {
+			result: undefined,
+			messages: []
+		};
+	}
 	if (!isObject(Craft)) {
 		return {
 			result: undefined,
@@ -223,10 +229,11 @@ export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): 
 		};
 		const result = CraftingValidate(Craft as CraftingItem, Asset, true);
 		return {
-			result: result > CraftingStatusCode.CRITICAL_ERROR ? Craft as CraftingItem : undefined,
+			result: result > CraftingStatusType.CRITICAL_ERROR ? Craft as CraftingItem : undefined,
 			messages
 		};
 	} catch (error) {
+		saved("BCX: Failed crafted data validation because of crash:", error);
 		return {
 			result: undefined,
 			messages: [`Validation failed: ${error}`]
@@ -269,7 +276,11 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 							lockAssignMemberNumber: Player.MemberNumber
 						});
 					}
-					item.Craft = ValidationVerifyCraftData(cloth.Craft, A).result;
+					const craftValidation = ValidationVerifyCraftData(cloth.Craft, A);
+					if (craftValidation.messages.length > 0) {
+						console.warn(`BCX: Crafted item validation failed:\n${craftValidation.messages.join("\n")}`);
+					}
+					item.Craft = craftValidation.result;
 				}
 			}
 		} else {
@@ -761,6 +772,7 @@ export class ModuleWardrobe extends BaseModule {
 			if (!sb &&
 				CharacterAppearanceSelection &&
 				allowSearchMode() &&
+				document.activeElement === MainCanvas.canvas &&
 				ev.key.length === 1 &&
 				!ev.altKey && !ev.ctrlKey && !ev.metaKey
 			) {

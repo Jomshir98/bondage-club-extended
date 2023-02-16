@@ -1,7 +1,7 @@
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { arrayUnique, capitalizeFirstLetter, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, isBind, itemColorsEquals } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorageSync } from "./storage";

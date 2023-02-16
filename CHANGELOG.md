@@ -1,5 +1,15 @@
 # BCX Changelog
 
+## 0.9.4
+
+This update includes:
+ - This update improves compatibility with BC releases up to R89
+ - Improved detection of whether item's properties should be cursed by default or not
+
+Fixes:
+ - Added support for Futuristic Bra item to prevent curses spam with cursed properties [by ExoticMatter]
+ - Fixed curses triggering while inside full wardrobe from FBC
+
 ## 0.9.3
 
 This update includes:

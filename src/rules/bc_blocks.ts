@@ -785,7 +785,7 @@ export function initRules_bc_blocks() {
 		keywords: ["limiting"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to blacklist/ghost this person!",
-			attempt_announce: "PLAYER_NAME violated a rule by trying to blacklist TARGET_CHARACTER"
+			attempt_announce: "PLAYER_NAME violated a rule by trying to blacklist TARGET_PLAYER"
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
@@ -826,7 +826,7 @@ export function initRules_bc_blocks() {
 		keywords: ["limiting"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to whitelist this person!",
-			attempt_announce: "PLAYER_NAME violated a rule by trying to whitelist TARGET_CHARACTER"
+			attempt_announce: "PLAYER_NAME violated a rule by trying to whitelist TARGET_PLAYER"
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {

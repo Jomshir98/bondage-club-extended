@@ -1,5 +1,19 @@
 # BCX Changelog
 
+## 0.9.3
+
+This update includes:
+ - This update improves compatibility with BC releases up to R88
+
+Fixes:
+ - Fixed exporting and importing of crafted items
+ - Fixed curses with crafted items
+ - Fixed bad messages in "Prevent blacklisting" & "Prevent whitelisting" rules
+ - Fixed BCX commands triggering shock/other item auto-punishments
+ - Fixed chat messages written as `..message` being saved as `.message` in message history
+ - Fixed export/import module allowing importing of blocked rules and curses
+ - Fixed BCX wardrobe search stealing focus from FBC layer priority input
+
 ## 0.9.2
 
 This update includes:

@@ -80,7 +80,7 @@ declare function CharacterSetFacialExpression(C: Character, AssetGroup: string, 
 declare function CharacterNickname(C: Character): string;
 
 // Crafting.js
-declare const CraftingStatusCode: {
+declare const CraftingStatusType: {
 	OK: 2;
 	ERROR: 1;
 	CRITICAL_ERROR: 0;
@@ -161,6 +161,11 @@ declare var ChatRoomPlayerCanJoin: boolean;
 declare var ChatRoomSenseDepBypass: boolean;
 declare var DialogLentLockpicks: boolean;
 declare var ChatRoomSlowtimer: number;
+declare var ChatRoomMessageExtractors: ChatRoomMessageExtractor[];
+declare function ChatRoomMessageDefaultMetadataExtractor(data: IChatRoomMessage, SenderCharacter: Character): {
+	metadata: IChatRoomMessageMetadata;
+	substitutions: [string, string][];
+};
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomCharacterUpdate(C: Character): void;
 declare function ChatRoomMessage(data: IChatRoomMessage): void;

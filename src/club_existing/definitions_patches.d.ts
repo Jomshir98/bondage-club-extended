@@ -5,8 +5,6 @@ type NotificationSetting = any;
  */
 type HSVColor = { H: number, S: number, V: number };
 
-type VibratorMode = "Off" | "Low" | "Medium" | "High" | "Maximum" | "Random" | "Escalate" | "Tease" | "Deny" | "Edge";
-
 type AssetBonusName = "KidnapDomination" | "KidnapSneakiness" | "KidnapBruteForce";
 
 /**
@@ -21,3 +19,10 @@ interface GenderSetting {
 }
 
 type ChatRoomSpaceType = string;
+
+declare const ExtendedArchetype: {
+	TYPED: "modular",
+	MODULAR: "typed",
+	VIBRATING: "vibrating",
+	VARIABLEHEIGHT: "variableheight"
+};

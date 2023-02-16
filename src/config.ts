@@ -5,9 +5,9 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Server commit: b894fce7856593d16850721febc44b09c2ec94f7
 
-// Game commit: b08ceef0b1dbdaba05aa717fb3978196921a7269
+// Game commit: f4a099563f8d62a1ad15334430bc76b51bd5b107
 export const SUPPORTED_BC_VERSIONS: readonly string[] = [
-	"R86"
+	"R88"
 ];
 
 export const FUNCTION_HASHES: Record<string, string[]> = {
@@ -20,13 +20,13 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ActivityCheckPrerequisite: ["2B10C903"],
 	ActivityOrgasmPrepare: ["D49DAC9B"],
 	ActivityOrgasmStart: ["0D463F76"],
-	AppearanceClick: ["0D1455A9"],
+	AppearanceClick: ["09FAC1CB"],
 	AppearanceExit: ["AA300341"],
 	AppearanceGetPreviewImageColor: ["06F02ADE"],
-	AppearanceMenuBuild: ["436C6417"],
+	AppearanceMenuBuild: ["A9809413"],
 	AppearanceMenuClick: ["80444418"],
 	AppearanceMenuDraw: ["28FDF65B"],
-	AppearanceRun: ["6DDA14A1"],
+	AppearanceRun: ["C65F23EF"],
 	AsylumEntranceCanWander: ["A85C35F3"],
 	AsylumGGTSClick: ["E5660C8C"],
 	AsylumGGTSLoad: ["DAB62F12"],
@@ -36,7 +36,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	CharacterCanChangeToPose: ["F55FE4B0"],
 	CharacterCanKneel: ["A5A325E3"],
 	CharacterLoadCanvas: ["678F3155"],
-	CharacterLoadEffect: ["27893941"],
+	CharacterLoadEffect: ["BD6B6B4D"],
 	CharacterNickname: ["EB452E5E"],
 	ChatAdminClick: ["D4354B95"],
 	ChatAdminExit: ["EC263A9C"],
@@ -57,8 +57,9 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomCreateElement: ["AD7CBE68"],
 	ChatRoomDrawBackground: ["597B062C"],
 	ChatRoomDrawCharacter: ["8ED3DF88"],
-	ChatRoomDrawCharacterOverlay: ["4AE4AD9E"],
+	ChatRoomDrawCharacterOverlay: ["1B280F1F"],
 	ChatRoomFirstTimeHelp: ["078BEEA9"],
+	ChatRoomGetFocusGroupSubstitutions: ["04FB0708"],
 	ChatRoomIsOwnedByPlayer: ["82640FF9"],
 	ChatRoomKeyDown: ["B4BFDB0C"],
 	ChatRoomListUpdate: ["D7FA0EC7"],
@@ -66,7 +67,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomMenuClick: ["0F32BA38"],
 	ChatRoomMenuDraw: ["0B8B0944"],
 	ChatRoomMessage: ["BBD61334"],
-	ChatRoomMessageDefaultMetadataExtractor: ["38894D6C"],
+	ChatRoomMessageDefaultMetadataExtractor: ["9054A0A0"],
 	ChatRoomOwnershipOptionIs: ["FE060F0B"],
 	ChatRoomRun: ["685FF69C"],
 	ChatRoomSendChat: ["7F540ED0"],
@@ -79,7 +80,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomUpdateDisplay: ["8DFC494A"],
 	ChatSearchJoin: ["22514B80"],
 	ChatSearchLoad: ["8AF12D1C"],
-	ChatSearchNormalDraw: ["0C7BF5F6"],
+	ChatSearchNormalDraw: ["66BF1158"],
 	ChatSearchRun: ["64BCF8FB"],
 	CheatFactor: ["594CFC45"],
 	CheatImport: ["26C67608"],
@@ -90,7 +91,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DialogCanUnlock: ["B849E6BC"],
 	DialogClickExpressionMenu: ["5938DDC1"],
 	DialogDrawExpressionMenu: ["EEFB3D22"],
-	DialogDrawItemMenu: ["082820A7"],
+	DialogDrawItemMenu: ["A85CB52B"],
 	DialogDrawPoseMenu: ["30C7A7C3"],
 	DialogFindPlayer: ["32851FF2"],
 	DialogInventoryAdd: ["EDB6BC02"],
@@ -100,12 +101,12 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DialogMenuButtonBuild: ["ACC00BF5"],
 	DialogMenuButtonClick: ["0EA82340"],
 	DrawArousalMeter: ["DC0BB5B4"],
-	DrawCharacter: ["0BBAEBAF"],
+	DrawCharacter: ["26364B35"],
 	DrawGetImage: ["BEC7B0DA"],
 	DrawImageEx: ["3D3D74F5"],
 	DrawProcess: ["4B2BE17E"],
 	DrawStatus: ["FD747092"],
-	ExtendedItemDrawButton: ["39FC10C9"],
+	ExtendedItemDrawButton: ["E29E3B51"],
 	FriendListBeepMenuSend: ["B81A695E"],
 	FriendListClick: ["6B039C7C"],
 	FriendListLoadFriendList: ["1F8A29E2"],
@@ -113,7 +114,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	InfiltrationStealItems: ["1F601756"],
 	InformationSheetClick: ["E535609B"],
 	InformationSheetExit: ["75521907"],
-	InformationSheetRun: ["5CF880E9"],
+	InformationSheetRun: ["D4947525"],
 	InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech: ["441EAEBF"],
 	ItemColorReset: ["8FD17CAC"],
 	ItemColorStateBuild: ["CD03DEEB"],
@@ -136,6 +137,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	PreferenceSubscreenDifficultyClick: ["3882E581"],
 	PreferenceSubscreenDifficultyRun: ["65BF560F"],
 	PrivateRansomStart: ["511E91C6"],
+	PropertyAutoPunishParseMessage: ["CE0C785F"],
 	ServerAccountBeep: ["F16771D4"],
 	ServerPlayerIsInChatRoom: ["E3771112"],
 	ServerSend: ["90A61F57"],
@@ -143,7 +145,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	StruggleDrawStrengthProgress: ["4755C02D"],
 	TextGet: ["4DDE5794"],
 	ValidationCanAddOrRemoveItem: ["62A8266A"],
-	ValidationResolveModifyDiff: ["C2FE52D3"],
+	ValidationResolveModifyDiff: ["1EE695DD"],
 	WardrobeClick: ["E96F7F63"],
 	WardrobeGroupAccessible: ["2D406A64"],
 	WardrobeRun: ["9616EB3A"]

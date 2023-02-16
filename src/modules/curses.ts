@@ -23,7 +23,10 @@ const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
 const CURSES_ANTILOOP_THRESHOLD = 10;
 const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 
-export const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.concat("HeartRate");
+const CURSE_IGNORED_PROPERTIES_CUSTOM = [
+	"HeartRate" // Futuristic bra
+];
+export const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.concat(CURSE_IGNORED_PROPERTIES_CUSTOM);
 export const CURSE_IGNORED_EFFECTS = ["Lock"];
 // Ignore slave collars, as they are forced by BC
 const CURSE_IGNORED_ITEMS = ["SlaveCollar", "ClubSlaveCollar"];
@@ -89,7 +92,13 @@ export function curseAllowItemCurseProperty(asset: Asset): boolean {
 }
 
 export function curseDefaultItemCurseProperty(asset: Asset): boolean {
-	return curseAllowItemCurseProperty(asset) && asset.Extended && asset.Archetype === "typed";
+	return curseAllowItemCurseProperty(asset) &&
+		// Only extended items make sense to curse properties of
+		asset.Extended &&
+		// Only typed and modular items are allowed as they don't have extra logic by themselves
+		["typed", "modular"].includes(asset.Archetype ?? "") &&
+		// Do not curse items that can change by themselves
+		!asset.DynamicScriptDraw;
 }
 
 export function curseItem(Group: string, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {

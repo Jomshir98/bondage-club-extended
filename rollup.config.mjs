@@ -7,9 +7,9 @@ import copy from "rollup-plugin-copy";
 import resolve from "@rollup/plugin-node-resolve";
 import json from "@rollup/plugin-json";
 import commonjs from "@rollup/plugin-commonjs";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 
-import packageJson from "./package.json";
+import packageJson from "./package.json" assert { type: "json" };
 import simpleGit from "simple-git";
 
 /* global process */

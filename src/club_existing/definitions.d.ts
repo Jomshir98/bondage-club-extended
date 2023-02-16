@@ -3131,7 +3131,7 @@ type DynamicAfterDrawCallback = (data: DynamicDrawingData) => void;
 /**
  * A dynamic ScriptDraw callback
  */
-type DynamicScriptDrawCallback = (data: {C: Character, Item: Item, PersistentData: <T>() => T}) => void;
+type DynamicScriptDrawCallback = (data: { C: Character, Item: Item, PersistentData: <T>() => T }) => void;
 
 // #endregion
 

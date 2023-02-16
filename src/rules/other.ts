@@ -131,7 +131,7 @@ export function initRules_other() {
 			}
 		},
 		tick(state) {
-			if (state.inEffect && state.customData && state.customData.reminderText !== [] &&
+			if (state.inEffect && state.customData && state.customData.reminderText.length > 0 &&
 				ServerPlayerIsInChatRoom() &&
 				Date.now() > lastReminder + state.customData.reminderFrequency * 60 * 1000
 			) {

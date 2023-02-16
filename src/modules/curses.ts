@@ -30,6 +30,8 @@ const CURSE_IGNORED_ITEMS = ["SlaveCollar", "ClubSlaveCollar"];
 
 /** Screens on which curses don't trigger at all */
 const CURSE_INACTIVE_SCREENS: string[] = [
+	"Appearance",
+	"Wardrobe",
 	"ChatSelect",
 	"ChatSearch",
 	"ChatCreate"
@@ -982,10 +984,6 @@ export class ModuleCurses extends BaseModule {
 
 		// Pause curses on certain screens and when talking with NPC altogether
 		if (CURSE_INACTIVE_SCREENS.includes(CurrentScreen) || CurrentCharacter?.IsNpc())
-			return;
-
-		// Pause curses of clothes while in appearance menu
-		if (CurrentScreen === "Appearance" && !isBind(assetGroup))
 			return;
 
 		const curse = condition.data;

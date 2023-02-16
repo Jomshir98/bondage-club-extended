@@ -280,6 +280,9 @@ export class ModuleClubUtils extends BaseModule {
 			"- Change or administrate the current chat room. Use '.room' for more help",
 			(args) => {
 				const subcommand = (args[0] || "").toLowerCase();
+				// Shouldn't be usable outside of room anyway
+				if (!ChatRoomData)
+					return false;
 
 				if (!ChatRoomPlayerIsAdmin()) {
 					ChatRoomSendLocal("You need to be admin in this room to use a .room command");

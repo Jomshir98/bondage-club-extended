@@ -669,7 +669,7 @@ export function ConditionsCategoryUpdate<C extends ConditionsCategories>(categor
 
 export function ConditionsEvaluateRequirements(requirements: ConditionsConditionRequirements, highestRoleInRoom?: AccessLevel | null): boolean {
 	const inChatroom = ServerPlayerIsInChatRoom();
-	const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
+	const chatroomPrivate = inChatroom && ChatRoomData != null && ChatRoomData.Private;
 	const results: boolean[] = [];
 	if (requirements.room) {
 		const res = inChatroom &&
@@ -678,7 +678,7 @@ export function ConditionsEvaluateRequirements(requirements: ConditionsCondition
 	}
 	if (requirements.roomName) {
 		const res = inChatroom &&
-			ChatRoomData &&
+			ChatRoomData != null &&
 			typeof ChatRoomData.Name === "string" &&
 			ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
 		results.push(requirements.roomName.inverted ? !res : res);

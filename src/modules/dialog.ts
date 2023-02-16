@@ -102,11 +102,19 @@ export class ModuleDialog extends BaseModule {
 			next(args);
 		});
 
-		hookFunction("StruggleDrawStrengthProgress", 0, (args, next) => {
-			next(args);
-			// Prevent A/S spamming from writing into search right after struggle finishes
-			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
-		});
+		if (GameVersion === "R88") {
+			hookFunction("StruggleDrawStrengthProgress", 0, (args, next) => {
+				next(args);
+				// Prevent A/S spamming from writing into search right after struggle finishes
+				struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
+			});
+		} else {
+			hookFunction("StruggleStrengthDraw", 0, (args, next) => {
+				next(args);
+				// Prevent A/S spamming from writing into search right after struggle finishes
+				struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
+			});
+		}
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {
 			if (searchBar) {

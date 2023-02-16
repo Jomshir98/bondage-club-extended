@@ -852,7 +852,9 @@ export function initRules_bc_speech_control() {
 						!alreadyGreeted &&
 						(msg.type !== "Emote" || (msg.type === "Emote" && state.customData.affectEmotes))
 					) {
-						lastRoomName = ChatRoomData.Name;
+						if (ChatRoomData?.Name) {
+							lastRoomName = ChatRoomData.Name;
+						}
 						// 4. set alreadyGreeted to true and overwrite lastRoomName
 						if (check(msg)) {
 							alreadyGreeted = true;

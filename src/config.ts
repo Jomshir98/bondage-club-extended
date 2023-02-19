@@ -7,10 +7,7 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Game commit: 4a1d8855d0e7c9d062efbabb40dca2b380bb5e80
 export const SUPPORTED_BC_VERSIONS: readonly string[] = [
-	"R88",
-	"R89Beta1",
-	"R89Beta3",
-	"R89"
+	"R88"
 ];
 
 export const FUNCTION_HASHES: Record<string, string[]> = {
@@ -94,14 +91,14 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	DialogCanUnlock: ["B849E6BC"],
 	DialogClickExpressionMenu: ["5938DDC1"],
 	DialogDrawExpressionMenu: ["EEFB3D22"],
-	DialogDrawItemMenu: ["A85CB52B", "9741F121"],
+	DialogDrawItemMenu: ["A85CB52B", "9741F121", "AC41D031"],
 	DialogDrawPoseMenu: ["30C7A7C3"],
 	DialogFindPlayer: ["32851FF2"],
 	DialogInventoryAdd: ["EDB6BC02", "0DD2B515"],
 	DialogInventoryBuild: ["6723E5B6"],
 	DialogItemClick: ["DAA8233C"],
-	DialogLeaveItemMenu: ["B54FD195", "C5A6320D"],
-	DialogMenuButtonBuild: ["ACC00BF5", "84F4B8E8"],
+	DialogLeaveItemMenu: ["B54FD195", "C5A6320D", "FF4E3C83"],
+	DialogMenuButtonBuild: ["ACC00BF5", "84F4B8E8", "EBF6E51A"],
 	DialogMenuButtonClick: ["74C8814C"],
 	DrawArousalMeter: ["DC0BB5B4"],
 	DrawCharacter: ["26364B35"],

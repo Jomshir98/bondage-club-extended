@@ -1178,4 +1178,36 @@ export function initRules_bc_speech_control() {
 			}, ModuleCategory.Rules);
 		}
 	});
+
+	registerRule("speech_garble_while_talking", {
+		name: "Force garbled speech",
+		type: RuleType.Speech,
+		loggable: false,
+		shortDescription: "force PLAYER_NAME to talk as if they were gagged",
+		longDescription: "This rule forces PLAYER_NAME to talk as if they were gagged, automatically garbling all of their speech. This rule does not affect OOC or, if \"Garble whispers while gagged\" is disabled, whispers.",
+		keywords: ["garble", "saying", "talking"],
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			gagLevel: {
+				type: "number",
+				default: 5,
+				options: {
+					min: 1,
+					max: 25
+				},
+				description: "The level of forced garbling"
+			}
+		},
+		load(state) {
+			hookFunction("SpeechGetTotalGagLevel", 0, (args, next) => {
+				const gagLevel: number = next(args);
+				if (!state.isEnforced || !state.customData?.gagLevel || !(args[0] as Character).IsPlayer()) {
+					return gagLevel;
+				} else {
+					// Use the rule-specified gag level as a lower bound in case the player is wearing an actual gag
+					return Math.max(gagLevel, state.customData.gagLevel);
+				}
+			}, ModuleCategory.Rules);
+		}
+	});
 }

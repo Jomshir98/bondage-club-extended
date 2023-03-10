@@ -1184,13 +1184,17 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "force PLAYER_NAME to talk as if they were gagged",
-		longDescription: "This rule forces PLAYER_NAME to talk as if they were gagged, automatically garbling all of their speech. This rule does not affect OOC or, if \"Garble whispers while gagged\" is disabled, whispers.",
-		keywords: ["garble", "saying", "talking"],
+		longDescription: `This rule forces PLAYER_NAME to talk as if they were gagged, automatically garbling all of their speech. This rule does not affect OOC. This rule only affects whispers if the rule "Garble whispers while gagged" is also in effect.`,
+		keywords: ["saying", "talking", "gagtalk", "garbling", "forced"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			gagLevel: {
 				type: "number",
 				default: 5,
+				/**
+				 * NOTE: While gag levels above 20 do not have any additional effects in vanilla BC,
+				 * FBC's "Extra gag anti-cheat" option (as of 4.22) adds additional garbling at >24.
+				 */
 				options: {
 					min: 1,
 					max: 25

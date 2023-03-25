@@ -455,7 +455,8 @@ export function initRules_bc_alter() {
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("Player.GetBlindLevel", 2, (args, next) => {
-				if (state.isEnforced && ["BlindHeavy", "BlindNormal", "BlindLight"].some(i => Player.Effect.includes(i) && !Player.Effect.includes("VRAvatars")))
+				const effectsToCheck: EffectName[] = ["BlindHeavy", "BlindNormal", "BlindLight"];
+				if (state.isEnforced && effectsToCheck.some(i => Player.Effect.includes(i) && !Player.Effect.includes("VRAvatars")))
 					return 3;
 				return next(args);
 			}, ModuleCategory.Rules);

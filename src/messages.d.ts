@@ -35,7 +35,7 @@ type BCX_message_ChatRoomStatusEvent = {
 /** BCX effects that should be visible to everyone in room */
 interface BCX_effects {
 	/** Any extra effects to be applied to character */
-	Effect: string[];
+	Effect: EffectName[];
 }
 
 type BCX_message_hello = {

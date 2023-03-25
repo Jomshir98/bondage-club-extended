@@ -1,7 +1,4 @@
 type TextCache = any;
-type NotificationSetting = any;
-
-type AssetBonusName = "KidnapDomination" | "KidnapSneakiness" | "KidnapBruteForce";
 
 /**
  * An object defining which genders a setting is active for

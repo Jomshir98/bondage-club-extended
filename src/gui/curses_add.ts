@@ -162,7 +162,7 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 		// Pagination
 		const totalPages = Math.ceil(CATEGORIES.length / 2);
-		DrawBackNextButton(1605, 820, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
+		DrawBackNextButton(1605, 865, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
 	}
 
 	Click() {
@@ -221,10 +221,10 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 		// Pagination
 		const totalPages = Math.ceil(CATEGORIES.length / 2);
-		if (MouseIn(1605, 800, 150, 90)) {
+		if (MouseIn(1605, 865, 150, 90)) {
 			this.page = clampWrap(this.page - 1, 0, totalPages - 1);
 			return true;
-		} else if (MouseIn(1755, 800, 150, 90)) {
+		} else if (MouseIn(1755, 865, 150, 90)) {
 			this.page = clampWrap(this.page + 1, 0, totalPages - 1);
 			return true;
 		}

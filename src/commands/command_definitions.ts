@@ -124,7 +124,7 @@ export function initCommands_definitions() {
 		}
 	});
 
-	const posesArms: Record<string, string> = {
+	const posesArms: Record<string, AssetPoseName> = {
 		down: "BaseUpper",
 		spread: "Yoked",
 		up: "OverTheHead",
@@ -133,7 +133,7 @@ export function initCommands_definitions() {
 		wrists: "BackCuffs"
 	};
 
-	const posesLegs: Record<string, string> = {
+	const posesLegs: Record<string, AssetPoseName> = {
 		normal: "BaseLower",
 		kneel: "Kneel",
 		kneelspread: "KneelingSpread",

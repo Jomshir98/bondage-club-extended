@@ -253,7 +253,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 	for (const cloth of data) {
 		if (
 			C.Appearance.some(a => a.Asset.Group.Name === cloth.Group) ||
-			!ValidationCanAccessCheck(C, cloth.Group as AssetGroupName, cloth.Name, cloth.Property?.Type)
+			!ValidationCanAccessCheck(C, cloth.Group, cloth.Name, cloth.Property?.Type)
 		) {
 			continue;
 		}

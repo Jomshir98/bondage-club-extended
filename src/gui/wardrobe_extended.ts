@@ -150,7 +150,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		this.skippedBlockedCount = 0;
 		for (let i = this.data.length - 1; i >= 0; i--) {
 			const item = this.data[i];
-			if (!ValidationCanAccessCheck(this.character, item.Group as AssetGroupName, item.Name, item.Property?.Type)) {
+			if (!ValidationCanAccessCheck(this.character, item.Group, item.Name, item.Property?.Type)) {
 				this.data.splice(i, 1);
 				this.skippedBlockedCount++;
 			}

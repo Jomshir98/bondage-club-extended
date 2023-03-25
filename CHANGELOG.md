@@ -1,5 +1,13 @@
 # BCX Changelog
 
+## 0.9.5
+
+This update includes:
+ - This update improves compatibility with BC releases up to R90
+
+Rules module changes:
+ - Added new rule "Force garbled speech" that can garble speech even without a gag [by Rama (bananarama92)]
+
 ## 0.9.4
 
 This update includes:

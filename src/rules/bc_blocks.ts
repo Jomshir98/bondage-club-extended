@@ -653,7 +653,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid freeing self",
 		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME removing any items from PLAYER_NAME's body",
-		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score, such as hand-held items, plushies, etc.",
+		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score by the original asset maker, such as hand-held items, plushies, etc. This means that custom crafted properties given to an item such as 'decoy' are not factored in.",
 		keywords: ["limiting", "untying", "unbinding", "bondage"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to remove an item from your body!",

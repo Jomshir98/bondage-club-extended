@@ -10,6 +10,12 @@ module.exports = {
 	collectCoverageFrom: [
 		"src/**/*.ts",
 	],
+	coverageReporters: [
+		"json",
+		"text-summary",
+		"lcov",
+		"clover",
+	],
 	coverageDirectory: "coverage",
 	errorOnDeprecated: true,
 	transform: {
@@ -18,8 +24,6 @@ module.exports = {
 		}],
 	},
 	testTimeout: 60_000,
-	maxWorkers: 1,
-	bail: true,
 	testRunner: "<rootDir>/test/_setup/test_runner.ts",
 	globalSetup: "<rootDir>/test/_setup/global_setup.ts",
 	globalTeardown: "<rootDir>/test/_setup/global_teardown.ts",

@@ -31,7 +31,7 @@ export type StrictGlobal = {
 export type JestPuppeteerGlobal = Required<StrictGlobal>;
 
 const DEFAULT_CONFIG = {
-	browserContext: "default",
+	browserContext: "incognito",
 	exitOnPageError: true,
 } as const;
 

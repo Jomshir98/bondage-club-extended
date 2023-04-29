@@ -362,7 +362,7 @@ const sourceBasedErrorMessage = {
 	bcx: "<br /><h3>Whoops... seems like BCX might be to blame this time</h3> Could you please help us by submitting the report below to the <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server?<br />Thank you!</p>",
 	knownMod: (mod: string) => `<br /><h3>The error seems to come from mod ${mod}</h3> Please submit the report to <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server!`,
 	bc: "<br /><h3>The error seems not to come from any ModSDK mod!</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
-	unknown: "<br /><h3>Could not detect origin of the error.</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!"
+	unknown: "<br /><h3>Could not detect origin of the error.</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
 } as const;
 
 export function onUnhandledError(event: ErrorEvent) {
@@ -403,7 +403,7 @@ function bcxSocketEmit(this: any, ...args: any[]) {
 		modArea: "",
 		extraInfo() {
 			return `Event: ${message}\n` + parameters.map(i => JSON.stringify(i, undefined, "  ")).join("\n");
-		}
+		},
 	});
 	const res = originalSocketEmit?.apply(this, args);
 	ctx.end();
@@ -416,7 +416,7 @@ function bcxClick(this: any, event: MouseEvent) {
 	const ctx = debugContextStart(`Canvas click`, {
 		root: true,
 		modArea: "",
-		extraInfo: () => `X: ${MouseX}\nY: ${MouseY}`
+		extraInfo: () => `X: ${MouseX}\nY: ${MouseY}`,
 	});
 	const res = originalClick?.call(this, event);
 	ctx.end();
@@ -429,7 +429,7 @@ function bcxRaf(this: any, fn: FrameRequestCallback): number {
 		const ctx = debugContextStart(`Animation frame`, {
 			root: true,
 			modArea: "",
-			extraInfo: () => `time: ${rafArgs}`
+			extraInfo: () => `time: ${rafArgs}`,
 		});
 		const res = fn.apply(window, rafArgs);
 		ctx.end();

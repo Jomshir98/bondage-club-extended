@@ -48,7 +48,7 @@ export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
 		) {
 			const context = debugContextStart("ModApiRuleTrigger", {
 				modArea: this.modName,
-				extraInfo: () => `mod: ${this.modName}; rule: ${this.rule}`
+				extraInfo: () => `mod: ${this.modName}; rule: ${this.rule}`,
 			});
 			this.#ruleState.trigger(targetCharacter, dictionary);
 			context.end();
@@ -65,7 +65,7 @@ export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
 		) {
 			const context = debugContextStart("ModApiRuleTriggerAttempt", {
 				modArea: this.modName,
-				extraInfo: () => `mod: ${this.modName}; rule: ${this.rule}`
+				extraInfo: () => `mod: ${this.modName}; rule: ${this.rule}`,
 			});
 			this.#ruleState.triggerAttempt(targetCharacter, dictionary);
 			context.end();

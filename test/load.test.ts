@@ -6,7 +6,7 @@ describe("Load", () => {
 
 	it("Should load BC", async () => {
 		bc = await TestOpenBC({
-			keepOpen: true
+			keepOpen: true,
 		});
 
 		await expect(bc.page.title()).resolves.toMatch("Bondage Club");

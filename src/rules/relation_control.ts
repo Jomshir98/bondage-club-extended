@@ -29,7 +29,7 @@ export function initRules_bc_relation_control() {
 				"ManagementCanBreakTrialOnline",
 				"ManagementCannotBeReleasedOnline",
 				"ManagementCanBeReleased",
-				"ManagementCannotBeReleased"
+				"ManagementCannotBeReleased",
 			]) {
 				hookFunction(fun, 5, (args, next) => {
 					return !state.isEnforced && next(args);
@@ -38,7 +38,7 @@ export function initRules_bc_relation_control() {
 			hookFunction("ManagementCannotBeReleasedExtreme", 5, (args, next) => {
 				return state.isEnforced || next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("rc_lover_new", {
@@ -61,7 +61,7 @@ export function initRules_bc_relation_control() {
 					return false;
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("rc_lover_leave", {
@@ -80,13 +80,13 @@ export function initRules_bc_relation_control() {
 		load(state) {
 			for (const fun of [
 				"ManagementCanBreakDatingLoverOnline",
-				"ManagementCanBreakUpLoverOnline"
+				"ManagementCanBreakUpLoverOnline",
 			]) {
 				hookFunction(fun, 5, (args, next) => {
 					return !state.isEnforced && next(args);
 				}, ModuleCategory.Rules);
 			}
-		}
+		},
 	});
 
 	registerRule("rc_sub_new", {
@@ -110,7 +110,7 @@ export function initRules_bc_relation_control() {
 					return false;
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("rc_sub_leave", {
@@ -130,6 +130,6 @@ export function initRules_bc_relation_control() {
 			hookFunction("ChatRoomIsOwnedByPlayer", 5, (args, next) => {
 				return !state.isEnforced && next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 }

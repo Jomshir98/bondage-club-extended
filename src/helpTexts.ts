@@ -18,7 +18,7 @@ export enum Views {
 	Relationships = 60,
 	ExportImportMain = 91,
 	ExportImportSelect = 92,
-	Misc = 100
+	Misc = 100,
 }
 
 // TODO
@@ -110,5 +110,5 @@ export const HELP_TEXTS: Record<Views, string> = {
 		"The set custom name replaces the added character's real name / BC-nickname in this player's chat, except within chat commands, which are " +
 		"considered OOC. You can also enforce the custom name so that the player is blocked from sending a chat message / whisper that use the " +
 		"character's name / BC-nickname while with her. The player cannot have multiple custom names set for a single character. A character who " +
-		"has a custom name set on this screen can always see their own set custom name in this list."
+		"has a custom name set on this screen can always see their own set custom name in this list.",
 };

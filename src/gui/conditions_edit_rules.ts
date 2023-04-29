@@ -39,7 +39,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 						this.processInputs();
 					},
 					value: data?.data.customData![k] ?? (typeof v.default === "function" ? v.default() : v.default),
-					access
+					access,
 				});
 			}
 		}
@@ -56,7 +56,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 					const res = handler.processInput({
 						def: v,
 						key: k,
-						value: this.changes.data.customData![k]
+						value: this.changes.data.customData![k],
 					});
 					if (res !== undefined) {
 						if (!handler.validate(res, v)) {
@@ -102,7 +102,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 					Y: v.Y ?? Y,
 					key: k,
 					target: this.character,
-					access
+					access,
 				});
 			}
 		}
@@ -159,7 +159,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 						Y: v.Y ?? Y,
 						key: k,
 						target: this.character,
-						access
+						access,
 					});
 					if (access && res !== undefined) {
 						this.changes = this.makeChangesData();
@@ -180,7 +180,7 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 				if (handler.unload) {
 					handler.unload({
 						def: v,
-						key: k
+						key: k,
 					});
 				}
 			}

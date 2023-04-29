@@ -13,7 +13,7 @@ import { TestContext, getConfig } from "./config";
 function run(command: string, args: string[] = [], options: SpawnSyncOptions = {}): void {
 	const { error } = spawnSync(command, args, {
 		stdio: "inherit",
-		...options
+		...options,
 	});
 	if (error)
 		throw error;
@@ -34,12 +34,12 @@ export default async (_jestConfig: JestConfig) => {
 		console.log("Starting MongoDB server...");
 		const mongoDbServer = await MongoMemoryServer.create({
 			binary: {
-				checkMD5: false
+				checkMD5: false,
 			},
 			instance: {
 				storageEngine: "ephemeralForTest",
-				args: ["--setParameter", "diagnosticDataCollectionEnabled=false"]
-			}
+				args: ["--setParameter", "diagnosticDataCollectionEnabled=false"],
+			},
 		});
 
 		mongoDbStringConnection = mongoDbServer.getUri();
@@ -64,7 +64,7 @@ export default async (_jestConfig: JestConfig) => {
 		}
 
 		run("npm", ["install", "--no-audit", "--no-fund"], {
-			cwd: BCServerPath
+			cwd: BCServerPath,
 		});
 
 		port = await getPortPromise({ host: "127.0.0.1", port: port + 1 });
@@ -80,10 +80,10 @@ export default async (_jestConfig: JestConfig) => {
 					NEW_RELIC_ENABLED: "false",
 					NEW_RELIC_NO_CONFIG_FILE: "true",
 					PORT: port.toString(10),
-					DATABASE_URL: mongoDbStringConnection
+					DATABASE_URL: mongoDbStringConnection,
 				},
-				cwd: BCServerPath
-			}
+				cwd: BCServerPath,
+			},
 		});
 
 		process.env.BC_SERVER_ADDRESS = `http://localhost:${port}/`;

@@ -53,7 +53,7 @@ export class GuiLogConfig extends GuiSubscreen {
 		Promise.all([
 			this.character.getLogConfig(),
 			this.character.getPermissionAccess("log_delete"),
-			this.character.getPermissionAccess("log_configure")
+			this.character.getPermissionAccess("log_configure"),
 		]).then(res => {
 			this.config = res[0];
 			this.allowDelete = res[1];
@@ -96,7 +96,7 @@ export class GuiLogConfig extends GuiSubscreen {
 				this.configList.push({
 					category: k,
 					access: v,
-					name: LOG_CONFIG_NAMES[k]
+					name: LOG_CONFIG_NAMES[k],
 				});
 			}
 		}

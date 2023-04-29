@@ -21,7 +21,7 @@ export enum AccessLevel {
 	mistress = 4,
 	whitelist = 5,
 	friend = 6,
-	public = 7
+	public = 7,
 }
 
 export interface PermissionSetup {
@@ -29,7 +29,7 @@ export interface PermissionSetup {
 	readonly category: ModuleCategory;
 	readonly defaults: {
 		readonly [p in Preset]: readonly [boolean, AccessLevel];
-	}
+	};
 }
 
 export interface PermissionInfo extends PermissionSetup {
@@ -56,7 +56,7 @@ export function registerPermission(name: BCX_Permissions, data: PermissionSetup)
 	permissions.set(name, {
 		...data,
 		self: data.defaults[Preset.switch][0],
-		min: data.defaults[Preset.switch][1]
+		min: data.defaults[Preset.switch][1],
 	});
 }
 
@@ -134,7 +134,7 @@ export function getPermissionDataFromBundle(bundle: PermissionsBundle): Permissi
 			res[k] = {
 				...v,
 				self: bundle[k][0],
-				min: bundle[k][1]
+				min: bundle[k][1],
 			};
 		}
 	}
@@ -287,7 +287,7 @@ export function getPlayerRoleData(character: ChatroomCharacter): PermissionRoleB
 		allowAddMistress: checkPermissionAccess("authority_mistress_add", character),
 		allowRemoveMistress: checkPermissionAccess("authority_mistress_remove", character),
 		allowAddOwner: checkPermissionAccess("authority_owner_add", character),
-		allowRemoveOwner: checkPermissionAccess("authority_owner_remove", character)
+		allowRemoveOwner: checkPermissionAccess("authority_owner_remove", character),
 	};
 }
 
@@ -344,7 +344,7 @@ export function editRole(role: "owner" | "mistress", action: "add" | "remove", t
 			const user = character.isPlayer() ? "her" : `TargetCharacterName's (${Player.MemberNumber})`;
 			ChatRoomActionMessage(`SourceCharacter (${character.MemberNumber}) added you as ${user} BCX ${role}.`, target, [
 				{ Tag: "SourceCharacter", MemberNumber: character.MemberNumber, Text: CharacterNickname(character.Character) },
-				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 			]);
 		}
 	}
@@ -381,8 +381,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [false, AccessLevel.owner],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 		registerPermission("authority_revoke_self", {
 			name: "Allow forbidding self access",
@@ -391,8 +391,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.self],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 		registerPermission("authority_edit_min", {
 			name: "Allow lowest access modification",
@@ -401,8 +401,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.self],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 		registerPermission("authority_mistress_add", {
 			name: "Allow granting Mistress status",
@@ -411,8 +411,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.lover],
-				[Preset.slave]: [true, AccessLevel.mistress]
-			}
+				[Preset.slave]: [true, AccessLevel.mistress],
+			},
 		});
 		registerPermission("authority_mistress_remove", {
 			name: "Allow revoking Mistress status",
@@ -421,8 +421,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [false, AccessLevel.lover],
-				[Preset.slave]: [false, AccessLevel.lover]
-			}
+				[Preset.slave]: [false, AccessLevel.lover],
+			},
 		});
 		registerPermission("authority_owner_add", {
 			name: "Allow granting Owner status",
@@ -431,8 +431,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.clubowner],
-				[Preset.slave]: [true, AccessLevel.owner]
-			}
+				[Preset.slave]: [true, AccessLevel.owner],
+			},
 		});
 		registerPermission("authority_owner_remove", {
 			name: "Allow revoking Owner status",
@@ -441,8 +441,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [false, AccessLevel.clubowner],
-				[Preset.slave]: [false, AccessLevel.clubowner]
-			}
+				[Preset.slave]: [false, AccessLevel.clubowner],
+			},
 		});
 		registerPermission("authority_view_roles", {
 			name: "Allow viewing list of owners/mistresses",
@@ -451,8 +451,8 @@ export class ModuleAuthority extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.mistress],
 				[Preset.submissive]: [true, AccessLevel.whitelist],
-				[Preset.slave]: [true, AccessLevel.public]
-			}
+				[Preset.slave]: [true, AccessLevel.public],
+			},
 		});
 
 		queryHandlers.permissions = () => {
@@ -731,7 +731,7 @@ export class ModuleAuthority extends BaseModule {
 				return res + `Done!`;
 			},
 			importPermissions: ["authority_grant_self", "authority_revoke_self", "authority_edit_min"],
-			importValidator: zod.record(zod.tuple([zod.boolean(), zod.nativeEnum(AccessLevel)]))
+			importValidator: zod.record(zod.tuple([zod.boolean(), zod.nativeEnum(AccessLevel)])),
 		});
 	}
 
@@ -752,7 +752,7 @@ export class ModuleAuthority extends BaseModule {
 
 		if (isObject(modStorage.permissions)) {
 			const transitionDictionary: Record<string, BCX_Permissions> = {
-				log_leaveMessage: "log_add_note"
+				log_leaveMessage: "log_add_note",
 			};
 			for (const [k, v] of Object.entries(modStorage.permissions)) {
 				if (transitionDictionary[k] !== undefined) {

@@ -23,20 +23,20 @@ export const schema_ConditionsConditionRequirements: ZodType<ConditionsCondition
 	orLogic: zod.literal(true).optional(),
 	room: zod.object({
 		type: zod.enum(["public", "private"]),
-		inverted: zod.literal(true).optional()
+		inverted: zod.literal(true).optional(),
 	}).optional(),
 	roomName: zod.object({
 		name: zod.string(),
-		inverted: zod.literal(true).optional()
+		inverted: zod.literal(true).optional(),
 	}).optional(),
 	role: zod.object({
 		role: zod.nativeEnum(AccessLevel),
-		inverted: zod.literal(true).optional()
+		inverted: zod.literal(true).optional(),
 	}).optional(),
 	player: zod.object({
 		memberNumber: zod.number(),
-		inverted: zod.literal(true).optional()
-	}).optional()
+		inverted: zod.literal(true).optional(),
+	}).optional(),
 }));
 
 export function guard_ConditionsConditionRequirements(data: unknown): data is ConditionsConditionRequirements {
@@ -162,7 +162,7 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 		importRemove(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter | null): true | string;
 		import(condition: ConditionsCategoryKeys[C], data: unknown, character: ChatroomCharacter | null): [true, ConditionsCategorySpecificData[C]] | [false, string];
 		importLog(condition: ConditionsCategoryKeys[C], data: ConditionsCategorySpecificData[C], character: ChatroomCharacter | null): void;
-	}
+	};
 }
 
 const conditionHandlers: Map<ConditionsCategories, ConditionsHandler<ConditionsCategories>> = new Map();
@@ -199,13 +199,13 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 					const publicData = ConditionsMakeConditionPublicData(handler, condition as ConditionsCategoryKeys[C], data, null);
 					conditions[condition] = {
 						...pick(publicData, "active", "timer", "timerRemove", "requirements", "favorite"),
-						data: currentExportImport.export(condition as ConditionsCategoryKeys[C], data.data)
+						data: currentExportImport.export(condition as ConditionsCategoryKeys[C], data.data),
 					};
 				}
 
 				return {
 					categoryConfig,
-					conditions
+					conditions,
 				};
 			},
 			import: (data, character) => {
@@ -273,7 +273,7 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 					requirements: schema_ConditionsConditionRequirements,
 					timer: zod.number().nullable(),
 					timerRemove: zod.boolean(),
-					data: zod.custom((data) => handler.validateCategorySpecificGlobalData(data as ConditionsCategorySpecificGlobalData[C]))
+					data: zod.custom((data) => handler.validateCategorySpecificGlobalData(data as ConditionsCategorySpecificGlobalData[C])),
 				}) as ZodType<ConditionsCategoryConfigurableData>,
 				conditions: zod.record(zod.object({
 					active: zod.boolean(),
@@ -281,9 +281,9 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 					timer: zod.number().nullable(),
 					timerRemove: zod.boolean(),
 					requirements: schema_ConditionsConditionRequirements.nullable(),
-					favorite: zod.boolean()
-				}))
-			})
+					favorite: zod.boolean(),
+				})),
+			}),
 		});
 	}
 
@@ -311,7 +311,7 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 			return res + `Done!`;
 		},
 		importPermissions: [handler.permission_changeLimits],
-		importValidator: zod.record(zod.nativeEnum(ConditionsLimit))
+		importValidator: zod.record(zod.nativeEnum(ConditionsLimit)),
 	});
 }
 
@@ -351,7 +351,7 @@ function ConditionsMakeConditionPublicData<C extends ConditionsCategories>(
 		timer: conditionData.timer ?? null,
 		timerRemove: conditionData.timerRemove ?? false,
 		requirements: conditionData.requirements ? cloneDeep(conditionData.requirements) : null,
-		favorite: conditionData.favorite ?? false
+		favorite: conditionData.favorite ?? false,
 	};
 	if (requester === null || handler.permission_viewOriginator != null && checkPermissionAccess(handler.permission_viewOriginator, requester)) {
 		res.addedBy = conditionData.addedBy;
@@ -366,7 +366,7 @@ export function ConditionsGetCategoryConfigurableData<C extends ConditionsCatego
 		timer: data.timer ?? null,
 		timerRemove: data.timerRemove ?? false,
 		data: cloneDeep(data.data),
-		requirements: cloneDeep(data.requirements)
+		requirements: cloneDeep(data.requirements),
 	};
 	return res as ConditionsCategoryConfigurableData<C>;
 }
@@ -385,8 +385,8 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 		...ConditionsGetCategoryConfigurableData(category),
 		limits: {
 			...handler.getDefaultLimits(),
-			...data.limits
-		}
+			...data.limits,
+		},
 	};
 	for (const [condition, conditionData] of Object.entries(data.conditions)) {
 		res.conditions[condition] = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData, requester);
@@ -441,7 +441,7 @@ export function ConditionsSetCondition<C extends ConditionsCategories>(
 			lastActive: false,
 			timer: categoryData.timer !== undefined ? Date.now() + categoryData.timer : undefined,
 			timerRemove: categoryData.timerRemove,
-			data
+			data,
 		};
 		if (source) {
 			res.addedBy = source.MemberNumber;
@@ -766,7 +766,7 @@ function ConditionsCommandProcessTriggers(triggers: ConditionsConditionRequireme
 		}
 		triggers.room = {
 			type: value,
-			inverted
+			inverted,
 		};
 	} else if (trigger === "roomname") {
 		if (keyword === "ignore") {
@@ -775,7 +775,7 @@ function ConditionsCommandProcessTriggers(triggers: ConditionsConditionRequireme
 		}
 		triggers.roomName = {
 			name: value,
-			inverted
+			inverted,
 		};
 	} else if (trigger === "role") {
 		if (keyword === "ignore") {
@@ -790,7 +790,7 @@ function ConditionsCommandProcessTriggers(triggers: ConditionsConditionRequireme
 		}
 		triggers.role = {
 			role: level,
-			inverted
+			inverted,
 		};
 	} else if (trigger === "player") {
 		if (keyword === "ignore") {
@@ -804,7 +804,7 @@ function ConditionsCommandProcessTriggers(triggers: ConditionsConditionRequireme
 		}
 		triggers.player = {
 			memberNumber: target,
-			inverted
+			inverted,
 		};
 	}
 	return false;
@@ -1197,14 +1197,14 @@ export class ModuleConditions extends BaseModule {
 				limits: {},
 				requirements: {},
 				data: {
-					itemRemove: false
-				}
+					itemRemove: false,
+				},
 			};
 			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
 				curses.conditions[group] = {
 					active: true,
 					lastActive: false,
-					data
+					data,
 				};
 			}
 			delete modStorage.cursedItems;
@@ -1303,7 +1303,7 @@ export class ModuleConditions extends BaseModule {
 					conditions: {},
 					limits: {},
 					requirements: {},
-					data: handler.loadCategorySpecificGlobalData(undefined)
+					data: handler.loadCategorySpecificGlobalData(undefined),
 				};
 			}
 		}

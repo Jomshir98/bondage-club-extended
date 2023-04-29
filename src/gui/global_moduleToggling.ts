@@ -32,7 +32,7 @@ export class GuiGlobalModuleToggling extends GuiSubscreen {
 			DrawCheckbox(150 + 500 * PX, 240 + 110 * PY, 64, 64, "", this.enabledModules.has(module));
 			DrawImageEx(MODULE_ICONS[module], 280 + 500 * PX, 240 + 110 * PY, {
 				Height: 64,
-				Width: 64
+				Width: 64,
 			});
 			DrawText(MODULE_NAMES[module], 370 + 500 * PX, 240 + 32 + 110 * PY, "Black");
 		}

@@ -12,7 +12,7 @@ export function initRules_bc_settings() {
 			OnlineSettings: Player.OnlineSettings,
 			OnlineSharedSettings: Player.OnlineSharedSettings,
 			GraphicsSettings: Player.GraphicsSettings,
-			ItemPermission: Player.ItemPermission
+			ItemPermission: Player.ItemPermission,
 		});
 	}
 
@@ -26,8 +26,8 @@ export function initRules_bc_settings() {
 			defaultLimit,
 			longDescription: `This rule forces PLAYER_NAME's base game setting '${setting}' to configurable value and prevents her from changing it.`,
 			triggerTexts: {
-				infoBeep: `Rule changed your '${setting}' setting`
-			}
+				infoBeep: `Rule changed your '${setting}' setting`,
+			},
 		};
 	}
 
@@ -55,7 +55,7 @@ export function initRules_bc_settings() {
 		defaultValue,
 		defaultLimit,
 		get,
-		set
+		set,
 	}: {
 		id: BooleanRule;
 		setting: string;
@@ -74,14 +74,14 @@ export function initRules_bc_settings() {
 				value: {
 					type: "toggle",
 					description: setting,
-					default: defaultValue
+					default: defaultValue,
 				},
 				restore: {
 					type: "toggle",
 					description: "Restore previous value when rule ends",
 					default: true,
-					Y: 420
-				}
+					Y: 420,
+				},
 			},
 			internalDataValidate: (data) => typeof data === "boolean",
 			internalDataDefault: () => get() ?? false,
@@ -114,7 +114,7 @@ export function initRules_bc_settings() {
 					}
 				}
 				return false;
-			}
+			},
 		});
 	}
 
@@ -129,11 +129,11 @@ export function initRules_bc_settings() {
 					["everyone", "Everyone, no exceptions"],
 					["everyoneBlacklist", "Everyone, except blacklist"],
 					["dominants", "Owner, Lovers, whitelist & Dominants"],
-					["whitelist", "Owner, Lovers and whitelist only"]
+					["whitelist", "Owner, Lovers and whitelist only"],
 				],
 				default: "everyone",
-				description: "Item permission"
-			}
+				description: "Item permission",
+			},
 		},
 		tick(state) {
 			if (state.isEnforced && state.customData) {
@@ -141,7 +141,7 @@ export function initRules_bc_settings() {
 					everyone: 0,
 					everyoneBlacklist: 1,
 					dominants: 2,
-					whitelist: 3
+					whitelist: 3,
 				};
 				const wanted = VALUE_CONVERSIONS[state.customData.value] ?? 0;
 				if (Player.ItemPermission !== wanted) {
@@ -152,7 +152,7 @@ export function initRules_bc_settings() {
 				}
 			}
 			return false;
-		}
+		},
 	});
 
 	toggleSettingHelper({
@@ -161,7 +161,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.OnlineSharedSettings?.DisablePickingLocksOnSelf,
-		set: value => Player.OnlineSharedSettings!.DisablePickingLocksOnSelf = value
+		set: value => Player.OnlineSharedSettings!.DisablePickingLocksOnSelf = value,
 	});
 
 	toggleSettingHelper({
@@ -170,7 +170,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.GameplaySettings?.OfflineLockedRestrained,
-		set: value => Player.GameplaySettings!.OfflineLockedRestrained = value
+		set: value => Player.GameplaySettings!.OfflineLockedRestrained = value,
 	});
 
 	toggleSettingHelper({
@@ -179,7 +179,7 @@ export function initRules_bc_settings() {
 		defaultValue: false,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.GameplaySettings?.EnableSafeword,
-		set: value => Player.GameplaySettings!.EnableSafeword = value
+		set: value => Player.GameplaySettings!.EnableSafeword = value,
 	});
 
 	// "Arousal" settings
@@ -194,22 +194,22 @@ export function initRules_bc_settings() {
 					["NoMeter", "Allow without a meter"],
 					["Manual", "Allow with a manual meter"],
 					["Hybrid", "Allow with a hybrid meter"],
-					["Automatic", "Allow with a locked meter"]
+					["Automatic", "Allow with a locked meter"],
 				],
 				default: "Hybrid",
-				description: "Sexual activities - Activation"
+				description: "Sexual activities - Activation",
 			},
 			visible: {
 				type: "listSelect",
 				options: [
 					["All", "Show arousal to everyone"],
 					["Access", "Show if they have access"],
-					["Self", "Show to yourself only"]
+					["Self", "Show to yourself only"],
 				],
 				default: "All",
 				description: "Meter visibility",
-				Y: 480
-			}
+				Y: 480,
+			},
 		},
 		tick(state) {
 			let change = false;
@@ -228,7 +228,7 @@ export function initRules_bc_settings() {
 				}
 			}
 			return change;
-		}
+		},
 	});
 
 	toggleSettingHelper({
@@ -237,7 +237,7 @@ export function initRules_bc_settings() {
 		defaultValue: false,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.ArousalSettings?.DisableAdvancedVibes,
-		set: value => Player.ArousalSettings!.DisableAdvancedVibes = value
+		set: value => Player.ArousalSettings!.DisableAdvancedVibes = value,
 	});
 
 	registerRule("setting_arousal_stutter", {
@@ -249,11 +249,11 @@ export function initRules_bc_settings() {
 					["None", "Never stutter"],
 					["Arousal", "When you're aroused"],
 					["Vibration", "When you're vibrated"],
-					["All", "Aroused & vibrated"]
+					["All", "Aroused & vibrated"],
 				],
 				default: "All",
-				description: "Speech stuttering"
-			}
+				description: "Speech stuttering",
+			},
 		},
 		tick(state) {
 			if (state.isEnforced && state.customData && Player.ArousalSettings) {
@@ -265,7 +265,7 @@ export function initRules_bc_settings() {
 				}
 			}
 			return false;
-		}
+		},
 	});
 
 	// "Online" settings
@@ -276,7 +276,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSettings?.EnableAfkTimer,
-		set: value => Player.OnlineSettings!.EnableAfkTimer = value
+		set: value => Player.OnlineSettings!.EnableAfkTimer = value,
 	});
 
 	toggleSettingHelper({
@@ -285,7 +285,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSharedSettings?.AllowFullWardrobeAccess,
-		set: value => Player.OnlineSharedSettings!.AllowFullWardrobeAccess = value
+		set: value => Player.OnlineSharedSettings!.AllowFullWardrobeAccess = value,
 	});
 
 	toggleSettingHelper({
@@ -294,7 +294,7 @@ export function initRules_bc_settings() {
 		defaultValue: false,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSharedSettings?.BlockBodyCosplay,
-		set: value => Player.OnlineSharedSettings!.BlockBodyCosplay = value
+		set: value => Player.OnlineSharedSettings!.BlockBodyCosplay = value,
 	});
 
 	// "Immersion" settings
@@ -309,23 +309,23 @@ export function initRules_bc_settings() {
 					["Normal", "Normal"],
 					["SensDepNames", "Hide names"],
 					["SensDepTotal", "Heavy"],
-					["SensDepExtreme", "Total"]
+					["SensDepExtreme", "Total"],
 				],
 				default: "Normal",
-				description: "Sensory deprivation setting"
+				description: "Sensory deprivation setting",
 			},
 			disableExamine: {
 				type: "toggle",
 				default: false,
 				description: "Disable examining when blind",
-				Y: 480
+				Y: 480,
 			},
 			hideMessages: {
 				type: "toggle",
 				default: false,
 				description: "Hide others' messages",
-				Y: 580
-			}
+				Y: 580,
+			},
 		},
 		tick(state) {
 			let changed = false;
@@ -353,7 +353,7 @@ export function initRules_bc_settings() {
 				}
 			}
 			return changed;
-		}
+		},
 	});
 
 	toggleSettingHelper({
@@ -362,7 +362,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.ImmersionSettings?.BlindAdjacent,
-		set: value => Player.ImmersionSettings!.BlindAdjacent = value
+		set: value => Player.ImmersionSettings!.BlindAdjacent = value,
 	});
 
 	toggleSettingHelper({
@@ -371,7 +371,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.ImmersionSettings?.ChatRoomMuffle,
-		set: value => Player.ImmersionSettings!.ChatRoomMuffle = value
+		set: value => Player.ImmersionSettings!.ChatRoomMuffle = value,
 	});
 
 	toggleSettingHelper({
@@ -380,7 +380,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.GameplaySettings?.DisableAutoRemoveLogin,
-		set: value => Player.GameplaySettings!.DisableAutoRemoveLogin = value
+		set: value => Player.GameplaySettings!.DisableAutoRemoveLogin = value,
 	});
 
 	toggleSettingHelper({
@@ -389,7 +389,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSharedSettings?.AllowPlayerLeashing,
-		set: value => Player.OnlineSharedSettings!.AllowPlayerLeashing = value
+		set: value => Player.OnlineSharedSettings!.AllowPlayerLeashing = value,
 	});
 
 	registerRule("setting_room_rejoin", {
@@ -398,14 +398,14 @@ export function initRules_bc_settings() {
 			value: {
 				type: "toggle",
 				default: true,
-				description: "Return to chatrooms on relog"
+				description: "Return to chatrooms on relog",
 			},
 			remakeRooms: {
 				type: "toggle",
 				default: false,
 				description: "Auto-remake rooms",
-				Y: 425
-			}
+				Y: 425,
+			},
 		},
 		tick(state) {
 			let changed = false;
@@ -426,7 +426,7 @@ export function initRules_bc_settings() {
 				}
 			}
 			return changed;
-		}
+		},
 	});
 
 	toggleSettingHelper({
@@ -435,7 +435,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.normal,
 		get: () => Player.ImmersionSettings?.StimulationEvents,
-		set: value => Player.ImmersionSettings!.StimulationEvents = value
+		set: value => Player.ImmersionSettings!.StimulationEvents = value,
 	});
 
 	toggleSettingHelper({
@@ -444,7 +444,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.ImmersionSettings?.AllowTints,
-		set: value => Player.ImmersionSettings!.AllowTints = value
+		set: value => Player.ImmersionSettings!.AllowTints = value,
 	});
 
 	// "Graphics" settings
@@ -455,7 +455,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.GraphicsSettings?.AllowBlur,
-		set: value => Player.GraphicsSettings!.AllowBlur = value
+		set: value => Player.GraphicsSettings!.AllowBlur = value,
 	});
 
 	toggleSettingHelper({
@@ -464,7 +464,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.GraphicsSettings?.InvertRoom,
-		set: value => Player.GraphicsSettings!.InvertRoom = value
+		set: value => Player.GraphicsSettings!.InvertRoom = value,
 	});
 
 	// "Misc" module settings
@@ -476,7 +476,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.normal,
 		get: () => cheatIsEnabled(MiscCheat.BlockRandomEvents),
-		set: value => cheatSetEnabled(MiscCheat.BlockRandomEvents, value)
+		set: value => cheatSetEnabled(MiscCheat.BlockRandomEvents, value),
 	});
 
 }

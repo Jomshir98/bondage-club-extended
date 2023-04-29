@@ -48,17 +48,17 @@ export function contextCurrentModArea(): string | null {
 }
 
 export function debugContextStart(name: string, { root = false, modArea, extraInfo }: {
-	root?: boolean,
+	root?: boolean;
 	/** Name of mod this context can be traced to, `""` for BC itself */
-	modArea?: string,
-	extraInfo?: () => string
+	modArea?: string;
+	extraInfo?: () => string;
 } = {}): DebugContextHandle {
 
 	const context: DebugContext = {
 		name,
 		modArea: modArea !== undefined ? modArea : (contextCurrentModArea() ?? ""),
 		root,
-		extraInfo
+		extraInfo,
 	};
 
 	const handle: DebugContextHandle = {
@@ -75,7 +75,7 @@ export function debugContextStart(name: string, { root = false, modArea, extraIn
 				const removed = contextStack.splice(index, toRemove);
 				console.warn(`BCX: Debug context end while not on top of the stack (depth ${toRemove})`, removed, new Error());
 			}
-		}
+		},
 	};
 
 	if (root && contextStack.length > 0) {

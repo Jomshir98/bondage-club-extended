@@ -24,7 +24,7 @@ const CURSES_ANTILOOP_THRESHOLD = 10;
 const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 
 const CURSE_IGNORED_PROPERTIES_CUSTOM = [
-	"HeartRate" // Futuristic bra
+	"HeartRate", // Futuristic bra
 ];
 export const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.concat(CURSE_IGNORED_PROPERTIES_CUSTOM);
 export const CURSE_IGNORED_EFFECTS = ["Lock"];
@@ -37,7 +37,7 @@ const CURSE_INACTIVE_SCREENS: string[] = [
 	"Wardrobe",
 	"ChatSelect",
 	"ChatSearch",
-	"ChatCreate"
+	"ChatCreate",
 ];
 
 export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
@@ -71,7 +71,7 @@ function curseCreateCurseItemInfo(item: Item): CursedItemInfo {
 		Difficulty: item.Difficulty || undefined,
 		Color: (item.Color && item.Color !== "Default") ? cloneDeep(item.Color) : undefined,
 		Property: curseMakeSavedProperty(item.Property),
-		Craft: ValidationVerifyCraftData(item.Craft, item.Asset).result
+		Craft: ValidationVerifyCraftData(item.Craft, item.Asset).result,
 	};
 
 	if (Object.keys(result.Property!).length === 0) {
@@ -263,7 +263,7 @@ export class ModuleCurses extends BaseModule {
 		swap: [],
 		update: [],
 		color: [],
-		autoremove: []
+		autoremove: [],
 	};
 
 	init() {
@@ -274,8 +274,8 @@ export class ModuleCurses extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.lover],
 				[Preset.switch]: [true, AccessLevel.lover],
 				[Preset.submissive]: [false, AccessLevel.mistress],
-				[Preset.slave]: [false, AccessLevel.mistress]
-			}
+				[Preset.slave]: [false, AccessLevel.mistress],
+			},
 		});
 		registerPermission("curses_limited", {
 			name: "Allows handling curses on limited object slots",
@@ -284,8 +284,8 @@ export class ModuleCurses extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.owner],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [false, AccessLevel.lover],
-				[Preset.slave]: [false, AccessLevel.lover]
-			}
+				[Preset.slave]: [false, AccessLevel.lover],
+			},
 		});
 		registerPermission("curses_global_configuration", {
 			name: "Allows editing the global curses configuration",
@@ -294,8 +294,8 @@ export class ModuleCurses extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.owner],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [false, AccessLevel.lover],
-				[Preset.slave]: [false, AccessLevel.lover]
-			}
+				[Preset.slave]: [false, AccessLevel.lover],
+			},
 		});
 		registerPermission("curses_change_limits", {
 			name: "Allows to limit/block individual curse object slots",
@@ -304,8 +304,8 @@ export class ModuleCurses extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.self],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 		registerPermission("curses_color", {
 			name: "Allow changing colors of cursed objects",
@@ -314,8 +314,8 @@ export class ModuleCurses extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.lover],
 				[Preset.switch]: [true, AccessLevel.lover],
 				[Preset.submissive]: [true, AccessLevel.mistress],
-				[Preset.slave]: [false, AccessLevel.mistress]
-			}
+				[Preset.slave]: [false, AccessLevel.mistress],
+			},
 		});
 		registerPermission("curses_view_originator", {
 			name: "Allow to view who added the curse originally",
@@ -324,8 +324,8 @@ export class ModuleCurses extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.mistress],
-				[Preset.slave]: [true, AccessLevel.mistress]
-			}
+				[Preset.slave]: [true, AccessLevel.mistress],
+			},
 		});
 
 		queryHandlers.curseItem = (sender, data) => {
@@ -624,7 +624,7 @@ export class ModuleCurses extends BaseModule {
 				if (!isObject(data)) {
 					console.warn("BCX: Bad curses global data, resetting");
 					data = {
-						itemRemove: false
+						itemRemove: false,
 					};
 				}
 				if (typeof data.itemRemove !== "boolean") {
@@ -642,7 +642,7 @@ export class ModuleCurses extends BaseModule {
 				return {
 					Name: data.data.Name,
 					curseProperties: data.data.curseProperty,
-					itemRemove: data.data.itemRemove ?? false
+					itemRemove: data.data.itemRemove ?? false,
 				};
 			},
 			validateCategorySpecificGlobalData: data => isObject(data) && typeof data.itemRemove === "boolean",
@@ -844,7 +844,7 @@ export class ModuleCurses extends BaseModule {
 						Difficulty: zod.number().optional(),
 						Property: zod.custom<ItemProperties>(isObject).optional(),
 						Craft: zod.any(),
-						itemRemove: zod.literal(true).optional()
+						itemRemove: zod.literal(true).optional(),
 					}).nullable();
 					const validationResult = validator.safeParse(data);
 					if (!validationResult.success) {
@@ -878,8 +878,8 @@ export class ModuleCurses extends BaseModule {
 						return "Failed.";
 					}
 					return true;
-				}
-			}
+				},
+			},
 		});
 	}
 
@@ -984,7 +984,7 @@ export class ModuleCurses extends BaseModule {
 				this.suspendedUntil.delete(group);
 				this.triggerCounts.clear();
 				ChatRoomActionMessage(`The dormant curse on SourceCharacter's ${getVisibleGroupName(assetGroup)} wakes up again.`, null, [
-					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				]);
 			} else {
 				return;
@@ -1041,7 +1041,7 @@ export class ModuleCurses extends BaseModule {
 				Color: curse.Color != null ? cloneDeep(curse.Color) : "Default",
 				Property: curse.Property != null ? cloneDeep(curse.Property) : {},
 				Craft: ValidationVerifyCraftData(curse.Craft, asset).result,
-				Difficulty: curse.Difficulty != null ? curse.Difficulty : 0
+				Difficulty: curse.Difficulty != null ? curse.Difficulty : 0,
 			};
 			Player.Appearance.push(currentItem);
 			if (!changeType) changeType = "add";
@@ -1094,7 +1094,7 @@ export class ModuleCurses extends BaseModule {
 			} else {
 				currentItem.Craft = {
 					...(isObject(currentItem.Craft) ? currentItem.Craft : {}),
-					...validatedCurseCraft
+					...validatedCurseCraft,
 				};
 			}
 			if (!changeType) changeType = "update";
@@ -1119,7 +1119,7 @@ export class ModuleCurses extends BaseModule {
 
 			if (counter >= CURSES_ANTILOOP_THRESHOLD) {
 				ChatRoomActionMessage(`Protection triggered: Curses on SourceCharacter's ${getVisibleGroupName(assetGroup)} have been disabled for 10 minutes. Please refrain from triggering curses so rapidly, as it creates strain on the server and may lead to unwanted side effects! If you believe this message was triggered by a bug, please report it to BCX Discord.`, null, [
-					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				]);
 				this.suspendedUntil.set(group, Date.now() + CURSES_ANTILOOP_SUSPEND_TIME);
 			}
@@ -1133,7 +1133,7 @@ export class ModuleCurses extends BaseModule {
 				continue;
 			if (list.length >= 3) {
 				ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS_BATCH[changeType], { PLAYER_NAME: "SourceCharacter" }), null, [
-					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				]);
 				if (changeType !== "autoremove") {
 					logMessage("curse_trigger", LogEntryType.curseTriggerBatch, changeType);
@@ -1141,7 +1141,7 @@ export class ModuleCurses extends BaseModule {
 			} else {
 				for (const item of list) {
 					ChatRoomActionMessage(dictionaryProcess(CURSES_TRIGGER_TEXTS[changeType], { PLAYER_NAME: "SourceCharacter", ASSET_NAME: item }), null, [
-						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 					]);
 					if (changeType !== "autoremove") {
 						logMessage("curse_trigger", LogEntryType.curseTrigger, [changeType, item]);

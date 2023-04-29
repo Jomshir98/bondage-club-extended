@@ -17,7 +17,7 @@ async function doClosePage(page: Page): Promise<void> {
 		page.off("pageerror", handlePageError);
 	}
 	await page.close({
-		runBeforeUnload: Boolean(puppeteerConfig.runBeforeUnloadOnClose)
+		runBeforeUnload: Boolean(puppeteerConfig.runBeforeUnloadOnClose),
 	});
 }
 
@@ -73,12 +73,12 @@ export async function TestOpenBC(options: TestPageOptions = {}): Promise<BCInter
 	const page = await TestOpenPage(options);
 
 	await page.goto(httpAddressBc, {
-		waitUntil: "networkidle2"
+		waitUntil: "networkidle2",
 	});
 
 	// Load ModSDK
 	await page.addScriptTag({
-		path: "node_modules/bondage-club-mod-sdk/dist/bcmodsdk.js"
+		path: "node_modules/bondage-club-mod-sdk/dist/bcmodsdk.js",
 	});
 
 	// Replace server connection to the correct server
@@ -104,7 +104,7 @@ export async function TestLoadBCX(page: Page): Promise<void> {
 	const { httpAddressBcx } = TestBrowserGlobals();
 
 	await page.addScriptTag({
-		url: httpAddressBcx
+		url: httpAddressBcx,
 	});
 
 	await page.waitForFunction(() => !!ServerBeep && typeof ServerBeep === "object" && ServerBeep.Message === "BCX Ready!");

@@ -14,7 +14,7 @@ interface BCTestText {
 	Text: string;
 	X: number;
 	Y: number;
-	Color: string
+	Color: string;
 	BackColor: string;
 }
 

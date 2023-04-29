@@ -27,11 +27,11 @@ const TUTORIAL_PAGES: TutorialPage[] = [
 				`we are happy you are interested in our extension for the Bondage Club (BC) in which we invest a lot of our free time and love. If you have any questions, suggestions, or encounter any bugs, please feel free to get in touch with us on Discord. A button linking to it is in the main menu.`
 				, 285 - 940 / 2, 544, 940, 160, "black");
 			MainCanvas.restore();
-		}
+		},
 	},
 	{
 		name: "Quick overview",
-		image: "quick_overview.png"
+		image: "quick_overview.png",
 	},
 	{
 		name: "New chat room icons",
@@ -43,79 +43,79 @@ const TUTORIAL_PAGES: TutorialPage[] = [
 			if (tick < 4_000 || tick > 6_000 && tick < 9_000) {
 				drawTypingIndicatorSpeechBubble(MainCanvas, 450, 128, 50, 48, 1);
 			}
-		}
+		},
 	},
 	{
 		name: "Introduction to roles and permissions",
-		image: "basic_roles_permissions.png"
+		image: "basic_roles_permissions.png",
 	},
 	{
 		name: "End of introduction",
 		image: "basic_end.png",
 		afterDraw() {
 			DrawCharacter(Player, 220, 160, 0.78, true, MainCanvas);
-		}
+		},
 	},
 	{
 		name: "Logging module screen",
-		image: "log_part1.png"
+		image: "log_part1.png",
 	},
 	{
 		name: "Logging configuration screen",
-		image: "log_part2.png"
+		image: "log_part2.png",
 	},
 	{
 		name: "Curses module overview",
-		image: "curses1.png"
+		image: "curses1.png",
 	},
 	{
 		name: "Adding curses",
-		image: "curses2.png"
+		image: "curses2.png",
 	},
 	{
 		name: "Rules module overview",
-		image: "rules1.png"
+		image: "rules1.png",
 	},
 	{
 		name: "Adding a rule",
-		image: "rules2.png"
+		image: "rules2.png",
 	},
 	{
 		name: "Limiting curse slots / rules",
-		image: "limit_system.png"
+		image: "limit_system.png",
 	},
 	{
 		name: "Commands module overview",
-		image: "commands.png"
+		image: "commands.png",
 	},
 	{
 		name: "Trigger conditions",
-		image: "trigger_conditions.png"
+		image: "trigger_conditions.png",
 	},
 	{
 		name: "Permission system overview",
-		image: "permissions1.png"
+		image: "permissions1.png",
 	},
 	{
 		name: "Permission system base principles",
-		image: "permissions2.png"
+		image: "permissions2.png",
 	},
 	{
 		name: "General permission examples",
-		image: "permissions3.png"
+		image: "permissions3.png",
 	},
 	{
 		name: "Permission setup example 1",
-		image: "permissions4.png"
+		image: "permissions4.png",
 	},
 	{
 		name: "Permission setup example 2",
-		image: "permissions5.png"
+		image: "permissions5.png",
 	},
 	{
 		name: "Chat commands",
-		image: "chat_commands.png"
-	}
+		image: "chat_commands.png",
+	},
 ];
 
 const TUTORIAL_BASIC_END = TUTORIAL_PAGES.findIndex(i => i.name === "End of introduction");

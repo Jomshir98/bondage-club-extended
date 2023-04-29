@@ -42,7 +42,7 @@ export function registerCommand<ID extends BCX_Command>(name: ID, data: CommandD
 	}
 	commands.set(name, {
 		...(data as CommandDefinition<BCX_Command>),
-		state: new CommandState<BCX_Command>(name, data)
+		state: new CommandState<BCX_Command>(name, data),
 	});
 	commandsList.push(name);
 }
@@ -58,7 +58,7 @@ export function CommandsGetDisplayDefinition(command: BCX_Command): CommandDispl
 		longDescription: data.longDescription,
 		helpDescription: data.helpDescription,
 		playerUsable: data.playerUsable,
-		defaultLimit: data.defaultLimit
+		defaultLimit: data.defaultLimit,
 	};
 }
 
@@ -136,8 +136,8 @@ export class ModuleCommandsModule extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.lover],
 				[Preset.switch]: [true, AccessLevel.lover],
 				[Preset.submissive]: [false, AccessLevel.mistress],
-				[Preset.slave]: [false, AccessLevel.mistress]
-			}
+				[Preset.slave]: [false, AccessLevel.mistress],
+			},
 		});
 		registerPermission("commands_limited", {
 			name: "Allows controlling limited commands",
@@ -146,8 +146,8 @@ export class ModuleCommandsModule extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.owner],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [false, AccessLevel.lover],
-				[Preset.slave]: [false, AccessLevel.lover]
-			}
+				[Preset.slave]: [false, AccessLevel.lover],
+			},
 		});
 		registerPermission("commands_change_limits", {
 			name: "Allows to limit/block specific commands",
@@ -156,8 +156,8 @@ export class ModuleCommandsModule extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.self],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 
 		queryHandlers.commandTrigger = (sender, data) => {
@@ -202,7 +202,7 @@ export class ModuleCommandsModule extends BaseModule {
 						data.longDescription,
 						{
 							PLAYER_NAME: Player.Name,
-							HELP_DESCRIPTION: data.helpDescription
+							HELP_DESCRIPTION: data.helpDescription,
 						}
 					)
 				);
@@ -271,7 +271,7 @@ export class ModuleCommandsModule extends BaseModule {
 				}
 				return res;
 			},
-			commandConditionSelectorHelp: "command"
+			commandConditionSelectorHelp: "command",
 		});
 
 		// Init individual commands
@@ -363,7 +363,7 @@ export class ModuleCommandsModule extends BaseModule {
 				this.suspendedUntil = null;
 				this.triggerCounts.clear();
 				ChatRoomActionMessage(`All of SourceCharacter's temporarily blocked commands can be used again.`, null, [
-					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				]);
 			} else {
 				return;

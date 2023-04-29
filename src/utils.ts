@@ -118,7 +118,7 @@ export function formatTimeInterval(time: number, mode: "full" | "short" = "full"
 export function dictionaryProcess(text: string, dictionary: Record<string, string>): string {
 	for (const [k, v] of Object.entries({
 		PLAYER_NAME: Player.Name,
-		...dictionary
+		...dictionary,
 	})) {
 		text = text.replaceAll(k, v);
 	}
@@ -169,7 +169,7 @@ export function positionElement(element: HTMLElement, X: number, Y: number, W: n
 		top: `${Top}px`,
 		width: `${Width}px`,
 		height: `${Height}px`,
-		display: "inline"
+		display: "inline",
 	});
 }
 
@@ -190,7 +190,7 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 			minor: Number.parseInt(devMatch[2], 10),
 			patch: Number.parseInt(devMatch[3], 10),
 			extra: devMatch[4],
-			dev: true
+			dev: true,
 		};
 	}
 	const match = /^(\d+).(\d+).(\d+)-([0-f]+)$/.exec(version);
@@ -200,7 +200,7 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 			minor: Number.parseInt(match[2], 10),
 			patch: Number.parseInt(match[3], 10),
 			extra: match[4],
-			dev: false
+			dev: false,
 		};
 	}
 	return null;

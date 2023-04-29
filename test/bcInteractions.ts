@@ -36,15 +36,15 @@ export class BCInteractionManager {
 	async click(x: number, y: number): Promise<void> {
 		const canvasSize = await this.page.evaluate(() => ({
 			width: MainCanvas.canvas.clientWidth,
-			height: MainCanvas.canvas.clientHeight
+			height: MainCanvas.canvas.clientHeight,
 		}));
 
 		await this.page.click("#MainCanvas", {
 			delay: 30,
 			offset: {
 				x: (x / 2000) * canvasSize.width,
-				y: (y / 1000) * canvasSize.height
-			}
+				y: (y / 1000) * canvasSize.height,
+			},
 		});
 
 		await this.page.mouse.move(0, 0);
@@ -84,7 +84,7 @@ export class BCInteractionManager {
 							result.Left + Math.floor(result.Width / 2),
 							result.Top + Math.floor(result.Height / 2)
 						);
-					}
+					},
 				});
 			}
 		}
@@ -93,7 +93,7 @@ export class BCInteractionManager {
 	async clickButton(selector: Partial<BCTestButton>, timeout: number = 5000): Promise<void> {
 		const button = await this.waitForButton({
 			Disabled: false,
-			...selector
+			...selector,
 		}, timeout);
 		await button.click();
 	}
@@ -132,7 +132,7 @@ export class BCInteractionManager {
 							1025 + Math.floor(950 / 2),
 							160 + 105 * result.pos + Math.floor(90 / 2)
 						);
-					}
+					},
 				});
 			}
 		}
@@ -177,7 +177,7 @@ export class BCInteractionManager {
 
 	async waitForScreen(module: string, screen: string, timeout: number = 5000): Promise<void> {
 		await this.page.waitForFunction((expectedModule, expectedScreen) => CurrentModule === expectedModule && CurrentScreen === expectedScreen, {
-			timeout
+			timeout,
 		}, module, screen);
 	}
 
@@ -185,13 +185,13 @@ export class BCInteractionManager {
 		this.apiHandle = await this.page.evaluateHandle(() => window.bcModSdk.registerMod({
 			name: "BCTest",
 			fullName: "BC Testing Library",
-			version: "0.0.0"
+			version: "0.0.0",
 		}));
 
 		const InjectedFunctions: InjectedFunctionsTable = {
 			BCTest_FoundAwaitedButton: this._onFoundAwaitedButton.bind(this),
 			BCTest_FoundDialogLine: this._onFoundDialogButton.bind(this),
-			BCTest_FoundAwaitedText: this._onFoundAwaitedText.bind(this)
+			BCTest_FoundAwaitedText: this._onFoundAwaitedText.bind(this),
 		};
 
 		for (const [k, v] of Object.entries(InjectedFunctions)) {
@@ -211,7 +211,7 @@ export class BCInteractionManager {
 						Color,
 						Image: Image ?? "",
 						HoveringText: HoveringText ?? "",
-						Disabled: !!Disabled
+						Disabled: !!Disabled,
 					});
 				}
 				return next(args);
@@ -225,7 +225,7 @@ export class BCInteractionManager {
 							X,
 							Y,
 							Color,
-							BackColor: BackColor ?? ""
+							BackColor: BackColor ?? "",
 						});
 					}
 				}
@@ -309,7 +309,7 @@ export class BCInteractionManager {
 						window.setTimeout(() => {
 							window.BCTest_FoundDialogLine(matchingLines.length === 1 ? {
 								...matchingLines[0],
-								pos: displayedLines.indexOf(matchingLines[0])
+								pos: displayedLines.indexOf(matchingLines[0]),
 							} : "More than one button matches");
 						}, 100);
 					}

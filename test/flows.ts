@@ -21,22 +21,22 @@ export async function LoginScreenRegister(bc: BCInteractionManager, account: BCC
 
 	// Login screen
 	await bc.clickButton({
-		Label: "New Character"
+		Label: "New Character",
 	});
 	await bc.waitForScreen("Character", "Disclaimer");
 
 	// Confirmation screen
 	await bc.clickButton({
-		Label: "I accept"
+		Label: "I accept",
 	});
 	await bc.waitForScreen("Character", "Appearance");
 
 	// Character setup
 	await bc.clickButton({
-		HoveringText: "Randomize character"
+		HoveringText: "Randomize character",
 	});
 	await bc.clickButton({
-		HoveringText: "Accept changes"
+		HoveringText: "Accept changes",
 	});
 	await bc.waitForScreen("Character", "Creation");
 
@@ -52,40 +52,40 @@ export async function LoginScreenRegister(bc: BCInteractionManager, account: BCC
 
 	// Register
 	await bc.clickButton({
-		Label: "Create your account"
+		Label: "Create your account",
 	});
 	await bc.waitForScreen("Room", "MainHall");
 
 	// Get through initial quiz
 	await bc.clickDialogLine({
-		Option: "No, I've been here before."
+		Option: "No, I've been here before.",
 	});
 	await bc.clickDialogLine({
-		Option: "Yes.  I will be honest."
+		Option: "Yes.  I will be honest.",
 	});
 	await bc.clickDialogLine({
-		Option: "I'm an adult."
+		Option: "I'm an adult.",
 	});
 	await bc.clickDialogLine({
-		Option: "I'm fine with BDSM."
+		Option: "I'm fine with BDSM.",
 	});
 	await bc.clickDialogLine({
-		Option: "I will be respectful and open-minded."
+		Option: "I will be respectful and open-minded.",
 	});
 	await bc.clickDialogLine({
-		Option: "Everything will be consensual, and I will respect limits."
+		Option: "Everything will be consensual, and I will respect limits.",
 	});
 	await bc.clickDialogLine({
-		Option: "I will stay safe when I play."
+		Option: "I will stay safe when I play.",
 	});
 	await bc.clickDialogLine({
-		Option: "My personal information will stay personal."
+		Option: "My personal information will stay personal.",
 	});
 	await bc.clickDialogLine({
-		Option: "I won't use exploits against others."
+		Option: "I won't use exploits against others.",
 	});
 	await bc.clickDialogLine({
-		Option: "(Thank her and leave her.)"
+		Option: "(Thank her and leave her.)",
 	});
 }
 
@@ -101,10 +101,10 @@ export async function MainHallLogout(bc: BCInteractionManager): Promise<void> {
 
 	await Promise.all([
 		page.waitForNavigation({
-			waitUntil: "domcontentloaded"
+			waitUntil: "domcontentloaded",
 		}),
 		bc.clickButton({
-			HoveringText: "Leave the Club"
-		})
+			HoveringText: "Leave the Club",
+		}),
 	]);
 }

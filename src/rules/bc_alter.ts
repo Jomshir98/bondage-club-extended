@@ -24,14 +24,14 @@ export function initRules_bc_alter() {
 				type: "listSelect",
 				options: [["light", "Light"], ["medium", "Medium"], ["heavy", "Heavy"]],
 				default: "light",
-				description: "Hearing impairment:"
-			}
+				description: "Hearing impairment:",
+			},
 		},
 		load(state) {
 			const strengthMap: Record<string, number> = {
 				light: 1,
 				medium: 2,
-				heavy: 4
+				heavy: 4,
 			};
 			hookFunction("Player.GetDeafLevel", 1, (args, next) => {
 				let res = next(args);
@@ -40,7 +40,7 @@ export function initRules_bc_alter() {
 				}
 				return res;
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("alt_hearing_whitelist", {
@@ -58,15 +58,15 @@ export function initRules_bc_alter() {
 				description: "Members numbers still heard while hearing impaired:",
 				Y: 350,
 				options: {
-					pageSize: 3
-				}
+					pageSize: 3,
+				},
 			},
 			ignoreGaggedMembersToggle: {
 				type: "toggle",
 				default: false,
 				description: "Also understand if those are speech impaired",
-				Y: 710
-			}
+				Y: 710,
+			},
 		},
 		load(state) {
 			let ignoreDeaf = false;
@@ -112,7 +112,7 @@ export function initRules_bc_alter() {
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("alt_restrict_sight", {
@@ -128,14 +128,14 @@ export function initRules_bc_alter() {
 				type: "listSelect",
 				options: [["light", "Light"], ["medium", "Medium"], ["heavy", "Heavy"]],
 				default: "light",
-				description: "Eyesight impairment:"
-			}
+				description: "Eyesight impairment:",
+			},
 		},
 		load(state) {
 			const strengthMap: Record<string, number> = {
 				light: 1,
 				medium: 2,
-				heavy: 3
+				heavy: 3,
 			};
 			hookFunction("Player.GetBlindLevel", 1, (args, next) => {
 				let res = next(args);
@@ -144,7 +144,7 @@ export function initRules_bc_alter() {
 				}
 				return Math.min(res, Player.GameplaySettings?.SensDepChatLog === "SensDepLight" ? 2 : 3);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("alt_seeing_whitelist", {
@@ -159,8 +159,8 @@ export function initRules_bc_alter() {
 			whitelistedMembers: {
 				type: "memberNumberList",
 				default: [],
-				description: "Members still seen while under blindness:"
-			}
+				description: "Members still seen while under blindness:",
+			},
 		},
 		load(state) {
 			let noBlind = false;
@@ -222,7 +222,7 @@ export function initRules_bc_alter() {
 					ChatRoomCharacterCount = ChatRoomCharacterDrawlist.length;
 				}
 			});
-		}
+		},
 	});
 
 	registerRule("alt_eyes_fullblind", {
@@ -236,14 +236,14 @@ export function initRules_bc_alter() {
 			affectPlayer: {
 				type: "toggle",
 				default: false,
-				description: "Player sees the effect also on herself"
+				description: "Player sees the effect also on herself",
 			},
 			hideNames: {
 				type: "toggle",
 				default: false,
 				description: "Hide names and icons during the effect",
-				Y: 440
-			}
+				Y: 440,
+			},
 		},
 		tick(state) {
 			if (state.isEnforced) {
@@ -293,7 +293,7 @@ export function initRules_bc_alter() {
 					return;
 				return next(args);
 			});
-		}
+		},
 	});
 
 	registerRule("alt_field_of_vision", {
@@ -307,14 +307,14 @@ export function initRules_bc_alter() {
 			affectPlayer: {
 				type: "toggle",
 				default: false,
-				description: "Player sees the effect also on herself"
+				description: "Player sees the effect also on herself",
 			},
 			hideNames: {
 				type: "toggle",
 				default: false,
 				description: "Hide names and icons during the effect",
-				Y: 440
-			}
+				Y: 440,
+			},
 		},
 		load(state) {
 			let limitTop = 0;
@@ -443,7 +443,7 @@ export function initRules_bc_alter() {
 				}
 				return next(args);
 			});
-		}
+		},
 	});
 
 	registerRule("alt_blindfolds_fullblind", {
@@ -460,7 +460,7 @@ export function initRules_bc_alter() {
 					return 3;
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("alt_always_slow", {
@@ -481,7 +481,7 @@ export function initRules_bc_alter() {
 					return true;
 				return next(args);
 			});
-		}
+		},
 	});
 
 	registerRule("alt_set_leave_slowing", {
@@ -497,10 +497,10 @@ export function initRules_bc_alter() {
 				default: 10,
 				options: {
 					min: 1,
-					max: 600
+					max: 600,
 				},
-				description: "New leave time in seconds:"
-			}
+				description: "New leave time in seconds:",
+			},
 		},
 		init(state) {
 			hookFunction("ChatRoomMenuClick", 2, (args, next) => {
@@ -513,7 +513,7 @@ export function initRules_bc_alter() {
 					ChatRoomSlowtimer = CurrentTime + state.customData.leaveTime * 1000;
 				}
 			});
-		}
+		},
 	});
 
 	registerRule("alt_control_orgasms", {
@@ -529,8 +529,8 @@ export function initRules_bc_alter() {
 				type: "listSelect",
 				default: "edge",
 				options: [["edge", "Edge"], ["ruined", "Ruin"], ["noResist", "Prevent resisting"]],
-				description: "Orgasm attempts will be fixed to:"
-			}
+				description: "Orgasm attempts will be fixed to:",
+			},
 		},
 		load(state) {
 			hookFunction("ServerSend", 0, (args, next) => {
@@ -567,7 +567,7 @@ export function initRules_bc_alter() {
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("alt_secret_orgasms", {
@@ -594,7 +594,7 @@ export function initRules_bc_alter() {
 				if (C.ID === 0 && state.isEnforced && MouseIn(CharX + 50 * Zoom, CharY + 200 * Zoom, 100 * Zoom, 500 * Zoom) && C.ArousalZoom) return;
 				return next(args);
 			});
-		}
+		},
 	});
 
 	const gaveAdminTo: Set<number> = new Set();
@@ -611,14 +611,14 @@ export function initRules_bc_alter() {
 				type: "roleSelector",
 				default: AccessLevel.owner,
 				description: "Minimum role that gets admin:",
-				Y: 320
+				Y: 320,
 			},
 			removeAdminToggle: {
 				type: "toggle",
 				default: false,
 				description: "Player loses admin afterwards",
-				Y: 470
-			}
+				Y: 470,
+			},
 		},
 		load() {
 			hookFunction("ChatRoomSyncMemberLeave", 3, (args, next) => {
@@ -659,14 +659,14 @@ export function initRules_bc_alter() {
 						BlockCategory: ChatRoomData.BlockCategory.slice(),
 						Game: ChatRoomGame,
 						Private: ChatRoomData.Private,
-						Locked: ChatRoomData.Locked
+						Locked: ChatRoomData.Locked,
 					};
 					ServerSend("ChatRoomAdmin", { MemberNumber: Player.ID, Room: UpdatedRoom, Action: "Update" });
 					changed = true;
 				}
 			}
 			return changed;
-		}
+		},
 	});
 
 	registerRule("alt_room_admin_limit", {
@@ -678,7 +678,7 @@ export function initRules_bc_alter() {
 		keywords: ["restraints", "authority", "suppressing", "bindings", "helpless"],
 		defaultLimit: ConditionsLimit.limited,
 		triggerTexts: {
-			attempt_infoBeep: "You are forbidden from changing room settings while restrained"
+			attempt_infoBeep: "You are forbidden from changing room settings while restrained",
 		},
 		load(state) {
 			hookFunction("ChatAdminLoad", 0, (args, next) => {
@@ -744,7 +744,7 @@ export function initRules_bc_alter() {
 				}
 				return next(args);
 			});
-		}
+		},
 	});
 
 	registerRule("alt_set_profile_description", {
@@ -759,8 +759,8 @@ export function initRules_bc_alter() {
 			playersProfileDescription: {
 				type: "textArea",
 				default: () => (Player.Description || ""),
-				description: "Edit this player's profile description:"
-			}
+				description: "Edit this player's profile description:",
+			},
 		},
 		tick(state) {
 			if (state.isEnforced && state.customData) {
@@ -776,7 +776,7 @@ export function initRules_bc_alter() {
 				}
 			}
 			return false;
-		}
+		},
 	});
 
 	function getValidNickname(): string {
@@ -798,14 +798,14 @@ export function initRules_bc_alter() {
 				type: "string",
 				default: getValidNickname,
 				description: "Set this player's nickname:",
-				options: /^[\p{L}0-9\p{Z}'-]{0,20}$/u
+				options: /^[\p{L}0-9\p{Z}'-]{0,20}$/u,
 			},
 			restore: {
 				type: "toggle",
 				description: "Restore the previous nickname at rule end",
 				default: true,
-				Y: 470
-			}
+				Y: 470,
+			},
 		},
 		internalDataValidate: (data) => typeof data === "string",
 		internalDataDefault: getValidNickname,
@@ -842,7 +842,7 @@ export function initRules_bc_alter() {
 				}
 			}
 			return false;
-		}
+		},
 	});
 
 	registerRule("alt_force_suitcase_game", {
@@ -860,7 +860,7 @@ export function initRules_bc_alter() {
 				return true;
 			}
 			return false;
-		}
+		},
 	});
 
 	registerRule("alt_restrict_leashability", {
@@ -875,8 +875,8 @@ export function initRules_bc_alter() {
 				type: "roleSelector",
 				default: AccessLevel.owner,
 				description: "Minimum role that is allowed to leash:",
-				Y: 320
-			}
+				Y: 320,
+			},
 		},
 		load(state) {
 			hookFunction("ChatRoomCanBeLeashedBy", 4, (args, next) => {
@@ -890,13 +890,13 @@ export function initRules_bc_alter() {
 					const character = getChatroomCharacter(sourceMemberNumber);
 					ChatRoomActionMessage(`SourceCharacter's leash seems to be cursed and slips out of TargetCharacterName's hand.`, null, [
 						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
-						{ Tag: "TargetCharacterName", MemberNumber: sourceMemberNumber, Text: character ? CharacterNickname(character.Character) : getCharacterName(sourceMemberNumber, "[unknown]") }
+						{ Tag: "TargetCharacterName", MemberNumber: sourceMemberNumber, Text: character ? CharacterNickname(character.Character) : getCharacterName(sourceMemberNumber, "[unknown]") },
 					]);
 					return false;
 				}
 				return next(args);
 			});
-		}
+		},
 	});
 
 	registerRule("alt_hide_friends", {
@@ -911,15 +911,15 @@ export function initRules_bc_alter() {
 			allowedMembers: {
 				type: "memberNumberList",
 				default: [],
-				description: "Members numbers that can always be seen:"
-			}
+				description: "Members numbers that can always be seen:",
+			},
 		},
 		load(state) {
 			patchFunction("FriendListLoadFriendList", {
-				"data.forEach(friend => {": 'data.forEach(friend => { if (typeof friend.MemberNumber !== "number") return;'
+				"data.forEach(friend => {": 'data.forEach(friend => { if (typeof friend.MemberNumber !== "number") return;',
 			});
 			patchFunction("FriendListLoadFriendList", {
-				"FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;": "if (typeof friend.MemberNumber === 'number') FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;"
+				"FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;": "if (typeof friend.MemberNumber === 'number') FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;",
 			});
 			hookFunction("FriendListLoadFriendList", 1, (args, next) => {
 				const data = args[0] as any[];
@@ -934,7 +934,7 @@ export function initRules_bc_alter() {
 				}
 				return next(args);
 			});
-		}
+		},
 	});
 
 	registerRule("alt_forced_summoning", {
@@ -945,7 +945,7 @@ export function initRules_bc_alter() {
 		longDescription: "This rule forces PLAYER_NAME to switch rooms from anywhere in the club to the chat room of the summoner after 15 seconds. It works by sending a beep message with the set text or simply the word 'summon' to PLAYER_NAME. Members who are allowed to summon PLAYER_NAME can be set. NOTES: PLAYER_NAME can always be summoned no matter if she has a leash or is prevented from leaving the room (ignoring restraints or locked rooms). However, if the target room is full or locked, she will end up in the lobby. Summoning will not work if the room name is not included with the beep message!",
 		keywords: ["leashing", "room", "calling", "ordering", "move", "moving", "movement", "warping", "beaming", "transporting"],
 		triggerTexts: {
-			infoBeep: "You are summoned by TARGET_PLAYER!"
+			infoBeep: "You are summoned by TARGET_PLAYER!",
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
@@ -955,21 +955,21 @@ export function initRules_bc_alter() {
 				description: "Members numbers allowed to summon:",
 				Y: 325,
 				options: {
-					pageSize: 1
-				}
+					pageSize: 1,
+				},
 			},
 			summoningText: {
 				type: "string",
 				default: "Come to my room immediately",
 				description: "The text used for summoning:",
-				Y: 705
+				Y: 705,
 			},
 			summonTime: {
 				type: "number",
 				default: 15,
 				description: "Time in seconds before enforcing summon:",
-				Y: 550
-			}
+				Y: 550,
+			},
 		},
 		load(state) {
 			let beep = false;
@@ -992,7 +992,7 @@ export function initRules_bc_alter() {
 					ChatSelectGendersAllowed(data.ChatRoomSpace, Player.GetGenders())
 				) {
 					ChatRoomActionMessage(`SourceCharacter received a summon: "${state.customData.summoningText}".`, null, [
-						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 					]);
 					beep = true;
 					BCX_setTimeout(() => {
@@ -1001,7 +1001,7 @@ export function initRules_bc_alter() {
 
 						// leave
 						ChatRoomActionMessage(`The demand for SourceCharacter's presence is now enforced.`, null, [
-							{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+							{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 						]);
 						DialogLentLockpicks = false;
 						ChatRoomClearAllElements();
@@ -1020,7 +1020,7 @@ export function initRules_bc_alter() {
 				if (beep) state.triggerAttempt(data.MemberNumber);
 				beep = false;
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("alt_allow_changing_appearance", {
@@ -1035,8 +1035,8 @@ export function initRules_bc_alter() {
 			minimumRole: {
 				type: "roleSelector",
 				default: AccessLevel.owner,
-				description: "Minimum role that is allowed:"
-			}
+				description: "Minimum role that is allowed:",
+			},
 		},
 		init(state) {
 			queryHandlers.rule_alt_allow_changing_appearance = (sender) => {
@@ -1093,6 +1093,6 @@ export function initRules_bc_alter() {
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 }

@@ -83,7 +83,7 @@ export function registerCommand(category: CommandCategory, name: string, descrip
 		callback,
 		autocomplete,
 		category,
-		description
+		description,
 	});
 }
 
@@ -100,7 +100,7 @@ export function aliasCommand(originalName: string, alias: string): void {
 			category: original.category,
 			description: null,
 			callback: original.callback,
-			autocomplete: original.autocomplete
+			autocomplete: original.autocomplete,
 		});
 	} else {
 		commands.set(alias, {
@@ -108,7 +108,7 @@ export function aliasCommand(originalName: string, alias: string): void {
 			category: original.category,
 			description: null,
 			callback: original.callback,
-			autocomplete: original.autocomplete
+			autocomplete: original.autocomplete,
 		});
 	}
 }
@@ -129,7 +129,7 @@ export function registerCommandParsed(
 		callback,
 		autocomplete,
 		category,
-		description
+		description,
 	});
 }
 
@@ -161,7 +161,7 @@ export function registerWhisperCommand(
 		callback,
 		autocomplete,
 		category,
-		description
+		description,
 	});
 }
 
@@ -300,7 +300,7 @@ function CommandAutocomplete(msg: string): [string, string][] {
 						.concat(needsQuotes ? CommandQuoteArgument(i, true) : i)
 						.join(" ") +
 					(fin ? " " : ""),
-					i
+					i,
 				]
 			);
 		} else {
@@ -368,7 +368,7 @@ function WhisperCommandAutocomplete(msg: string, sender: ChatroomCharacter): [st
 					.concat(needsQuotes ? CommandQuoteArgument(i, true) : i)
 					.join(" ") +
 				(fin ? " " : ""),
-				i
+				i,
 			]
 		);
 	}
@@ -669,7 +669,7 @@ export class ModuleCommands extends BaseModule {
 						ServerSend("ChatRoomChat", {
 							Content: `[BCX]\n${msg}`,
 							Type: "Whisper",
-							Target: sender.MemberNumber
+							Target: sender.MemberNumber,
 						});
 					});
 					return;

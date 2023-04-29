@@ -63,7 +63,7 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 	protected drawCategoryImage(X: number, Y: number, data: dataEntry): void {
 		DrawImageEx(data.extra.type === "body" ? "Icons/Character.png" : data.extra.type === "clothing" ? "Icons/Dress.png" : "Assets/Female3DCG/ItemArms/Preview/NylonRope.png", X + 6, Y + 6, {
 			Height: 50,
-			Width: 50
+			Width: 50,
 		});
 	}
 
@@ -75,7 +75,7 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 			DrawImageEx("Icons/Remove.png", X + 610, Y + 10, {
 				Height: 40,
 				Width: 40,
-				Alpha: itemRemove ? 1 : 0.2
+				Alpha: itemRemove ? 1 : 0.2,
 			});
 			if (MouseIn(X + 610, Y + 6, 44, 44)) {
 				DrawHoverElements.push(() => {
@@ -87,7 +87,7 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 			DrawImageEx(data.extra.propertiesCursed ? "Icons/Lock.png" : "Icons/Unlock.png", X + 660, Y + 10, {
 				Height: 40,
 				Width: 40,
-				Alpha: data.extra.propertiesCursed ? 1 : 0.2
+				Alpha: data.extra.propertiesCursed ? 1 : 0.2,
 			});
 			if (MouseIn(X + 660, Y + 6, 44, 44)) {
 				DrawHoverElements.push(() => {
@@ -110,14 +110,14 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 		}
 		if (data.data === null) {
 			return [`Blocked: ${getVisibleGroupName(group)}`, {
-				type: group.Category === "Item" ? "item" : group.Clothing ? "clothing" : "body"
+				type: group.Category === "Item" ? "item" : group.Clothing ? "clothing" : "body",
 			}];
 		} else {
 			const item = AssetGet(this.character.Character.AssetFamily, condition, data.data.Name);
 			return [`${item?.Description ?? data.data.Name} (${getVisibleGroupName(group)})`, {
 				type: group.Category === "Item" ? "item" : group.Clothing ? "clothing" : "body",
 				propertiesCursed: data.data.curseProperties,
-				propertiesCursedShow: data.data.curseProperties || !item || curseAllowItemCurseProperty(item)
+				propertiesCursedShow: data.data.curseProperties || !item || curseAllowItemCurseProperty(item),
 			}];
 		}
 	}

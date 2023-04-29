@@ -81,15 +81,15 @@ export class GuiMemberSelect extends GuiSubscreen {
 			{
 				type: "Character",
 				memberNumber: this.character.MemberNumber,
-				name: this.character.Name
-			}
+				name: this.character.Name,
+			},
 		];
 
 		if (!this.character.isPlayer()) {
 			this.roleList.push({
 				type: "Player",
 				memberNumber: Player.MemberNumber!,
-				name: Player.Name
+				name: Player.Name,
 			});
 		}
 
@@ -97,7 +97,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 			this.roleList.push({
 				type: "Clubowner",
 				memberNumber: this.character.Character.Ownership.MemberNumber,
-				name: this.character.Character.Ownership.Name
+				name: this.character.Character.Ownership.Name,
 			});
 		}
 		for (const owner of this.roleData.owners) {
@@ -105,7 +105,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 				this.roleList.push({
 					type: "Owner",
 					memberNumber: owner[0],
-					name: getCharacterName(owner[0], owner[1] || "[unknown name]")
+					name: getCharacterName(owner[0], owner[1] || "[unknown name]"),
 				});
 			}
 		}
@@ -115,7 +115,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 					this.roleList.push({
 						type: "Lover",
 						memberNumber: L.MemberNumber,
-						name: L.Name
+						name: L.Name,
 					});
 				}
 			}
@@ -125,7 +125,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 				this.roleList.push({
 					type: "Mistress",
 					memberNumber: mistress[0],
-					name: getCharacterName(mistress[0], mistress[1] || "[unknown name]")
+					name: getCharacterName(mistress[0], mistress[1] || "[unknown name]"),
 				});
 			}
 		}
@@ -142,7 +142,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 						this.roleList.push({
 							type: "in same room",
 							memberNumber: ChatRoomCharacterList[i].MemberNumber,
-							name: ChatRoomCharacterList[i].Name
+							name: ChatRoomCharacterList[i].Name,
 						});
 					}
 				}
@@ -153,7 +153,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 						this.roleList.push({
 							type: "in same room",
 							memberNumber: character.MemberNumber,
-							name: character.Name
+							name: character.Name,
 						});
 					}
 				}
@@ -166,7 +166,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 					this.roleList.push({
 						type: "Friend",
 						memberNumber,
-						name
+						name,
 					});
 				}
 			}

@@ -6,7 +6,7 @@ import { AssertNotNullable } from "./utils";
 const account: BCCharacterRegistrationData = {
 	characterName: "Testy",
 	accountName: AccountNameGenerator(),
-	password: AccountPasswordGenerator()
+	password: AccountPasswordGenerator(),
 };
 
 describe("BC Registration and login", () => {
@@ -22,7 +22,7 @@ describe("BC Registration and login", () => {
 
 		beforeAll(async () => {
 			bc = await TestOpenBC({
-				keepOpen: true
+				keepOpen: true,
 			});
 		});
 
@@ -38,11 +38,11 @@ describe("BC Registration and login", () => {
 			await bc.page.type("#InputPassword", account.password.slice(1));
 
 			await bc.clickButton({
-				Label: "Login"
+				Label: "Login",
 			});
 
 			await bc.waitForText({
-				Text: "Invalid name or password"
+				Text: "Invalid name or password",
 			});
 		});
 
@@ -60,7 +60,7 @@ describe("BC Registration and login", () => {
 			await passwordInput.type(account.password);
 
 			await bc.clickButton({
-				Label: "Login"
+				Label: "Login",
 			});
 
 			await bc.waitForScreen("Room", "MainHall");

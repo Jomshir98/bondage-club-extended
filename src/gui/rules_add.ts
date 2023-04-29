@@ -96,7 +96,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 			)) continue;
 			this.ruleList.push({
 				name: entry[0],
-				definition: entry[1]
+				definition: entry[1],
 			});
 		}
 
@@ -202,7 +202,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 
 			DrawImageEx(RULE_ICONS[e.definition.type], 125, Y, {
 				Height: 64,
-				Width: 64
+				Width: 64,
 			});
 
 			let color: string;

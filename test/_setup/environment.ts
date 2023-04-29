@@ -16,7 +16,7 @@ async function connectBrowserFromWorker(config: Config): Promise<Browser> {
 	return puppeteer.connect({
 		...config.launch,
 		browserURL: undefined,
-		browserWSEndpoint: wsEndpoint
+		browserWSEndpoint: wsEndpoint,
 	});
 }
 

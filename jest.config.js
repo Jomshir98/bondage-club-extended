@@ -6,14 +6,14 @@
 module.exports = {
 	clearMocks: true,
 	collectCoverageFrom: [
-		"src/**/*.ts"
+		"src/**/*.ts",
 	],
 	coverageDirectory: "coverage",
 	errorOnDeprecated: true,
 	transform: {
 		"^.+\\.[tj]sx?$": ["ts-jest", {
-			tsconfig: "./test/tsconfig.json"
-		}]
+			tsconfig: "./test/tsconfig.json",
+		}],
 	},
 	testTimeout: 60_000,
 	maxWorkers: 1,
@@ -22,6 +22,6 @@ module.exports = {
 	globalTeardown: "<rootDir>/test/_setup/global_teardown.ts",
 	testEnvironment: "<rootDir>/test/_setup/environment.ts",
 	setupFilesAfterEnv: [
-		"expect-puppeteer"
-	]
+		"expect-puppeteer",
+	],
 };

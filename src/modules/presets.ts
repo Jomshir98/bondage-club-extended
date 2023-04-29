@@ -12,7 +12,7 @@ const PRESET_DISABLED_MODULES: Record<Preset, ModuleCategory[]> = {
 	[Preset.dominant]: [ModuleCategory.Log, ModuleCategory.Curses, ModuleCategory.Rules, ModuleCategory.Commands],
 	[Preset.switch]: [],
 	[Preset.submissive]: [],
-	[Preset.slave]: []
+	[Preset.slave]: [],
 };
 
 export function getCurrentPreset(): Preset {

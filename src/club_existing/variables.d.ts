@@ -210,7 +210,7 @@ declare var ServerSocket: import("socket.io-client").Socket;
 declare var ServerIsConnected: boolean;
 declare var ServerAccountUpdate: {
 	SyncToServer(): void;
-	QueueData(Data: object, Force?: true): void
+	QueueData(Data: object, Force?: true): void;
 };
 declare var ServerCharacterNicknameRegex: RegExp;
 declare function ServerPlayerIsInChatRoom(): boolean;

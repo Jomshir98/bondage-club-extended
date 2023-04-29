@@ -22,14 +22,14 @@ export enum LogEntryType {
 	ruleTrigger = 2,
 	ruleTriggerAttempt = 3,
 	curseTrigger = 4,
-	curseTriggerBatch = 5
+	curseTriggerBatch = 5,
 }
 
 export enum LogAccessLevel {
 	none = 0,
 	protected = 1,
 	normal = 2,
-	everyone = 3
+	everyone = 3,
 }
 
 export type LogEntryTypeData = {
@@ -188,7 +188,7 @@ export function getVisibleLogEntries(character: ChatroomCharacter): LogEntry[] {
 		[LogAccessLevel.none]: character.isPlayer(),
 		[LogAccessLevel.normal]: checkPermissionAccess("log_view_normal", character),
 		[LogAccessLevel.protected]: checkPermissionAccess("log_view_protected", character),
-		[LogAccessLevel.everyone]: true
+		[LogAccessLevel.everyone]: true,
 	};
 	return modStorage.log.filter(e => allow[e[1]]);
 }
@@ -239,7 +239,7 @@ export function logGetAllowedActions(character: ChatroomCharacter): BCX_logAllow
 		configure: checkPermissionAccess("log_configure", character),
 		delete: checkPermissionAccess("log_delete", character),
 		leaveMessage: checkPermissionAccess("log_add_note", character) && !!(modStorage.logConfig?.user_note),
-		praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber)
+		praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber),
 	};
 }
 
@@ -316,7 +316,7 @@ const logConfigDefaults: Record<BCX_LogCategory, LogAccessLevel> = {
 	rule_trigger: LogAccessLevel.none,
 	command_change: LogAccessLevel.none,
 	authority_roles_change: LogAccessLevel.protected,
-	relationships_change: LogAccessLevel.none
+	relationships_change: LogAccessLevel.none,
 };
 
 export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
@@ -334,14 +334,14 @@ export const LOG_CONFIG_NAMES: Record<BCX_LogCategory, string> = {
 	rule_trigger: "Log every rule violation",
 	command_change: "Log each change of commands limit",
 	authority_roles_change: "Log getting or losing a BCX owner/mistress",
-	relationships_change: "Log each change in relationships module"
+	relationships_change: "Log each change in relationships module",
 };
 
 export const LOG_LEVEL_NAMES: Record<LogAccessLevel, string> = {
 	[LogAccessLevel.everyone]: "[ERROR]",
 	[LogAccessLevel.none]: "No",
 	[LogAccessLevel.protected]: "Protected",
-	[LogAccessLevel.normal]: "Yes"
+	[LogAccessLevel.normal]: "Yes",
 };
 
 export class ModuleLog extends BaseModule {
@@ -353,8 +353,8 @@ export class ModuleLog extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.mistress],
 				[Preset.switch]: [true, AccessLevel.mistress],
 				[Preset.submissive]: [true, AccessLevel.friend],
-				[Preset.slave]: [true, AccessLevel.public]
-			}
+				[Preset.slave]: [true, AccessLevel.public],
+			},
 		});
 		registerPermission("log_view_protected", {
 			name: "Allow to see protected log entries",
@@ -363,8 +363,8 @@ export class ModuleLog extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.lover],
 				[Preset.switch]: [true, AccessLevel.lover],
 				[Preset.submissive]: [true, AccessLevel.mistress],
-				[Preset.slave]: [true, AccessLevel.mistress]
-			}
+				[Preset.slave]: [true, AccessLevel.mistress],
+			},
 		});
 		registerPermission("log_configure", {
 			name: "Allow to configure what is logged",
@@ -373,8 +373,8 @@ export class ModuleLog extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.owner],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 		registerPermission("log_delete", {
 			name: "Allow deleting log entries",
@@ -383,8 +383,8 @@ export class ModuleLog extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.owner],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 		registerPermission("log_praise", {
 			name: "Allow to praise or scold",
@@ -393,8 +393,8 @@ export class ModuleLog extends BaseModule {
 				[Preset.dominant]: [false, AccessLevel.friend],
 				[Preset.switch]: [false, AccessLevel.friend],
 				[Preset.submissive]: [false, AccessLevel.public],
-				[Preset.slave]: [false, AccessLevel.public]
-			}
+				[Preset.slave]: [false, AccessLevel.public],
+			},
 		});
 		registerPermission("log_add_note", {
 			name: "Allow to attach notes to the body",
@@ -403,8 +403,8 @@ export class ModuleLog extends BaseModule {
 				[Preset.dominant]: [false, AccessLevel.mistress],
 				[Preset.switch]: [false, AccessLevel.mistress],
 				[Preset.submissive]: [false, AccessLevel.friend],
-				[Preset.slave]: [false, AccessLevel.public]
-			}
+				[Preset.slave]: [false, AccessLevel.public],
+			},
 		});
 
 		queryHandlers.logData = (sender) => {
@@ -574,7 +574,7 @@ export class ModuleLog extends BaseModule {
 				return res + `Done!`;
 			},
 			importPermissions: ["log_configure"],
-			importValidator: zod.record(zod.nativeEnum(LogAccessLevel))
+			importValidator: zod.record(zod.nativeEnum(LogAccessLevel)),
 		});
 	}
 
@@ -611,7 +611,7 @@ export class ModuleLog extends BaseModule {
 				hadOrgasm: "had_orgasm",
 				enteredPublicRoom: "entered_public_room",
 				enteredPrivateRoom: "entered_private_room",
-				ownershipChangesBCX: "authority_roles_change"
+				ownershipChangesBCX: "authority_roles_change",
 			};
 			for (const k of Object.keys(modStorage.logConfig) as BCX_LogCategory[]) {
 				if (transitionDictionary[k] !== undefined) {

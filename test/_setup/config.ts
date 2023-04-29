@@ -29,7 +29,7 @@ export type JestPuppeteerGlobal = Required<StrictGlobal>;
 
 const DEFAULT_CONFIG = {
 	browserContext: "default",
-	exitOnPageError: true
+	exitOnPageError: true,
 } as const;
 
 export function getConfig(): Config {
@@ -43,15 +43,15 @@ export function getConfig(): Config {
 					"--disable-setuid-sandbox",
 					"--disable-background-timer-throttling",
 					"--disable-backgrounding-occluded-windows",
-					"--disable-renderer-backgrounding"
-				]
-			}
+					"--disable-renderer-backgrounding",
+				],
+			},
 		};
 	}
 	return {
 		...DEFAULT_CONFIG,
 		launch: {
-			headless: "new"
-		}
+			headless: "new",
+		},
 	};
 }

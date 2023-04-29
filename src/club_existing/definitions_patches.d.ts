@@ -14,8 +14,8 @@ interface GenderSetting {
 type ChatRoomSpaceType = string;
 
 declare const ExtendedArchetype: {
-	TYPED: "modular",
-	MODULAR: "typed",
-	VIBRATING: "vibrating",
-	VARIABLEHEIGHT: "variableheight"
+	TYPED: "modular";
+	MODULAR: "typed";
+	VIBRATING: "vibrating";
+	VARIABLEHEIGHT: "variableheight";
 };

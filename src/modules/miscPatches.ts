@@ -184,7 +184,7 @@ export class ModuleMiscPatches extends BaseModule {
 		});
 
 		patchFunction("DrawGetImage", {
-			"Img.src = Source;": 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;'
+			"Img.src = Source;": 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;',
 		});
 
 		// fixes a bug in BC
@@ -194,7 +194,7 @@ export class ModuleMiscPatches extends BaseModule {
 
 		// Widen possible nicknames
 		patchFunction("CharacterNickname", {
-			"/^[a-zA-Z\\s]*$/": "/^[\\p{L}0-9\\p{Z}'-]+$/u"
+			"/^[a-zA-Z\\s]*$/": "/^[\\p{L}0-9\\p{Z}'-]+$/u",
 		});
 		ServerCharacterNicknameRegex = NICKNAME_REGEX;
 	}

@@ -14,11 +14,15 @@ import simpleGit from "simple-git";
 
 /* global process */
 
-/** @type {import("rollup").RollupOptions} */
-const config = {
-	input: "src/index.ts",
-	output: {
-		file: "dist/bcx.js",
+/**
+ * Creates options for building BCX
+ * @param {string} output - Output file for bcx
+ * @param {import("rollup").OutputPlugin[]} plugins - Extra plugins to apply
+ * @returns {import("rollup").OutputOptions}
+ */
+function GetBCXBuilder(output, plugins = []) {
+	return {
+		file: output,
 		format: "iife",
 		sourcemap: true,
 		banner: `// BCX: Bondage Club Extended
@@ -48,7 +52,14 @@ console.debug("BCX: Parse start...");
 			}
 			return `const BCX_VERSION="${BCX_VERSION}";const BCX_DEVEL=${BCX_DEVEL};`;
 		},
-	},
+		plugins,
+	};
+}
+
+/** @type {import("rollup").RollupOptions} */
+const config = {
+	input: "src/index.ts",
+	output: [],
 	treeshake: false,
 	plugins: [
 		progress({ clearLine: true }),
@@ -83,11 +94,10 @@ console.debug("BCX: Parse start...");
 	},
 };
 
-if (!process.env.ROLLUP_WATCH) {
-	config.plugins.push(terser());
-}
-
 if (process.env.ROLLUP_WATCH) {
+	config.output.push(
+		GetBCXBuilder("dist/bcx.js")
+	);
 	config.plugins.push(
 		serve({
 			contentBase: "dist",
@@ -97,6 +107,13 @@ if (process.env.ROLLUP_WATCH) {
 				"Access-Control-Allow-Origin": "*",
 			},
 		})
+	);
+} else {
+	config.output.push(
+		GetBCXBuilder("dist/bcx.js", [
+			terser(),
+		]),
+		GetBCXBuilder("dist/bcx.dev.js")
 	);
 }
 

@@ -80,7 +80,7 @@ export let BCXSourceExternal: boolean = false;
 
 export function init_findBCXSource(): void {
 	for (const elem of Array.from(document.getElementsByTagName("script"))) {
-		const match = /^(https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?bcx.js($|\?)/i.exec(elem.src);
+		const match = /^(https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?bcx(\.dev)?\.js($|\?)/i.exec(elem.src);
 		if (match) {
 			BCXSource = match[1];
 			return;
@@ -89,7 +89,7 @@ export function init_findBCXSource(): void {
 	const externalSrc = (window as any).BCX_SOURCE as unknown;
 	if (typeof externalSrc === "string") {
 		BCXSourceExternal = true;
-		const match = /^(https:\/\/[^?/]+\/(?:[^?]+?)?)(?:bcx.js)?(?:$|\?)/i.exec(externalSrc);
+		const match = /^(https:\/\/[^?/]+\/(?:[^?]+?)?)(?:bcx(\.dev)?\.js)?(?:$|\?)/i.exec(externalSrc);
 		if (match) {
 			BCXSource = match[1];
 			console.log("BCX: External BCX_SOURCE supplied, using it");

@@ -103,7 +103,7 @@ export default async (_jestConfig: JestConfig) => {
 		}
 
 		const BCXPath = "dist";
-		const BCXLoader = path.join(BCXPath, "bcx.js");
+		const BCXLoader = path.join(BCXPath, "bcx.dev.js");
 		if (!fs.existsSync(BCXLoader) || !fs.statSync(BCXLoader).isFile()) {
 			throw new Error(`Did not find built BCX at ${BCPath}, please build BCX first`);
 		}
@@ -123,7 +123,7 @@ export default async (_jestConfig: JestConfig) => {
 		const server = app.listen(port);
 
 		process.env.HTTP_SERVER_BC_ADDRESS = `http://localhost:${port}/Bondage-College/BondageClub`;
-		process.env.HTTP_SERVER_BCX_ADDRESS = `http://localhost:${port}/BCX/bcx.js`;
+		process.env.HTTP_SERVER_BCX_ADDRESS = `http://localhost:${port}/BCX/bcx.dev.js`;
 
 		cleanup.push(async () => {
 			await new Promise((resolve) => {

@@ -9,6 +9,7 @@ module.exports = {
 	coverageProvider: "v8",
 	collectCoverageFrom: [
 		"src/**/*.ts",
+		"!src/**/*.d.ts",
 	],
 	coverageReporters: [
 		"json",

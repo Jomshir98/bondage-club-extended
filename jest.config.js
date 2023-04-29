@@ -5,6 +5,8 @@
 // eslint-disable-next-line no-undef
 module.exports = {
 	clearMocks: true,
+	collectCoverage: true,
+	coverageProvider: "v8",
 	collectCoverageFrom: [
 		"src/**/*.ts",
 	],
@@ -18,6 +20,7 @@ module.exports = {
 	testTimeout: 60_000,
 	maxWorkers: 1,
 	bail: true,
+	testRunner: "<rootDir>/test/_setup/test_runner.ts",
 	globalSetup: "<rootDir>/test/_setup/global_setup.ts",
 	globalTeardown: "<rootDir>/test/_setup/global_teardown.ts",
 	testEnvironment: "<rootDir>/test/_setup/environment.ts",

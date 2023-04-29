@@ -47,7 +47,7 @@ console.debug("BCX: Parse start...");
 				BCX_DEVEL = "true";
 			}
 			return `const BCX_VERSION="${BCX_VERSION}";const BCX_DEVEL=${BCX_DEVEL};`;
-		}
+		},
 	},
 	treeshake: false,
 	plugins: [
@@ -61,16 +61,16 @@ console.debug("BCX: Parse start...");
 				{
 					src: [
 						"static/*",
-						process.env.IS_DEVEL ? "static_devel/*" : "static_stable/*"
+						process.env.IS_DEVEL ? "static_devel/*" : "static_stable/*",
 					],
-					dest: "dist"
+					dest: "dist",
 				},
 				{
 					src: "resources/*",
-					dest: "dist/resources"
-				}
-			]
-		})
+					dest: "dist/resources",
+				},
+			],
+		}),
 	],
 	onwarn(warning, warn) {
 		switch (warning.code) {
@@ -80,7 +80,7 @@ console.debug("BCX: Parse start...");
 			default:
 				warn(warning);
 		}
-	}
+	},
 };
 
 if (!process.env.ROLLUP_WATCH) {
@@ -94,8 +94,8 @@ if (process.env.ROLLUP_WATCH) {
 			host: "localhost",
 			port: 8082,
 			headers: {
-				"Access-Control-Allow-Origin": "*"
-			}
+				"Access-Control-Allow-Origin": "*",
+			},
 		})
 	);
 }

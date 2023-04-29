@@ -1,6 +1,8 @@
 import type { Page } from "puppeteer";
 import type { JestPuppeteerGlobal } from "./_setup/config";
 import { BCInteractionManager } from "./bcInteractions";
+import { AssertNotNullable } from "./utils";
+import * as path from "path";
 
 export function TestBrowserGlobals(): JestPuppeteerGlobal {
 	return globalThis as unknown as JestPuppeteerGlobal;
@@ -11,11 +13,40 @@ const handlePageError = (error: Error) => {
 };
 
 async function doClosePage(page: Page): Promise<void> {
-	const { puppeteerConfig } = TestBrowserGlobals();
+	const { writeCoverate, puppeteerConfig, httpAddressBcx, httpAddressBc } = TestBrowserGlobals();
 
 	if (puppeteerConfig.exitOnPageError) {
 		page.off("pageerror", handlePageError);
 	}
+
+	const jsCoverage = await page.coverage.stopJSCoverage();
+
+	const BCPath = path.resolve(process.cwd(), "../Bondage-College/BondageClub");
+	const BCXPath = path.resolve(process.cwd(), "./dist/bcx.js");
+	const AllowedPath = path.resolve(process.cwd(), "..");
+
+	// Point to original .js files
+	const coverage = jsCoverage
+		.map(({ rawScriptCoverage: it }) => {
+			AssertNotNullable(it);
+			return ({
+				...it,
+				scriptId: String(it.scriptId),
+				url: it.url
+					.replaceAll(httpAddressBcx, BCXPath)
+					.replaceAll(httpAddressBc, BCPath),
+			});
+		})
+		.filter(res =>
+			res.url.startsWith(AllowedPath) &&
+			!res.url.includes("node_modules") &&
+			res.url.endsWith(".js") &&
+			!res.url.endsWith(".min.js")
+		);
+
+	// Export coverage data
+	writeCoverate(coverage);
+
 	await page.close({
 		runBeforeUnload: Boolean(puppeteerConfig.runBeforeUnloadOnClose),
 	});
@@ -64,6 +95,11 @@ export async function TestOpenPage(options: TestPageOptions = {}): Promise<Page>
 		openPagesEach.push(page);
 	}
 
+	await page.coverage.startJSCoverage({
+		resetOnNavigation: false,
+		includeRawScriptCoverage: true,
+	});
+
 	return page;
 }
 
@@ -107,5 +143,7 @@ export async function TestLoadBCX(page: Page): Promise<void> {
 		url: httpAddressBcx,
 	});
 
-	await page.waitForFunction(() => !!ServerBeep && typeof ServerBeep === "object" && ServerBeep.Message === "BCX Ready!");
+	await page.waitForFunction(() => !!ServerBeep && typeof ServerBeep === "object" &&
+		(ServerBeep.Message === "BCX Ready!" || ServerBeep.Message.startsWith("BCX loaded!"))
+	);
 }

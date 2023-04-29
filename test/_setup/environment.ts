@@ -1,7 +1,7 @@
 import * as puppeteer from "puppeteer";
 import type { Browser } from "puppeteer";
 import NodeEnvironment from "jest-environment-node";
-import { Config, StrictGlobal, getConfig } from "./config";
+import { Config, CoverageData, StrictGlobal, getConfig } from "./config";
 
 function getEnvString(name: string): string {
 	const value = process.env[name];
@@ -21,6 +21,8 @@ async function connectBrowserFromWorker(config: Config): Promise<Browser> {
 }
 
 class PuppeteerEnvironment extends NodeEnvironment {
+	public coverageData: CoverageData = [];
+
 	async setup(): Promise<void> {
 		await super.setup();
 
@@ -31,6 +33,10 @@ class PuppeteerEnvironment extends NodeEnvironment {
 		global.bcServerAddress = getEnvString("BC_SERVER_ADDRESS");
 		global.httpAddressBc = getEnvString("HTTP_SERVER_BC_ADDRESS");
 		global.httpAddressBcx = getEnvString("HTTP_SERVER_BCX_ADDRESS");
+
+		global.writeCoverate = (coverage) => {
+			this.coverageData.push(...coverage);
+		};
 
 		// Connect to the browser
 		if (global.browser) {

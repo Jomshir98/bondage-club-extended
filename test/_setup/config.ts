@@ -16,7 +16,10 @@ export type Config = {
 	launch: PuppeteerLaunchOptions;
 };
 
+export type CoverageData = import("inspector").Profiler.ScriptCoverage[];
+
 export type StrictGlobal = {
+	writeCoverate?: (coverageData: CoverageData) => void;
 	browser?: Browser | undefined;
 	context?: BrowserContext | undefined;
 	puppeteerConfig: Config;

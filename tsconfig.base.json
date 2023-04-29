@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2018",
+		"lib": ["ESNext", "DOM"],
+		"types": [],
+		"module": "ESNext",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true,
+		"experimentalDecorators": true,
+		"esModuleInterop": true,
+		"baseUrl": "./src",
+		"noEmit": true,
+		"noEmitOnError": true,
+		"sourceMap": true,
+		"declaration": false,
+		"removeComments": true,
+		"strict": true,
+		"noImplicitOverride": false,
+		"noImplicitReturns": true
+	}
+}

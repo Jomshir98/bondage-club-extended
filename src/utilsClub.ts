@@ -80,7 +80,7 @@ export let BCXSourceExternal: boolean = false;
 
 export function init_findBCXSource(): void {
 	for (const elem of Array.from(document.getElementsByTagName("script"))) {
-		const match = /^(https:\/\/[^?/]+\/([^?]+)?|http:\/\/localhost(?::[0-9]+)?\/)bcx.js($|\?)/i.exec(elem.src);
+		const match = /^(https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?bcx.js($|\?)/i.exec(elem.src);
 		if (match) {
 			BCXSource = match[1];
 			return;

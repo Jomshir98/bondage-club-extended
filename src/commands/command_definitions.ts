@@ -179,7 +179,7 @@ export function initCommands_definitions() {
 				respond(`Bad value: ${argv[0].toLowerCase()} is not one of '${Object.keys(posesArms).join("', '")}'`);
 				return false;
 			}
-			if ((typeof Player.ActivePose === "string" && Player.ActivePose === pose) || (Array.isArray(Player.ActivePose) && Player.ActivePose.includes(pose))) {
+			if (Array.isArray(Player.ActivePose) && Player.ActivePose.includes(pose)) {
 				respond(`This character is already in the chosen pose.`);
 				return false;
 			}
@@ -232,7 +232,7 @@ export function initCommands_definitions() {
 				respond(`Bad value: ${argv[0].toLowerCase()} is not one of '${Object.keys(posesLegs).join("', '")}'`);
 				return false;
 			}
-			if ((typeof Player.ActivePose === "string" && Player.ActivePose === pose) || (Array.isArray(Player.ActivePose) && Player.ActivePose.includes(pose))) {
+			if (Array.isArray(Player.ActivePose) && Player.ActivePose.includes(pose)) {
 				respond(`This character is already in the chosen pose.`);
 				return false;
 			}
@@ -280,7 +280,7 @@ export function initCommands_definitions() {
 				return false;
 			}
 			const pose = "AllFours";
-			if ((typeof Player.ActivePose === "string" && Player.ActivePose === pose) || (Array.isArray(Player.ActivePose) && Player.ActivePose.includes(pose))) {
+			if (Array.isArray(Player.ActivePose) && Player.ActivePose.includes(pose)) {
 				respond(`This character is already in the chosen pose.`);
 				return false;
 			}

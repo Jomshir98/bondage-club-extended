@@ -92,6 +92,8 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 	private originalData!: ItemBundle[];
 
 	private allowBindsBase: boolean;
+	/** If the import is strictly clothes-only (acts as forbidden binds, but without warnings) */
+	private clothesOnly: boolean;
 	private allowBinds: boolean;
 	private bindsBlockedByLock: boolean;
 	private allowPiercings: boolean;
@@ -108,11 +110,14 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 	private doApply = false;
 	private skippedBlockedCount = 0;
 
-	constructor(exitCallback: (newScreen: GuiWardrobeExtended | null) => void, character: Character, allowBinds: boolean, data: ItemBundle[]) {
+	constructor(exitCallback: (newScreen: GuiWardrobeExtended | null) => void, character: Character, allowBinds: boolean, data: ItemBundle[], clothesOnly: boolean) {
 		super();
 		this.exitCallback = exitCallback;
 		this.character = character;
 		this.allowBindsBase = allowBinds;
+		this.clothesOnly = clothesOnly;
+		allowBinds &&= !clothesOnly;
+
 		this.allowBinds = allowBinds;
 		this.bindsBlockedByLock = false;
 		this.allowPiercings = allowBinds;
@@ -377,7 +382,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 
 			if (this.skippedBlockedCount > 0) {
 				warning = `Skipped ${this.skippedBlockedCount} blocked/limited item${this.skippedBlockedCount > 1 ? "s" : ""}`;
-			} else if (!this.allowBindsBase) {
+			} else if (!this.allowBindsBase && !this.clothesOnly) {
 				warning = `You do not have permission to import items.`;
 			}
 
@@ -582,7 +587,8 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 					this.exitCallback,
 					this.character,
 					this.allowBindsBase,
-					parsedData
+					parsedData,
+					false,
 				));
 			}, 0);
 			return;

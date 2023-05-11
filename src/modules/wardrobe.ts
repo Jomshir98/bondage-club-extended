@@ -419,7 +419,7 @@ function useExtendedImport(): boolean {
 	return (modStorage.wardrobeDefaultExtended ?? false) !== holdingShift;
 }
 
-function openExtendedImport(data: string | ItemBundle[], baseAllowBinds: boolean = true): string | null {
+function openExtendedImport(data: string | ItemBundle[], clothesOnly: boolean = false): string | null {
 	const parsedData = Array.isArray(data) ? data : parseWardrobeImportData(data);
 	if (typeof parsedData === "string")
 		return parsedData;
@@ -428,13 +428,14 @@ function openExtendedImport(data: string | ItemBundle[], baseAllowBinds: boolean
 	if (!C) {
 		return "Import error: No character";
 	}
-	const allowBinds = baseAllowBinds && C.MemberNumber === j_WardrobeBindsAllowedCharacter;
+	const allowBinds = C.MemberNumber === j_WardrobeBindsAllowedCharacter;
 
 	setAppearanceOverrideScreen(new GuiWardrobeExtended(
 		setAppearanceOverrideScreen,
 		C,
 		allowBinds,
-		parsedData
+		parsedData,
+		clothesOnly
 	));
 	return null;
 }
@@ -614,7 +615,7 @@ export class ModuleWardrobe extends BaseModule {
 								if (slot.some(i => Array.isArray(i)) && typeof WardrobeExtractBundle === "function") {
 									slot = slot.map(i => Array.isArray(i) ? WardrobeExtractBundle(i) : i);
 								}
-								if (slot.every(i => isObject(i)) && openExtendedImport(slot, false) === null) {
+								if (slot.every(i => isObject(i)) && openExtendedImport(slot, true) === null) {
 									return;
 								}
 							}

@@ -9,7 +9,7 @@ const modApi = bcModSDK.registerMod({
 	name: "BCX",
 	fullName: "Bondage Club Extended",
 	version: BCX_VERSION,
-	repository: "https://github.com/Jomshir98/bondage-club-extended"
+	repository: "https://github.com/Jomshir98/bondage-club-extended",
 });
 
 bcModSDK.errorReporterHooks.hookEnter = (fn, mod) => {
@@ -22,7 +22,7 @@ bcModSDK.errorReporterHooks.hookEnter = (fn, mod) => {
 bcModSDK.errorReporterHooks.hookChainExit = (fn, mods) => {
 	const ctx = debugContextStart(`Function ${fn} hook chain exit`, {
 		modArea: mods.size === 0 ? "" : mods.size === 1 ? Array.from(mods).join("") : `[Possibly multiple mods]`,
-		extraInfo: () => mods.size > 0 ? `Patched by: ${Array.from(mods).join(", ")}` : ""
+		extraInfo: () => mods.size > 0 ? `Patched by: ${Array.from(mods).join(", ")}` : "",
 	});
 	return () => {
 		ctx.end();
@@ -68,7 +68,7 @@ function initPatchableFunction(target: string): IPatchedFunctionData {
 		result = {
 			name: target,
 			originalHash,
-			hooks: []
+			hooks: [],
 		};
 		patchedFunctions.set(target, result);
 	}
@@ -94,7 +94,7 @@ export function hookFunction(target: string, priority: number, hook: PatchHook, 
 		hook,
 		priority,
 		module,
-		removeCallback
+		removeCallback,
 	});
 	data.hooks.sort((a, b) => b.priority - a.priority);
 }

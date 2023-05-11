@@ -22,7 +22,7 @@ export const enum SpeechHookAllow {
 	/** Message will be blocked */
 	BLOCK,
 	/** Message will not be blocked, even if some hook returned BLOCK */
-	ALLOW_BYPASS
+	ALLOW_BYPASS,
 }
 
 export interface SpeechHook {
@@ -86,7 +86,7 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 			rawMessage,
 			originalMessage: msg,
 			target: null,
-			hasOOC: true
+			hasOOC: true,
 		};
 	}
 	if (msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3)) {
@@ -99,7 +99,7 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 		originalMessage: msg,
 		target: ChatRoomTargetMemberNumber,
 		noOOCMessage: msg.replace(/\([^)]*\)*\s?/gs, ""),
-		hasOOC: msg.includes("(")
+		hasOOC: msg.includes("("),
 	};
 }
 
@@ -212,7 +212,7 @@ export class ModuleSpeech extends BaseModule {
 					currentlyProcessedMessage = {
 						result: msg2.startsWith("//") ? msg2.substring(1) : msg2,
 						original: info.originalMessage.startsWith("//") ? info.originalMessage.substring(1) : info.originalMessage,
-						target: info.target
+						target: info.target,
 					};
 				}
 			}
@@ -279,7 +279,7 @@ export class ModuleSpeech extends BaseModule {
 				originalMessage: msg,
 				target: ChatRoomTargetMemberNumber,
 				noOOCMessage: msg,
-				hasOOC: false
+				hasOOC: false,
 			});
 			if (msg2 !== null) {
 				return next(["*" + msg2]);
@@ -298,7 +298,7 @@ export class ModuleSpeech extends BaseModule {
 			"2": 2,
 			"normal": 0,
 			"both": 1,
-			"ungarbled": 2
+			"ungarbled": 2,
 		};
 
 		const ANTIGARBLE_LEVEL_NAMES: string[] = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);

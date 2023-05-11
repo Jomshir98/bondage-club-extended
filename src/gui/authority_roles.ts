@@ -44,7 +44,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 				`Any character, added to the list on the left as "Mistress"`,
 				`Anyone you have white-listed`,
 				`Anyone you have friend-listed`,
-				`Anyone, who can use items on you`
+				`Anyone, who can use items on you`,
 			] : [
 				`This player - either top or bottom of the hierarchy`,
 				`This player's owner, visible on their character profile`,
@@ -53,7 +53,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 				`Any character, added to the list on the left as "Mistress"`,
 				`Anyone this player has white-listed`,
 				`Anyone this player has friend-listed`,
-				`Anyone, who can use items on this player`
+				`Anyone, who can use items on this player`,
 			];
 	}
 
@@ -109,12 +109,12 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 		this.roleList = this.roleData.owners.map((i): RoleListItem => ({
 			type: "Owner",
 			memberNumber: i[0],
-			name: getCharacterName(i[0], i[1] || null)
+			name: getCharacterName(i[0], i[1] || null),
 		}));
 		this.roleList.push(...this.roleData.mistresses.map((i): RoleListItem => ({
 			type: "Mistress",
 			memberNumber: i[0],
-			name: getCharacterName(i[0], i[1] || null)
+			name: getCharacterName(i[0], i[1] || null),
 		})));
 
 		const totalPages = Math.ceil(this.roleList.length / PER_PAGE_COUNT);

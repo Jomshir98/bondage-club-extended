@@ -38,7 +38,7 @@ export const enum RuleType {
 	Setting = 2,
 	RC = 3,
 	Speech = 4,
-	Other = 99
+	Other = 99,
 }
 
 export const RULE_ICONS: Record<RuleType, string> = {
@@ -47,7 +47,7 @@ export const RULE_ICONS: Record<RuleType, string> = {
 	[RuleType.Setting]: "Icons/Preference.png",
 	[RuleType.RC]: icon_OwnerList,
 	[RuleType.Speech]: "Icons/Chat.png",
-	[RuleType.Other]: "Icons/Chest.png"
+	[RuleType.Other]: "Icons/Chest.png",
 };
 
 export function guard_BCX_Rule(name: unknown): name is BCX_Rule {
@@ -116,7 +116,7 @@ export function registerRule<ID extends BCX_Rule>(name: ID, data: RuleDefinition
 	}
 	rules.set(name, {
 		...(data as unknown as RuleDefinition<BCX_Rule>),
-		state: new RuleState<BCX_Rule>(name, data)
+		state: new RuleState<BCX_Rule>(name, data),
 	});
 	rulesList.push(name);
 }
@@ -136,7 +136,7 @@ export function RulesGetDisplayDefinition(rule: BCX_Rule): RuleDisplayDefinition
 		defaultLimit: data.defaultLimit,
 		enforceable: data.enforceable,
 		loggable: data.loggable,
-		dataDefinition: data.dataDefinition
+		dataDefinition: data.dataDefinition,
 	};
 }
 
@@ -165,7 +165,7 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 	}): RuleCustomDataTypesMap[type] | undefined;
 	unload?(data: {
 		def: RuleCustomDataEntryDefinition<type>;
-		key: string
+		key: string;
 	}): void;
 	run(data: {
 		def: RuleCustomDataEntryDefinition<type>;
@@ -186,7 +186,7 @@ export type RuleCustomDataHandler<type extends RuleCustomDataTypes = RuleCustomD
 } & (type extends keyof RuleCustomDataTypesOptions ? {
 	validateOptions(options: RuleCustomDataTypesOptions[type]): boolean;
 } : {
-	validateOptions?: undefined
+	validateOptions?: undefined;
 });
 
 const ruleCustomDataHandlerPage: Map<string, number> = new Map();
@@ -229,7 +229,7 @@ export const ruleCustomDataHandlers: {
 				return def.options![clampWrap(index + 1, 0, def.options!.length - 1)][0];
 			}
 			return undefined;
-		}
+		},
 	},
 	memberNumberList: {
 		validateOptions: options => options === undefined || (Number.isInteger(options?.pageSize)),
@@ -336,7 +336,7 @@ export const ruleCustomDataHandlers: {
 		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
 			ruleCustomDataHandlerPage.delete(key);
-		}
+		},
 	},
 	number: {
 		validateOptions: options => options === undefined || (
@@ -393,7 +393,7 @@ export const ruleCustomDataHandlers: {
 		},
 		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
-		}
+		},
 	},
 	poseSelect: {
 		// TODO: stricten
@@ -447,7 +447,7 @@ export const ruleCustomDataHandlers: {
 				}
 			}
 			return undefined;
-		}
+		},
 	},
 	// element has Y length of 150px (description + element plus offset to the next one)
 	roleSelector: {
@@ -476,7 +476,7 @@ export const ruleCustomDataHandlers: {
 				return value < AccessLevel.public ? value + 1 : AccessLevel.clubowner;
 			}
 			return undefined;
-		}
+		},
 	},
 	string: {
 		validateOptions: options => options === undefined || options instanceof RegExp,
@@ -519,7 +519,7 @@ export const ruleCustomDataHandlers: {
 		},
 		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
-		}
+		},
 	},
 	stringList: {
 		validateOptions: options => options === undefined || (
@@ -635,7 +635,7 @@ export const ruleCustomDataHandlers: {
 		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
 			ruleCustomDataHandlerPage.delete(key);
-		}
+		},
 	},
 	textArea: {
 		validate: value => typeof value === "string",
@@ -677,7 +677,7 @@ export const ruleCustomDataHandlers: {
 		},
 		unload({ key }) {
 			ElementRemove(`BCX_RCDH_${key}`);
-		}
+		},
 	},
 	toggle: {
 		validate: value => typeof value === "boolean",
@@ -691,8 +691,8 @@ export const ruleCustomDataHandlers: {
 				return !value;
 			}
 			return undefined;
-		}
-	}
+		},
+	},
 };
 
 function parseRuleName(selector: string, filter?: (ruleName: BCX_Rule) => boolean): [true, BCX_Rule] | [false, string] {
@@ -839,7 +839,7 @@ export class RuleState<ID extends BCX_Rule> {
 				InfoBeep("BCX: " + dictionaryProcess(texts.infoBeep, {
 					PLAYER_NAME: RelationshipsGetNickname(Player.MemberNumber) ?? CharacterNickname(Player),
 					TARGET_PLAYER: RelationshipsGetNickname(targetCharacter ?? Player.MemberNumber) ?? targetName,
-					...dictionary
+					...dictionary,
 				}), 7_000);
 			}
 			if (this.isLogged) {
@@ -852,10 +852,10 @@ export class RuleState<ID extends BCX_Rule> {
 					ChatRoomActionMessage(`${dictionaryProcess(announce, {
 						PLAYER_NAME: "SourceCharacter",
 						TARGET_PLAYER: `TargetCharacterName (${targetCharacter ?? Player.MemberNumber})`,
-						...dictionary
+						...dictionary,
 					})}.`, null, [
 						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
-						{ Tag: "TargetCharacterName", MemberNumber: targetCharacter ?? Player.MemberNumber, Text: targetName }
+						{ Tag: "TargetCharacterName", MemberNumber: targetCharacter ?? Player.MemberNumber, Text: targetName },
 					]);
 				}
 			}
@@ -875,7 +875,7 @@ export class RuleState<ID extends BCX_Rule> {
 				InfoBeep("BCX: " + dictionaryProcess(infoBeep, {
 					PLAYER_NAME: RelationshipsGetNickname(Player.MemberNumber) ?? CharacterNickname(Player),
 					TARGET_PLAYER: RelationshipsGetNickname(targetCharacter ?? Player.MemberNumber) ?? targetName,
-					...dictionary
+					...dictionary,
 				}), 7_000);
 			}
 			if (this.isLogged) {
@@ -888,10 +888,10 @@ export class RuleState<ID extends BCX_Rule> {
 					ChatRoomActionMessage(`${dictionaryProcess(announce, {
 						PLAYER_NAME: "SourceCharacter",
 						TARGET_PLAYER: `TargetCharacterName (${targetCharacter ?? Player.MemberNumber})`,
-						...dictionary
+						...dictionary,
 					})}.`, null, [
 						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
-						{ Tag: "TargetCharacterName", MemberNumber: targetCharacter ?? Player.MemberNumber, Text: targetName }
+						{ Tag: "TargetCharacterName", MemberNumber: targetCharacter ?? Player.MemberNumber, Text: targetName },
 					]);
 				}
 			}
@@ -912,8 +912,8 @@ export class ModuleRules extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.lover],
 				[Preset.switch]: [true, AccessLevel.lover],
 				[Preset.submissive]: [false, AccessLevel.mistress],
-				[Preset.slave]: [false, AccessLevel.mistress]
-			}
+				[Preset.slave]: [false, AccessLevel.mistress],
+			},
 		});
 		registerPermission("rules_limited", {
 			name: "Allows controlling limited rules",
@@ -922,8 +922,8 @@ export class ModuleRules extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.owner],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [false, AccessLevel.lover],
-				[Preset.slave]: [false, AccessLevel.lover]
-			}
+				[Preset.slave]: [false, AccessLevel.lover],
+			},
 		});
 		registerPermission("rules_global_configuration", {
 			name: "Allows editing the global rules configuration",
@@ -932,8 +932,8 @@ export class ModuleRules extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.owner],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [false, AccessLevel.lover],
-				[Preset.slave]: [false, AccessLevel.lover]
-			}
+				[Preset.slave]: [false, AccessLevel.lover],
+			},
 		});
 		registerPermission("rules_change_limits", {
 			name: "Allows to limit/block specific rules",
@@ -942,8 +942,8 @@ export class ModuleRules extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.self],
-				[Preset.slave]: [false, AccessLevel.owner]
-			}
+				[Preset.slave]: [false, AccessLevel.owner],
+			},
 		});
 		registerPermission("rules_view_originator", {
 			name: "Allow to view who added the rule originally",
@@ -952,8 +952,8 @@ export class ModuleRules extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.self],
 				[Preset.submissive]: [true, AccessLevel.mistress],
-				[Preset.slave]: [true, AccessLevel.mistress]
-			}
+				[Preset.slave]: [true, AccessLevel.mistress],
+			},
 		});
 
 		queryHandlers.ruleCreate = (sender, data) => {
@@ -1131,7 +1131,7 @@ export class ModuleRules extends BaseModule {
 			makePublicData: (rule, data) => ({
 				enforce: data.data.enforce ?? true,
 				log: data.data.log ?? true,
-				customData: cloneDeep(data.data.customData)
+				customData: cloneDeep(data.data.customData),
 			}),
 			validateCategorySpecificGlobalData: () => true,
 			validatePublicData: (rule, data) =>
@@ -1319,14 +1319,14 @@ export class ModuleRules extends BaseModule {
 					return {
 						enforce: data.enforce ?? true,
 						log: data.log ?? true,
-						customData: cloneDeep(data.customData)
+						customData: cloneDeep(data.customData),
 					};
 				},
 				import(condition, data, character) {
 					const validator: ZodType<ConditionsCategorySpecificPublicData["rules"]> = zod.object({
 						enforce: zod.boolean(),
 						log: zod.boolean(),
-						customData: zod.record(zod.any()).optional()
+						customData: zod.record(zod.any()).optional(),
 					});
 					const validationResult = validator.safeParse(data);
 					if (!validationResult.success) {
@@ -1355,7 +1355,7 @@ export class ModuleRules extends BaseModule {
 						enforce: !validatedData.enforce && definition.enforceable ? false : undefined,
 						log: !validatedData.log && definition.loggable ? false : undefined,
 						customData: validatedData.customData,
-						internalData
+						internalData,
 					}];
 				},
 				importLog(condition, data, character) {
@@ -1372,8 +1372,8 @@ export class ModuleRules extends BaseModule {
 						return "Failed.";
 					}
 					return true;
-				}
-			}
+				},
+			},
 		});
 
 		// Init individual rules
@@ -1446,7 +1446,7 @@ export class ModuleRules extends BaseModule {
 				this.suspendedUntil = null;
 				this.triggerCounts.clear();
 				ChatRoomActionMessage(`All of SourceCharacter's temporarily suspended rules are in effect again.`, null, [
-					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) }
+					{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				]);
 			} else {
 				return;

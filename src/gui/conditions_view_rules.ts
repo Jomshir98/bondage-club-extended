@@ -53,7 +53,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 	protected drawCategoryImage(X: number, Y: number, entry: dataEntry): void {
 		DrawImageEx(RULE_ICONS[entry.extra.definition.type], X + 6, Y + 6, {
 			Height: 50,
-			Width: 50
+			Width: 50,
 		});
 	}
 
@@ -62,7 +62,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 			DrawImageEx("Icons/Management.png", X + 610, Y + 10, {
 				Height: 40,
 				Width: 40,
-				Alpha: entry.data.data.enforce ? 1 : 0.2
+				Alpha: entry.data.data.enforce ? 1 : 0.2,
 			});
 			if (MouseIn(X + 610, Y + 6, 44, 44)) {
 				DrawHoverElements.push(() => {
@@ -74,7 +74,7 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 			DrawImageEx("Icons/Title.png", X + 660, Y + 10, {
 				Height: 40,
 				Width: 40,
-				Alpha: entry.data.data.log ? 1 : 0.2
+				Alpha: entry.data.data.log ? 1 : 0.2,
 			});
 			if (MouseIn(X + 660, Y + 6, 44, 44)) {
 				DrawHoverElements.push(() => {

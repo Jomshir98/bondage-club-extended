@@ -24,7 +24,7 @@ export function sendHiddenMessage<T extends keyof BCX_messages>(type: T, message
 		Content: "BCXMsg",
 		Type: "Hidden",
 		Target,
-		Dictionary: { type, message }
+		Dictionary: { type, message },
 	});
 }
 
@@ -33,8 +33,8 @@ export function sendHiddenBeep<T extends keyof BCX_beeps>(type: T, message: BCX_
 		MemberNumber: target,
 		BeepType: asLeashBeep ? "Leash" : "BCX",
 		Message: {
-			BCX: { type, message }
-		}
+			BCX: { type, message },
+		},
 	});
 }
 
@@ -62,7 +62,7 @@ export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_querie
 				console.warn("BCX: Query timed out", target, type);
 				pendingQueries.delete(id);
 				reject("Timed out");
-			}, timeout)
+			}, timeout),
 		};
 		pendingQueries.set(id, info);
 
@@ -72,7 +72,7 @@ export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_querie
 			handleQuery(playerCharacter, cloneDeep({
 				id,
 				query: type,
-				data
+				data,
 			}))
 				.then(result => {
 					handleQueryAnswer(playerCharacter.MemberNumber, result);
@@ -80,14 +80,14 @@ export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_querie
 					handleQueryAnswer(playerCharacter.MemberNumber, {
 						id,
 						ok: false,
-						data: error
+						data: error,
 					});
 				});
 		} else {
 			sendHiddenMessage("query", {
 				id,
 				query: type,
-				data
+				data,
 			}, target);
 		}
 
@@ -100,7 +100,7 @@ async function handleQuery(sender: ChatroomCharacter, message: BCX_message_query
 		console.warn("BCX: Query no handler", sender, message);
 		return {
 			id: message.id,
-			ok: false
+			ok: false,
 		};
 	}
 
@@ -108,7 +108,7 @@ async function handleQuery(sender: ChatroomCharacter, message: BCX_message_query
 	return {
 		id: message.id,
 		ok: result !== undefined,
-		data: result
+		data: result,
 	};
 }
 
@@ -125,7 +125,7 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 	if (!character || !character.hasAccessToPlayer()) {
 		return sendHiddenMessage("queryAnswer", {
 			id: message.id,
-			ok: false
+			ok: false,
 		}, sender);
 	}
 
@@ -136,7 +136,7 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 			sendHiddenMessage("queryAnswer", {
 				id: message.id,
 				ok: false,
-				data: String(error)
+				data: String(error),
 			}, sender);
 		});
 });

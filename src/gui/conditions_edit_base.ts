@@ -373,7 +373,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		MainCanvas.fill();
 		DrawImageEx("Icons/General.png", 1877 + 10, 800 + 7, {
 			Height: 46,
-			Width: 46
+			Width: 46,
 		});
 
 		// hover text for timer behavior toggle

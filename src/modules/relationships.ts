@@ -23,7 +23,7 @@ export interface RelationshipData {
 export const RelationshipData_schema = zod.object({
 	memberNumber: zod.number(),
 	nickname: zod.string().refine(isValidNickname),
-	enforceNickname: zod.boolean()
+	enforceNickname: zod.boolean(),
 });
 
 export const NICKNAME_LENGTH_MAX = 20;
@@ -68,8 +68,8 @@ export class ModuleRelationhips extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [true, AccessLevel.mistress],
-				[Preset.slave]: [true, AccessLevel.mistress]
-			}
+				[Preset.slave]: [true, AccessLevel.mistress],
+			},
 		});
 
 		registerPermission("relationships_modify_self", {
@@ -79,8 +79,8 @@ export class ModuleRelationhips extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [false, AccessLevel.mistress],
-				[Preset.slave]: [false, AccessLevel.mistress]
-			}
+				[Preset.slave]: [false, AccessLevel.mistress],
+			},
 		});
 
 		registerPermission("relationships_modify_others", {
@@ -90,8 +90,8 @@ export class ModuleRelationhips extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [false, AccessLevel.mistress],
-				[Preset.slave]: [false, AccessLevel.mistress]
-			}
+				[Preset.slave]: [false, AccessLevel.mistress],
+			},
 		});
 
 		queryHandlers.relatonshipsGet = (sender) => {
@@ -104,7 +104,7 @@ export class ModuleRelationhips extends BaseModule {
 				relationships: viewAll ? cloneDeep(modStorage.relationships) : cloneDeep(modStorage.relationships.filter(r => r.memberNumber === sender.MemberNumber)),
 				access_view_all: viewAll,
 				access_modify_self: checkPermissionAccess("relationships_modify_self", sender),
-				access_modify_others: viewAll && checkPermissionAccess("relationships_modify_others", sender)
+				access_modify_others: viewAll && checkPermissionAccess("relationships_modify_others", sender),
 			};
 		};
 
@@ -227,7 +227,7 @@ export class ModuleRelationhips extends BaseModule {
 
 				}
 				return SpeechHookAllow.ALLOW;
-			}
+			},
 		});
 
 		ExportImportRegisterCategory<RelationshipData[]>({
@@ -254,7 +254,7 @@ export class ModuleRelationhips extends BaseModule {
 				return `Done!`;
 			},
 			importPermissions: ["relationships_view_all", "relationships_modify_self", "relationships_modify_others"],
-			importValidator: zod.array(RelationshipData_schema)
+			importValidator: zod.array(RelationshipData_schema),
 		});
 	}
 
@@ -328,11 +328,11 @@ export class ModuleRelationhips extends BaseModule {
 		});
 
 		patchFunction("CommandParse", {
-			'TextGet("WhisperTo") + " " + TargetName + ": " + msg;': 'TextGet("WhisperTo") + " " + (WhisperTarget ? CharacterNickname(WhisperTarget) : TargetName) + ": " + msg;'
+			'TextGet("WhisperTo") + " " + TargetName + ": " + msg;': 'TextGet("WhisperTo") + " " + (WhisperTarget ? CharacterNickname(WhisperTarget) : TargetName) + ": " + msg;',
 		});
 
 		patchFunction("ChatRoomTarget", {
-			"TargetName = ChatRoomCharacter[C].Name;": "TargetName = CharacterNickname(ChatRoomCharacter[C]);"
+			"TargetName = ChatRoomCharacter[C].Name;": "TargetName = CharacterNickname(ChatRoomCharacter[C]);",
 		});
 	}
 

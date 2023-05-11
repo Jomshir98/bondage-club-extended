@@ -24,11 +24,11 @@ export function j_WardrobeExportSelectionClothes(includeBinds: boolean = false):
 			body: true, // TODO: Toggle
 			binds: includeBinds,
 			collar: includeBinds,
-			piercings: includeBinds
+			piercings: includeBinds,
 		}))
 		.map((i) => ({
 			...WardrobeAssetBundle(i),
-			Craft: ValidationVerifyCraftData(i.Craft, i.Asset).result
+			Craft: ValidationVerifyCraftData(i.Craft, i.Asset).result,
 		}));
 	return LZString.compressToBase64(JSON.stringify(save));
 }
@@ -52,7 +52,7 @@ export function parseWardrobeImportData(data: string): string | ItemBundle[] {
 
 export function itemMergeProperties(sourceProperty: Partial<ItemProperties> | undefined, targetProperty: Partial<ItemProperties> | undefined, {
 	includeNoncursableProperties = false,
-	lockAssignMemberNumber
+	lockAssignMemberNumber,
 }: {
 	includeNoncursableProperties?: boolean;
 	lockAssignMemberNumber?: number;
@@ -159,7 +159,7 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 				!itemColorsEquals(currentItem.Color, newItem.Color) ||
 				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, newItem.Property, {
 					includeNoncursableProperties: true,
-					lockAssignMemberNumber: Player.MemberNumber
+					lockAssignMemberNumber: Player.MemberNumber,
 				}) ?? {})
 			) {
 				return true;
@@ -175,7 +175,7 @@ export function WardrobeImportMakeFilterFunction({
 	body,
 	binds,
 	collar,
-	piercings
+	piercings,
 }: {
 	cloth: boolean;
 	cosplay: boolean;
@@ -210,13 +210,13 @@ export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): 
 	if (Craft === undefined) {
 		return {
 			result: undefined,
-			messages: []
+			messages: [],
 		};
 	}
 	if (!isObject(Craft)) {
 		return {
 			result: undefined,
-			messages: [`Expected object, got ${typeof Craft}`]
+			messages: [`Expected object, got ${typeof Craft}`],
 		};
 	}
 	const saved = console.warn;
@@ -230,13 +230,13 @@ export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): 
 		const result = CraftingValidate(Craft as CraftingItem, Asset, true);
 		return {
 			result: result > CraftingStatusType.CRITICAL_ERROR ? Craft as CraftingItem : undefined,
-			messages
+			messages,
 		};
 	} catch (error) {
 		saved("BCX: Failed crafted data validation because of crash:", error);
 		return {
 			result: undefined,
-			messages: [`Validation failed: ${error}`]
+			messages: [`Validation failed: ${error}`],
 		};
 	} finally {
 		console.warn = saved;
@@ -273,7 +273,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 								(!C.IsPlayer() || !InventoryIsPermissionBlocked(C, cloth.Property.LockedBy, "ItemMisc")) &&
 								(includeLocks === true || (typeof includeLocks !== "boolean" && includeLocks.has(cloth.Property.LockedBy)))
 							),
-							lockAssignMemberNumber: Player.MemberNumber
+							lockAssignMemberNumber: Player.MemberNumber,
 						});
 					}
 					const craftValidation = ValidationVerifyCraftData(cloth.Craft, A);
@@ -311,7 +311,7 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 		body: false,
 		binds: includeBinds,
 		collar: false,
-		piercings: includeBinds
+		piercings: includeBinds,
 	});
 
 	if (includeBinds && !force && WardrobeImportCheckChangesLockedItem(C, data, Allow))
@@ -419,7 +419,7 @@ function useExtendedImport(): boolean {
 	return (modStorage.wardrobeDefaultExtended ?? false) !== holdingShift;
 }
 
-function openExtendedImport(data: string | ItemBundle[], baseAllowBinds: boolean = true): string | null {
+function openExtendedImport(data: string | ItemBundle[], clothesOnly: boolean = false): string | null {
 	const parsedData = Array.isArray(data) ? data : parseWardrobeImportData(data);
 	if (typeof parsedData === "string")
 		return parsedData;
@@ -428,13 +428,14 @@ function openExtendedImport(data: string | ItemBundle[], baseAllowBinds: boolean
 	if (!C) {
 		return "Import error: No character";
 	}
-	const allowBinds = baseAllowBinds && C.MemberNumber === j_WardrobeBindsAllowedCharacter;
+	const allowBinds = C.MemberNumber === j_WardrobeBindsAllowedCharacter;
 
 	setAppearanceOverrideScreen(new GuiWardrobeExtended(
 		setAppearanceOverrideScreen,
 		C,
 		allowBinds,
-		parsedData
+		parsedData,
+		clothesOnly
 	));
 	return null;
 }
@@ -460,8 +461,8 @@ export class ModuleWardrobe extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.whitelist],
 				[Preset.switch]: [true, AccessLevel.friend],
 				[Preset.submissive]: [true, AccessLevel.friend],
-				[Preset.slave]: [true, AccessLevel.friend]
-			}
+				[Preset.slave]: [true, AccessLevel.friend],
+			},
 		});
 
 		ExtendedWardrobeInit();
@@ -499,15 +500,15 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		patchFunction("AppearanceRun", {
-			'DrawButton(1820, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 160, 65, "Save"': 'DrawButton(1860, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 120, 65, "Save"'
+			'DrawButton(1820, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 160, 65, "Save"': 'DrawButton(1860, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 120, 65, "Save"',
 		});
 
 		patchFunction("AppearanceRun", {
-			"DrawButton(1300, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 500,": "DrawButton(1385, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 455,"
+			"DrawButton(1300, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 500,": "DrawButton(1385, 430 + (W - CharacterAppearanceWardrobeOffset) * 95, 455,",
 		});
 
 		patchFunction("AppearanceRun", {
-			"1550, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 496,": "1614, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 446,"
+			"1550, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 496,": "1614, 463 + (W - CharacterAppearanceWardrobeOffset) * 95, 446,",
 		});
 
 		hookFunction("AppearanceRun", 7, (args, next) => {
@@ -551,11 +552,11 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		patchFunction("AppearanceClick", {
-			"(MouseX >= 1300) && (MouseX < 1800)": "(MouseX >= 1385) && (MouseX < 1385 + 455)"
+			"(MouseX >= 1300) && (MouseX < 1800)": "(MouseX >= 1385) && (MouseX < 1385 + 455)",
 		});
 
 		patchFunction("AppearanceClick", {
-			"(MouseX >= 1820) && (MouseX < 1975)": "(MouseX >= 1860) && (MouseX < 1980)"
+			"(MouseX >= 1820) && (MouseX < 1975)": "(MouseX >= 1860) && (MouseX < 1980)",
 		});
 
 		hookFunction("AppearanceClick", 7, (args, next) => {
@@ -614,7 +615,7 @@ export class ModuleWardrobe extends BaseModule {
 								if (slot.some(i => Array.isArray(i)) && typeof WardrobeExtractBundle === "function") {
 									slot = slot.map(i => Array.isArray(i) ? WardrobeExtractBundle(i) : i);
 								}
-								if (slot.every(i => isObject(i)) && openExtendedImport(slot, false) === null) {
+								if (slot.every(i => isObject(i)) && openExtendedImport(slot, true) === null) {
 									return;
 								}
 							}

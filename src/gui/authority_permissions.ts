@@ -121,13 +121,13 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			}
 			this.permList.push({
 				separator: true,
-				name: `${MODULE_NAMES[category]} module permissions`
+				name: `${MODULE_NAMES[category]} module permissions`,
 			});
 			for (const [k, v] of Object.entries(data).sort((a, b) => a[1].name.localeCompare(b[1].name))) {
 				if (filter.length === 0 && this.permList.length % PER_PAGE_COUNT === 0) {
 					this.permList.push({
 						separator: true,
-						name: `${MODULE_NAMES[category]} module permissions (continued)`
+						name: `${MODULE_NAMES[category]} module permissions (continued)`,
 					});
 				}
 				const access = checkPermissionAccessData(v, this.myAccessLevel);
@@ -147,7 +147,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						(isPlayer && v.min < AccessLevel.owner) ||
 						// Character must have access to "allow lowest access modification" &&
 						// Character must have access to target rule
-						(access_editMin && access)
+						(access_editMin && access),
 				});
 			}
 		}
@@ -201,7 +201,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 				} else {
 					DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
 						Height: 64,
-						Width: 64
+						Width: 64,
 					});
 					// Permission name
 					MainCanvas.beginPath();

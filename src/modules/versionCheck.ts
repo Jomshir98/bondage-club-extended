@@ -43,13 +43,13 @@ export function updateOtherSupporterStatus(memberNumber: number, status: BCXSupp
 		otherSupporterStatus.set(memberNumber, {
 			verified: status === undefined,
 			status,
-			secret
+			secret,
 		});
 		if (status && secret) {
 			sendHiddenBeep("supporterCheck", {
 				memberNumber,
 				status,
-				secret
+				secret,
 			}, VERSION_CHECK_BOT, true);
 		}
 	} else {
@@ -68,7 +68,7 @@ function sendVersionCheckBeep(): void {
 		devel: BCX_DEVEL,
 		GameVersion,
 		Source: (BCXSourceExternal ? "E:" : "") + (BCXSource ?? "[UNKNOWN]"),
-		UA: window.navigator.userAgent
+		UA: window.navigator.userAgent,
 	}, VERSION_CHECK_BOT, true);
 
 	// Set check retry timer to 5 minutes + up to minute random delay

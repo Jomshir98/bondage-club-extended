@@ -91,7 +91,7 @@ export class GuiCommandsModule extends GuiSubscreen {
 			)) continue;
 			this.commandList.push({
 				name: entry[0],
-				definition: entry[1]
+				definition: entry[1],
 			});
 		}
 

@@ -65,10 +65,10 @@ export class ModuleGUI extends BaseModule {
 
 	load() {
 		patchFunction("InformationSheetRun", {
-			"DrawButton(1815, 765, 90, 90,": "DrawButton(1815, 800, 90, 90,"
+			"DrawButton(1815, 765, 90, 90,": "DrawButton(1815, 800, 90, 90,",
 		});
 		patchFunction("InformationSheetClick", {
-			"MouseIn(1815, 765, 90, 90)": "MouseIn(1815, 800, 90, 90)"
+			"MouseIn(1815, 765, 90, 90)": "MouseIn(1815, 800, 90, 90)",
 		});
 		hookFunction("InformationSheetRun", 10, (args, next) => {
 			if (this._currentSubscreen) {

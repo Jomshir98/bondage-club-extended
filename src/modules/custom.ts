@@ -38,7 +38,7 @@ export class ModuleCustom extends BaseModule {
 						Asset: f,
 						Difficulty: 20,
 						Color: ["#A7806F", "Default", "Default"],
-						Property: { Mode: "Off", Intensity: -1, Effect: ["Egged"], TriggerValues: "ø,".repeat(7) + "ø", AccessMode: "LockMember" }
+						Property: { Mode: "Off", Intensity: -1, Effect: ["Egged"], TriggerValues: "ø,".repeat(7) + "ø", AccessMode: "LockMember" },
 					});
 					CharacterRefresh(C.Character, false);
 					ChatRoomCharacterUpdate(C.Character);

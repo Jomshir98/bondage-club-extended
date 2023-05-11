@@ -14,7 +14,7 @@ export interface ConditionEntry<CAT extends ConditionsCategories, ExtraData> {
 	condition: string;
 	access: boolean;
 	data: ConditionsConditionPublicData<CAT>;
-	extra: ExtraData
+	extra: ExtraData;
 }
 
 let alphabeticalSort: boolean = false;
@@ -105,7 +105,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 				access,
 				data,
 				displayName: res[0],
-				extra: res[1]
+				extra: res[1],
 			});
 		}
 
@@ -190,7 +190,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			}
 			DrawImageEx("Icons/General.png", X + 480, Y + 7, {
 				Height: 46,
-				Width: 46
+				Width: 46,
 			});
 			// shows time left (XXd -> XXh -> XXm -> XXs) or ∞
 			let timeLeftText: string = "n/a";
@@ -235,7 +235,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		MainCanvas.fill();
 		DrawImageEx("Icons/General.png", 675 + 120, 885 + 1, {
 			Height: 44,
-			Width: 44
+			Width: 44,
 		});
 
 		DrawButton(870, 820, 170, 50, "Deactivate all", accessFull ? "White" : "#ddd", "",
@@ -249,7 +249,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		MainCanvas.fill();
 		DrawImageEx("Icons/General.png", 868 + 120, 885 + 1, {
 			Height: 44,
-			Width: 44
+			Width: 44,
 		});
 
 		// change global config button
@@ -262,7 +262,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		MainCanvas.fill();
 		DrawImageEx("Icons/General.png", 1068 + 10, 820 + 10, {
 			Height: 70,
-			Width: 70
+			Width: 70,
 		});
 
 		// filter

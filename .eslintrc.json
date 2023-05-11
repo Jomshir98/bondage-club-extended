@@ -18,7 +18,7 @@
 			"files": ["*.ts"],
 			"parser": "@typescript-eslint/parser",
 			"parserOptions": {
-				"project": ["./tsconfig.json"],
+				"project": ["./tsconfig.json", "./test/tsconfig.json"],
 				"sourceType": "module"
 			},
 			"rules": {
@@ -112,8 +112,24 @@
 			}
 		],
 		"comma-dangle": "off",
-		// TODO: "always-multiline"
-		"@typescript-eslint/comma-dangle": ["warn", "never"],
+		"@typescript-eslint/comma-dangle": ["warn", {
+			"arrays": "always-multiline",
+			"objects": "always-multiline",
+			"imports": "always-multiline",
+			"exports": "always-multiline",
+			"enums": "always-multiline",
+			"functions": "never",
+			"generics": "never",
+			"tuples": "never"
+		}],
+		"@typescript-eslint/member-delimiter-style": [
+			"warn",
+			{
+				"singleline": {
+					"requireLast": true
+				}
+			}
+		],
 		"no-trailing-spaces": "warn",
 		"quotes": "off",
 		"@typescript-eslint/quotes": ["warn", "double", { "avoidEscape": true, "allowTemplateLiterals": true }],

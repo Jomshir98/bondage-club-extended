@@ -88,7 +88,7 @@ export class GuiRelationships extends GuiSubscreen {
 			memberNumber: entry.memberNumber,
 			name: getCharacterName(entry.memberNumber, null),
 			newName: entry.nickname,
-			enforced: entry.enforceNickname
+			enforced: entry.enforceNickname,
 		}));
 
 		this.page = clamp(this.page, 0, Math.ceil(this.relationshipsList.length / PER_PAGE_COUNT));
@@ -205,7 +205,7 @@ export class GuiRelationships extends GuiSubscreen {
 				this.character.relationshipsSet({
 					memberNumber: e.memberNumber,
 					nickname: e.newName,
-					enforceNickname: !e.enforced
+					enforceNickname: !e.enforced,
 				});
 				return;
 			}
@@ -237,7 +237,7 @@ export class GuiRelationships extends GuiSubscreen {
 			this.character.relationshipsSet({
 				memberNumber: inputNumber,
 				nickname: inputText_2,
-				enforceNickname: this.relationshipsList.find(r => r.memberNumber === inputNumber)?.enforced ?? false
+				enforceNickname: this.relationshipsList.find(r => r.memberNumber === inputNumber)?.enforced ?? false,
 			});
 			return;
 		}

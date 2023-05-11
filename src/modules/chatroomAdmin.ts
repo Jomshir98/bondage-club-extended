@@ -17,7 +17,7 @@ enum ThemeRoomType {
 	Tie = 4,
 	Market = 5,
 	Game = 6,
-	Other = 99
+	Other = 99,
 }
 
 enum ThemeRoomSetting {
@@ -27,7 +27,7 @@ enum ThemeRoomSetting {
 	Modern = 3,
 	Romantic = 4,
 	School = 5,
-	SciFi = 6
+	SciFi = 6,
 }
 
 const TR_TYPE_NAMES: Record<ThemeRoomType, string> = {
@@ -38,7 +38,7 @@ const TR_TYPE_NAMES: Record<ThemeRoomType, string> = {
 	[ThemeRoomType.Tie]: "Tying all up",
 	[ThemeRoomType.Market]: "Market/Auction",
 	[ThemeRoomType.Game]: "Game",
-	[ThemeRoomType.Other]: "Undefined"
+	[ThemeRoomType.Other]: "Undefined",
 };
 
 interface ThemeRoom {
@@ -63,7 +63,7 @@ const THEME_ROOM_LIMITS = [
 	"no-limits",
 	"no-males",
 	"no-sexual",
-	"no-tentacles"
+	"no-tentacles",
 ];
 
 // for 2nd page / room template feature
@@ -89,7 +89,7 @@ const currentThemeRoom: ThemeRoom = {
 	Limits: new Set(),
 	BlockCategories: [],
 	Background: "",
-	IntroText: ""
+	IntroText: "",
 };
 
 let onThemeRoomSubpage: boolean = false;
@@ -100,7 +100,7 @@ let input = document.getElementById(`INTRO_TEXT`) as HTMLTextAreaElement | undef
 function serializeThemeRoom(value: ThemeRoom): string {
 	return JSON.stringify({
 		...value,
-		Limits: Array.from(value.Limits)
+		Limits: Array.from(value.Limits),
 	});
 }
 
@@ -563,7 +563,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 				Limit: ElementValue("InputSize") ? ElementValue("InputSize")!.trim() : "",
 				Language: create ? ChatCreateLanguage : ChatAdminLanguage,
 				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory),
-				AutoApply: modStorage.roomTemplates[i]?.AutoApply
+				AutoApply: modStorage.roomTemplates[i]?.AutoApply,
 			};
 			modStorageSync();
 			overwriteMode = undefined;
@@ -602,32 +602,32 @@ export class ModuleChatroomAdmin extends BaseModule {
 		});
 		if (GameVersion === "R79") {
 			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomName"), 535, 110,': 'DrawText(TextGet("RoomName"), 675, 110,'
+				'DrawText(TextGet("RoomName"), 535, 110,': 'DrawText(TextGet("RoomName"), 675, 110,',
 			});
 			patchFunction("ChatCreateRun", {
-				'ElementPosition("InputName", 535, 170, 820);': 'ElementPosition("InputName", 610, 170, 680);'
+				'ElementPosition("InputName", 535, 170, 820);': 'ElementPosition("InputName", 610, 170, 680);',
 			});
 		} else {
 			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,'
+				'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
 			});
 			patchFunction("ChatCreateRun", {
-				'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);'
+				'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
 			});
 			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,'
+				'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
 			});
 			patchFunction("ChatCreateRun", {
-				"DrawButton(405, 172,": "DrawButton(505, 172,"
+				"DrawButton(405, 172,": "DrawButton(505, 172,",
 			});
 			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,'
+				'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
 			});
 			patchFunction("ChatCreateRun", {
-				'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);'
+				'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
 			});
 			patchFunction("ChatCreateClick", {
-				"if (MouseIn(405, 172,": "if (MouseIn(505, 172,"
+				"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
 			});
 		}
 		hookFunction("ChatCreateRun", 0, (args, next) => {
@@ -707,32 +707,32 @@ export class ModuleChatroomAdmin extends BaseModule {
 		//#region Second page button (on room admin screen)
 		if (GameVersion === "R79") {
 			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomName"), 535, 110,': 'DrawText(TextGet("RoomName"), 675, 110,'
+				'DrawText(TextGet("RoomName"), 535, 110,': 'DrawText(TextGet("RoomName"), 675, 110,',
 			});
 			patchFunction("ChatAdminRun", {
-				'ElementPosition("InputName", 535, 170, 820);': 'ElementPosition("InputName", 610, 170, 680);'
+				'ElementPosition("InputName", 535, 170, 820);': 'ElementPosition("InputName", 610, 170, 680);',
 			});
 		} else {
 			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,'
+				'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
 			});
 			patchFunction("ChatAdminRun", {
-				'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);'
+				'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
 			});
 			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,'
+				'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
 			});
 			patchFunction("ChatAdminRun", {
-				"DrawButton(405, 172,": "DrawButton(505, 172,"
+				"DrawButton(405, 172,": "DrawButton(505, 172,",
 			});
 			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,'
+				'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
 			});
 			patchFunction("ChatAdminRun", {
-				'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);'
+				'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
 			});
 			patchFunction("ChatAdminClick", {
-				"if (MouseIn(405, 172,": "if (MouseIn(505, 172,"
+				"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
 			});
 		}
 		hookFunction("ChatAdminRun", 0, (args, next) => {

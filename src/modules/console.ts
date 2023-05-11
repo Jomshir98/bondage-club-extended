@@ -152,10 +152,10 @@ export class ModuleConsole extends BaseModule {
 		window.bcx = consoleInterface;
 
 		patchFunction("ChatRoomMessageDefaultMetadataExtractor", {
-			"asset.DynamicDescription(character).toLowerCase()": `( bcx.isDevel ? asset.Description : asset.DynamicDescription(character).toLowerCase() )`
+			"asset.DynamicDescription(character).toLowerCase()": `( bcx.isDevel ? asset.Description : asset.DynamicDescription(character).toLowerCase() )`,
 		});
 		patchFunction("ChatRoomGetFocusGroupSubstitutions", {
-			"DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase()": `( bcx.isDevel ? focusGroup.Description : DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase() )`
+			"DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase()": `( bcx.isDevel ? focusGroup.Description : DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase() )`,
 		});
 
 		for (let i = 0; i < ChatRoomMessageExtractors.length; i++) {
@@ -165,7 +165,7 @@ export class ModuleConsole extends BaseModule {
 		}
 
 		patchFunction("ExtendedItemDrawButton", {
-			"DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`
+			"DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`,
 		});
 
 		hookFunction("DialogDrawItemMenu", 0, (args, next) => {
@@ -176,7 +176,7 @@ export class ModuleConsole extends BaseModule {
 		});
 
 		patchFunction("DialogDrawPoseMenu", {
-			'"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`
+			'"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`,
 		});
 
 		hookFunction("DialogDrawExpressionMenu", 0, (args, next) => {

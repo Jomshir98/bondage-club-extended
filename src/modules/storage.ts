@@ -9,7 +9,7 @@ import { BCX_setTimeout } from "../BCXContext";
 
 export enum StorageLocations {
 	OnlineSettings = 0,
-	LocalStorage = 1
+	LocalStorage = 1,
 }
 
 export let modStorage: Partial<ModStorage> = {};

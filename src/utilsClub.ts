@@ -25,7 +25,7 @@ const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"HairAccessory2": "Ears Accessory",
 	"Height": "Character Height",
 	"Mouth": "Mouth Style",
-	"Pussy": "Pussy Style"
+	"Pussy": "Pussy Style",
 };
 
 export let allowMode: boolean = false;
@@ -80,7 +80,7 @@ export let BCXSourceExternal: boolean = false;
 
 export function init_findBCXSource(): void {
 	for (const elem of Array.from(document.getElementsByTagName("script"))) {
-		const match = /^(https:\/\/[^?/]+\/([^?]+)?|http:\/\/localhost(?::[0-9]+)?\/)bcx.js($|\?)/i.exec(elem.src);
+		const match = /^(https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?bcx(\.dev)?\.js($|\?)/i.exec(elem.src);
 		if (match) {
 			BCXSource = match[1];
 			return;
@@ -89,7 +89,7 @@ export function init_findBCXSource(): void {
 	const externalSrc = (window as any).BCX_SOURCE as unknown;
 	if (typeof externalSrc === "string") {
 		BCXSourceExternal = true;
-		const match = /^(https:\/\/[^?/]+\/(?:[^?]+?)?)(?:bcx.js)?(?:$|\?)/i.exec(externalSrc);
+		const match = /^(https:\/\/[^?/]+\/(?:[^?]+?)?)(?:bcx(\.dev)?\.js)?(?:$|\?)/i.exec(externalSrc);
 		if (match) {
 			BCXSource = match[1];
 			console.log("BCX: External BCX_SOURCE supplied, using it");
@@ -109,7 +109,7 @@ export function getVisibleGroupName(group: AssetGroup): string {
 export function InfoBeep(msg: string, timer: number = 3000) {
 	ServerBeep = {
 		Timer: CommonTime() + timer,
-		Message: msg
+		Message: msg,
 	};
 }
 
@@ -121,8 +121,8 @@ export function ChatRoomActionMessage(msg: string, target: null | number = null,
 		Target: target,
 		Dictionary: [
 			{ Tag: "MISSING PLAYER DIALOG: BCX_PLAYER_CUSTOM_DIALOG", Text: msg },
-			...dictionary
-		]
+			...dictionary,
+		],
 	});
 }
 
@@ -171,7 +171,7 @@ export function detectOtherMods() {
 		BcUtil: typeof w.StartBcUtil === "function",
 		QuickAccessMenu: typeof w.OLDmenu === "function" && typeof w.NEWmenu === "function",
 		ImprovedStruggle: typeof w.OLDclick === "function" && typeof w.NEWclick === "function",
-		BCE: w.BCE_VERSION !== undefined ? (`${w.BCE_VERSION}` || true) : false
+		BCE: w.BCE_VERSION !== undefined ? (`${w.BCE_VERSION}` || true) : false,
 	};
 }
 
@@ -214,7 +214,7 @@ export function DrawImageEx(
 		Height,
 		Invert = false,
 		Mirror = false,
-		Zoom = 1
+		Zoom = 1,
 	}: DrawImageExOptions = {}
 ) {
 	if (typeof Source === "string") {

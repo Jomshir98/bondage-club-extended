@@ -7,7 +7,7 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Game commit: 3e343273faa9c1959747c194c4fad566d505e9c4
 export const SUPPORTED_BC_VERSIONS: readonly string[] = [
-	"R90"
+	"R90",
 ];
 
 export const FUNCTION_HASHES: Record<string, string[]> = {
@@ -150,7 +150,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ValidationResolveModifyDiff: ["5D9FA740"],
 	WardrobeClick: ["E96F7F63"],
 	WardrobeGroupAccessible: ["2D406A64"],
-	WardrobeRun: ["9616EB3A"]
+	WardrobeRun: ["9616EB3A"],
 };
 
 export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
@@ -203,5 +203,5 @@ export const FUNCTION_HASHES_NMOD: Record<string, string[]> = {
 	ServerAccountBeep: ["0A2C7C78"],
 	ServerSend: ["F8627678"],
 	WardrobeClick: ["842709D9"],
-	WardrobeRun: ["02775589"]
+	WardrobeRun: ["02775589"],
 };

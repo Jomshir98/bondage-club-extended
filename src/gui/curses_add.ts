@@ -16,18 +16,18 @@ const CATEGORIES: {
 		{
 			title: "Items",
 			filter: g => g.Category === "Item",
-			batchType: "items"
+			batchType: "items",
 		},
 		{
 			title: "Clothing",
 			filter: g => g.Category === "Appearance" && g.Clothing,
-			batchType: "clothes"
+			batchType: "clothes",
 		},
 		{
 			title: "Body",
 			filter: g => g.Category === "Appearance" && !g.Clothing && g.AllowCustomize,
-			batchType: "body"
-		}
+			batchType: "body",
+		},
 	];
 
 export class GuiCursesAdd extends GuiSubscreen {

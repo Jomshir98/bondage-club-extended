@@ -14,11 +14,15 @@ import simpleGit from "simple-git";
 
 /* global process */
 
-/** @type {import("rollup").RollupOptions} */
-const config = {
-	input: "src/index.ts",
-	output: {
-		file: "dist/bcx.js",
+/**
+ * Creates options for building BCX
+ * @param {string} output - Output file for bcx
+ * @param {import("rollup").OutputPlugin[]} plugins - Extra plugins to apply
+ * @returns {import("rollup").OutputOptions}
+ */
+function GetBCXBuilder(output, plugins = []) {
+	return {
+		file: output,
 		format: "iife",
 		sourcemap: true,
 		banner: `// BCX: Bondage Club Extended
@@ -47,9 +51,17 @@ console.debug("BCX: Parse start...");
 				BCX_DEVEL = "true";
 			}
 			return `const BCX_VERSION="${BCX_VERSION}";const BCX_DEVEL=${BCX_DEVEL};`;
-		}
-	},
+		},
+		plugins,
+	};
+}
+
+/** @type {import("rollup").RollupOptions} */
+const config = {
+	input: "src/index.ts",
+	output: [],
 	treeshake: false,
+	cache: false,
 	plugins: [
 		progress({ clearLine: true }),
 		resolve({ browser: true }),
@@ -61,16 +73,16 @@ console.debug("BCX: Parse start...");
 				{
 					src: [
 						"static/*",
-						process.env.IS_DEVEL ? "static_devel/*" : "static_stable/*"
+						process.env.IS_DEVEL ? "static_devel/*" : "static_stable/*",
 					],
-					dest: "dist"
+					dest: "dist",
 				},
 				{
 					src: "resources/*",
-					dest: "dist/resources"
-				}
-			]
-		})
+					dest: "dist/resources",
+				},
+			],
+		}),
 	],
 	onwarn(warning, warn) {
 		switch (warning.code) {
@@ -80,23 +92,29 @@ console.debug("BCX: Parse start...");
 			default:
 				warn(warning);
 		}
-	}
+	},
 };
 
-if (!process.env.ROLLUP_WATCH) {
-	config.plugins.push(terser());
-}
-
 if (process.env.ROLLUP_WATCH) {
+	config.output.push(
+		GetBCXBuilder("dist/bcx.js")
+	);
 	config.plugins.push(
 		serve({
 			contentBase: "dist",
 			host: "localhost",
 			port: 8082,
 			headers: {
-				"Access-Control-Allow-Origin": "*"
-			}
+				"Access-Control-Allow-Origin": "*",
+			},
 		})
+	);
+} else {
+	config.output.push(
+		GetBCXBuilder("dist/bcx.js", [
+			terser(),
+		]),
+		GetBCXBuilder("dist/bcx.dev.js")
 	);
 }
 

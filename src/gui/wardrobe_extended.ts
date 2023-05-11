@@ -12,35 +12,35 @@ enum ScreenState {
 	clothSelect = 1,
 	cosplaySelect = 2,
 	bodySelect = 3,
-	lockSelect = 4
+	lockSelect = 4,
 }
 
 const CATEGORIES_BASE =
 	{
 		clothes: {
 			title: "clothing",
-			filter: (g: AssetGroup) => isCloth(g, false)
+			filter: (g: AssetGroup) => isCloth(g, false),
 		},
 		cosplay: {
 			title: "cosplay items",
-			filter: (g: AssetGroup) => isCosplay(g)
+			filter: (g: AssetGroup) => isCosplay(g),
 		},
 		body: {
 			title: "body parts",
-			filter: (g: AssetGroup) => isBody(g)
+			filter: (g: AssetGroup) => isBody(g),
 		},
 		items: {
 			title: "items",
-			filter: (g: AssetGroup) => isBind(g, ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints", "ItemNipplesPiercings", "ItemVulvaPiercings"])
+			filter: (g: AssetGroup) => isBind(g, ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints", "ItemNipplesPiercings", "ItemVulvaPiercings"]),
 		},
 		piercings: {
 			title: "piercings",
-			filter: (g: AssetGroup) => isBind(g, []) && ["ItemNipplesPiercings", "ItemVulvaPiercings"].includes(g.Name)
+			filter: (g: AssetGroup) => isBind(g, []) && ["ItemNipplesPiercings", "ItemVulvaPiercings"].includes(g.Name),
 		},
 		collar: {
 			title: "collar and accessories",
-			filter: (g: AssetGroup) => isBind(g, []) && ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(g.Name)
-		}
+			filter: (g: AssetGroup) => isBind(g, []) && ["ItemNeck", "ItemNeckAccessories", "ItemNeckRestraints"].includes(g.Name),
+		},
 	} as const;
 
 type CategoryType = keyof typeof CATEGORIES_BASE;
@@ -55,7 +55,7 @@ const BACKGROUND_SELECTION: (null | string)[] = [
 	"Introduction",
 	"BrickWall",
 	"grey",
-	"White"
+	"White",
 ];
 
 let LOCK_TYPES_LIST: readonly Asset[] = [];
@@ -92,6 +92,8 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 	private originalData!: ItemBundle[];
 
 	private allowBindsBase: boolean;
+	/** If the import is strictly clothes-only (acts as forbidden binds, but without warnings) */
+	private clothesOnly: boolean;
 	private allowBinds: boolean;
 	private bindsBlockedByLock: boolean;
 	private allowPiercings: boolean;
@@ -108,11 +110,14 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 	private doApply = false;
 	private skippedBlockedCount = 0;
 
-	constructor(exitCallback: (newScreen: GuiWardrobeExtended | null) => void, character: Character, allowBinds: boolean, data: ItemBundle[]) {
+	constructor(exitCallback: (newScreen: GuiWardrobeExtended | null) => void, character: Character, allowBinds: boolean, data: ItemBundle[], clothesOnly: boolean) {
 		super();
 		this.exitCallback = exitCallback;
 		this.character = character;
 		this.allowBindsBase = allowBinds;
+		this.clothesOnly = clothesOnly;
+		allowBinds &&= !clothesOnly;
+
 		this.allowBinds = allowBinds;
 		this.bindsBlockedByLock = false;
 		this.allowPiercings = allowBinds;
@@ -173,7 +178,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			body: false,
 			binds: true,
 			collar: false,
-			piercings: false
+			piercings: false,
 		}))) {
 			this.allowBinds = false;
 			this.bindsBlockedByLock = true;
@@ -184,7 +189,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			body: false,
 			binds: true,
 			collar: false,
-			piercings: true
+			piercings: true,
 		}))) {
 			this.allowPiercings = false;
 			this.piercingsBlockedByLock = true;
@@ -195,7 +200,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			body: false,
 			binds: false,
 			collar: true,
-			piercings: false
+			piercings: false,
 		}))) {
 			this.allowCollar = false;
 			this.collarBlockedByLock = true;
@@ -377,7 +382,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 
 			if (this.skippedBlockedCount > 0) {
 				warning = `Skipped ${this.skippedBlockedCount} blocked/limited item${this.skippedBlockedCount > 1 ? "s" : ""}`;
-			} else if (!this.allowBindsBase) {
+			} else if (!this.allowBindsBase && !this.clothesOnly) {
 				warning = `You do not have permission to import items.`;
 			}
 
@@ -493,7 +498,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 
 	private drawLocksSelector(): void {
 		const importedLockTypes = new Set(this.data
-			.filter((g): g is ItemBundle & { Property: { LockedBy: AssetLockType } } => isObject(g.Property) &&
+			.filter((g): g is ItemBundle & { Property: { LockedBy: AssetLockType; }; } => isObject(g.Property) &&
 				typeof g.Property.LockedBy === "string" &&
 				AssetGet(this.character.AssetFamily, "ItemMisc", g.Property.LockedBy)?.IsLock === true
 			)
@@ -526,7 +531,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 
 	private clickLocksSelector(): void {
 		const importedLockTypes = new Set(this.data
-			.filter((g): g is ItemBundle & { Property: { LockedBy: AssetLockType } } => isObject(g.Property) &&
+			.filter((g): g is ItemBundle & { Property: { LockedBy: AssetLockType; }; } => isObject(g.Property) &&
 				typeof g.Property.LockedBy === "string" &&
 				AssetGet(this.character.AssetFamily, "ItemMisc", g.Property.LockedBy)?.IsLock === true
 			)
@@ -582,7 +587,8 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 					this.exitCallback,
 					this.character,
 					this.allowBindsBase,
-					parsedData
+					parsedData,
+					false
 				));
 			}, 0);
 			return;
@@ -810,7 +816,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			return {
 				checked: "no",
 				color: "#88c",
-				disabled: true
+				disabled: true,
 			};
 
 		const allowed =
@@ -833,7 +839,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			return {
 				checked: "no",
 				color: blockedByLock ? "#faa" : "#ccc",
-				disabled: true
+				disabled: true,
 			};
 
 		const assetGroupsWithChange = AssetGroups.filter(g => !checkImportItemNoChange(g.Name, this.data, this.originalData));
@@ -847,7 +853,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		return {
 			checked,
 			color: this.data.some(bi => AssetGroups.some(g => g.Name === bi.Group)) ? "#ffb" : "#fff",
-			disabled: false
+			disabled: false,
 		};
 	}
 
@@ -857,7 +863,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		disabled: boolean;
 	} {
 		const lockTypes = new Set(this.data
-			.filter((g): g is ItemBundle & { Property: { LockedBy: AssetLockType } } => isObject(g.Property) &&
+			.filter((g): g is ItemBundle & { Property: { LockedBy: AssetLockType; }; } => isObject(g.Property) &&
 				typeof g.Property.LockedBy === "string" &&
 				AssetGet(this.character.AssetFamily, "ItemMisc", g.Property.LockedBy)?.IsLock === true
 			)
@@ -868,14 +874,14 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			return {
 				checked: "no",
 				color: "#88c",
-				disabled: true
+				disabled: true,
 			};
 
 		if (!this.allowLocks)
 			return {
 				checked: "no",
 				color: "#ccc",
-				disabled: true
+				disabled: true,
 			};
 
 		let checked: "yes" | "partial" | "no" = "no";
@@ -887,7 +893,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		return {
 			checked,
 			color: "#ffb",
-			disabled: false
+			disabled: false,
 		};
 	}
 }

@@ -4,7 +4,7 @@ export enum Preset {
 	dominant = 0,
 	switch = 1,
 	submissive = 2,
-	slave = 3
+	slave = 3,
 }
 
 export enum ModuleCategory {
@@ -16,7 +16,7 @@ export enum ModuleCategory {
 	Commands = 5,
 	Relationships = 6,
 	ExportImport = 88,
-	Misc = 99
+	Misc = 99,
 }
 
 export const MODULE_NAMES: Record<ModuleCategory, string> = {
@@ -28,7 +28,7 @@ export const MODULE_NAMES: Record<ModuleCategory, string> = {
 	[ModuleCategory.Commands]: "Commands",
 	[ModuleCategory.Relationships]: "Relationships",
 	[ModuleCategory.ExportImport]: "Export-Import",
-	[ModuleCategory.Misc]: "Miscellaneous"
+	[ModuleCategory.Misc]: "Miscellaneous",
 };
 
 export const MODULE_ICONS: Record<ModuleCategory, string> = {
@@ -40,7 +40,7 @@ export const MODULE_ICONS: Record<ModuleCategory, string> = {
 	[ModuleCategory.Commands]: "Icons/Use.png",
 	[ModuleCategory.Relationships]: "Icons/FriendList.png",
 	[ModuleCategory.ExportImport]: "Icons/Save.png",
-	[ModuleCategory.Misc]: "Icons/Random.png"
+	[ModuleCategory.Misc]: "Icons/Random.png",
 };
 
 export const TOGGLEABLE_MODULES: readonly ModuleCategory[] = [
@@ -48,7 +48,7 @@ export const TOGGLEABLE_MODULES: readonly ModuleCategory[] = [
 	ModuleCategory.Curses,
 	ModuleCategory.Rules,
 	ModuleCategory.Commands,
-	ModuleCategory.Relationships
+	ModuleCategory.Relationships,
 ];
 
 export enum ModuleInitPhase {
@@ -56,22 +56,22 @@ export enum ModuleInitPhase {
 	init,
 	load,
 	ready,
-	destroy
+	destroy,
 }
 
 export enum MiscCheat {
 	BlockRandomEvents = 0,
 	CantLoseMistress = 1,
 	GiveMistressKey = 2,
-	GivePandoraKey = 3
+	GivePandoraKey = 3,
 }
 
 export enum ConditionsLimit {
 	normal = 0,
 	limited = 1,
-	blocked = 2
+	blocked = 2,
 }
 
 export const defaultBCXEffects: Readonly<BCX_effects> = {
-	Effect: []
+	Effect: [],
 };

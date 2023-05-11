@@ -115,6 +115,7 @@ declare var DialogInventory: DialogInventoryItem[];
 declare var DialogItemPermissionMode: boolean;
 declare var CurrentCharacter: Character | null;
 declare var DialogFacialExpressionsSelectedBlindnessLevel: number;
+declare function DialogPrerequisite(D: number): boolean;
 declare function DialogIntro(): string;
 declare function DialogLeave(): void;
 declare function DialogInventoryBuild(C: Character, Offset?: number, redrawPreviews?: boolean): void;
@@ -197,6 +198,8 @@ declare var ChatBlockItemReturnData: { Screen?: string; };
 declare function ChatSelectGendersAllowed(space: string, genders: string[]): boolean;
 
 // Server.js
+declare var ServerURL: string;
+declare function ServerInit(): void;
 declare var ServerBeep: {
 	Message: string;
 	Timer: number;
@@ -207,7 +210,7 @@ declare var ServerSocket: import("socket.io-client").Socket;
 declare var ServerIsConnected: boolean;
 declare var ServerAccountUpdate: {
 	SyncToServer(): void;
-	QueueData(Data: object, Force?: true): void
+	QueueData(Data: object, Force?: true): void;
 };
 declare var ServerCharacterNicknameRegex: RegExp;
 declare function ServerPlayerIsInChatRoom(): boolean;

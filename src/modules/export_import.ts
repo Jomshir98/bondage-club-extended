@@ -44,7 +44,7 @@ export function ExportImportDoExport(category: string, compress: boolean, charac
 
 	let result = JSON.stringify({
 		__bcxExport: EXPORT_IMPORT_FORMAT_VERSION,
-		[category]: definition.export(character)
+		[category]: definition.export(character),
 	});
 	if (compress) {
 		result = LZString.compressToBase64(result);
@@ -120,8 +120,8 @@ export class ModuleExportImport extends BaseModule {
 				[Preset.dominant]: [true, AccessLevel.self],
 				[Preset.switch]: [true, AccessLevel.owner],
 				[Preset.submissive]: [true, AccessLevel.mistress],
-				[Preset.slave]: [true, AccessLevel.mistress]
-			}
+				[Preset.slave]: [true, AccessLevel.mistress],
+			},
 		});
 	}
 

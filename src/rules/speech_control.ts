@@ -44,7 +44,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are allowed to speak only using one of the defined sounds!",
 			attempt_log: "PLAYER_NAME tried to break a rule to only speak using specific sound patterns",
-			log: "PLAYER_NAME broke a rule to only speak using specific sound patterns"
+			log: "PLAYER_NAME broke a rule to only speak using specific sound patterns",
 		},
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
@@ -53,9 +53,9 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "Set the allowed sounds:",
 				options: {
-					validate: /^\p{L}*$/iu
-				}
-			}
+					validate: /^\p{L}*$/iu,
+				},
+			},
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
@@ -78,9 +78,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_garble_whispers", {
@@ -93,7 +93,7 @@ export function initRules_bc_speech_control() {
 		defaultLimit: ConditionsLimit.limited,
 		init(state) {
 			registerSpeechHook({
-				modify: (info, message) => state.isEnforced && info.type === "Whisper" ? callOriginal("SpeechGarble", [Player, message, true]) : message
+				modify: (info, message) => state.isEnforced && info.type === "Whisper" ? callOriginal("SpeechGarble", [Player, message, true]) : message,
 			});
 		},
 		load(state) {
@@ -101,7 +101,7 @@ export function initRules_bc_speech_control() {
 				if (state.isEnforced && ChatRoomTargetMemberNumber !== null && !(args[0] as string).includes("(")) return false;
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("speech_block_gagged_ooc", {
@@ -113,7 +113,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to use OOC in messages while gagged.",
 			attempt_log: "PLAYER_NAME tried to use OOC in a message while gagged",
-			log: "PLAYER_NAME used OOC in a message while gagged"
+			log: "PLAYER_NAME used OOC in a message while gagged",
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -130,9 +130,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_block_ooc", {
@@ -144,7 +144,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to use OOC in messages!",
 			attempt_log: "PLAYER_NAME tried to use OOC in a message",
-			log: "PLAYER_NAME used OOC in a message"
+			log: "PLAYER_NAME used OOC in a message",
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -161,9 +161,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_doll_talk", {
@@ -175,7 +175,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You broke the doll talk rule!",
 			attempt_log: "PLAYER_NAME tried to break the doll talk rule",
-			log: "PLAYER_NAME broke the doll talk rule"
+			log: "PLAYER_NAME broke the doll talk rule",
 		},
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
@@ -183,14 +183,14 @@ export function initRules_bc_speech_control() {
 				type: "number",
 				default: 6,
 				description: "Max. character length of any word:",
-				Y: 420
+				Y: 420,
 			},
 			maxNumberOfWords: {
 				type: "number",
 				default: 5,
 				description: "Max. number of words per message:",
-				Y: 570
-			}
+				Y: 570,
+			},
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
@@ -215,9 +215,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_ban_words", {
@@ -229,7 +229,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
 			attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",
-			log: "PLAYER_NAME used the banned word 'USED_WORD'"
+			log: "PLAYER_NAME used the banned word 'USED_WORD'",
 		},
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
@@ -238,9 +238,9 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "All forbidden words:",
 				options: {
-					validate: /^[\p{L} ]*$/iu
-				}
-			}
+					validate: /^[\p{L} ]*$/iu,
+				},
+			},
 		},
 		init(state) {
 			let transgression: undefined | string;
@@ -266,9 +266,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg) && transgression !== undefined) {
 						state.trigger(null, { USED_WORD: transgression });
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_ban_words_in_emotes", {
@@ -280,7 +280,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
 			attempt_log: "PLAYER_NAME tried to use the banned word 'USED_WORD'",
-			log: "PLAYER_NAME used the banned word 'USED_WORD'"
+			log: "PLAYER_NAME used the banned word 'USED_WORD'",
 		},
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
@@ -289,9 +289,9 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "All forbidden words:",
 				options: {
-					validate: /^[\p{L} ]*$/iu
-				}
-			}
+					validate: /^[\p{L} ]*$/iu,
+				},
+			},
 		},
 		init(state) {
 			let transgression: undefined | string;
@@ -317,9 +317,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg) && transgression !== undefined) {
 						state.trigger(null, { USED_WORD: transgression });
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_forbid_open_talking", {
@@ -331,7 +331,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to talk openly in chatrooms!",
 			attempt_log: "PLAYER_NAME tried to openly speak in a room",
-			log: "PLAYER_NAME spoke openly in a room"
+			log: "PLAYER_NAME spoke openly in a room",
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -348,9 +348,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_limit_open_talking", {
@@ -361,15 +361,15 @@ export function initRules_bc_speech_control() {
 		longDescription: "This rule limits PLAYER_NAME's ability to send a message to all people inside a chat room to only the set number per minute. Does not affect whispers or emotes, but does affect OOC. Note: Setting '0' will have no effect, as there is another rule to forbid open talking completely.",
 		keywords: ["limit", "restrict", "loud", "saying", "speaking", "chatting", "slow", "fast"],
 		triggerTexts: {
-			infoBeep: "You exceeded the number of allowed chat messages per minute!"
+			infoBeep: "You exceeded the number of allowed chat messages per minute!",
 		},
 		dataDefinition: {
 			maxNumberOfMsg: {
 				type: "number",
 				default: 42,
 				description: "Maximum allowed number of chat messages per minute (> 0):",
-				Y: 380
-			}
+				Y: 380,
+			},
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -394,9 +394,9 @@ export function initRules_bc_speech_control() {
 					if (state.customData?.maxNumberOfMsg && state.customData.maxNumberOfMsg !== 0 && state.isEnforced && !check(msg)) {
 						currentCount++;
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_forbid_emotes", {
@@ -408,7 +408,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to use emotes in chatrooms!",
 			attempt_log: "PLAYER_NAME tried to use an emote in a room",
-			log: "PLAYER_NAME used an emote in a room"
+			log: "PLAYER_NAME used an emote in a room",
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -425,9 +425,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_limit_emotes", {
@@ -438,15 +438,15 @@ export function initRules_bc_speech_control() {
 		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room to only the set number per minute. Note: Setting '0' will have no effect, as there is another rule to forbid using emotes completely.",
 		keywords: ["restrict", "emoting", "acting", "slow", "fast"],
 		triggerTexts: {
-			infoBeep: "You exceeded the number of allowed emotes per minute!"
+			infoBeep: "You exceeded the number of allowed emotes per minute!",
 		},
 		dataDefinition: {
 			maxNumberOfEmotes: {
 				type: "number",
 				default: 42,
 				description: "Maximum allowed number of emotes per minute (> 0):",
-				Y: 380
-			}
+				Y: 380,
+			},
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
@@ -467,9 +467,9 @@ export function initRules_bc_speech_control() {
 						}, 60_000);
 					}
 					return SpeechHookAllow.ALLOW;
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_restrict_whisper_send", {
@@ -481,15 +481,15 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to whisper to TARGET_PLAYER!",
 			attempt_log: "PLAYER_NAME tried to whisper to TARGET_PLAYER",
-			log: "PLAYER_NAME whispered to TARGET_PLAYER"
+			log: "PLAYER_NAME whispered to TARGET_PLAYER",
 		},
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			minimumPermittedRole: {
 				type: "roleSelector",
 				default: AccessLevel.mistress,
-				description: "Minimum role whispering is still allowed to:"
-			}
+				description: "Minimum role whispering is still allowed to:",
+			},
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
@@ -508,9 +508,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg) && msg.target != null) {
 						state.trigger(msg.target);
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_restrict_whisper_receive", {
@@ -526,15 +526,15 @@ export function initRules_bc_speech_control() {
 				type: "roleSelector",
 				default: AccessLevel.whitelist,
 				description: "Minimum role still allowed to send whisper:",
-				Y: 480
+				Y: 480,
 			},
 			autoreplyText: {
 				type: "string",
 				default: "PLAYER_NAME is currently forbidden to receive whispers.",
 				description: "Auto replies blocked sender with this:",
 				Y: 320,
-				options: /^([^/.*].*)?$/
-			}
+				options: /^([^/.*].*)?$/,
+			},
 		},
 		load(state) {
 			hookFunction("ChatRoomMessage", 5, (args, next) => {
@@ -555,7 +555,7 @@ export function initRules_bc_speech_control() {
 							ServerSend("ChatRoomChat", {
 								Content: msg,
 								Type: "Whisper",
-								Target: data.Sender
+								Target: data.Sender,
 							});
 							if (!state.isEnforced) {
 								ChatRoomSendLocal(msg);
@@ -566,7 +566,7 @@ export function initRules_bc_speech_control() {
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("speech_restrict_beep_send", {
@@ -577,7 +577,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You broke the rule that forbids sending a beep message to TARGET_PLAYER!",
 			attempt_log: "PLAYER_NAME broke a rule by trying to send a beep message to TARGET_PLAYER",
-			log: "PLAYER_NAME broke a rule by sending a beep message to TARGET_PLAYER"
+			log: "PLAYER_NAME broke a rule by sending a beep message to TARGET_PLAYER",
 		},
 		keywords: ["limit", "forbid", "prevent", "whitelist", "allowlist"],
 		defaultLimit: ConditionsLimit.blocked,
@@ -587,15 +587,15 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "Member numbers still allowed to be beeped:",
 				options: {
-					pageSize: 2
-				}
+					pageSize: 2,
+				},
 			},
 			onlyWhenBound: {
 				type: "toggle",
 				default: false,
 				description: "Only in effect when unable to use hands",
-				Y: 700
-			}
+				Y: 700,
+			},
 		},
 		load(state) {
 			hookFunction("FriendListBeepMenuSend", 5, (args, next) => {
@@ -614,7 +614,7 @@ export function initRules_bc_speech_control() {
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("speech_restrict_beep_receive", {
@@ -632,21 +632,21 @@ export function initRules_bc_speech_control() {
 				description: "Member numbers still allowed to send beeps:",
 				Y: 470,
 				options: {
-					pageSize: 2
-				}
+					pageSize: 2,
+				},
 			},
 			autoreplyText: {
 				type: "string",
 				default: "PLAYER_NAME is currently forbidden to receive beeps.",
 				description: "Auto replies blocked sender with this:",
-				Y: 300
+				Y: 300,
 			},
 			onlyWhenBound: {
 				type: "toggle",
 				default: false,
 				description: "Only in effect when unable to use hands",
-				Y: 740
-			}
+				Y: 740,
+			},
 		},
 		load(state) {
 			hookFunction("ServerAccountBeep", 5, (args, next) => {
@@ -666,7 +666,7 @@ export function initRules_bc_speech_control() {
 							MemberNumber: data.MemberNumber,
 							BeepType: "",
 							Message: msg,
-							IsSecret: true
+							IsSecret: true,
 						});
 						if (!state.isEnforced) {
 							ChatRoomSendLocal(msg);
@@ -677,7 +677,7 @@ export function initRules_bc_speech_control() {
 								Sent: true,
 								Private: false,
 								Time: new Date(),
-								Message: msg
+								Message: msg,
 							});
 						}
 					}
@@ -685,7 +685,7 @@ export function initRules_bc_speech_control() {
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("speech_greet_order", {
@@ -698,15 +698,15 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "A BCX rule made you greet one or more people (if currently online) with a beep.",
 			attempt_log: "",
-			log: ""
+			log: "",
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
 			toGreetMemberNumbers: {
 				type: "memberNumberList",
 				default: [],
-				description: "Member numbers that will be greeted:"
-			}
+				description: "Member numbers that will be greeted:",
+			},
 		},
 		load(state) {
 			if (state.isEnforced && state.customData) {
@@ -714,7 +714,7 @@ export function initRules_bc_speech_control() {
 					ServerSend("AccountBeep", {
 						MemberNumber: number,
 						BeepType: "",
-						IsSecret: true
+						IsSecret: true,
 					});
 				}
 				if (state.customData.toGreetMemberNumbers.length > 0) {
@@ -723,7 +723,7 @@ export function initRules_bc_speech_control() {
 					}, 5_000);
 				}
 			}
-		}
+		},
 	});
 
 	registerRule("speech_block_antigarble", {
@@ -735,9 +735,9 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the antigarble command!",
 			attempt_log: "PLAYER_NAME tried to use the antigarble command",
-			log: "PLAYER_NAME used the antigarble command"
+			log: "PLAYER_NAME used the antigarble command",
 		},
-		defaultLimit: ConditionsLimit.normal
+		defaultLimit: ConditionsLimit.normal,
 		// Implemented externally
 	});
 
@@ -791,7 +791,7 @@ export function initRules_bc_speech_control() {
 		shortDescription: "if sending a message in chat is rejected by BCX due to a rule violation",
 		longDescription: "This rule forces PLAYER_NAME to retype any chat/whisper/emote/OOC message as a punishment when they try to send it and another enforced BCX speech rule determines that there is any rule violation in that message.",
 		keywords: ["punish", "retry", "clear", "input", "blocked", "forbidden"],
-		defaultLimit: ConditionsLimit.limited
+		defaultLimit: ConditionsLimit.limited,
 		// Implemented externally
 	});
 
@@ -807,7 +807,7 @@ export function initRules_bc_speech_control() {
 			infoBeep: "You broke the rule to greet this room like taught!",
 			attempt_infoBeep: "You need to greet this room like taught!",
 			attempt_log: "PLAYER_NAME almost broke a rule by not greeting the room like taught",
-			log: "PLAYER_NAME broke a rule by not greeting the room like taught"
+			log: "PLAYER_NAME broke a rule by not greeting the room like taught",
 		},
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
@@ -815,14 +815,14 @@ export function initRules_bc_speech_control() {
 				type: "string",
 				default: "",
 				description: "The sentence that has to be used to greet any joined room:",
-				options: /^([^/.*()\s][^()]*)?$/
+				options: /^([^/.*()\s][^()]*)?$/,
 			},
 			affectEmotes: {
 				type: "toggle",
 				default: false,
 				description: "Also forbid emote messages before greeting",
-				Y: 560
-			}
+				Y: 560,
+			},
 		},
 		load(state) {
 			// 1. hook ChatRoomSync to set alreadyGreeted to false if the room name is different from the one stored locally
@@ -880,9 +880,9 @@ export function initRules_bc_speech_control() {
 						}
 						alreadyGreeted = true;
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("greet_new_guests", {
@@ -898,8 +898,8 @@ export function initRules_bc_speech_control() {
 				type: "string",
 				default: "",
 				description: "The sentence that will be used to greet new guests:",
-				options: /^([^/.].*)?$/
-			}
+				options: /^([^/.].*)?$/,
+			},
 		},
 		load(state) {
 			const GREET_DELAY = 600_000;
@@ -944,7 +944,7 @@ export function initRules_bc_speech_control() {
 					}, 5_000);
 				}
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	// Restrained speech:
@@ -996,9 +996,9 @@ export function initRules_bc_speech_control() {
 					} else {
 						return text;
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_mandatory_words", {
@@ -1010,7 +1010,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You forgot to include one of the mandatory words!",
 			attempt_log: "PLAYER_NAME almost forgot to use a mandatory word while talking",
-			log: "PLAYER_NAME did not use a mandatory word while talking"
+			log: "PLAYER_NAME did not use a mandatory word while talking",
 		},
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
@@ -1020,15 +1020,15 @@ export function initRules_bc_speech_control() {
 				description: "At least one of these words always needs to be used:",
 				options: {
 					validate: /^[\p{L} ]*$/iu,
-					pageSize: 3
-				}
+					pageSize: 3,
+				},
 			},
 			affectWhispers: {
 				type: "toggle",
 				default: false,
 				description: "Also affect whispered messages",
-				Y: 740
-			}
+				Y: 740,
+			},
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
@@ -1062,9 +1062,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_mandatory_words_in_emotes", {
@@ -1076,7 +1076,7 @@ export function initRules_bc_speech_control() {
 		triggerTexts: {
 			infoBeep: "You forgot to include one of the mandatory words!",
 			attempt_log: "PLAYER_NAME almost forgot to use a mandatory word while talking",
-			log: "PLAYER_NAME did not use a mandatory word while talking"
+			log: "PLAYER_NAME did not use a mandatory word while talking",
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
@@ -1085,9 +1085,9 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "At least one of these words always needs to be used:",
 				options: {
-					validate: /^[\p{L} ]*$/iu
-				}
-			}
+					validate: /^[\p{L} ]*$/iu,
+				},
+			},
 		},
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
@@ -1116,9 +1116,9 @@ export function initRules_bc_speech_control() {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
-				}
+				},
 			});
-		}
+		},
 	});
 
 	registerRule("speech_partial_hearing", {
@@ -1136,21 +1136,21 @@ export function initRules_bc_speech_control() {
 				description: "Words that can always be understood:",
 				options: {
 					validate: /^[\p{L}]*$/iu,
-					pageSize: 3
-				}
+					pageSize: 3,
+				},
 			},
 			randomUnderstanding: {
 				type: "toggle",
 				default: true,
 				description: "Some words are randomly understood",
-				Y: 650
+				Y: 650,
 			},
 			affectGaggedMembersToggle: {
 				type: "toggle",
 				default: false,
 				description: "Can also understand gagged persons",
-				Y: 740
-			}
+				Y: 740,
+			},
 		},
 		load(state) {
 			hookFunction("SpeechGarble", 2, (args, next) => {
@@ -1176,7 +1176,7 @@ export function initRules_bc_speech_control() {
 					}
 				});
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 
 	registerRule("speech_garble_while_talking", {
@@ -1197,10 +1197,10 @@ export function initRules_bc_speech_control() {
 				 */
 				options: {
 					min: 1,
-					max: 25
+					max: 25,
 				},
-				description: "The level of forced garbling"
-			}
+				description: "The level of forced garbling",
+			},
 		},
 		init(state) {
 			registerSpeechHook({
@@ -1217,6 +1217,6 @@ export function initRules_bc_speech_control() {
 					return Math.max(gagLevel, state.customData.gagLevel);
 				}
 			}, ModuleCategory.Rules);
-		}
+		},
 	});
 }

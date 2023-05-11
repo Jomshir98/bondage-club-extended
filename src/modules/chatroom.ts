@@ -25,7 +25,7 @@ export enum ChatRoomStatusManagerStatusType {
 	Profile = "Profile",
 	// NMod
 	Action = "Action",
-	Afk = "Afk"
+	Afk = "Afk",
 }
 
 const CharacterStatuses: WeakMap<Character, string> = new WeakMap();
@@ -279,11 +279,11 @@ export class ModuleChatroom extends BaseModule {
 			});
 
 			patchFunction("ChatRoomDrawCharacterOverlay", {
-				"switch (C.Status)": "switch (null)"
+				"switch (C.Status)": "switch (null)",
 			});
 		} else {
 			patchFunction("ChatRoomDrawCharacterOverlay", {
-				'DrawImageResize("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom);': ""
+				'DrawImageResize("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom);': "",
 			});
 
 			hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
@@ -302,7 +302,7 @@ export class ModuleChatroom extends BaseModule {
 				} else if (Friend && ChatRoomHideIconState === 0) {
 					DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {
 						Width: 50 * Zoom,
-						Height: 50 * Zoom
+						Height: 50 * Zoom,
 					});
 				}
 			});
@@ -336,29 +336,29 @@ export class ModuleChatroom extends BaseModule {
 					DrawRect(CharX + 380 * Zoom, CharY + 53 * Zoom, 40 * Zoom, 40 * Zoom, "White");
 					DrawImageEx("Icons/Import.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
-						Height: 50 * Zoom
+						Height: 50 * Zoom,
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Color:
 					DrawImageEx("Assets/Female3DCG/Emoticon/Spectator/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
-						Height: 50 * Zoom
+						Height: 50 * Zoom,
 					});
 					DrawImageEx("Icons/ColorPick.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
 						Width: 40 * Zoom,
-						Height: 40 * Zoom
+						Height: 40 * Zoom,
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Wardrobe:
 					DrawImageEx("Assets/Female3DCG/Emoticon/Wardrobe/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
-						Height: 50 * Zoom
+						Height: 50 * Zoom,
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Profile:
 					DrawImageEx("Assets/Female3DCG/Emoticon/Read/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
-						Height: 50 * Zoom
+						Height: 50 * Zoom,
 					});
 					break;
 			}
@@ -483,7 +483,7 @@ export function announceSelf(request: boolean = false) {
 		request,
 		effects: player.Effects,
 		typingIndicatorEnable: modStorage.typingIndicatorEnable,
-		screenIndicatorEnable: modStorage.screenIndicatorEnable
+		screenIndicatorEnable: modStorage.screenIndicatorEnable,
 	};
 	if (supporterStatus && supporterSecret && !modStorage.supporterHidden) {
 		msg.supporterStatus = supporterStatus;

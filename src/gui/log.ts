@@ -48,7 +48,7 @@ export class GuiLog extends GuiSubscreen {
 	private requestData() {
 		Promise.all([
 			this.character.getLogEntries(),
-			this.character.logGetAllowedActions()
+			this.character.logGetAllowedActions(),
 		]).then(res => {
 			this.logData = res[0];
 			this.allowDeletion = res[1].delete;
@@ -131,7 +131,7 @@ export class GuiLog extends GuiSubscreen {
 				// Log message
 				DrawImageEx(e[1] === LogAccessLevel.protected ? "Icons/Security.png" : "Icons/Public.png", 125, Y, {
 					Height: 64,
-					Width: 64
+					Width: 64,
 				});
 
 				MainCanvas.textAlign = "left";

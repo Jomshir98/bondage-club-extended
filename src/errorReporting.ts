@@ -158,6 +158,25 @@ export function debugGenerateReportErrorEvent(event: ErrorEvent): string {
 	return res;
 }
 
+export function debugGenerateReportManualError(description: string, error: unknown): string {
+	const currentMod = contextCurrentModArea();
+
+	let res = `----- ERROR ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n` +
+		`Description: ${description}\n`;
+
+	res += debugPrettifyError(error) + "\n\n";
+
+	res += debugMakeContextReport();
+
+	try {
+		res += "\n" + debugGenerateReport(currentMod === "BCX");
+	} catch (error2) {
+		res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error2)}`;
+	}
+
+	return res;
+}
+
 export function showErrorOverlay(
 	title: string,
 	description: string,
@@ -362,7 +381,7 @@ const sourceBasedErrorMessage = {
 	bcx: "<br /><h3>Whoops... seems like BCX might be to blame this time</h3> Could you please help us by submitting the report below to the <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server?<br />Thank you!</p>",
 	knownMod: (mod: string) => `<br /><h3>The error seems to come from mod ${mod}</h3> Please submit the report to <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server!`,
 	bc: "<br /><h3>The error seems not to come from any ModSDK mod!</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
-	unknown: "<br /><h3>Could not detect origin of the error.</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!"
+	unknown: "<br /><h3>Could not detect origin of the error.</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
 } as const;
 
 export function onUnhandledError(event: ErrorEvent) {
@@ -386,6 +405,28 @@ export function onUnhandledError(event: ErrorEvent) {
 	);
 }
 
+export function reportManualError(description: string, error: unknown) {
+	console.error(`BCX: Error report: ${description}\n`, error);
+	if (!firstError)
+		return;
+	firstError = false;
+	const currentMod = contextCurrentModArea();
+	// Display error window
+	showErrorOverlay(
+		"Error Report (by BCX)",
+		"The following error happend in event originating from BCX.<br />" +
+		"While reporting this error, please use the information below to help us find the source faster.<br />" +
+		"You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
+		(
+			currentMod === "BCX" ? sourceBasedErrorMessage.bcx :
+				currentMod === "" ? sourceBasedErrorMessage.bc :
+					currentMod == null ? sourceBasedErrorMessage.unknown :
+						sourceBasedErrorMessage.knownMod(currentMod)
+		),
+		debugGenerateReportManualError(description, error)
+	);
+}
+
 // Server message origin
 let originalSocketEmit: undefined | ((...args: any[]) => any);
 function bcxSocketEmit(this: any, ...args: any[]) {
@@ -403,7 +444,7 @@ function bcxSocketEmit(this: any, ...args: any[]) {
 		modArea: "",
 		extraInfo() {
 			return `Event: ${message}\n` + parameters.map(i => JSON.stringify(i, undefined, "  ")).join("\n");
-		}
+		},
 	});
 	const res = originalSocketEmit?.apply(this, args);
 	ctx.end();
@@ -416,7 +457,7 @@ function bcxClick(this: any, event: MouseEvent) {
 	const ctx = debugContextStart(`Canvas click`, {
 		root: true,
 		modArea: "",
-		extraInfo: () => `X: ${MouseX}\nY: ${MouseY}`
+		extraInfo: () => `X: ${MouseX}\nY: ${MouseY}`,
 	});
 	const res = originalClick?.call(this, event);
 	ctx.end();
@@ -429,7 +470,7 @@ function bcxRaf(this: any, fn: FrameRequestCallback): number {
 		const ctx = debugContextStart(`Animation frame`, {
 			root: true,
 			modArea: "",
-			extraInfo: () => `time: ${rafArgs}`
+			extraInfo: () => `time: ${rafArgs}`,
 		});
 		const res = fn.apply(window, rafArgs);
 		ctx.end();

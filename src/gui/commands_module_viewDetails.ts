@@ -36,7 +36,7 @@ export class GuiCommandsModuleViewDetails extends GuiSubscreen {
 				this.commandDefinition.longDescription,
 				{
 					PLAYER_NAME: this.character.Name,
-					HELP_DESCRIPTION: this.commandDefinition.helpDescription
+					HELP_DESCRIPTION: this.commandDefinition.helpDescription,
 				}
 			),
 			125, 220,

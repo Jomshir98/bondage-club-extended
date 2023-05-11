@@ -124,7 +124,7 @@ export class ChatroomCharacter {
 		return sendQuery("editPermission", {
 			permission,
 			edit: type,
-			target
+			target,
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'editPermission' query\n", data);
@@ -157,7 +157,7 @@ export class ChatroomCharacter {
 		return sendQuery("editRole", {
 			type: role,
 			action,
-			target
+			target,
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'editRole' query\n", data);
@@ -216,7 +216,7 @@ export class ChatroomCharacter {
 	setLogConfig(category: BCX_LogCategory, target: LogAccessLevel): Promise<boolean> {
 		return sendQuery("logConfigEdit", {
 			category,
-			target
+			target,
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'logConfigEdit' query\n", data);
@@ -239,7 +239,7 @@ export class ChatroomCharacter {
 	logPraise(value: -1 | 0 | 1, message: string | null): Promise<boolean> {
 		return sendQuery("logPraise", {
 			message,
-			value
+			value,
 		}, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'logPraise' query\n", data);
@@ -377,7 +377,7 @@ export class ChatroomCharacter {
 	exportImportDoExport(category: string, compress: boolean = true): Promise<string> {
 		return sendQuery("export_import_do_export", {
 			category,
-			compress
+			compress,
 		}, this.MemberNumber).then(res => {
 			if (typeof res !== "string") {
 				console.error("BCX: Bad data during 'export_import_do_export' query\n", res);
@@ -390,7 +390,7 @@ export class ChatroomCharacter {
 	exportImportDoImport(category: string, data: string): Promise<string> {
 		return sendQuery("export_import_do_import", {
 			category,
-			data
+			data,
 		}, this.MemberNumber).then(res => {
 			if (typeof res !== "string") {
 				console.error("BCX: Bad data during 'export_import_do_import' query\n", res);

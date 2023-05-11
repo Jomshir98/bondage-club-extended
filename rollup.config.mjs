@@ -61,6 +61,7 @@ const config = {
 	input: "src/index.ts",
 	output: [],
 	treeshake: false,
+	cache: false,
 	plugins: [
 		progress({ clearLine: true }),
 		resolve({ browser: true }),

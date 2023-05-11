@@ -2,6 +2,8 @@ import { cloneDeep } from "lodash-es";
 import { debugContextStart } from "../BCXContext";
 import { isObject } from "../utils";
 import { RulesGetRuleState, RuleState } from "./rules";
+import { BCXGlobalEventSystem, TypedEventEmitter } from "../event";
+import { reportManualError } from "../errorReporting";
 
 export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
 	readonly modName: string;
@@ -75,11 +77,25 @@ export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
 	}
 }
 
-export class ModAPI implements BCX_ModAPI {
+export class ModAPI extends TypedEventEmitter<BCX_Events> implements BCX_ModAPI {
 	readonly modName: string;
 
 	constructor(modName: string) {
+		super();
 		this.modName = modName;
+
+		BCXGlobalEventSystem.onAny((event) => {
+			const context = debugContextStart("ModApiEvent", {
+				modArea: this.modName,
+				extraInfo: () => `mod: ${this.modName}; event: ${event.event}`,
+			});
+			try {
+				this.emit(event.event, event.data);
+			} catch (error) {
+				reportManualError("While emitting BCX event", error);
+			}
+			context.end();
+		});
 	}
 
 	getRuleState<ID extends BCX_Rule>(rule: ID): BCX_RuleStateAPI<ID> | null {

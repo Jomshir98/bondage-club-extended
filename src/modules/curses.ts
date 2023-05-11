@@ -14,6 +14,7 @@ import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetC
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
 import { BCX_setInterval } from "../BCXContext";
 import { ValidationVerifyCraftData } from "./wardrobe";
+import { BCXGlobalEventSystem } from "../event";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
@@ -1012,7 +1013,10 @@ export class ModuleCurses extends BaseModule {
 				CharacterRefresh(Player, true);
 				ChatRoomCharacterUpdate(Player);
 				this.pendingMessages.remove.push(currentItem.Asset.Description);
-				return;
+				BCXGlobalEventSystem.emitEvent("curseTrigger", {
+					action: "remove",
+					group,
+				});
 			}
 			return;
 		}
@@ -1113,6 +1117,10 @@ export class ModuleCurses extends BaseModule {
 			CharacterRefresh(Player, true);
 			ChatRoomCharacterUpdate(Player);
 			this.pendingMessages[changeType].push(asset.Description);
+			BCXGlobalEventSystem.emitEvent("curseTrigger", {
+				action: changeType,
+				group,
+			});
 
 			const counter = (this.triggerCounts.get(group) ?? 0) + 1;
 			this.triggerCounts.set(group, counter);
@@ -1169,6 +1177,10 @@ export class ModuleCurses extends BaseModule {
 				InventoryRemove(Player, curse, true);
 				ChatRoomCharacterUpdate(Player);
 				this.pendingMessages.autoremove.push(currentItem.Asset.Description);
+				BCXGlobalEventSystem.emitEvent("curseTrigger", {
+					action: "autoremove",
+					group: curse,
+				});
 			}
 		}
 	}

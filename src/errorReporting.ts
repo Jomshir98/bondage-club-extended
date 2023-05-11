@@ -158,6 +158,25 @@ export function debugGenerateReportErrorEvent(event: ErrorEvent): string {
 	return res;
 }
 
+export function debugGenerateReportManualError(description: string, error: unknown): string {
+	const currentMod = contextCurrentModArea();
+
+	let res = `----- ERROR ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n` +
+		`Description: ${description}\n`;
+
+	res += debugPrettifyError(error) + "\n\n";
+
+	res += debugMakeContextReport();
+
+	try {
+		res += "\n" + debugGenerateReport(currentMod === "BCX");
+	} catch (error2) {
+		res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error2)}`;
+	}
+
+	return res;
+}
+
 export function showErrorOverlay(
 	title: string,
 	description: string,
@@ -383,6 +402,28 @@ export function onUnhandledError(event: ErrorEvent) {
 						sourceBasedErrorMessage.knownMod(currentMod)
 		),
 		debugGenerateReportErrorEvent(event)
+	);
+}
+
+export function reportManualError(description: string, error: unknown) {
+	console.error(`BCX: Error report: ${description}\n`, error);
+	if (!firstError)
+		return;
+	firstError = false;
+	const currentMod = contextCurrentModArea();
+	// Display error window
+	showErrorOverlay(
+		"Error Report (by BCX)",
+		"The following error happend in event originating from BCX.<br />" +
+		"While reporting this error, please use the information below to help us find the source faster.<br />" +
+		"You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
+		(
+			currentMod === "BCX" ? sourceBasedErrorMessage.bcx :
+				currentMod === "" ? sourceBasedErrorMessage.bc :
+					currentMod == null ? sourceBasedErrorMessage.unknown :
+						sourceBasedErrorMessage.knownMod(currentMod)
+		),
+		debugGenerateReportManualError(description, error)
 	);
 }
 

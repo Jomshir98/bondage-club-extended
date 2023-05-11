@@ -60,7 +60,16 @@ interface BCX_RuleStateAPI<ID extends BCX_Rule> extends BCX_RuleStateAPI_Generic
 
 //#endregion
 
-interface BCX_ModAPI {
+interface BCX_Events {
+	curseTrigger: {
+		/** Which action the curses did to the item */
+		action: "remove" | "add" | "swap" | "update" | "color" | "autoremove";
+		/** Name of asset group that was changed */
+		group: string;
+	};
+}
+
+interface BCX_ModAPI extends BCXEventEmitter<BCX_Events> {
 	/** Name of the mod this API was requested for */
 	readonly modName: string;
 
@@ -93,4 +102,17 @@ interface BCX_ConsoleInterface {
 
 interface Window {
 	bcx?: BCX_ConsoleInterface;
+}
+
+type BCXEvent = Record<never, unknown>;
+type BCXAnyEvent<T extends BCXEvent> = {
+	[key in keyof T]: {
+		event: key;
+		data: T[key];
+	};
+}[keyof T];
+
+interface BCXEventEmitter<T extends BCXEvent> {
+	on<K extends keyof T>(s: K, listener: (v: T[K]) => void): () => void;
+	onAny(listener: (value: BCXAnyEvent<T>) => void): () => void;
 }

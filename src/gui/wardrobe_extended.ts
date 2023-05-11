@@ -588,7 +588,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 					this.character,
 					this.allowBindsBase,
 					parsedData,
-					false,
+					false
 				));
 			}, 0);
 			return;

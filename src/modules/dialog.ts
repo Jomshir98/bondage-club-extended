@@ -156,7 +156,7 @@ export class ModuleDialog extends BaseModule {
 		// Remove some buttons, if there are too many
 		hookFunction("DialogMenuButtonBuild", 10, (args, next) => {
 			next(args);
-			for (const toRemove of ["ChangeLayersMouth", "Prev"]) {
+			for (const toRemove of ["ChangeLayersMouth", "Prev", "BCX_Search"]) {
 				if (DialogMenuButton.length <= 9)
 					break;
 				const index = DialogMenuButton.indexOf(toRemove);

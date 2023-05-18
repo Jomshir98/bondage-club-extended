@@ -14,7 +14,7 @@ import { drawIcon, DrawImageEx } from "../utilsClub";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { GuiConditionViewRules } from "./conditions_view_rules";
 import { GuiTutorial } from "./tutorial";
-import { setSupporterVisible, supporterStatus, versionCheckNewAvailable } from "../modules/versionCheck";
+import { versionCheckNewAvailable } from "../modules/versionCheck";
 import { modStorage, modStorageSync } from "../modules/storage";
 import { GuiCommandsModule } from "./commands_module";
 
@@ -165,11 +165,6 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		if (this.character.isPlayer()) {
-			if (supporterStatus !== undefined) {
-				DrawCheckbox(1450, 380, 64, 64, "", !modStorage.supporterHidden);
-				DrawTextFit("Show your BCX Supporter", 1694, 391, 330, "Black");
-				DrawTextFit("Heart to all BCX users", 1669, 433, 294, "Black");
-			}
 			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 500, "Black", "");
 			DrawButton(1450, 590, 400, 90, "", "White", "", "Open changelog on GitHub");
 			if (versionCheckNewAvailable === true) {
@@ -209,11 +204,6 @@ export class GuiMainMenu extends GuiSubscreen {
 				modStorageSync();
 			}
 			setSubscreen(new GuiTutorial(this.character, false));
-		}
-
-		// BCX Supporter Heart toggle
-		if (MouseIn(1450, 380, 64, 64) && this.character.isPlayer()) {
-			setSupporterVisible(!!modStorage.supporterHidden);
 		}
 
 		// Changelog

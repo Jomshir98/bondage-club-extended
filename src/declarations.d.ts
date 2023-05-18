@@ -746,6 +746,8 @@ interface ModStorage {
 	chatShouldDisplayFirstTimeHelp?: true;
 	/** Toggle, if friendlist autorefresh is enabled */
 	FLAutorefresh?: true;
+	/** Toggle, if player chose to hide BCX icon in chatroom */
+	chatroomIconHidden?: true;
 	/** Toggle, if player chose to hide the supporter status */
 	supporterHidden?: true;
 	cheats: import("./constants").MiscCheat[];

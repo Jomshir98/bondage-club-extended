@@ -199,6 +199,7 @@ export function initCommands_speech() {
 		registerSpeechHook({
 			allowSend: (msg) => {
 				if (typeTaskText &&
+					typeof repetitions === "number" &&
 					senderNumber &&
 					(msg.type === "Chat" || msg.type === "Whisper")
 				) {

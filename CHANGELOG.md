@@ -1,5 +1,19 @@
 # BCX Changelog
 
+## 0.9.6
+
+This update includes:
+ - Added new setting in the global module to no longer show the BCX icon above yourself and others in chat rooms if you dislike the icon flood
+ - Moved the BCX Supporter Heart toggle from the BCX main screen to the global module
+ - Added API that can be used to listen for curse triggering events (for other mods to be able to better integrate with BCX)
+ - This update improves compatibility with BC releases up to R92
+
+Fixes:
+ - Rule "Force garbled speech" will now correctly garble for other characters in the room, not only the player [by Rama (bananarama92)]
+ - Fixed an issue causing a false warning about lacking permissions when importing clothes in the wardrobe
+ - Fixed the issue that the changed position of the admin icon was covered by the BCX icon
+ - Removes the filter button from the item interaction row when it exceeds 9 icons in some situations
+
 ## 0.9.5
 
 This update includes:

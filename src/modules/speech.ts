@@ -234,7 +234,7 @@ export class ModuleSpeech extends BaseModule {
 				if (!Array.isArray(data.Dictionary)) {
 					data.Dictionary = [];
 				}
-				(data.Dictionary as any[]).push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: currentlyProcessedMessage.original });
+				(data.Dictionary as ChatMessageDictionary).push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: currentlyProcessedMessage.original });
 			}
 			return next(args);
 		});

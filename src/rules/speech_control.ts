@@ -1202,6 +1202,11 @@ export function initRules_bc_speech_control() {
 				description: "The level of forced garbling",
 			},
 		},
+		init(state) {
+			registerSpeechHook({
+				modify: (info, message) => state.isEnforced && info.type === "Chat" ? callOriginal("SpeechGarble", [Player, message, true]) : message,
+			});
+		},
 		load(state) {
 			hookFunction("SpeechGetTotalGagLevel", 0, (args, next) => {
 				const gagLevel: number = next(args);

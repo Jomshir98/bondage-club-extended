@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.5-fe324bb2";const BCX_DEVEL=true;
+    const BCX_VERSION="0.9.6-cf3ec467";const BCX_DEVEL=true;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -368,7 +368,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     const VERSION$1 = BCX_VERSION;
     const VERSION_CHECK_BOT = 37685;
     const SUPPORTED_BC_VERSIONS = [
-        "R90",
+        "R91",
     ];
     const FUNCTION_HASHES = {
         "Player.CanChangeClothesOn": ["40EF5292"],
@@ -377,16 +377,16 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         "Player.GetDeafLevel": ["42CB6D63"],
         "Player.HasTints": ["E09CA942", "F1F63BF9"],
         "Player.IsSlow": ["6E60F118"],
-        ActivityCheckPrerequisite: ["75C6B105"],
+        ActivityCheckPrerequisite: ["168A7F07"],
         ActivityOrgasmPrepare: ["D49DAC9B"],
         ActivityOrgasmStart: ["0BD14BED"],
-        AppearanceClick: ["6D043815"],
+        AppearanceClick: ["64C82387"],
         AppearanceExit: ["AA300341"],
         AppearanceGetPreviewImageColor: ["06F02ADE"],
         AppearanceMenuBuild: ["A9809413"],
         AppearanceMenuClick: ["45018222"],
         AppearanceMenuDraw: ["28FDF65B"],
-        AppearanceRun: ["24E07FA0"],
+        AppearanceRun: ["8C0005E2"],
         AsylumEntranceCanWander: ["A85C35F3"],
         AsylumGGTSClick: ["E5660C8C"],
         AsylumGGTSLoad: ["DAB62F12"],
@@ -410,14 +410,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         ChatRoomAdminAction: ["86DE8F3C"],
         ChatRoomCanAttemptKneel: ["0AA710FA"],
         ChatRoomCanAttemptStand: ["026065D0"],
-        ChatRoomCanBeLeashedBy: ["A05C6F82"],
+        ChatRoomCanBeLeashedBy: ["749EBE4E"],
         ChatRoomCanLeave: ["7065F82F"],
         ChatRoomClearAllElements: ["C49AA2C1"],
         ChatRoomClickCharacter: ["715D92A0"],
         ChatRoomCreateElement: ["AD7CBE68"],
         ChatRoomDrawBackground: ["597B062C"],
         ChatRoomDrawCharacter: ["8ED3DF88"],
-        ChatRoomDrawCharacterOverlay: ["1B280F1F"],
+        ChatRoomDrawCharacterOverlay: ["06FB4CC3"],
         ChatRoomFirstTimeHelp: ["078BEEA9"],
         ChatRoomGetFocusGroupSubstitutions: ["04FB0708"],
         ChatRoomIsOwnedByPlayer: ["82640FF9"],
@@ -439,52 +439,52 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         ChatRoomTarget: ["C76C5E33"],
         ChatRoomUpdateDisplay: ["8DFC494A"],
         ChatSearchJoin: ["22514B80"],
-        ChatSearchLoad: ["8AF12D1C"],
+        ChatSearchLoad: ["05A059CF"],
         ChatSearchNormalDraw: ["66BF1158"],
         ChatSearchRun: ["64BCF8FB"],
         CheatFactor: ["594CFC45"],
         CheatImport: ["26C67608"],
         ColorPickerDraw: ["D1E82FB3"],
         CommandParse: ["6E46F29E"],
-        CommonKeyDown: ["A8EC46AB"],
-        CommonSetScreen: ["17692CD7"],
-        DialogCanUnlock: ["B849E6BC"],
+        CommonKeyDown: ["0F27218B"],
+        CommonSetScreen: ["E2AC00F4"],
+        DialogCanUnlock: ["0881FEFF"],
         DialogClickExpressionMenu: ["BD1C7523"],
         DialogDrawExpressionMenu: ["A350DE2C"],
         DialogDrawItemMenu: ["689891E5"],
         DialogDrawPoseMenu: ["30C7A7C3"],
         DialogFindPlayer: ["32851FF2"],
-        DialogInventoryAdd: ["EDB6BC02", "0DD2B515"],
+        DialogInventoryAdd: ["77BEFF8F"],
         DialogInventoryBuild: ["75F93206"],
         DialogItemClick: ["639713E6"],
         DialogLeaveItemMenu: ["2348FCE9"],
-        DialogMenuButtonBuild: ["CDF4922D", "38CD99E7"],
+        DialogMenuButtonBuild: ["8F72FA67"],
         DialogMenuButtonClick: ["D6970391"],
         DrawArousalMeter: ["DC0BB5B4"],
-        DrawCharacter: ["0A5772FA"],
+        DrawCharacter: ["CA0D50AF"],
         DrawGetImage: ["BEC7B0DA"],
         DrawImageEx: ["3D3D74F5"],
         DrawProcess: ["4B2BE17E"],
         DrawStatus: ["FD747092"],
-        ExtendedItemDrawButton: ["E29E3B51", "AB0C9258"],
+        ExtendedItemDrawButton: ["E1453F3F"],
         FriendListBeepMenuSend: ["B81A695E"],
         FriendListClick: ["6B039C7C"],
         FriendListLoadFriendList: ["1F8A29E2"],
         FriendListRun: ["051E747B"],
         InfiltrationStealItems: ["1F601756"],
         InformationSheetClick: ["E535609B"],
-        InformationSheetExit: ["75521907"],
+        InformationSheetExit: ["29FF58C9"],
         InformationSheetRun: ["E248ADC7"],
         InventoryItemNeckAccessoriesCollarAutoShockUnitDetectSpeech: ["441EAEBF"],
         ItemColorReset: ["8FD17CAC"],
         ItemColorStateBuild: ["0CD125D8"],
         LoginMistressItems: ["B58EF410"],
-        LoginResponse: ["D030D0CF"],
+        LoginResponse: ["DB977132"],
         LoginStableItems: ["EA93FBF7"],
         LogValue: ["6ED63114"],
         MainHallMaidsDisabledBegForMore: ["EA29F2B3"],
         MainHallWalk: ["E52553C4"],
-        ManagementCanBeClubSlave: ["EB05C417"],
+        ManagementCanBeClubSlave: ["2A5CC4E5"],
         ManagementCanBeReleased: ["A2E2CA35"],
         ManagementCanBeReleasedOnline: ["3374263B"],
         ManagementCanBreakDatingLoverOnline: ["366AECAE"],
@@ -504,9 +504,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         SpeechGarble: ["9D669F73"],
         SpeechGetTotalGagLevel: ["C55B705A"],
         StruggleDrawStrengthProgress: ["4755C02D"],
-        StruggleStrengthDraw: ["B843C1EE"],
+        StruggleStrengthDraw: ["4406AD10"],
         TextGet: ["4DDE5794"],
-        ValidationCanAddOrRemoveItem: ["62A8266A"],
+        ValidationCanAddOrRemoveItem: ["80E3D94D"],
         ValidationResolveModifyDiff: ["5D9FA740"],
         WardrobeClick: ["E96F7F63"],
         WardrobeGroupAccessible: ["2D406A64"],
@@ -755,7 +755,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         if (maxLength) {
             input.maxLength = maxLength;
         }
-        input.addEventListener("keydown", KeyDown);
+        input.addEventListener("keydown", GameKeyDown);
         input.className = "HideOnPopup";
         return input;
     }
@@ -889,7 +889,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     	// Bondage Club Mod Development Kit (1.1.0)
     	// For more info see: https://github.com/Jomshir98/bondage-club-mod-sdk
     	/** @type {ModSDKGlobalAPI} */
-    	var bcModSdk=function(){"use strict";const e="1.1.0";function o(e){alert("Mod ERROR:\n"+e);const o=new Error(e);throw console.error(o),o}const t=new TextEncoder;function n(e){return !!e&&"object"==typeof e&&!Array.isArray(e)}function r(e){const o=new Set;return e.filter((e=>!o.has(e)&&o.add(e)))}const i=new Map,a=new Set;function d(e){a.has(e)||(a.add(e),console.warn(e));}function s(e){const o=[],t=new Map,n=new Set;for(const r of p.values()){const i=r.patching.get(e.name);if(i){o.push(...i.hooks);for(const[o,a]of i.patches.entries())t.has(o)&&t.get(o)!==a&&d(`ModSDK: Mod '${r.name}' is patching function ${e.name} with same pattern that is already applied by different mod, but with different pattern:\nPattern:\n${o}\nPatch1:\n${t.get(o)||""}\nPatch2:\n${a}`),t.set(o,a),n.add(r.name);}}o.sort(((e,o)=>o.priority-e.priority));const r=function(e,o){if(0===o.size)return e;let t=e.toString().replaceAll("\r\n","\n");for(const[n,r]of o.entries())t.includes(n)||d(`ModSDK: Patching ${e.name}: Patch ${n} not applied`),t=t.replaceAll(n,r);return (0,eval)(`(${t})`)}(e.original,t);let i=function(o){var t,i;const a=null===(i=(t=m.errorReporterHooks).hookChainExit)||void 0===i?void 0:i.call(t,e.name,n),d=r.apply(this,o);return null==a||a(),d};for(let t=o.length-1;t>=0;t--){const n=o[t],r=i;i=function(o){var t,i;const a=null===(i=(t=m.errorReporterHooks).hookEnter)||void 0===i?void 0:i.call(t,e.name,n.mod),d=n.hook.apply(this,[o,e=>{if(1!==arguments.length||!Array.isArray(o))throw new Error(`Mod ${n.mod} failed to call next hook: Expected args to be array, got ${typeof e}`);return r.call(this,e)}]);return null==a||a(),d};}return {hooks:o,patches:t,patchesSources:n,enter:i,final:r}}function c(e,o=!1){let r=i.get(e);if(r)o&&(r.precomputed=s(r));else {let o=window;const a=e.split(".");for(let t=0;t<a.length-1;t++)if(o=o[a[t]],!n(o))throw new Error(`ModSDK: Function ${e} to be patched not found; ${a.slice(0,t+1).join(".")} is not object`);const d=o[a[a.length-1]];if("function"!=typeof d)throw new Error(`ModSDK: Function ${e} to be patched not found`);const c=function(e){let o=-1;for(const n of t.encode(e)){let e=255&(o^n);for(let o=0;o<8;o++)e=1&e?-306674912^e>>>1:e>>>1;o=o>>>8^e;}return ((-1^o)>>>0).toString(16).padStart(8,"0").toUpperCase()}(d.toString().replaceAll("\r\n","\n")),l={name:e,original:d,originalHash:c};r=Object.assign(Object.assign({},l),{precomputed:s(l),router:()=>{},context:o,contextProperty:a[a.length-1]}),r.router=function(e){return function(...o){return e.precomputed.enter.apply(this,[o])}}(r),i.set(e,r),o[r.contextProperty]=r.router;}return r}function l(){const e=new Set;for(const o of p.values())for(const t of o.patching.keys())e.add(t);for(const o of i.keys())e.add(o);for(const o of e)c(o,!0);}function f(){const e=new Map;for(const[o,t]of i)e.set(o,{name:o,original:t.original,originalHash:t.originalHash,sdkEntrypoint:t.router,currentEntrypoint:t.context[t.contextProperty],hookedByMods:r(t.precomputed.hooks.map((e=>e.mod))),patchedByMods:Array.from(t.precomputed.patchesSources)});return e}const p=new Map;function u(e){p.get(e.name)!==e&&o(`Failed to unload mod '${e.name}': Not registered`),p.delete(e.name),e.loaded=!1,l();}function g(e,t,r){"string"==typeof e&&"string"==typeof t&&(alert(`Mod SDK warning: Mod '${e}' is registering in a deprecated way.\nIt will work for now, but please inform author to update.`),e={name:e,fullName:e,version:t},t={allowReplace:!0===r}),e&&"object"==typeof e||o("Failed to register mod: Expected info object, got "+typeof e),"string"==typeof e.name&&e.name||o("Failed to register mod: Expected name to be non-empty string, got "+typeof e.name);let i=`'${e.name}'`;"string"==typeof e.fullName&&e.fullName||o(`Failed to register mod ${i}: Expected fullName to be non-empty string, got ${typeof e.fullName}`),i=`'${e.fullName} (${e.name})'`,"string"!=typeof e.version&&o(`Failed to register mod ${i}: Expected version to be string, got ${typeof e.version}`),e.repository||(e.repository=void 0),void 0!==e.repository&&"string"!=typeof e.repository&&o(`Failed to register mod ${i}: Expected repository to be undefined or string, got ${typeof e.version}`),null==t&&(t={}),t&&"object"==typeof t||o(`Failed to register mod ${i}: Expected options to be undefined or object, got ${typeof t}`);const a=!0===t.allowReplace,d=p.get(e.name);d&&(d.allowReplace&&a||o(`Refusing to load mod ${i}: it is already loaded and doesn't allow being replaced.\nWas the mod loaded multiple times?`),u(d));const s=e=>{"string"==typeof e&&e||o(`Mod ${i} failed to patch a function: Expected function name string, got ${typeof e}`);let t=g.patching.get(e);return t||(t={hooks:[],patches:new Map},g.patching.set(e,t)),t},f={unload:()=>u(g),hookFunction:(e,t,n)=>{g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`);const r=s(e);"number"!=typeof t&&o(`Mod ${i} failed to hook function '${e}': Expected priority number, got ${typeof t}`),"function"!=typeof n&&o(`Mod ${i} failed to hook function '${e}': Expected hook function, got ${typeof n}`);const a={mod:g.name,priority:t,hook:n};return r.hooks.push(a),l(),()=>{const e=r.hooks.indexOf(a);e>=0&&(r.hooks.splice(e,1),l());}},patchFunction:(e,t)=>{g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`);const r=s(e);n(t)||o(`Mod ${i} failed to patch function '${e}': Expected patches object, got ${typeof t}`);for(const[n,a]of Object.entries(t))"string"==typeof a?r.patches.set(n,a):null===a?r.patches.delete(n):o(`Mod ${i} failed to patch function '${e}': Invalid format of patch '${n}'`);l();},removePatches:e=>{g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`);s(e).patches.clear(),l();},callOriginal:(e,t,n)=>(g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`),"string"==typeof e&&e||o(`Mod ${i} failed to call a function: Expected function name string, got ${typeof e}`),Array.isArray(t)||o(`Mod ${i} failed to call a function: Expected args array, got ${typeof t}`),function(e,o,t=window){return c(e).original.apply(t,o)}(e,t,n)),getOriginalHash:e=>("string"==typeof e&&e||o(`Mod ${i} failed to get hash: Expected function name string, got ${typeof e}`),c(e).originalHash)},g={name:e.name,fullName:e.fullName,version:e.version,repository:e.repository,allowReplace:a,api:f,loaded:!0,patching:new Map};return p.set(e.name,g),Object.freeze(f)}function h(){const e=[];for(const o of p.values())e.push({name:o.name,fullName:o.fullName,version:o.version,repository:o.repository});return e}let m;const y=function(){if(void 0===window.bcModSdk)return window.bcModSdk=function(){const o={version:e,apiVersion:1,registerMod:g,getModsInfo:h,getPatchingInfo:f,errorReporterHooks:Object.seal({hookEnter:null,hookChainExit:null})};return m=o,Object.freeze(o)}();if(n(window.bcModSdk)||o("Failed to init Mod SDK: Name already in use"),1!==window.bcModSdk.apiVersion&&o(`Failed to init Mod SDK: Different version already loaded ('1.1.0' vs '${window.bcModSdk.version}')`),window.bcModSdk.version!==e&&(alert(`Mod SDK warning: Loading different but compatible versions ('1.1.0' vs '${window.bcModSdk.version}')\nOne of mods you are using is using an old version of SDK. It will work for now but please inform author to update`),window.bcModSdk.version.startsWith("1.0.")&&void 0===window.bcModSdk._shim10register)){const e=window.bcModSdk,o=Object.freeze(Object.assign(Object.assign({},e),{registerMod:(o,t,n)=>o&&"object"==typeof o&&"string"==typeof o.name&&"string"==typeof o.version?e.registerMod(o.name,o.version,"object"==typeof t&&!!t&&!0===t.allowReplace):e.registerMod(o,t,n),_shim10register:!0}));window.bcModSdk=o;}return window.bcModSdk}();return "undefined"!='object'&&(Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=y),y}();
+    	var bcModSdk=function(){"use strict";const e="1.1.0";function o(e){alert("Mod ERROR:\n"+e);const o=new Error(e);throw console.error(o),o}const t=new TextEncoder;function n(e){return !!e&&"object"==typeof e&&!Array.isArray(e)}function r(e){const o=new Set;return e.filter((e=>!o.has(e)&&o.add(e)))}const i=new Map,a=new Set;function d(e){a.has(e)||(a.add(e),console.warn(e));}function s(e){const o=[],t=new Map,n=new Set;for(const r of p.values()){const i=r.patching.get(e.name);if(i){o.push(...i.hooks);for(const[o,a]of i.patches.entries())t.has(o)&&t.get(o)!==a&&d(`ModSDK: Mod '${r.name}' is patching function ${e.name} with same pattern that is already applied by different mod, but with different pattern:\nPattern:\n${o}\nPatch1:\n${t.get(o)||""}\nPatch2:\n${a}`),t.set(o,a),n.add(r.name);}}o.sort(((e,o)=>o.priority-e.priority));const r=function(e,o){if(0===o.size)return e;let t=e.toString().replaceAll("\r\n","\n");for(const[n,r]of o.entries())t.includes(n)||d(`ModSDK: Patching ${e.name}: Patch ${n} not applied`),t=t.replaceAll(n,r);return (0,eval)(`(${t})`)}(e.original,t);let i=function(o){var t,i;const a=null===(i=(t=m.errorReporterHooks).hookChainExit)||void 0===i?void 0:i.call(t,e.name,n),d=r.apply(this,o);return null==a||a(),d};for(let t=o.length-1;t>=0;t--){const n=o[t],r=i;i=function(o){var t,i;const a=null===(i=(t=m.errorReporterHooks).hookEnter)||void 0===i?void 0:i.call(t,e.name,n.mod),d=n.hook.apply(this,[o,e=>{if(1!==arguments.length||!Array.isArray(o))throw new Error(`Mod ${n.mod} failed to call next hook: Expected args to be array, got ${typeof e}`);return r.call(this,e)}]);return null==a||a(),d};}return {hooks:o,patches:t,patchesSources:n,enter:i,final:r}}function c(e,o=!1){let r=i.get(e);if(r)o&&(r.precomputed=s(r));else {let o=window;const a=e.split(".");for(let t=0;t<a.length-1;t++)if(o=o[a[t]],!n(o))throw new Error(`ModSDK: Function ${e} to be patched not found; ${a.slice(0,t+1).join(".")} is not object`);const d=o[a[a.length-1]];if("function"!=typeof d)throw new Error(`ModSDK: Function ${e} to be patched not found`);const c=function(e){let o=-1;for(const n of t.encode(e)){let e=255&(o^n);for(let o=0;o<8;o++)e=1&e?-306674912^e>>>1:e>>>1;o=o>>>8^e;}return ((-1^o)>>>0).toString(16).padStart(8,"0").toUpperCase()}(d.toString().replaceAll("\r\n","\n")),l={name:e,original:d,originalHash:c};r=Object.assign(Object.assign({},l),{precomputed:s(l),router:()=>{},context:o,contextProperty:a[a.length-1]}),r.router=function(e){return function(...o){return e.precomputed.enter.apply(this,[o])}}(r),i.set(e,r),o[r.contextProperty]=r.router;}return r}function l(){const e=new Set;for(const o of p.values())for(const t of o.patching.keys())e.add(t);for(const o of i.keys())e.add(o);for(const o of e)c(o,!0);}function f(){const e=new Map;for(const[o,t]of i)e.set(o,{name:o,original:t.original,originalHash:t.originalHash,sdkEntrypoint:t.router,currentEntrypoint:t.context[t.contextProperty],hookedByMods:r(t.precomputed.hooks.map((e=>e.mod))),patchedByMods:Array.from(t.precomputed.patchesSources)});return e}const p=new Map;function u(e){p.get(e.name)!==e&&o(`Failed to unload mod '${e.name}': Not registered`),p.delete(e.name),e.loaded=!1,l();}function g(e,t,r){"string"==typeof e&&"string"==typeof t&&(alert(`Mod SDK warning: Mod '${e}' is registering in a deprecated way.\nIt will work for now, but please inform author to update.`),e={name:e,fullName:e,version:t},t={allowReplace:!0===r}),e&&"object"==typeof e||o("Failed to register mod: Expected info object, got "+typeof e),"string"==typeof e.name&&e.name||o("Failed to register mod: Expected name to be non-empty string, got "+typeof e.name);let i=`'${e.name}'`;"string"==typeof e.fullName&&e.fullName||o(`Failed to register mod ${i}: Expected fullName to be non-empty string, got ${typeof e.fullName}`),i=`'${e.fullName} (${e.name})'`,"string"!=typeof e.version&&o(`Failed to register mod ${i}: Expected version to be string, got ${typeof e.version}`),e.repository||(e.repository=void 0),void 0!==e.repository&&"string"!=typeof e.repository&&o(`Failed to register mod ${i}: Expected repository to be undefined or string, got ${typeof e.version}`),null==t&&(t={}),t&&"object"==typeof t||o(`Failed to register mod ${i}: Expected options to be undefined or object, got ${typeof t}`);const a=!0===t.allowReplace,d=p.get(e.name);d&&(d.allowReplace&&a||o(`Refusing to load mod ${i}: it is already loaded and doesn't allow being replaced.\nWas the mod loaded multiple times?`),u(d));const s=e=>{"string"==typeof e&&e||o(`Mod ${i} failed to patch a function: Expected function name string, got ${typeof e}`);let t=g.patching.get(e);return t||(t={hooks:[],patches:new Map},g.patching.set(e,t)),t},f={unload:()=>u(g),hookFunction:(e,t,n)=>{g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`);const r=s(e);"number"!=typeof t&&o(`Mod ${i} failed to hook function '${e}': Expected priority number, got ${typeof t}`),"function"!=typeof n&&o(`Mod ${i} failed to hook function '${e}': Expected hook function, got ${typeof n}`);const a={mod:g.name,priority:t,hook:n};return r.hooks.push(a),l(),()=>{const e=r.hooks.indexOf(a);e>=0&&(r.hooks.splice(e,1),l());}},patchFunction:(e,t)=>{g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`);const r=s(e);n(t)||o(`Mod ${i} failed to patch function '${e}': Expected patches object, got ${typeof t}`);for(const[n,a]of Object.entries(t))"string"==typeof a?r.patches.set(n,a):null===a?r.patches.delete(n):o(`Mod ${i} failed to patch function '${e}': Invalid format of patch '${n}'`);l();},removePatches:e=>{g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`);s(e).patches.clear(),l();},callOriginal:(e,t,n)=>(g.loaded||o(`Mod ${i} attempted to call SDK function after being unloaded`),"string"==typeof e&&e||o(`Mod ${i} failed to call a function: Expected function name string, got ${typeof e}`),Array.isArray(t)||o(`Mod ${i} failed to call a function: Expected args array, got ${typeof t}`),function(e,o,t=window){return c(e).original.apply(t,o)}(e,t,n)),getOriginalHash:e=>("string"==typeof e&&e||o(`Mod ${i} failed to get hash: Expected function name string, got ${typeof e}`),c(e).originalHash)},g={name:e.name,fullName:e.fullName,version:e.version,repository:e.repository,allowReplace:a,api:f,loaded:!0,patching:new Map};return p.set(e.name,g),Object.freeze(f)}function h(){const e=[];for(const o of p.values())e.push({name:o.name,fullName:o.fullName,version:o.version,repository:o.repository});return e}let m;const y=function(){if(void 0===window.bcModSdk)return window.bcModSdk=function(){const o={version:e,apiVersion:1,registerMod:g,getModsInfo:h,getPatchingInfo:f,errorReporterHooks:Object.seal({hookEnter:null,hookChainExit:null})};return m=o,Object.freeze(o)}();if(n(window.bcModSdk)||o("Failed to init Mod SDK: Name already in use"),1!==window.bcModSdk.apiVersion&&o(`Failed to init Mod SDK: Different version already loaded ('1.1.0' vs '${window.bcModSdk.version}')`),window.bcModSdk.version!==e&&(alert(`Mod SDK warning: Loading different but compatible versions ('1.1.0' vs '${window.bcModSdk.version}')\nOne of mods you are using is using an old version of SDK. It will work for now but please inform author to update`),window.bcModSdk.version.startsWith("1.0.")&&void 0===window.bcModSdk._shim10register)){const e=window.bcModSdk,o=Object.freeze(Object.assign(Object.assign({},e),{registerMod:(o,t,n)=>o&&"object"==typeof o&&"string"==typeof o.name&&"string"==typeof o.version?e.registerMod(o.name,o.version,"object"==typeof t&&!!t&&!0===t.allowReplace):e.registerMod(o,t,n),_shim10register:!0}));window.bcModSdk=o;}return window.bcModSdk}();return "undefined"!='object'&&(Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=y),y}(); 
     } (bcmodsdk));
 
     var bcModSDK = /*@__PURE__*/getDefaultExportFromCjs(bcmodsdk);
@@ -4343,46 +4343,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
     }
 
-    class GuiGlobal extends GuiSubscreen {
-        constructor(character) {
-            super();
-            this.character = character;
-        }
-        Run() {
-            MainCanvas.textAlign = "left";
-            DrawText(`- Global: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
-            MainCanvas.textAlign = "center";
-            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
-            if (!this.character.isPlayer()) {
-                DrawText(`Global configuration is not possible on others`, 1000, 500, "Black");
-                return;
-            }
-            MainCanvas.fillStyle = "#ddd";
-            MainCanvas.fillRect(840, 200, 950, 90);
-            DrawImageEx("Icons/Introduction.png", 840 + 20, 200 + 20, { Height: 50, Width: 50 });
-            DrawTextFit(`Your initially selected BCX preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
-            DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
-            DrawButton(1490, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
-        }
-        Click() {
-            if (MouseIn(1815, 75, 90, 90))
-                return this.Exit();
-            if (!this.character.isPlayer())
-                return;
-            if (MouseIn(120, 200, 400, 90)) {
-                setSubscreen(new GuiGlobalModuleToggling());
-                return;
-            }
-            if (MouseIn(1490, 800, 300, 90)) {
-                setSubscreen(new GuiGlobalDialogClearData(this));
-                return;
-            }
-        }
-        Exit() {
-            setSubscreen(new GuiMainMenu(this.character));
-        }
-    }
-
     /** Used to stand-in for `undefined` hash values. */
     var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
@@ -4903,6 +4863,720 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       return baseIsEqual(value, other);
     }
 
+    /** `Object#toString` result references. */
+    var symbolTag = '[object Symbol]';
+
+    /**
+     * Checks if `value` is classified as a `Symbol` primitive or object.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+     * @example
+     *
+     * _.isSymbol(Symbol.iterator);
+     * // => true
+     *
+     * _.isSymbol('abc');
+     * // => false
+     */
+    function isSymbol(value) {
+      return typeof value == 'symbol' ||
+        (isObjectLike(value) && baseGetTag(value) == symbolTag);
+    }
+
+    /** Used to match property names within property paths. */
+    var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
+        reIsPlainProp = /^\w*$/;
+
+    /**
+     * Checks if `value` is a property name and not a property path.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @param {Object} [object] The object to query keys on.
+     * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+     */
+    function isKey(value, object) {
+      if (isArray(value)) {
+        return false;
+      }
+      var type = typeof value;
+      if (type == 'number' || type == 'symbol' || type == 'boolean' ||
+          value == null || isSymbol(value)) {
+        return true;
+      }
+      return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+        (object != null && value in Object(object));
+    }
+
+    /** Error message constants. */
+    var FUNC_ERROR_TEXT$b = 'Expected a function';
+
+    /**
+     * Creates a function that memoizes the result of `func`. If `resolver` is
+     * provided, it determines the cache key for storing the result based on the
+     * arguments provided to the memoized function. By default, the first argument
+     * provided to the memoized function is used as the map cache key. The `func`
+     * is invoked with the `this` binding of the memoized function.
+     *
+     * **Note:** The cache is exposed as the `cache` property on the memoized
+     * function. Its creation may be customized by replacing the `_.memoize.Cache`
+     * constructor with one whose instances implement the
+     * [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)
+     * method interface of `clear`, `delete`, `get`, `has`, and `set`.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Function
+     * @param {Function} func The function to have its output memoized.
+     * @param {Function} [resolver] The function to resolve the cache key.
+     * @returns {Function} Returns the new memoized function.
+     * @example
+     *
+     * var object = { 'a': 1, 'b': 2 };
+     * var other = { 'c': 3, 'd': 4 };
+     *
+     * var values = _.memoize(_.values);
+     * values(object);
+     * // => [1, 2]
+     *
+     * values(other);
+     * // => [3, 4]
+     *
+     * object.a = 2;
+     * values(object);
+     * // => [1, 2]
+     *
+     * // Modify the result cache.
+     * values.cache.set(object, ['a', 'b']);
+     * values(object);
+     * // => ['a', 'b']
+     *
+     * // Replace `_.memoize.Cache`.
+     * _.memoize.Cache = WeakMap;
+     */
+    function memoize(func, resolver) {
+      if (typeof func != 'function' || (resolver != null && typeof resolver != 'function')) {
+        throw new TypeError(FUNC_ERROR_TEXT$b);
+      }
+      var memoized = function() {
+        var args = arguments,
+            key = resolver ? resolver.apply(this, args) : args[0],
+            cache = memoized.cache;
+
+        if (cache.has(key)) {
+          return cache.get(key);
+        }
+        var result = func.apply(this, args);
+        memoized.cache = cache.set(key, result) || cache;
+        return result;
+      };
+      memoized.cache = new (memoize.Cache || MapCache);
+      return memoized;
+    }
+
+    // Expose `MapCache`.
+    memoize.Cache = MapCache;
+
+    /** Used as the maximum memoize cache size. */
+    var MAX_MEMOIZE_SIZE = 500;
+
+    /**
+     * A specialized version of `_.memoize` which clears the memoized function's
+     * cache when it exceeds `MAX_MEMOIZE_SIZE`.
+     *
+     * @private
+     * @param {Function} func The function to have its output memoized.
+     * @returns {Function} Returns the new memoized function.
+     */
+    function memoizeCapped(func) {
+      var result = memoize(func, function(key) {
+        if (cache.size === MAX_MEMOIZE_SIZE) {
+          cache.clear();
+        }
+        return key;
+      });
+
+      var cache = result.cache;
+      return result;
+    }
+
+    /** Used to match property names within property paths. */
+    var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+
+    /** Used to match backslashes in property paths. */
+    var reEscapeChar = /\\(\\)?/g;
+
+    /**
+     * Converts `string` to a property path array.
+     *
+     * @private
+     * @param {string} string The string to convert.
+     * @returns {Array} Returns the property path array.
+     */
+    var stringToPath = memoizeCapped(function(string) {
+      var result = [];
+      if (string.charCodeAt(0) === 46 /* . */) {
+        result.push('');
+      }
+      string.replace(rePropName, function(match, number, quote, subString) {
+        result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
+      });
+      return result;
+    });
+
+    /**
+     * A specialized version of `_.map` for arrays without support for iteratee
+     * shorthands.
+     *
+     * @private
+     * @param {Array} [array] The array to iterate over.
+     * @param {Function} iteratee The function invoked per iteration.
+     * @returns {Array} Returns the new mapped array.
+     */
+    function arrayMap(array, iteratee) {
+      var index = -1,
+          length = array == null ? 0 : array.length,
+          result = Array(length);
+
+      while (++index < length) {
+        result[index] = iteratee(array[index], index, array);
+      }
+      return result;
+    }
+
+    /** Used as references for various `Number` constants. */
+    var INFINITY$5 = 1 / 0;
+
+    /** Used to convert symbols to primitives and strings. */
+    var symbolProto = Symbol$1 ? Symbol$1.prototype : undefined,
+        symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+    /**
+     * The base implementation of `_.toString` which doesn't convert nullish
+     * values to empty strings.
+     *
+     * @private
+     * @param {*} value The value to process.
+     * @returns {string} Returns the string.
+     */
+    function baseToString(value) {
+      // Exit early for strings to avoid a performance hit in some environments.
+      if (typeof value == 'string') {
+        return value;
+      }
+      if (isArray(value)) {
+        // Recursively convert values (susceptible to call stack limits).
+        return arrayMap(value, baseToString) + '';
+      }
+      if (isSymbol(value)) {
+        return symbolToString ? symbolToString.call(value) : '';
+      }
+      var result = (value + '');
+      return (result == '0' && (1 / value) == -INFINITY$5) ? '-0' : result;
+    }
+
+    /**
+     * Converts `value` to a string. An empty string is returned for `null`
+     * and `undefined` values. The sign of `-0` is preserved.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Lang
+     * @param {*} value The value to convert.
+     * @returns {string} Returns the converted string.
+     * @example
+     *
+     * _.toString(null);
+     * // => ''
+     *
+     * _.toString(-0);
+     * // => '-0'
+     *
+     * _.toString([1, 2, 3]);
+     * // => '1,2,3'
+     */
+    function toString(value) {
+      return value == null ? '' : baseToString(value);
+    }
+
+    /**
+     * Casts `value` to a path array if it's not one.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @param {Object} [object] The object to query keys on.
+     * @returns {Array} Returns the cast property path array.
+     */
+    function castPath(value, object) {
+      if (isArray(value)) {
+        return value;
+      }
+      return isKey(value, object) ? [value] : stringToPath(toString(value));
+    }
+
+    /** Used as references for various `Number` constants. */
+    var INFINITY$4 = 1 / 0;
+
+    /**
+     * Converts `value` to a string key if it's not a string or symbol.
+     *
+     * @private
+     * @param {*} value The value to inspect.
+     * @returns {string|symbol} Returns the key.
+     */
+    function toKey(value) {
+      if (typeof value == 'string' || isSymbol(value)) {
+        return value;
+      }
+      var result = (value + '');
+      return (result == '0' && (1 / value) == -INFINITY$4) ? '-0' : result;
+    }
+
+    /**
+     * The base implementation of `_.get` without support for default values.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {Array|string} path The path of the property to get.
+     * @returns {*} Returns the resolved value.
+     */
+    function baseGet(object, path) {
+      path = castPath(path, object);
+
+      var index = 0,
+          length = path.length;
+
+      while (object != null && index < length) {
+        object = object[toKey(path[index++])];
+      }
+      return (index && index == length) ? object : undefined;
+    }
+
+    /**
+     * The base implementation of `_.set`.
+     *
+     * @private
+     * @param {Object} object The object to modify.
+     * @param {Array|string} path The path of the property to set.
+     * @param {*} value The value to set.
+     * @param {Function} [customizer] The function to customize path creation.
+     * @returns {Object} Returns `object`.
+     */
+    function baseSet(object, path, value, customizer) {
+      if (!isObject(object)) {
+        return object;
+      }
+      path = castPath(path, object);
+
+      var index = -1,
+          length = path.length,
+          lastIndex = length - 1,
+          nested = object;
+
+      while (nested != null && ++index < length) {
+        var key = toKey(path[index]),
+            newValue = value;
+
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return object;
+        }
+
+        if (index != lastIndex) {
+          var objValue = nested[key];
+          newValue = customizer ? customizer(objValue, key, nested) : undefined;
+          if (newValue === undefined) {
+            newValue = isObject(objValue)
+              ? objValue
+              : (isIndex(path[index + 1]) ? [] : {});
+          }
+        }
+        assignValue(nested, key, newValue);
+        nested = nested[key];
+      }
+      return object;
+    }
+
+    /**
+     * The base implementation of  `_.pickBy` without support for iteratee shorthands.
+     *
+     * @private
+     * @param {Object} object The source object.
+     * @param {string[]} paths The property paths to pick.
+     * @param {Function} predicate The function invoked per property.
+     * @returns {Object} Returns the new object.
+     */
+    function basePickBy(object, paths, predicate) {
+      var index = -1,
+          length = paths.length,
+          result = {};
+
+      while (++index < length) {
+        var path = paths[index],
+            value = baseGet(object, path);
+
+        if (predicate(value, path)) {
+          baseSet(result, castPath(path, object), value);
+        }
+      }
+      return result;
+    }
+
+    /**
+     * The base implementation of `_.hasIn` without support for deep paths.
+     *
+     * @private
+     * @param {Object} [object] The object to query.
+     * @param {Array|string} key The key to check.
+     * @returns {boolean} Returns `true` if `key` exists, else `false`.
+     */
+    function baseHasIn(object, key) {
+      return object != null && key in Object(object);
+    }
+
+    /**
+     * Checks if `path` exists on `object`.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @param {Array|string} path The path to check.
+     * @param {Function} hasFunc The function to check properties.
+     * @returns {boolean} Returns `true` if `path` exists, else `false`.
+     */
+    function hasPath(object, path, hasFunc) {
+      path = castPath(path, object);
+
+      var index = -1,
+          length = path.length,
+          result = false;
+
+      while (++index < length) {
+        var key = toKey(path[index]);
+        if (!(result = object != null && hasFunc(object, key))) {
+          break;
+        }
+        object = object[key];
+      }
+      if (result || ++index != length) {
+        return result;
+      }
+      length = object == null ? 0 : object.length;
+      return !!length && isLength(length) && isIndex(key, length) &&
+        (isArray(object) || isArguments(object));
+    }
+
+    /**
+     * Checks if `path` is a direct or inherited property of `object`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.0.0
+     * @category Object
+     * @param {Object} object The object to query.
+     * @param {Array|string} path The path to check.
+     * @returns {boolean} Returns `true` if `path` exists, else `false`.
+     * @example
+     *
+     * var object = _.create({ 'a': _.create({ 'b': 2 }) });
+     *
+     * _.hasIn(object, 'a');
+     * // => true
+     *
+     * _.hasIn(object, 'a.b');
+     * // => true
+     *
+     * _.hasIn(object, ['a', 'b']);
+     * // => true
+     *
+     * _.hasIn(object, 'b');
+     * // => false
+     */
+    function hasIn(object, path) {
+      return object != null && hasPath(object, path, baseHasIn);
+    }
+
+    /**
+     * The base implementation of `_.pick` without support for individual
+     * property identifiers.
+     *
+     * @private
+     * @param {Object} object The source object.
+     * @param {string[]} paths The property paths to pick.
+     * @returns {Object} Returns the new object.
+     */
+    function basePick(object, paths) {
+      return basePickBy(object, paths, function(value, path) {
+        return hasIn(object, path);
+      });
+    }
+
+    /** Built-in value references. */
+    var spreadableSymbol = Symbol$1 ? Symbol$1.isConcatSpreadable : undefined;
+
+    /**
+     * Checks if `value` is a flattenable `arguments` object or array.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is flattenable, else `false`.
+     */
+    function isFlattenable(value) {
+      return isArray(value) || isArguments(value) ||
+        !!(spreadableSymbol && value && value[spreadableSymbol]);
+    }
+
+    /**
+     * The base implementation of `_.flatten` with support for restricting flattening.
+     *
+     * @private
+     * @param {Array} array The array to flatten.
+     * @param {number} depth The maximum recursion depth.
+     * @param {boolean} [predicate=isFlattenable] The function invoked per iteration.
+     * @param {boolean} [isStrict] Restrict to values that pass `predicate` checks.
+     * @param {Array} [result=[]] The initial result value.
+     * @returns {Array} Returns the new flattened array.
+     */
+    function baseFlatten(array, depth, predicate, isStrict, result) {
+      var index = -1,
+          length = array.length;
+
+      predicate || (predicate = isFlattenable);
+      result || (result = []);
+
+      while (++index < length) {
+        var value = array[index];
+        if (depth > 0 && predicate(value)) {
+          if (depth > 1) {
+            // Recursively flatten arrays (susceptible to call stack limits).
+            baseFlatten(value, depth - 1, predicate, isStrict, result);
+          } else {
+            arrayPush(result, value);
+          }
+        } else if (!isStrict) {
+          result[result.length] = value;
+        }
+      }
+      return result;
+    }
+
+    /**
+     * Flattens `array` a single level deep.
+     *
+     * @static
+     * @memberOf _
+     * @since 0.1.0
+     * @category Array
+     * @param {Array} array The array to flatten.
+     * @returns {Array} Returns the new flattened array.
+     * @example
+     *
+     * _.flatten([1, [2, [3, [4]], 5]]);
+     * // => [1, 2, [3, [4]], 5]
+     */
+    function flatten(array) {
+      var length = array == null ? 0 : array.length;
+      return length ? baseFlatten(array, 1) : [];
+    }
+
+    /**
+     * A faster alternative to `Function#apply`, this function invokes `func`
+     * with the `this` binding of `thisArg` and the arguments of `args`.
+     *
+     * @private
+     * @param {Function} func The function to invoke.
+     * @param {*} thisArg The `this` binding of `func`.
+     * @param {Array} args The arguments to invoke `func` with.
+     * @returns {*} Returns the result of `func`.
+     */
+    function apply(func, thisArg, args) {
+      switch (args.length) {
+        case 0: return func.call(thisArg);
+        case 1: return func.call(thisArg, args[0]);
+        case 2: return func.call(thisArg, args[0], args[1]);
+        case 3: return func.call(thisArg, args[0], args[1], args[2]);
+      }
+      return func.apply(thisArg, args);
+    }
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeMax$g = Math.max;
+
+    /**
+     * A specialized version of `baseRest` which transforms the rest array.
+     *
+     * @private
+     * @param {Function} func The function to apply a rest parameter to.
+     * @param {number} [start=func.length-1] The start position of the rest parameter.
+     * @param {Function} transform The rest array transform.
+     * @returns {Function} Returns the new function.
+     */
+    function overRest(func, start, transform) {
+      start = nativeMax$g(start === undefined ? (func.length - 1) : start, 0);
+      return function() {
+        var args = arguments,
+            index = -1,
+            length = nativeMax$g(args.length - start, 0),
+            array = Array(length);
+
+        while (++index < length) {
+          array[index] = args[start + index];
+        }
+        index = -1;
+        var otherArgs = Array(start + 1);
+        while (++index < start) {
+          otherArgs[index] = args[index];
+        }
+        otherArgs[start] = transform(array);
+        return apply(func, this, otherArgs);
+      };
+    }
+
+    /**
+     * Creates a function that returns `value`.
+     *
+     * @static
+     * @memberOf _
+     * @since 2.4.0
+     * @category Util
+     * @param {*} value The value to return from the new function.
+     * @returns {Function} Returns the new constant function.
+     * @example
+     *
+     * var objects = _.times(2, _.constant({ 'a': 1 }));
+     *
+     * console.log(objects);
+     * // => [{ 'a': 1 }, { 'a': 1 }]
+     *
+     * console.log(objects[0] === objects[1]);
+     * // => true
+     */
+    function constant(value) {
+      return function() {
+        return value;
+      };
+    }
+
+    /**
+     * This method returns the first argument it receives.
+     *
+     * @static
+     * @since 0.1.0
+     * @memberOf _
+     * @category Util
+     * @param {*} value Any value.
+     * @returns {*} Returns `value`.
+     * @example
+     *
+     * var object = { 'a': 1 };
+     *
+     * console.log(_.identity(object) === object);
+     * // => true
+     */
+    function identity(value) {
+      return value;
+    }
+
+    /**
+     * The base implementation of `setToString` without support for hot loop shorting.
+     *
+     * @private
+     * @param {Function} func The function to modify.
+     * @param {Function} string The `toString` result.
+     * @returns {Function} Returns `func`.
+     */
+    var baseSetToString = !defineProperty ? identity : function(func, string) {
+      return defineProperty(func, 'toString', {
+        'configurable': true,
+        'enumerable': false,
+        'value': constant(string),
+        'writable': true
+      });
+    };
+
+    /** Used to detect hot functions by number of calls within a span of milliseconds. */
+    var HOT_COUNT = 800,
+        HOT_SPAN = 16;
+
+    /* Built-in method references for those with the same name as other `lodash` methods. */
+    var nativeNow = Date.now;
+
+    /**
+     * Creates a function that'll short out and invoke `identity` instead
+     * of `func` when it's called `HOT_COUNT` or more times in `HOT_SPAN`
+     * milliseconds.
+     *
+     * @private
+     * @param {Function} func The function to restrict.
+     * @returns {Function} Returns the new shortable function.
+     */
+    function shortOut(func) {
+      var count = 0,
+          lastCalled = 0;
+
+      return function() {
+        var stamp = nativeNow(),
+            remaining = HOT_SPAN - (stamp - lastCalled);
+
+        lastCalled = stamp;
+        if (remaining > 0) {
+          if (++count >= HOT_COUNT) {
+            return arguments[0];
+          }
+        } else {
+          count = 0;
+        }
+        return func.apply(undefined, arguments);
+      };
+    }
+
+    /**
+     * Sets the `toString` method of `func` to return `string`.
+     *
+     * @private
+     * @param {Function} func The function to modify.
+     * @param {Function} string The `toString` result.
+     * @returns {Function} Returns `func`.
+     */
+    var setToString = shortOut(baseSetToString);
+
+    /**
+     * A specialized version of `baseRest` which flattens the rest array.
+     *
+     * @private
+     * @param {Function} func The function to apply a rest parameter to.
+     * @returns {Function} Returns the new function.
+     */
+    function flatRest(func) {
+      return setToString(overRest(func, undefined, flatten), func + '');
+    }
+
+    /**
+     * Creates an object composed of the picked `object` properties.
+     *
+     * @static
+     * @since 0.1.0
+     * @memberOf _
+     * @category Object
+     * @param {Object} object The source object.
+     * @param {...(string|string[])} [paths] The property paths to pick.
+     * @returns {Object} Returns the new object.
+     * @example
+     *
+     * var object = { 'a': 1, 'b': '2', 'c': 3 };
+     *
+     * _.pick(object, ['a', 'c']);
+     * // => { 'a': 1, 'c': 3 }
+     */
+    var pick = flatRest(function(object, paths) {
+      return object == null ? {} : basePick(object, paths);
+    });
+
     var util$1;
     (function (util) {
         util.assertEqual = (val) => val;
@@ -4966,6 +5640,15 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             return value;
         };
     })(util$1 || (util$1 = {}));
+    var objectUtil;
+    (function (objectUtil) {
+        objectUtil.mergeShapes = (first, second) => {
+            return {
+                ...first,
+                ...second, // second overwrites first
+            };
+        };
+    })(objectUtil || (objectUtil = {}));
     const ZodParsedType = util$1.arrayToEnum([
         "string",
         "nan",
@@ -5197,7 +5880,13 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 break;
             case ZodIssueCode.invalid_string:
                 if (typeof issue.validation === "object") {
-                    if ("startsWith" in issue.validation) {
+                    if ("includes" in issue.validation) {
+                        message = `Invalid input: must include "${issue.validation.includes}"`;
+                        if (typeof issue.validation.position === "number") {
+                            message = `${message} at one or more positions greater than or equal to ${issue.validation.position}`;
+                        }
+                    }
+                    else if ("startsWith" in issue.validation) {
                         message = `Invalid input: must start with "${issue.validation.startsWith}"`;
                     }
                     else if ("endsWith" in issue.validation) {
@@ -5230,7 +5919,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     ? `exactly equal to `
                     : issue.inclusive
                         ? `greater than or equal to `
-                        : `greater than `}${new Date(issue.minimum)}`;
+                        : `greater than `}${new Date(Number(issue.minimum))}`;
                 else
                     message = "Invalid input";
                 break;
@@ -5245,12 +5934,18 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     : issue.inclusive
                         ? `less than or equal to`
                         : `less than`} ${issue.maximum}`;
+                else if (issue.type === "bigint")
+                    message = `BigInt must be ${issue.exact
+                    ? `exactly`
+                    : issue.inclusive
+                        ? `less than or equal to`
+                        : `less than`} ${issue.maximum}`;
                 else if (issue.type === "date")
                     message = `Date must be ${issue.exact
                     ? `exactly`
                     : issue.inclusive
                         ? `smaller than or equal to`
-                        : `smaller than`} ${new Date(issue.maximum)}`;
+                        : `smaller than`} ${new Date(Number(issue.maximum))}`;
                 else
                     message = "Invalid input";
                 break;
@@ -5387,13 +6082,22 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
 
     class ParseInputLazyPath {
         constructor(parent, value, path, key) {
+            this._cachedPath = [];
             this.parent = parent;
             this.data = value;
             this._path = path;
             this._key = key;
         }
         get path() {
-            return this._path.concat(this._key);
+            if (!this._cachedPath.length) {
+                if (this._key instanceof Array) {
+                    this._cachedPath.push(...this._path, ...this._key);
+                }
+                else {
+                    this._cachedPath.push(...this._path, this._key);
+                }
+            }
+            return this._cachedPath;
         }
     }
     const handleResult = (ctx, result) => {
@@ -5404,8 +6108,16 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             if (!ctx.common.issues.length) {
                 throw new Error("Validation failed but no issues detected.");
             }
-            const error = new ZodError(ctx.common.issues);
-            return { success: false, error };
+            return {
+                success: false,
+                get error() {
+                    if (this._error)
+                        return this._error;
+                    const error = new ZodError(ctx.common.issues);
+                    this._error = error;
+                    return this._error;
+                },
+            };
         }
     };
     function processCreateParams(params) {
@@ -5678,6 +6390,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
     const cuidRegex = /^c[^\s-]{8,}$/i;
     const cuid2Regex = /^[a-z][a-z0-9]*$/;
+    const ulidRegex = /[0-9A-HJKMNP-TV-Z]{26}/;
     const uuidRegex = /^([a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}|00000000-0000-0000-0000-000000000000)$/i;
     // from https://stackoverflow.com/a/46181/1550155
     // old version: too slow, didn't support unicode
@@ -5685,13 +6398,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     //old email regex
     // const emailRegex = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@((?!-)([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{1,})[^-<>()[\].,;:\s@"]$/i;
     // eslint-disable-next-line
-    const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|([^-]([a-zA-Z0-9-]*\.)+[a-zA-Z]{2,}))$/;
-    // interface IsDateStringOptions extends StringDateOptions {
-    /**
-     * Match any configuration
-     */
-    // any?: boolean;
-    // }
+    const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\])|(\[IPv6:(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))\])|([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])*(\.[A-Za-z]{2,})+))$/;
+    // from https://thekevinscott.com/emojis-in-javascript/#writing-a-regular-expression
+    const emojiRegex = /^(\p{Extended_Pictographic}|\p{Emoji_Component})+$/u;
+    const ipv4Regex = /^(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))$/;
+    const ipv6Regex = /^(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))$/;
     // Adapted from https://stackoverflow.com/a/3143231
     const datetimeRegex = (args) => {
         if (args.precision) {
@@ -5719,6 +6430,15 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
         }
     };
+    function isValidIP(ip, version) {
+        if ((version === "v4" || !version) && ipv4Regex.test(ip)) {
+            return true;
+        }
+        if ((version === "v6" || !version) && ipv6Regex.test(ip)) {
+            return true;
+        }
+        return false;
+    }
     class ZodString extends ZodType {
         constructor() {
             super(...arguments);
@@ -5735,6 +6455,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             this.trim = () => new ZodString({
                 ...this._def,
                 checks: [...this._def.checks, { kind: "trim" }],
+            });
+            this.toLowerCase = () => new ZodString({
+                ...this._def,
+                checks: [...this._def.checks, { kind: "toLowerCase" }],
+            });
+            this.toUpperCase = () => new ZodString({
+                ...this._def,
+                checks: [...this._def.checks, { kind: "toUpperCase" }],
             });
         }
         _parse(input) {
@@ -5823,6 +6551,17 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         status.dirty();
                     }
                 }
+                else if (check.kind === "emoji") {
+                    if (!emojiRegex.test(input.data)) {
+                        ctx = this._getOrReturnCtx(input, ctx);
+                        addIssueToContext(ctx, {
+                            validation: "emoji",
+                            code: ZodIssueCode.invalid_string,
+                            message: check.message,
+                        });
+                        status.dirty();
+                    }
+                }
                 else if (check.kind === "uuid") {
                     if (!uuidRegex.test(input.data)) {
                         ctx = this._getOrReturnCtx(input, ctx);
@@ -5850,6 +6589,17 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         ctx = this._getOrReturnCtx(input, ctx);
                         addIssueToContext(ctx, {
                             validation: "cuid2",
+                            code: ZodIssueCode.invalid_string,
+                            message: check.message,
+                        });
+                        status.dirty();
+                    }
+                }
+                else if (check.kind === "ulid") {
+                    if (!ulidRegex.test(input.data)) {
+                        ctx = this._getOrReturnCtx(input, ctx);
+                        addIssueToContext(ctx, {
+                            validation: "ulid",
                             code: ZodIssueCode.invalid_string,
                             message: check.message,
                         });
@@ -5886,6 +6636,23 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 else if (check.kind === "trim") {
                     input.data = input.data.trim();
                 }
+                else if (check.kind === "includes") {
+                    if (!input.data.includes(check.value, check.position)) {
+                        ctx = this._getOrReturnCtx(input, ctx);
+                        addIssueToContext(ctx, {
+                            code: ZodIssueCode.invalid_string,
+                            validation: { includes: check.value, position: check.position },
+                            message: check.message,
+                        });
+                        status.dirty();
+                    }
+                }
+                else if (check.kind === "toLowerCase") {
+                    input.data = input.data.toLowerCase();
+                }
+                else if (check.kind === "toUpperCase") {
+                    input.data = input.data.toUpperCase();
+                }
                 else if (check.kind === "startsWith") {
                     if (!input.data.startsWith(check.value)) {
                         ctx = this._getOrReturnCtx(input, ctx);
@@ -5920,6 +6687,17 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         status.dirty();
                     }
                 }
+                else if (check.kind === "ip") {
+                    if (!isValidIP(input.data, check.version)) {
+                        ctx = this._getOrReturnCtx(input, ctx);
+                        addIssueToContext(ctx, {
+                            validation: "ip",
+                            code: ZodIssueCode.invalid_string,
+                            message: check.message,
+                        });
+                        status.dirty();
+                    }
+                }
                 else {
                     util$1.assertNever(check);
                 }
@@ -5938,6 +6716,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         url(message) {
             return this._addCheck({ kind: "url", ...errorUtil.errToObj(message) });
         }
+        emoji(message) {
+            return this._addCheck({ kind: "emoji", ...errorUtil.errToObj(message) });
+        }
         uuid(message) {
             return this._addCheck({ kind: "uuid", ...errorUtil.errToObj(message) });
         }
@@ -5946,6 +6727,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         cuid2(message) {
             return this._addCheck({ kind: "cuid2", ...errorUtil.errToObj(message) });
+        }
+        ulid(message) {
+            return this._addCheck({ kind: "ulid", ...errorUtil.errToObj(message) });
+        }
+        ip(options) {
+            return this._addCheck({ kind: "ip", ...errorUtil.errToObj(options) });
         }
         datetime(options) {
             var _a;
@@ -5969,6 +6756,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 kind: "regex",
                 regex: regex,
                 ...errorUtil.errToObj(message),
+            });
+        }
+        includes(value, options) {
+            return this._addCheck({
+                kind: "includes",
+                value: value,
+                position: options === null || options === void 0 ? void 0 : options.position,
+                ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message),
             });
         }
         startsWith(value, message) {
@@ -6015,6 +6810,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         get isURL() {
             return !!this._def.checks.find((ch) => ch.kind === "url");
         }
+        get isEmoji() {
+            return !!this._def.checks.find((ch) => ch.kind === "emoji");
+        }
         get isUUID() {
             return !!this._def.checks.find((ch) => ch.kind === "uuid");
         }
@@ -6023,6 +6821,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         get isCUID2() {
             return !!this._def.checks.find((ch) => ch.kind === "cuid2");
+        }
+        get isULID() {
+            return !!this._def.checks.find((ch) => ch.kind === "ulid");
+        }
+        get isIP() {
+            return !!this._def.checks.find((ch) => ch.kind === "ip");
         }
         get minLength() {
             let min = null;
@@ -6243,6 +7047,19 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 message: errorUtil.toString(message),
             });
         }
+        safe(message) {
+            return this._addCheck({
+                kind: "min",
+                inclusive: true,
+                value: Number.MIN_SAFE_INTEGER,
+                message: errorUtil.toString(message),
+            })._addCheck({
+                kind: "max",
+                inclusive: true,
+                value: Number.MAX_SAFE_INTEGER,
+                message: errorUtil.toString(message),
+            });
+        }
         get minValue() {
             let min = null;
             for (const ch of this._def.checks) {
@@ -6296,6 +7113,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         });
     };
     class ZodBigInt extends ZodType {
+        constructor() {
+            super(...arguments);
+            this.min = this.gte;
+            this.max = this.lte;
+        }
         _parse(input) {
             if (this._def.coerce) {
                 input.data = BigInt(input.data);
@@ -6310,12 +7132,154 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 });
                 return INVALID;
             }
-            return OK(input.data);
+            let ctx = undefined;
+            const status = new ParseStatus();
+            for (const check of this._def.checks) {
+                if (check.kind === "min") {
+                    const tooSmall = check.inclusive
+                        ? input.data < check.value
+                        : input.data <= check.value;
+                    if (tooSmall) {
+                        ctx = this._getOrReturnCtx(input, ctx);
+                        addIssueToContext(ctx, {
+                            code: ZodIssueCode.too_small,
+                            type: "bigint",
+                            minimum: check.value,
+                            inclusive: check.inclusive,
+                            message: check.message,
+                        });
+                        status.dirty();
+                    }
+                }
+                else if (check.kind === "max") {
+                    const tooBig = check.inclusive
+                        ? input.data > check.value
+                        : input.data >= check.value;
+                    if (tooBig) {
+                        ctx = this._getOrReturnCtx(input, ctx);
+                        addIssueToContext(ctx, {
+                            code: ZodIssueCode.too_big,
+                            type: "bigint",
+                            maximum: check.value,
+                            inclusive: check.inclusive,
+                            message: check.message,
+                        });
+                        status.dirty();
+                    }
+                }
+                else if (check.kind === "multipleOf") {
+                    if (input.data % check.value !== BigInt(0)) {
+                        ctx = this._getOrReturnCtx(input, ctx);
+                        addIssueToContext(ctx, {
+                            code: ZodIssueCode.not_multiple_of,
+                            multipleOf: check.value,
+                            message: check.message,
+                        });
+                        status.dirty();
+                    }
+                }
+                else {
+                    util$1.assertNever(check);
+                }
+            }
+            return { status: status.value, value: input.data };
+        }
+        gte(value, message) {
+            return this.setLimit("min", value, true, errorUtil.toString(message));
+        }
+        gt(value, message) {
+            return this.setLimit("min", value, false, errorUtil.toString(message));
+        }
+        lte(value, message) {
+            return this.setLimit("max", value, true, errorUtil.toString(message));
+        }
+        lt(value, message) {
+            return this.setLimit("max", value, false, errorUtil.toString(message));
+        }
+        setLimit(kind, value, inclusive, message) {
+            return new ZodBigInt({
+                ...this._def,
+                checks: [
+                    ...this._def.checks,
+                    {
+                        kind,
+                        value,
+                        inclusive,
+                        message: errorUtil.toString(message),
+                    },
+                ],
+            });
+        }
+        _addCheck(check) {
+            return new ZodBigInt({
+                ...this._def,
+                checks: [...this._def.checks, check],
+            });
+        }
+        positive(message) {
+            return this._addCheck({
+                kind: "min",
+                value: BigInt(0),
+                inclusive: false,
+                message: errorUtil.toString(message),
+            });
+        }
+        negative(message) {
+            return this._addCheck({
+                kind: "max",
+                value: BigInt(0),
+                inclusive: false,
+                message: errorUtil.toString(message),
+            });
+        }
+        nonpositive(message) {
+            return this._addCheck({
+                kind: "max",
+                value: BigInt(0),
+                inclusive: true,
+                message: errorUtil.toString(message),
+            });
+        }
+        nonnegative(message) {
+            return this._addCheck({
+                kind: "min",
+                value: BigInt(0),
+                inclusive: true,
+                message: errorUtil.toString(message),
+            });
+        }
+        multipleOf(value, message) {
+            return this._addCheck({
+                kind: "multipleOf",
+                value,
+                message: errorUtil.toString(message),
+            });
+        }
+        get minValue() {
+            let min = null;
+            for (const ch of this._def.checks) {
+                if (ch.kind === "min") {
+                    if (min === null || ch.value > min)
+                        min = ch.value;
+                }
+            }
+            return min;
+        }
+        get maxValue() {
+            let max = null;
+            for (const ch of this._def.checks) {
+                if (ch.kind === "max") {
+                    if (max === null || ch.value < max)
+                        max = ch.value;
+                }
+            }
+            return max;
         }
     }
     ZodBigInt.create = (params) => {
         var _a;
         return new ZodBigInt({
+            checks: [],
             typeName: ZodFirstPartyTypeKind.ZodBigInt,
             coerce: (_a = params === null || params === void 0 ? void 0 : params.coerce) !== null && _a !== void 0 ? _a : false,
             ...processCreateParams(params),
@@ -6691,22 +7655,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             ...processCreateParams(params),
         });
     };
-    /////////////////////////////////////////
-    /////////////////////////////////////////
-    //////////                     //////////
-    //////////      ZodObject      //////////
-    //////////                     //////////
-    /////////////////////////////////////////
-    /////////////////////////////////////////
-    var objectUtil;
-    (function (objectUtil) {
-        objectUtil.mergeShapes = (first, second) => {
-            return {
-                ...first,
-                ...second, // second overwrites first
-            };
-        };
-    })(objectUtil || (objectUtil = {}));
     function deepPartialify(schema) {
         if (schema instanceof ZodObject) {
             const newShape = {};
@@ -6720,7 +7668,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             });
         }
         else if (schema instanceof ZodArray) {
-            return ZodArray.create(deepPartialify(schema.element));
+            return new ZodArray({
+                ...schema._def,
+                type: deepPartialify(schema.element),
+            });
         }
         else if (schema instanceof ZodOptional) {
             return ZodOptional.create(deepPartialify(schema.unwrap()));
@@ -6952,7 +7903,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             const merged = new ZodObject({
                 unknownKeys: merging._def.unknownKeys,
                 catchall: merging._def.catchall,
-                shape: () => objectUtil.mergeShapes(this._def.shape(), merging._def.shape()),
+                shape: () => ({
+                    ...this._def.shape(),
+                    ...merging._def.shape(),
+                }),
                 typeName: ZodFirstPartyTypeKind.ZodObject,
             });
             return merged;
@@ -7046,6 +8000,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 shape: () => shape,
             });
         }
+        /**
+         * @deprecated
+         */
         deepPartial() {
             return deepPartialify(this);
         }
@@ -8085,10 +9042,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         path: ctx.path,
                         parent: ctx,
                     });
-                    // if (base.status === "aborted") return INVALID;
-                    // if (base.status === "dirty") {
-                    //   return { status: "dirty", value: base.value };
-                    // }
                     if (!isValid(base))
                         return base;
                     const result = effect.transform(base.value, checkCtx);
@@ -8103,10 +9056,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         .then((base) => {
                         if (!isValid(base))
                             return base;
-                        // if (base.status === "aborted") return INVALID;
-                        // if (base.status === "dirty") {
-                        //   return { status: "dirty", value: base.value };
-                        // }
                         return Promise.resolve(effect.transform(base.value, checkCtx)).then((result) => ({ status: status.value, value: result }));
                     });
                 }
@@ -8198,29 +9147,47 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     class ZodCatch extends ZodType {
         _parse(input) {
             const { ctx } = this._processInputParams(input);
+            // newCtx is used to not collect issues from inner types in ctx
+            const newCtx = {
+                ...ctx,
+                common: {
+                    ...ctx.common,
+                    issues: [],
+                },
+            };
             const result = this._def.innerType._parse({
-                data: ctx.data,
-                path: ctx.path,
+                data: newCtx.data,
+                path: newCtx.path,
                 parent: {
-                    ...ctx,
-                    common: {
-                        ...ctx.common,
-                        issues: [], // don't collect issues from inner type
-                    },
+                    ...newCtx,
                 },
             });
             if (isAsync(result)) {
                 return result.then((result) => {
                     return {
                         status: "valid",
-                        value: result.status === "valid" ? result.value : this._def.catchValue(),
+                        value: result.status === "valid"
+                            ? result.value
+                            : this._def.catchValue({
+                                get error() {
+                                    return new ZodError(newCtx.common.issues);
+                                },
+                                input: newCtx.data,
+                            }),
                     };
                 });
             }
             else {
                 return {
                     status: "valid",
-                    value: result.status === "valid" ? result.value : this._def.catchValue(),
+                    value: result.status === "valid"
+                        ? result.value
+                        : this._def.catchValue({
+                            get error() {
+                                return new ZodError(newCtx.common.issues);
+                            },
+                            input: newCtx.data,
+                        }),
                 };
             }
         }
@@ -8330,13 +9297,30 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             });
         }
     }
-    const custom = (check, params = {}, fatal) => {
+    const custom = (check, params = {}, 
+    /*
+     * @deprecated
+     *
+     * Pass `fatal` into the params object instead:
+     *
+     * ```ts
+     * z.string().custom((val) => val.length > 5, { fatal: false })
+     * ```
+     *
+     */
+    fatal) => {
         if (check)
             return ZodAny.create().superRefine((data, ctx) => {
+                var _a, _b;
                 if (!check(data)) {
-                    const p = typeof params === "function" ? params(data) : params;
+                    const p = typeof params === "function"
+                        ? params(data)
+                        : typeof params === "string"
+                            ? { message: params }
+                            : params;
+                    const _fatal = (_b = (_a = p.fatal) !== null && _a !== void 0 ? _a : fatal) !== null && _b !== void 0 ? _b : true;
                     const p2 = typeof p === "string" ? { message: p } : p;
-                    ctx.addIssue({ code: "custom", ...p2, fatal });
+                    ctx.addIssue({ code: "custom", ...p2, fatal: _fatal });
                 }
             });
         return ZodAny.create();
@@ -8386,7 +9370,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     // const instanceOfType = <T extends new (...args: any[]) => any>(
     cls, params = {
         message: `Input not instance of ${cls.name}`,
-    }) => custom((data) => data instanceof cls, params, true);
+    }) => custom((data) => data instanceof cls, params);
     const stringType = ZodString.create;
     const numberType = ZodNumber.create;
     const nanType = ZodNaN.create;
@@ -8436,7 +9420,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     };
     const NEVER = INVALID;
 
-    var mod = /*#__PURE__*/Object.freeze({
+    var z = /*#__PURE__*/Object.freeze({
         __proto__: null,
         defaultErrorMap: errorMap,
         setErrorMap: setErrorMap,
@@ -8453,6 +9437,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         isValid: isValid,
         isAsync: isAsync,
         get util () { return util$1; },
+        get objectUtil () { return objectUtil; },
         ZodParsedType: ZodParsedType,
         getParsedType: getParsedType,
         ZodType: ZodType,
@@ -8469,7 +9454,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         ZodNever: ZodNever,
         ZodVoid: ZodVoid,
         ZodArray: ZodArray,
-        get objectUtil () { return objectUtil; },
         ZodObject: ZodObject,
         ZodUnion: ZodUnion,
         ZodDiscriminatedUnion: ZodDiscriminatedUnion,
@@ -8545,31 +9529,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         ZodError: ZodError
     });
 
-    /** `Object#toString` result references. */
-    var symbolTag = '[object Symbol]';
-
-    /**
-     * Checks if `value` is classified as a `Symbol` primitive or object.
-     *
-     * @static
-     * @memberOf _
-     * @since 4.0.0
-     * @category Lang
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
-     * @example
-     *
-     * _.isSymbol(Symbol.iterator);
-     * // => true
-     *
-     * _.isSymbol('abc');
-     * // => false
-     */
-    function isSymbol(value) {
-      return typeof value == 'symbol' ||
-        (isObjectLike(value) && baseGetTag(value) == symbolTag);
-    }
-
     /** Used as references for various `Number` constants. */
     var NAN$2 = 0 / 0;
 
@@ -8589,57 +9548,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         return NAN$2;
       }
       return +value;
-    }
-
-    /**
-     * A specialized version of `_.map` for arrays without support for iteratee
-     * shorthands.
-     *
-     * @private
-     * @param {Array} [array] The array to iterate over.
-     * @param {Function} iteratee The function invoked per iteration.
-     * @returns {Array} Returns the new mapped array.
-     */
-    function arrayMap(array, iteratee) {
-      var index = -1,
-          length = array == null ? 0 : array.length,
-          result = Array(length);
-
-      while (++index < length) {
-        result[index] = iteratee(array[index], index, array);
-      }
-      return result;
-    }
-
-    /** Used as references for various `Number` constants. */
-    var INFINITY$5 = 1 / 0;
-
-    /** Used to convert symbols to primitives and strings. */
-    var symbolProto = Symbol$1 ? Symbol$1.prototype : undefined,
-        symbolToString = symbolProto ? symbolProto.toString : undefined;
-
-    /**
-     * The base implementation of `_.toString` which doesn't convert nullish
-     * values to empty strings.
-     *
-     * @private
-     * @param {*} value The value to process.
-     * @returns {string} Returns the string.
-     */
-    function baseToString(value) {
-      // Exit early for strings to avoid a performance hit in some environments.
-      if (typeof value == 'string') {
-        return value;
-      }
-      if (isArray(value)) {
-        // Recursively convert values (susceptible to call stack limits).
-        return arrayMap(value, baseToString) + '';
-      }
-      if (isSymbol(value)) {
-        return symbolToString ? symbolToString.call(value) : '';
-      }
-      var result = (value + '');
-      return (result == '0' && (1 / value) == -INFINITY$5) ? '-0' : result;
     }
 
     /**
@@ -8789,7 +9697,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
 
     /** Used as references for various `Number` constants. */
-    var INFINITY$4 = 1 / 0,
+    var INFINITY$3 = 1 / 0,
         MAX_INTEGER = 1.7976931348623157e+308;
 
     /**
@@ -8820,7 +9728,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         return value === 0 ? value : 0;
       }
       value = toNumber(value);
-      if (value === INFINITY$4 || value === -INFINITY$4) {
+      if (value === INFINITY$3 || value === -INFINITY$3) {
         var sign = (value < 0 ? -1 : 1);
         return sign * MAX_INTEGER;
       }
@@ -8861,7 +9769,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
 
     /** Error message constants. */
-    var FUNC_ERROR_TEXT$b = 'Expected a function';
+    var FUNC_ERROR_TEXT$a = 'Expected a function';
 
     /**
      * The opposite of `_.before`; this method creates a function that invokes
@@ -8889,7 +9797,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
      */
     function after(n, func) {
       if (typeof func != 'function') {
-        throw new TypeError(FUNC_ERROR_TEXT$b);
+        throw new TypeError(FUNC_ERROR_TEXT$a);
       }
       n = toInteger(n);
       return function() {
@@ -8897,26 +9805,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
           return func.apply(this, arguments);
         }
       };
-    }
-
-    /**
-     * This method returns the first argument it receives.
-     *
-     * @static
-     * @since 0.1.0
-     * @memberOf _
-     * @category Util
-     * @param {*} value Any value.
-     * @returns {*} Returns `value`.
-     * @example
-     *
-     * var object = { 'a': 1 };
-     *
-     * console.log(_.identity(object) === object);
-     * // => true
-     */
-    function identity(value) {
-      return value;
     }
 
     /** Used to store function metadata. */
@@ -8992,28 +9880,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       return wrapper;
     }
 
-    /**
-     * A faster alternative to `Function#apply`, this function invokes `func`
-     * with the `this` binding of `thisArg` and the arguments of `args`.
-     *
-     * @private
-     * @param {Function} func The function to invoke.
-     * @param {*} thisArg The `this` binding of `func`.
-     * @param {Array} args The arguments to invoke `func` with.
-     * @returns {*} Returns the result of `func`.
-     */
-    function apply(func, thisArg, args) {
-      switch (args.length) {
-        case 0: return func.call(thisArg);
-        case 1: return func.call(thisArg, args[0]);
-        case 2: return func.call(thisArg, args[0], args[1]);
-        case 3: return func.call(thisArg, args[0], args[1], args[2]);
-      }
-      return func.apply(thisArg, args);
-    }
-
     /* Built-in method references for those with the same name as other `lodash` methods. */
-    var nativeMax$g = Math.max;
+    var nativeMax$f = Math.max;
 
     /**
      * Creates an array that is the composition of partially applied arguments,
@@ -9032,7 +9900,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
           holdersLength = holders.length,
           leftIndex = -1,
           leftLength = partials.length,
-          rangeLength = nativeMax$g(argsLength - holdersLength, 0),
+          rangeLength = nativeMax$f(argsLength - holdersLength, 0),
           result = Array(leftLength + rangeLength),
           isUncurried = !isCurried;
 
@@ -9051,7 +9919,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
 
     /* Built-in method references for those with the same name as other `lodash` methods. */
-    var nativeMax$f = Math.max;
+    var nativeMax$e = Math.max;
 
     /**
      * This function is like `composeArgs` except that the arguments composition
@@ -9071,7 +9939,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
           holdersLength = holders.length,
           rightIndex = -1,
           rightLength = partials.length,
-          rangeLength = nativeMax$f(argsLength - holdersLength, 0),
+          rangeLength = nativeMax$e(argsLength - holdersLength, 0),
           result = Array(rangeLength + rightLength),
           isUncurried = !isCurried;
 
@@ -9398,42 +10266,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       return !!data && func === data[0];
     }
 
-    /** Used to detect hot functions by number of calls within a span of milliseconds. */
-    var HOT_COUNT = 800,
-        HOT_SPAN = 16;
-
-    /* Built-in method references for those with the same name as other `lodash` methods. */
-    var nativeNow = Date.now;
-
-    /**
-     * Creates a function that'll short out and invoke `identity` instead
-     * of `func` when it's called `HOT_COUNT` or more times in `HOT_SPAN`
-     * milliseconds.
-     *
-     * @private
-     * @param {Function} func The function to restrict.
-     * @returns {Function} Returns the new shortable function.
-     */
-    function shortOut(func) {
-      var count = 0,
-          lastCalled = 0;
-
-      return function() {
-        var stamp = nativeNow(),
-            remaining = HOT_SPAN - (stamp - lastCalled);
-
-        lastCalled = stamp;
-        if (remaining > 0) {
-          if (++count >= HOT_COUNT) {
-            return arguments[0];
-          }
-        } else {
-          count = 0;
-        }
-        return func.apply(undefined, arguments);
-      };
-    }
-
     /**
      * Sets metadata for `func`.
      *
@@ -9487,58 +10319,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       details = details.join(length > 2 ? ', ' : ' ');
       return source.replace(reWrapComment, '{\n/* [wrapped with ' + details + '] */\n');
     }
-
-    /**
-     * Creates a function that returns `value`.
-     *
-     * @static
-     * @memberOf _
-     * @since 2.4.0
-     * @category Util
-     * @param {*} value The value to return from the new function.
-     * @returns {Function} Returns the new constant function.
-     * @example
-     *
-     * var objects = _.times(2, _.constant({ 'a': 1 }));
-     *
-     * console.log(objects);
-     * // => [{ 'a': 1 }, { 'a': 1 }]
-     *
-     * console.log(objects[0] === objects[1]);
-     * // => true
-     */
-    function constant(value) {
-      return function() {
-        return value;
-      };
-    }
-
-    /**
-     * The base implementation of `setToString` without support for hot loop shorting.
-     *
-     * @private
-     * @param {Function} func The function to modify.
-     * @param {Function} string The `toString` result.
-     * @returns {Function} Returns `func`.
-     */
-    var baseSetToString = !defineProperty ? identity : function(func, string) {
-      return defineProperty(func, 'toString', {
-        'configurable': true,
-        'enumerable': false,
-        'value': constant(string),
-        'writable': true
-      });
-    };
-
-    /**
-     * Sets the `toString` method of `func` to return `string`.
-     *
-     * @private
-     * @param {Function} func The function to modify.
-     * @param {Function} string The `toString` result.
-     * @returns {Function} Returns `func`.
-     */
-    var setToString = shortOut(baseSetToString);
 
     /**
      * The base implementation of `_.findIndex` and `_.findLastIndex` without
@@ -10040,7 +10820,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
 
     /** Error message constants. */
-    var FUNC_ERROR_TEXT$a = 'Expected a function';
+    var FUNC_ERROR_TEXT$9 = 'Expected a function';
 
     /** Used to compose bitmasks for function metadata. */
     var WRAP_BIND_FLAG$2 = 1,
@@ -10051,7 +10831,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         WRAP_PARTIAL_RIGHT_FLAG$1 = 64;
 
     /* Built-in method references for those with the same name as other `lodash` methods. */
-    var nativeMax$e = Math.max;
+    var nativeMax$d = Math.max;
 
     /**
      * Creates a function that either curries or invokes `func` with optional
@@ -10081,14 +10861,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     function createWrap(func, bitmask, thisArg, partials, holders, argPos, ary, arity) {
       var isBindKey = bitmask & WRAP_BIND_KEY_FLAG$2;
       if (!isBindKey && typeof func != 'function') {
-        throw new TypeError(FUNC_ERROR_TEXT$a);
+        throw new TypeError(FUNC_ERROR_TEXT$9);
       }
       var length = partials ? partials.length : 0;
       if (!length) {
         bitmask &= ~(WRAP_PARTIAL_FLAG$4 | WRAP_PARTIAL_RIGHT_FLAG$1);
         partials = holders = undefined;
       }
-      ary = ary === undefined ? ary : nativeMax$e(toInteger(ary), 0);
+      ary = ary === undefined ? ary : nativeMax$d(toInteger(ary), 0);
       arity = arity === undefined ? arity : toInteger(arity);
       length -= holders ? holders.length : 0;
 
@@ -10115,7 +10895,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       holders = newData[4];
       arity = newData[9] = newData[9] === undefined
         ? (isBindKey ? 0 : func.length)
-        : nativeMax$e(newData[9] - length, 0);
+        : nativeMax$d(newData[9] - length, 0);
 
       if (!arity && bitmask & (WRAP_CURRY_FLAG$2 | WRAP_CURRY_RIGHT_FLAG$1)) {
         bitmask &= ~(WRAP_CURRY_FLAG$2 | WRAP_CURRY_RIGHT_FLAG$1);
@@ -10157,39 +10937,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       n = guard ? undefined : n;
       n = (func && n == null) ? func.length : n;
       return createWrap(func, WRAP_ARY_FLAG$1, undefined, undefined, undefined, undefined, n);
-    }
-
-    /* Built-in method references for those with the same name as other `lodash` methods. */
-    var nativeMax$d = Math.max;
-
-    /**
-     * A specialized version of `baseRest` which transforms the rest array.
-     *
-     * @private
-     * @param {Function} func The function to apply a rest parameter to.
-     * @param {number} [start=func.length-1] The start position of the rest parameter.
-     * @param {Function} transform The rest array transform.
-     * @returns {Function} Returns the new function.
-     */
-    function overRest(func, start, transform) {
-      start = nativeMax$d(start === undefined ? (func.length - 1) : start, 0);
-      return function() {
-        var args = arguments,
-            index = -1,
-            length = nativeMax$d(args.length - start, 0),
-            array = Array(length);
-
-        while (++index < length) {
-          array[index] = args[start + index];
-        }
-        index = -1;
-        var otherArgs = Array(start + 1);
-        while (++index < start) {
-          otherArgs[index] = args[index];
-        }
-        otherArgs[start] = transform(array);
-        return apply(func, this, otherArgs);
-      };
     }
 
     /**
@@ -10411,226 +11158,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       copyObject(source, keys(source), object, customizer);
     });
 
-    /** Used to match property names within property paths. */
-    var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
-        reIsPlainProp = /^\w*$/;
-
-    /**
-     * Checks if `value` is a property name and not a property path.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @param {Object} [object] The object to query keys on.
-     * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
-     */
-    function isKey(value, object) {
-      if (isArray(value)) {
-        return false;
-      }
-      var type = typeof value;
-      if (type == 'number' || type == 'symbol' || type == 'boolean' ||
-          value == null || isSymbol(value)) {
-        return true;
-      }
-      return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
-        (object != null && value in Object(object));
-    }
-
-    /** Error message constants. */
-    var FUNC_ERROR_TEXT$9 = 'Expected a function';
-
-    /**
-     * Creates a function that memoizes the result of `func`. If `resolver` is
-     * provided, it determines the cache key for storing the result based on the
-     * arguments provided to the memoized function. By default, the first argument
-     * provided to the memoized function is used as the map cache key. The `func`
-     * is invoked with the `this` binding of the memoized function.
-     *
-     * **Note:** The cache is exposed as the `cache` property on the memoized
-     * function. Its creation may be customized by replacing the `_.memoize.Cache`
-     * constructor with one whose instances implement the
-     * [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)
-     * method interface of `clear`, `delete`, `get`, `has`, and `set`.
-     *
-     * @static
-     * @memberOf _
-     * @since 0.1.0
-     * @category Function
-     * @param {Function} func The function to have its output memoized.
-     * @param {Function} [resolver] The function to resolve the cache key.
-     * @returns {Function} Returns the new memoized function.
-     * @example
-     *
-     * var object = { 'a': 1, 'b': 2 };
-     * var other = { 'c': 3, 'd': 4 };
-     *
-     * var values = _.memoize(_.values);
-     * values(object);
-     * // => [1, 2]
-     *
-     * values(other);
-     * // => [3, 4]
-     *
-     * object.a = 2;
-     * values(object);
-     * // => [1, 2]
-     *
-     * // Modify the result cache.
-     * values.cache.set(object, ['a', 'b']);
-     * values(object);
-     * // => ['a', 'b']
-     *
-     * // Replace `_.memoize.Cache`.
-     * _.memoize.Cache = WeakMap;
-     */
-    function memoize(func, resolver) {
-      if (typeof func != 'function' || (resolver != null && typeof resolver != 'function')) {
-        throw new TypeError(FUNC_ERROR_TEXT$9);
-      }
-      var memoized = function() {
-        var args = arguments,
-            key = resolver ? resolver.apply(this, args) : args[0],
-            cache = memoized.cache;
-
-        if (cache.has(key)) {
-          return cache.get(key);
-        }
-        var result = func.apply(this, args);
-        memoized.cache = cache.set(key, result) || cache;
-        return result;
-      };
-      memoized.cache = new (memoize.Cache || MapCache);
-      return memoized;
-    }
-
-    // Expose `MapCache`.
-    memoize.Cache = MapCache;
-
-    /** Used as the maximum memoize cache size. */
-    var MAX_MEMOIZE_SIZE = 500;
-
-    /**
-     * A specialized version of `_.memoize` which clears the memoized function's
-     * cache when it exceeds `MAX_MEMOIZE_SIZE`.
-     *
-     * @private
-     * @param {Function} func The function to have its output memoized.
-     * @returns {Function} Returns the new memoized function.
-     */
-    function memoizeCapped(func) {
-      var result = memoize(func, function(key) {
-        if (cache.size === MAX_MEMOIZE_SIZE) {
-          cache.clear();
-        }
-        return key;
-      });
-
-      var cache = result.cache;
-      return result;
-    }
-
-    /** Used to match property names within property paths. */
-    var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
-
-    /** Used to match backslashes in property paths. */
-    var reEscapeChar = /\\(\\)?/g;
-
-    /**
-     * Converts `string` to a property path array.
-     *
-     * @private
-     * @param {string} string The string to convert.
-     * @returns {Array} Returns the property path array.
-     */
-    var stringToPath = memoizeCapped(function(string) {
-      var result = [];
-      if (string.charCodeAt(0) === 46 /* . */) {
-        result.push('');
-      }
-      string.replace(rePropName, function(match, number, quote, subString) {
-        result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
-      });
-      return result;
-    });
-
-    /**
-     * Converts `value` to a string. An empty string is returned for `null`
-     * and `undefined` values. The sign of `-0` is preserved.
-     *
-     * @static
-     * @memberOf _
-     * @since 4.0.0
-     * @category Lang
-     * @param {*} value The value to convert.
-     * @returns {string} Returns the converted string.
-     * @example
-     *
-     * _.toString(null);
-     * // => ''
-     *
-     * _.toString(-0);
-     * // => '-0'
-     *
-     * _.toString([1, 2, 3]);
-     * // => '1,2,3'
-     */
-    function toString(value) {
-      return value == null ? '' : baseToString(value);
-    }
-
-    /**
-     * Casts `value` to a path array if it's not one.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @param {Object} [object] The object to query keys on.
-     * @returns {Array} Returns the cast property path array.
-     */
-    function castPath(value, object) {
-      if (isArray(value)) {
-        return value;
-      }
-      return isKey(value, object) ? [value] : stringToPath(toString(value));
-    }
-
-    /** Used as references for various `Number` constants. */
-    var INFINITY$3 = 1 / 0;
-
-    /**
-     * Converts `value` to a string key if it's not a string or symbol.
-     *
-     * @private
-     * @param {*} value The value to inspect.
-     * @returns {string|symbol} Returns the key.
-     */
-    function toKey(value) {
-      if (typeof value == 'string' || isSymbol(value)) {
-        return value;
-      }
-      var result = (value + '');
-      return (result == '0' && (1 / value) == -INFINITY$3) ? '-0' : result;
-    }
-
-    /**
-     * The base implementation of `_.get` without support for default values.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {Array|string} path The path of the property to get.
-     * @returns {*} Returns the resolved value.
-     */
-    function baseGet(object, path) {
-      path = castPath(path, object);
-
-      var index = 0,
-          length = path.length;
-
-      while (object != null && index < length) {
-        object = object[toKey(path[index++])];
-      }
-      return (index && index == length) ? object : undefined;
-    }
-
     /**
      * Gets the value at `path` of `object`. If the resolved value is
      * `undefined`, the `defaultValue` is returned in its place.
@@ -10679,85 +11206,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         result[index] = skip ? undefined : get(object, paths[index]);
       }
       return result;
-    }
-
-    /** Built-in value references. */
-    var spreadableSymbol = Symbol$1 ? Symbol$1.isConcatSpreadable : undefined;
-
-    /**
-     * Checks if `value` is a flattenable `arguments` object or array.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is flattenable, else `false`.
-     */
-    function isFlattenable(value) {
-      return isArray(value) || isArguments(value) ||
-        !!(spreadableSymbol && value && value[spreadableSymbol]);
-    }
-
-    /**
-     * The base implementation of `_.flatten` with support for restricting flattening.
-     *
-     * @private
-     * @param {Array} array The array to flatten.
-     * @param {number} depth The maximum recursion depth.
-     * @param {boolean} [predicate=isFlattenable] The function invoked per iteration.
-     * @param {boolean} [isStrict] Restrict to values that pass `predicate` checks.
-     * @param {Array} [result=[]] The initial result value.
-     * @returns {Array} Returns the new flattened array.
-     */
-    function baseFlatten(array, depth, predicate, isStrict, result) {
-      var index = -1,
-          length = array.length;
-
-      predicate || (predicate = isFlattenable);
-      result || (result = []);
-
-      while (++index < length) {
-        var value = array[index];
-        if (depth > 0 && predicate(value)) {
-          if (depth > 1) {
-            // Recursively flatten arrays (susceptible to call stack limits).
-            baseFlatten(value, depth - 1, predicate, isStrict, result);
-          } else {
-            arrayPush(result, value);
-          }
-        } else if (!isStrict) {
-          result[result.length] = value;
-        }
-      }
-      return result;
-    }
-
-    /**
-     * Flattens `array` a single level deep.
-     *
-     * @static
-     * @memberOf _
-     * @since 0.1.0
-     * @category Array
-     * @param {Array} array The array to flatten.
-     * @returns {Array} Returns the new flattened array.
-     * @example
-     *
-     * _.flatten([1, [2, [3, [4]], 5]]);
-     * // => [1, 2, [3, [4]], 5]
-     */
-    function flatten(array) {
-      var length = array == null ? 0 : array.length;
-      return length ? baseFlatten(array, 1) : [];
-    }
-
-    /**
-     * A specialized version of `baseRest` which flattens the rest array.
-     *
-     * @private
-     * @param {Function} func The function to apply a rest parameter to.
-     * @returns {Function} Returns the new function.
-     */
-    function flatRest(func) {
-      return setToString(overRest(func, undefined, flatten), func + '');
     }
 
     /**
@@ -12154,79 +12602,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
       return function(object) {
         return object === source || baseIsMatch(object, source, matchData);
       };
-    }
-
-    /**
-     * The base implementation of `_.hasIn` without support for deep paths.
-     *
-     * @private
-     * @param {Object} [object] The object to query.
-     * @param {Array|string} key The key to check.
-     * @returns {boolean} Returns `true` if `key` exists, else `false`.
-     */
-    function baseHasIn(object, key) {
-      return object != null && key in Object(object);
-    }
-
-    /**
-     * Checks if `path` exists on `object`.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @param {Array|string} path The path to check.
-     * @param {Function} hasFunc The function to check properties.
-     * @returns {boolean} Returns `true` if `path` exists, else `false`.
-     */
-    function hasPath(object, path, hasFunc) {
-      path = castPath(path, object);
-
-      var index = -1,
-          length = path.length,
-          result = false;
-
-      while (++index < length) {
-        var key = toKey(path[index]);
-        if (!(result = object != null && hasFunc(object, key))) {
-          break;
-        }
-        object = object[key];
-      }
-      if (result || ++index != length) {
-        return result;
-      }
-      length = object == null ? 0 : object.length;
-      return !!length && isLength(length) && isIndex(key, length) &&
-        (isArray(object) || isArguments(object));
-    }
-
-    /**
-     * Checks if `path` is a direct or inherited property of `object`.
-     *
-     * @static
-     * @memberOf _
-     * @since 4.0.0
-     * @category Object
-     * @param {Object} object The object to query.
-     * @param {Array|string} path The path to check.
-     * @returns {boolean} Returns `true` if `path` exists, else `false`.
-     * @example
-     *
-     * var object = _.create({ 'a': _.create({ 'b': 2 }) });
-     *
-     * _.hasIn(object, 'a');
-     * // => true
-     *
-     * _.hasIn(object, 'a.b');
-     * // => true
-     *
-     * _.hasIn(object, ['a', 'b']);
-     * // => true
-     *
-     * _.hasIn(object, 'b');
-     * // => false
-     */
-    function hasIn(object, path) {
-      return object != null && hasPath(object, path, baseHasIn);
     }
 
     /** Used to compose bitmasks for value comparisons. */
@@ -17896,75 +18271,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     });
 
     /**
-     * The base implementation of `_.set`.
-     *
-     * @private
-     * @param {Object} object The object to modify.
-     * @param {Array|string} path The path of the property to set.
-     * @param {*} value The value to set.
-     * @param {Function} [customizer] The function to customize path creation.
-     * @returns {Object} Returns `object`.
-     */
-    function baseSet(object, path, value, customizer) {
-      if (!isObject(object)) {
-        return object;
-      }
-      path = castPath(path, object);
-
-      var index = -1,
-          length = path.length,
-          lastIndex = length - 1,
-          nested = object;
-
-      while (nested != null && ++index < length) {
-        var key = toKey(path[index]),
-            newValue = value;
-
-        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-          return object;
-        }
-
-        if (index != lastIndex) {
-          var objValue = nested[key];
-          newValue = customizer ? customizer(objValue, key, nested) : undefined;
-          if (newValue === undefined) {
-            newValue = isObject(objValue)
-              ? objValue
-              : (isIndex(path[index + 1]) ? [] : {});
-          }
-        }
-        assignValue(nested, key, newValue);
-        nested = nested[key];
-      }
-      return object;
-    }
-
-    /**
-     * The base implementation of  `_.pickBy` without support for iteratee shorthands.
-     *
-     * @private
-     * @param {Object} object The source object.
-     * @param {string[]} paths The property paths to pick.
-     * @param {Function} predicate The function invoked per property.
-     * @returns {Object} Returns the new object.
-     */
-    function basePickBy(object, paths, predicate) {
-      var index = -1,
-          length = paths.length,
-          result = {};
-
-      while (++index < length) {
-        var path = paths[index],
-            value = baseGet(object, path);
-
-        if (predicate(value, path)) {
-          baseSet(result, castPath(path, object), value);
-        }
-      }
-      return result;
-    }
-
-    /**
      * Creates an object composed of the `object` properties `predicate` returns
      * truthy for. The predicate is invoked with two arguments: (value, key).
      *
@@ -18783,42 +19089,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     var partition = createAggregator(function(result, value, key) {
       result[key ? 0 : 1].push(value);
     }, function() { return [[], []]; });
-
-    /**
-     * The base implementation of `_.pick` without support for individual
-     * property identifiers.
-     *
-     * @private
-     * @param {Object} object The source object.
-     * @param {string[]} paths The property paths to pick.
-     * @returns {Object} Returns the new object.
-     */
-    function basePick(object, paths) {
-      return basePickBy(object, paths, function(value, path) {
-        return hasIn(object, path);
-      });
-    }
-
-    /**
-     * Creates an object composed of the picked `object` properties.
-     *
-     * @static
-     * @since 0.1.0
-     * @memberOf _
-     * @category Object
-     * @param {Object} object The source object.
-     * @param {...(string|string[])} [paths] The property paths to pick.
-     * @returns {Object} Returns the new object.
-     * @example
-     *
-     * var object = { 'a': 1, 'b': '2', 'c': 3 };
-     *
-     * _.pick(object, ['a', 'c']);
-     * // => { 'a': 1, 'c': 3 }
-     */
-    var pick = flatRest(function(object, paths) {
-      return object == null ? {} : basePick(object, paths);
-    });
 
     /**
      * Creates a clone of the chain sequence planting `value` as the wrapped value.
@@ -23900,6 +24170,608 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
     }
 
+    const CURSES_TRIGGER_TEXTS = {
+        remove: "PLAYER_NAME's body seems to be cursed and the ASSET_NAME just falls off her body.",
+        add: "The curse on PLAYER_NAME's ASSET_NAME wakes up and the item reappears.",
+        swap: "The curse on PLAYER_NAME's ASSET_NAME wakes up, not allowing the item to be replaced by another item.",
+        update: "The curse on PLAYER_NAME's ASSET_NAME wakes up and undoes all changes to the item.",
+        color: "The curse on PLAYER_NAME's ASSET_NAME wakes up, changing the color of the item back.",
+        autoremove: "The curse on PLAYER_NAME's body becomes dormant and the ASSET_NAME falls off her body.",
+    };
+    const CURSES_TRIGGER_TEXTS_BATCH = {
+        remove: "PLAYER_NAME's body seems to be cursed and several items just fall off her body.",
+        add: "The curses on PLAYER_NAME's body wake up and several items reappear.",
+        swap: "The curses on PLAYER_NAME's body wake up, not allowing several items to be replaced.",
+        update: "The curses on PLAYER_NAME's body wake up and undoes all changes to several items.",
+        color: "The curses on PLAYER_NAME's body wake up, changing the color of several items back.",
+        autoremove: "The curses on PLAYER_NAME's body become dormant and several items fall off her body.",
+    };
+    const CURSES_TRIGGER_LOGS = {
+        remove: "The curse on PLAYER_NAME's body prevented a ASSET_NAME from being added to it",
+        add: "The curse on PLAYER_NAME's ASSET_NAME made the item reappear",
+        swap: "The curse on PLAYER_NAME's ASSET_NAME prevented the item from being replaced",
+        update: "The curse on PLAYER_NAME's ASSET_NAME reverted all changes to the item",
+        color: "The curse on PLAYER_NAME's ASSET_NAME reverted the color of the item",
+    };
+    const CURSES_TRIGGER_LOGS_BATCH = {
+        remove: "The curses on PLAYER_NAME's body prevented several items from being added to it",
+        add: "The curses on PLAYER_NAME's body made several items reappear",
+        swap: "The curses on PLAYER_NAME's body prevented several items from being replaced",
+        update: "The curses on PLAYER_NAME's body reverted all changes to several items",
+        color: "The curses on PLAYER_NAME's body reverted the color of several items",
+    };
+
+    const LOG_ENTRIES_LIMIT = 256;
+    var LogEntryType;
+    (function (LogEntryType) {
+        LogEntryType[LogEntryType["plaintext"] = 0] = "plaintext";
+        LogEntryType[LogEntryType["deleted"] = 1] = "deleted";
+        LogEntryType[LogEntryType["ruleTrigger"] = 2] = "ruleTrigger";
+        LogEntryType[LogEntryType["ruleTriggerAttempt"] = 3] = "ruleTriggerAttempt";
+        LogEntryType[LogEntryType["curseTrigger"] = 4] = "curseTrigger";
+        LogEntryType[LogEntryType["curseTriggerBatch"] = 5] = "curseTriggerBatch";
+    })(LogEntryType || (LogEntryType = {}));
+    var LogAccessLevel;
+    (function (LogAccessLevel) {
+        LogAccessLevel[LogAccessLevel["none"] = 0] = "none";
+        LogAccessLevel[LogAccessLevel["protected"] = 1] = "protected";
+        LogAccessLevel[LogAccessLevel["normal"] = 2] = "normal";
+        LogAccessLevel[LogAccessLevel["everyone"] = 3] = "everyone";
+    })(LogAccessLevel || (LogAccessLevel = {}));
+    function logMessage(category, type, data) {
+        var _a;
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return;
+        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category];
+        if (access === undefined) {
+            throw new Error(`Attempt to log message with unknown category "${category}"`);
+        }
+        if (access > LogAccessLevel.none) {
+            logMessageAdd(access, type, data);
+        }
+    }
+    function logMessageAdd(access, type, data) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return;
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        modStorage.log.unshift([Date.now(), access, type, data]);
+        if (modStorage.log.length >= 2 && modStorage.log[0][0] <= modStorage.log[1][0]) {
+            modStorage.log[0][0] = modStorage.log[1][0] + 1;
+        }
+        modStorage.log.splice(LOG_ENTRIES_LIMIT);
+        modStorageSync();
+        notifyOfChange();
+    }
+    function logMessageDelete(time, character) {
+        var _a;
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
+        if (character && !checkPermissionAccess("log_delete", character)) {
+            return false;
+        }
+        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.log_deleted;
+        if (access === undefined) {
+            throw new Error("log_deleted category not found");
+        }
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        let changed = false;
+        for (let i = modStorage.log.length - 1; i >= 0; i--) {
+            const e = modStorage.log[i];
+            if ((Array.isArray(time) && time.includes(e[0])) || e[0] === time) {
+                changed = true;
+                if (access === LogAccessLevel.none) {
+                    modStorage.log.splice(i, 1);
+                }
+                else {
+                    e[1] = access;
+                    e[2] = LogEntryType.deleted;
+                    e[3] = null;
+                }
+            }
+        }
+        if (changed) {
+            modStorageSync();
+            notifyOfChange();
+        }
+        return changed;
+    }
+    function logConfigSet(category, accessLevel, character) {
+        var _a;
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
+        if (character && !checkPermissionAccess("log_configure", character)) {
+            return false;
+        }
+        if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category]) === undefined) {
+            return false;
+        }
+        if (![LogAccessLevel.none, LogAccessLevel.normal, LogAccessLevel.protected].includes(accessLevel)) {
+            return false;
+        }
+        if (modStorage.logConfig[category] === accessLevel) {
+            return true;
+        }
+        if (character) {
+            logMessage("log_config_change", LogEntryType.plaintext, `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
+                `from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`);
+            if (!character.isPlayer()) {
+                ChatRoomSendLocal(`${character.toNicknamedString()} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
+                    `from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`, undefined, character.MemberNumber);
+            }
+        }
+        modStorage.logConfig[category] = accessLevel;
+        modStorageSync();
+        notifyOfChange();
+        return true;
+    }
+    function logClear(character) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
+        if (character && !checkPermissionAccess("log_delete", character)) {
+            return false;
+        }
+        modStorage.log = [];
+        logMessageAdd(LogAccessLevel.everyone, LogEntryType.plaintext, "The log has been cleared");
+        return true;
+    }
+    function getVisibleLogEntries(character) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return [];
+        if (!modStorage.log) {
+            throw new Error("Mod storage log not initialized");
+        }
+        const allow = {
+            [LogAccessLevel.none]: character.isPlayer(),
+            [LogAccessLevel.normal]: checkPermissionAccess("log_view_normal", character),
+            [LogAccessLevel.protected]: checkPermissionAccess("log_view_protected", character),
+            [LogAccessLevel.everyone]: true,
+        };
+        return modStorage.log.filter(e => allow[e[1]]);
+    }
+    function logMessageRender(entry, character) {
+        var _a, _b;
+        if (entry[2] === LogEntryType.plaintext) {
+            const e = entry;
+            return e[3];
+        }
+        else if (entry[2] === LogEntryType.deleted) {
+            return "[Log message deleted]";
+        }
+        else if (entry[2] === LogEntryType.ruleTrigger || entry[2] === LogEntryType.ruleTriggerAttempt) {
+            const data = entry[3];
+            if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== "string") {
+                return `[ERROR: Bad data for type ${entry[2]}]`;
+            }
+            if (!guard_BCX_Rule(data[0])) {
+                return `[ERROR: Trigger for unknown rule "${data[0]}"]`;
+            }
+            const rule = RulesGetDisplayDefinition(data[0]);
+            const log = entry[2] === LogEntryType.ruleTriggerAttempt ? (_a = rule.triggerTexts) === null || _a === void 0 ? void 0 : _a.attempt_log : (_b = rule.triggerTexts) === null || _b === void 0 ? void 0 : _b.log;
+            return log ? dictionaryProcess(log, { PLAYER_NAME: character.Name, ...data[1] }) : `[ERROR: Missing log text for rule "${data[0]}" trigger]`;
+        }
+        else if (entry[2] === LogEntryType.curseTrigger) {
+            const data = entry[3];
+            if (!Array.isArray(data) ||
+                data.length !== 2 ||
+                data.some(i => typeof i !== "string") ||
+                !Object.keys(CURSES_TRIGGER_LOGS).includes(data[0])) {
+                return `[ERROR: Bad data for type ${entry[2]}]`;
+            }
+            return dictionaryProcess(CURSES_TRIGGER_LOGS[data[0]], { PLAYER_NAME: character.Name, ASSET_NAME: data[1] });
+        }
+        else if (entry[2] === LogEntryType.curseTriggerBatch) {
+            const data = entry[3];
+            if (typeof data !== "string" ||
+                !Object.keys(CURSES_TRIGGER_LOGS_BATCH).includes(data)) {
+                return `[ERROR: Bad data for type ${entry[2]}]`;
+            }
+            return dictionaryProcess(CURSES_TRIGGER_LOGS_BATCH[data], { PLAYER_NAME: character.Name });
+        }
+        return `[ERROR: Unknown entry type ${entry[2]}]`;
+    }
+    const alreadyPraisedBy = new Set();
+    function logGetAllowedActions(character) {
+        var _a;
+        return {
+            configure: checkPermissionAccess("log_configure", character),
+            delete: checkPermissionAccess("log_delete", character),
+            leaveMessage: checkPermissionAccess("log_add_note", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.user_note),
+            praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber),
+        };
+    }
+    function logGetConfig() {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return {};
+        if (!modStorage.logConfig) {
+            throw new Error("Mod storage log not initialized");
+        }
+        return { ...modStorage.logConfig };
+    }
+    function logPraise(value, message, character) {
+        if (!moduleIsEnabled(ModuleCategory.Log))
+            return false;
+        if (![-1, 0, 1].includes(value)) {
+            throw new Error("Invalid value");
+        }
+        if (value === 0 && !message)
+            return false;
+        const allowed = logGetAllowedActions(character);
+        if (value !== 0 && !allowed.praise)
+            return false;
+        if (message && !allowed.leaveMessage)
+            return false;
+        if (value !== 0) {
+            alreadyPraisedBy.add(character.MemberNumber);
+        }
+        if (value > 0) {
+            if (message) {
+                logMessage("user_note", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
+                ChatRoomSendLocal(`${character.toNicknamedString()} praised you with the following note: ${message}`, undefined, character.MemberNumber);
+            }
+            else {
+                logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
+                ChatRoomSendLocal(`${character.toNicknamedString()} praised you.`, undefined, character.MemberNumber);
+            }
+        }
+        else if (value < 0) {
+            if (message) {
+                logMessage("user_note", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
+                ChatRoomSendLocal(`${character.toNicknamedString()} scolded you with the following note: ${message}`, undefined, character.MemberNumber);
+            }
+            else {
+                logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
+                ChatRoomSendLocal(`${character.toNicknamedString()} scolded you.`, undefined, character.MemberNumber);
+            }
+        }
+        else if (message) {
+            logMessage("user_note", LogEntryType.plaintext, `${character} attached a note: ${message}`);
+            ChatRoomSendLocal(`${character.toNicknamedString()} put the following note on you: ${message}`, undefined, character.MemberNumber);
+        }
+        return true;
+    }
+    const logConfigDefaults = {
+        log_config_change: LogAccessLevel.protected,
+        log_deleted: LogAccessLevel.normal,
+        praise: LogAccessLevel.normal,
+        user_note: LogAccessLevel.normal,
+        entered_public_room: LogAccessLevel.none,
+        entered_private_room: LogAccessLevel.none,
+        had_orgasm: LogAccessLevel.none,
+        permission_change: LogAccessLevel.protected,
+        curse_change: LogAccessLevel.none,
+        curse_trigger: LogAccessLevel.none,
+        rule_change: LogAccessLevel.none,
+        rule_trigger: LogAccessLevel.none,
+        command_change: LogAccessLevel.none,
+        authority_roles_change: LogAccessLevel.protected,
+        relationships_change: LogAccessLevel.none,
+    };
+    const LOG_CONFIG_NAMES = {
+        log_config_change: "Log changes in logging configuration",
+        log_deleted: "Log deleted log entries",
+        praise: "Log praising or scolding behavior",
+        user_note: "Ability to see attached notes",
+        entered_public_room: "Log which public rooms are entered",
+        entered_private_room: "Log which private rooms are entered",
+        had_orgasm: "Log each single orgasm",
+        permission_change: "Log changes in permission settings",
+        curse_change: "Log each application, removal or change of curses",
+        curse_trigger: "Log every time a triggered curse reapplies an item",
+        rule_change: "Log each addition, removal or change of rules",
+        rule_trigger: "Log every rule violation",
+        command_change: "Log each change of commands limit",
+        authority_roles_change: "Log getting or losing a BCX owner/mistress",
+        relationships_change: "Log each change in relationships module",
+    };
+    const LOG_LEVEL_NAMES = {
+        [LogAccessLevel.everyone]: "[ERROR]",
+        [LogAccessLevel.none]: "No",
+        [LogAccessLevel.protected]: "Protected",
+        [LogAccessLevel.normal]: "Yes",
+    };
+    class ModuleLog extends BaseModule {
+        init() {
+            registerPermission("log_view_normal", {
+                name: "Allow to see normal log entries",
+                category: ModuleCategory.Log,
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.mistress],
+                    [Preset.switch]: [true, AccessLevel.mistress],
+                    [Preset.submissive]: [true, AccessLevel.friend],
+                    [Preset.slave]: [true, AccessLevel.public],
+                },
+            });
+            registerPermission("log_view_protected", {
+                name: "Allow to see protected log entries",
+                category: ModuleCategory.Log,
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.lover],
+                    [Preset.switch]: [true, AccessLevel.lover],
+                    [Preset.submissive]: [true, AccessLevel.mistress],
+                    [Preset.slave]: [true, AccessLevel.mistress],
+                },
+            });
+            registerPermission("log_configure", {
+                name: "Allow to configure what is logged",
+                category: ModuleCategory.Log,
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.owner],
+                    [Preset.slave]: [false, AccessLevel.owner],
+                },
+            });
+            registerPermission("log_delete", {
+                name: "Allow deleting log entries",
+                category: ModuleCategory.Log,
+                defaults: {
+                    [Preset.dominant]: [true, AccessLevel.self],
+                    [Preset.switch]: [true, AccessLevel.self],
+                    [Preset.submissive]: [true, AccessLevel.owner],
+                    [Preset.slave]: [false, AccessLevel.owner],
+                },
+            });
+            registerPermission("log_praise", {
+                name: "Allow to praise or scold",
+                category: ModuleCategory.Log,
+                defaults: {
+                    [Preset.dominant]: [false, AccessLevel.friend],
+                    [Preset.switch]: [false, AccessLevel.friend],
+                    [Preset.submissive]: [false, AccessLevel.public],
+                    [Preset.slave]: [false, AccessLevel.public],
+                },
+            });
+            registerPermission("log_add_note", {
+                name: "Allow to attach notes to the body",
+                category: ModuleCategory.Log,
+                defaults: {
+                    [Preset.dominant]: [false, AccessLevel.mistress],
+                    [Preset.switch]: [false, AccessLevel.mistress],
+                    [Preset.submissive]: [false, AccessLevel.friend],
+                    [Preset.slave]: [false, AccessLevel.public],
+                },
+            });
+            queryHandlers.logData = (sender) => {
+                return getVisibleLogEntries(sender);
+            };
+            queryHandlers.logDelete = (sender, data) => {
+                if (typeof data === "number" || (Array.isArray(data) && data.every(item => typeof item === "number"))) {
+                    return logMessageDelete(data, sender);
+                }
+                else {
+                    return undefined;
+                }
+            };
+            queryHandlers.logConfigGet = (sender) => {
+                if (sender.isPlayer() || checkPermissionAccess("log_configure", sender)) {
+                    return logGetConfig();
+                }
+                else {
+                    return undefined;
+                }
+            };
+            queryHandlers.logConfigEdit = (sender, data) => {
+                if (!isObject$1(data) ||
+                    typeof data.category !== "string" ||
+                    typeof data.target !== "number") {
+                    console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
+                    return undefined;
+                }
+                return logConfigSet(data.category, data.target, sender);
+            };
+            queryHandlers.logClear = (sender) => {
+                return logClear(sender);
+            };
+            queryHandlers.logPraise = (sender, data) => {
+                if (!isObject$1(data) ||
+                    (data.message !== null && typeof data.message !== "string") ||
+                    ![-1, 0, 1].includes(data.value)) {
+                    console.warn(`BCX: Bad logPraise query from ${sender}`, data);
+                    return undefined;
+                }
+                return logPraise(data.value, data.message, sender);
+            };
+            queryHandlers.logGetAllowedActions = (sender) => {
+                return logGetAllowedActions(sender);
+            };
+            registerWhisperCommand("modules", "log", "- Manage the behaviour log", (argv, sender, respond) => {
+                const subcommand = (argv[0] || "").toLocaleLowerCase();
+                if (subcommand === "list") {
+                    const logEntries = getVisibleLogEntries(sender);
+                    if (logEntries.length === 0) {
+                        return respond(`You have no permission to view the log.`);
+                    }
+                    const totalPages = Math.ceil(logEntries.length / 5);
+                    const page = clamp$1(Number.parseInt(argv[1] || "", 10) || 1, 1, totalPages);
+                    let result = `Page ${page} / ${totalPages}:`;
+                    for (let i = 5 * (page - 1); i < Math.min(5 * page, logEntries.length); i++) {
+                        const entry = logEntries[i];
+                        const time = new Date(entry[0]);
+                        result += `\n[${time.toUTCString()}] (${entry[0]})\n  ${logMessageRender(entry, getPlayerCharacter())}`;
+                    }
+                    respond(result);
+                }
+                else if (subcommand === "delete") {
+                    if (!/^[0-9]+$/.test(argv[1] || "")) {
+                        return respond(`Expected number as timestamp.`);
+                    }
+                    const timestamp = Number.parseInt(argv[1], 10);
+                    if (!getVisibleLogEntries(sender).some(logentry => logentry[0] === timestamp)) {
+                        return respond(`No such log entry found`);
+                    }
+                    respond(logMessageDelete(timestamp, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                }
+                else if (subcommand === "praise" || subcommand === "scold") {
+                    if (!checkPermissionAccess("log_praise", sender)) {
+                        return respond(COMMAND_GENERIC_ERROR);
+                    }
+                    respond(logPraise(subcommand === "praise" ? 1 : -1, null, sender) ? `Ok.` :
+                        `The command failed to execute, likely because you already did ${subcommand} recently.`);
+                }
+                else if (subcommand === "config") {
+                    if (!checkPermissionAccess("log_configure", sender)) {
+                        return respond(COMMAND_GENERIC_ERROR);
+                    }
+                    const category = argv[1] || "";
+                    const config = logGetConfig();
+                    if (!category) {
+                        let result = "Current log config:";
+                        for (const [k, v] of Object.entries(config)) {
+                            if (LOG_CONFIG_NAMES[k] !== undefined &&
+                                LOG_LEVEL_NAMES[v] !== undefined) {
+                                result += `\n[${k}]\n  ${LOG_CONFIG_NAMES[k]}: ${LOG_LEVEL_NAMES[v]}`;
+                            }
+                        }
+                        return respond(result);
+                    }
+                    else if (LOG_CONFIG_NAMES[category] === undefined) {
+                        return respond(`Unknown category "${category}".`);
+                    }
+                    else {
+                        const level = (argv[2] || "").toLocaleLowerCase();
+                        if (level !== "yes" && level !== "protected" && level !== "no") {
+                            return respond(`Expected level to be one of:\nno, protected, yes`);
+                        }
+                        return respond(logConfigSet(category, level === "yes" ? LogAccessLevel.normal : level === "protected" ? LogAccessLevel.protected : LogAccessLevel.none, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                    }
+                }
+                else {
+                    respond(Command_fixExclamationMark(sender, `!log usage:\n` +
+                        `!log list [page] - List all visible logs\n` +
+                        `!log delete <timestamp> - Deletes the log with the given <timestamp> (the number in parentheses in list)\n` +
+                        `!log praise - Note that you praised ${Player.Name} in her log\n` +
+                        `!log scold - Note that you scolded ${Player.Name} in her log\n` +
+                        `!log config - Shows the current logging settings for ${Player.Name}\n` +
+                        `!log config <category> <no|protected|yes> - Sets visibility of the given config <category>`));
+                }
+            }, (argv, sender) => {
+                if (argv.length <= 1) {
+                    const c = argv[0].toLocaleLowerCase();
+                    return ["list", "delete", "praise", "scold", "config"].filter(i => i.startsWith(c));
+                }
+                const subcommand = argv[0].toLocaleLowerCase();
+                if (subcommand === "delete") {
+                    if (argv.length === 2) {
+                        return getVisibleLogEntries(sender).map(logentry => logentry[0].toString()).filter(i => i.startsWith(argv[1]));
+                    }
+                }
+                else if (subcommand === "config") {
+                    if (!checkPermissionAccess("log_configure", sender)) {
+                        return [];
+                    }
+                    if (argv.length === 2) {
+                        return Object.keys(logGetConfig()).concat("").filter(i => i.startsWith(argv[1].toLocaleLowerCase()));
+                    }
+                    else if (argv.length === 3) {
+                        return ["no", "protected", "yes"].filter(i => i.startsWith(argv[2].toLocaleLowerCase()));
+                    }
+                }
+                return [];
+            });
+            ExportImportRegisterCategory({
+                category: `logConfig`,
+                name: `Behaviour Log - Configuration`,
+                module: ModuleCategory.Log,
+                export: () => logGetConfig(),
+                import: (data, character) => {
+                    var _a;
+                    let res = "";
+                    for (const [k, v] of Object.entries(data)) {
+                        const category = k;
+                        if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category]) === undefined || LOG_CONFIG_NAMES[category] === undefined) {
+                            res += `Skipped unknown log config category '${category}'\n`;
+                            continue;
+                        }
+                        if (!logConfigSet(category, v, character)) {
+                            res += `Error setting category '${LOG_CONFIG_NAMES[category]}'\n`;
+                        }
+                    }
+                    return res + `Done!`;
+                },
+                importPermissions: ["log_configure"],
+                importValidator: z.record(z.nativeEnum(LogAccessLevel)),
+            });
+        }
+        load() {
+            if (!moduleIsEnabled(ModuleCategory.Log)) {
+                delete modStorage.log;
+                delete modStorage.logConfig;
+                return;
+            }
+            if (!Array.isArray(modStorage.log)) {
+                logClear(null);
+            }
+            else if (!modStorage.log.every(e => Array.isArray(e) &&
+                e.length === 4 &&
+                typeof e[0] === "number" &&
+                typeof e[1] === "number" &&
+                typeof e[2] === "number")) {
+                console.error("BCX: Some log entries have invalid format, reseting whole log!");
+                logClear(null);
+            }
+            if (!modStorage.logConfig) {
+                modStorage.logConfig = { ...logConfigDefaults };
+            }
+            else {
+                const transitionDictionary = {
+                    permissionChange: "permission_change",
+                    logConfigChange: "log_config_change",
+                    logDeleted: "log_deleted",
+                    userNote: "user_note",
+                    curseChange: "curse_change",
+                    curseTrigger: "curse_trigger",
+                    hadOrgasm: "had_orgasm",
+                    enteredPublicRoom: "entered_public_room",
+                    enteredPrivateRoom: "entered_private_room",
+                    ownershipChangesBCX: "authority_roles_change",
+                };
+                for (const k of Object.keys(modStorage.logConfig)) {
+                    if (transitionDictionary[k] !== undefined) {
+                        console.info(`BCX: Updating log config name "${k}"->"${transitionDictionary[k]}"`);
+                        modStorage.logConfig[transitionDictionary[k]] = modStorage.logConfig[k];
+                        delete modStorage.logConfig[k];
+                        continue;
+                    }
+                    if (logConfigDefaults[k] === undefined) {
+                        console.info(`BCX: Removing unknown log config category "${k}"`);
+                        delete modStorage.logConfig[k];
+                    }
+                }
+                for (const k of Object.keys(logConfigDefaults)) {
+                    if (modStorage.logConfig[k] === undefined) {
+                        console.info(`BCX: Adding missing log category "${k}"`);
+                        modStorage.logConfig[k] = logConfigDefaults[k];
+                    }
+                }
+            }
+            hookFunction("ActivityOrgasmStart", 0, (args, next) => {
+                const C = args[0];
+                if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
+                    logMessage("had_orgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+                }
+                return next(args);
+            }, ModuleCategory.Log);
+            hookFunction("ChatRoomSync", 0, (args, next) => {
+                const data = args[0];
+                if (data.Private) {
+                    logMessage("entered_private_room", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
+                }
+                else {
+                    logMessage("entered_public_room", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
+                }
+                return next(args);
+            }, ModuleCategory.Log);
+        }
+        reload() {
+            removeAllHooksByModule(ModuleCategory.Log);
+            this.load();
+        }
+    }
+
     const speechHooks = [];
     function registerSpeechHook(hook) {
         if (moduleInitPhase !== ModuleInitPhase.init) {
@@ -24164,10 +25036,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
     }
 
-    const RelationshipData_schema = mod.object({
-        memberNumber: mod.number(),
-        nickname: mod.string().refine(isValidNickname),
-        enforceNickname: mod.boolean(),
+    const RelationshipData_schema = z.object({
+        memberNumber: z.number(),
+        nickname: z.string().refine(isValidNickname),
+        enforceNickname: z.boolean(),
     });
     const NICKNAME_LENGTH_MAX = 20;
     const NICKNAME_REGEX = /^[\p{L}0-9\p{Z}'-]+$/u;
@@ -24357,7 +25229,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     return `Done!`;
                 },
                 importPermissions: ["relationships_view_all", "relationships_modify_self", "relationships_modify_others"],
-                importValidator: mod.array(RelationshipData_schema),
+                importValidator: z.array(RelationshipData_schema),
             });
         }
         load() {
@@ -28668,1293 +29540,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         });
     }
 
-    const CONDITIONS_CHECK_INTERVAL = 2000;
-    const schema_ConditionsConditionRequirements = mod.lazy(() => mod.object({
-        orLogic: mod.literal(true).optional(),
-        room: mod.object({
-            type: mod.enum(["public", "private"]),
-            inverted: mod.literal(true).optional(),
-        }).optional(),
-        roomName: mod.object({
-            name: mod.string(),
-            inverted: mod.literal(true).optional(),
-        }).optional(),
-        role: mod.object({
-            role: mod.nativeEnum(AccessLevel),
-            inverted: mod.literal(true).optional(),
-        }).optional(),
-        player: mod.object({
-            memberNumber: mod.number(),
-            inverted: mod.literal(true).optional(),
-        }).optional(),
-    }));
-    function guard_ConditionsConditionRequirements(data) {
-        return isObject$1(data) &&
-            (data.orLogic === undefined ||
-                data.orLogic === true) &&
-            (data.room === undefined ||
-                isObject$1(data.room) &&
-                    (data.room.inverted === undefined || data.room.inverted === true) &&
-                    (data.room.type === "public" || data.room.type === "private")) &&
-            (data.roomName === undefined ||
-                isObject$1(data.roomName) &&
-                    (data.roomName.inverted === undefined || data.roomName.inverted === true) &&
-                    typeof data.roomName.name === "string") &&
-            (data.role === undefined ||
-                isObject$1(data.role) &&
-                    (data.role.inverted === undefined || data.role.inverted === true) &&
-                    typeof data.role.role === "number" &&
-                    AccessLevel[data.role.role] !== undefined) &&
-            (data.player === undefined ||
-                isObject$1(data.player) &&
-                    (data.player.inverted === undefined || data.player.inverted === true) &&
-                    typeof data.player.memberNumber === "number");
-    }
-    function guard_ConditionsConditionPublicData(category, condition, data) {
-        const d = data;
-        const handler = conditionHandlers.get(category);
-        if (!handler)
-            return false;
-        return handler.loadValidateConditionKey(condition) &&
-            isObject$1(d) &&
-            typeof d.active === "boolean" &&
-            typeof d.favorite === "boolean" &&
-            (d.timer === null || typeof d.timer === "number") &&
-            typeof d.timerRemove === "boolean" &&
-            (d.requirements === null || guard_ConditionsConditionRequirements(d.requirements)) &&
-            (d.addedBy === undefined || Number.isInteger(d.addedBy)) &&
-            handler.validatePublicData(condition, d.data);
-    }
-    function guard_ConditionsCategoryPublicData(category, data, allowInvalidConditionRemoval = false) {
-        const d = data;
-        const handler = conditionHandlers.get(category);
-        if (!handler)
-            return false;
-        return isObject$1(d) &&
-            typeof d.access_normal === "boolean" &&
-            typeof d.access_limited === "boolean" &&
-            typeof d.access_configure === "boolean" &&
-            typeof d.access_changeLimits === "boolean" &&
-            (d.highestRoleInRoom === null ||
-                (typeof d.highestRoleInRoom === "number" &&
-                    AccessLevel[d.highestRoleInRoom] !== undefined)) &&
-            isObject$1(d.conditions) &&
-            Object.entries(d.conditions).every(([condition, conditionData]) => {
-                const res = guard_ConditionsConditionPublicData(category, condition, conditionData);
-                if (!res && allowInvalidConditionRemoval) {
-                    console.warn(`BCX: Removing invalid ${condition}:${category} condition from public data`, conditionData);
-                    delete d.conditions[condition];
-                    return true;
-                }
-                return res;
-            }) &&
-            (d.timer === null || typeof d.timer === "number") &&
-            typeof d.timerRemove === "boolean" &&
-            handler.validateCategorySpecificGlobalData(d.data) &&
-            guard_ConditionsConditionRequirements(d.requirements) &&
-            isObject$1(d.limits) &&
-            Object.entries(d.limits).every(([condition, limit]) => limit === undefined || typeof limit === "number" && ConditionsLimit[limit] !== undefined);
-    }
-    const conditionHandlers = new Map();
-    function ConditionsRegisterCategory(category, handler) {
-        if (moduleInitPhase !== ModuleInitPhase.init) {
-            throw new Error("Conditions categories can be registered only during init");
-        }
-        if (conditionHandlers.has(category)) {
-            throw new Error(`Conditions categories "${category}" already defined!`);
-        }
-        conditionHandlers.set(category, handler);
-        if (handler.permission_configure != null && handler.currentExportImport) {
-            const currentExportImport = handler.currentExportImport;
-            ExportImportRegisterCategory({
-                category: `${category}Current`,
-                name: `${MODULE_NAMES[handler.category]}`,
-                module: handler.category,
-                export: () => {
-                    const categoryConfig = ConditionsGetCategoryConfigurableData(category);
-                    const conditionsData = ConditionsGetCategoryData(category).conditions;
-                    const conditions = {};
-                    for (const [condition, data] of Object.entries(conditionsData)) {
-                        const publicData = ConditionsMakeConditionPublicData(handler, condition, data, null);
-                        conditions[condition] = {
-                            ...pick(publicData, "active", "timer", "timerRemove", "requirements", "favorite"),
-                            data: currentExportImport.export(condition, data.data),
-                        };
-                    }
-                    return {
-                        categoryConfig,
-                        conditions,
-                    };
-                },
-                import: (data, character) => {
-                    let res = "";
-                    if (!ConditionsCategoryUpdate(category, data.categoryConfig, character)) {
-                        res += `Failed to set global config!\n`;
-                    }
-                    const conditionsData = ConditionsGetCategoryData(category).conditions;
-                    for (const condition of Object.keys(conditionsData)) {
-                        if (data.conditions[condition] == null) {
-                            const removeResult = currentExportImport.importRemove(condition, character);
-                            if (removeResult !== true) {
-                                return res
-                                    + `Failed to remove ${handler.commandConditionSelectorHelp} "${condition}": ${removeResult}\n`
-                                    + `Failed!\n`;
-                            }
-                        }
-                    }
-                    for (const [c, conditionData] of Object.entries(data.conditions)) {
-                        const condition = c;
-                        if (conditionData == null)
-                            continue;
-                        if (!handler.loadValidateConditionKey(condition)) {
-                            res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${condition}"\n`;
-                            continue;
-                        }
-                        const limit = ConditionsGetConditionLimit(category, condition);
-                        if (limit === ConditionsLimit.blocked) {
-                            res += `Skipped blocked ${handler.commandConditionSelectorHelp} "${condition}"\n`;
-                            continue;
-                        }
-                        const [result, resultData] = currentExportImport.import(condition, conditionData.data, character);
-                        if (!result) {
-                            res += `Failed to load ${handler.commandConditionSelectorHelp} "${condition}": ${resultData}\n`;
-                            continue;
-                        }
-                        let oldData = cloneDeep(ConditionsGetCondition(category, condition));
-                        if (!oldData || !isEqual(oldData.data, resultData)) {
-                            ConditionsSetCondition(category, condition, resultData, character);
-                            currentExportImport.importLog(condition, resultData, character);
-                            oldData = cloneDeep(ConditionsGetCondition(category, condition));
-                        }
-                        if (!ConditionsUpdateBase(category, condition, conditionData)) {
-                            res += `Failed to load ${handler.commandConditionSelectorHelp} "${condition}": Error updating base data\n`;
-                            continue;
-                        }
-                        const newData = ConditionsGetCondition(category, condition);
-                        if (oldData && newData && character) {
-                            handler.logConditionUpdate(condition, character, ConditionsMakeConditionPublicData(handler, condition, newData, null), ConditionsMakeConditionPublicData(handler, condition, oldData, null));
-                        }
-                    }
-                    return res + `Done!`;
-                },
-                importPermissions: [handler.permission_configure, handler.permission_normal, handler.permission_limited],
-                importValidator: mod.object({
-                    categoryConfig: mod.object({
-                        requirements: schema_ConditionsConditionRequirements,
-                        timer: mod.number().nullable(),
-                        timerRemove: mod.boolean(),
-                        data: mod.custom((data) => handler.validateCategorySpecificGlobalData(data)),
-                    }),
-                    conditions: mod.record(mod.object({
-                        active: mod.boolean(),
-                        data: mod.unknown().optional(),
-                        timer: mod.number().nullable(),
-                        timerRemove: mod.boolean(),
-                        requirements: schema_ConditionsConditionRequirements.nullable(),
-                        favorite: mod.boolean(),
-                    })),
-                }),
-            });
-        }
-        ExportImportRegisterCategory({
-            category: `${category}Limits`,
-            name: `${MODULE_NAMES[handler.category]} - Limits`,
-            module: handler.category,
-            export: () => {
-                const data = ConditionsGetCategoryData(category);
-                return data.limits;
-            },
-            import: (data, character) => {
-                let res = "";
-                for (const [k, v] of Object.entries(data)) {
-                    if (v == null)
-                        continue;
-                    if (!handler.loadValidateConditionKey(k)) {
-                        res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${k}"\n`;
-                        continue;
-                    }
-                    if (!ConditionsSetLimit(category, k, v, character)) {
-                        res += `Failed to set limit for "${k}"\n`;
-                    }
-                }
-                return res + `Done!`;
-            },
-            importPermissions: [handler.permission_changeLimits],
-            importValidator: mod.record(mod.nativeEnum(ConditionsLimit)),
-        });
-    }
-    function ConditionsGetCategoryHandler(category) {
-        const handler = conditionHandlers.get(category);
-        if (!handler) {
-            throw new Error(`No handler for conditions category ${category}`);
-        }
-        return handler;
-    }
-    function ConditionsGetCategoryEnabled(category) {
-        return moduleIsEnabled(ConditionsGetCategoryHandler(category).category);
-    }
-    function ConditionsGetCategoryData(category) {
-        var _a;
-        if (!conditionHandlers.has(category)) {
-            throw new Error(`Attempt to get unknown conditions category data ${category}`);
-        }
-        const data = (_a = modStorage.conditions) === null || _a === void 0 ? void 0 : _a[category];
-        if (!data) {
-            throw new Error(`Attempt to get data for uninitialized category ${category}`);
-        }
-        return data;
-    }
-    function ConditionsMakeConditionPublicData(handler, condition, conditionData, requester) {
-        var _a, _b, _c;
-        const res = {
-            active: conditionData.active,
-            data: handler.makePublicData(condition, conditionData),
-            timer: (_a = conditionData.timer) !== null && _a !== void 0 ? _a : null,
-            timerRemove: (_b = conditionData.timerRemove) !== null && _b !== void 0 ? _b : false,
-            requirements: conditionData.requirements ? cloneDeep(conditionData.requirements) : null,
-            favorite: (_c = conditionData.favorite) !== null && _c !== void 0 ? _c : false,
-        };
-        if (requester === null || handler.permission_viewOriginator != null && checkPermissionAccess(handler.permission_viewOriginator, requester)) {
-            res.addedBy = conditionData.addedBy;
-        }
-        return res;
-    }
-    function ConditionsGetCategoryConfigurableData(category) {
-        var _a, _b;
-        const data = ConditionsGetCategoryData(category);
-        const res = {
-            timer: (_a = data.timer) !== null && _a !== void 0 ? _a : null,
-            timerRemove: (_b = data.timerRemove) !== null && _b !== void 0 ? _b : false,
-            data: cloneDeep(data.data),
-            requirements: cloneDeep(data.requirements),
-        };
-        return res;
-    }
-    function ConditionsGetCategoryPublicData(category, requester) {
-        const handler = ConditionsGetCategoryHandler(category);
-        const data = ConditionsGetCategoryData(category);
-        const res = {
-            access_normal: checkPermissionAccess(handler.permission_normal, requester),
-            access_limited: checkPermissionAccess(handler.permission_limited, requester),
-            access_configure: handler.permission_configure != null && checkPermissionAccess(handler.permission_configure, requester),
-            access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
-            highestRoleInRoom: getHighestRoleInRoom(),
-            conditions: {},
-            ...ConditionsGetCategoryConfigurableData(category),
-            limits: {
-                ...handler.getDefaultLimits(),
-                ...data.limits,
-            },
-        };
-        for (const [condition, conditionData] of Object.entries(data.conditions)) {
-            res.conditions[condition] = ConditionsMakeConditionPublicData(handler, condition, conditionData, requester);
-        }
-        return res;
-    }
-    function ConditionsGetCondition(category, condition) {
-        if (!ConditionsGetCategoryEnabled(category))
-            return undefined;
-        return ConditionsGetCategoryData(category).conditions[condition];
-    }
-    function ConditionsIsConditionInEffect(category, condition) {
-        var _a;
-        if (!ConditionsGetCategoryEnabled(category))
-            return false;
-        const categoryData = ConditionsGetCategoryData(category);
-        const conditionData = categoryData.conditions[condition];
-        if (!conditionData)
-            return false;
-        if (conditionData.timer !== undefined && conditionData.timer <= Date.now())
-            return false;
-        if (!conditionData.active)
-            return false;
-        const requirements = (_a = conditionData.requirements) !== null && _a !== void 0 ? _a : categoryData.requirements;
-        if (!ConditionsEvaluateRequirements(requirements))
-            return false;
-        return true;
-    }
-    function ConditionsSetCondition(category, condition, data, source) {
-        const handler = ConditionsGetCategoryHandler(category);
-        if (!moduleIsEnabled(handler.category))
-            return;
-        const categoryData = ConditionsGetCategoryData(category);
-        const existing = categoryData.conditions[condition];
-        if (existing) {
-            existing.data = data;
-        }
-        else {
-            const res = {
-                active: true,
-                lastActive: false,
-                timer: categoryData.timer !== undefined ? Date.now() + categoryData.timer : undefined,
-                timerRemove: categoryData.timerRemove,
-                data,
-            };
-            if (source) {
-                res.addedBy = source.MemberNumber;
-            }
-            categoryData.conditions[condition] = res;
-        }
-        modStorageSync();
-        notifyOfChange();
-    }
-    function ConditionsGetConditionLimit(category, condition) {
-        var _a, _b;
-        const handler = ConditionsGetCategoryHandler(category);
-        if (!moduleIsEnabled(handler.category))
-            return ConditionsLimit.blocked;
-        const data = ConditionsGetCategoryData(category);
-        return (_b = (_a = data.limits[condition]) !== null && _a !== void 0 ? _a : handler.getDefaultLimits()[condition]) !== null && _b !== void 0 ? _b : ConditionsLimit.normal;
-    }
-    function ConditionsCheckAccess(category, condition, character) {
-        const limit = ConditionsGetConditionLimit(category, condition);
-        if (limit === ConditionsLimit.blocked)
-            return false;
-        const handler = ConditionsGetCategoryHandler(category);
-        return checkPermissionAccess(limit === ConditionsLimit.limited ? handler.permission_limited : handler.permission_normal, character);
-    }
-    function ConditionsRemoveCondition(category, conditions) {
-        if (!ConditionsGetCategoryEnabled(category))
-            return false;
-        if (!Array.isArray(conditions)) {
-            conditions = [conditions];
-        }
-        const categoryData = ConditionsGetCategoryData(category);
-        const handler = ConditionsGetCategoryHandler(category);
-        let changed = false;
-        for (const condition of conditions) {
-            if (categoryData.conditions[condition]) {
-                handler.stateChangeHandler(condition, categoryData.conditions[condition], false);
-                delete categoryData.conditions[condition];
-                changed = true;
-            }
-        }
-        if (changed) {
-            modStorageSync();
-            notifyOfChange();
-        }
-        return changed;
-    }
-    function ConditionsSetLimit(category, condition, limit, character) {
-        var _a, _b;
-        const handler = ConditionsGetCategoryHandler(category);
-        if (!moduleIsEnabled(handler.category))
-            return false;
-        if (!handler.loadValidateConditionKey(condition)) {
-            console.warn(`Attempt to set invalid condition limit ${category}:${condition}`);
-            return false;
-        }
-        const data = ConditionsGetCategoryData(category);
-        if (character && !checkPermissionAccess(handler.permission_changeLimits, character)) {
-            return false;
-        }
-        const defaultLimit = (_a = handler.getDefaultLimits()[condition]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal;
-        const oldLimit = (_b = data.limits[condition]) !== null && _b !== void 0 ? _b : defaultLimit;
-        if (oldLimit === limit)
-            return true;
-        if (data.conditions[condition] !== undefined)
-            return false;
-        if (limit === defaultLimit) {
-            delete data.limits[condition];
-        }
-        else {
-            data.limits[condition] = limit;
-        }
-        if (character) {
-            handler.logLimitChange(condition, character, limit, oldLimit);
-        }
-        notifyOfChange();
-        modStorageSync();
-        return true;
-    }
-    function ConditionsUpdateBase(category, condition, data) {
-        const handler = ConditionsGetCategoryHandler(category);
-        if (!moduleIsEnabled(handler.category))
-            return false;
-        const conditionData = ConditionsGetCondition(category, condition);
-        if (!conditionData)
-            return false;
-        conditionData.active = data.active;
-        if (data.favorite) {
-            conditionData.favorite = true;
-        }
-        else {
-            delete conditionData.favorite;
-        }
-        if (data.requirements) {
-            conditionData.requirements = data.requirements;
-            const requirements = conditionData.requirements;
-            const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
-            if (requirements.orLogic && !hasAnyRequirement) {
-                delete requirements.orLogic;
-            }
-        }
-        else {
-            delete conditionData.requirements;
-        }
-        if (data.timer !== null) {
-            conditionData.timer = data.timer;
-        }
-        else {
-            delete conditionData.timer;
-        }
-        if (data.timerRemove && data.active) {
-            conditionData.timerRemove = true;
-        }
-        else {
-            delete conditionData.timerRemove;
-        }
-        notifyOfChange();
-        modStorageSync();
-        return true;
-    }
-    function ConditionsUpdate(category, condition, data, character) {
-        const handler = ConditionsGetCategoryHandler(category);
-        if (!moduleIsEnabled(handler.category))
-            return false;
-        if (character && !ConditionsCheckAccess(category, condition, character))
-            return false;
-        const conditionData = ConditionsGetCondition(category, condition);
-        if (!conditionData)
-            return false;
-        const oldData = ConditionsMakeConditionPublicData(handler, condition, conditionData, character);
-        if (!handler.updateCondition(condition, conditionData, data.data, character, data))
-            return false;
-        if (!ConditionsUpdateBase(category, condition, data))
-            return false;
-        if (character) {
-            handler.logConditionUpdate(condition, character, data, oldData);
-        }
-        notifyOfChange();
-        modStorageSync();
-        return true;
-    }
-    function ConditionsUpdateMultiple(category, conditions, data, character) {
-        const handler = ConditionsGetCategoryHandler(category);
-        if (!moduleIsEnabled(handler.category))
-            return false;
-        let didChange = false;
-        for (const condition of conditions) {
-            const conditionData = ConditionsGetCondition(category, condition);
-            if (!conditionData)
-                continue;
-            const mergedData = ConditionsMakeConditionPublicData(handler, condition, conditionData, character);
-            let conditionHasChange = false;
-            if (data.active !== undefined && data.active !== mergedData.active) {
-                mergedData.active = data.active;
-                conditionHasChange = true;
-            }
-            if (data.timer !== undefined && data.timer !== mergedData.timer) {
-                mergedData.timer = data.timer;
-                conditionHasChange = true;
-            }
-            if (data.timerRemove !== undefined && data.timerRemove !== mergedData.timerRemove) {
-                mergedData.timerRemove = data.timerRemove;
-                conditionHasChange = true;
-            }
-            if (data.requirements !== undefined && data.requirements !== mergedData.requirements) {
-                mergedData.requirements = data.requirements;
-                conditionHasChange = true;
-            }
-            if (data.favorite !== undefined && data.favorite !== mergedData.favorite) {
-                mergedData.favorite = data.favorite;
-                conditionHasChange = true;
-            }
-            if (conditionHasChange) {
-                didChange = ConditionsUpdate(category, condition, mergedData, character) || didChange;
-            }
-        }
-        return didChange;
-    }
-    function ConditionsCategoryUpdate(category, data, character) {
-        const handler = ConditionsGetCategoryHandler(category);
-        if (!moduleIsEnabled(handler.category))
-            return false;
-        if (character && (handler.permission_configure == null || !checkPermissionAccess(handler.permission_configure, character)))
-            return false;
-        const conditionData = ConditionsGetCategoryData(category);
-        if (!conditionData)
-            return false;
-        const oldData = character && ConditionsGetCategoryPublicData(category, character);
-        conditionData.requirements = data.requirements;
-        const requirements = conditionData.requirements;
-        const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
-        if (requirements.orLogic && !hasAnyRequirement) {
-            delete requirements.orLogic;
-        }
-        if (data.timer !== null) {
-            conditionData.timer = data.timer;
-        }
-        else {
-            delete conditionData.timer;
-        }
-        if (data.timerRemove) {
-            conditionData.timerRemove = true;
-        }
-        else {
-            delete conditionData.timerRemove;
-        }
-        conditionData.data = cloneDeep(data.data);
-        if (character && oldData) {
-            handler.logCategoryUpdate(character, data, oldData);
-        }
-        notifyOfChange();
-        modStorageSync();
-        return true;
-    }
-    function ConditionsEvaluateRequirements(requirements, highestRoleInRoom) {
-        const inChatroom = ServerPlayerIsInChatRoom();
-        const chatroomPrivate = inChatroom && ChatRoomData != null && ChatRoomData.Private;
-        const results = [];
-        if (requirements.room) {
-            const res = inChatroom &&
-                (requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
-            results.push(requirements.room.inverted ? !res : res);
-        }
-        if (requirements.roomName) {
-            const res = inChatroom &&
-                ChatRoomData != null &&
-                typeof ChatRoomData.Name === "string" &&
-                ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
-            results.push(requirements.roomName.inverted ? !res : res);
-        }
-        if (requirements.role) {
-            if (highestRoleInRoom === undefined) {
-                highestRoleInRoom = getHighestRoleInRoom();
-            }
-            const res = highestRoleInRoom != null && highestRoleInRoom <= requirements.role.role;
-            results.push(requirements.role.inverted ? !res : res);
-        }
-        if (requirements.player) {
-            const res = inChatroom &&
-                getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player.memberNumber);
-            results.push(requirements.player.inverted ? !res : res);
-        }
-        if (results.length === 0)
-            return true;
-        else if (requirements.orLogic)
-            return results.includes(true);
-        else
-            return !results.includes(false);
-    }
-    const ConditionsSubcommands = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer", "setlimit"];
-    const ConditionsCommandTriggersKeywords = ["room", "roomname", "role", "player"];
-    function ConditionsCommandProcessTriggers(triggers, argv, sender, respond) {
-        const trigger = (argv[0] || "").toLocaleLowerCase();
-        const keyword = (argv[1] || "").toLocaleLowerCase();
-        if (keyword === "ignore" && argv.length !== 2) {
-            respond(`Error:\n'${trigger} ignore' does not expect any extra arguments.`);
-            return true;
-        }
-        if (!["is", "isnot", "with", "notwith"].includes(keyword)) {
-            respond(`Error:\nUnknown setting '${keyword}'. please use one of: ${trigger === "room" || trigger === "roomname" ? "is, isnot" : "with, notwith"}`);
-            return true;
-        }
-        if (argv.length !== 3) {
-            respond(`Error:\n'${trigger} ${keyword} <value>' got too many arguments. Arguments with space need to be "quoted".`);
-            return true;
-        }
-        const inverted = (keyword === "isnot" || keyword === "notwith") ? true : undefined;
-        let value = argv[2];
-        if (trigger === "room") {
-            if (keyword === "ignore") {
-                delete triggers.room;
-                return false;
-            }
-            value = value.toLocaleLowerCase();
-            if (value !== "public" && value !== "private") {
-                respond(`Error:\nRoom can be either 'public' or 'private', got: '${value}'`);
-                return true;
-            }
-            triggers.room = {
-                type: value,
-                inverted,
-            };
-        }
-        else if (trigger === "roomname") {
-            if (keyword === "ignore") {
-                delete triggers.roomName;
-                return false;
-            }
-            triggers.roomName = {
-                name: value,
-                inverted,
-            };
-        }
-        else if (trigger === "role") {
-            if (keyword === "ignore") {
-                delete triggers.role;
-                return false;
-            }
-            const level = AccessLevel[value.toLocaleLowerCase()];
-            if (typeof level !== "number" || level === AccessLevel.self) {
-                respond(`Error:\n` +
-                    `'role ${keyword}' expects one of: clubowner, owner, lover, mistress, whitelist, friend, public; got: '${value.toLocaleLowerCase()}'`);
-                return true;
-            }
-            triggers.role = {
-                role: level,
-                inverted,
-            };
-        }
-        else if (trigger === "player") {
-            if (keyword === "ignore") {
-                delete triggers.player;
-                return false;
-            }
-            const target = Command_selectCharacterMemberNumber(value, true);
-            if (typeof target === "string") {
-                respond(target);
-                return true;
-            }
-            triggers.player = {
-                memberNumber: target,
-                inverted,
-            };
-        }
-        return false;
-    }
-    function ConditionsCommandTriggersAutocomplete(argv, sender) {
-        const trigger = (argv[0] || "").toLocaleLowerCase();
-        if (argv.length < 2)
-            return [];
-        if (trigger === "room" && argv.length === 2) {
-            return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
-        }
-        if (trigger === "room" && argv.length === 3) {
-            return Command_pickAutocomplete(argv[2], ["public", "private"]);
-        }
-        if (trigger === "roomname" && argv.length === 2) {
-            return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
-        }
-        if (trigger === "role" && argv.length === 2) {
-            return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
-        }
-        if (trigger === "role" && argv.length === 3) {
-            return Command_pickAutocomplete(argv[2], ["clubowner", "owner", "lover", "mistress", "whitelist", "friend", "public"]);
-        }
-        if (trigger === "player" && argv.length === 2) {
-            return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
-        }
-        if (trigger === "player" && argv.length === 3) {
-            return Command_selectCharacterAutocomplete(argv[2]);
-        }
-        return [];
-    }
-    function ConditionsRunSubcommand(category, argv, sender, respond) {
-        const subcommand = (argv[0] || "").toLocaleLowerCase();
-        if (!ConditionsSubcommands.includes(subcommand)) {
-            throw new Error(`Subcomand "${subcommand}" passed to ConditionsRunSubcommand isn't valid ConditionsSubcommand`);
-        }
-        const handler = conditionHandlers.get(category);
-        if (!handler) {
-            throw new Error(`Attempt to run command for unknown conditions category ${category}`);
-        }
-        if (!moduleIsEnabled(handler.category)) {
-            return respond(`The command failed to execute, because ${Player.Name} disabled her ${MODULE_NAMES[handler.category]} module.`);
-        }
-        const categoryData = ConditionsGetCategoryData(category);
-        const categorySingular = category.slice(0, -1);
-        const CSHelp = handler.commandConditionSelectorHelp;
-        if (subcommand === "setactive") {
-            const active = (argv[2] || "").toLocaleLowerCase();
-            if (argv.length !== 3 || active !== "yes" && active !== "no") {
-                return respond(`Usage:\nsetactive <${CSHelp}> <yes/no>`);
-            }
-            const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
-            if (!result) {
-                return respond(condition);
-            }
-            if (!categoryData.conditions[condition]) {
-                return respond(`This ${categorySingular} doesn't exist`);
-            }
-            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
-            conditionData.active = active === "yes";
-            respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-        }
-        else if (subcommand === "triggers") {
-            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
-            if (!result) {
-                return respond(condition);
-            }
-            if (!categoryData.conditions[condition]) {
-                return respond(`This ${categorySingular} doesn't exist`);
-            }
-            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
-            const keyword = (argv[2] || "").toLocaleLowerCase();
-            if (!keyword) {
-                if (!conditionData.requirements) {
-                    return respond(`Current status:\n` +
-                        `Uses global ${category} trigger configuration`);
-                }
-                else {
-                    const triggers = [];
-                    const r = conditionData.requirements;
-                    triggers.push(r.orLogic ? `Logic: OR (at least one)` : `Logic: AND (all of)`);
-                    if (r.room) {
-                        triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
-                    }
-                    if (r.roomName) {
-                        triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
-                    }
-                    if (r.role) {
-                        const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
-                        triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
-                    }
-                    if (r.player) {
-                        const name = getCharacterName(r.player.memberNumber, null);
-                        triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
-                    }
-                    if (triggers.length > 1) {
-                        return respond(`Current status:\n` +
-                            `This ${categorySingular} will trigger under following conditions:\n` +
-                            triggers.join("\n"));
-                    }
-                    else {
-                        return respond(`Current status:\n` +
-                            `No triggers are set. The ${categorySingular} will now always trigger, while it is active`);
-                    }
-                }
-            }
-            else if (keyword === "global") {
-                const global = (argv[3] || "").toLocaleLowerCase();
-                if (argv.length !== 4 || global !== "yes" && global !== "no") {
-                    return respond(`Usage:\ntriggers <${CSHelp}> global <yes/no>`);
-                }
-                if (global === "yes") {
-                    conditionData.requirements = null;
-                }
-                else if (!conditionData.requirements) {
-                    conditionData.requirements = cloneDeep(categoryData.requirements);
-                }
-            }
-            else if (keyword === "logic") {
-                const logic = (argv[3] || "").toLocaleLowerCase();
-                if (argv.length !== 4 || logic !== "or" && logic !== "and") {
-                    return respond(`Usage:\ntriggers <${CSHelp}> logic <or/and>`);
-                }
-                if (!conditionData.requirements) {
-                    return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${CSHelp}> global no`);
-                }
-                if (logic === "or") {
-                    conditionData.requirements.orLogic = true;
-                }
-                else {
-                    delete conditionData.requirements.orLogic;
-                }
-            }
-            else if (!ConditionsCommandTriggersKeywords.includes(keyword)) {
-                return respond(`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${CSHelp}> *' options:\n` +
-                    `global <yes/no> - Set the trigger condition of this ${categorySingular} to the global configuration\n` +
-                    `logic <or/and>	- Set if the logic should be OR (at least one) or AND (all of) logic; default is AND\n` +
-                    `room ignore - Remove the 'room type'-based trigger condition\n` +
-                    `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
-                    `roomname ignore - Remove the 'room name'-based trigger condition\n` +
-                    `roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
-                    `role ignore - Remove the role-based trigger condition\n` +
-                    `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
-                    `player ignore - Remove the person-based trigger condition\n` +
-                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
-                    `To show currently set triggers, use just 'triggers <group>' without adding one of the above sub-commands.`);
-            }
-            else if (!conditionData.requirements) {
-                return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${CSHelp}> global no`);
-            }
-            else {
-                if (ConditionsCommandProcessTriggers(conditionData.requirements, argv.slice(2), sender, respond))
-                    return;
-            }
-            respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-        }
-        else if (subcommand === "globaltriggers") {
-            const configData = ConditionsGetCategoryPublicData(category, sender);
-            if (!argv[1]) {
-                const triggers = [];
-                const r = configData.requirements;
-                triggers.push(r.orLogic ? `Logic: OR (at least one)` : `Logic: AND (all of)`);
-                if (r.room) {
-                    triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
-                }
-                if (r.roomName) {
-                    triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
-                }
-                if (r.role) {
-                    const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
-                    triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
-                }
-                if (r.player) {
-                    const name = getCharacterName(r.player.memberNumber, null);
-                    triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
-                }
-                if (triggers.length > 1) {
-                    return respond(`Current status:\n` +
-                        `Globally ${category} are set to trigger under following conditions:\n` +
-                        triggers.join("\n"));
-                }
-                else {
-                    return respond(`Current status:\n` +
-                        `No triggers are set globally. ${capitalizeFirstLetter(category)} using global config will now always trigger, if they are active`);
-                }
-            }
-            else if (argv[1].toLocaleLowerCase() === "logic") {
-                const logic = (argv[2] || "").toLocaleLowerCase();
-                if (argv.length !== 3 || logic !== "or" && logic !== "and") {
-                    return respond(`Usage:\nglobaltriggers logic <or/and>`);
-                }
-                if (logic === "or") {
-                    configData.requirements.orLogic = true;
-                }
-                else {
-                    delete configData.requirements.orLogic;
-                }
-            }
-            else if (!ConditionsCommandTriggersKeywords.includes(argv[1].toLocaleLowerCase())) {
-                return respond(`${argv[1] !== "help" ? `Unknown trigger '${argv[1].toLocaleLowerCase()}'. ` : ""}List of possible 'globaltriggers *' options:\n` +
-                    `logic <or/and>	- Set if the logic should be OR (at least one) or AND (all of) logic; default is AND\n` +
-                    `room ignore - Remove the 'room type'-based trigger condition\n` +
-                    `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
-                    `roomname ignore - Remove the 'room name'-based trigger condition\n` +
-                    `roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
-                    `role ignore - Remove the role-based trigger condition\n` +
-                    `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
-                    `player ignore - Remove the person-based trigger condition\n` +
-                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
-                    `To show currently set global triggers, use just 'globaltriggers' without anything behind.`);
-            }
-            else {
-                if (ConditionsCommandProcessTriggers(configData.requirements, argv.slice(1), sender, respond))
-                    return;
-            }
-            respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-        }
-        else if (subcommand === "timer") {
-            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
-            if (!result) {
-                return respond(condition);
-            }
-            if (!categoryData.conditions[condition]) {
-                return respond(`This ${categorySingular} doesn't exist`);
-            }
-            const keyword = (argv[2] || "").toLocaleLowerCase();
-            if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
-                return respond(`Usage:\n` +
-                    `timer <${CSHelp}> disable - Remove the timer and set lifetime to infinite\n` +
-                    `timer <${CSHelp}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
-                    `timer <${CSHelp}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
-            }
-            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
-            if (keyword === "disable") {
-                conditionData.timer = null;
-                conditionData.timerRemove = false;
-            }
-            else if (keyword === "set") {
-                let time = 0;
-                for (const v of argv.slice(3)) {
-                    const i = Command_parseTime(v);
-                    if (typeof i === "string") {
-                        return respond(i);
-                    }
-                    time += i;
-                }
-                conditionData.timer = Date.now() + time;
-            }
-            else if (keyword === "autoremove") {
-                const autoremove = (argv[3] || "").toLocaleLowerCase();
-                if (argv.length !== 4 || autoremove !== "yes" && autoremove !== "no") {
-                    return respond(`Usage:\ntimer <${CSHelp}> autoremove <yes/no>`);
-                }
-                else if (!conditionData.active) {
-                    return respond(`Timer is counting until ${categorySingular} becomes enabled, cannot use autoremove in this mode.`);
-                }
-                else if (conditionData.timer === null) {
-                    return respond(`Timer is disabled on this ${categorySingular}. To use autoremove, first set timer`);
-                }
-                conditionData.timerRemove = autoremove === "yes";
-            }
-            respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-        }
-        else if (subcommand === "defaulttimer") {
-            const keyword = (argv[1] || "").toLocaleLowerCase();
-            if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
-                return respond(`Usage:\n` +
-                    `defaulttimer disable - Remove the timer and set lifetime to infinite\n` +
-                    `defaulttimer set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
-                    `defaulttimer autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
-            }
-            const configData = ConditionsGetCategoryPublicData(category, sender);
-            if (keyword === "disable") {
-                configData.timer = null;
-                configData.timerRemove = false;
-            }
-            else if (keyword === "set") {
-                let time = 0;
-                for (const v of argv.slice(2)) {
-                    const i = Command_parseTime(v);
-                    if (typeof i === "string") {
-                        return respond(i);
-                    }
-                    time += i;
-                }
-                configData.timer = time;
-            }
-            else if (keyword === "autoremove") {
-                const autoremove = (argv[2] || "").toLocaleLowerCase();
-                if (argv.length !== 3 || autoremove !== "yes" && autoremove !== "no") {
-                    return respond(`Usage:\ndefaulttimer <${CSHelp}> autoremove <yes/no>`);
-                }
-                if (configData.timer === null) {
-                    return respond(`Timer is disabled by default for ${category}. To use autoremove, first set timer`);
-                }
-                configData.timerRemove = autoremove === "yes";
-            }
-            respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-        }
-        else if (subcommand === "setlimit") {
-            const [result, condition] = handler.parseConditionName(argv[1] || "", false);
-            if (!result) {
-                return respond(condition);
-            }
-            if (!handler.loadValidateConditionKey(condition)) {
-                throw new Error("Parse name returned invalid condition key");
-            }
-            const keyword = (argv[2] || "").toLocaleLowerCase();
-            if (keyword !== "normal" && keyword !== "limited" && keyword !== "blocked") {
-                return respond(`Usage:\n` +
-                    `setlimit <${CSHelp}> <normal/limited/blocked> - Set a limit on certain <${CSHelp}>`);
-            }
-            respond(ConditionsSetLimit(category, condition, ConditionsLimit[keyword], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-        }
-    }
-    function ConditionsAutocompleteSubcommand(category, argv, sender) {
-        const subcommand = (argv[0] || "").toLocaleLowerCase();
-        if (!ConditionsSubcommands.includes(subcommand)) {
-            throw new Error(`Subcomand "${subcommand}" passed to ConditionsAutocompleteSubcommand isn't valid ConditionsSubcommand`);
-        }
-        const handler = conditionHandlers.get(category);
-        if (!handler) {
-            throw new Error(`Attempt to autocomplete command for unknown conditions category ${category}`);
-        }
-        if (!moduleIsEnabled(handler.category))
-            return [];
-        const categoryData = ConditionsGetCategoryData(category);
-        if (subcommand === "setactive") {
-            if (argv.length === 2) {
-                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
-            }
-            else if (argv.length === 3) {
-                return Command_pickAutocomplete(argv[2], ["yes", "no"]);
-            }
-        }
-        else if (subcommand === "triggers") {
-            if (argv.length === 2) {
-                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
-            }
-            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
-            if (!result || !categoryData.conditions[condition]) {
-                return [];
-            }
-            if (argv.length === 3) {
-                return Command_pickAutocomplete(argv[2], ["global", "logic", ...ConditionsCommandTriggersKeywords]);
-            }
-            if (argv[2].toLocaleLowerCase() === "global") {
-                return Command_pickAutocomplete(argv[3], ["yes", "no"]);
-            }
-            else if (argv[2].toLocaleLowerCase() === "logic") {
-                return Command_pickAutocomplete(argv[3], ["and", "or"]);
-            }
-            else if (categoryData.conditions[condition].requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
-                return ConditionsCommandTriggersAutocomplete(argv.slice(2), sender);
-            }
-        }
-        else if (subcommand === "globaltriggers") {
-            if (argv.length === 2) {
-                return Command_pickAutocomplete(argv[1], ["logic", ...ConditionsCommandTriggersKeywords]);
-            }
-            else if (argv[1].toLocaleLowerCase() === "logic") {
-                return Command_pickAutocomplete(argv[2], ["and", "or"]);
-            }
-            else if (ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
-                return ConditionsCommandTriggersAutocomplete(argv.slice(1), sender);
-            }
-        }
-        else if (subcommand === "timer") {
-            if (argv.length === 2) {
-                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
-            }
-            else if (argv.length === 3) {
-                return Command_pickAutocomplete(argv[2], ["set", "disable", "autoremove"]);
-            }
-            else if (argv.length === 4 && argv[2].toLocaleLowerCase() === "autoremove") {
-                return Command_pickAutocomplete(argv[3], ["yes", "no"]);
-            }
-        }
-        else if (subcommand === "defaulttimer") {
-            if (argv.length === 2) {
-                return Command_pickAutocomplete(argv[1], ["set", "disable", "autoremove"]);
-            }
-            else if (argv.length === 3 && argv[1].toLocaleLowerCase() === "autoremove") {
-                return Command_pickAutocomplete(argv[2], ["yes", "no"]);
-            }
-        }
-        else if (subcommand === "setlimit") {
-            if (argv.length === 2) {
-                return handler.autocompleteConditionName(argv[1], false);
-            }
-            else if (argv.length === 3) {
-                return Command_pickAutocomplete(argv[2], ["normal", "limited", "blocked"]);
-            }
-        }
-        return [];
-    }
-    class ModuleConditions extends BaseModule {
-        constructor() {
-            super(...arguments);
-            this.timer = null;
-        }
-        load() {
-            var _a;
-            if (!isObject$1(modStorage.conditions)) {
-                modStorage.conditions = {};
-            }
-            if (modStorage.cursedItems) {
-                const curses = modStorage.conditions.curses = {
-                    conditions: {},
-                    limits: {},
-                    requirements: {},
-                    data: {
-                        itemRemove: false,
-                    },
-                };
-                for (const [group, data] of Object.entries(modStorage.cursedItems)) {
-                    curses.conditions[group] = {
-                        active: true,
-                        lastActive: false,
-                        data,
-                    };
-                }
-                delete modStorage.cursedItems;
-            }
-            for (const key of Object.keys(modStorage.conditions)) {
-                const handler = conditionHandlers.get(key);
-                if (!handler || !moduleIsEnabled(handler.category)) {
-                    console.debug(`BCX: Removing unknown or disabled conditions category ${key}`);
-                    delete modStorage.conditions[key];
-                    continue;
-                }
-                const data = modStorage.conditions[key];
-                if (!isObject$1(data) || !isObject$1(data.conditions)) {
-                    console.warn(`BCX: Removing category ${key} with invalid data`);
-                    delete modStorage.conditions[key];
-                    continue;
-                }
-                if (data.timer !== undefined && typeof data.timer !== "number") {
-                    console.warn(`BCX: Removing category ${key} invalid timer`, data.timer);
-                    delete data.timer;
-                }
-                if (data.timerRemove !== undefined && data.timerRemove !== true) {
-                    console.warn(`BCX: Removing category ${key} invalid timerRemove`, data.timerRemove);
-                    delete data.timerRemove;
-                }
-                if (!isObject$1(data.limits)) {
-                    console.warn(`BCX: Resetting category ${key} limits with invalid data`);
-                    data.limits = {};
-                }
-                for (const [condition, limitValue] of Object.entries(data.limits)) {
-                    if (!handler.loadValidateConditionKey(condition)) {
-                        console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
-                        delete data.limits[condition];
-                    }
-                    else if (typeof limitValue !== "number" ||
-                        limitValue === ((_a = handler.getDefaultLimits()[condition]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal) ||
-                        ConditionsLimit[limitValue] === undefined) {
-                        console.warn(`BCX: Bad condition ${key}:${condition} limit value, removing it`, limitValue);
-                        delete data.limits[condition];
-                    }
-                }
-                if (!guard_ConditionsConditionRequirements(data.requirements)) {
-                    console.warn(`BCX: Resetting category ${key} requirements with invalid data`);
-                    data.requirements = {};
-                }
-                data.data = handler.loadCategorySpecificGlobalData(data.data);
-                for (const [condition, conditiondata] of Object.entries(data.conditions)) {
-                    if (!handler.loadValidateConditionKey(condition)) {
-                        console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
-                        delete data.conditions[condition];
-                        continue;
-                    }
-                    else if (!handler.loadValidateCondition(condition, conditiondata)) {
-                        delete data.conditions[condition];
-                        continue;
-                    }
-                    else if (typeof conditiondata.active !== "boolean" ||
-                        conditiondata.requirements !== undefined && !guard_ConditionsConditionRequirements(conditiondata.requirements) ||
-                        conditiondata.timer !== undefined && typeof conditiondata.timer !== "number" ||
-                        conditiondata.timerRemove !== undefined && conditiondata.timerRemove !== true ||
-                        conditiondata.favorite !== undefined && conditiondata.favorite !== true) {
-                        console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
-                        delete data.conditions[condition];
-                        continue;
-                    }
-                    else if (ConditionsGetConditionLimit(key, condition) === ConditionsLimit.blocked) {
-                        console.warn(`BCX: Condition ${key}:${condition} became blocked while active, removing it`);
-                        delete data.conditions[condition];
-                        continue;
-                    }
-                    if (conditiondata.timerRemove && !conditiondata.active) {
-                        console.warn(`BCX: Condition ${key}:${condition} had timerRemove while inactive, cleaning up`);
-                        delete conditiondata.timerRemove;
-                    }
-                    if (typeof conditiondata.lastActive !== "boolean") {
-                        console.warn(`BCX: Condition ${key}:${condition} missing lastActive, adding`);
-                        conditiondata.lastActive = false;
-                    }
-                    if (conditiondata.addedBy !== undefined && !Number.isInteger(conditiondata.addedBy)) {
-                        console.warn(`BCX: Condition ${key}:${condition} bad addedBy, cleaning up`, conditiondata.addedBy);
-                        delete conditiondata.addedBy;
-                    }
-                }
-            }
-            for (const [key, handler] of conditionHandlers.entries()) {
-                if (moduleIsEnabled(handler.category) && !isObject$1(modStorage.conditions[key])) {
-                    console.debug(`BCX: Adding missing conditions category ${key}`);
-                    modStorage.conditions[key] = {
-                        conditions: {},
-                        limits: {},
-                        requirements: {},
-                        data: handler.loadCategorySpecificGlobalData(undefined),
-                    };
-                }
-            }
-            queryHandlers.conditionsGet = (sender, data) => {
-                if (typeof data === "string" && conditionHandlers.has(data) && ConditionsGetCategoryEnabled(data)) {
-                    return ConditionsGetCategoryPublicData(data, sender);
-                }
-                else {
-                    return undefined;
-                }
-            };
-            queryHandlers.conditionSetLimit = (sender, data) => {
-                if (isObject$1(data) &&
-                    typeof data.category === "string" &&
-                    conditionHandlers.has(data.category) &&
-                    typeof data.condition === "string" &&
-                    typeof data.limit === "number" &&
-                    ConditionsLimit[data.limit] !== undefined) {
-                    return ConditionsSetLimit(data.category, data.condition, data.limit, sender);
-                }
-                else {
-                    return undefined;
-                }
-            };
-            queryHandlers.conditionUpdate = (sender, data) => {
-                if (isObject$1(data) &&
-                    typeof data.category === "string" &&
-                    conditionHandlers.has(data.category) &&
-                    typeof data.condition === "string" &&
-                    guard_ConditionsConditionPublicData(data.category, data.condition, data.data)) {
-                    return ConditionsUpdate(data.category, data.condition, data.data, sender);
-                }
-                else {
-                    return undefined;
-                }
-            };
-            queryHandlers.conditionUpdateMultiple = (sender, data) => {
-                if (isObject$1(data) &&
-                    typeof data.category === "string" &&
-                    conditionHandlers.has(data.category) &&
-                    Array.isArray(data.conditions) &&
-                    data.conditions.every(c => { var _a; return typeof c === "string" && ((_a = conditionHandlers.get(data.category)) === null || _a === void 0 ? void 0 : _a.loadValidateConditionKey(c)); }) &&
-                    isObject$1(data.data) &&
-                    (data.data.active === undefined || typeof data.data.active === "boolean") &&
-                    (data.data.timer === undefined || data.data.timer === null || typeof data.data.timer === "number") &&
-                    (data.data.timerRemove === undefined || typeof data.data.timerRemove === "boolean") &&
-                    (data.data.requirements === undefined || data.data.requirements === null || guard_ConditionsConditionRequirements(data.data.requirements)) &&
-                    (data.data.favorite === undefined || typeof data.data.favorite === "boolean")) {
-                    return ConditionsUpdateMultiple(data.category, data.conditions, data.data, sender);
-                }
-                else {
-                    return undefined;
-                }
-            };
-            queryHandlers.conditionCategoryUpdate = (sender, data) => {
-                if (isObject$1(data) &&
-                    typeof data.category === "string" &&
-                    conditionHandlers.has(data.category) &&
-                    isObject$1(data.data) &&
-                    (data.data.timer === null || typeof data.data.timer === "number") &&
-                    typeof data.data.timerRemove === "boolean" &&
-                    guard_ConditionsConditionRequirements(data.data.requirements)) {
-                    return ConditionsCategoryUpdate(data.category, data.data, sender);
-                }
-                else {
-                    return undefined;
-                }
-            };
-        }
-        run() {
-            this.timer = BCX_setInterval(() => this.conditionsTick(), CONDITIONS_CHECK_INTERVAL);
-        }
-        unload() {
-            if (this.timer !== null) {
-                clearInterval(this.timer);
-                this.timer = null;
-            }
-        }
-        reload() {
-            this.unload();
-            this.load();
-            this.run();
-        }
-        conditionsTick() {
-            var _a, _b;
-            if (!ServerIsConnected || !modStorage.conditions)
-                return;
-            let dataChanged = false;
-            const now = Date.now();
-            for (const [category, handler] of conditionHandlers.entries()) {
-                const categoryData = modStorage.conditions[category];
-                if (!moduleIsEnabled(handler.category) || !categoryData)
-                    continue;
-                for (const [conditionName, conditionData] of Object.entries(categoryData.conditions)) {
-                    if (conditionData.timer !== undefined && conditionData.timer <= now) {
-                        if (conditionData.timerRemove && conditionData.active) {
-                            ConditionsRemoveCondition(category, conditionName);
-                            return;
-                        }
-                        else {
-                            delete conditionData.timer;
-                            delete conditionData.timerRemove;
-                            conditionData.active = !conditionData.active;
-                            dataChanged = true;
-                        }
-                    }
-                    const resolvedActive = conditionData.active && ConditionsEvaluateRequirements((_a = conditionData.requirements) !== null && _a !== void 0 ? _a : categoryData.requirements);
-                    if (resolvedActive !== conditionData.lastActive) {
-                        conditionData.lastActive = resolvedActive;
-                        dataChanged = true;
-                        const copyChange = cloneDeep(conditionData);
-                        handler.stateChangeHandler(conditionName, conditionData, resolvedActive);
-                        if (!isEqual(copyChange, conditionData)) {
-                            dataChanged = true;
-                        }
-                    }
-                    if (!resolvedActive)
-                        continue;
-                    const copy = cloneDeep(conditionData);
-                    handler.tickHandler(conditionName, conditionData);
-                    if (!isEqual(copy, conditionData)) {
-                        dataChanged = true;
-                    }
-                }
-                (_b = handler.afterTickHandler) === null || _b === void 0 ? void 0 : _b.call(handler);
-            }
-            if (dataChanged) {
-                modStorageSync();
-                notifyOfChange();
-            }
-        }
-    }
-
     const RULES_ANTILOOP_RESET_INTERVAL = 60000;
     const RULES_ANTILOOP_THRESHOLD = 10;
     const RULES_ANTILOOP_SUSPEND_TIME = 600000;
@@ -31152,10 +30737,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     },
                     import(condition, data, character) {
                         var _a;
-                        const validator = mod.object({
-                            enforce: mod.boolean(),
-                            log: mod.boolean(),
-                            customData: mod.record(mod.any()).optional(),
+                        const validator = z.object({
+                            enforce: z.boolean(),
+                            log: z.boolean(),
+                            customData: z.record(z.any()).optional(),
                         });
                         const validationResult = validator.safeParse(data);
                         if (!validationResult.success) {
@@ -31911,107 +31496,365 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
     }
 
-    const CURSES_TRIGGER_TEXTS = {
-        remove: "PLAYER_NAME's body seems to be cursed and the ASSET_NAME just falls off her body.",
-        add: "The curse on PLAYER_NAME's ASSET_NAME wakes up and the item reappears.",
-        swap: "The curse on PLAYER_NAME's ASSET_NAME wakes up, not allowing the item to be replaced by another item.",
-        update: "The curse on PLAYER_NAME's ASSET_NAME wakes up and undoes all changes to the item.",
-        color: "The curse on PLAYER_NAME's ASSET_NAME wakes up, changing the color of the item back.",
-        autoremove: "The curse on PLAYER_NAME's body becomes dormant and the ASSET_NAME falls off her body.",
-    };
-    const CURSES_TRIGGER_TEXTS_BATCH = {
-        remove: "PLAYER_NAME's body seems to be cursed and several items just fall off her body.",
-        add: "The curses on PLAYER_NAME's body wake up and several items reappear.",
-        swap: "The curses on PLAYER_NAME's body wake up, not allowing several items to be replaced.",
-        update: "The curses on PLAYER_NAME's body wake up and undoes all changes to several items.",
-        color: "The curses on PLAYER_NAME's body wake up, changing the color of several items back.",
-        autoremove: "The curses on PLAYER_NAME's body become dormant and several items fall off her body.",
-    };
-    const CURSES_TRIGGER_LOGS = {
-        remove: "The curse on PLAYER_NAME's body prevented a ASSET_NAME from being added to it",
-        add: "The curse on PLAYER_NAME's ASSET_NAME made the item reappear",
-        swap: "The curse on PLAYER_NAME's ASSET_NAME prevented the item from being replaced",
-        update: "The curse on PLAYER_NAME's ASSET_NAME reverted all changes to the item",
-        color: "The curse on PLAYER_NAME's ASSET_NAME reverted the color of the item",
-    };
-    const CURSES_TRIGGER_LOGS_BATCH = {
-        remove: "The curses on PLAYER_NAME's body prevented several items from being added to it",
-        add: "The curses on PLAYER_NAME's body made several items reappear",
-        swap: "The curses on PLAYER_NAME's body prevented several items from being replaced",
-        update: "The curses on PLAYER_NAME's body reverted all changes to several items",
-        color: "The curses on PLAYER_NAME's body reverted the color of several items",
-    };
-
-    const LOG_ENTRIES_LIMIT = 256;
-    var LogEntryType;
-    (function (LogEntryType) {
-        LogEntryType[LogEntryType["plaintext"] = 0] = "plaintext";
-        LogEntryType[LogEntryType["deleted"] = 1] = "deleted";
-        LogEntryType[LogEntryType["ruleTrigger"] = 2] = "ruleTrigger";
-        LogEntryType[LogEntryType["ruleTriggerAttempt"] = 3] = "ruleTriggerAttempt";
-        LogEntryType[LogEntryType["curseTrigger"] = 4] = "curseTrigger";
-        LogEntryType[LogEntryType["curseTriggerBatch"] = 5] = "curseTriggerBatch";
-    })(LogEntryType || (LogEntryType = {}));
-    var LogAccessLevel;
-    (function (LogAccessLevel) {
-        LogAccessLevel[LogAccessLevel["none"] = 0] = "none";
-        LogAccessLevel[LogAccessLevel["protected"] = 1] = "protected";
-        LogAccessLevel[LogAccessLevel["normal"] = 2] = "normal";
-        LogAccessLevel[LogAccessLevel["everyone"] = 3] = "everyone";
-    })(LogAccessLevel || (LogAccessLevel = {}));
-    function logMessage(category, type, data) {
-        var _a;
-        if (!moduleIsEnabled(ModuleCategory.Log))
-            return;
-        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category];
-        if (access === undefined) {
-            throw new Error(`Attempt to log message with unknown category "${category}"`);
-        }
-        if (access > LogAccessLevel.none) {
-            logMessageAdd(access, type, data);
-        }
+    const CONDITIONS_CHECK_INTERVAL = 2000;
+    const schema_ConditionsConditionRequirements = z.lazy(() => z.object({
+        orLogic: z.literal(true).optional(),
+        room: z.object({
+            type: z.enum(["public", "private"]),
+            inverted: z.literal(true).optional(),
+        }).optional(),
+        roomName: z.object({
+            name: z.string(),
+            inverted: z.literal(true).optional(),
+        }).optional(),
+        role: z.object({
+            role: z.nativeEnum(AccessLevel),
+            inverted: z.literal(true).optional(),
+        }).optional(),
+        player: z.object({
+            memberNumber: z.number(),
+            inverted: z.literal(true).optional(),
+        }).optional(),
+    }));
+    function guard_ConditionsConditionRequirements(data) {
+        return isObject$1(data) &&
+            (data.orLogic === undefined ||
+                data.orLogic === true) &&
+            (data.room === undefined ||
+                isObject$1(data.room) &&
+                    (data.room.inverted === undefined || data.room.inverted === true) &&
+                    (data.room.type === "public" || data.room.type === "private")) &&
+            (data.roomName === undefined ||
+                isObject$1(data.roomName) &&
+                    (data.roomName.inverted === undefined || data.roomName.inverted === true) &&
+                    typeof data.roomName.name === "string") &&
+            (data.role === undefined ||
+                isObject$1(data.role) &&
+                    (data.role.inverted === undefined || data.role.inverted === true) &&
+                    typeof data.role.role === "number" &&
+                    AccessLevel[data.role.role] !== undefined) &&
+            (data.player === undefined ||
+                isObject$1(data.player) &&
+                    (data.player.inverted === undefined || data.player.inverted === true) &&
+                    typeof data.player.memberNumber === "number");
     }
-    function logMessageAdd(access, type, data) {
-        if (!moduleIsEnabled(ModuleCategory.Log))
+    function guard_ConditionsConditionPublicData(category, condition, data) {
+        const d = data;
+        const handler = conditionHandlers.get(category);
+        if (!handler)
+            return false;
+        return handler.loadValidateConditionKey(condition) &&
+            isObject$1(d) &&
+            typeof d.active === "boolean" &&
+            typeof d.favorite === "boolean" &&
+            (d.timer === null || typeof d.timer === "number") &&
+            typeof d.timerRemove === "boolean" &&
+            (d.requirements === null || guard_ConditionsConditionRequirements(d.requirements)) &&
+            (d.addedBy === undefined || Number.isInteger(d.addedBy)) &&
+            handler.validatePublicData(condition, d.data);
+    }
+    function guard_ConditionsCategoryPublicData(category, data, allowInvalidConditionRemoval = false) {
+        const d = data;
+        const handler = conditionHandlers.get(category);
+        if (!handler)
+            return false;
+        return isObject$1(d) &&
+            typeof d.access_normal === "boolean" &&
+            typeof d.access_limited === "boolean" &&
+            typeof d.access_configure === "boolean" &&
+            typeof d.access_changeLimits === "boolean" &&
+            (d.highestRoleInRoom === null ||
+                (typeof d.highestRoleInRoom === "number" &&
+                    AccessLevel[d.highestRoleInRoom] !== undefined)) &&
+            isObject$1(d.conditions) &&
+            Object.entries(d.conditions).every(([condition, conditionData]) => {
+                const res = guard_ConditionsConditionPublicData(category, condition, conditionData);
+                if (!res && allowInvalidConditionRemoval) {
+                    console.warn(`BCX: Removing invalid ${condition}:${category} condition from public data`, conditionData);
+                    delete d.conditions[condition];
+                    return true;
+                }
+                return res;
+            }) &&
+            (d.timer === null || typeof d.timer === "number") &&
+            typeof d.timerRemove === "boolean" &&
+            handler.validateCategorySpecificGlobalData(d.data) &&
+            guard_ConditionsConditionRequirements(d.requirements) &&
+            isObject$1(d.limits) &&
+            Object.entries(d.limits).every(([condition, limit]) => limit === undefined || typeof limit === "number" && ConditionsLimit[limit] !== undefined);
+    }
+    const conditionHandlers = new Map();
+    function ConditionsRegisterCategory(category, handler) {
+        if (moduleInitPhase !== ModuleInitPhase.init) {
+            throw new Error("Conditions categories can be registered only during init");
+        }
+        if (conditionHandlers.has(category)) {
+            throw new Error(`Conditions categories "${category}" already defined!`);
+        }
+        conditionHandlers.set(category, handler);
+        if (handler.permission_configure != null && handler.currentExportImport) {
+            const currentExportImport = handler.currentExportImport;
+            ExportImportRegisterCategory({
+                category: `${category}Current`,
+                name: `${MODULE_NAMES[handler.category]}`,
+                module: handler.category,
+                export: () => {
+                    const categoryConfig = ConditionsGetCategoryConfigurableData(category);
+                    const conditionsData = ConditionsGetCategoryData(category).conditions;
+                    const conditions = {};
+                    for (const [condition, data] of Object.entries(conditionsData)) {
+                        const publicData = ConditionsMakeConditionPublicData(handler, condition, data, null);
+                        conditions[condition] = {
+                            ...pick(publicData, "active", "timer", "timerRemove", "requirements", "favorite"),
+                            data: currentExportImport.export(condition, data.data),
+                        };
+                    }
+                    return {
+                        categoryConfig,
+                        conditions,
+                    };
+                },
+                import: (data, character) => {
+                    let res = "";
+                    if (!ConditionsCategoryUpdate(category, data.categoryConfig, character)) {
+                        res += `Failed to set global config!\n`;
+                    }
+                    const conditionsData = ConditionsGetCategoryData(category).conditions;
+                    for (const condition of Object.keys(conditionsData)) {
+                        if (data.conditions[condition] == null) {
+                            const removeResult = currentExportImport.importRemove(condition, character);
+                            if (removeResult !== true) {
+                                return res
+                                    + `Failed to remove ${handler.commandConditionSelectorHelp} "${condition}": ${removeResult}\n`
+                                    + `Failed!\n`;
+                            }
+                        }
+                    }
+                    for (const [c, conditionData] of Object.entries(data.conditions)) {
+                        const condition = c;
+                        if (conditionData == null)
+                            continue;
+                        if (!handler.loadValidateConditionKey(condition)) {
+                            res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${condition}"\n`;
+                            continue;
+                        }
+                        const limit = ConditionsGetConditionLimit(category, condition);
+                        if (limit === ConditionsLimit.blocked) {
+                            res += `Skipped blocked ${handler.commandConditionSelectorHelp} "${condition}"\n`;
+                            continue;
+                        }
+                        const [result, resultData] = currentExportImport.import(condition, conditionData.data, character);
+                        if (!result) {
+                            res += `Failed to load ${handler.commandConditionSelectorHelp} "${condition}": ${resultData}\n`;
+                            continue;
+                        }
+                        let oldData = cloneDeep(ConditionsGetCondition(category, condition));
+                        if (!oldData || !isEqual(oldData.data, resultData)) {
+                            ConditionsSetCondition(category, condition, resultData, character);
+                            currentExportImport.importLog(condition, resultData, character);
+                            oldData = cloneDeep(ConditionsGetCondition(category, condition));
+                        }
+                        if (!ConditionsUpdateBase(category, condition, conditionData)) {
+                            res += `Failed to load ${handler.commandConditionSelectorHelp} "${condition}": Error updating base data\n`;
+                            continue;
+                        }
+                        const newData = ConditionsGetCondition(category, condition);
+                        if (oldData && newData && character) {
+                            handler.logConditionUpdate(condition, character, ConditionsMakeConditionPublicData(handler, condition, newData, null), ConditionsMakeConditionPublicData(handler, condition, oldData, null));
+                        }
+                    }
+                    return res + `Done!`;
+                },
+                importPermissions: [handler.permission_configure, handler.permission_normal, handler.permission_limited],
+                importValidator: z.object({
+                    categoryConfig: z.object({
+                        requirements: schema_ConditionsConditionRequirements,
+                        timer: z.number().nullable(),
+                        timerRemove: z.boolean(),
+                        data: z.custom((data) => handler.validateCategorySpecificGlobalData(data)),
+                    }),
+                    conditions: z.record(z.object({
+                        active: z.boolean(),
+                        data: z.unknown().optional(),
+                        timer: z.number().nullable(),
+                        timerRemove: z.boolean(),
+                        requirements: schema_ConditionsConditionRequirements.nullable(),
+                        favorite: z.boolean(),
+                    })),
+                }),
+            });
+        }
+        ExportImportRegisterCategory({
+            category: `${category}Limits`,
+            name: `${MODULE_NAMES[handler.category]} - Limits`,
+            module: handler.category,
+            export: () => {
+                const data = ConditionsGetCategoryData(category);
+                return data.limits;
+            },
+            import: (data, character) => {
+                let res = "";
+                for (const [k, v] of Object.entries(data)) {
+                    if (v == null)
+                        continue;
+                    if (!handler.loadValidateConditionKey(k)) {
+                        res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${k}"\n`;
+                        continue;
+                    }
+                    if (!ConditionsSetLimit(category, k, v, character)) {
+                        res += `Failed to set limit for "${k}"\n`;
+                    }
+                }
+                return res + `Done!`;
+            },
+            importPermissions: [handler.permission_changeLimits],
+            importValidator: z.record(z.nativeEnum(ConditionsLimit)),
+        });
+    }
+    function ConditionsGetCategoryHandler(category) {
+        const handler = conditionHandlers.get(category);
+        if (!handler) {
+            throw new Error(`No handler for conditions category ${category}`);
+        }
+        return handler;
+    }
+    function ConditionsGetCategoryEnabled(category) {
+        return moduleIsEnabled(ConditionsGetCategoryHandler(category).category);
+    }
+    function ConditionsGetCategoryData(category) {
+        var _a;
+        if (!conditionHandlers.has(category)) {
+            throw new Error(`Attempt to get unknown conditions category data ${category}`);
+        }
+        const data = (_a = modStorage.conditions) === null || _a === void 0 ? void 0 : _a[category];
+        if (!data) {
+            throw new Error(`Attempt to get data for uninitialized category ${category}`);
+        }
+        return data;
+    }
+    function ConditionsMakeConditionPublicData(handler, condition, conditionData, requester) {
+        var _a, _b, _c;
+        const res = {
+            active: conditionData.active,
+            data: handler.makePublicData(condition, conditionData),
+            timer: (_a = conditionData.timer) !== null && _a !== void 0 ? _a : null,
+            timerRemove: (_b = conditionData.timerRemove) !== null && _b !== void 0 ? _b : false,
+            requirements: conditionData.requirements ? cloneDeep(conditionData.requirements) : null,
+            favorite: (_c = conditionData.favorite) !== null && _c !== void 0 ? _c : false,
+        };
+        if (requester === null || handler.permission_viewOriginator != null && checkPermissionAccess(handler.permission_viewOriginator, requester)) {
+            res.addedBy = conditionData.addedBy;
+        }
+        return res;
+    }
+    function ConditionsGetCategoryConfigurableData(category) {
+        var _a, _b;
+        const data = ConditionsGetCategoryData(category);
+        const res = {
+            timer: (_a = data.timer) !== null && _a !== void 0 ? _a : null,
+            timerRemove: (_b = data.timerRemove) !== null && _b !== void 0 ? _b : false,
+            data: cloneDeep(data.data),
+            requirements: cloneDeep(data.requirements),
+        };
+        return res;
+    }
+    function ConditionsGetCategoryPublicData(category, requester) {
+        const handler = ConditionsGetCategoryHandler(category);
+        const data = ConditionsGetCategoryData(category);
+        const res = {
+            access_normal: checkPermissionAccess(handler.permission_normal, requester),
+            access_limited: checkPermissionAccess(handler.permission_limited, requester),
+            access_configure: handler.permission_configure != null && checkPermissionAccess(handler.permission_configure, requester),
+            access_changeLimits: checkPermissionAccess(handler.permission_changeLimits, requester),
+            highestRoleInRoom: getHighestRoleInRoom(),
+            conditions: {},
+            ...ConditionsGetCategoryConfigurableData(category),
+            limits: {
+                ...handler.getDefaultLimits(),
+                ...data.limits,
+            },
+        };
+        for (const [condition, conditionData] of Object.entries(data.conditions)) {
+            res.conditions[condition] = ConditionsMakeConditionPublicData(handler, condition, conditionData, requester);
+        }
+        return res;
+    }
+    function ConditionsGetCondition(category, condition) {
+        if (!ConditionsGetCategoryEnabled(category))
+            return undefined;
+        return ConditionsGetCategoryData(category).conditions[condition];
+    }
+    function ConditionsIsConditionInEffect(category, condition) {
+        var _a;
+        if (!ConditionsGetCategoryEnabled(category))
+            return false;
+        const categoryData = ConditionsGetCategoryData(category);
+        const conditionData = categoryData.conditions[condition];
+        if (!conditionData)
+            return false;
+        if (conditionData.timer !== undefined && conditionData.timer <= Date.now())
+            return false;
+        if (!conditionData.active)
+            return false;
+        const requirements = (_a = conditionData.requirements) !== null && _a !== void 0 ? _a : categoryData.requirements;
+        if (!ConditionsEvaluateRequirements(requirements))
+            return false;
+        return true;
+    }
+    function ConditionsSetCondition(category, condition, data, source) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
             return;
-        if (!modStorage.log) {
-            throw new Error("Mod storage log not initialized");
+        const categoryData = ConditionsGetCategoryData(category);
+        const existing = categoryData.conditions[condition];
+        if (existing) {
+            existing.data = data;
         }
-        modStorage.log.unshift([Date.now(), access, type, data]);
-        if (modStorage.log.length >= 2 && modStorage.log[0][0] <= modStorage.log[1][0]) {
-            modStorage.log[0][0] = modStorage.log[1][0] + 1;
+        else {
+            const res = {
+                active: true,
+                lastActive: false,
+                timer: categoryData.timer !== undefined ? Date.now() + categoryData.timer : undefined,
+                timerRemove: categoryData.timerRemove,
+                data,
+            };
+            if (source) {
+                res.addedBy = source.MemberNumber;
+            }
+            categoryData.conditions[condition] = res;
         }
-        modStorage.log.splice(LOG_ENTRIES_LIMIT);
         modStorageSync();
         notifyOfChange();
     }
-    function logMessageDelete(time, character) {
-        var _a;
-        if (!moduleIsEnabled(ModuleCategory.Log))
+    function ConditionsGetConditionLimit(category, condition) {
+        var _a, _b;
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return ConditionsLimit.blocked;
+        const data = ConditionsGetCategoryData(category);
+        return (_b = (_a = data.limits[condition]) !== null && _a !== void 0 ? _a : handler.getDefaultLimits()[condition]) !== null && _b !== void 0 ? _b : ConditionsLimit.normal;
+    }
+    function ConditionsCheckAccess(category, condition, character) {
+        const limit = ConditionsGetConditionLimit(category, condition);
+        if (limit === ConditionsLimit.blocked)
             return false;
-        if (character && !checkPermissionAccess("log_delete", character)) {
+        const handler = ConditionsGetCategoryHandler(category);
+        return checkPermissionAccess(limit === ConditionsLimit.limited ? handler.permission_limited : handler.permission_normal, character);
+    }
+    function ConditionsRemoveCondition(category, conditions) {
+        if (!ConditionsGetCategoryEnabled(category))
             return false;
+        if (!Array.isArray(conditions)) {
+            conditions = [conditions];
         }
-        const access = (_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.log_deleted;
-        if (access === undefined) {
-            throw new Error("log_deleted category not found");
-        }
-        if (!modStorage.log) {
-            throw new Error("Mod storage log not initialized");
-        }
+        const categoryData = ConditionsGetCategoryData(category);
+        const handler = ConditionsGetCategoryHandler(category);
         let changed = false;
-        for (let i = modStorage.log.length - 1; i >= 0; i--) {
-            const e = modStorage.log[i];
-            if ((Array.isArray(time) && time.includes(e[0])) || e[0] === time) {
+        for (const condition of conditions) {
+            if (categoryData.conditions[condition]) {
+                handler.stateChangeHandler(condition, categoryData.conditions[condition], false);
+                delete categoryData.conditions[condition];
                 changed = true;
-                if (access === LogAccessLevel.none) {
-                    modStorage.log.splice(i, 1);
-                }
-                else {
-                    e[1] = access;
-                    e[2] = LogEntryType.deleted;
-                    e[3] = null;
-                }
             }
         }
         if (changed) {
@@ -32020,496 +31863,1676 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         return changed;
     }
-    function logConfigSet(category, accessLevel, character) {
-        var _a;
-        if (!moduleIsEnabled(ModuleCategory.Log))
+    function ConditionsSetLimit(category, condition, limit, character) {
+        var _a, _b;
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
             return false;
-        if (character && !checkPermissionAccess("log_configure", character)) {
-            return false;
-        }
-        if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category]) === undefined) {
-            return false;
-        }
-        if (![LogAccessLevel.none, LogAccessLevel.normal, LogAccessLevel.protected].includes(accessLevel)) {
+        if (!handler.loadValidateConditionKey(condition)) {
+            console.warn(`Attempt to set invalid condition limit ${category}:${condition}`);
             return false;
         }
-        if (modStorage.logConfig[category] === accessLevel) {
+        const data = ConditionsGetCategoryData(category);
+        if (character && !checkPermissionAccess(handler.permission_changeLimits, character)) {
+            return false;
+        }
+        const defaultLimit = (_a = handler.getDefaultLimits()[condition]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal;
+        const oldLimit = (_b = data.limits[condition]) !== null && _b !== void 0 ? _b : defaultLimit;
+        if (oldLimit === limit)
             return true;
+        if (data.conditions[condition] !== undefined)
+            return false;
+        if (limit === defaultLimit) {
+            delete data.limits[condition];
+        }
+        else {
+            data.limits[condition] = limit;
         }
         if (character) {
-            logMessage("log_config_change", LogEntryType.plaintext, `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
-                `from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`);
-            if (!character.isPlayer()) {
-                ChatRoomSendLocal(`${character.toNicknamedString()} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
-                    `from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`, undefined, character.MemberNumber);
-            }
+            handler.logLimitChange(condition, character, limit, oldLimit);
         }
-        modStorage.logConfig[category] = accessLevel;
-        modStorageSync();
         notifyOfChange();
+        modStorageSync();
         return true;
     }
-    function logClear(character) {
-        if (!moduleIsEnabled(ModuleCategory.Log))
+    function ConditionsUpdateBase(category, condition, data) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
             return false;
-        if (character && !checkPermissionAccess("log_delete", character)) {
+        const conditionData = ConditionsGetCondition(category, condition);
+        if (!conditionData)
             return false;
+        conditionData.active = data.active;
+        if (data.favorite) {
+            conditionData.favorite = true;
         }
-        modStorage.log = [];
-        logMessageAdd(LogAccessLevel.everyone, LogEntryType.plaintext, "The log has been cleared");
+        else {
+            delete conditionData.favorite;
+        }
+        if (data.requirements) {
+            conditionData.requirements = data.requirements;
+            const requirements = conditionData.requirements;
+            const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
+            if (requirements.orLogic && !hasAnyRequirement) {
+                delete requirements.orLogic;
+            }
+        }
+        else {
+            delete conditionData.requirements;
+        }
+        if (data.timer !== null) {
+            conditionData.timer = data.timer;
+        }
+        else {
+            delete conditionData.timer;
+        }
+        if (data.timerRemove && data.active) {
+            conditionData.timerRemove = true;
+        }
+        else {
+            delete conditionData.timerRemove;
+        }
+        notifyOfChange();
+        modStorageSync();
         return true;
     }
-    function getVisibleLogEntries(character) {
-        if (!moduleIsEnabled(ModuleCategory.Log))
+    function ConditionsUpdate(category, condition, data, character) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return false;
+        if (character && !ConditionsCheckAccess(category, condition, character))
+            return false;
+        const conditionData = ConditionsGetCondition(category, condition);
+        if (!conditionData)
+            return false;
+        const oldData = ConditionsMakeConditionPublicData(handler, condition, conditionData, character);
+        if (!handler.updateCondition(condition, conditionData, data.data, character, data))
+            return false;
+        if (!ConditionsUpdateBase(category, condition, data))
+            return false;
+        if (character) {
+            handler.logConditionUpdate(condition, character, data, oldData);
+        }
+        notifyOfChange();
+        modStorageSync();
+        return true;
+    }
+    function ConditionsUpdateMultiple(category, conditions, data, character) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return false;
+        let didChange = false;
+        for (const condition of conditions) {
+            const conditionData = ConditionsGetCondition(category, condition);
+            if (!conditionData)
+                continue;
+            const mergedData = ConditionsMakeConditionPublicData(handler, condition, conditionData, character);
+            let conditionHasChange = false;
+            if (data.active !== undefined && data.active !== mergedData.active) {
+                mergedData.active = data.active;
+                conditionHasChange = true;
+            }
+            if (data.timer !== undefined && data.timer !== mergedData.timer) {
+                mergedData.timer = data.timer;
+                conditionHasChange = true;
+            }
+            if (data.timerRemove !== undefined && data.timerRemove !== mergedData.timerRemove) {
+                mergedData.timerRemove = data.timerRemove;
+                conditionHasChange = true;
+            }
+            if (data.requirements !== undefined && data.requirements !== mergedData.requirements) {
+                mergedData.requirements = data.requirements;
+                conditionHasChange = true;
+            }
+            if (data.favorite !== undefined && data.favorite !== mergedData.favorite) {
+                mergedData.favorite = data.favorite;
+                conditionHasChange = true;
+            }
+            if (conditionHasChange) {
+                didChange = ConditionsUpdate(category, condition, mergedData, character) || didChange;
+            }
+        }
+        return didChange;
+    }
+    function ConditionsCategoryUpdate(category, data, character) {
+        const handler = ConditionsGetCategoryHandler(category);
+        if (!moduleIsEnabled(handler.category))
+            return false;
+        if (character && (handler.permission_configure == null || !checkPermissionAccess(handler.permission_configure, character)))
+            return false;
+        const conditionData = ConditionsGetCategoryData(category);
+        if (!conditionData)
+            return false;
+        const oldData = character && ConditionsGetCategoryPublicData(category, character);
+        conditionData.requirements = data.requirements;
+        const requirements = conditionData.requirements;
+        const hasAnyRequirement = !!(requirements.room || requirements.roomName || requirements.role || requirements.player);
+        if (requirements.orLogic && !hasAnyRequirement) {
+            delete requirements.orLogic;
+        }
+        if (data.timer !== null) {
+            conditionData.timer = data.timer;
+        }
+        else {
+            delete conditionData.timer;
+        }
+        if (data.timerRemove) {
+            conditionData.timerRemove = true;
+        }
+        else {
+            delete conditionData.timerRemove;
+        }
+        conditionData.data = cloneDeep(data.data);
+        if (character && oldData) {
+            handler.logCategoryUpdate(character, data, oldData);
+        }
+        notifyOfChange();
+        modStorageSync();
+        return true;
+    }
+    function ConditionsEvaluateRequirements(requirements, highestRoleInRoom) {
+        const inChatroom = ServerPlayerIsInChatRoom();
+        const chatroomPrivate = inChatroom && ChatRoomData != null && ChatRoomData.Private;
+        const results = [];
+        if (requirements.room) {
+            const res = inChatroom &&
+                (requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
+            results.push(requirements.room.inverted ? !res : res);
+        }
+        if (requirements.roomName) {
+            const res = inChatroom &&
+                ChatRoomData != null &&
+                typeof ChatRoomData.Name === "string" &&
+                ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
+            results.push(requirements.roomName.inverted ? !res : res);
+        }
+        if (requirements.role) {
+            if (highestRoleInRoom === undefined) {
+                highestRoleInRoom = getHighestRoleInRoom();
+            }
+            const res = highestRoleInRoom != null && highestRoleInRoom <= requirements.role.role;
+            results.push(requirements.role.inverted ? !res : res);
+        }
+        if (requirements.player) {
+            const res = inChatroom &&
+                getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player.memberNumber);
+            results.push(requirements.player.inverted ? !res : res);
+        }
+        if (results.length === 0)
+            return true;
+        else if (requirements.orLogic)
+            return results.includes(true);
+        else
+            return !results.includes(false);
+    }
+    const ConditionsSubcommands = ["setactive", "triggers", "globaltriggers", "timer", "defaulttimer", "setlimit"];
+    const ConditionsCommandTriggersKeywords = ["room", "roomname", "role", "player"];
+    function ConditionsCommandProcessTriggers(triggers, argv, sender, respond) {
+        const trigger = (argv[0] || "").toLocaleLowerCase();
+        const keyword = (argv[1] || "").toLocaleLowerCase();
+        if (keyword === "ignore" && argv.length !== 2) {
+            respond(`Error:\n'${trigger} ignore' does not expect any extra arguments.`);
+            return true;
+        }
+        if (!["is", "isnot", "with", "notwith"].includes(keyword)) {
+            respond(`Error:\nUnknown setting '${keyword}'. please use one of: ${trigger === "room" || trigger === "roomname" ? "is, isnot" : "with, notwith"}`);
+            return true;
+        }
+        if (argv.length !== 3) {
+            respond(`Error:\n'${trigger} ${keyword} <value>' got too many arguments. Arguments with space need to be "quoted".`);
+            return true;
+        }
+        const inverted = (keyword === "isnot" || keyword === "notwith") ? true : undefined;
+        let value = argv[2];
+        if (trigger === "room") {
+            if (keyword === "ignore") {
+                delete triggers.room;
+                return false;
+            }
+            value = value.toLocaleLowerCase();
+            if (value !== "public" && value !== "private") {
+                respond(`Error:\nRoom can be either 'public' or 'private', got: '${value}'`);
+                return true;
+            }
+            triggers.room = {
+                type: value,
+                inverted,
+            };
+        }
+        else if (trigger === "roomname") {
+            if (keyword === "ignore") {
+                delete triggers.roomName;
+                return false;
+            }
+            triggers.roomName = {
+                name: value,
+                inverted,
+            };
+        }
+        else if (trigger === "role") {
+            if (keyword === "ignore") {
+                delete triggers.role;
+                return false;
+            }
+            const level = AccessLevel[value.toLocaleLowerCase()];
+            if (typeof level !== "number" || level === AccessLevel.self) {
+                respond(`Error:\n` +
+                    `'role ${keyword}' expects one of: clubowner, owner, lover, mistress, whitelist, friend, public; got: '${value.toLocaleLowerCase()}'`);
+                return true;
+            }
+            triggers.role = {
+                role: level,
+                inverted,
+            };
+        }
+        else if (trigger === "player") {
+            if (keyword === "ignore") {
+                delete triggers.player;
+                return false;
+            }
+            const target = Command_selectCharacterMemberNumber(value, true);
+            if (typeof target === "string") {
+                respond(target);
+                return true;
+            }
+            triggers.player = {
+                memberNumber: target,
+                inverted,
+            };
+        }
+        return false;
+    }
+    function ConditionsCommandTriggersAutocomplete(argv, sender) {
+        const trigger = (argv[0] || "").toLocaleLowerCase();
+        if (argv.length < 2)
             return [];
-        if (!modStorage.log) {
-            throw new Error("Mod storage log not initialized");
+        if (trigger === "room" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
         }
-        const allow = {
-            [LogAccessLevel.none]: character.isPlayer(),
-            [LogAccessLevel.normal]: checkPermissionAccess("log_view_normal", character),
-            [LogAccessLevel.protected]: checkPermissionAccess("log_view_protected", character),
-            [LogAccessLevel.everyone]: true,
-        };
-        return modStorage.log.filter(e => allow[e[1]]);
+        if (trigger === "room" && argv.length === 3) {
+            return Command_pickAutocomplete(argv[2], ["public", "private"]);
+        }
+        if (trigger === "roomname" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "is", "isnot"]);
+        }
+        if (trigger === "role" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
+        }
+        if (trigger === "role" && argv.length === 3) {
+            return Command_pickAutocomplete(argv[2], ["clubowner", "owner", "lover", "mistress", "whitelist", "friend", "public"]);
+        }
+        if (trigger === "player" && argv.length === 2) {
+            return Command_pickAutocomplete(argv[1], ["ignore", "with", "notwith"]);
+        }
+        if (trigger === "player" && argv.length === 3) {
+            return Command_selectCharacterAutocomplete(argv[2]);
+        }
+        return [];
     }
-    function logMessageRender(entry, character) {
-        var _a, _b;
-        if (entry[2] === LogEntryType.plaintext) {
-            const e = entry;
-            return e[3];
+    function ConditionsRunSubcommand(category, argv, sender, respond) {
+        const subcommand = (argv[0] || "").toLocaleLowerCase();
+        if (!ConditionsSubcommands.includes(subcommand)) {
+            throw new Error(`Subcomand "${subcommand}" passed to ConditionsRunSubcommand isn't valid ConditionsSubcommand`);
         }
-        else if (entry[2] === LogEntryType.deleted) {
-            return "[Log message deleted]";
+        const handler = conditionHandlers.get(category);
+        if (!handler) {
+            throw new Error(`Attempt to run command for unknown conditions category ${category}`);
         }
-        else if (entry[2] === LogEntryType.ruleTrigger || entry[2] === LogEntryType.ruleTriggerAttempt) {
-            const data = entry[3];
-            if (!Array.isArray(data) || data.length !== 2 || typeof data[0] !== "string") {
-                return `[ERROR: Bad data for type ${entry[2]}]`;
+        if (!moduleIsEnabled(handler.category)) {
+            return respond(`The command failed to execute, because ${Player.Name} disabled her ${MODULE_NAMES[handler.category]} module.`);
+        }
+        const categoryData = ConditionsGetCategoryData(category);
+        const categorySingular = category.slice(0, -1);
+        const CSHelp = handler.commandConditionSelectorHelp;
+        if (subcommand === "setactive") {
+            const active = (argv[2] || "").toLocaleLowerCase();
+            if (argv.length !== 3 || active !== "yes" && active !== "no") {
+                return respond(`Usage:\nsetactive <${CSHelp}> <yes/no>`);
             }
-            if (!guard_BCX_Rule(data[0])) {
-                return `[ERROR: Trigger for unknown rule "${data[0]}"]`;
+            const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
+            if (!result) {
+                return respond(condition);
             }
-            const rule = RulesGetDisplayDefinition(data[0]);
-            const log = entry[2] === LogEntryType.ruleTriggerAttempt ? (_a = rule.triggerTexts) === null || _a === void 0 ? void 0 : _a.attempt_log : (_b = rule.triggerTexts) === null || _b === void 0 ? void 0 : _b.log;
-            return log ? dictionaryProcess(log, { PLAYER_NAME: character.Name, ...data[1] }) : `[ERROR: Missing log text for rule "${data[0]}" trigger]`;
-        }
-        else if (entry[2] === LogEntryType.curseTrigger) {
-            const data = entry[3];
-            if (!Array.isArray(data) ||
-                data.length !== 2 ||
-                data.some(i => typeof i !== "string") ||
-                !Object.keys(CURSES_TRIGGER_LOGS).includes(data[0])) {
-                return `[ERROR: Bad data for type ${entry[2]}]`;
+            if (!categoryData.conditions[condition]) {
+                return respond(`This ${categorySingular} doesn't exist`);
             }
-            return dictionaryProcess(CURSES_TRIGGER_LOGS[data[0]], { PLAYER_NAME: character.Name, ASSET_NAME: data[1] });
+            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
+            conditionData.active = active === "yes";
+            respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
         }
-        else if (entry[2] === LogEntryType.curseTriggerBatch) {
-            const data = entry[3];
-            if (typeof data !== "string" ||
-                !Object.keys(CURSES_TRIGGER_LOGS_BATCH).includes(data)) {
-                return `[ERROR: Bad data for type ${entry[2]}]`;
+        else if (subcommand === "triggers") {
+            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            if (!result) {
+                return respond(condition);
             }
-            return dictionaryProcess(CURSES_TRIGGER_LOGS_BATCH[data], { PLAYER_NAME: character.Name });
-        }
-        return `[ERROR: Unknown entry type ${entry[2]}]`;
-    }
-    const alreadyPraisedBy = new Set();
-    function logGetAllowedActions(character) {
-        var _a;
-        return {
-            configure: checkPermissionAccess("log_configure", character),
-            delete: checkPermissionAccess("log_delete", character),
-            leaveMessage: checkPermissionAccess("log_add_note", character) && !!((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a.user_note),
-            praise: checkPermissionAccess("log_praise", character) && !alreadyPraisedBy.has(character.MemberNumber),
-        };
-    }
-    function logGetConfig() {
-        if (!moduleIsEnabled(ModuleCategory.Log))
-            return {};
-        if (!modStorage.logConfig) {
-            throw new Error("Mod storage log not initialized");
-        }
-        return { ...modStorage.logConfig };
-    }
-    function logPraise(value, message, character) {
-        if (!moduleIsEnabled(ModuleCategory.Log))
-            return false;
-        if (![-1, 0, 1].includes(value)) {
-            throw new Error("Invalid value");
-        }
-        if (value === 0 && !message)
-            return false;
-        const allowed = logGetAllowedActions(character);
-        if (value !== 0 && !allowed.praise)
-            return false;
-        if (message && !allowed.leaveMessage)
-            return false;
-        if (value !== 0) {
-            alreadyPraisedBy.add(character.MemberNumber);
-        }
-        if (value > 0) {
-            if (message) {
-                logMessage("user_note", LogEntryType.plaintext, `Praised by ${character} with note: ${message}`);
-                ChatRoomSendLocal(`${character.toNicknamedString()} praised you with the following note: ${message}`, undefined, character.MemberNumber);
+            if (!categoryData.conditions[condition]) {
+                return respond(`This ${categorySingular} doesn't exist`);
             }
-            else {
-                logMessage("praise", LogEntryType.plaintext, `Praised by ${character}`);
-                ChatRoomSendLocal(`${character.toNicknamedString()} praised you.`, undefined, character.MemberNumber);
-            }
-        }
-        else if (value < 0) {
-            if (message) {
-                logMessage("user_note", LogEntryType.plaintext, `Scolded by ${character} with note: ${message}`);
-                ChatRoomSendLocal(`${character.toNicknamedString()} scolded you with the following note: ${message}`, undefined, character.MemberNumber);
-            }
-            else {
-                logMessage("praise", LogEntryType.plaintext, `Scolded by ${character}`);
-                ChatRoomSendLocal(`${character.toNicknamedString()} scolded you.`, undefined, character.MemberNumber);
-            }
-        }
-        else if (message) {
-            logMessage("user_note", LogEntryType.plaintext, `${character} attached a note: ${message}`);
-            ChatRoomSendLocal(`${character.toNicknamedString()} put the following note on you: ${message}`, undefined, character.MemberNumber);
-        }
-        return true;
-    }
-    const logConfigDefaults = {
-        log_config_change: LogAccessLevel.protected,
-        log_deleted: LogAccessLevel.normal,
-        praise: LogAccessLevel.normal,
-        user_note: LogAccessLevel.normal,
-        entered_public_room: LogAccessLevel.none,
-        entered_private_room: LogAccessLevel.none,
-        had_orgasm: LogAccessLevel.none,
-        permission_change: LogAccessLevel.protected,
-        curse_change: LogAccessLevel.none,
-        curse_trigger: LogAccessLevel.none,
-        rule_change: LogAccessLevel.none,
-        rule_trigger: LogAccessLevel.none,
-        command_change: LogAccessLevel.none,
-        authority_roles_change: LogAccessLevel.protected,
-        relationships_change: LogAccessLevel.none,
-    };
-    const LOG_CONFIG_NAMES = {
-        log_config_change: "Log changes in logging configuration",
-        log_deleted: "Log deleted log entries",
-        praise: "Log praising or scolding behavior",
-        user_note: "Ability to see attached notes",
-        entered_public_room: "Log which public rooms are entered",
-        entered_private_room: "Log which private rooms are entered",
-        had_orgasm: "Log each single orgasm",
-        permission_change: "Log changes in permission settings",
-        curse_change: "Log each application, removal or change of curses",
-        curse_trigger: "Log every time a triggered curse reapplies an item",
-        rule_change: "Log each addition, removal or change of rules",
-        rule_trigger: "Log every rule violation",
-        command_change: "Log each change of commands limit",
-        authority_roles_change: "Log getting or losing a BCX owner/mistress",
-        relationships_change: "Log each change in relationships module",
-    };
-    const LOG_LEVEL_NAMES = {
-        [LogAccessLevel.everyone]: "[ERROR]",
-        [LogAccessLevel.none]: "No",
-        [LogAccessLevel.protected]: "Protected",
-        [LogAccessLevel.normal]: "Yes",
-    };
-    class ModuleLog extends BaseModule {
-        init() {
-            registerPermission("log_view_normal", {
-                name: "Allow to see normal log entries",
-                category: ModuleCategory.Log,
-                defaults: {
-                    [Preset.dominant]: [true, AccessLevel.mistress],
-                    [Preset.switch]: [true, AccessLevel.mistress],
-                    [Preset.submissive]: [true, AccessLevel.friend],
-                    [Preset.slave]: [true, AccessLevel.public],
-                },
-            });
-            registerPermission("log_view_protected", {
-                name: "Allow to see protected log entries",
-                category: ModuleCategory.Log,
-                defaults: {
-                    [Preset.dominant]: [true, AccessLevel.lover],
-                    [Preset.switch]: [true, AccessLevel.lover],
-                    [Preset.submissive]: [true, AccessLevel.mistress],
-                    [Preset.slave]: [true, AccessLevel.mistress],
-                },
-            });
-            registerPermission("log_configure", {
-                name: "Allow to configure what is logged",
-                category: ModuleCategory.Log,
-                defaults: {
-                    [Preset.dominant]: [true, AccessLevel.self],
-                    [Preset.switch]: [true, AccessLevel.self],
-                    [Preset.submissive]: [true, AccessLevel.owner],
-                    [Preset.slave]: [false, AccessLevel.owner],
-                },
-            });
-            registerPermission("log_delete", {
-                name: "Allow deleting log entries",
-                category: ModuleCategory.Log,
-                defaults: {
-                    [Preset.dominant]: [true, AccessLevel.self],
-                    [Preset.switch]: [true, AccessLevel.self],
-                    [Preset.submissive]: [true, AccessLevel.owner],
-                    [Preset.slave]: [false, AccessLevel.owner],
-                },
-            });
-            registerPermission("log_praise", {
-                name: "Allow to praise or scold",
-                category: ModuleCategory.Log,
-                defaults: {
-                    [Preset.dominant]: [false, AccessLevel.friend],
-                    [Preset.switch]: [false, AccessLevel.friend],
-                    [Preset.submissive]: [false, AccessLevel.public],
-                    [Preset.slave]: [false, AccessLevel.public],
-                },
-            });
-            registerPermission("log_add_note", {
-                name: "Allow to attach notes to the body",
-                category: ModuleCategory.Log,
-                defaults: {
-                    [Preset.dominant]: [false, AccessLevel.mistress],
-                    [Preset.switch]: [false, AccessLevel.mistress],
-                    [Preset.submissive]: [false, AccessLevel.friend],
-                    [Preset.slave]: [false, AccessLevel.public],
-                },
-            });
-            queryHandlers.logData = (sender) => {
-                return getVisibleLogEntries(sender);
-            };
-            queryHandlers.logDelete = (sender, data) => {
-                if (typeof data === "number" || (Array.isArray(data) && data.every(item => typeof item === "number"))) {
-                    return logMessageDelete(data, sender);
+            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
+            const keyword = (argv[2] || "").toLocaleLowerCase();
+            if (!keyword) {
+                if (!conditionData.requirements) {
+                    return respond(`Current status:\n` +
+                        `Uses global ${category} trigger configuration`);
                 }
                 else {
-                    return undefined;
-                }
-            };
-            queryHandlers.logConfigGet = (sender) => {
-                if (sender.isPlayer() || checkPermissionAccess("log_configure", sender)) {
-                    return logGetConfig();
-                }
-                else {
-                    return undefined;
-                }
-            };
-            queryHandlers.logConfigEdit = (sender, data) => {
-                if (!isObject$1(data) ||
-                    typeof data.category !== "string" ||
-                    typeof data.target !== "number") {
-                    console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
-                    return undefined;
-                }
-                return logConfigSet(data.category, data.target, sender);
-            };
-            queryHandlers.logClear = (sender) => {
-                return logClear(sender);
-            };
-            queryHandlers.logPraise = (sender, data) => {
-                if (!isObject$1(data) ||
-                    (data.message !== null && typeof data.message !== "string") ||
-                    ![-1, 0, 1].includes(data.value)) {
-                    console.warn(`BCX: Bad logPraise query from ${sender}`, data);
-                    return undefined;
-                }
-                return logPraise(data.value, data.message, sender);
-            };
-            queryHandlers.logGetAllowedActions = (sender) => {
-                return logGetAllowedActions(sender);
-            };
-            registerWhisperCommand("modules", "log", "- Manage the behaviour log", (argv, sender, respond) => {
-                const subcommand = (argv[0] || "").toLocaleLowerCase();
-                if (subcommand === "list") {
-                    const logEntries = getVisibleLogEntries(sender);
-                    if (logEntries.length === 0) {
-                        return respond(`You have no permission to view the log.`);
+                    const triggers = [];
+                    const r = conditionData.requirements;
+                    triggers.push(r.orLogic ? `Logic: OR (at least one)` : `Logic: AND (all of)`);
+                    if (r.room) {
+                        triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
                     }
-                    const totalPages = Math.ceil(logEntries.length / 5);
-                    const page = clamp$1(Number.parseInt(argv[1] || "", 10) || 1, 1, totalPages);
-                    let result = `Page ${page} / ${totalPages}:`;
-                    for (let i = 5 * (page - 1); i < Math.min(5 * page, logEntries.length); i++) {
-                        const entry = logEntries[i];
-                        const time = new Date(entry[0]);
-                        result += `\n[${time.toUTCString()}] (${entry[0]})\n  ${logMessageRender(entry, getPlayerCharacter())}`;
+                    if (r.roomName) {
+                        triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
                     }
-                    respond(result);
-                }
-                else if (subcommand === "delete") {
-                    if (!/^[0-9]+$/.test(argv[1] || "")) {
-                        return respond(`Expected number as timestamp.`);
+                    if (r.role) {
+                        const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+                        triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
                     }
-                    const timestamp = Number.parseInt(argv[1], 10);
-                    if (!getVisibleLogEntries(sender).some(logentry => logentry[0] === timestamp)) {
-                        return respond(`No such log entry found`);
+                    if (r.player) {
+                        const name = getCharacterName(r.player.memberNumber, null);
+                        triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
                     }
-                    respond(logMessageDelete(timestamp, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
-                }
-                else if (subcommand === "praise" || subcommand === "scold") {
-                    if (!checkPermissionAccess("log_praise", sender)) {
-                        return respond(COMMAND_GENERIC_ERROR);
-                    }
-                    respond(logPraise(subcommand === "praise" ? 1 : -1, null, sender) ? `Ok.` :
-                        `The command failed to execute, likely because you already did ${subcommand} recently.`);
-                }
-                else if (subcommand === "config") {
-                    if (!checkPermissionAccess("log_configure", sender)) {
-                        return respond(COMMAND_GENERIC_ERROR);
-                    }
-                    const category = argv[1] || "";
-                    const config = logGetConfig();
-                    if (!category) {
-                        let result = "Current log config:";
-                        for (const [k, v] of Object.entries(config)) {
-                            if (LOG_CONFIG_NAMES[k] !== undefined &&
-                                LOG_LEVEL_NAMES[v] !== undefined) {
-                                result += `\n[${k}]\n  ${LOG_CONFIG_NAMES[k]}: ${LOG_LEVEL_NAMES[v]}`;
-                            }
-                        }
-                        return respond(result);
-                    }
-                    else if (LOG_CONFIG_NAMES[category] === undefined) {
-                        return respond(`Unknown category "${category}".`);
+                    if (triggers.length > 1) {
+                        return respond(`Current status:\n` +
+                            `This ${categorySingular} will trigger under following conditions:\n` +
+                            triggers.join("\n"));
                     }
                     else {
-                        const level = (argv[2] || "").toLocaleLowerCase();
-                        if (level !== "yes" && level !== "protected" && level !== "no") {
-                            return respond(`Expected level to be one of:\nno, protected, yes`);
-                        }
-                        return respond(logConfigSet(category, level === "yes" ? LogAccessLevel.normal : level === "protected" ? LogAccessLevel.protected : LogAccessLevel.none, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+                        return respond(`Current status:\n` +
+                            `No triggers are set. The ${categorySingular} will now always trigger, while it is active`);
                     }
+                }
+            }
+            else if (keyword === "global") {
+                const global = (argv[3] || "").toLocaleLowerCase();
+                if (argv.length !== 4 || global !== "yes" && global !== "no") {
+                    return respond(`Usage:\ntriggers <${CSHelp}> global <yes/no>`);
+                }
+                if (global === "yes") {
+                    conditionData.requirements = null;
+                }
+                else if (!conditionData.requirements) {
+                    conditionData.requirements = cloneDeep(categoryData.requirements);
+                }
+            }
+            else if (keyword === "logic") {
+                const logic = (argv[3] || "").toLocaleLowerCase();
+                if (argv.length !== 4 || logic !== "or" && logic !== "and") {
+                    return respond(`Usage:\ntriggers <${CSHelp}> logic <or/and>`);
+                }
+                if (!conditionData.requirements) {
+                    return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${CSHelp}> global no`);
+                }
+                if (logic === "or") {
+                    conditionData.requirements.orLogic = true;
                 }
                 else {
-                    respond(Command_fixExclamationMark(sender, `!log usage:\n` +
-                        `!log list [page] - List all visible logs\n` +
-                        `!log delete <timestamp> - Deletes the log with the given <timestamp> (the number in parentheses in list)\n` +
-                        `!log praise - Note that you praised ${Player.Name} in her log\n` +
-                        `!log scold - Note that you scolded ${Player.Name} in her log\n` +
-                        `!log config - Shows the current logging settings for ${Player.Name}\n` +
-                        `!log config <category> <no|protected|yes> - Sets visibility of the given config <category>`));
+                    delete conditionData.requirements.orLogic;
                 }
-            }, (argv, sender) => {
-                if (argv.length <= 1) {
-                    const c = argv[0].toLocaleLowerCase();
-                    return ["list", "delete", "praise", "scold", "config"].filter(i => i.startsWith(c));
-                }
-                const subcommand = argv[0].toLocaleLowerCase();
-                if (subcommand === "delete") {
-                    if (argv.length === 2) {
-                        return getVisibleLogEntries(sender).map(logentry => logentry[0].toString()).filter(i => i.startsWith(argv[1]));
-                    }
-                }
-                else if (subcommand === "config") {
-                    if (!checkPermissionAccess("log_configure", sender)) {
-                        return [];
-                    }
-                    if (argv.length === 2) {
-                        return Object.keys(logGetConfig()).concat("").filter(i => i.startsWith(argv[1].toLocaleLowerCase()));
-                    }
-                    else if (argv.length === 3) {
-                        return ["no", "protected", "yes"].filter(i => i.startsWith(argv[2].toLocaleLowerCase()));
-                    }
-                }
-                return [];
-            });
-            ExportImportRegisterCategory({
-                category: `logConfig`,
-                name: `Behaviour Log - Configuration`,
-                module: ModuleCategory.Log,
-                export: () => logGetConfig(),
-                import: (data, character) => {
-                    var _a;
-                    let res = "";
-                    for (const [k, v] of Object.entries(data)) {
-                        const category = k;
-                        if (((_a = modStorage.logConfig) === null || _a === void 0 ? void 0 : _a[category]) === undefined || LOG_CONFIG_NAMES[category] === undefined) {
-                            res += `Skipped unknown log config category '${category}'\n`;
-                            continue;
-                        }
-                        if (!logConfigSet(category, v, character)) {
-                            res += `Error setting category '${LOG_CONFIG_NAMES[category]}'\n`;
-                        }
-                    }
-                    return res + `Done!`;
-                },
-                importPermissions: ["log_configure"],
-                importValidator: mod.record(mod.nativeEnum(LogAccessLevel)),
-            });
-        }
-        load() {
-            if (!moduleIsEnabled(ModuleCategory.Log)) {
-                delete modStorage.log;
-                delete modStorage.logConfig;
-                return;
             }
-            if (!Array.isArray(modStorage.log)) {
-                logClear(null);
+            else if (!ConditionsCommandTriggersKeywords.includes(keyword)) {
+                return respond(`${keyword !== "help" ? `Unknown trigger '${keyword}'. ` : ""}List of possible 'triggers <${CSHelp}> *' options:\n` +
+                    `global <yes/no> - Set the trigger condition of this ${categorySingular} to the global configuration\n` +
+                    `logic <or/and>	- Set if the logic should be OR (at least one) or AND (all of) logic; default is AND\n` +
+                    `room ignore - Remove the 'room type'-based trigger condition\n` +
+                    `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
+                    `roomname ignore - Remove the 'room name'-based trigger condition\n` +
+                    `roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
+                    `role ignore - Remove the role-based trigger condition\n` +
+                    `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
+                    `player ignore - Remove the person-based trigger condition\n` +
+                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
+                    `To show currently set triggers, use just 'triggers <group>' without adding one of the above sub-commands.`);
             }
-            else if (!modStorage.log.every(e => Array.isArray(e) &&
-                e.length === 4 &&
-                typeof e[0] === "number" &&
-                typeof e[1] === "number" &&
-                typeof e[2] === "number")) {
-                console.error("BCX: Some log entries have invalid format, reseting whole log!");
-                logClear(null);
-            }
-            if (!modStorage.logConfig) {
-                modStorage.logConfig = { ...logConfigDefaults };
+            else if (!conditionData.requirements) {
+                return respond(`Cannot configure specific trigger while using global data. First use:\ntriggers <${CSHelp}> global no`);
             }
             else {
-                const transitionDictionary = {
-                    permissionChange: "permission_change",
-                    logConfigChange: "log_config_change",
-                    logDeleted: "log_deleted",
-                    userNote: "user_note",
-                    curseChange: "curse_change",
-                    curseTrigger: "curse_trigger",
-                    hadOrgasm: "had_orgasm",
-                    enteredPublicRoom: "entered_public_room",
-                    enteredPrivateRoom: "entered_private_room",
-                    ownershipChangesBCX: "authority_roles_change",
-                };
-                for (const k of Object.keys(modStorage.logConfig)) {
-                    if (transitionDictionary[k] !== undefined) {
-                        console.info(`BCX: Updating log config name "${k}"->"${transitionDictionary[k]}"`);
-                        modStorage.logConfig[transitionDictionary[k]] = modStorage.logConfig[k];
-                        delete modStorage.logConfig[k];
-                        continue;
+                if (ConditionsCommandProcessTriggers(conditionData.requirements, argv.slice(2), sender, respond))
+                    return;
+            }
+            respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "globaltriggers") {
+            const configData = ConditionsGetCategoryPublicData(category, sender);
+            if (!argv[1]) {
+                const triggers = [];
+                const r = configData.requirements;
+                triggers.push(r.orLogic ? `Logic: OR (at least one)` : `Logic: AND (all of)`);
+                if (r.room) {
+                    triggers.push(`When ${r.room.inverted ? "not in" : "in"} ${r.room.type} room`);
+                }
+                if (r.roomName) {
+                    triggers.push(`When ${r.roomName.inverted ? "not in" : "in"} room named '${r.roomName.name}'`);
+                }
+                if (r.role) {
+                    const role = capitalizeFirstLetter(AccessLevel[r.role.role]) + (r.role.role !== AccessLevel.clubowner ? " ↑" : "");
+                    triggers.push(`When ${r.role.inverted ? "not in" : "in"} room with role '${role}'`);
+                }
+                if (r.player) {
+                    const name = getCharacterName(r.player.memberNumber, null);
+                    triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
+                }
+                if (triggers.length > 1) {
+                    return respond(`Current status:\n` +
+                        `Globally ${category} are set to trigger under following conditions:\n` +
+                        triggers.join("\n"));
+                }
+                else {
+                    return respond(`Current status:\n` +
+                        `No triggers are set globally. ${capitalizeFirstLetter(category)} using global config will now always trigger, if they are active`);
+                }
+            }
+            else if (argv[1].toLocaleLowerCase() === "logic") {
+                const logic = (argv[2] || "").toLocaleLowerCase();
+                if (argv.length !== 3 || logic !== "or" && logic !== "and") {
+                    return respond(`Usage:\nglobaltriggers logic <or/and>`);
+                }
+                if (logic === "or") {
+                    configData.requirements.orLogic = true;
+                }
+                else {
+                    delete configData.requirements.orLogic;
+                }
+            }
+            else if (!ConditionsCommandTriggersKeywords.includes(argv[1].toLocaleLowerCase())) {
+                return respond(`${argv[1] !== "help" ? `Unknown trigger '${argv[1].toLocaleLowerCase()}'. ` : ""}List of possible 'globaltriggers *' options:\n` +
+                    `logic <or/and>	- Set if the logic should be OR (at least one) or AND (all of) logic; default is AND\n` +
+                    `room ignore - Remove the 'room type'-based trigger condition\n` +
+                    `room <is/isnot> <public/private> - Add such a 'room type'-based trigger condition\n` +
+                    `roomname ignore - Remove the 'room name'-based trigger condition\n` +
+                    `roomname <is/isnot> <name> - Add such a 'room name'-based trigger condition\n` +
+                    `role ignore - Remove the role-based trigger condition\n` +
+                    `role <with/notwith> <role> - Add such a role-based trigger condition\n` +
+                    `player ignore - Remove the person-based trigger condition\n` +
+                    `player <with/notwith> <memberNumber> - Add such a person-based trigger condition\n\n` +
+                    `To show currently set global triggers, use just 'globaltriggers' without anything behind.`);
+            }
+            else {
+                if (ConditionsCommandProcessTriggers(configData.requirements, argv.slice(1), sender, respond))
+                    return;
+            }
+            respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "timer") {
+            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            if (!result) {
+                return respond(condition);
+            }
+            if (!categoryData.conditions[condition]) {
+                return respond(`This ${categorySingular} doesn't exist`);
+            }
+            const keyword = (argv[2] || "").toLocaleLowerCase();
+            if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
+                return respond(`Usage:\n` +
+                    `timer <${CSHelp}> disable - Remove the timer and set lifetime to infinite\n` +
+                    `timer <${CSHelp}> set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+                    `timer <${CSHelp}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
+            }
+            const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
+            if (keyword === "disable") {
+                conditionData.timer = null;
+                conditionData.timerRemove = false;
+            }
+            else if (keyword === "set") {
+                let time = 0;
+                for (const v of argv.slice(3)) {
+                    const i = Command_parseTime(v);
+                    if (typeof i === "string") {
+                        return respond(i);
                     }
-                    if (logConfigDefaults[k] === undefined) {
-                        console.info(`BCX: Removing unknown log config category "${k}"`);
-                        delete modStorage.logConfig[k];
+                    time += i;
+                }
+                conditionData.timer = Date.now() + time;
+            }
+            else if (keyword === "autoremove") {
+                const autoremove = (argv[3] || "").toLocaleLowerCase();
+                if (argv.length !== 4 || autoremove !== "yes" && autoremove !== "no") {
+                    return respond(`Usage:\ntimer <${CSHelp}> autoremove <yes/no>`);
+                }
+                else if (!conditionData.active) {
+                    return respond(`Timer is counting until ${categorySingular} becomes enabled, cannot use autoremove in this mode.`);
+                }
+                else if (conditionData.timer === null) {
+                    return respond(`Timer is disabled on this ${categorySingular}. To use autoremove, first set timer`);
+                }
+                conditionData.timerRemove = autoremove === "yes";
+            }
+            respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "defaulttimer") {
+            const keyword = (argv[1] || "").toLocaleLowerCase();
+            if (keyword !== "set" && keyword !== "disable" && keyword !== "autoremove") {
+                return respond(`Usage:\n` +
+                    `defaulttimer disable - Remove the timer and set lifetime to infinite\n` +
+                    `defaulttimer set <time> - Set timer to the given amount of days, hours, minutes or seconds (e.g. 23h 30m)\n` +
+                    `defaulttimer autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`);
+            }
+            const configData = ConditionsGetCategoryPublicData(category, sender);
+            if (keyword === "disable") {
+                configData.timer = null;
+                configData.timerRemove = false;
+            }
+            else if (keyword === "set") {
+                let time = 0;
+                for (const v of argv.slice(2)) {
+                    const i = Command_parseTime(v);
+                    if (typeof i === "string") {
+                        return respond(i);
+                    }
+                    time += i;
+                }
+                configData.timer = time;
+            }
+            else if (keyword === "autoremove") {
+                const autoremove = (argv[2] || "").toLocaleLowerCase();
+                if (argv.length !== 3 || autoremove !== "yes" && autoremove !== "no") {
+                    return respond(`Usage:\ndefaulttimer <${CSHelp}> autoremove <yes/no>`);
+                }
+                if (configData.timer === null) {
+                    return respond(`Timer is disabled by default for ${category}. To use autoremove, first set timer`);
+                }
+                configData.timerRemove = autoremove === "yes";
+            }
+            respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+        else if (subcommand === "setlimit") {
+            const [result, condition] = handler.parseConditionName(argv[1] || "", false);
+            if (!result) {
+                return respond(condition);
+            }
+            if (!handler.loadValidateConditionKey(condition)) {
+                throw new Error("Parse name returned invalid condition key");
+            }
+            const keyword = (argv[2] || "").toLocaleLowerCase();
+            if (keyword !== "normal" && keyword !== "limited" && keyword !== "blocked") {
+                return respond(`Usage:\n` +
+                    `setlimit <${CSHelp}> <normal/limited/blocked> - Set a limit on certain <${CSHelp}>`);
+            }
+            respond(ConditionsSetLimit(category, condition, ConditionsLimit[keyword], sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
+        }
+    }
+    function ConditionsAutocompleteSubcommand(category, argv, sender) {
+        const subcommand = (argv[0] || "").toLocaleLowerCase();
+        if (!ConditionsSubcommands.includes(subcommand)) {
+            throw new Error(`Subcomand "${subcommand}" passed to ConditionsAutocompleteSubcommand isn't valid ConditionsSubcommand`);
+        }
+        const handler = conditionHandlers.get(category);
+        if (!handler) {
+            throw new Error(`Attempt to autocomplete command for unknown conditions category ${category}`);
+        }
+        if (!moduleIsEnabled(handler.category))
+            return [];
+        const categoryData = ConditionsGetCategoryData(category);
+        if (subcommand === "setactive") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+            }
+            else if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+            }
+        }
+        else if (subcommand === "triggers") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+            }
+            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            if (!result || !categoryData.conditions[condition]) {
+                return [];
+            }
+            if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["global", "logic", ...ConditionsCommandTriggersKeywords]);
+            }
+            if (argv[2].toLocaleLowerCase() === "global") {
+                return Command_pickAutocomplete(argv[3], ["yes", "no"]);
+            }
+            else if (argv[2].toLocaleLowerCase() === "logic") {
+                return Command_pickAutocomplete(argv[3], ["and", "or"]);
+            }
+            else if (categoryData.conditions[condition].requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+                return ConditionsCommandTriggersAutocomplete(argv.slice(2), sender);
+            }
+        }
+        else if (subcommand === "globaltriggers") {
+            if (argv.length === 2) {
+                return Command_pickAutocomplete(argv[1], ["logic", ...ConditionsCommandTriggersKeywords]);
+            }
+            else if (argv[1].toLocaleLowerCase() === "logic") {
+                return Command_pickAutocomplete(argv[2], ["and", "or"]);
+            }
+            else if (ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+                return ConditionsCommandTriggersAutocomplete(argv.slice(1), sender);
+            }
+        }
+        else if (subcommand === "timer") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+            }
+            else if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["set", "disable", "autoremove"]);
+            }
+            else if (argv.length === 4 && argv[2].toLocaleLowerCase() === "autoremove") {
+                return Command_pickAutocomplete(argv[3], ["yes", "no"]);
+            }
+        }
+        else if (subcommand === "defaulttimer") {
+            if (argv.length === 2) {
+                return Command_pickAutocomplete(argv[1], ["set", "disable", "autoremove"]);
+            }
+            else if (argv.length === 3 && argv[1].toLocaleLowerCase() === "autoremove") {
+                return Command_pickAutocomplete(argv[2], ["yes", "no"]);
+            }
+        }
+        else if (subcommand === "setlimit") {
+            if (argv.length === 2) {
+                return handler.autocompleteConditionName(argv[1], false);
+            }
+            else if (argv.length === 3) {
+                return Command_pickAutocomplete(argv[2], ["normal", "limited", "blocked"]);
+            }
+        }
+        return [];
+    }
+    class ModuleConditions extends BaseModule {
+        constructor() {
+            super(...arguments);
+            this.timer = null;
+        }
+        load() {
+            var _a;
+            if (!isObject$1(modStorage.conditions)) {
+                modStorage.conditions = {};
+            }
+            if (modStorage.cursedItems) {
+                const curses = modStorage.conditions.curses = {
+                    conditions: {},
+                    limits: {},
+                    requirements: {},
+                    data: {
+                        itemRemove: false,
+                    },
+                };
+                for (const [group, data] of Object.entries(modStorage.cursedItems)) {
+                    curses.conditions[group] = {
+                        active: true,
+                        lastActive: false,
+                        data,
+                    };
+                }
+                delete modStorage.cursedItems;
+            }
+            for (const key of Object.keys(modStorage.conditions)) {
+                const handler = conditionHandlers.get(key);
+                if (!handler || !moduleIsEnabled(handler.category)) {
+                    console.debug(`BCX: Removing unknown or disabled conditions category ${key}`);
+                    delete modStorage.conditions[key];
+                    continue;
+                }
+                const data = modStorage.conditions[key];
+                if (!isObject$1(data) || !isObject$1(data.conditions)) {
+                    console.warn(`BCX: Removing category ${key} with invalid data`);
+                    delete modStorage.conditions[key];
+                    continue;
+                }
+                if (data.timer !== undefined && typeof data.timer !== "number") {
+                    console.warn(`BCX: Removing category ${key} invalid timer`, data.timer);
+                    delete data.timer;
+                }
+                if (data.timerRemove !== undefined && data.timerRemove !== true) {
+                    console.warn(`BCX: Removing category ${key} invalid timerRemove`, data.timerRemove);
+                    delete data.timerRemove;
+                }
+                if (!isObject$1(data.limits)) {
+                    console.warn(`BCX: Resetting category ${key} limits with invalid data`);
+                    data.limits = {};
+                }
+                for (const [condition, limitValue] of Object.entries(data.limits)) {
+                    if (!handler.loadValidateConditionKey(condition)) {
+                        console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
+                        delete data.limits[condition];
+                    }
+                    else if (typeof limitValue !== "number" ||
+                        limitValue === ((_a = handler.getDefaultLimits()[condition]) !== null && _a !== void 0 ? _a : ConditionsLimit.normal) ||
+                        ConditionsLimit[limitValue] === undefined) {
+                        console.warn(`BCX: Bad condition ${key}:${condition} limit value, removing it`, limitValue);
+                        delete data.limits[condition];
                     }
                 }
-                for (const k of Object.keys(logConfigDefaults)) {
-                    if (modStorage.logConfig[k] === undefined) {
-                        console.info(`BCX: Adding missing log category "${k}"`);
-                        modStorage.logConfig[k] = logConfigDefaults[k];
+                if (!guard_ConditionsConditionRequirements(data.requirements)) {
+                    console.warn(`BCX: Resetting category ${key} requirements with invalid data`);
+                    data.requirements = {};
+                }
+                data.data = handler.loadCategorySpecificGlobalData(data.data);
+                for (const [condition, conditiondata] of Object.entries(data.conditions)) {
+                    if (!handler.loadValidateConditionKey(condition)) {
+                        console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
+                        delete data.conditions[condition];
+                        continue;
+                    }
+                    else if (!handler.loadValidateCondition(condition, conditiondata)) {
+                        delete data.conditions[condition];
+                        continue;
+                    }
+                    else if (typeof conditiondata.active !== "boolean" ||
+                        conditiondata.requirements !== undefined && !guard_ConditionsConditionRequirements(conditiondata.requirements) ||
+                        conditiondata.timer !== undefined && typeof conditiondata.timer !== "number" ||
+                        conditiondata.timerRemove !== undefined && conditiondata.timerRemove !== true ||
+                        conditiondata.favorite !== undefined && conditiondata.favorite !== true) {
+                        console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
+                        delete data.conditions[condition];
+                        continue;
+                    }
+                    else if (ConditionsGetConditionLimit(key, condition) === ConditionsLimit.blocked) {
+                        console.warn(`BCX: Condition ${key}:${condition} became blocked while active, removing it`);
+                        delete data.conditions[condition];
+                        continue;
+                    }
+                    if (conditiondata.timerRemove && !conditiondata.active) {
+                        console.warn(`BCX: Condition ${key}:${condition} had timerRemove while inactive, cleaning up`);
+                        delete conditiondata.timerRemove;
+                    }
+                    if (typeof conditiondata.lastActive !== "boolean") {
+                        console.warn(`BCX: Condition ${key}:${condition} missing lastActive, adding`);
+                        conditiondata.lastActive = false;
+                    }
+                    if (conditiondata.addedBy !== undefined && !Number.isInteger(conditiondata.addedBy)) {
+                        console.warn(`BCX: Condition ${key}:${condition} bad addedBy, cleaning up`, conditiondata.addedBy);
+                        delete conditiondata.addedBy;
                     }
                 }
             }
-            hookFunction("ActivityOrgasmStart", 0, (args, next) => {
-                const C = args[0];
-                if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
-                    logMessage("had_orgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
+            for (const [key, handler] of conditionHandlers.entries()) {
+                if (moduleIsEnabled(handler.category) && !isObject$1(modStorage.conditions[key])) {
+                    console.debug(`BCX: Adding missing conditions category ${key}`);
+                    modStorage.conditions[key] = {
+                        conditions: {},
+                        limits: {},
+                        requirements: {},
+                        data: handler.loadCategorySpecificGlobalData(undefined),
+                    };
                 }
-                return next(args);
-            }, ModuleCategory.Log);
-            hookFunction("ChatRoomSync", 0, (args, next) => {
-                const data = args[0];
-                if (data.Private) {
-                    logMessage("entered_private_room", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
+            }
+            queryHandlers.conditionsGet = (sender, data) => {
+                if (typeof data === "string" && conditionHandlers.has(data) && ConditionsGetCategoryEnabled(data)) {
+                    return ConditionsGetCategoryPublicData(data, sender);
                 }
                 else {
-                    logMessage("entered_public_room", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);
+                    return undefined;
                 }
-                return next(args);
-            }, ModuleCategory.Log);
+            };
+            queryHandlers.conditionSetLimit = (sender, data) => {
+                if (isObject$1(data) &&
+                    typeof data.category === "string" &&
+                    conditionHandlers.has(data.category) &&
+                    typeof data.condition === "string" &&
+                    typeof data.limit === "number" &&
+                    ConditionsLimit[data.limit] !== undefined) {
+                    return ConditionsSetLimit(data.category, data.condition, data.limit, sender);
+                }
+                else {
+                    return undefined;
+                }
+            };
+            queryHandlers.conditionUpdate = (sender, data) => {
+                if (isObject$1(data) &&
+                    typeof data.category === "string" &&
+                    conditionHandlers.has(data.category) &&
+                    typeof data.condition === "string" &&
+                    guard_ConditionsConditionPublicData(data.category, data.condition, data.data)) {
+                    return ConditionsUpdate(data.category, data.condition, data.data, sender);
+                }
+                else {
+                    return undefined;
+                }
+            };
+            queryHandlers.conditionUpdateMultiple = (sender, data) => {
+                if (isObject$1(data) &&
+                    typeof data.category === "string" &&
+                    conditionHandlers.has(data.category) &&
+                    Array.isArray(data.conditions) &&
+                    data.conditions.every(c => { var _a; return typeof c === "string" && ((_a = conditionHandlers.get(data.category)) === null || _a === void 0 ? void 0 : _a.loadValidateConditionKey(c)); }) &&
+                    isObject$1(data.data) &&
+                    (data.data.active === undefined || typeof data.data.active === "boolean") &&
+                    (data.data.timer === undefined || data.data.timer === null || typeof data.data.timer === "number") &&
+                    (data.data.timerRemove === undefined || typeof data.data.timerRemove === "boolean") &&
+                    (data.data.requirements === undefined || data.data.requirements === null || guard_ConditionsConditionRequirements(data.data.requirements)) &&
+                    (data.data.favorite === undefined || typeof data.data.favorite === "boolean")) {
+                    return ConditionsUpdateMultiple(data.category, data.conditions, data.data, sender);
+                }
+                else {
+                    return undefined;
+                }
+            };
+            queryHandlers.conditionCategoryUpdate = (sender, data) => {
+                if (isObject$1(data) &&
+                    typeof data.category === "string" &&
+                    conditionHandlers.has(data.category) &&
+                    isObject$1(data.data) &&
+                    (data.data.timer === null || typeof data.data.timer === "number") &&
+                    typeof data.data.timerRemove === "boolean" &&
+                    guard_ConditionsConditionRequirements(data.data.requirements)) {
+                    return ConditionsCategoryUpdate(data.category, data.data, sender);
+                }
+                else {
+                    return undefined;
+                }
+            };
+        }
+        run() {
+            this.timer = BCX_setInterval(() => this.conditionsTick(), CONDITIONS_CHECK_INTERVAL);
+        }
+        unload() {
+            if (this.timer !== null) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
         }
         reload() {
-            removeAllHooksByModule(ModuleCategory.Log);
+            this.unload();
             this.load();
+            this.run();
+        }
+        conditionsTick() {
+            var _a, _b;
+            if (!ServerIsConnected || !modStorage.conditions)
+                return;
+            let dataChanged = false;
+            const now = Date.now();
+            for (const [category, handler] of conditionHandlers.entries()) {
+                const categoryData = modStorage.conditions[category];
+                if (!moduleIsEnabled(handler.category) || !categoryData)
+                    continue;
+                for (const [conditionName, conditionData] of Object.entries(categoryData.conditions)) {
+                    if (conditionData.timer !== undefined && conditionData.timer <= now) {
+                        if (conditionData.timerRemove && conditionData.active) {
+                            ConditionsRemoveCondition(category, conditionName);
+                            return;
+                        }
+                        else {
+                            delete conditionData.timer;
+                            delete conditionData.timerRemove;
+                            conditionData.active = !conditionData.active;
+                            dataChanged = true;
+                        }
+                    }
+                    const resolvedActive = conditionData.active && ConditionsEvaluateRequirements((_a = conditionData.requirements) !== null && _a !== void 0 ? _a : categoryData.requirements);
+                    if (resolvedActive !== conditionData.lastActive) {
+                        conditionData.lastActive = resolvedActive;
+                        dataChanged = true;
+                        const copyChange = cloneDeep(conditionData);
+                        handler.stateChangeHandler(conditionName, conditionData, resolvedActive);
+                        if (!isEqual(copyChange, conditionData)) {
+                            dataChanged = true;
+                        }
+                    }
+                    if (!resolvedActive)
+                        continue;
+                    const copy = cloneDeep(conditionData);
+                    handler.tickHandler(conditionName, conditionData);
+                    if (!isEqual(copy, conditionData)) {
+                        dataChanged = true;
+                    }
+                }
+                (_b = handler.afterTickHandler) === null || _b === void 0 ? void 0 : _b.call(handler);
+            }
+            if (dataChanged) {
+                modStorageSync();
+                notifyOfChange();
+            }
+        }
+    }
+
+    const MAX_STACK_SIZE = 15;
+    let firstError = true;
+    let lastReceivedMessageType = "";
+    let lastReceivedMessageTime = 0;
+    let lastSentMessageType = "";
+    let lastSentMessageTime = 0;
+    let logServerMessages = false;
+    function debugSetLogServerMessages(value) {
+        logServerMessages = value;
+    }
+    function debugGenerateReport(includeBCX = true) {
+        let res = `----- Debug report -----\n`;
+        res += `Location: ${window.location.href.replace(/\d{4,}/g, "<numbers>")}\n`;
+        res += `UA: ${window.navigator.userAgent}\n`;
+        res += `BC Version: ${GameVersion}\n`;
+        res += `ModSDK Version: ${bcModSDK.version}\n`;
+        res += `Mods:\n` +
+            bcModSDK.getModsInfo()
+                .map(mod => `  - ${mod.fullName} (${mod.name}): ${mod.version}\n` + (mod.repository ? `    repository: ${mod.repository}\n` : ""))
+                .join("");
+        const otherMods = Object.entries(detectOtherMods()).filter(i => i[1]);
+        if (otherMods.length > 0) {
+            res += `Detected legacy mods (NOT USING ModSDK):\n` +
+                otherMods
+                    .map(i => `  - ${i[0]}` + (typeof i[1] !== "boolean" ? `: ${i[1]}` : "") + "\n")
+                    .join("");
+        }
+        else {
+            res += `No known legacy mods detected.\n`;
+        }
+        const now = Date.now();
+        res += `\n----- BC state report -----\n`;
+        res += `Mouse position: ${MouseX} ${MouseY}\n`;
+        res += `Connected to server: ${ServerIsConnected}\n`;
+        res += `Local time: ${now}\n`;
+        res += `Server time: ${CurrentTime} (diff: ${(CurrentTime - now).toFixed(2)})\n`;
+        res += `Screen: ${CurrentModule}/${CurrentScreen}\n`;
+        res += `In chatroom: ${ServerPlayerIsInChatRoom()}\n`;
+        res += `GLVersion: ${GLVersion}\n`;
+        res += `Last received message: ${lastReceivedMessageType} (${lastReceivedMessageTime})\n`;
+        res += `Last sent message: ${lastSentMessageType} (${lastSentMessageTime})\n`;
+        if (includeBCX) {
+            res += `\n----- BCX report -----\n`;
+            res += `Version: ${VERSION$1}\n`;
+            res += `Init state: ${ModuleInitPhase[moduleInitPhase]}\n`;
+            res += `First init: ${firstTimeInit}\n`;
+            res += `Disabled modules: ${getDisabledModules().map(i => ModuleCategory[i]).join(", ") || "[None]"}\n`;
+            try {
+                if (ConditionsGetCategoryEnabled("curses")) {
+                    res += `Curses: ${Object.keys(ConditionsGetCategoryData("curses").conditions).join(", ") || "[None]"}\n`;
+                }
+            }
+            catch (error) {
+                res += `ERROR getting Curses data: ${debugPrettifyError(error)}\n`;
+            }
+            try {
+                if (ConditionsGetCategoryEnabled("rules")) {
+                    res += `Rules: ${Object.keys(ConditionsGetCategoryData("rules").conditions).join(", ") || "[None]"}\n`;
+                }
+            }
+            catch (error) {
+                res += `ERROR getting Rules data: ${debugPrettifyError(error)}\n`;
+            }
+        }
+        res += "\n" + debugGenerateSDKReport(includeBCX);
+        return res;
+    }
+    function debugGenerateSDKReport(verbose = false) {
+        let res = `----- ModSDK report -----\n`;
+        const patchingInfo = Array.from(bcModSDK.getPatchingInfo().values());
+        let hadWarnings = false;
+        const overwrittenFunctions = patchingInfo.filter(fn => fn.currentEntrypoint !== fn.sdkEntrypoint);
+        if (overwrittenFunctions.length > 0) {
+            hadWarnings = true;
+            res += `Functions overwritten by non-ModSDK mods:\n` +
+                overwrittenFunctions.map(fn => { var _a, _b; return `  - ${fn.name}: ${crc32((_b = (_a = fn.currentEntrypoint) === null || _a === void 0 ? void 0 : _a.toString().replaceAll("\r\n", "\n")) !== null && _b !== void 0 ? _b : "")}\n`; }).join("");
+        }
+        if (!hadWarnings) {
+            res += `No warnings.\n`;
+        }
+        const unexpectedHashes = getPatchedFunctionsHashes(false);
+        if (unexpectedHashes.length > 0 && (verbose || SUPPORTED_BC_VERSIONS.includes(GameVersion))) {
+            res += `\n----- BCX Patching report -----\n`;
+            if (unexpectedHashes.length > 0) {
+                res += `Patched functions with unknown checksums:\n` +
+                    unexpectedHashes.map(i => `  - ${i[0]}: ${i[1]}\n`).join("");
+            }
+        }
+        else if (verbose) {
+            res += `\n----- BCX Patching report -----\n`;
+            res += `No warnings.\n`;
+        }
+        return res;
+    }
+    function cleanupErrorLocation(location) {
+        return location
+            .replaceAll(window.location.href.substring(0, window.location.href.lastIndexOf("/")), "<url>")
+            .replace(/https:\/\/[^?/]+\/([^?]+)?bcx.js(?=$|\?|:)/, "<bcx>")
+            .replace(/\/\d{4,}\.html/, "/<numbers>.html")
+            .replace(/[?&]_=\d+(?=$|&|:)/, "");
+    }
+    function debugPrettifyError(error) {
+        if (error instanceof Error) {
+            let stack = `${error.stack}`.split("\n");
+            if (stack.length > MAX_STACK_SIZE) {
+                stack = stack.slice(0, MAX_STACK_SIZE).concat("    ...");
+            }
+            return stack.map(cleanupErrorLocation).join("\n");
+        }
+        return `${error}`;
+    }
+    function debugGenerateReportErrorEvent(event) {
+        const currentMod = contextCurrentModArea();
+        let res = `----- UNHANDLED ERROR ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n` +
+            `Message: ${event.message}\n` +
+            `Source: ${cleanupErrorLocation(event.filename)}:${event.lineno}:${event.colno}\n`;
+        res += debugPrettifyError(event.error) + "\n\n";
+        res += debugMakeContextReport();
+        try {
+            res += "\n" + debugGenerateReport(currentMod === "BCX");
+        }
+        catch (error) {
+            res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error)}`;
+        }
+        return res;
+    }
+    function debugGenerateReportManualError(description, error) {
+        const currentMod = contextCurrentModArea();
+        let res = `----- ERROR ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n` +
+            `Description: ${description}\n`;
+        res += debugPrettifyError(error) + "\n\n";
+        res += debugMakeContextReport();
+        try {
+            res += "\n" + debugGenerateReport(currentMod === "BCX");
+        }
+        catch (error2) {
+            res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error2)}`;
+        }
+        return res;
+    }
+    function showErrorOverlay(title, description, contents, wrapCodeBlock = true, minTimeout, preContentHook) {
+        var _a, _b;
+        console.info("Error overlay displayed\n", contents);
+        if (wrapCodeBlock) {
+            contents = "```\n" + contents.trim() + "\n```";
+        }
+        const overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.inset = "0px";
+        overlay.style.zIndex = "999999";
+        overlay.style.background = "#00000090";
+        const win = document.createElement("div");
+        overlay.appendChild(win);
+        win.style.position = "absolute";
+        win.style.inset = "5%";
+        win.style.background = "white";
+        win.style.display = "flex";
+        win.style.flexDirection = "column";
+        win.style.padding = "1em";
+        const titleElem = document.createElement("h1");
+        win.appendChild(titleElem);
+        titleElem.innerText = title;
+        const descriptionElement = document.createElement("p");
+        win.appendChild(descriptionElement);
+        descriptionElement.innerHTML = description;
+        const contentElem = document.createElement("textarea");
+        if (preContentHook) {
+            preContentHook(win);
+        }
+        else {
+            const copy = document.createElement("button");
+            copy.style.cursor = "pointer";
+            win.appendChild(copy);
+            copy.innerText = "Copy report";
+            copy.onclick = () => {
+                contentElem.focus();
+                contentElem.select();
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(contentElem.value);
+                }
+                else {
+                    try {
+                        document.execCommand("copy");
+                    }
+                    catch (err) {
+                    }
+                }
+            };
+        }
+        win.appendChild(contentElem);
+        contentElem.readOnly = true;
+        contentElem.value = contents;
+        contentElem.style.flex = "1";
+        contentElem.style.margin = "0.5em 0";
+        let timeout = minTimeout !== null && minTimeout !== void 0 ? minTimeout : 0;
+        const close = document.createElement("button");
+        win.appendChild(close);
+        close.onclick = () => {
+            if (timeout > 0)
+                return;
+            overlay.remove();
+        };
+        const updateCloseButton = () => {
+            close.innerText = timeout > 0 ? `Close (${timeout})` : "Close";
+            close.disabled = timeout > 0;
+            if (timeout > 0) {
+                BCX_setTimeout(() => {
+                    timeout--;
+                    updateCloseButton();
+                }, 1000);
+            }
+            else {
+                close.style.cursor = "pointer";
+            }
+        };
+        updateCloseButton();
+        (_b = (_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.blur) === null || _b === void 0 ? void 0 : _b.call(_a);
+        window.document.body.appendChild(overlay);
+    }
+    let compatibilityCheckTimeout;
+    const COMPATIBILITY_CHECK_INTERVAL = 60000;
+    let didReportCompatibilityIssues = false;
+    function detectCompatibilityProblems() {
+        if (didReportCompatibilityIssues || moduleInitPhase !== ModuleInitPhase.ready)
+            return;
+        const legacyMods = detectOtherMods();
+        let result = "";
+        let wait = 0;
+        if (legacyMods.BcUtil) {
+            wait = 5;
+            result += `----- BC-Util -----\n` +
+                `BCX detected the presence of the incompatible mod BC-Util.\n` +
+                `BC-Util is a useful and high quality mod, which has unfortunately not been updated since September 2021 and doesn't use ModSDK.\n` +
+                `It isn't compatible with BCX due to that and is known to cause problems, including crashes (especially in the wardrobe).\n` +
+                `\n`;
+        }
+        if (legacyMods.QuickAccessMenu) {
+            wait = 5;
+            result += `----- Quick Access Menu (QAM) -----\n` +
+                `BCX detected the presence of the incompatible mod Quick Access Menu.\n` +
+                `Besides not using ModSDK to support compatibility with other mods, it also modifies parts of the game such that it can break parts of BCX's functionality.\n` +
+                `Its author has refused multiple times to make the mod more compatible with other mods, causing a fair amount of extra work for other moders (for example BCX & FBC).\n` +
+                `Error reports while using QAM will not be acted upon.\n` +
+                `\n`;
+        }
+        if (legacyMods.Curse) {
+            result += `----- "Cursed" Script -----\n` +
+                `BCX detected the presence of the obsolete mod Cursed script.\n` +
+                `Curse is the spiritual predecessor of BCX, and can be considered obsolete since BCX has almost the same features (and much more). Curse is no longer updated since September 2021 and doesn't use ModSDK.\n` +
+                `As BCX is meant to supersede Curse, no compatibility can be guaranteed.\n` +
+                `\n`;
+        }
+        const patchingInfo = Array.from(bcModSDK.getPatchingInfo().values());
+        const unexpectedHashes = SUPPORTED_BC_VERSIONS.includes(GameVersion) ? getPatchedFunctionsHashes(false) : [];
+        const overwrittenFunctions = patchingInfo.filter(fn => fn.currentEntrypoint !== fn.sdkEntrypoint);
+        if (Array.from(Object.values(legacyMods)).every(v => !v) && (unexpectedHashes.length > 0 || overwrittenFunctions.length > 0)) {
+            result += `----- Unknown mod not using ModSDK -----\n` +
+                `BCX detected the presence of modifications not done using ModSDK or any known legacy mod.\n` +
+                `If you are not author of the mod, please report what mod caused this warning on the BC Scripting Community Discord server: https://discord.gg/SHJMjEh9VH\n` +
+                `If you are author of the mod triggering this warning, please modify your mod to use ModSDK: https://github.com/Jomshir98/bondage-club-mod-sdk. Feel free to ask for help doing that on the above-mentioned Discord server.\n` +
+                `\n`;
+        }
+        if (result) {
+            result += `----- Detected modifications -----\n` +
+                (unexpectedHashes.length > 0 ? `Patched functions with unknown checksums:\n` + unexpectedHashes.map(i => `  - ${i[0]}: ${i[1]}\n`).join("") : "") +
+                (overwrittenFunctions.length > 0 ? `Overwritten functions:\n` + overwrittenFunctions.map(fn => { var _a, _b; return `  - ${fn.name}: ${crc32((_b = (_a = fn.currentEntrypoint) === null || _a === void 0 ? void 0 : _a.toString().replaceAll("\r\n", "\n")) !== null && _b !== void 0 ? _b : "")}\n`; }).join("") : "") +
+                `\n`;
+        }
+        if (result) {
+            const checksum = crc32(result);
+            if (modStorage.compatibilityCheckerWarningIgnore === checksum)
+                return;
+            didReportCompatibilityIssues = true;
+            showErrorOverlay("BCX Compatibility checker", "BCX's Compatibility checker detected problems with other mods you appear to be using.<br />" +
+                "For reasons stated below please reconsider using mentioned mods.<br />" +
+                "Please note, that this is a warning for you, not meant to be reported. It says that some features are likely to be broken.<br />" +
+                "If you have any questions or think this message is an error, please get in touch with us on <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community</a> Discord server.<br />" +
+                "You can use the 'Close' button at the bottom to continue anyway.", result + `Report signature: ${checksum}`, false, wait, (win) => {
+                const doNotShowAgain = document.createElement("button");
+                doNotShowAgain.style.cursor = "pointer";
+                win.appendChild(doNotShowAgain);
+                doNotShowAgain.innerText = "Do not show this report again unless something changes";
+                doNotShowAgain.onclick = () => {
+                    doNotShowAgain.innerText = "This report won't show again unless something changes.";
+                    doNotShowAgain.disabled = true;
+                    modStorage.compatibilityCheckerWarningIgnore = checksum;
+                    modStorageSync();
+                };
+            });
+        }
+        else if (modStorage.compatibilityCheckerWarningIgnore != null) {
+            delete modStorage.compatibilityCheckerWarningIgnore;
+            modStorageSync();
+        }
+    }
+    const sourceBasedErrorMessage = {
+        bcx: "<br /><h3>Whoops... seems like BCX might be to blame this time</h3> Could you please help us by submitting the report below to the <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server?<br />Thank you!</p>",
+        knownMod: (mod) => `<br /><h3>The error seems to come from mod ${mod}</h3> Please submit the report to <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server!`,
+        bc: "<br /><h3>The error seems not to come from any ModSDK mod!</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
+        unknown: "<br /><h3>Could not detect origin of the error.</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
+    };
+    function onUnhandledError(event) {
+        if (!firstError)
+            return;
+        firstError = false;
+        const currentMod = contextCurrentModArea();
+        showErrorOverlay("Crash Handler (by ModSDK)", "The Crash Handler provided by ModSDK detected an uncaught error, which most likely crashed the Bondage Club.<br />" +
+            "While reporting this error, please use the information below to help us find the source faster.<br />" +
+            "You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
+            (currentMod === "BCX" ? sourceBasedErrorMessage.bcx :
+                currentMod === "" ? sourceBasedErrorMessage.bc :
+                    currentMod == null ? sourceBasedErrorMessage.unknown :
+                        sourceBasedErrorMessage.knownMod(currentMod)), debugGenerateReportErrorEvent(event));
+    }
+    function reportManualError(description, error) {
+        console.error(`BCX: Error report: ${description}\n`, error);
+        if (!firstError)
+            return;
+        firstError = false;
+        const currentMod = contextCurrentModArea();
+        showErrorOverlay("Error Report (by BCX)", "The following error happend in event originating from BCX.<br />" +
+            "While reporting this error, please use the information below to help us find the source faster.<br />" +
+            "You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
+            (currentMod === "BCX" ? sourceBasedErrorMessage.bcx :
+                currentMod === "" ? sourceBasedErrorMessage.bc :
+                    currentMod == null ? sourceBasedErrorMessage.unknown :
+                        sourceBasedErrorMessage.knownMod(currentMod)), debugGenerateReportManualError(description, error));
+    }
+    let originalSocketEmit;
+    function bcxSocketEmit(...args) {
+        const message = Array.isArray(args[0]) && typeof args[0][0] === "string" ? args[0][0] : "[unknown]";
+        lastReceivedMessageType = message;
+        lastReceivedMessageTime = Date.now();
+        const parameters = Array.isArray(args[0]) ? args[0].slice(1) : [];
+        if (logServerMessages) {
+            console.log("\u2B07 Receive", message, ...parameters);
+        }
+        const ctx = debugContextStart(`Server message ${message}`, {
+            root: true,
+            modArea: "",
+            extraInfo() {
+                return `Event: ${message}\n` + parameters.map(i => JSON.stringify(i, undefined, "  ")).join("\n");
+            },
+        });
+        const res = originalSocketEmit === null || originalSocketEmit === void 0 ? void 0 : originalSocketEmit.apply(this, args);
+        ctx.end();
+        return res;
+    }
+    let originalClick;
+    function bcxClick(event) {
+        const ctx = debugContextStart(`Canvas click`, {
+            root: true,
+            modArea: "",
+            extraInfo: () => `X: ${MouseX}\nY: ${MouseY}`,
+        });
+        const res = originalClick === null || originalClick === void 0 ? void 0 : originalClick.call(this, event);
+        ctx.end();
+        return res;
+    }
+    let originalRAF;
+    function bcxRaf(fn) {
+        var _a;
+        return (_a = originalRAF === null || originalRAF === void 0 ? void 0 : originalRAF.call(this, (...rafArgs) => {
+            const ctx = debugContextStart(`Animation frame`, {
+                root: true,
+                modArea: "",
+                extraInfo: () => `time: ${rafArgs}`,
+            });
+            const res = fn.apply(window, rafArgs);
+            ctx.end();
+            return res;
+        })) !== null && _a !== void 0 ? _a : 0;
+    }
+    function InitErrorReporter() {
+        var _a;
+        window.addEventListener("error", onUnhandledError);
+        if (originalSocketEmit === undefined && typeof ((_a = ServerSocket === null || ServerSocket === void 0 ? void 0 : ServerSocket.__proto__) === null || _a === void 0 ? void 0 : _a.emitEvent) === "function") {
+            originalSocketEmit = ServerSocket.__proto__.emitEvent;
+            ServerSocket.__proto__.emitEvent = bcxSocketEmit;
+        }
+        const canvas = document.getElementById("MainCanvas");
+        if (canvas) {
+            if (originalClick === undefined && typeof canvas.onclick === "function") {
+                originalClick = canvas.onclick;
+                canvas.onclick = bcxClick;
+            }
+        }
+        if (originalRAF === undefined && typeof window.requestAnimationFrame === "function") {
+            originalRAF = window.requestAnimationFrame;
+            window.requestAnimationFrame = bcxRaf;
+        }
+        hookFunction("ServerSend", 0, (args, next) => {
+            lastSentMessageType = args[0];
+            lastSentMessageTime = Date.now();
+            if (logServerMessages) {
+                console.log("\u2B06 Send", ...args);
+            }
+            return next(args);
+        });
+        if (compatibilityCheckTimeout == null) {
+            compatibilityCheckTimeout = BCX_setInterval(() => {
+                detectCompatibilityProblems();
+            }, COMPATIBILITY_CHECK_INTERVAL);
+            BCX_setTimeout(() => {
+                detectCompatibilityProblems();
+            }, 3000);
+        }
+    }
+    function UnloadErrorReporter() {
+        window.removeEventListener("error", onUnhandledError);
+        if (originalSocketEmit && ServerSocket.__proto__.emitEvent === bcxSocketEmit) {
+            ServerSocket.__proto__.emitEvent = originalSocketEmit;
+            originalSocketEmit = undefined;
+        }
+        const canvas = document.getElementById("MainCanvas");
+        if (canvas && originalClick && canvas.onclick === bcxClick) {
+            canvas.onclick = originalClick;
+            originalClick = undefined;
+        }
+        if (originalRAF && window.requestAnimationFrame === bcxRaf) {
+            window.requestAnimationFrame = originalRAF;
+            originalRAF = undefined;
+        }
+        if (compatibilityCheckTimeout != null) {
+            clearInterval(compatibilityCheckTimeout);
+            compatibilityCheckTimeout = undefined;
+        }
+    }
+
+    function loginInit(C) {
+        if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
+            return;
+        SetLoadedBeforeLogin(C);
+        init();
+    }
+    function clearCaches() {
+        if (typeof DrawRunMap !== "undefined") {
+            DrawRunMap.clear();
+            DrawScreen = "";
+        }
+        if (typeof CurrentScreenFunctions !== "undefined") {
+            const w = window;
+            CurrentScreenFunctions = {
+                Run: w[`${CurrentScreen}Run`],
+                Click: w[`${CurrentScreen}Click`],
+                Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
+                Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
+                Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
+                KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
+                Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined,
+            };
+        }
+    }
+    function init() {
+        if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
+            return;
+        const ctx = debugContextStart("BCX init", { modArea: "BCX" });
+        InitErrorReporter();
+        if (!init_modules()) {
+            ctx.end();
+            unload();
+            return;
+        }
+        const currentAccount = Player.MemberNumber;
+        if (currentAccount == null) {
+            throw new Error("No player MemberNumber");
+        }
+        hookFunction("LoginResponse", 0, (args, next) => {
+            const response = args[0];
+            if (isObject$1(response) && typeof response.Name === "string" && typeof response.AccountName === "string" && response.MemberNumber !== currentAccount) {
+                alert(`Attempting to load BCX with different account than already loaded (${response.MemberNumber} vs ${currentAccount}). This is not supported, please refresh the page.`);
+                throw new Error("Attempting to load BCX with different account");
+            }
+            return next(args);
+        });
+        clearCaches();
+        const { BondageClubTools } = detectOtherMods();
+        if (BondageClubTools) {
+            console.warn("BCX: Bondage Club Tools detected!");
+            if (window.BCX_BondageClubToolsPatch === true) {
+                console.info("BCX: Bondage Club Tools already patched, skip!");
+            }
+            else {
+                window.BCX_BondageClubToolsPatch = true;
+                const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
+                const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
+                if (!ChatRoomMessageForwarder || !AccountBeepForwarder) {
+                    throw new Error("Failed to patch for Bondage Club Tools!");
+                }
+                ServerSocket.off("ChatRoomMessage", ChatRoomMessageForwarder);
+                ServerSocket.on("ChatRoomMessage", data => {
+                    if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
+                        ChatRoomMessageForwarder(data);
+                    }
+                });
+                ServerSocket.off("AccountBeep", AccountBeepForwarder);
+                ServerSocket.on("AccountBeep", data => {
+                    var _a;
+                    if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !["Leash", "BCX"].includes(data.BeepType) || !isObject$1((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
+                        AccountBeepForwarder(data);
+                    }
+                });
+            }
+        }
+        window.BCX_Loaded = true;
+        InfoBeep(`BCX loaded! Version: ${VERSION$1.replace(/-[0-f]+$/i, "")}`);
+        console.log(`BCX loaded! Version: ${VERSION$1}`);
+        ctx.end();
+    }
+    function unload() {
+        unload_patches();
+        unload_modules();
+        UnloadErrorReporter();
+        clearCaches();
+        delete window.BCX_Loaded;
+        console.log("BCX: Unloaded.");
+        return true;
+    }
+
+    let nextCheckTimer = null;
+    let versionCheckNewAvailable = null;
+    let versionCheckDidNotify = false;
+    let supporterStatus;
+    let supporterSecret;
+    function setSupporterVisible(visible) {
+        if (visible === !modStorage.supporterHidden)
+            return;
+        if (visible) {
+            delete modStorage.supporterHidden;
+        }
+        else {
+            modStorage.supporterHidden = true;
+        }
+        announceSelf();
+    }
+    const otherSupporterStatus = new Map();
+    function updateOtherSupporterStatus(memberNumber, status, secret) {
+        if (memberNumber === Player.MemberNumber)
+            return;
+        const current = otherSupporterStatus.get(memberNumber);
+        if (current && current.secret === status && current.secret === secret && current.verified)
+            return;
+        if (status && secret) {
+            otherSupporterStatus.set(memberNumber, {
+                verified: status === undefined,
+                status,
+                secret,
+            });
+            if (status && secret) {
+                sendHiddenBeep("supporterCheck", {
+                    memberNumber,
+                    status,
+                    secret,
+                }, VERSION_CHECK_BOT, true);
+            }
+        }
+        else {
+            otherSupporterStatus.delete(memberNumber);
+        }
+    }
+    function sendVersionCheckBeep() {
+        if (nextCheckTimer !== null) {
+            clearTimeout(nextCheckTimer);
+            nextCheckTimer = null;
+        }
+        sendHiddenBeep("versionCheck", {
+            version: VERSION$1,
+            devel: BCX_DEVEL,
+            GameVersion,
+            Source: (BCXSourceExternal ? "E:" : "") + (BCXSource !== null && BCXSource !== void 0 ? BCXSource : "[UNKNOWN]"),
+            UA: window.navigator.userAgent,
+        }, VERSION_CHECK_BOT, true);
+        nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (5 + Math.random()) * 60000);
+    }
+    class ModuleVersionCheck extends BaseModule {
+        load() {
+            hiddenBeepHandlers.set("versionResponse", (sender, message) => {
+                var _a, _b;
+                if (sender !== VERSION_CHECK_BOT) {
+                    console.warn(`BCX: got versionResponse from unexpected sender ${sender}, ignoring`);
+                    return;
+                }
+                if (!isObject$1(message) || typeof message.status !== "string") {
+                    console.warn(`BCX: bad versionResponse`, message);
+                    return;
+                }
+                if (nextCheckTimer !== null) {
+                    clearTimeout(nextCheckTimer);
+                    nextCheckTimer = null;
+                }
+                nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (15 + 5 * Math.random()) * 60000);
+                if (message.status === "current") {
+                    versionCheckNewAvailable = false;
+                }
+                else if (message.status === "newAvailable") {
+                    versionCheckNewAvailable = true;
+                    if (!versionCheckDidNotify) {
+                        versionCheckDidNotify = true;
+                        if (ServerPlayerIsInChatRoom()) {
+                            ChatRoomSendLocal("New BCX version is available! You can upgrade by logging in again.");
+                        }
+                        else {
+                            InfoBeep("New BCX version is available! You can upgrade by logging in again.", 10000);
+                        }
+                    }
+                }
+                else if (message.status === "deprecated") {
+                    versionCheckNewAvailable = true;
+                    if (!versionCheckDidNotify) {
+                        versionCheckDidNotify = true;
+                        const overlay = document.createElement("div");
+                        overlay.style.position = "fixed";
+                        overlay.style.top = "0px";
+                        overlay.style.right = "0px";
+                        overlay.style.bottom = "0px";
+                        overlay.style.left = "0px";
+                        overlay.style.background = "#00000090";
+                        overlay.style.display = "flex";
+                        overlay.style.alignItems = "center";
+                        overlay.style.justifyContent = "center";
+                        const win = document.createElement("div");
+                        overlay.appendChild(win);
+                        win.style.background = "white";
+                        win.style.display = "flex";
+                        win.style.flexDirection = "column";
+                        win.style.padding = "1em";
+                        const titleElem = document.createElement("h1");
+                        win.appendChild(titleElem);
+                        titleElem.innerText = "Deprecated BCX version";
+                        const descriptionElement = document.createElement("p");
+                        win.appendChild(descriptionElement);
+                        descriptionElement.innerText = "The BCX version you are using is too old and either contains critical bugs or " +
+                            "is no longer compatible with the current Bondage Club release version.\n" +
+                            "Unless you are using additional mods preventing this, please refresh the page and log into the club again to load the newest version.";
+                        const close = document.createElement("button");
+                        close.style.cursor = "pointer";
+                        win.appendChild(close);
+                        close.innerText = "Close";
+                        close.onclick = () => {
+                            overlay.remove();
+                        };
+                        (_b = (_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.blur) === null || _b === void 0 ? void 0 : _b.call(_a);
+                        window.document.body.appendChild(overlay);
+                    }
+                }
+                else if (message.status === "unsupported") {
+                    unload();
+                    alert("The BCX version you are trying to load is too old and either contains critical bugs or " +
+                        "is no longer compatible with the current Bondage Club release version. Please update your BCX.");
+                }
+                else {
+                    console.warn(`BCX: bad versionResponse status "${message.status}"`);
+                }
+                if (supporterStatus !== message.supporterStatus || supporterSecret !== message.supporterSecret) {
+                    supporterStatus = message.supporterStatus;
+                    supporterSecret = message.supporterSecret;
+                    announceSelf();
+                }
+            });
+            hiddenBeepHandlers.set("supporterCheckResult", (sender, message) => {
+                if (sender !== VERSION_CHECK_BOT) {
+                    console.warn(`BCX: got supporterCheckResult from unexpected sender ${sender}, ignoring`);
+                    return;
+                }
+                if (!isObject$1(message) || typeof message.memberNumber !== "number" || (message.status !== undefined && typeof message.status !== "string")) {
+                    console.warn(`BCX: bad supporterCheckResult`, message);
+                    return;
+                }
+                const status = otherSupporterStatus.get(message.memberNumber);
+                if (!status) {
+                    console.warn(`BCX: supporterCheckResult unknown memberNumber`, message);
+                    return;
+                }
+                status.status = message.status;
+                status.verified = true;
+            });
+            hookFunction("LoginResponse", 0, (args, next) => {
+                next(args);
+                const response = args[0];
+                if (isObject$1(response) && typeof response.Name === "string" && typeof response.AccountName === "string") {
+                    sendVersionCheckBeep();
+                }
+            });
+        }
+        run() {
+            sendVersionCheckBeep();
+        }
+        unload() {
+            if (nextCheckTimer !== null) {
+                clearTimeout(nextCheckTimer);
+                nextCheckTimer = null;
+            }
+        }
+    }
+
+    class GuiGlobal extends GuiSubscreen {
+        constructor(character) {
+            super();
+            this.character = character;
+        }
+        Run() {
+            MainCanvas.textAlign = "left";
+            DrawText(`- Global: Configuration for ${this.character.Name} -`, 125, 125, "Black", "Gray");
+            MainCanvas.textAlign = "center";
+            DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
+            if (!this.character.isPlayer()) {
+                DrawText(`Global configuration is not possible on others`, 1000, 500, "Black");
+                return;
+            }
+            MainCanvas.fillStyle = "#ddd";
+            MainCanvas.fillRect(840, 200, 950, 90);
+            DrawImageEx("Icons/Introduction.png", 840 + 20, 200 + 20, { Height: 50, Width: 50 });
+            DrawTextFit(`Your initially selected BCX preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
+            DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
+            DrawButton(1490, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
+            MainCanvas.textAlign = "left";
+            DrawCheckbox(125, 350, 64, 64, "Show BCX icons above characters in chatroom", !modStorage.chatroomIconHidden);
+            const isSupporter = supporterStatus !== undefined;
+            DrawCheckbox(125, 450, 64, 64, "Show your BCX Supporter Heart to all BCX users", isSupporter && !modStorage.supporterHidden, !isSupporter);
+        }
+        Click() {
+            if (MouseIn(1815, 75, 90, 90))
+                return this.Exit();
+            if (!this.character.isPlayer())
+                return;
+            if (MouseIn(120, 200, 400, 90)) {
+                setSubscreen(new GuiGlobalModuleToggling());
+                return;
+            }
+            if (MouseIn(1490, 800, 300, 90)) {
+                setSubscreen(new GuiGlobalDialogClearData(this));
+                return;
+            }
+            if (MouseIn(125, 350, 64, 64)) {
+                if (modStorage.chatroomIconHidden != null) {
+                    delete modStorage.chatroomIconHidden;
+                }
+                else {
+                    modStorage.chatroomIconHidden = true;
+                }
+                return;
+            }
+            const isSupporter = supporterStatus !== undefined;
+            if (isSupporter && MouseIn(125, 450, 64, 64)) {
+                setSupporterVisible(!!modStorage.supporterHidden);
+                return;
+            }
+        }
+        Exit() {
+            setSubscreen(new GuiMainMenu(this.character));
         }
     }
 
@@ -35810,14 +36833,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         return data;
                     },
                     import(condition, data, character) {
-                        const validator = mod.object({
-                            Name: mod.string(),
-                            curseProperty: mod.boolean(),
-                            Color: mod.union([mod.string(), mod.array(mod.string())]).optional(),
-                            Difficulty: mod.number().optional(),
-                            Property: mod.custom(isObject$1).optional(),
-                            Craft: mod.any(),
-                            itemRemove: mod.literal(true).optional(),
+                        const validator = z.object({
+                            Name: z.string(),
+                            curseProperty: z.boolean(),
+                            Color: z.union([z.string(), z.array(z.string())]).optional(),
+                            Difficulty: z.number().optional(),
+                            Property: z.custom(isObject$1).optional(),
+                            Craft: z.any(),
+                            itemRemove: z.literal(true).optional(),
                         }).nullable();
                         const validationResult = validator.safeParse(data);
                         if (!validationResult.success) {
@@ -38625,701 +39648,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
     }
 
-    const MAX_STACK_SIZE = 15;
-    let firstError = true;
-    let lastReceivedMessageType = "";
-    let lastReceivedMessageTime = 0;
-    let lastSentMessageType = "";
-    let lastSentMessageTime = 0;
-    let logServerMessages = false;
-    function debugSetLogServerMessages(value) {
-        logServerMessages = value;
-    }
-    function debugGenerateReport(includeBCX = true) {
-        let res = `----- Debug report -----\n`;
-        res += `Location: ${window.location.href.replace(/\d{4,}/g, "<numbers>")}\n`;
-        res += `UA: ${window.navigator.userAgent}\n`;
-        res += `BC Version: ${GameVersion}\n`;
-        res += `ModSDK Version: ${bcModSDK.version}\n`;
-        res += `Mods:\n` +
-            bcModSDK.getModsInfo()
-                .map(mod => `  - ${mod.fullName} (${mod.name}): ${mod.version}\n` + (mod.repository ? `    repository: ${mod.repository}\n` : ""))
-                .join("");
-        const otherMods = Object.entries(detectOtherMods()).filter(i => i[1]);
-        if (otherMods.length > 0) {
-            res += `Detected legacy mods (NOT USING ModSDK):\n` +
-                otherMods
-                    .map(i => `  - ${i[0]}` + (typeof i[1] !== "boolean" ? `: ${i[1]}` : "") + "\n")
-                    .join("");
-        }
-        else {
-            res += `No known legacy mods detected.\n`;
-        }
-        const now = Date.now();
-        res += `\n----- BC state report -----\n`;
-        res += `Mouse position: ${MouseX} ${MouseY}\n`;
-        res += `Connected to server: ${ServerIsConnected}\n`;
-        res += `Local time: ${now}\n`;
-        res += `Server time: ${CurrentTime} (diff: ${(CurrentTime - now).toFixed(2)})\n`;
-        res += `Screen: ${CurrentModule}/${CurrentScreen}\n`;
-        res += `In chatroom: ${ServerPlayerIsInChatRoom()}\n`;
-        res += `GLVersion: ${GLVersion}\n`;
-        res += `Last received message: ${lastReceivedMessageType} (${lastReceivedMessageTime})\n`;
-        res += `Last sent message: ${lastSentMessageType} (${lastSentMessageTime})\n`;
-        if (includeBCX) {
-            res += `\n----- BCX report -----\n`;
-            res += `Version: ${VERSION$1}\n`;
-            res += `Init state: ${ModuleInitPhase[moduleInitPhase]}\n`;
-            res += `First init: ${firstTimeInit}\n`;
-            res += `Disabled modules: ${getDisabledModules().map(i => ModuleCategory[i]).join(", ") || "[None]"}\n`;
-            try {
-                if (ConditionsGetCategoryEnabled("curses")) {
-                    res += `Curses: ${Object.keys(ConditionsGetCategoryData("curses").conditions).join(", ") || "[None]"}\n`;
-                }
-            }
-            catch (error) {
-                res += `ERROR getting Curses data: ${debugPrettifyError(error)}\n`;
-            }
-            try {
-                if (ConditionsGetCategoryEnabled("rules")) {
-                    res += `Rules: ${Object.keys(ConditionsGetCategoryData("rules").conditions).join(", ") || "[None]"}\n`;
-                }
-            }
-            catch (error) {
-                res += `ERROR getting Rules data: ${debugPrettifyError(error)}\n`;
-            }
-        }
-        res += "\n" + debugGenerateSDKReport(includeBCX);
-        return res;
-    }
-    function debugGenerateSDKReport(verbose = false) {
-        let res = `----- ModSDK report -----\n`;
-        const patchingInfo = Array.from(bcModSDK.getPatchingInfo().values());
-        let hadWarnings = false;
-        const overwrittenFunctions = patchingInfo.filter(fn => fn.currentEntrypoint !== fn.sdkEntrypoint);
-        if (overwrittenFunctions.length > 0) {
-            hadWarnings = true;
-            res += `Functions overwritten by non-ModSDK mods:\n` +
-                overwrittenFunctions.map(fn => { var _a, _b; return `  - ${fn.name}: ${crc32((_b = (_a = fn.currentEntrypoint) === null || _a === void 0 ? void 0 : _a.toString().replaceAll("\r\n", "\n")) !== null && _b !== void 0 ? _b : "")}\n`; }).join("");
-        }
-        if (!hadWarnings) {
-            res += `No warnings.\n`;
-        }
-        const unexpectedHashes = getPatchedFunctionsHashes(false);
-        if (unexpectedHashes.length > 0 && (verbose || SUPPORTED_BC_VERSIONS.includes(GameVersion))) {
-            res += `\n----- BCX Patching report -----\n`;
-            if (unexpectedHashes.length > 0) {
-                res += `Patched functions with unknown checksums:\n` +
-                    unexpectedHashes.map(i => `  - ${i[0]}: ${i[1]}\n`).join("");
-            }
-        }
-        else if (verbose) {
-            res += `\n----- BCX Patching report -----\n`;
-            res += `No warnings.\n`;
-        }
-        return res;
-    }
-    function cleanupErrorLocation(location) {
-        return location
-            .replaceAll(window.location.href.substring(0, window.location.href.lastIndexOf("/")), "<url>")
-            .replace(/https:\/\/[^?/]+\/([^?]+)?bcx.js(?=$|\?|:)/, "<bcx>")
-            .replace(/\/\d{4,}\.html/, "/<numbers>.html")
-            .replace(/[?&]_=\d+(?=$|&|:)/, "");
-    }
-    function debugPrettifyError(error) {
-        if (error instanceof Error) {
-            let stack = `${error.stack}`.split("\n");
-            if (stack.length > MAX_STACK_SIZE) {
-                stack = stack.slice(0, MAX_STACK_SIZE).concat("    ...");
-            }
-            return stack.map(cleanupErrorLocation).join("\n");
-        }
-        return `${error}`;
-    }
-    function debugGenerateReportErrorEvent(event) {
-        const currentMod = contextCurrentModArea();
-        let res = `----- UNHANDLED ERROR ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n` +
-            `Message: ${event.message}\n` +
-            `Source: ${cleanupErrorLocation(event.filename)}:${event.lineno}:${event.colno}\n`;
-        res += debugPrettifyError(event.error) + "\n\n";
-        res += debugMakeContextReport();
-        try {
-            res += "\n" + debugGenerateReport(currentMod === "BCX");
-        }
-        catch (error) {
-            res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error)}`;
-        }
-        return res;
-    }
-    function debugGenerateReportManualError(description, error) {
-        const currentMod = contextCurrentModArea();
-        let res = `----- ERROR ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n` +
-            `Description: ${description}\n`;
-        res += debugPrettifyError(error) + "\n\n";
-        res += debugMakeContextReport();
-        try {
-            res += "\n" + debugGenerateReport(currentMod === "BCX");
-        }
-        catch (error2) {
-            res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error2)}`;
-        }
-        return res;
-    }
-    function showErrorOverlay(title, description, contents, wrapCodeBlock = true, minTimeout, preContentHook) {
-        var _a, _b;
-        console.info("Error overlay displayed\n", contents);
-        if (wrapCodeBlock) {
-            contents = "```\n" + contents.trim() + "\n```";
-        }
-        const overlay = document.createElement("div");
-        overlay.style.position = "fixed";
-        overlay.style.inset = "0px";
-        overlay.style.zIndex = "999999";
-        overlay.style.background = "#00000090";
-        const win = document.createElement("div");
-        overlay.appendChild(win);
-        win.style.position = "absolute";
-        win.style.inset = "5%";
-        win.style.background = "white";
-        win.style.display = "flex";
-        win.style.flexDirection = "column";
-        win.style.padding = "1em";
-        const titleElem = document.createElement("h1");
-        win.appendChild(titleElem);
-        titleElem.innerText = title;
-        const descriptionElement = document.createElement("p");
-        win.appendChild(descriptionElement);
-        descriptionElement.innerHTML = description;
-        const contentElem = document.createElement("textarea");
-        if (preContentHook) {
-            preContentHook(win);
-        }
-        else {
-            const copy = document.createElement("button");
-            copy.style.cursor = "pointer";
-            win.appendChild(copy);
-            copy.innerText = "Copy report";
-            copy.onclick = () => {
-                contentElem.focus();
-                contentElem.select();
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(contentElem.value);
-                }
-                else {
-                    try {
-                        document.execCommand("copy");
-                    }
-                    catch (err) {
-                    }
-                }
-            };
-        }
-        win.appendChild(contentElem);
-        contentElem.readOnly = true;
-        contentElem.value = contents;
-        contentElem.style.flex = "1";
-        contentElem.style.margin = "0.5em 0";
-        let timeout = minTimeout !== null && minTimeout !== void 0 ? minTimeout : 0;
-        const close = document.createElement("button");
-        win.appendChild(close);
-        close.onclick = () => {
-            if (timeout > 0)
-                return;
-            overlay.remove();
-        };
-        const updateCloseButton = () => {
-            close.innerText = timeout > 0 ? `Close (${timeout})` : "Close";
-            close.disabled = timeout > 0;
-            if (timeout > 0) {
-                BCX_setTimeout(() => {
-                    timeout--;
-                    updateCloseButton();
-                }, 1000);
-            }
-            else {
-                close.style.cursor = "pointer";
-            }
-        };
-        updateCloseButton();
-        (_b = (_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.blur) === null || _b === void 0 ? void 0 : _b.call(_a);
-        window.document.body.appendChild(overlay);
-    }
-    let compatibilityCheckTimeout;
-    const COMPATIBILITY_CHECK_INTERVAL = 60000;
-    let didReportCompatibilityIssues = false;
-    function detectCompatibilityProblems() {
-        if (didReportCompatibilityIssues || moduleInitPhase !== ModuleInitPhase.ready)
-            return;
-        const legacyMods = detectOtherMods();
-        let result = "";
-        let wait = 0;
-        if (legacyMods.BcUtil) {
-            wait = 5;
-            result += `----- BC-Util -----\n` +
-                `BCX detected the presence of the incompatible mod BC-Util.\n` +
-                `BC-Util is a useful and high quality mod, which has unfortunately not been updated since September 2021 and doesn't use ModSDK.\n` +
-                `It isn't compatible with BCX due to that and is known to cause problems, including crashes (especially in the wardrobe).\n` +
-                `\n`;
-        }
-        if (legacyMods.QuickAccessMenu) {
-            wait = 5;
-            result += `----- Quick Access Menu (QAM) -----\n` +
-                `BCX detected the presence of the incompatible mod Quick Access Menu.\n` +
-                `Besides not using ModSDK to support compatibility with other mods, it also modifies parts of the game such that it can break parts of BCX's functionality.\n` +
-                `Its author has refused multiple times to make the mod more compatible with other mods, causing a fair amount of extra work for other moders (for example BCX & FBC).\n` +
-                `Error reports while using QAM will not be acted upon.\n` +
-                `\n`;
-        }
-        if (legacyMods.Curse) {
-            result += `----- "Cursed" Script -----\n` +
-                `BCX detected the presence of the obsolete mod Cursed script.\n` +
-                `Curse is the spiritual predecessor of BCX, and can be considered obsolete since BCX has almost the same features (and much more). Curse is no longer updated since September 2021 and doesn't use ModSDK.\n` +
-                `As BCX is meant to supersede Curse, no compatibility can be guaranteed.\n` +
-                `\n`;
-        }
-        const patchingInfo = Array.from(bcModSDK.getPatchingInfo().values());
-        const unexpectedHashes = SUPPORTED_BC_VERSIONS.includes(GameVersion) ? getPatchedFunctionsHashes(false) : [];
-        const overwrittenFunctions = patchingInfo.filter(fn => fn.currentEntrypoint !== fn.sdkEntrypoint);
-        if (Array.from(Object.values(legacyMods)).every(v => !v) && (unexpectedHashes.length > 0 || overwrittenFunctions.length > 0)) {
-            result += `----- Unknown mod not using ModSDK -----\n` +
-                `BCX detected the presence of modifications not done using ModSDK or any known legacy mod.\n` +
-                `If you are not author of the mod, please report what mod caused this warning on the BC Scripting Community Discord server: https://discord.gg/SHJMjEh9VH\n` +
-                `If you are author of the mod triggering this warning, please modify your mod to use ModSDK: https://github.com/Jomshir98/bondage-club-mod-sdk. Feel free to ask for help doing that on the above-mentioned Discord server.\n` +
-                `\n`;
-        }
-        if (result) {
-            result += `----- Detected modifications -----\n` +
-                (unexpectedHashes.length > 0 ? `Patched functions with unknown checksums:\n` + unexpectedHashes.map(i => `  - ${i[0]}: ${i[1]}\n`).join("") : "") +
-                (overwrittenFunctions.length > 0 ? `Overwritten functions:\n` + overwrittenFunctions.map(fn => { var _a, _b; return `  - ${fn.name}: ${crc32((_b = (_a = fn.currentEntrypoint) === null || _a === void 0 ? void 0 : _a.toString().replaceAll("\r\n", "\n")) !== null && _b !== void 0 ? _b : "")}\n`; }).join("") : "") +
-                `\n`;
-        }
-        if (result) {
-            const checksum = crc32(result);
-            if (modStorage.compatibilityCheckerWarningIgnore === checksum)
-                return;
-            didReportCompatibilityIssues = true;
-            showErrorOverlay("BCX Compatibility checker", "BCX's Compatibility checker detected problems with other mods you appear to be using.<br />" +
-                "For reasons stated below please reconsider using mentioned mods.<br />" +
-                "Please note, that this is a warning for you, not meant to be reported. It says that some features are likely to be broken.<br />" +
-                "If you have any questions or think this message is an error, please get in touch with us on <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community</a> Discord server.<br />" +
-                "You can use the 'Close' button at the bottom to continue anyway.", result + `Report signature: ${checksum}`, false, wait, (win) => {
-                const doNotShowAgain = document.createElement("button");
-                doNotShowAgain.style.cursor = "pointer";
-                win.appendChild(doNotShowAgain);
-                doNotShowAgain.innerText = "Do not show this report again unless something changes";
-                doNotShowAgain.onclick = () => {
-                    doNotShowAgain.innerText = "This report won't show again unless something changes.";
-                    doNotShowAgain.disabled = true;
-                    modStorage.compatibilityCheckerWarningIgnore = checksum;
-                    modStorageSync();
-                };
-            });
-        }
-        else if (modStorage.compatibilityCheckerWarningIgnore != null) {
-            delete modStorage.compatibilityCheckerWarningIgnore;
-            modStorageSync();
-        }
-    }
-    const sourceBasedErrorMessage = {
-        bcx: "<br /><h3>Whoops... seems like BCX might be to blame this time</h3> Could you please help us by submitting the report below to the <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server?<br />Thank you!</p>",
-        knownMod: (mod) => `<br /><h3>The error seems to come from mod ${mod}</h3> Please submit the report to <a href='https://discord.gg/SHJMjEh9VH' target='_blank'>BC Scripting Community Discord</a> server!`,
-        bc: "<br /><h3>The error seems not to come from any ModSDK mod!</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
-        unknown: "<br /><h3>Could not detect origin of the error.</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!",
-    };
-    function onUnhandledError(event) {
-        if (!firstError)
-            return;
-        firstError = false;
-        const currentMod = contextCurrentModArea();
-        showErrorOverlay("Crash Handler (by ModSDK)", "The Crash Handler provided by ModSDK detected an uncaught error, which most likely crashed the Bondage Club.<br />" +
-            "While reporting this error, please use the information below to help us find the source faster.<br />" +
-            "You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
-            (currentMod === "BCX" ? sourceBasedErrorMessage.bcx :
-                currentMod === "" ? sourceBasedErrorMessage.bc :
-                    currentMod == null ? sourceBasedErrorMessage.unknown :
-                        sourceBasedErrorMessage.knownMod(currentMod)), debugGenerateReportErrorEvent(event));
-    }
-    function reportManualError(description, error) {
-        console.error(`BCX: Error report: ${description}\n`, error);
-        if (!firstError)
-            return;
-        firstError = false;
-        const currentMod = contextCurrentModArea();
-        showErrorOverlay("Error Report (by BCX)", "The following error happend in event originating from BCX.<br />" +
-            "While reporting this error, please use the information below to help us find the source faster.<br />" +
-            "You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
-            (currentMod === "BCX" ? sourceBasedErrorMessage.bcx :
-                currentMod === "" ? sourceBasedErrorMessage.bc :
-                    currentMod == null ? sourceBasedErrorMessage.unknown :
-                        sourceBasedErrorMessage.knownMod(currentMod)), debugGenerateReportManualError(description, error));
-    }
-    let originalSocketEmit;
-    function bcxSocketEmit(...args) {
-        const message = Array.isArray(args[0]) && typeof args[0][0] === "string" ? args[0][0] : "[unknown]";
-        lastReceivedMessageType = message;
-        lastReceivedMessageTime = Date.now();
-        const parameters = Array.isArray(args[0]) ? args[0].slice(1) : [];
-        if (logServerMessages) {
-            console.log("\u2B07 Receive", message, ...parameters);
-        }
-        const ctx = debugContextStart(`Server message ${message}`, {
-            root: true,
-            modArea: "",
-            extraInfo() {
-                return `Event: ${message}\n` + parameters.map(i => JSON.stringify(i, undefined, "  ")).join("\n");
-            },
-        });
-        const res = originalSocketEmit === null || originalSocketEmit === void 0 ? void 0 : originalSocketEmit.apply(this, args);
-        ctx.end();
-        return res;
-    }
-    let originalClick;
-    function bcxClick(event) {
-        const ctx = debugContextStart(`Canvas click`, {
-            root: true,
-            modArea: "",
-            extraInfo: () => `X: ${MouseX}\nY: ${MouseY}`,
-        });
-        const res = originalClick === null || originalClick === void 0 ? void 0 : originalClick.call(this, event);
-        ctx.end();
-        return res;
-    }
-    let originalRAF;
-    function bcxRaf(fn) {
-        var _a;
-        return (_a = originalRAF === null || originalRAF === void 0 ? void 0 : originalRAF.call(this, (...rafArgs) => {
-            const ctx = debugContextStart(`Animation frame`, {
-                root: true,
-                modArea: "",
-                extraInfo: () => `time: ${rafArgs}`,
-            });
-            const res = fn.apply(window, rafArgs);
-            ctx.end();
-            return res;
-        })) !== null && _a !== void 0 ? _a : 0;
-    }
-    function InitErrorReporter() {
-        var _a;
-        window.addEventListener("error", onUnhandledError);
-        if (originalSocketEmit === undefined && typeof ((_a = ServerSocket === null || ServerSocket === void 0 ? void 0 : ServerSocket.__proto__) === null || _a === void 0 ? void 0 : _a.emitEvent) === "function") {
-            originalSocketEmit = ServerSocket.__proto__.emitEvent;
-            ServerSocket.__proto__.emitEvent = bcxSocketEmit;
-        }
-        const canvas = document.getElementById("MainCanvas");
-        if (canvas) {
-            if (originalClick === undefined && typeof canvas.onclick === "function") {
-                originalClick = canvas.onclick;
-                canvas.onclick = bcxClick;
-            }
-        }
-        if (originalRAF === undefined && typeof window.requestAnimationFrame === "function") {
-            originalRAF = window.requestAnimationFrame;
-            window.requestAnimationFrame = bcxRaf;
-        }
-        hookFunction("ServerSend", 0, (args, next) => {
-            lastSentMessageType = args[0];
-            lastSentMessageTime = Date.now();
-            if (logServerMessages) {
-                console.log("\u2B06 Send", ...args);
-            }
-            return next(args);
-        });
-        if (compatibilityCheckTimeout == null) {
-            compatibilityCheckTimeout = BCX_setInterval(() => {
-                detectCompatibilityProblems();
-            }, COMPATIBILITY_CHECK_INTERVAL);
-            BCX_setTimeout(() => {
-                detectCompatibilityProblems();
-            }, 3000);
-        }
-    }
-    function UnloadErrorReporter() {
-        window.removeEventListener("error", onUnhandledError);
-        if (originalSocketEmit && ServerSocket.__proto__.emitEvent === bcxSocketEmit) {
-            ServerSocket.__proto__.emitEvent = originalSocketEmit;
-            originalSocketEmit = undefined;
-        }
-        const canvas = document.getElementById("MainCanvas");
-        if (canvas && originalClick && canvas.onclick === bcxClick) {
-            canvas.onclick = originalClick;
-            originalClick = undefined;
-        }
-        if (originalRAF && window.requestAnimationFrame === bcxRaf) {
-            window.requestAnimationFrame = originalRAF;
-            originalRAF = undefined;
-        }
-        if (compatibilityCheckTimeout != null) {
-            clearInterval(compatibilityCheckTimeout);
-            compatibilityCheckTimeout = undefined;
-        }
-    }
-
-    function loginInit(C) {
-        if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
-            return;
-        SetLoadedBeforeLogin(C);
-        init();
-    }
-    function clearCaches() {
-        if (typeof DrawRunMap !== "undefined") {
-            DrawRunMap.clear();
-            DrawScreen = "";
-        }
-        if (typeof CurrentScreenFunctions !== "undefined") {
-            const w = window;
-            CurrentScreenFunctions = {
-                Run: w[`${CurrentScreen}Run`],
-                Click: w[`${CurrentScreen}Click`],
-                Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
-                Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
-                Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
-                KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
-                Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined,
-            };
-        }
-    }
-    function init() {
-        if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
-            return;
-        const ctx = debugContextStart("BCX init", { modArea: "BCX" });
-        InitErrorReporter();
-        if (!init_modules()) {
-            ctx.end();
-            unload();
-            return;
-        }
-        const currentAccount = Player.MemberNumber;
-        if (currentAccount == null) {
-            throw new Error("No player MemberNumber");
-        }
-        hookFunction("LoginResponse", 0, (args, next) => {
-            const response = args[0];
-            if (isObject$1(response) && typeof response.Name === "string" && typeof response.AccountName === "string" && response.MemberNumber !== currentAccount) {
-                alert(`Attempting to load BCX with different account than already loaded (${response.MemberNumber} vs ${currentAccount}). This is not supported, please refresh the page.`);
-                throw new Error("Attempting to load BCX with different account");
-            }
-            return next(args);
-        });
-        clearCaches();
-        const { BondageClubTools } = detectOtherMods();
-        if (BondageClubTools) {
-            console.warn("BCX: Bondage Club Tools detected!");
-            if (window.BCX_BondageClubToolsPatch === true) {
-                console.info("BCX: Bondage Club Tools already patched, skip!");
-            }
-            else {
-                window.BCX_BondageClubToolsPatch = true;
-                const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
-                const AccountBeepForwarder = ServerSocket.listeners("AccountBeep").find(i => i.toString().includes("window.postMessage"));
-                if (!ChatRoomMessageForwarder || !AccountBeepForwarder) {
-                    throw new Error("Failed to patch for Bondage Club Tools!");
-                }
-                ServerSocket.off("ChatRoomMessage", ChatRoomMessageForwarder);
-                ServerSocket.on("ChatRoomMessage", data => {
-                    if ((data === null || data === void 0 ? void 0 : data.Type) !== "Hidden" || data.Content !== "BCXMsg" || typeof data.Sender !== "number") {
-                        ChatRoomMessageForwarder(data);
-                    }
-                });
-                ServerSocket.off("AccountBeep", AccountBeepForwarder);
-                ServerSocket.on("AccountBeep", data => {
-                    var _a;
-                    if (typeof (data === null || data === void 0 ? void 0 : data.BeepType) !== "string" || !["Leash", "BCX"].includes(data.BeepType) || !isObject$1((_a = data.Message) === null || _a === void 0 ? void 0 : _a.BCX)) {
-                        AccountBeepForwarder(data);
-                    }
-                });
-            }
-        }
-        window.BCX_Loaded = true;
-        InfoBeep(`BCX loaded! Version: ${VERSION$1.replace(/-[0-f]+$/i, "")}`);
-        console.log(`BCX loaded! Version: ${VERSION$1}`);
-        ctx.end();
-    }
-    function unload() {
-        unload_patches();
-        unload_modules();
-        UnloadErrorReporter();
-        clearCaches();
-        delete window.BCX_Loaded;
-        console.log("BCX: Unloaded.");
-        return true;
-    }
-
-    let nextCheckTimer = null;
-    let versionCheckNewAvailable = null;
-    let versionCheckDidNotify = false;
-    let supporterStatus;
-    let supporterSecret;
-    function setSupporterVisible(visible) {
-        if (visible === !modStorage.supporterHidden)
-            return;
-        if (visible) {
-            delete modStorage.supporterHidden;
-        }
-        else {
-            modStorage.supporterHidden = true;
-        }
-        announceSelf();
-    }
-    const otherSupporterStatus = new Map();
-    function updateOtherSupporterStatus(memberNumber, status, secret) {
-        if (memberNumber === Player.MemberNumber)
-            return;
-        const current = otherSupporterStatus.get(memberNumber);
-        if (current && current.secret === status && current.secret === secret && current.verified)
-            return;
-        if (status && secret) {
-            otherSupporterStatus.set(memberNumber, {
-                verified: status === undefined,
-                status,
-                secret,
-            });
-            if (status && secret) {
-                sendHiddenBeep("supporterCheck", {
-                    memberNumber,
-                    status,
-                    secret,
-                }, VERSION_CHECK_BOT, true);
-            }
-        }
-        else {
-            otherSupporterStatus.delete(memberNumber);
-        }
-    }
-    function sendVersionCheckBeep() {
-        if (nextCheckTimer !== null) {
-            clearTimeout(nextCheckTimer);
-            nextCheckTimer = null;
-        }
-        sendHiddenBeep("versionCheck", {
-            version: VERSION$1,
-            devel: BCX_DEVEL,
-            GameVersion,
-            Source: (BCXSourceExternal ? "E:" : "") + (BCXSource !== null && BCXSource !== void 0 ? BCXSource : "[UNKNOWN]"),
-            UA: window.navigator.userAgent,
-        }, VERSION_CHECK_BOT, true);
-        nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (5 + Math.random()) * 60000);
-    }
-    class ModuleVersionCheck extends BaseModule {
-        load() {
-            hiddenBeepHandlers.set("versionResponse", (sender, message) => {
-                var _a, _b;
-                if (sender !== VERSION_CHECK_BOT) {
-                    console.warn(`BCX: got versionResponse from unexpected sender ${sender}, ignoring`);
-                    return;
-                }
-                if (!isObject$1(message) || typeof message.status !== "string") {
-                    console.warn(`BCX: bad versionResponse`, message);
-                    return;
-                }
-                if (nextCheckTimer !== null) {
-                    clearTimeout(nextCheckTimer);
-                    nextCheckTimer = null;
-                }
-                nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (15 + 5 * Math.random()) * 60000);
-                if (message.status === "current") {
-                    versionCheckNewAvailable = false;
-                }
-                else if (message.status === "newAvailable") {
-                    versionCheckNewAvailable = true;
-                    if (!versionCheckDidNotify) {
-                        versionCheckDidNotify = true;
-                        if (ServerPlayerIsInChatRoom()) {
-                            ChatRoomSendLocal("New BCX version is available! You can upgrade by logging in again.");
-                        }
-                        else {
-                            InfoBeep("New BCX version is available! You can upgrade by logging in again.", 10000);
-                        }
-                    }
-                }
-                else if (message.status === "deprecated") {
-                    versionCheckNewAvailable = true;
-                    if (!versionCheckDidNotify) {
-                        versionCheckDidNotify = true;
-                        const overlay = document.createElement("div");
-                        overlay.style.position = "fixed";
-                        overlay.style.top = "0px";
-                        overlay.style.right = "0px";
-                        overlay.style.bottom = "0px";
-                        overlay.style.left = "0px";
-                        overlay.style.background = "#00000090";
-                        overlay.style.display = "flex";
-                        overlay.style.alignItems = "center";
-                        overlay.style.justifyContent = "center";
-                        const win = document.createElement("div");
-                        overlay.appendChild(win);
-                        win.style.background = "white";
-                        win.style.display = "flex";
-                        win.style.flexDirection = "column";
-                        win.style.padding = "1em";
-                        const titleElem = document.createElement("h1");
-                        win.appendChild(titleElem);
-                        titleElem.innerText = "Deprecated BCX version";
-                        const descriptionElement = document.createElement("p");
-                        win.appendChild(descriptionElement);
-                        descriptionElement.innerText = "The BCX version you are using is too old and either contains critical bugs or " +
-                            "is no longer compatible with the current Bondage Club release version.\n" +
-                            "Unless you are using additional mods preventing this, please refresh the page and log into the club again to load the newest version.";
-                        const close = document.createElement("button");
-                        close.style.cursor = "pointer";
-                        win.appendChild(close);
-                        close.innerText = "Close";
-                        close.onclick = () => {
-                            overlay.remove();
-                        };
-                        (_b = (_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.blur) === null || _b === void 0 ? void 0 : _b.call(_a);
-                        window.document.body.appendChild(overlay);
-                    }
-                }
-                else if (message.status === "unsupported") {
-                    unload();
-                    alert("The BCX version you are trying to load is too old and either contains critical bugs or " +
-                        "is no longer compatible with the current Bondage Club release version. Please update your BCX.");
-                }
-                else {
-                    console.warn(`BCX: bad versionResponse status "${message.status}"`);
-                }
-                if (supporterStatus !== message.supporterStatus || supporterSecret !== message.supporterSecret) {
-                    supporterStatus = message.supporterStatus;
-                    supporterSecret = message.supporterSecret;
-                    announceSelf();
-                }
-            });
-            hiddenBeepHandlers.set("supporterCheckResult", (sender, message) => {
-                if (sender !== VERSION_CHECK_BOT) {
-                    console.warn(`BCX: got supporterCheckResult from unexpected sender ${sender}, ignoring`);
-                    return;
-                }
-                if (!isObject$1(message) || typeof message.memberNumber !== "number" || (message.status !== undefined && typeof message.status !== "string")) {
-                    console.warn(`BCX: bad supporterCheckResult`, message);
-                    return;
-                }
-                const status = otherSupporterStatus.get(message.memberNumber);
-                if (!status) {
-                    console.warn(`BCX: supporterCheckResult unknown memberNumber`, message);
-                    return;
-                }
-                status.status = message.status;
-                status.verified = true;
-            });
-            hookFunction("LoginResponse", 0, (args, next) => {
-                next(args);
-                const response = args[0];
-                if (isObject$1(response) && typeof response.Name === "string" && typeof response.AccountName === "string") {
-                    sendVersionCheckBeep();
-                }
-            });
-        }
-        run() {
-            sendVersionCheckBeep();
-        }
-        unload() {
-            if (nextCheckTimer !== null) {
-                clearTimeout(nextCheckTimer);
-                nextCheckTimer = null;
-            }
-        }
-    }
-
     var backgroundList = [
     	"AbandonedBuilding",
     	"AbandonedSideRoom",
@@ -39392,6 +39720,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     	"HorseStableLight",
     	"HotelBedroom",
     	"HotelBedroom2",
+    	"HouseBasement1",
+    	"HouseBasement2",
+    	"HouseBasement3",
+    	"HouseInterior1",
+    	"HouseInterior2",
+    	"HouseInterior3",
     	"HypnoSpiral2",
     	"HypnoticSpiral",
     	"IndoorPool",
@@ -40467,6 +40801,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             registerSpeechHook({
                 allowSend: (msg) => {
                     if (typeTaskText &&
+                        typeof repetitions === "number" &&
                         senderNumber &&
                         (msg.type === "Chat" || msg.type === "Whisper")) {
                         if (ChatRoomData === null || ChatRoomData === void 0 ? void 0 : ChatRoomData.Name) {
@@ -41359,11 +41694,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             MainCanvas.textAlign = "center";
             if (this.character.isPlayer()) {
-                if (supporterStatus !== undefined) {
-                    DrawCheckbox(1450, 380, 64, 64, "", !modStorage.supporterHidden);
-                    DrawTextFit("Show your BCX Supporter", 1694, 391, 330, "Black");
-                    DrawTextFit("Heart to all BCX users", 1669, 433, 294, "Black");
-                }
                 DrawText(`Your BCX version: ${VERSION$1.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 500, "Black", "");
                 DrawButton(1450, 590, 400, 90, "", "White", "", "Open changelog on GitHub");
                 if (versionCheckNewAvailable === true) {
@@ -41405,9 +41735,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     modStorageSync();
                 }
                 setSubscreen(new GuiTutorial(this.character, false));
-            }
-            if (MouseIn(1450, 380, 64, 64) && this.character.isPlayer()) {
-                setSupporterVisible(!!modStorage.supporterHidden);
             }
             if (MouseIn(1450, 590, 400, 90) && this.character.isPlayer()) {
                 window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? "master" : "stable"}/CHANGELOG.md`, "_blank");
@@ -41771,56 +42098,30 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
                 return next(args);
             });
-            const NMod = isNModClient();
-            if (NMod) {
-                hookFunction("ChatRoomDrawFriendList", 0, (args, next) => {
-                    var _a, _b;
-                    const [C, Zoom, CharX, CharY] = args;
-                    const Char = getChatroomCharacter(C.MemberNumber);
-                    const Friend = C.ID === 0 || ((_a = Player.FriendList) !== null && _a !== void 0 ? _a : []).includes(C.MemberNumber);
-                    const Ghosted = ((_b = Player.GhostList) !== null && _b !== void 0 ? _b : []).includes(C.MemberNumber);
-                    if ((Char === null || Char === void 0 ? void 0 : Char.BCXVersion) && ChatRoomHideIconState === 0 && !Ghosted) {
-                        if (Friend) {
-                            drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
-                        }
-                        else {
-                            drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 0.5, 3, "#6e6eff");
-                        }
+            patchFunction("ChatRoomDrawCharacterOverlay", {
+                'DrawImageResize("Icons/Small/Admin.png", CharX + 390 * Zoom, CharY, 40 * Zoom, 40 * Zoom);': 'DrawImageResize("Icons/Small/Admin.png", CharX + 400 * Zoom, CharY, 40 * Zoom, 40 * Zoom);',
+            });
+            hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
+                var _a, _b;
+                next(args);
+                const [C, CharX, CharY, Zoom] = args;
+                const Char = getChatroomCharacter(C.MemberNumber);
+                const Friend = C.ID === 0 || ((_a = Player.FriendList) !== null && _a !== void 0 ? _a : []).includes(C.MemberNumber);
+                const Ghosted = ((_b = Player.GhostList) !== null && _b !== void 0 ? _b : []).includes(C.MemberNumber);
+                if ((Char === null || Char === void 0 ? void 0 : Char.BCXVersion) &&
+                    !Ghosted &&
+                    ChatRoomHideIconState === 0 &&
+                    !modStorage.chatroomIconHidden) {
+                    if (Friend) {
+                        drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
                     }
                     else {
-                        next(args);
+                        drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.5, 3, "#6e6eff");
                     }
-                });
-                patchFunction("ChatRoomDrawCharacterOverlay", {
-                    "switch (C.Status)": "switch (null)",
-                });
-            }
-            else {
-                patchFunction("ChatRoomDrawCharacterOverlay", {
-                    'DrawImageResize("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom);': "",
-                });
-                hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
-                    var _a, _b;
-                    next(args);
-                    const [C, CharX, CharY, Zoom] = args;
-                    const Char = getChatroomCharacter(C.MemberNumber);
-                    const Friend = C.ID === 0 || ((_a = Player.FriendList) !== null && _a !== void 0 ? _a : []).includes(C.MemberNumber);
-                    const Ghosted = ((_b = Player.GhostList) !== null && _b !== void 0 ? _b : []).includes(C.MemberNumber);
-                    if ((Char === null || Char === void 0 ? void 0 : Char.BCXVersion) && ChatRoomHideIconState === 0 && !Ghosted) {
-                        if (Friend) {
-                            drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
-                        }
-                        else {
-                            drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 0.7, 3, "#6e6eff");
-                        }
-                    }
-                    else if (Friend && ChatRoomHideIconState === 0) {
-                        DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {
-                            Width: 50 * Zoom,
-                            Height: 50 * Zoom,
-                        });
-                    }
-                });
+                }
+            });
+            const NMod = isNModClient();
+            if (!NMod) {
                 hookFunction("ChatRoomCreateElement", 0, (args, next) => {
                     next(args);
                     ChatroomSM.SetInputElement(document.getElementById("InputChat"));
@@ -43091,7 +43392,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     return res + `Done!`;
                 },
                 importPermissions: ["authority_grant_self", "authority_revoke_self", "authority_edit_min"],
-                importValidator: mod.record(mod.tuple([mod.boolean(), mod.nativeEnum(AccessLevel)])),
+                importValidator: z.record(z.tuple([z.boolean(), z.nativeEnum(AccessLevel)])),
             });
         }
         setDefultPermissionsForPreset(preset) {
@@ -45369,10 +45670,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 if (result === null || typeof result !== "object") throw new TypeError("Object expected");
                 if (_ = accept(result.get)) descriptor.get = _;
                 if (_ = accept(result.set)) descriptor.set = _;
-                if (_ = accept(result.init)) initializers.push(_);
+                if (_ = accept(result.init)) initializers.unshift(_);
             }
             else if (_ = accept(result)) {
-                if (kind === "field") initializers.push(_);
+                if (kind === "field") initializers.unshift(_);
                 else descriptor[key] = _;
             }
         }
@@ -45580,6 +45881,34 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         if (receiver === null || (typeof receiver !== "object" && typeof receiver !== "function")) throw new TypeError("Cannot use 'in' operator on non-object");
         return typeof state === "function" ? receiver === state : state.has(receiver);
     }
+
+    var tslib_es6 = {
+        __extends,
+        __assign,
+        __rest,
+        __decorate,
+        __param,
+        __metadata,
+        __awaiter,
+        __generator,
+        __createBinding,
+        __exportStar,
+        __values,
+        __read,
+        __spread,
+        __spreadArrays,
+        __spreadArray,
+        __await,
+        __asyncGenerator,
+        __asyncDelegator,
+        __asyncValues,
+        __makeTemplateObject,
+        __importStar,
+        __importDefault,
+        __classPrivateFieldGet,
+        __classPrivateFieldSet,
+        __classPrivateFieldIn,
+    };
 
     var _ModRuleState_ruleState;
     class ModRuleState {

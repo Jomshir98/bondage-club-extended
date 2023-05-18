@@ -182,7 +182,7 @@ declare var ChatAdminBackgroundIndex: number;
 declare var ChatAdminBackgroundSelect: string;
 declare var ChatAdminPrivate: boolean;
 declare var ChatAdminLocked: boolean;
-declare var ChatAdminGame: string;
+declare var ChatAdminGame: ChatRoomGame;
 declare var ChatAdminBlockCategory: any[];
 declare var ChatAdminLanguage: string;
 
@@ -247,6 +247,9 @@ declare function InventoryGetLock(Item: Item): Item | null;
 declare function InventoryRemove(C: Character, AssetGroup: string, Refresh?: boolean): void;
 declare function InventoryItemHasEffect(Item: Item, Effect?: string, CheckProperties?: boolean): boolean;
 declare function InventoryIsPermissionBlocked(C: Character, AssetName: string, AssetGroup: string, AssetType?: string): boolean;
+
+// Game.js
+declare function GameKeyDown(event: KeyboardEvent): void;
 
 // GameLog.js
 declare function LogAdd(NewLogName: string, NewLogGroup: string, NewLogValue: number, Push: boolean): void;
@@ -318,7 +321,7 @@ declare function ReputationCharacterGet(C: Character, RepType: string): number;
 declare var ChatCreateBackgroundSelect: string;
 declare var ChatCreatePrivate: boolean | null;
 declare var ChatCreateLocked: boolean | null;
-declare var ChatCreateGame: string;
+declare var ChatCreateGame: ChatRoomGame;
 declare var ChatCreateLanguage: string;
 declare var ChatBlockItemCategory: any[];
 

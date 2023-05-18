@@ -259,54 +259,33 @@ export class ModuleChatroom extends BaseModule {
 			return next(args);
 		});
 
+		patchFunction("ChatRoomDrawCharacterOverlay", {
+			'DrawImageResize("Icons/Small/Admin.png", CharX + 390 * Zoom, CharY, 40 * Zoom, 40 * Zoom);': 'DrawImageResize("Icons/Small/Admin.png", CharX + 400 * Zoom, CharY, 40 * Zoom, 40 * Zoom);',
+		});
+
+		hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
+			next(args);
+
+			const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
+			const Char = getChatroomCharacter(C.MemberNumber!);
+			const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
+			const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
+			if (Char?.BCXVersion &&
+				!Ghosted &&
+				ChatRoomHideIconState === 0 &&
+				!modStorage.chatroomIconHidden
+			) {
+				if (Friend) {
+					drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.7, 4, "#6e6eff");
+				} else {
+					drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY + 5, 30 * Zoom, 30 * Zoom, 50, 0.5, 3, "#6e6eff");
+				}
+			}
+		});
+
 		const NMod = isNModClient();
 
-		if (NMod) {
-			hookFunction("ChatRoomDrawFriendList", 0, (args, next) => {
-				const [C, Zoom, CharX, CharY] = args as [Character, number, number, number];
-				const Char = getChatroomCharacter(C.MemberNumber!);
-				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
-				const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
-				if (Char?.BCXVersion && ChatRoomHideIconState === 0 && !Ghosted) {
-					if (Friend) {
-						drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
-					} else {
-						drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 0.5, 3, "#6e6eff");
-					}
-				} else {
-					next(args);
-				}
-			});
-
-			patchFunction("ChatRoomDrawCharacterOverlay", {
-				"switch (C.Status)": "switch (null)",
-			});
-		} else {
-			patchFunction("ChatRoomDrawCharacterOverlay", {
-				'DrawImageResize("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom);': "",
-			});
-
-			hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
-				next(args);
-
-				const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
-				const Char = getChatroomCharacter(C.MemberNumber!);
-				const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
-				const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
-				if (Char?.BCXVersion && ChatRoomHideIconState === 0 && !Ghosted) {
-					if (Friend) {
-						drawIcon(MainCanvas, icon_heart, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 1, 4, "#6e6eff");
-					} else {
-						drawIcon(MainCanvas, icon_BCX_cross, CharX + 375 * Zoom, CharY, 50 * Zoom, 50 * Zoom, 50, 0.7, 3, "#6e6eff");
-					}
-				} else if (Friend && ChatRoomHideIconState === 0) {
-					DrawImageEx("Icons/Small/FriendList.png", CharX + 375 * Zoom, CharY, {
-						Width: 50 * Zoom,
-						Height: 50 * Zoom,
-					});
-				}
-			});
-
+		if (!NMod) {
 			hookFunction("ChatRoomCreateElement", 0, (args, next) => {
 				next(args);
 				ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);

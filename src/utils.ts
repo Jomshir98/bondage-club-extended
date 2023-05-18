@@ -137,7 +137,7 @@ export function createInputElement(type: string, maxLength?: number): HTMLInputE
 	if (maxLength) {
 		input.maxLength = maxLength;
 	}
-	input.addEventListener("keydown", KeyDown);
+	input.addEventListener("keydown", GameKeyDown);
 	input.className = "HideOnPopup";
 	return input;
 }

@@ -11,11 +11,14 @@ interface GenderSetting {
 	Male: boolean;
 }
 
-type ChatRoomSpaceType = string;
-
 declare const ExtendedArchetype: {
-	TYPED: "modular";
-	MODULAR: "typed";
+	MODULAR: "modular";
+	TYPED: "typed";
 	VIBRATING: "vibrating";
 	VARIABLEHEIGHT: "variableheight";
+	TEXT: "text";
 };
+
+declare class DictionaryBuilder {
+	// Not necessary for BCX
+}

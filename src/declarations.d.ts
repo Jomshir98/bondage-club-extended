@@ -502,15 +502,15 @@ type RuleCustomData = {
 		restore: boolean;
 	};
 	setting_arousal_meter: {
-		active: string;
-		visible: string;
+		active: ArousalActiveName;
+		visible: ArousalVisibleName;
 	};
 	setting_block_vibe_modes: {
 		value: boolean;
 		restore: boolean;
 	};
 	setting_arousal_stutter: {
-		value: string;
+		value: ArousalAffectStutterName;
 	};
 	setting_show_afk: {
 		value: boolean;
@@ -525,7 +525,7 @@ type RuleCustomData = {
 		restore: boolean;
 	};
 	setting_sensdep: {
-		value: string;
+		value: SettingsSensDepName;
 		disableExamine: boolean;
 		hideMessages: boolean;
 	};
@@ -618,7 +618,7 @@ type RuleCustomDataTypesOptions = {
 };
 
 type RuleCustomDataFilter<U> = {
-	[K in RuleCustomDataTypes]: RuleCustomDataTypesMap[K] extends U ? K : never;
+	[K in RuleCustomDataTypes]: U extends RuleCustomDataTypesMap[K] ? K : never;
 }[RuleCustomDataTypes];
 
 type RuleCustomDataEntryDefinition<T extends RuleCustomDataTypes = RuleCustomDataTypes> = {
@@ -732,10 +732,10 @@ interface RoomTemplate {
 	Language: string;
 	Limit: string;
 	Admin: number[];
-	Game: string;
+	Game: ChatRoomGame;
 	Private: boolean;
 	Locked: boolean;
-	BlockCategory: string[];
+	BlockCategory: ChatRoomBlockCategory[];
 	AutoApply: true | undefined;
 }
 

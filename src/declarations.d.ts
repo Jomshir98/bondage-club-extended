@@ -12,7 +12,9 @@ type Satisfies<T extends U, U> = T;
 
 type BCXSupporterType = undefined | "supporter" | "developer";
 
-// Player.OnlineSettings.BCX?: string;
+interface PlayerOnlineSettings {
+	BCX?: string;
+}
 
 type BCX_Permissions =
 	| "authority_edit_min"

@@ -19,7 +19,9 @@ export function registerModule<T extends BaseModule>(module: T): T {
 export function init_modules(): boolean {
 	moduleInitPhase = ModuleInitPhase.init;
 	for (const m of modules) {
-		m.init();
+		if (m.init() === false) {
+			return false;
+		}
 	}
 
 	const oldVersion: BCXVersion | null = typeof modStorage.version === "string" ? parseBCXVersion(modStorage.version) : { major: 0, minor: 0, patch: 0 };

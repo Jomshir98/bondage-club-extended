@@ -32,7 +32,9 @@ function getLocalStorageName(): string {
 }
 
 function storageClearData() {
-	delete (Player.OnlineSettings as any).BCX;
+	if (Player.OnlineSettings) {
+		delete Player.OnlineSettings.BCX;
+	}
 	localStorage.removeItem(getLocalStorageName());
 
 	if (typeof ServerAccountUpdate !== "undefined") {
@@ -68,7 +70,7 @@ export function modStorageSync() {
 	const serializedData = LZString.compressToBase64(JSON.stringify(modStorage));
 
 	if (modStorageLocation === StorageLocations.OnlineSettings) {
-		(Player.OnlineSettings as any).BCX = serializedData;
+		Player.OnlineSettings.BCX = serializedData;
 		if (typeof ServerAccountUpdate !== "undefined") {
 			ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
 		} else {
@@ -104,7 +106,7 @@ export class ModuleStorage extends BaseModule {
 		}
 
 		if (!saved) {
-			saved = (Player.OnlineSettings as any)?.BCX;
+			saved = Player.OnlineSettings?.BCX;
 			modStorageLocation = StorageLocations.OnlineSettings;
 		}
 
@@ -117,11 +119,17 @@ export class ModuleStorage extends BaseModule {
 				modStorage = storage;
 			} catch (error) {
 				console.error("BCX: Error while loading saved data, full reset.", error);
+				if (confirm(`BCX Failed to load saved data! Continue anyway, resetting all data?\n(${error})`)) {
+					firstTimeInit = true;
+				} else {
+					return false;
+				}
 			}
 		} else {
 			console.log("BCX: First time init");
 			firstTimeInit = true;
 		}
+		return true;
 	}
 
 	run() {

@@ -2,7 +2,7 @@ import type { Preset } from "../constants";
 
 export abstract class BaseModule {
 
-	init() {
+	init(): void | boolean {
 		// Empty
 	}
 

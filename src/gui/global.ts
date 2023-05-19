@@ -8,7 +8,7 @@ import { capitalizeFirstLetter } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { getCurrentPreset } from "../modules/presets";
 import { Preset } from "../constants";
-import { modStorage } from "../modules/storage";
+import { modStorage, modStorageSync } from "../modules/storage";
 import { setSupporterVisible, supporterStatus } from "../modules/versionCheck";
 
 export class GuiGlobal extends GuiSubscreen {
@@ -76,6 +76,7 @@ export class GuiGlobal extends GuiSubscreen {
 			} else {
 				modStorage.chatroomIconHidden = true;
 			}
+			modStorageSync();
 			return;
 		}
 

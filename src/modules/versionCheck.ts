@@ -5,7 +5,7 @@ import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
 import { BCXSource, BCXSourceExternal, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
 import { unload } from "../main";
-import { modStorage } from "./storage";
+import { modStorage, modStorageSync } from "./storage";
 import { announceSelf } from "./chatroom";
 import { hookFunction } from "../patching";
 
@@ -24,6 +24,7 @@ export function setSupporterVisible(visible: boolean): void {
 	} else {
 		modStorage.supporterHidden = true;
 	}
+	modStorageSync();
 	announceSelf();
 }
 

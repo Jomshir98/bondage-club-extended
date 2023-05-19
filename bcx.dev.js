@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.6-cf3ec467";const BCX_DEVEL=false;
+    const BCX_VERSION="0.9.6-5b68f36f";const BCX_DEVEL=false;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -33316,6 +33316,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         else {
             modStorage.supporterHidden = true;
         }
+        modStorageSync();
         announceSelf();
     }
     const otherSupporterStatus = new Map();
@@ -33523,6 +33524,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 else {
                     modStorage.chatroomIconHidden = true;
                 }
+                modStorageSync();
                 return;
             }
             const isSupporter = supporterStatus !== undefined;
@@ -42310,7 +42312,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         return `BCX_${Player.MemberNumber}`;
     }
     function storageClearData() {
-        delete Player.OnlineSettings.BCX;
+        if (Player.OnlineSettings) {
+            delete Player.OnlineSettings.BCX;
+        }
         localStorage.removeItem(getLocalStorageName());
         if (typeof ServerAccountUpdate !== "undefined") {
             ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
@@ -42389,12 +42393,19 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
                 catch (error) {
                     console.error("BCX: Error while loading saved data, full reset.", error);
+                    if (confirm(`BCX Failed to load saved data! Continue anyway, resetting all data?\n(${error})`)) {
+                        firstTimeInit = true;
+                    }
+                    else {
+                        return false;
+                    }
                 }
             }
             else {
                 console.log("BCX: First time init");
                 firstTimeInit = true;
             }
+            return true;
         }
         run() {
             modStorageSync();
@@ -42708,7 +42719,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     function init_modules() {
         moduleInitPhase = ModuleInitPhase.init;
         for (const m of modules) {
-            m.init();
+            if (m.init() === false) {
+                return false;
+            }
         }
         const oldVersion = typeof modStorage.version === "string" ? parseBCXVersion(modStorage.version) : { major: 0, minor: 0, patch: 0 };
         if (!oldVersion) {

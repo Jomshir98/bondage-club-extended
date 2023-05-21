@@ -304,8 +304,8 @@ export function detectCompatibilityProblems(): void {
 		wait = 5;
 		result += `----- Quick Access Menu (QAM) -----\n` +
 			`BCX detected the presence of the incompatible mod Quick Access Menu.\n` +
-			`Besides not using ModSDK to support compatibility with other mods, it also modifies parts of the game such that it can break parts of BCX's functionality.\n` +
-			`Its author has refused multiple times to make the mod more compatible with other mods, causing a fair amount of extra work for other moders (for example BCX & FBC).\n` +
+			`This mod is deprecated and is known to conflict with other mods (e.g. BCX or FBC). Continued usage of this mod is not advised.\n` +
+			`Contact its author for more information.\n` +
 			`Error reports while using QAM will not be acted upon.\n` +
 			`\n`;
 	}

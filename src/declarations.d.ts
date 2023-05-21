@@ -13,7 +13,10 @@ type Satisfies<T extends U, U> = T;
 type BCXSupporterType = undefined | "supporter" | "developer";
 
 interface PlayerOnlineSettings {
+	/** Saved BCX data */
 	BCX?: string;
+	/** The last time BCX data was cleared (debug helper) */
+	BCXDataCleared?: number;
 }
 
 type BCX_Permissions =

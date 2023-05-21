@@ -6,6 +6,8 @@ import { announceSelf } from "./chatroom";
 import { sendHiddenBeep } from "./messaging";
 import { ModuleInitPhase } from "../constants";
 import { BCX_setTimeout } from "../BCXContext";
+import { isMatch } from "lodash-es";
+import { reportManualError } from "../errorReporting";
 
 export enum StorageLocations {
 	OnlineSettings = 0,
@@ -31,18 +33,19 @@ function getLocalStorageName(): string {
 	return `BCX_${Player.MemberNumber}`;
 }
 
+function getLocalStorageNameBackup(): string {
+	return `BCX_${Player.MemberNumber}_backup`;
+}
+
 function storageClearData() {
 	if (Player.OnlineSettings) {
 		delete Player.OnlineSettings.BCX;
+		Player.OnlineSettings.BCXDataCleared = Date.now();
 	}
 	localStorage.removeItem(getLocalStorageName());
+	localStorage.removeItem(getLocalStorageNameBackup());
 
-	if (typeof ServerAccountUpdate !== "undefined") {
-		ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
-	} else {
-		console.debug("BCX: Old sync method");
-		ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-	}
+	ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
 }
 
 export function switchStorageLocation(location: StorageLocations) {
@@ -69,19 +72,32 @@ export function modStorageSync() {
 
 	const serializedData = LZString.compressToBase64(JSON.stringify(modStorage));
 
+	try {
+		if (typeof serializedData !== 'string') {
+			throw new Error('Data compression failed');
+		}
+
+		const checkParsedData = JSON.parse(LZString.decompressFromBase64(serializedData)!);
+
+		if (!isMatch(modStorage, checkParsedData)) {
+			console.warn("Current data:\n", modStorage, "\nSaved data:\n", checkParsedData);
+			throw new Error('Saved data differs after load');
+		}
+	} catch (error) {
+		reportManualError("Save data failed to validate!", error);
+		return;
+	}
+
 	if (modStorageLocation === StorageLocations.OnlineSettings) {
 		Player.OnlineSettings.BCX = serializedData;
-		if (typeof ServerAccountUpdate !== "undefined") {
-			ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
-		} else {
-			console.debug("BCX: Old sync method");
-			ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-		}
+		ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
 	} else if (modStorageLocation === StorageLocations.LocalStorage) {
 		localStorage.setItem(getLocalStorageName(), serializedData);
 	} else {
 		throw new Error(`Unknown StorageLocation`);
 	}
+
+	localStorage.setItem(getLocalStorageNameBackup(), serializedData);
 }
 
 export function clearAllData() {
@@ -105,9 +121,23 @@ export class ModuleStorage extends BaseModule {
 			modStorageLocation = StorageLocations.LocalStorage;
 		}
 
-		if (!saved) {
-			saved = Player.OnlineSettings?.BCX;
+		if (typeof saved !== "string") {
+			if (!isObject(Player.OnlineSettings)) {
+				console.error("BCX: Missing OnlineSettings during load");
+				alert("BCX: Failed to load data, please see console for more details");
+				return false;
+			}
+			saved = Player.OnlineSettings.BCX;
 			modStorageLocation = StorageLocations.OnlineSettings;
+		}
+
+		if (typeof saved !== "string") {
+			const backupSave = localStorage.getItem(getLocalStorageNameBackup());
+			if (typeof backupSave === "string" &&
+				confirm("BCX: Error loading saved data, but found local backup.\nDo you want to load the backup?")
+			) {
+				saved = backupSave;
+			}
 		}
 
 		if (typeof saved === "string") {
@@ -125,6 +155,10 @@ export class ModuleStorage extends BaseModule {
 					return false;
 				}
 			}
+		} else if (saved !== undefined) {
+			console.error("BCX: Unknown save data type:", saved);
+			alert("BCX: Failed to load data, please see console for more details");
+			return false;
 		} else {
 			console.log("BCX: First time init");
 			firstTimeInit = true;

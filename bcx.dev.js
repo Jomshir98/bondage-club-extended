@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.6-5b68f36f";const BCX_DEVEL=false;
+    const BCX_VERSION="0.9.6-867b187d";const BCX_DEVEL=false;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -33023,8 +33023,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             wait = 5;
             result += `----- Quick Access Menu (QAM) -----\n` +
                 `BCX detected the presence of the incompatible mod Quick Access Menu.\n` +
-                `Besides not using ModSDK to support compatibility with other mods, it also modifies parts of the game such that it can break parts of BCX's functionality.\n` +
-                `Its author has refused multiple times to make the mod more compatible with other mods, causing a fair amount of extra work for other moders (for example BCX & FBC).\n` +
+                `This mod is deprecated and is known to conflict with other mods (e.g. BCX or FBC). Continued usage of this mod is not advised.\n` +
+                `Contact its author for more information.\n` +
                 `Error reports while using QAM will not be acted upon.\n` +
                 `\n`;
         }
@@ -42311,18 +42311,17 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     function getLocalStorageName() {
         return `BCX_${Player.MemberNumber}`;
     }
+    function getLocalStorageNameBackup() {
+        return `BCX_${Player.MemberNumber}_backup`;
+    }
     function storageClearData() {
         if (Player.OnlineSettings) {
             delete Player.OnlineSettings.BCX;
+            Player.OnlineSettings.BCXDataCleared = Date.now();
         }
         localStorage.removeItem(getLocalStorageName());
-        if (typeof ServerAccountUpdate !== "undefined") {
-            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
-        }
-        else {
-            console.debug("BCX: Old sync method");
-            ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-        }
+        localStorage.removeItem(getLocalStorageNameBackup());
+        ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
     }
     function switchStorageLocation(location) {
         if (location !== StorageLocations.LocalStorage && location !== StorageLocations.OnlineSettings) {
@@ -42345,15 +42344,23 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             return;
         }
         const serializedData = LZString.compressToBase64(JSON.stringify(modStorage));
+        try {
+            if (typeof serializedData !== "string") {
+                throw new Error("Data compression failed");
+            }
+            const checkParsedData = JSON.parse(LZString.decompressFromBase64(serializedData));
+            if (!isMatch(modStorage, checkParsedData)) {
+                console.warn("Current data:\n", modStorage, "\nSaved data:\n", checkParsedData);
+                throw new Error("Saved data differs after load");
+            }
+        }
+        catch (error) {
+            reportManualError("Save data failed to validate!", error);
+            return;
+        }
         if (modStorageLocation === StorageLocations.OnlineSettings) {
             Player.OnlineSettings.BCX = serializedData;
-            if (typeof ServerAccountUpdate !== "undefined") {
-                ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
-            }
-            else {
-                console.debug("BCX: Old sync method");
-                ServerSend("AccountUpdate", { OnlineSettings: Player.OnlineSettings });
-            }
+            ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings });
         }
         else if (modStorageLocation === StorageLocations.LocalStorage) {
             localStorage.setItem(getLocalStorageName(), serializedData);
@@ -42361,6 +42368,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         else {
             throw new Error(`Unknown StorageLocation`);
         }
+        localStorage.setItem(getLocalStorageNameBackup(), serializedData);
     }
     function clearAllData() {
         deletionPending = true;
@@ -42372,16 +42380,27 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
     class ModuleStorage extends BaseModule {
         init() {
-            var _a;
             let saved = null;
             saved = localStorage.getItem(getLocalStorageName());
             if (typeof saved === "string") {
                 console.info(`BCX: Detected storage location: local storage`);
                 modStorageLocation = StorageLocations.LocalStorage;
             }
-            if (!saved) {
-                saved = (_a = Player.OnlineSettings) === null || _a === void 0 ? void 0 : _a.BCX;
+            if (typeof saved !== "string") {
+                if (!isObject$1(Player.OnlineSettings)) {
+                    console.error("BCX: Missing OnlineSettings during load");
+                    alert("BCX: Failed to load data, please see console for more details");
+                    return false;
+                }
+                saved = Player.OnlineSettings.BCX;
                 modStorageLocation = StorageLocations.OnlineSettings;
+            }
+            if (typeof saved !== "string") {
+                const backupSave = localStorage.getItem(getLocalStorageNameBackup());
+                if (typeof backupSave === "string" &&
+                    confirm("BCX: Error loading saved data, but found local backup.\nDo you want to load the backup?")) {
+                    saved = backupSave;
+                }
             }
             if (typeof saved === "string") {
                 try {
@@ -42400,6 +42419,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                         return false;
                     }
                 }
+            }
+            else if (saved !== undefined) {
+                console.error("BCX: Unknown save data type:", saved);
+                alert("BCX: Failed to load data, please see console for more details");
+                return false;
             }
             else {
                 console.log("BCX: First time init");
@@ -44014,9 +44038,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     let BCXSourceExternal = false;
     function init_findBCXSource() {
         for (const elem of Array.from(document.getElementsByTagName("script"))) {
-            const match = /^(https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?bcx(\.dev)?\.js($|\?)/i.exec(elem.src);
+            const match = /^((https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?)bcx(\.dev)?\.js($|\?)/i.exec(elem.src);
             if (match) {
                 BCXSource = match[1];
+                console.debug("BCX: Using detected source:", BCXSource);
                 return;
             }
         }
@@ -44026,7 +44051,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             const match = /^(https:\/\/[^?/]+\/(?:[^?]+?)?)(?:bcx(\.dev)?\.js)?(?:$|\?)/i.exec(externalSrc);
             if (match) {
                 BCXSource = match[1];
-                console.log("BCX: External BCX_SOURCE supplied, using it");
+                console.log("BCX: External BCX_SOURCE supplied:", BCXSource);
                 return;
             }
             console.warn("BCX: External BCX_SOURCE supplied, but malformed, ignoring", externalSrc);

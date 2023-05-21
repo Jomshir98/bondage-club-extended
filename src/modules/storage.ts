@@ -73,15 +73,15 @@ export function modStorageSync() {
 	const serializedData = LZString.compressToBase64(JSON.stringify(modStorage));
 
 	try {
-		if (typeof serializedData !== 'string') {
-			throw new Error('Data compression failed');
+		if (typeof serializedData !== "string") {
+			throw new Error("Data compression failed");
 		}
 
 		const checkParsedData = JSON.parse(LZString.decompressFromBase64(serializedData)!);
 
 		if (!isMatch(modStorage, checkParsedData)) {
 			console.warn("Current data:\n", modStorage, "\nSaved data:\n", checkParsedData);
-			throw new Error('Saved data differs after load');
+			throw new Error("Saved data differs after load");
 		}
 	} catch (error) {
 		reportManualError("Save data failed to validate!", error);

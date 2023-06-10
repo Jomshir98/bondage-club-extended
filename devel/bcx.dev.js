@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.6-867b187d";const BCX_DEVEL=true;
+    const BCX_VERSION="0.9.6-77de8e35";const BCX_DEVEL=true;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -26507,6 +26507,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             hookFunction("DrawCharacter", 100, (args, next) => {
                 if (args[0] != null)
                     return next(args);
+            });
+            hookFunction("SpeechGarble", 100, (args, next) => {
+                if (args[1] == null) {
+                    args[1] = "";
+                }
+                return next(args);
             });
             patchFunction("DrawGetImage", {
                 "Img.src = Source;": 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;',

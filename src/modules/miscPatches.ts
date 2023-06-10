@@ -176,12 +176,21 @@ export class ModuleMiscPatches extends BaseModule {
 		hookFunction("Player.CanChangeClothesOn", 1, (args, next) => (allowMode && (args[0] as Character).IsPlayer()) || next(args));
 		hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
 
-		// Anti-stupid-null
+		// Anti-stupid-null(s)
 
 		hookFunction("DrawCharacter", 100, (args, next) => {
 			if (args[0] != null)
 				return next(args);
 		});
+
+		hookFunction("SpeechGarble", 100, (args, next) => {
+			if (args[1] == null) {
+				args[1] = "";
+			}
+			return next(args);
+		});
+
+		// Fix loading external images
 
 		patchFunction("DrawGetImage", {
 			"Img.src = Source;": 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;',

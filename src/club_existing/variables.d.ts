@@ -161,10 +161,6 @@ declare function ChatRoomStart(Space: ChatRoomSpaceType, Game: ChatRoomGame, Lea
 declare function ChatRoomSetLastChatRoom(room: string): void;
 declare function ChatRoomCharacterUpdate(C: Character): void;
 declare var ChatRoomMessageExtractors: ChatRoomMessageExtractor[];
-declare function ChatRoomMessageDefaultMetadataExtractor(data: IChatRoomMessage, SenderCharacter: Character): {
-	metadata: IChatRoomMessageMetadata;
-	substitutions: CommonSubtituteSubstitution[];
-};
 declare function ChatRoomMessage(data: IChatRoomMessage): void;
 declare function ChatRoomCurrentTime(): string;
 declare function ChatRoomListUpdate(list: number[], adding: boolean, memberNumber: number): void;

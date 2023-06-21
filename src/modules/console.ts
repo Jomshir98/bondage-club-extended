@@ -1,5 +1,5 @@
 import { allowMode, developmentMode, setAllowMode, setDevelopmentMode } from "../utilsClub";
-import { hookFunction, patchFunction } from "../patching";
+import { hookFunction } from "../patching";
 import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } from "./wardrobe";
 import { InvisibilityEarbuds } from "./clubUtils";
 import { BaseModule } from "./_BaseModule";
@@ -150,19 +150,6 @@ export const consoleInterface: ConsoleInterface = Object.freeze(new ConsoleInter
 export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
-
-		patchFunction("ChatRoomMessageDefaultMetadataExtractor", {
-			"asset.DynamicDescription(character).toLowerCase()": `( bcx.isDevel ? asset.Description : asset.DynamicDescription(character).toLowerCase() )`,
-		});
-		patchFunction("ChatRoomGetFocusGroupSubstitutions", {
-			"DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase()": `( bcx.isDevel ? focusGroup.Description : DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase() )`,
-		});
-
-		for (let i = 0; i < ChatRoomMessageExtractors.length; i++) {
-			if (ChatRoomMessageExtractors[i] === bcModSDK.getPatchingInfo().get("ChatRoomMessageDefaultMetadataExtractor")?.original) {
-				ChatRoomMessageExtractors[i] = ChatRoomMessageDefaultMetadataExtractor;
-			}
-		}
 
 		hookFunction("DialogDrawItemMenu", 0, (args, next) => {
 			if (developmentMode) {

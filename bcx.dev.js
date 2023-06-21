@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.6-867b187d";const BCX_DEVEL=false;
+    const BCX_VERSION="0.9.7-8a1663b4";const BCX_DEVEL=false;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -368,7 +368,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     const VERSION$1 = BCX_VERSION;
     const VERSION_CHECK_BOT = 37685;
     const SUPPORTED_BC_VERSIONS = [
-        "R91",
+        "R93",
     ];
     const FUNCTION_HASHES = {
         "Player.CanChangeClothesOn": ["40EF5292"],
@@ -377,16 +377,16 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         "Player.GetDeafLevel": ["42CB6D63"],
         "Player.HasTints": ["E09CA942", "F1F63BF9"],
         "Player.IsSlow": ["6E60F118"],
-        ActivityCheckPrerequisite: ["168A7F07"],
+        ActivityCheckPrerequisite: ["AADA5EE5"],
         ActivityOrgasmPrepare: ["D49DAC9B"],
         ActivityOrgasmStart: ["0BD14BED"],
-        AppearanceClick: ["64C82387"],
+        AppearanceClick: ["723EA7F1"],
         AppearanceExit: ["AA300341"],
-        AppearanceGetPreviewImageColor: ["06F02ADE"],
-        AppearanceMenuBuild: ["A9809413"],
-        AppearanceMenuClick: ["45018222"],
+        AppearanceGetPreviewImageColor: ["4B9707B3"],
+        AppearanceMenuBuild: ["94B77E20"],
+        AppearanceMenuClick: ["E5E76A96"],
         AppearanceMenuDraw: ["28FDF65B"],
-        AppearanceRun: ["8C0005E2"],
+        AppearanceRun: ["0BBDEE59"],
         AsylumEntranceCanWander: ["A85C35F3"],
         AsylumGGTSClick: ["E5660C8C"],
         AsylumGGTSLoad: ["DAB62F12"],
@@ -397,7 +397,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         CharacterCanKneel: ["A5A325E3"],
         CharacterLoadCanvas: ["BA6AD4FF"],
         CharacterLoadEffect: ["BD6B6B4D"],
-        CharacterNickname: ["EB452E5E"],
+        CharacterNickname: ["A794EFF5"],
         ChatAdminClick: ["D4354B95", "A15E13F5"],
         ChatAdminExit: ["EC263A9C"],
         ChatAdminLoad: ["BC01235B"],
@@ -414,22 +414,20 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         ChatRoomCanLeave: ["7065F82F"],
         ChatRoomClearAllElements: ["C49AA2C1"],
         ChatRoomClickCharacter: ["715D92A0"],
-        ChatRoomCreateElement: ["AD7CBE68"],
+        ChatRoomCreateElement: ["9A3FD548"],
         ChatRoomDrawBackground: ["597B062C"],
         ChatRoomDrawCharacter: ["8ED3DF88"],
         ChatRoomDrawCharacterOverlay: ["06FB4CC3"],
         ChatRoomFirstTimeHelp: ["078BEEA9"],
-        ChatRoomGetFocusGroupSubstitutions: ["04FB0708"],
         ChatRoomIsOwnedByPlayer: ["82640FF9"],
         ChatRoomKeyDown: ["B4BFDB0C"],
         ChatRoomListUpdate: ["D7FA0EC7"],
         ChatRoomLovershipOptionIs: ["6F5CE6A0"],
-        ChatRoomMenuClick: ["95171B81"],
+        ChatRoomMenuClick: ["4E8B3A64"],
         ChatRoomMenuDraw: ["0B8B0944"],
         ChatRoomMessage: ["BBD61334"],
-        ChatRoomMessageDefaultMetadataExtractor: ["E8718964"],
         ChatRoomOwnershipOptionIs: ["FE060F0B"],
-        ChatRoomRun: ["7D2E2D71"],
+        ChatRoomRun: ["77FAE23C"],
         ChatRoomSendChat: ["7F540ED0"],
         ChatRoomSendEmote: ["6EF53CBA"],
         ChatRoomShouldBlockGaggedOOCMessage: ["16D6AED5"],
@@ -445,28 +443,25 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         CheatFactor: ["594CFC45"],
         CheatImport: ["26C67608"],
         ColorPickerDraw: ["D1E82FB3"],
-        CommandParse: ["6E46F29E"],
+        CommandParse: ["C9061FE8"],
         CommonKeyDown: ["0F27218B"],
         CommonSetScreen: ["E2AC00F4"],
         DialogCanUnlock: ["0881FEFF"],
-        DialogClickExpressionMenu: ["BD1C7523"],
-        DialogDrawExpressionMenu: ["A350DE2C"],
-        DialogDrawItemMenu: ["689891E5"],
-        DialogDrawPoseMenu: ["30C7A7C3"],
+        DialogClickExpressionMenu: ["6497E698"],
+        DialogDrawItemMenu: ["FCE556C2"],
         DialogFindPlayer: ["32851FF2"],
-        DialogInventoryAdd: ["77BEFF8F"],
-        DialogInventoryBuild: ["75F93206"],
-        DialogItemClick: ["639713E6"],
-        DialogLeaveItemMenu: ["2348FCE9"],
-        DialogMenuButtonBuild: ["8F72FA67"],
-        DialogMenuButtonClick: ["D6970391"],
+        DialogInventoryAdd: ["A0FD4697"],
+        DialogInventoryBuild: ["A4A5BA06"],
+        DialogItemClick: ["FAC6259A"],
+        DialogChangeFocusToGroup: ["257B7857"],
+        DialogMenuButtonBuild: ["F0360ADB"],
+        DialogMenuButtonClick: ["9D46EE8F"],
         DrawArousalMeter: ["DC0BB5B4"],
-        DrawCharacter: ["CA0D50AF"],
+        DrawCharacter: ["B54922F5"],
         DrawGetImage: ["BEC7B0DA"],
         DrawImageEx: ["3D3D74F5"],
         DrawProcess: ["4B2BE17E"],
         DrawStatus: ["FD747092"],
-        ExtendedItemDrawButton: ["E1453F3F"],
         FriendListBeepMenuSend: ["B81A695E"],
         FriendListClick: ["6B039C7C"],
         FriendListLoadFriendList: ["1F8A29E2"],
@@ -503,6 +498,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         ServerSend: ["90A61F57"],
         SpeechGarble: ["9D669F73"],
         SpeechGetTotalGagLevel: ["C55B705A"],
+        StableGenericDrawProgress: ["6BACDAA2"],
         StruggleDrawStrengthProgress: ["4755C02D"],
         StruggleStrengthDraw: ["4406AD10"],
         TextGet: ["4DDE5794"],
@@ -511,58 +507,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         WardrobeClick: ["E96F7F63"],
         WardrobeGroupAccessible: ["2D406A64"],
         WardrobeRun: ["9616EB3A"],
-    };
-    const FUNCTION_HASHES_NMOD = {
-        ActivityOrgasmPrepare: ["AA5FC17F"],
-        AppearanceClick: ["C18D893E"],
-        AppearanceMenuClick: ["C01EFEE3"],
-        AppearanceRun: ["9A24F9FE"],
-        BackgroundSelectionRun: ["F605602A"],
-        CharacterLoadEffect: ["74D62AA1"],
-        ChatAdminClick: ["4BA1B803"],
-        ChatAdminLoad: ["62FB992F"],
-        ChatAdminRun: ["F92A0B2E"],
-        ChatRoomAddCharacterToChatRoom: ["1C43D1C1"],
-        ChatRoomCanChangeClothes: ["DF8A6550"],
-        ChatRoomCanLeave: ["B406F3E5"],
-        ChatRoomClearAllElements: ["52F91E02"],
-        ChatRoomCreateElement: ["76299AEC"],
-        ChatRoomDrawCharacter: ["FB2F0B97"],
-        ChatRoomDrawCharacterOverlay: ["D9A831CC"],
-        ChatRoomDrawFriendList: ["327DA1B8"],
-        ChatRoomKeyDown: ["FCA8DF29"],
-        ChatRoomMenuClick: ["8304B61F"],
-        ChatRoomMessage: ["7C097519"],
-        ChatRoomRun: ["9A1E764B"],
-        ChatRoomStatusUpdate: ["6DBFC554"],
-        ChatRoomSync: ["32E1C9AF"],
-        ChatRoomUpdateDisplay: ["8B37556F"],
-        ChatSearchLoad: ["4659E8F5"],
-        CheatImport: ["1ECB0CC4"],
-        ColorPickerDraw: ["FF93AF2E"],
-        CommandParse: ["2F4176CA"],
-        DialogClickExpressionMenu: ["AFBB0323"],
-        DialogDrawItemMenu: ["05301080"],
-        DialogFindPlayer: ["44A7263C"],
-        DialogInventoryAdd: ["A6DED236"],
-        DialogItemClick: ["1A6D14C0"],
-        DialogMenuButtonBuild: ["AC45F4CF"],
-        DialogMenuButtonClick: ["A4CE0C1C"],
-        DrawCharacter: ["CFEDEF08"],
-        DrawGetImage: ["8BFFECA9"],
-        DrawStatus: ["E9DC1722"],
-        FriendListBeepMenuSend: ["C5C27229"],
-        FriendListClick: ["E08BFE66"],
-        FriendListLoadFriendList: ["428B288B"],
-        FriendListRun: ["96BCBB6E"],
-        InformationSheetRun: ["08EF8A57"],
-        LoginMistressItems: ["984A6AD9"],
-        LoginResponse: ["9F59AEF1"],
-        LoginStableItems: ["C3F50DD1"],
-        ServerAccountBeep: ["0A2C7C78"],
-        ServerSend: ["F8627678"],
-        WardrobeClick: ["842709D9"],
-        WardrobeRun: ["02775589"],
     };
 
     var Preset;
@@ -672,6 +616,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
     function isObject$1(obj) {
         return !!obj && typeof obj === "object" && !Array.isArray(obj);
+    }
+    function typedObjectAssumedEntries(obj) {
+        return Object.entries(obj);
+    }
+    function typedObjectAssumedKeys(obj) {
+        return Object.keys(obj);
     }
     function longestCommonPrefix(strings) {
         if (strings.length === 0)
@@ -908,7 +858,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     };
     bcModSDK.errorReporterHooks.hookChainExit = (fn, mods) => {
         const ctx = debugContextStart(`Function ${fn} hook chain exit`, {
-            modArea: mods.size === 0 ? "" : mods.size === 1 ? Array.from(mods).join("") : `[Possibly multiple mods]`,
+            modArea: mods.size === 0 ? "" : "[Presence of patches prevents identifying source]",
             extraInfo: () => mods.size > 0 ? `Patched by: ${Array.from(mods).join(", ")}` : "",
         });
         return () => {
@@ -919,10 +869,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     let unloaded = false;
     function isHashExpected(functionName, hash) {
         var _a;
+        if (isNModClient())
+            return true;
         const expectedHashes = (_a = FUNCTION_HASHES[functionName]) !== null && _a !== void 0 ? _a : [];
-        if (isNModClient() && FUNCTION_HASHES_NMOD[functionName]) {
-            expectedHashes.push(...FUNCTION_HASHES_NMOD[functionName]);
-        }
         return expectedHashes.includes(hash);
     }
     function initPatchableFunction(target) {
@@ -25042,12 +24991,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         enforceNickname: z.boolean(),
     });
     const NICKNAME_LENGTH_MAX = 20;
-    const NICKNAME_REGEX = /^[\p{L}0-9\p{Z}'-]+$/u;
     function isValidNickname(nickname) {
         return (nickname.trim() === nickname &&
             nickname.length > 0 &&
             nickname.length <= NICKNAME_LENGTH_MAX &&
-            NICKNAME_REGEX.test(nickname));
+            ServerCharacterNicknameRegex.test(nickname));
     }
     function guard_RelationshipData(data) {
         const d = data;
@@ -26279,7 +26227,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                             ServerSend("ChatRoomLeave", "");
                             ChatRoomSetLastChatRoom("");
                             ChatRoomLeashPlayer = null;
-                            ChatRoomStart(data.ChatRoomSpace, "", "", "", "Introduction", BackgroundsTagList);
+                            ChatRoomStart(data.ChatRoomSpace, "", null, null, "Introduction", BackgroundsTagList);
                             CharacterDeleteAllOnline();
                             ChatRoomPlayerCanJoin = true;
                             ServerSend("ChatRoomJoin", { Name: data.ChatRoomName });
@@ -26508,16 +26456,18 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 if (args[0] != null)
                     return next(args);
             });
+            hookFunction("SpeechGarble", 100, (args, next) => {
+                if (args[1] == null) {
+                    args[1] = "";
+                }
+                return next(args);
+            });
             patchFunction("DrawGetImage", {
                 "Img.src = Source;": 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;',
             });
             hookFunction("ServerPlayerIsInChatRoom", 0, (args, next) => {
                 return next(args) || CurrentScreen === "GetUp";
             });
-            patchFunction("CharacterNickname", {
-                "/^[a-zA-Z\\s]*$/": "/^[\\p{L}0-9\\p{Z}'-]+$/u",
-            });
-            ServerCharacterNicknameRegex = NICKNAME_REGEX;
         }
         run() {
             LoginMistressItems();
@@ -30475,7 +30425,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 permission_configure: "rules_global_configuration",
                 permission_changeLimits: "rules_change_limits",
                 permission_viewOriginator: "rules_view_originator",
-                loadValidateConditionKey: rule => guard_BCX_Rule(rule),
+                loadValidateConditionKey: (rule) => guard_BCX_Rule(rule),
                 loadValidateCondition: (rule, data) => {
                     const info = data.data;
                     const descriptor = rules.get(rule);
@@ -31567,7 +31517,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 (typeof d.highestRoleInRoom === "number" &&
                     AccessLevel[d.highestRoleInRoom] !== undefined)) &&
             isObject$1(d.conditions) &&
-            Object.entries(d.conditions).every(([condition, conditionData]) => {
+            typedObjectAssumedEntries(d.conditions).every(([condition, conditionData]) => {
                 const res = guard_ConditionsConditionPublicData(category, condition, conditionData);
                 if (!res && allowInvalidConditionRemoval) {
                     console.warn(`BCX: Removing invalid ${condition}:${category} condition from public data`, conditionData);
@@ -31602,7 +31552,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     const categoryConfig = ConditionsGetCategoryConfigurableData(category);
                     const conditionsData = ConditionsGetCategoryData(category).conditions;
                     const conditions = {};
-                    for (const [condition, data] of Object.entries(conditionsData)) {
+                    for (const [condition, data] of typedObjectAssumedEntries(conditionsData)) {
+                        if (!data)
+                            continue;
                         const publicData = ConditionsMakeConditionPublicData(handler, condition, data, null);
                         conditions[condition] = {
                             ...pick(publicData, "active", "timer", "timerRemove", "requirements", "favorite"),
@@ -31774,7 +31726,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 ...data.limits,
             },
         };
-        for (const [condition, conditionData] of Object.entries(data.conditions)) {
+        for (const [condition, conditionData] of typedObjectAssumedEntries(data.conditions)) {
+            if (!conditionData)
+                continue;
             res.conditions[condition] = ConditionsMakeConditionPublicData(handler, condition, conditionData, requester);
         }
         return res;
@@ -32189,7 +32143,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             if (argv.length !== 3 || active !== "yes" && active !== "no") {
                 return respond(`Usage:\nsetactive <${CSHelp}> <yes/no>`);
             }
-            const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
+            const [result, condition] = handler.parseConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
             if (!result) {
                 return respond(condition);
             }
@@ -32201,7 +32155,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
         }
         else if (subcommand === "triggers") {
-            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            const [result, condition] = handler.parseConditionName(argv[1] || "", typedObjectAssumedKeys(categoryData.conditions));
             if (!result) {
                 return respond(condition);
             }
@@ -32356,7 +32310,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
         }
         else if (subcommand === "timer") {
-            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            const [result, condition] = handler.parseConditionName(argv[1] || "", typedObjectAssumedKeys(categoryData.conditions));
             if (!result) {
                 return respond(condition);
             }
@@ -32467,7 +32421,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         const categoryData = ConditionsGetCategoryData(category);
         if (subcommand === "setactive") {
             if (argv.length === 2) {
-                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+                return handler.autocompleteConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
             }
             else if (argv.length === 3) {
                 return Command_pickAutocomplete(argv[2], ["yes", "no"]);
@@ -32475,9 +32429,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         else if (subcommand === "triggers") {
             if (argv.length === 2) {
-                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+                return handler.autocompleteConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
             }
-            const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+            const [result, condition] = handler.parseConditionName(argv[1] || "", typedObjectAssumedKeys(categoryData.conditions));
             if (!result || !categoryData.conditions[condition]) {
                 return [];
             }
@@ -32507,7 +32461,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         else if (subcommand === "timer") {
             if (argv.length === 2) {
-                return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+                return handler.autocompleteConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
             }
             else if (argv.length === 3) {
                 return Command_pickAutocomplete(argv[2], ["set", "disable", "autoremove"]);
@@ -32554,6 +32508,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     },
                 };
                 for (const [group, data] of Object.entries(modStorage.cursedItems)) {
+                    if (!isAssetGroupName(group))
+                        continue;
                     curses.conditions[group] = {
                         active: true,
                         lastActive: false,
@@ -32587,7 +32543,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     console.warn(`BCX: Resetting category ${key} limits with invalid data`);
                     data.limits = {};
                 }
-                for (const [condition, limitValue] of Object.entries(data.limits)) {
+                for (const [condition, limitValue] of typedObjectAssumedEntries(data.limits)) {
                     if (!handler.loadValidateConditionKey(condition)) {
                         console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
                         delete data.limits[condition];
@@ -32604,7 +32560,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     data.requirements = {};
                 }
                 data.data = handler.loadCategorySpecificGlobalData(data.data);
-                for (const [condition, conditiondata] of Object.entries(data.conditions)) {
+                for (const [condition, conditiondata] of typedObjectAssumedEntries(data.conditions)) {
+                    if (!conditiondata)
+                        continue;
                     if (!handler.loadValidateConditionKey(condition)) {
                         console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
                         delete data.conditions[condition];
@@ -32743,7 +32701,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 const categoryData = modStorage.conditions[category];
                 if (!moduleIsEnabled(handler.category) || !categoryData)
                     continue;
-                for (const [conditionName, conditionData] of Object.entries(categoryData.conditions)) {
+                for (const [conditionName, conditionData] of typedObjectAssumedEntries(categoryData.conditions)) {
+                    if (!conditionData)
+                        continue;
                     if (conditionData.timer !== undefined && conditionData.timer <= now) {
                         if (conditionData.timerRemove && conditionData.active) {
                             ConditionsRemoveCondition(category, conditionName);
@@ -33219,10 +33179,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         init();
     }
     function clearCaches() {
-        if (typeof DrawRunMap !== "undefined") {
-            DrawRunMap.clear();
-            DrawScreen = "";
-        }
         if (typeof CurrentScreenFunctions !== "undefined") {
             const w = window;
             CurrentScreenFunctions = {
@@ -35857,7 +35813,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     if (DialogInventory.length > 9)
                         AppearanceMenu.push("Next");
                     AppearanceMenu.push("BCX_SearchExit");
-                    if (!DialogItemPermissionMode)
+                    if (DialogMenuMode !== "permissions")
                         AppearanceMenu.push("Cancel");
                     AppearanceMenu.push("Accept");
                 }
@@ -36240,7 +36196,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 ChatRoomSendLocal(`${character.toNicknamedString()} lifted all curses on you`);
             }
         }
-        ConditionsRemoveCondition("curses", Object.keys(ConditionsGetCategoryData("curses").conditions));
+        ConditionsRemoveCondition("curses", typedObjectAssumedKeys(ConditionsGetCategoryData("curses").conditions));
         return true;
     }
     class ModuleCurses extends BaseModule {
@@ -36320,7 +36276,10 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 },
             });
             queryHandlers.curseItem = (sender, data) => {
-                if (isObject$1(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
+                if (isObject$1(data) &&
+                    typeof data.Group === "string" &&
+                    isAssetGroupName(data.Group) &&
+                    (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
                     return curseItem(data.Group, data.curseProperties, sender);
                 }
                 else {
@@ -36328,7 +36287,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
             };
             queryHandlers.curseLift = (sender, data) => {
-                if (typeof data === "string") {
+                if (typeof data === "string" && isAssetGroupName(data)) {
                     return curseLift(data, sender);
                 }
                 else {
@@ -36358,7 +36317,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
                 else if (subcommand === "list") {
                     let result = "Current curses:";
-                    for (const [k, v] of Object.entries(cursesInfo)) {
+                    for (const [k, v] of typedObjectAssumedEntries(cursesInfo)) {
+                        if (!v)
+                            continue;
                         const group = AssetGroup.find(g => g.Name === k);
                         if (!group) {
                             console.warn(`BCX: Unknown group ${k}`);
@@ -36480,7 +36441,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     if (curse.data == null) {
                         return respond(`Empty groups cannot have configuration cursed`);
                     }
-                    const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name].data.Name);
+                    const asset = AssetGet(Player.AssetFamily, group.Name, curse.data.Name);
                     if (asset && target === "yes" && !curseAllowItemCurseProperty(asset)) {
                         return respond(`This item cannot have configuration cursed`);
                     }
@@ -36496,7 +36457,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     if (!curse) {
                         return respond(`This group or item is not cursed`);
                     }
-                    if (!cursesInfo[group.Name].requirements) {
+                    if (!curse.requirements) {
                         return respond(`Cannot change autoremove while the curse uses the global configuration. First use:\ncurses triggers <curse> global no`);
                     }
                     const target = (argv[2] || "").toLocaleLowerCase();
@@ -36922,7 +36883,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                             if (curse &&
                                 !itemColorsEquals(curse.Color, ItemColorItem.Color) &&
                                 checkPermissionAccess("curses_color", getPlayerCharacter())) {
-                                if (ItemColorItem.Color && ItemColorItem.Color !== "Default") {
+                                if (ItemColorItem.Color) {
                                     curse.Color = cloneDeep(ItemColorItem.Color);
                                 }
                                 else {
@@ -38258,7 +38219,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 document.body.appendChild(this.filterInput);
             }
             const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
-            for (const [condition, data] of Object.entries(this.conditionCategoryData.conditions)) {
+            for (const [condition, data] of typedObjectAssumedEntries(this.conditionCategoryData.conditions)) {
+                if (!data)
+                    continue;
                 const res = this.loadCondition(condition, data);
                 if (res === null)
                     continue;
@@ -38441,26 +38404,26 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             const accessFull = this.conditionCategoryData.access_normal && this.conditionCategoryData.access_limited;
             if (accessFull && MouseIn(678, 820, 170, 50)) {
-                this.character.conditionUpdateMultiple(this.conditionCategory, Object.entries(this.conditionCategoryData.conditions)
-                    .filter(([c, d]) => !d.active)
+                this.character.conditionUpdateMultiple(this.conditionCategory, typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+                    .filter(([c, d]) => !!d && !d.active)
                     .map(([c, d]) => c), { active: true });
                 return true;
             }
             if (accessFull && MouseIn(678, 885, 170, 46)) {
-                this.character.conditionUpdateMultiple(this.conditionCategory, Object.entries(this.conditionCategoryData.conditions)
-                    .filter(([c, d]) => !d.active && d.requirements === null)
+                this.character.conditionUpdateMultiple(this.conditionCategory, typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+                    .filter(([c, d]) => !!d && !d.active && d.requirements === null)
                     .map(([c, d]) => c), { active: true });
                 return true;
             }
             if (accessFull && MouseIn(870, 820, 170, 50)) {
-                this.character.conditionUpdateMultiple(this.conditionCategory, Object.entries(this.conditionCategoryData.conditions)
-                    .filter(([c, d]) => d.active)
+                this.character.conditionUpdateMultiple(this.conditionCategory, typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+                    .filter(([c, d]) => !!d && d.active)
                     .map(([c, d]) => c), { active: false });
                 return true;
             }
             if (accessFull && MouseIn(870, 885, 170, 46)) {
-                this.character.conditionUpdateMultiple(this.conditionCategory, Object.entries(this.conditionCategoryData.conditions)
-                    .filter(([c, d]) => d.active && d.requirements === null)
+                this.character.conditionUpdateMultiple(this.conditionCategory, typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+                    .filter(([c, d]) => !!d && d.active && d.requirements === null)
                     .map(([c, d]) => c), { active: false });
                 return true;
             }
@@ -40490,6 +40453,8 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 ChatRoomClearAllElements();
                 ServerSend("ChatRoomLeave", "");
                 CommonSetScreen("Room", "MaidQuarters");
+                if (MaidQuartersMaid == null)
+                    throw new Error("BCX: Missing MaidQuartersMaid when expected");
                 CharacterSetCurrent(MaidQuartersMaid);
                 MaidQuartersMaid.CurrentDialog = D;
                 MaidQuartersMaid.Stage = "205";
@@ -41166,7 +41131,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 permission_normal: "commands_normal",
                 permission_limited: "commands_limited",
                 permission_changeLimits: "commands_change_limits",
-                loadValidateConditionKey: command => guard_BCX_Command(command),
+                loadValidateConditionKey: (command) => guard_BCX_Command(command),
                 loadValidateCondition: (command) => {
                     console.error(`BCX: Removing unexpected command condition ${command}`);
                     return false;
@@ -44188,6 +44153,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         }
         return group;
     }
+    function isAssetGroupName(name) {
+        return AssetGroup.some((group) => group.Name === name);
+    }
     function isCloth(item, allowCosplay = false) {
         const group = smartGetAssetGroup(item);
         return group.Category === "Appearance" && group.AllowNone && group.Clothing && (allowCosplay || !group.BodyCosplay);
@@ -46141,22 +46109,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     const consoleInterface = Object.freeze(new ConsoleInterface());
     class ModuleConsole extends BaseModule {
         load() {
-            var _a;
             window.bcx = consoleInterface;
-            patchFunction("ChatRoomMessageDefaultMetadataExtractor", {
-                "asset.DynamicDescription(character).toLowerCase()": `( bcx.isDevel ? asset.Description : asset.DynamicDescription(character).toLowerCase() )`,
-            });
-            patchFunction("ChatRoomGetFocusGroupSubstitutions", {
-                "DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase()": `( bcx.isDevel ? focusGroup.Description : DialogActualNameForGroup(targetCharacter, focusGroup).toLowerCase() )`,
-            });
-            for (let i = 0; i < ChatRoomMessageExtractors.length; i++) {
-                if (ChatRoomMessageExtractors[i] === ((_a = bcModSDK.getPatchingInfo().get("ChatRoomMessageDefaultMetadataExtractor")) === null || _a === void 0 ? void 0 : _a.original)) {
-                    ChatRoomMessageExtractors[i] = ChatRoomMessageDefaultMetadataExtractor;
-                }
-            }
-            patchFunction("ExtendedItemDrawButton", {
-                "DialogFindPlayer(DialogPrefix + Option.Name)": `( bcx.isDevel ? JSON.stringify(Option.Property.Type) : DialogFindPlayer(DialogPrefix + Option.Name) )`,
-            });
             hookFunction("DialogDrawItemMenu", 0, (args, next) => {
                 var _a;
                 if (developmentMode) {
@@ -46164,41 +46117,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
                 return next(args);
             });
-            patchFunction("DialogDrawPoseMenu", {
-                '"Icons/Poses/" + PoseGroup[P].Name + ".png"': `"Icons/Poses/" + PoseGroup[P].Name + ".png", ( bcx.isDevel ? PoseGroup[P].Name : undefined )`,
-            });
-            hookFunction("DialogDrawExpressionMenu", 0, (args, next) => {
-                next(args);
-                if (developmentMode) {
-                    for (let I = 0; I < DialogFacialExpressions.length; I++) {
-                        const FE = DialogFacialExpressions[I];
-                        const OffsetY = 185 + 100 * I;
-                        if (MouseIn(20, OffsetY, 90, 90)) {
-                            DrawText(JSON.stringify(FE.Group), 300, 950, "White");
-                        }
-                        if (I === DialogFacialExpressionsSelected) {
-                            for (let j = 0; j < FE.ExpressionList.length; j++) {
-                                const EOffsetX = 155 + 100 * (j % 3);
-                                const EOffsetY = 185 + 100 * Math.floor(j / 3);
-                                if (MouseIn(EOffsetX, EOffsetY, 90, 90)) {
-                                    DrawText(JSON.stringify(FE.ExpressionList[j]), 300, 950, "White");
-                                }
-                            }
-                        }
-                    }
-                }
-            });
             DialogSelfMenuOptions.forEach(opt => {
                 if (opt.Name === "Pose") {
                     opt.IsAvailable = () => true;
-                    opt.Draw = function () {
-                        return DialogDrawPoseMenu();
-                    };
-                }
-                else if (opt.Name === "Expression") {
-                    opt.Draw = function () {
-                        return DialogDrawExpressionMenu();
-                    };
                 }
             });
         }
@@ -46290,13 +46211,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     CurrentCharacter.FocusGroup != null &&
                     CurrentCharacter.AllowItem)) &&
             DialogIntro() !== "" &&
-            DialogFocusItem == null &&
-            !DialogActivityMode &&
-            !DialogCraftingMenu &&
-            DialogColor == null &&
-            StruggleProgress < 0 &&
-            !StruggleLockPickOrder &&
-            DialogItemToLock == null;
+            (DialogMenuMode === "items" || DialogMenuMode === "permissions");
     }
     function enterSearchMode(C) {
         if (!searchBar) {
@@ -46309,11 +46224,13 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     }
                     else {
                         DialogInventoryBuild(C);
+                        DialogMenuButtonBuild(C);
                     }
                 }
             };
             searchBar.focus();
             DialogInventoryBuild(C);
+            DialogMenuButtonBuild(C);
         }
     }
     function exitSearchMode(C) {
@@ -46322,6 +46239,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             searchBar = null;
             searchBarAutoClose = false;
             DialogInventoryBuild(C);
+            DialogMenuButtonBuild(C);
         }
     }
     class ModuleDialog extends BaseModule {
@@ -46369,18 +46287,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
                 next(args);
             });
-            if (GameVersion === "R88") {
-                hookFunction("StruggleDrawStrengthProgress", 0, (args, next) => {
-                    next(args);
-                    struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
-                });
-            }
-            else {
-                hookFunction("StruggleStrengthDraw", 0, (args, next) => {
-                    next(args);
-                    struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
-                });
-            }
+            hookFunction("StruggleStrengthDraw", 0, (args, next) => {
+                next(args);
+                struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
+            });
+            hookFunction("StableGenericDrawProgress", 0, (args, next) => {
+                next(args);
+                struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
+            });
             hookFunction("DialogInventoryAdd", 5, (args, next) => {
                 if (searchBar) {
                     const item = args[1];
@@ -46401,21 +46315,25 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 }
                 next(args);
             });
-            hookFunction("DialogLeaveItemMenu", 0, (args, next) => {
+            hookFunction("DialogChangeFocusToGroup", 0, (args, next) => {
                 var _a;
                 exitSearchMode((_a = CharacterGetCurrent()) !== null && _a !== void 0 ? _a : Player);
-                next(args);
+                return next(args);
             });
             hookFunction("DialogItemClick", 0, (args, next) => {
                 var _a;
                 next(args);
-                if (!DialogItemPermissionMode) {
+                if (DialogMenuMode !== "permissions") {
                     exitSearchMode((_a = CharacterGetCurrent()) !== null && _a !== void 0 ? _a : Player);
                 }
             });
             hookFunction("DialogMenuButtonBuild", 10, (args, next) => {
                 next(args);
-                for (const toRemove of ["ChangeLayersMouth", "Prev", "BCX_Search"]) {
+                const ICON_REMOVAL_CANDIDATES = [
+                    "Prev",
+                    "BCX_Search",
+                ];
+                for (const toRemove of ICON_REMOVAL_CANDIDATES) {
                     if (DialogMenuButton.length <= 9)
                         break;
                     const index = DialogMenuButton.indexOf(toRemove);
@@ -46429,12 +46347,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             const C = CharacterGetCurrent();
             if (C) {
                 DialogInventoryBuild(C);
+                DialogMenuButtonBuild(C);
             }
         }
         unload() {
-            var _a, _b;
+            var _a, _b, _c;
             exitSearchMode((_a = CharacterGetCurrent()) !== null && _a !== void 0 ? _a : Player);
             DialogInventoryBuild((_b = CharacterGetCurrent()) !== null && _b !== void 0 ? _b : Player);
+            DialogMenuButtonBuild((_c = CharacterGetCurrent()) !== null && _c !== void 0 ? _c : Player);
         }
     }
 

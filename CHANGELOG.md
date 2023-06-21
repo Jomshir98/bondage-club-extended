@@ -1,5 +1,23 @@
 # BCX Changelog
 
+## 0.9.7
+
+This update includes:
+ - Improved handling of possibly corrupted BCX data during load
+ - Added data validation after save to catch invalidly formed save data before actually saving it
+ - This update improves compatibility with BC releases up to R93
+
+Fixes:
+ - Fixed inconsistent behaviour of search bar after R93
+ - Fixed BCX icon toggle not getting saved if it was the only modified setting
+ - Fixed a possible crash when gagged and talking with character while dialog translations were not fully loaded
+ - Fixed tutorial images not properly loading in some mod combinations
+ - General cleanup of several older parts of BCX to integrate better with newer releases
+
+Removed:
+ - Removed several development-only tools that got broken almost every update
+ - Removed most of NMod support
+
 ## 0.9.6
 
 This update includes:

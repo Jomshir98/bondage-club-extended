@@ -45,7 +45,7 @@ interface ThemeRoom {
 	Type: ThemeRoomType;
 	Setting: ThemeRoomSetting | undefined;
 	Limits: Set<string>;
-	BlockCategories: string[];
+	BlockCategories: ChatRoomBlockCategory[];
 	Background: string;
 	IntroText: string;
 }
@@ -286,8 +286,8 @@ function ChatSettingsThemeRoomClick() {
 
 	if (MouseIn(1480, 75, 420, 245)) {
 		ElementToggleGeneratedElements("ChatCreate", false);
-		BackgroundSelectionMake(ChatCreateBackgroundList,
-			(ChatCreateBackgroundList as any[]).indexOf(onRoomCreateScreen ? ChatCreateBackgroundSelect : ChatAdminBackgroundSelect), Name => {
+		BackgroundSelectionMake(ChatCreateBackgroundList!,
+			ChatCreateBackgroundList!.indexOf(onRoomCreateScreen ? ChatCreateBackgroundSelect : ChatAdminBackgroundSelect), Name => {
 				currentThemeRoom.Background = Name;
 			}
 		);

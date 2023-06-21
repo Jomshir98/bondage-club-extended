@@ -14,7 +14,7 @@ import { getAllCharactersInRoom } from "../characters";
 import { AccessLevel, registerPermission } from "./authority";
 import { ModuleCategory, Preset } from "../constants";
 
-const BACKGROUNDS_BCX_NAME = "[BCX] Hidden";
+const BACKGROUNDS_BCX_NAME: BCX_BackgroundTag = "[BCX] Hidden";
 
 export function InvisibilityEarbuds() {
 	if (InventoryGet(Player, "ItemEars")?.Asset.Name === "BluetoothEarbuds") {
@@ -444,7 +444,7 @@ export class ModuleClubUtils extends BaseModule {
 		registerCommand("utility", "background", "<name> - Changes chat room background", processBackgroundCommand, processBackgroundCommand_autocomplete);
 
 		// Add missing tags to tag list
-		const availableTags = new Set<string>();
+		const availableTags = new Set<BCX_BackgroundTag>();
 		for (const background of BackgroundsList) {
 			background.Tag.forEach(t => availableTags.add(t));
 		}

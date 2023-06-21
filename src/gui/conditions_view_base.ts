@@ -2,7 +2,7 @@ import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { GuiMainMenu } from "./mainmenu";
 import { GuiSubscreen } from "./subscreen";
-import { clamp, createInputElement, formatTimeInterval, positionElement } from "../utils";
+import { clamp, createInputElement, formatTimeInterval, positionElement, typedObjectAssumedEntries } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { ConditionsLimit } from "../constants";
 
@@ -88,12 +88,14 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ").filter(Boolean);
 
-		for (const [condition, data] of Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)) {
-			const res = this.loadCondition(condition as ConditionsCategoryKeys[CAT], data);
+		for (const [condition, data] of typedObjectAssumedEntries(this.conditionCategoryData.conditions)) {
+			if (!data)
+				continue;
+			const res = this.loadCondition(condition, data);
 			if (res === null)
 				continue;
 
-			const access = [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][this.conditionCategoryData.limits[condition as ConditionsCategoryKeys[CAT]] ?? ConditionsLimit.normal];
+			const access = [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][this.conditionCategoryData.limits[condition] ?? ConditionsLimit.normal];
 
 			if (filter.some(i =>
 				!condition.toLocaleLowerCase().includes(i) &&
@@ -336,9 +338,9 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		if (accessFull && MouseIn(678, 820, 170, 50)) {
 			this.character.conditionUpdateMultiple(
 				this.conditionCategory,
-				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
-					.filter(([c, d]) => !d.active)
-					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => !!d && !d.active)
+					.map(([c, d]) => c),
 				{ active: true }
 			);
 			return true;
@@ -347,9 +349,9 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		if (accessFull && MouseIn(678, 885, 170, 46)) {
 			this.character.conditionUpdateMultiple(
 				this.conditionCategory,
-				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
-					.filter(([c, d]) => !d.active && d.requirements === null)
-					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => !!d && !d.active && d.requirements === null)
+					.map(([c, d]) => c),
 				{ active: true }
 			);
 			return true;
@@ -358,9 +360,9 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		if (accessFull && MouseIn(870, 820, 170, 50)) {
 			this.character.conditionUpdateMultiple(
 				this.conditionCategory,
-				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
-					.filter(([c, d]) => d.active)
-					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => !!d && d.active)
+					.map(([c, d]) => c),
 				{ active: false }
 			);
 			return true;
@@ -369,9 +371,9 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		if (accessFull && MouseIn(870, 885, 170, 46)) {
 			this.character.conditionUpdateMultiple(
 				this.conditionCategory,
-				Object.entries<ConditionsConditionPublicData<CAT>>(this.conditionCategoryData.conditions)
-					.filter(([c, d]) => d.active && d.requirements === null)
-					.map(([c, d]) => c as ConditionsCategoryKeys[CAT]),
+				typedObjectAssumedEntries(this.conditionCategoryData.conditions)
+					.filter(([c, d]) => !!d && d.active && d.requirements === null)
+					.map(([c, d]) => c),
 				{ active: false }
 			);
 			return true;

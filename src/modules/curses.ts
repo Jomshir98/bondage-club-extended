@@ -1,7 +1,7 @@
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
-import { arrayUnique, capitalizeFirstLetter, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, itemColorsEquals } from "../utilsClub";
+import { arrayUnique, capitalizeFirstLetter, dictionaryProcess, formatTimeInterval, isObject, typedObjectAssumedEntries, typedObjectAssumedKeys } from "../utils";
+import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, isAssetGroupName, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorageSync } from "./storage";
@@ -102,7 +102,7 @@ export function curseDefaultItemCurseProperty(asset: Asset): boolean {
 		!asset.DynamicScriptDraw;
 }
 
-export function curseItem(Group: string, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {
+export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
@@ -206,7 +206,7 @@ export function curseBatch(mode: "items" | "clothes" | "body", includingEmpty: b
 	return true;
 }
 
-export function curseLift(Group: string, character: ChatroomCharacter | null): boolean {
+export function curseLift(Group: AssetGroupName, character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
@@ -249,7 +249,7 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 			ChatRoomSendLocal(`${character.toNicknamedString()} lifted all curses on you`);
 		}
 	}
-	ConditionsRemoveCondition("curses", Object.keys(ConditionsGetCategoryData("curses").conditions));
+	ConditionsRemoveCondition("curses", typedObjectAssumedKeys(ConditionsGetCategoryData("curses").conditions));
 	return true;
 }
 
@@ -330,14 +330,19 @@ export class ModuleCurses extends BaseModule {
 		});
 
 		queryHandlers.curseItem = (sender, data) => {
-			if (isObject(data) && typeof data.Group === "string" && (typeof data.curseProperties === "boolean" || data.curseProperties === null)) {
+			if (
+				isObject(data) &&
+				typeof data.Group === "string" &&
+				isAssetGroupName(data.Group) &&
+				(typeof data.curseProperties === "boolean" || data.curseProperties === null)
+			) {
 				return curseItem(data.Group, data.curseProperties, sender);
 			} else {
 				return undefined;
 			}
 		};
 		queryHandlers.curseLift = (sender, data) => {
-			if (typeof data === "string") {
+			if (typeof data === "string" && isAssetGroupName(data)) {
 				return curseLift(data, sender);
 			} else {
 				return undefined;
@@ -364,7 +369,9 @@ export class ModuleCurses extends BaseModule {
 				return ConditionsRunSubcommand("curses", argv, sender, respond);
 			} else if (subcommand === "list") {
 				let result = "Current curses:";
-				for (const [k, v] of Object.entries(cursesInfo)) {
+				for (const [k, v] of typedObjectAssumedEntries(cursesInfo)) {
+					if (!v)
+						continue;
 					const group = AssetGroup.find(g => g.Name === k);
 					if (!group) {
 						console.warn(`BCX: Unknown group ${k}`);
@@ -483,7 +490,7 @@ export class ModuleCurses extends BaseModule {
 				if (curse.data == null) {
 					return respond(`Empty groups cannot have configuration cursed`);
 				}
-				const asset = AssetGet(Player.AssetFamily, group.Name, cursesInfo[group.Name].data!.Name);
+				const asset = AssetGet(Player.AssetFamily, group.Name, curse.data.Name);
 				if (asset && target === "yes" && !curseAllowItemCurseProperty(asset)) {
 					return respond(`This item cannot have configuration cursed`);
 				}
@@ -498,7 +505,7 @@ export class ModuleCurses extends BaseModule {
 				if (!curse) {
 					return respond(`This group or item is not cursed`);
 				}
-				if (!cursesInfo[group.Name].requirements) {
+				if (!curse.requirements) {
 					return respond(`Cannot change autoremove while the curse uses the global configuration. First use:\ncurses triggers <curse> global no`);
 				}
 				const target = (argv[2] || "").toLocaleLowerCase();
@@ -586,7 +593,7 @@ export class ModuleCurses extends BaseModule {
 			permission_configure: "curses_global_configuration",
 			permission_changeLimits: "curses_change_limits",
 			permission_viewOriginator: "curses_view_originator",
-			loadValidateConditionKey: (group) => AssetGroup.some(g => g.Name === group && g.AllowCustomize),
+			loadValidateConditionKey: (group): group is AssetGroupName => AssetGroup.some(g => g.Name === group && g.AllowCustomize),
 			loadValidateCondition: (group, data) => {
 				const info = data.data;
 				const assetGroup = AssetGroupGet(Player.AssetFamily, group);
@@ -921,9 +928,9 @@ export class ModuleCurses extends BaseModule {
 				args[5] = (color: any) => {
 					if (ItemColorCharacter === Player && ItemColorItem) {
 						// Original code
-						const newColors = (ItemColorState.colors as any[]).slice();
+						const newColors = ItemColorState!.colors.slice();
 						ItemColorPickerIndices.forEach(i => newColors[i] = color);
-						ItemColorItem.Color = (newColors as string | any[]);
+						ItemColorItem.Color = newColors;
 						CharacterLoadCanvas(ItemColorCharacter);
 						// Curse color change code
 						const condition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
@@ -932,7 +939,7 @@ export class ModuleCurses extends BaseModule {
 							!itemColorsEquals(curse.Color, ItemColorItem.Color) &&
 							checkPermissionAccess("curses_color", getPlayerCharacter())
 						) {
-							if (ItemColorItem.Color && ItemColorItem.Color !== "Default") {
+							if (ItemColorItem.Color) {
 								curse.Color = cloneDeep(ItemColorItem.Color);
 							} else {
 								delete curse.Color;
@@ -973,7 +980,7 @@ export class ModuleCurses extends BaseModule {
 		this.run();
 	}
 
-	curseTick(group: string, condition: ConditionsConditionData<"curses">): void {
+	curseTick(group: AssetGroupName, condition: ConditionsConditionData<"curses">): void {
 		const assetGroup = AssetGroupGet(Player.AssetFamily, group);
 		if (!assetGroup) {
 			console.error(`BCX: AssetGroup not found for curse ${group}`, condition);
@@ -1160,7 +1167,7 @@ export class ModuleCurses extends BaseModule {
 		}
 	}
 
-	private curseStateChange(curse: string, data: ConditionsConditionData<"curses">, newState: boolean): void {
+	private curseStateChange(curse: AssetGroupName, data: ConditionsConditionData<"curses">, newState: boolean): void {
 		const group = AssetGroupGet(Player.AssetFamily, curse);
 		if (!newState &&
 			data.data &&

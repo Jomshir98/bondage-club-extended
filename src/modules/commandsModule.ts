@@ -236,7 +236,7 @@ export class ModuleCommandsModule extends BaseModule {
 			permission_normal: "commands_normal",
 			permission_limited: "commands_limited",
 			permission_changeLimits: "commands_change_limits",
-			loadValidateConditionKey: command => guard_BCX_Command(command),
+			loadValidateConditionKey: (command): command is BCX_Command  => guard_BCX_Command(command),
 			loadValidateCondition: (command) => {
 				console.error(`BCX: Removing unexpected command condition ${command}`);
 				return false;

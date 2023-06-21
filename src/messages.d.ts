@@ -114,12 +114,12 @@ type BCX_queries = {
 	logGetAllowedActions: [undefined, BCX_logAllowedActions];
 	curseItem: [
 		{
-			Group: string;
+			Group: AssetGroupName;
 			curseProperties: boolean | null;
 		},
 		boolean
 	];
-	curseLift: [string, boolean];
+	curseLift: [AssetGroupName, boolean];
 	curseLiftAll: [undefined, boolean];
 	curseBatch: [
 		{
@@ -131,17 +131,17 @@ type BCX_queries = {
 	conditionsGet: [ConditionsCategories, ConditionsCategoryPublicData<ConditionsCategories>];
 	conditionSetLimit: [{
 		category: ConditionsCategories;
-		condition: string;
+		condition: ConditionsCategoryKeys[ConditionsCategories];
 		limit: import("./constants").ConditionsLimit;
 	}, boolean];
 	conditionUpdate: [{
 		category: ConditionsCategories;
-		condition: string;
+		condition: ConditionsCategoryKeys[ConditionsCategories];
 		data: ConditionsConditionPublicData;
 	}, boolean];
 	conditionUpdateMultiple: [{
 		category: ConditionsCategories;
-		conditions: string[];
+		conditions: (ConditionsCategoryKeys[ConditionsCategories])[];
 		data: Partial<ConditionsConditionPublicDataBase>;
 	}, boolean];
 	conditionCategoryUpdate: [{

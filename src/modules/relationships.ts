@@ -27,14 +27,13 @@ export const RelationshipData_schema = zod.object({
 });
 
 export const NICKNAME_LENGTH_MAX = 20;
-export const NICKNAME_REGEX = /^[\p{L}0-9\p{Z}'-]+$/u;
 
 export function isValidNickname(nickname: string): boolean {
 	return (
 		nickname.trim() === nickname &&
 		nickname.length > 0 &&
 		nickname.length <= NICKNAME_LENGTH_MAX &&
-		NICKNAME_REGEX.test(nickname)
+		ServerCharacterNicknameRegex.test(nickname)
 	);
 }
 

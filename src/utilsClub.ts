@@ -285,6 +285,10 @@ export function smartGetAssetGroup(item: Item | Asset | AssetGroup): AssetGroup 
 	return group;
 }
 
+export function isAssetGroupName(name: string): name is AssetGroupName {
+	return AssetGroup.some((group) => group.Name === name);
+}
+
 export function isCloth(item: Item | Asset | AssetGroup, allowCosplay: boolean = false): boolean {
 	const group = smartGetAssetGroup(item);
 	return group.Category === "Appearance" && group.AllowNone && group.Clothing && (allowCosplay || !group.BodyCosplay);

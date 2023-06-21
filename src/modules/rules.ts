@@ -1062,10 +1062,10 @@ export class ModuleRules extends BaseModule {
 			permission_configure: "rules_global_configuration",
 			permission_changeLimits: "rules_change_limits",
 			permission_viewOriginator: "rules_view_originator",
-			loadValidateConditionKey: rule => guard_BCX_Rule(rule),
+			loadValidateConditionKey: (rule): rule is BCX_Rule => guard_BCX_Rule(rule),
 			loadValidateCondition: (rule, data) => {
 				const info = data.data;
-				const descriptor = rules.get(rule as BCX_Rule);
+				const descriptor = rules.get(rule);
 				if (!descriptor) {
 					console.error(`BCX: Bad data for rule ${rule}: descriptor not found, removing it`);
 					return false;

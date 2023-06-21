@@ -740,9 +740,11 @@ export class ModuleWardrobe extends BaseModule {
 				exitSearchMode(C);
 			} else if (searchBar) {
 				AppearanceMenu = [];
-				if (DialogInventory.length > 9) AppearanceMenu.push("Next");
+				if (DialogInventory.length > 9)
+					AppearanceMenu.push("Next");
 				AppearanceMenu.push("BCX_SearchExit");
-				if (!DialogItemPermissionMode) AppearanceMenu.push("Cancel");
+				if (DialogMenuMode !== "permissions")
+					AppearanceMenu.push("Cancel");
 				AppearanceMenu.push("Accept");
 			} else {
 				AppearanceMenu.splice(AppearanceMenu.length - (AppearanceMenu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");

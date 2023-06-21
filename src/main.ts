@@ -15,10 +15,6 @@ export function loginInit(C: any) {
 }
 
 function clearCaches() {
-	if (typeof DrawRunMap !== "undefined") {
-		DrawRunMap.clear();
-		DrawScreen = "";
-	}
 	if (typeof CurrentScreenFunctions !== "undefined") {
 		const w = window as any;
 		CurrentScreenFunctions = {

@@ -3,7 +3,6 @@ import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { MiscCheat } from "../constants";
 import { modStorage, modStorageSync } from "./storage";
-import { NICKNAME_REGEX } from "./relationships";
 
 export const cheatChangeHooks: Partial<Record<MiscCheat, (enabled: boolean) => void>> = {};
 
@@ -200,12 +199,6 @@ export class ModuleMiscPatches extends BaseModule {
 		hookFunction("ServerPlayerIsInChatRoom", 0, (args, next) => {
 			return next(args) || CurrentScreen === "GetUp";
 		});
-
-		// Widen possible nicknames
-		patchFunction("CharacterNickname", {
-			"/^[a-zA-Z\\s]*$/": "/^[\\p{L}0-9\\p{Z}'-]+$/u",
-		});
-		ServerCharacterNicknameRegex = NICKNAME_REGEX;
 	}
 
 	run() {

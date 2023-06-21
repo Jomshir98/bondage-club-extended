@@ -18,13 +18,7 @@ function allowSearchMode(): boolean {
 			)
 		) &&
 		DialogIntro() !== "" &&
-		DialogFocusItem == null &&
-		!DialogActivityMode &&
-		!DialogCraftingMenu &&
-		DialogColor == null &&
-		StruggleProgress < 0 &&
-		!StruggleLockPickOrder &&
-		DialogItemToLock == null;
+		(DialogMenuMode === "items" || DialogMenuMode === "permissions");
 }
 
 function enterSearchMode(C: Character) {
@@ -37,11 +31,13 @@ function enterSearchMode(C: Character) {
 					MainCanvas.canvas.focus();
 				} else {
 					DialogInventoryBuild(C);
+					DialogMenuButtonBuild(C);
 				}
 			}
 		};
 		searchBar.focus();
 		DialogInventoryBuild(C);
+		DialogMenuButtonBuild(C);
 	}
 }
 
@@ -51,6 +47,7 @@ function exitSearchMode(C: Character) {
 		searchBar = null;
 		searchBarAutoClose = false;
 		DialogInventoryBuild(C);
+		DialogMenuButtonBuild(C);
 	}
 }
 
@@ -102,19 +99,16 @@ export class ModuleDialog extends BaseModule {
 			next(args);
 		});
 
-		if (GameVersion === "R88") {
-			hookFunction("StruggleDrawStrengthProgress", 0, (args, next) => {
-				next(args);
-				// Prevent A/S spamming from writing into search right after struggle finishes
-				struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
-			});
-		} else {
-			hookFunction("StruggleStrengthDraw", 0, (args, next) => {
-				next(args);
-				// Prevent A/S spamming from writing into search right after struggle finishes
-				struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
-			});
-		}
+		hookFunction("StruggleStrengthDraw", 0, (args, next) => {
+			next(args);
+			// Prevent A/S spamming from writing into search right after struggle finishes
+			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
+		});
+		hookFunction("StableGenericDrawProgress", 0, (args, next) => {
+			next(args);
+			// Prevent A/S spamming from writing into search right after struggle finishes
+			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
+		});
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {
 			if (searchBar) {
@@ -141,14 +135,14 @@ export class ModuleDialog extends BaseModule {
 			next(args);
 		});
 
-		hookFunction("DialogLeaveItemMenu", 0, (args, next) => {
+		hookFunction("DialogChangeFocusToGroup", 0, (args, next) => {
 			exitSearchMode(CharacterGetCurrent() ?? Player);
-			next(args);
+			return next(args);
 		});
 
 		hookFunction("DialogItemClick", 0, (args, next) => {
 			next(args);
-			if (!DialogItemPermissionMode) {
+			if (DialogMenuMode !== "permissions") {
 				exitSearchMode(CharacterGetCurrent() ?? Player);
 			}
 		});
@@ -156,7 +150,11 @@ export class ModuleDialog extends BaseModule {
 		// Remove some buttons, if there are too many
 		hookFunction("DialogMenuButtonBuild", 10, (args, next) => {
 			next(args);
-			for (const toRemove of ["ChangeLayersMouth", "Prev", "BCX_Search"]) {
+			const ICON_REMOVAL_CANDIDATES: (DialogMenuButton | BCX_DialogMenuButton)[] = [
+				"Prev",
+				"BCX_Search",
+			];
+			for (const toRemove of ICON_REMOVAL_CANDIDATES) {
 				if (DialogMenuButton.length <= 9)
 					break;
 				const index = DialogMenuButton.indexOf(toRemove);
@@ -171,11 +169,13 @@ export class ModuleDialog extends BaseModule {
 		const C = CharacterGetCurrent();
 		if (C) {
 			DialogInventoryBuild(C);
+			DialogMenuButtonBuild(C);
 		}
 	}
 
 	unload() {
 		exitSearchMode(CharacterGetCurrent() ?? Player);
 		DialogInventoryBuild(CharacterGetCurrent() ?? Player);
+		DialogMenuButtonBuild(CharacterGetCurrent() ?? Player);
 	}
 }

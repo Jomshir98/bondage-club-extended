@@ -27,6 +27,14 @@ export function isObject(obj: unknown): obj is Record<string, any> {
 	return !!obj && typeof obj === "object" && !Array.isArray(obj);
 }
 
+export function typedObjectAssumedEntries<T extends object>(obj: T): [keyof T, T[keyof T]][] {
+	return Object.entries(obj) as [keyof T, T[keyof T]][];
+}
+
+export function typedObjectAssumedKeys<T extends object>(obj: T): (keyof T)[] {
+	return Object.keys(obj) as (keyof T)[];
+}
+
 export function longestCommonPrefix(strings: string[]): string {
 	if (strings.length === 0) return "";
 

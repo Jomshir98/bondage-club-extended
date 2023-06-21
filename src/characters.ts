@@ -264,7 +264,7 @@ export class ChatroomCharacter {
 		});
 	}
 
-	curseItem(Group: string, curseProperties: boolean | null): Promise<boolean> {
+	curseItem(Group: AssetGroupName, curseProperties: boolean | null): Promise<boolean> {
 		return sendQuery("curseItem", { Group, curseProperties }, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'curseItem' query\n", data);
@@ -274,7 +274,7 @@ export class ChatroomCharacter {
 		});
 	}
 
-	curseLift(Group: string): Promise<boolean> {
+	curseLift(Group: AssetGroupName): Promise<boolean> {
 		return sendQuery("curseLift", Group, this.MemberNumber).then(data => {
 			if (typeof data !== "boolean") {
 				console.error("BCX: Bad data during 'curseLift' query\n", data);

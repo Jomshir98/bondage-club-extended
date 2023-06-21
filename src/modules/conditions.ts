@@ -1,6 +1,6 @@
 import { ConditionsLimit, ModuleCategory, ModuleInitPhase, MODULE_NAMES } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
-import { capitalizeFirstLetter, isObject } from "../utils";
+import { capitalizeFirstLetter, isObject, typedObjectAssumedEntries, typedObjectAssumedKeys } from "../utils";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { modStorage, modStorageSync } from "./storage";
@@ -13,7 +13,7 @@ import zod, { ZodType } from "zod";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { AccessLevel, checkPermissionAccess, getHighestRoleInRoom } from "./authority";
 import { COMMAND_GENERIC_ERROR, Command_parseTime, Command_pickAutocomplete, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber } from "./commands";
-import { getCharacterName } from "../utilsClub";
+import { getCharacterName, isAssetGroupName } from "../utilsClub";
 import { BCX_setInterval } from "../BCXContext";
 import { ExportImportRegisterCategory } from "./export_import";
 
@@ -106,7 +106,7 @@ export function guard_ConditionsCategoryPublicData<C extends ConditionsCategorie
 			)
 		) &&
 		isObject(d.conditions) &&
-		Object.entries(d.conditions).every(
+		typedObjectAssumedEntries(d.conditions).every(
 			([condition, conditionData]) => {
 				const res = guard_ConditionsConditionPublicData(category, condition, conditionData);
 				if (!res && allowInvalidConditionRemoval) {
@@ -134,8 +134,8 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	permission_configure?: BCX_Permissions;
 	permission_changeLimits: BCX_Permissions;
 	permission_viewOriginator?: BCX_Permissions;
-	loadValidateConditionKey(key: string): boolean;
-	loadValidateCondition(key: string, data: ConditionsConditionData<C>): boolean;
+	loadValidateConditionKey(key: string): key is ConditionsCategoryKeys[C];
+	loadValidateCondition(key: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): boolean;
 	loadCategorySpecificGlobalData(data: ConditionsCategorySpecificGlobalData[C] | undefined): ConditionsCategorySpecificGlobalData[C];
 	stateChangeHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>, newState: boolean): void;
 	tickHandler(condition: ConditionsCategoryKeys[C], data: ConditionsConditionData<C>): void;
@@ -154,7 +154,7 @@ export interface ConditionsHandler<C extends ConditionsCategories> {
 	logConditionUpdate(condition: ConditionsCategoryKeys[C], character: ChatroomCharacter, newData: ConditionsConditionPublicData<C>, oldData: ConditionsConditionPublicData<C>): void;
 	logCategoryUpdate(character: ChatroomCharacter, newData: ConditionsCategoryConfigurableData, oldData: ConditionsCategoryConfigurableData): void;
 	getDefaultLimits(): Record<string, ConditionsLimit>;
-	parseConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): [boolean, string | ConditionsCategoryKeys[C]];
+	parseConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): [true, ConditionsCategoryKeys[C]] | [false, string];
 	autocompleteConditionName(selector: string, onlyExisting: false | (ConditionsCategoryKeys[C])[]): string[];
 	commandConditionSelectorHelp: string;
 	currentExportImport?: {
@@ -195,11 +195,13 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 					data?: unknown;
 				}> = {};
 
-				for (const [condition, data] of Object.entries(conditionsData)) {
-					const publicData = ConditionsMakeConditionPublicData(handler, condition as ConditionsCategoryKeys[C], data, null);
+				for (const [condition, data] of typedObjectAssumedEntries(conditionsData)) {
+					if (!data)
+						continue;
+					const publicData = ConditionsMakeConditionPublicData(handler, condition, data, null);
 					conditions[condition] = {
 						...pick(publicData, "active", "timer", "timerRemove", "requirements", "favorite"),
-						data: currentExportImport.export(condition as ConditionsCategoryKeys[C], data.data),
+						data: currentExportImport.export(condition, data.data),
 					};
 				}
 
@@ -304,7 +306,7 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 					res += `Skipped unknown ${handler.commandConditionSelectorHelp}: "${k}"\n`;
 					continue;
 				}
-				if (!ConditionsSetLimit(category, k as ConditionsCategoryKeys[C], v, character)) {
+				if (!ConditionsSetLimit(category, k, v, character)) {
 					res += `Failed to set limit for "${k}"\n`;
 				}
 			}
@@ -388,7 +390,9 @@ export function ConditionsGetCategoryPublicData<C extends ConditionsCategories>(
 			...data.limits,
 		},
 	};
-	for (const [condition, conditionData] of Object.entries(data.conditions)) {
+	for (const [condition, conditionData] of typedObjectAssumedEntries(data.conditions)) {
+		if (!conditionData)
+			continue;
 		res.conditions[condition] = ConditionsMakeConditionPublicData<ConditionsCategories>(handler, condition, conditionData, requester);
 	}
 	return res as ConditionsCategoryPublicData<C>;
@@ -479,7 +483,7 @@ export function ConditionsRemoveCondition<C extends ConditionsCategories>(catego
 	let changed = false;
 	for (const condition of conditions) {
 		if (categoryData.conditions[condition]) {
-			handler.stateChangeHandler(condition, categoryData.conditions[condition], false);
+			handler.stateChangeHandler(condition, categoryData.conditions[condition]!, false);
 			delete categoryData.conditions[condition];
 			changed = true;
 		}
@@ -859,25 +863,25 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		if (argv.length !== 3 || active !== "yes" && active !== "no") {
 			return respond(`Usage:\nsetactive <${CSHelp}> <yes/no>`);
 		}
-		const [result, condition] = handler.parseConditionName(argv[1], Object.keys(categoryData.conditions));
+		const [result, condition] = handler.parseConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
 		if (!result) {
 			return respond(condition);
 		}
 		if (!categoryData.conditions[condition]) {
 			return respond(`This ${categorySingular} doesn't exist`);
 		}
-		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]!, sender);
 		conditionData.active = active === "yes";
 		respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 	} else if (subcommand === "triggers") {
-		const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+		const [result, condition] = handler.parseConditionName(argv[1] || "", typedObjectAssumedKeys(categoryData.conditions));
 		if (!result) {
 			return respond(condition);
 		}
 		if (!categoryData.conditions[condition]) {
 			return respond(`This ${categorySingular} doesn't exist`);
 		}
-		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]!, sender);
 		const keyword = (argv[2] || "").toLocaleLowerCase();
 		if (!keyword) {
 			if (!conditionData.requirements) {
@@ -1018,7 +1022,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		}
 		respond(ConditionsCategoryUpdate(category, configData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 	} else if (subcommand === "timer") {
-		const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+		const [result, condition] = handler.parseConditionName(argv[1] || "", typedObjectAssumedKeys(categoryData.conditions));
 		if (!result) {
 			return respond(condition);
 		}
@@ -1033,7 +1037,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 				`timer <${CSHelp}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`
 			);
 		}
-		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]!, sender);
 		if (keyword === "disable") {
 			conditionData.timer = null;
 			conditionData.timerRemove = false;
@@ -1127,15 +1131,15 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 
 	if (subcommand === "setactive") {
 		if (argv.length === 2) {
-			return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+			return handler.autocompleteConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
 		} else if (argv.length === 3) {
 			return Command_pickAutocomplete(argv[2], ["yes", "no"]);
 		}
 	} else if (subcommand === "triggers") {
 		if (argv.length === 2) {
-			return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+			return handler.autocompleteConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
 		}
-		const [result, condition] = handler.parseConditionName(argv[1] || "", Object.keys(categoryData.conditions));
+		const [result, condition] = handler.parseConditionName(argv[1] || "", typedObjectAssumedKeys(categoryData.conditions));
 		if (!result || !categoryData.conditions[condition]) {
 			return [];
 		}
@@ -1146,7 +1150,7 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 			return Command_pickAutocomplete(argv[3], ["yes", "no"]);
 		} else if (argv[2].toLocaleLowerCase() === "logic") {
 			return Command_pickAutocomplete(argv[3], ["and", "or"]);
-		} else if (categoryData.conditions[condition].requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+		} else if (categoryData.conditions[condition]!.requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
 			return ConditionsCommandTriggersAutocomplete(argv.slice(2), sender);
 		}
 	} else if (subcommand === "globaltriggers") {
@@ -1159,7 +1163,7 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 		}
 	} else if (subcommand === "timer") {
 		if (argv.length === 2) {
-			return handler.autocompleteConditionName(argv[1], Object.keys(categoryData.conditions));
+			return handler.autocompleteConditionName(argv[1], typedObjectAssumedKeys(categoryData.conditions));
 		} else if (argv.length === 3) {
 			return Command_pickAutocomplete(argv[2], ["set", "disable", "autoremove"]);
 		} else if (argv.length === 4 && argv[2].toLocaleLowerCase() === "autoremove") {
@@ -1201,6 +1205,8 @@ export class ModuleConditions extends BaseModule {
 				},
 			};
 			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
+				if (!isAssetGroupName(group))
+					continue;
 				curses.conditions[group] = {
 					active: true,
 					lastActive: false,
@@ -1236,7 +1242,7 @@ export class ModuleConditions extends BaseModule {
 				console.warn(`BCX: Resetting category ${key} limits with invalid data`);
 				data.limits = {};
 			}
-			for (const [condition, limitValue] of Object.entries(data.limits)) {
+			for (const [condition, limitValue] of typedObjectAssumedEntries(data.limits)) {
 				if (!handler.loadValidateConditionKey(condition)) {
 					console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
 					delete data.limits[condition];
@@ -1256,7 +1262,9 @@ export class ModuleConditions extends BaseModule {
 
 			data.data = handler.loadCategorySpecificGlobalData(data.data);
 
-			for (const [condition, conditiondata] of Object.entries<ConditionsConditionData>(data.conditions)) {
+			for (const [condition, conditiondata] of typedObjectAssumedEntries(data.conditions)) {
+				if (!conditiondata)
+					continue;
 				if (!handler.loadValidateConditionKey(condition)) {
 					console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
 					delete data.conditions[condition];
@@ -1408,7 +1416,9 @@ export class ModuleConditions extends BaseModule {
 			if (!moduleIsEnabled(handler.category) || !categoryData)
 				continue;
 
-			for (const [conditionName, conditionData] of Object.entries<ConditionsConditionData>(categoryData.conditions)) {
+			for (const [conditionName, conditionData] of typedObjectAssumedEntries<Partial<Record<ConditionsCategoryKeys[ConditionsCategories], ConditionsConditionData<ConditionsCategories>>>>(categoryData.conditions)) {
+				if (!conditionData)
+					continue;
 				if (conditionData.timer !== undefined && conditionData.timer <= now) {
 					if (conditionData.timerRemove && conditionData.active) {
 						ConditionsRemoveCondition(category, conditionName);

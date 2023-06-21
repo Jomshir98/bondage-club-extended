@@ -1,5 +1,5 @@
 import { debugContextStart } from "./BCXContext";
-import { FUNCTION_HASHES, FUNCTION_HASHES_NMOD } from "./config";
+import { FUNCTION_HASHES } from "./config";
 import { ModuleCategory } from "./constants";
 import { isNModClient } from "./utilsClub";
 
@@ -46,10 +46,9 @@ const patchedFunctions: Map<string, IPatchedFunctionData> = new Map();
 let unloaded: boolean = false;
 
 function isHashExpected(functionName: string, hash: string): boolean {
+	if (isNModClient())
+		return true;
 	const expectedHashes = FUNCTION_HASHES[functionName] ?? [];
-	if (isNModClient() && FUNCTION_HASHES_NMOD[functionName]) {
-		expectedHashes.push(...FUNCTION_HASHES_NMOD[functionName]);
-	}
 	return expectedHashes.includes(hash);
 }
 

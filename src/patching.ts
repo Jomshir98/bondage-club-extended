@@ -21,7 +21,7 @@ bcModSDK.errorReporterHooks.hookEnter = (fn, mod) => {
 
 bcModSDK.errorReporterHooks.hookChainExit = (fn, mods) => {
 	const ctx = debugContextStart(`Function ${fn} hook chain exit`, {
-		modArea: mods.size === 0 ? "" : mods.size === 1 ? Array.from(mods).join("") : `[Possibly multiple mods]`,
+		modArea: mods.size === 0 ? "" : "[Presence of patches prevents identifying source]",
 		extraInfo: () => mods.size > 0 ? `Patched by: ${Array.from(mods).join(", ")}` : "",
 	});
 	return () => {

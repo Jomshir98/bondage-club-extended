@@ -11,6 +11,7 @@ import { debugGenerateReport, debugSetLogServerMessages, showErrorOverlay } from
 import { VERSION } from "../config";
 import { ModAPI } from "./console_modApi";
 import { BCX_VERSION_PARSED } from "../utils";
+import { getCurrentSubscreen } from "./gui";
 
 import bcModSDK from "bondage-club-mod-sdk";
 import { cloneDeep } from "lodash-es";
@@ -142,6 +143,10 @@ class ConsoleInterface implements BCX_ConsoleInterface {
 			throw new Error("Only mods registered to ModSDK can request BCX API");
 		}
 		return Object.freeze(new ModAPI(modName));
+	}
+
+	inBcxSubscreen(): boolean {
+		return getCurrentSubscreen() != null;
 	}
 }
 

@@ -67,6 +67,19 @@ interface BCX_Events {
 		/** Name of asset group that was changed */
 		group: string;
 	};
+	/**
+	 * Triggers whenever player changes subscreen in BCX.
+	 * Note, that some changes might not be observable by outside mod (e.g. when user simply switches to different subscreen).
+	 * This can trigger even outside of `InformationSheet` screen.
+	 */
+	bcxSubscreenChange: {
+		/**
+		 * Whether BCX is currently showing one of custom screens, overriding the default BC screen.
+		 *
+		 * At the time of emitting, this value is the same as the one returned by `bcx.inBcxSubscreen()`.
+		 */
+		inBcxSubscreen: boolean;
+	};
 }
 
 interface BCX_ModAPI extends BCXEventEmitter<BCX_Events> {
@@ -98,6 +111,9 @@ interface BCX_ConsoleInterface {
 	 * @param mod - Same identifier of your mod as used for ModSDK
 	 */
 	getModApi(mod: string): BCX_ModAPI;
+
+	/** Whether BCX is currently showing one of custom screens, overriding the default BC screen. */
+	inBcxSubscreen(): boolean;
 }
 
 interface Window {

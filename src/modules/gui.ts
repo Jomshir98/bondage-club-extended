@@ -9,6 +9,7 @@ import { firstTimeInit } from "./storage";
 import { developmentMode } from "../utilsClub";
 import { ChatroomSM } from "./chatroom";
 import { GuiTutorial } from "../gui/tutorial";
+import { BCXGlobalEventSystem } from "../event";
 
 export function getCurrentSubscreen(): GuiSubscreen | null {
 	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
@@ -39,6 +40,9 @@ export class ModuleGUI extends BaseModule {
 			this._currentSubscreen.Load();
 		}
 		ChatroomSM.UpdateStatus();
+		BCXGlobalEventSystem.emitEvent("bcxSubscreenChange", {
+			inBcxSubscreen: subscreen != null,
+		});
 	}
 
 	constructor() {

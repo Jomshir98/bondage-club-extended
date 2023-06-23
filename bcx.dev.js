@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.7-8a1663b4";const BCX_DEVEL=false;
+    const BCX_VERSION="0.9.7-7439f024";const BCX_DEVEL=false;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -35513,12 +35513,14 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     }
                     else {
                         DialogInventoryBuild(C);
+                        AppearancePreviewBuild(C, true);
                         AppearanceMenuBuild(C);
                     }
                 }
             };
             searchBar$1.focus();
             DialogInventoryBuild(C);
+            AppearancePreviewBuild(C, true);
             AppearanceMenuBuild(C);
         }
     }
@@ -35528,6 +35530,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             searchBar$1 = null;
             searchBarAutoClose$1 = false;
             DialogInventoryBuild(C);
+            AppearancePreviewBuild(C, true);
             AppearanceMenuBuild(C);
         }
     }
@@ -41745,6 +41748,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 this._currentSubscreen.Load();
             }
             ChatroomSM.UpdateStatus();
+            BCXGlobalEventSystem.emitEvent("bcxSubscreenChange", {
+                inBcxSubscreen: subscreen != null,
+            });
         }
         constructor() {
             super();
@@ -46104,6 +46110,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 throw new Error("Only mods registered to ModSDK can request BCX API");
             }
             return Object.freeze(new ModAPI(modName));
+        }
+        inBcxSubscreen() {
+            return getCurrentSubscreen() != null;
         }
     }
     const consoleInterface = Object.freeze(new ConsoleInterface());

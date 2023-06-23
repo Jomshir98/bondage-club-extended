@@ -394,12 +394,14 @@ function enterSearchMode(C: Character) {
 					MainCanvas.canvas.focus();
 				} else {
 					DialogInventoryBuild(C);
+					AppearancePreviewBuild(C, true);
 					AppearanceMenuBuild(C);
 				}
 			}
 		};
 		searchBar.focus();
 		DialogInventoryBuild(C);
+		AppearancePreviewBuild(C, true);
 		AppearanceMenuBuild(C);
 	}
 }
@@ -410,6 +412,7 @@ function exitSearchMode(C: Character) {
 		searchBar = null;
 		searchBarAutoClose = false;
 		DialogInventoryBuild(C);
+		AppearancePreviewBuild(C, true);
 		AppearanceMenuBuild(C);
 	}
 }

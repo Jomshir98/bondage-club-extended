@@ -26,6 +26,7 @@ declare const CanvasDrawHeight: number;
 declare function CharacterAppearanceStripLayer(C: Character): void;
 declare function CharacterAppearanceYOffset(C: Character, HeightRatio: number, IgnoreUpButton?: boolean): number;
 declare function AppearanceMenuBuild(C: Character): void;
+declare function AppearancePreviewBuild(C: Character, buildCanvases: boolean): void;
 declare function CharacterAppearanceSetItem(C: Character, Group: AssetGroupName, ItemAsset: Asset | null, NewColor?: string | string[], DifficultyFactor?: number, ItemMemberNumber?: number, Refresh?: boolean): null | Item;
 declare function CharacterAppearanceStringify(C: Character): string;
 declare function CharacterAppearanceRestore(C: Character, backup: string): void;

@@ -206,6 +206,7 @@ export function showErrorOverlay(
 	win.style.display = "flex";
 	win.style.flexDirection = "column";
 	win.style.padding = "1em";
+	win.style.overflow = "auto";
 
 	// Title
 	const titleElem = document.createElement("h1");
@@ -248,6 +249,7 @@ export function showErrorOverlay(
 	win.appendChild(contentElem);
 	contentElem.readOnly = true;
 	contentElem.value = contents;
+	contentElem.style.minHeight = "min(10em, 50vh)";
 	contentElem.style.flex = "1";
 	contentElem.style.margin = "0.5em 0";
 

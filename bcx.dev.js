@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.7-7439f024";const BCX_DEVEL=false;
+    const BCX_VERSION="0.9.7-727d4820";const BCX_DEVEL=false;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -32902,6 +32902,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         win.style.display = "flex";
         win.style.flexDirection = "column";
         win.style.padding = "1em";
+        win.style.overflow = "auto";
         const titleElem = document.createElement("h1");
         win.appendChild(titleElem);
         titleElem.innerText = title;
@@ -32935,6 +32936,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         win.appendChild(contentElem);
         contentElem.readOnly = true;
         contentElem.value = contents;
+        contentElem.style.minHeight = "min(10em, 50vh)";
         contentElem.style.flex = "1";
         contentElem.style.margin = "0.5em 0";
         let timeout = minTimeout !== null && minTimeout !== void 0 ? minTimeout : 0;

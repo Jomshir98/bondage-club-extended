@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.7-727d4820";const BCX_DEVEL=true;
+    const BCX_VERSION="0.9.7-db21f2a7";const BCX_DEVEL=true;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -608,6 +608,19 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             crc = (crc >>> 8) ^ c;
         }
         return ((crc ^ -1) >>> 0).toString(16).padStart(8, "0").toUpperCase();
+    }
+    function measureDataSize(data) {
+        try {
+            if (typeof data !== "string") {
+                data = JSON.stringify(data) || "";
+            }
+            if (typeof data === "string") {
+                return encoder.encode(data).byteLength;
+            }
+        }
+        catch (_err) {
+        }
+        return 0;
     }
     function addStyle(styleString) {
         const style = document.createElement("style");
@@ -32744,6 +32757,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
 
     const MAX_STACK_SIZE = 15;
+    const PROBLEMATIC_MESSAGE_SIZE = 180000;
     let firstError = true;
     let lastReceivedMessageType = "";
     let lastReceivedMessageTime = 0;
@@ -32874,6 +32888,42 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         let res = `----- ERROR ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n` +
             `Description: ${description}\n`;
         res += debugPrettifyError(error) + "\n\n";
+        res += debugMakeContextReport();
+        try {
+            res += "\n" + debugGenerateReport(currentMod === "BCX");
+        }
+        catch (error2) {
+            res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error2)}`;
+        }
+        return res;
+    }
+    function debugGenerateReportProblematicOutgoingMessage(messageType, message) {
+        const currentMod = contextCurrentModArea();
+        let res = `----- Huge outgoing message report ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n`;
+        res += `Message type: ${messageType}\n`;
+        res += `Message total size: ${measureDataSize(message)}\n`;
+        res += `\n----- Message size breakdown -----\n`;
+        for (let i = 0; i < message.length; i++) {
+            const part = message[i];
+            res += `\n--- Part #${i} ---\n`;
+            res += `Type: ${part == null ? "null" : Array.isArray(part) ? "array" : typeof part}\n`;
+            res += `Size: ${measureDataSize(part)}\n`;
+            if (typeof part === "string" && part.length < 64) {
+                res += `Value: ${JSON.stringify(part)}\n`;
+            }
+            if (isObject$1(part)) {
+                res += "Breakdown by keys:\n";
+                for (const [key, value] of Object.entries(part).sort((a, b) => measureDataSize(b[1]) - measureDataSize(a[1]))) {
+                    res += `- ${key}: ${measureDataSize(value)}\n`;
+                    if (isObject$1(value)) {
+                        for (const [key2, value2] of Object.entries(value).sort((a, b) => measureDataSize(b[1]) - measureDataSize(a[1]))) {
+                            res += `  - ${key2}: ${measureDataSize(value2)}\n`;
+                        }
+                    }
+                }
+            }
+        }
+        res += "\n";
         res += debugMakeContextReport();
         try {
             res += "\n" + debugGenerateReport(currentMod === "BCX");
@@ -33073,8 +33123,26 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                     currentMod == null ? sourceBasedErrorMessage.unknown :
                         sourceBasedErrorMessage.knownMod(currentMod)), debugGenerateReportManualError(description, error));
     }
-    let originalSocketEmit;
-    function bcxSocketEmit(...args) {
+    function reportProblematicOutgoingMessage(messageType, message) {
+        const totalSize = measureDataSize(message);
+        console.error(`BCX: Outgoing message size: ${totalSize}`, "\nIndividual sizes:", message.map(measureDataSize), "\nMessage:", message);
+        if (!firstError)
+            return;
+        firstError = false;
+        showErrorOverlay("Profile data size alert", "BCX detected a large outgoing data packet that might cause you to disconnect from the server.<br />" +
+            "The most common cause for this is too much data being stored by all of your mods/extensions together. This problem won't be fixed by simply disabling some or all extensions.<br />" +
+            "Solution to this problem isn't straightforward - we recommend asking for help on the <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server.<br />" +
+            "<h3>If you do encounter a disconnect:</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!<br />" +
+            "<i>This message will not show again during this session.</i>", debugGenerateReportProblematicOutgoingMessage(messageType, message));
+    }
+    function checkOutgoingMessageSize(messageType, message) {
+        const size = measureDataSize(message);
+        if (size > 0 && size > PROBLEMATIC_MESSAGE_SIZE) {
+            reportProblematicOutgoingMessage(messageType, message);
+        }
+    }
+    let originalSocketEmitEvent;
+    function bcxSocketEmitEvent(...args) {
         const message = Array.isArray(args[0]) && typeof args[0][0] === "string" ? args[0][0] : "[unknown]";
         lastReceivedMessageType = message;
         lastReceivedMessageTime = Date.now();
@@ -33089,9 +33157,22 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
                 return `Event: ${message}\n` + parameters.map(i => JSON.stringify(i, undefined, "  ")).join("\n");
             },
         });
-        const res = originalSocketEmit === null || originalSocketEmit === void 0 ? void 0 : originalSocketEmit.apply(this, args);
+        const res = originalSocketEmitEvent === null || originalSocketEmitEvent === void 0 ? void 0 : originalSocketEmitEvent.apply(this, args);
         ctx.end();
         return res;
+    }
+    let originalSocketEmit;
+    function bcxSocketEmit(...args) {
+        const messageType = Array.isArray(args) && typeof args[0] === "string" ? args[0] : "[unknown]";
+        lastSentMessageType = messageType;
+        lastSentMessageTime = Date.now();
+        if (logServerMessages) {
+            console.log("\u2B06 Send", ...args);
+        }
+        if (args.length >= 2) {
+            checkOutgoingMessageSize(messageType, args);
+        }
+        return originalSocketEmit === null || originalSocketEmit === void 0 ? void 0 : originalSocketEmit.apply(this, args);
     }
     let originalClick;
     function bcxClick(event) {
@@ -33119,11 +33200,15 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         })) !== null && _a !== void 0 ? _a : 0;
     }
     function InitErrorReporter() {
-        var _a;
+        var _a, _b;
         window.addEventListener("error", onUnhandledError);
-        if (originalSocketEmit === undefined && typeof ((_a = ServerSocket === null || ServerSocket === void 0 ? void 0 : ServerSocket.__proto__) === null || _a === void 0 ? void 0 : _a.emitEvent) === "function") {
-            originalSocketEmit = ServerSocket.__proto__.emitEvent;
-            ServerSocket.__proto__.emitEvent = bcxSocketEmit;
+        if (originalSocketEmitEvent === undefined && typeof ((_a = ServerSocket === null || ServerSocket === void 0 ? void 0 : ServerSocket.__proto__) === null || _a === void 0 ? void 0 : _a.emitEvent) === "function") {
+            originalSocketEmitEvent = ServerSocket.__proto__.emitEvent;
+            ServerSocket.__proto__.emitEvent = bcxSocketEmitEvent;
+        }
+        if (originalSocketEmit === undefined && typeof ((_b = ServerSocket === null || ServerSocket === void 0 ? void 0 : ServerSocket.__proto__) === null || _b === void 0 ? void 0 : _b.emit) === "function") {
+            originalSocketEmit = ServerSocket.__proto__.emit;
+            ServerSocket.__proto__.emit = bcxSocketEmit;
         }
         const canvas = document.getElementById("MainCanvas");
         if (canvas) {
@@ -33136,14 +33221,6 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             originalRAF = window.requestAnimationFrame;
             window.requestAnimationFrame = bcxRaf;
         }
-        hookFunction("ServerSend", 0, (args, next) => {
-            lastSentMessageType = args[0];
-            lastSentMessageTime = Date.now();
-            if (logServerMessages) {
-                console.log("\u2B06 Send", ...args);
-            }
-            return next(args);
-        });
         if (compatibilityCheckTimeout == null) {
             compatibilityCheckTimeout = BCX_setInterval(() => {
                 detectCompatibilityProblems();
@@ -33155,7 +33232,11 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
     }
     function UnloadErrorReporter() {
         window.removeEventListener("error", onUnhandledError);
-        if (originalSocketEmit && ServerSocket.__proto__.emitEvent === bcxSocketEmit) {
+        if (originalSocketEmitEvent && ServerSocket.__proto__.emitEvent === bcxSocketEmitEvent) {
+            ServerSocket.__proto__.emitEvent = originalSocketEmitEvent;
+            originalSocketEmitEvent = undefined;
+        }
+        if (originalSocketEmit && ServerSocket.__proto__.emit === bcxSocketEmit) {
             ServerSocket.__proto__.emitEvent = originalSocketEmit;
             originalSocketEmit = undefined;
         }

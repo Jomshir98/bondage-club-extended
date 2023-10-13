@@ -5,13 +5,14 @@ import { moduleInitPhase } from "./moduleManager";
 import { ConditionsGetCategoryData, ConditionsGetCategoryEnabled } from "./modules/conditions";
 import { getDisabledModules } from "./modules/presets";
 import { firstTimeInit, modStorage, modStorageSync } from "./modules/storage";
-import { getPatchedFunctionsHashes, hookFunction } from "./patching";
+import { getPatchedFunctionsHashes } from "./patching";
 import { detectOtherMods } from "./utilsClub";
-import { crc32 } from "./utils";
+import { crc32, isObject, measureDataSize } from "./utils";
 
 import bcModSDK from "bondage-club-mod-sdk";
 
 const MAX_STACK_SIZE = 15;
+export const PROBLEMATIC_MESSAGE_SIZE = 180_000;
 
 let firstError = true;
 
@@ -165,6 +166,52 @@ export function debugGenerateReportManualError(description: string, error: unkno
 		`Description: ${description}\n`;
 
 	res += debugPrettifyError(error) + "\n\n";
+
+	res += debugMakeContextReport();
+
+	try {
+		res += "\n" + debugGenerateReport(currentMod === "BCX");
+	} catch (error2) {
+		res += `----- Debug report -----\nERROR GENERATING DEBUG REPORT!\n${debugPrettifyError(error2)}`;
+	}
+
+	return res;
+}
+
+export function debugGenerateReportProblematicOutgoingMessage(messageType: string, message: unknown[]): string {
+	const currentMod = contextCurrentModArea();
+
+	let res = `----- Huge outgoing message report ${currentMod != null ? `(IN ${currentMod || "BC"}) ` : ""}-----\n`;
+
+	res += `Message type: ${messageType}\n`;
+	res += `Message total size: ${measureDataSize(message)}\n`;
+
+	res += `\n----- Message size breakdown -----\n`;
+
+	for (let i = 0; i < message.length; i++) {
+		const part = message[i];
+		res += `\n--- Part #${i} ---\n`;
+		res += `Type: ${part == null ? "null" : Array.isArray(part) ? "array" : typeof part}\n`;
+		res += `Size: ${measureDataSize(part)}\n`;
+
+		if (typeof part === "string" && part.length < 64) {
+			res += `Value: ${JSON.stringify(part)}\n`;
+		}
+
+		if (isObject(part)) {
+			res += "Breakdown by keys:\n";
+			for (const [key, value] of Object.entries(part).sort((a, b) => measureDataSize(b[1]) - measureDataSize(a[1]))) {
+				res += `- ${key}: ${measureDataSize(value)}\n`;
+				if (isObject(value)) {
+					for (const [key2, value2] of Object.entries(value).sort((a, b) => measureDataSize(b[1]) - measureDataSize(a[1]))) {
+						res += `  - ${key2}: ${measureDataSize(value2)}\n`;
+					}
+				}
+			}
+		}
+	}
+
+	res += "\n";
 
 	res += debugMakeContextReport();
 
@@ -429,9 +476,36 @@ export function reportManualError(description: string, error: unknown) {
 	);
 }
 
+export function reportProblematicOutgoingMessage(messageType: string, message: unknown[]) {
+	const totalSize = measureDataSize(message);
+
+	console.error(`BCX: Outgoing message size: ${totalSize}`, "\nIndividual sizes:", message.map(measureDataSize), "\nMessage:", message);
+	if (!firstError)
+		return;
+	firstError = false;
+
+	// Display error window
+	showErrorOverlay(
+		"Profile data size alert",
+		"BCX detected a large outgoing data packet that might cause you to disconnect from the server.<br />" +
+		"The most common cause for this is too much data being stored by all of your mods/extensions together. This problem won't be fixed by simply disabling some or all extensions.<br />" +
+		"Solution to this problem isn't straightforward - we recommend asking for help on the <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server.<br />" +
+		"<h3>If you do encounter a disconnect:</h3> Please submit the report to <a href='https://discord.gg/dkWsEjf' target='_blank'>Bondage Club's Discord</a> server!<br />" +
+		"<i>This message will not show again during this session.</i>",
+		debugGenerateReportProblematicOutgoingMessage(messageType, message)
+	);
+}
+
+function checkOutgoingMessageSize(messageType: string, message: unknown[]): void {
+	const size = measureDataSize(message);
+	if (size > 0 && size > PROBLEMATIC_MESSAGE_SIZE) {
+		reportProblematicOutgoingMessage(messageType, message);
+	}
+}
+
 // Server message origin
-let originalSocketEmit: undefined | ((...args: any[]) => any);
-function bcxSocketEmit(this: any, ...args: any[]) {
+let originalSocketEmitEvent: undefined | ((...args: any[]) => any);
+function bcxSocketEmitEvent(this: any, ...args: any[]) {
 	const message = Array.isArray(args[0]) && typeof args[0][0] === "string" ? args[0][0] : "[unknown]";
 	lastReceivedMessageType = message;
 	lastReceivedMessageTime = Date.now();
@@ -448,9 +522,24 @@ function bcxSocketEmit(this: any, ...args: any[]) {
 			return `Event: ${message}\n` + parameters.map(i => JSON.stringify(i, undefined, "  ")).join("\n");
 		},
 	});
-	const res = originalSocketEmit?.apply(this, args);
+	const res = originalSocketEmitEvent?.apply(this, args);
 	ctx.end();
 	return res;
+}
+
+// Server outgoing message
+let originalSocketEmit: undefined | ((...args: any[]) => any);
+function bcxSocketEmit(this: any, ...args: unknown[]) {
+	const messageType = Array.isArray(args) && typeof args[0] === "string" ? args[0] : "[unknown]";
+	lastSentMessageType = messageType;
+	lastSentMessageTime = Date.now();
+	if (logServerMessages) {
+		console.log("\u2B06 Send", ...args);
+	}
+	if (args.length >= 2) {
+		checkOutgoingMessageSize(messageType, args);
+	}
+	return originalSocketEmit?.apply(this, args);
 }
 
 // Click origin
@@ -483,9 +572,14 @@ function bcxRaf(this: any, fn: FrameRequestCallback): number {
 export function InitErrorReporter() {
 	window.addEventListener("error", onUnhandledError);
 	// Server message origin
-	if (originalSocketEmit === undefined && typeof (ServerSocket as any)?.__proto__?.emitEvent === "function") {
-		originalSocketEmit = (ServerSocket as any).__proto__.emitEvent;
-		(ServerSocket as any).__proto__.emitEvent = bcxSocketEmit;
+	if (originalSocketEmitEvent === undefined && typeof (ServerSocket as any)?.__proto__?.emitEvent === "function") {
+		originalSocketEmitEvent = (ServerSocket as any).__proto__.emitEvent;
+		(ServerSocket as any).__proto__.emitEvent = bcxSocketEmitEvent;
+	}
+	// Server outgoing message
+	if (originalSocketEmit === undefined && typeof (ServerSocket as any)?.__proto__?.emit === "function") {
+		originalSocketEmit = (ServerSocket as any).__proto__.emit;
+		(ServerSocket as any).__proto__.emit = bcxSocketEmit;
 	}
 
 	const canvas = document.getElementById("MainCanvas") as (HTMLCanvasElement | undefined);
@@ -503,15 +597,6 @@ export function InitErrorReporter() {
 		window.requestAnimationFrame = bcxRaf;
 	}
 
-	hookFunction("ServerSend", 0, (args, next) => {
-		lastSentMessageType = args[0];
-		lastSentMessageTime = Date.now();
-		if (logServerMessages) {
-			console.log("\u2B06 Send", ...args);
-		}
-		return next(args);
-	});
-
 	if (compatibilityCheckTimeout == null) {
 		compatibilityCheckTimeout = BCX_setInterval(() => {
 			detectCompatibilityProblems();
@@ -525,7 +610,12 @@ export function InitErrorReporter() {
 export function UnloadErrorReporter() {
 	window.removeEventListener("error", onUnhandledError);
 	// Server message origin
-	if (originalSocketEmit && (ServerSocket as any).__proto__.emitEvent === bcxSocketEmit) {
+	if (originalSocketEmitEvent && (ServerSocket as any).__proto__.emitEvent === bcxSocketEmitEvent) {
+		(ServerSocket as any).__proto__.emitEvent = originalSocketEmitEvent;
+		originalSocketEmitEvent = undefined;
+	}
+	// Server outgoing message
+	if (originalSocketEmit && (ServerSocket as any).__proto__.emit === bcxSocketEmit) {
 		(ServerSocket as any).__proto__.emitEvent = originalSocketEmit;
 		originalSocketEmit = undefined;
 	}

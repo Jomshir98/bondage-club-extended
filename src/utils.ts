@@ -15,6 +15,22 @@ export function crc32(str: string): string {
 }
 /* eslint-enable no-bitwise */
 
+export function measureDataSize(data: unknown): number {
+	try {
+		if (typeof data !== "string") {
+			data = JSON.stringify(data) || "";
+		}
+		if (typeof data === "string") {
+			// We want byte size, so use text encoder
+			return encoder.encode(data).byteLength;
+		}
+	} catch (_err) {
+		// Ignore errors
+	}
+	// If stringification fails, we can't guess how the data would be actually serialized
+	return 0;
+}
+
 /** Utility function to add CSS */
 export function addStyle(styleString: string): void {
 	const style = document.createElement("style");

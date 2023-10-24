@@ -158,7 +158,7 @@ export class ModuleConsole extends BaseModule {
 
 		hookFunction("DialogDrawItemMenu", 0, (args, next) => {
 			if (developmentMode) {
-				DialogTextDefault = (args[0] as Character).FocusGroup?.Description || "";
+				DialogTextDefault = args[0].FocusGroup?.Description || "";
 			}
 			return next(args);
 		});

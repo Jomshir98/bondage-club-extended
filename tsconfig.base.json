@@ -8,7 +8,6 @@
 		"resolveJsonModule": true,
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
-		"baseUrl": "./src",
 		"noEmit": true,
 		"noEmitOnError": true,
 		"sourceMap": true,

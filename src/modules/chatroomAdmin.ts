@@ -45,7 +45,7 @@ interface ThemeRoom {
 	Type: ThemeRoomType;
 	Setting: ThemeRoomSetting | undefined;
 	Limits: Set<string>;
-	BlockCategories: ChatRoomBlockCategory[];
+	BlockCategories: ServerChatRoomBlockCategory[];
 	Background: string;
 	IntroText: string;
 }
@@ -135,7 +135,7 @@ function ThemeRoomLoad(): void {
 	// start cooldown for the room greeting when someone leaves
 	hookFunction("ChatRoomSyncMemberLeave", 5, (args, next) => {
 		next(args);
-		const R = args[0] as Record<string, number>;
+		const R = args[0];
 		if (nextGreet.has(R.SourceMemberNumber)) {
 			nextGreet.set(R.SourceMemberNumber, Date.now() + GREET_DELAY);
 		}
@@ -149,7 +149,7 @@ function ThemeRoomLoad(): void {
 			return;
 		}
 		if (size < ChatRoomCharacter.length) {
-			const C = args[0] as Character;
+			const C = args[0];
 			if (C.MemberNumber !== undefined &&
 				nextGreet.has(C.MemberNumber) &&
 				nextGreet.get(C.MemberNumber)! < Date.now()
@@ -600,36 +600,27 @@ export class ModuleChatroomAdmin extends BaseModule {
 			next(args);
 			ChatSettingsExtraExit();
 		});
-		if (GameVersion === "R79") {
-			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomName"), 535, 110,': 'DrawText(TextGet("RoomName"), 675, 110,',
-			});
-			patchFunction("ChatCreateRun", {
-				'ElementPosition("InputName", 535, 170, 820);': 'ElementPosition("InputName", 610, 170, 680);',
-			});
-		} else {
-			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
-			});
-			patchFunction("ChatCreateRun", {
-				'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
-			});
-			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
-			});
-			patchFunction("ChatCreateRun", {
-				"DrawButton(405, 172,": "DrawButton(505, 172,",
-			});
-			patchFunction("ChatCreateRun", {
-				'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
-			});
-			patchFunction("ChatCreateRun", {
-				'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
-			});
-			patchFunction("ChatCreateClick", {
-				"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
-			});
-		}
+		patchFunction("ChatCreateRun", {
+			'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
+		});
+		patchFunction("ChatCreateRun", {
+			'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
+		});
+		patchFunction("ChatCreateRun", {
+			'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
+		});
+		patchFunction("ChatCreateRun", {
+			"DrawButton(405, 172,": "DrawButton(505, 172,",
+		});
+		patchFunction("ChatCreateRun", {
+			'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
+		});
+		patchFunction("ChatCreateRun", {
+			'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
+		});
+		patchFunction("ChatCreateClick", {
+			"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
+		});
 		hookFunction("ChatCreateRun", 0, (args, next) => {
 			onRoomCreateScreen = true;
 			if (onSecondPage) {
@@ -705,36 +696,27 @@ export class ModuleChatroomAdmin extends BaseModule {
 			next(args);
 		});
 		//#region Second page button (on room admin screen)
-		if (GameVersion === "R79") {
-			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomName"), 535, 110,': 'DrawText(TextGet("RoomName"), 675, 110,',
-			});
-			patchFunction("ChatAdminRun", {
-				'ElementPosition("InputName", 535, 170, 820);': 'ElementPosition("InputName", 610, 170, 680);',
-			});
-		} else {
-			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
-			});
-			patchFunction("ChatAdminRun", {
-				'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
-			});
-			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
-			});
-			patchFunction("ChatAdminRun", {
-				"DrawButton(405, 172,": "DrawButton(505, 172,",
-			});
-			patchFunction("ChatAdminRun", {
-				'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
-			});
-			patchFunction("ChatAdminRun", {
-				'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
-			});
-			patchFunction("ChatAdminClick", {
-				"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
-			});
-		}
+		patchFunction("ChatAdminRun", {
+			'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
+		});
+		patchFunction("ChatAdminRun", {
+			'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
+		});
+		patchFunction("ChatAdminRun", {
+			'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
+		});
+		patchFunction("ChatAdminRun", {
+			"DrawButton(405, 172,": "DrawButton(505, 172,",
+		});
+		patchFunction("ChatAdminRun", {
+			'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
+		});
+		patchFunction("ChatAdminRun", {
+			'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
+		});
+		patchFunction("ChatAdminClick", {
+			"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
+		});
 		hookFunction("ChatAdminRun", 0, (args, next) => {
 			onRoomCreateScreen = false;
 			if (onSecondPage) {

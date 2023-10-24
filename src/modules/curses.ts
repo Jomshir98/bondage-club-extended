@@ -897,8 +897,8 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		hookFunction("ValidationResolveModifyDiff", 0, (args, next) => {
-			const params = args[2] as AppearanceUpdateParameters;
-			const result = next(args) as ItemDiffResolution;
+			const params = args[2];
+			const result = next(args);
 
 			if (params.C.ID === 0 && result.item) {
 				const condition = ConditionsGetCondition("curses", result.item.Asset.Group.Name);

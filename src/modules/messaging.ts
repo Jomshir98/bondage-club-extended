@@ -25,7 +25,7 @@ export function sendHiddenMessage<T extends keyof BCX_messages>(type: T, message
 		Type: "Hidden",
 		Target,
 		Dictionary: { type, message },
-	});
+	} as any);
 }
 
 export function sendHiddenBeep<T extends keyof BCX_beeps>(type: T, message: BCX_beeps[T], target: number, asLeashBeep: boolean = false) {
@@ -35,7 +35,7 @@ export function sendHiddenBeep<T extends keyof BCX_beeps>(type: T, message: BCX_
 		Message: {
 			BCX: { type, message },
 		},
-	});
+	} as any);
 }
 
 interface IPendingQuery {
@@ -196,7 +196,7 @@ export function notifyOfChange(): void {
 
 export class ModuleMessaging extends BaseModule {
 	load() {
-		hookFunction("ChatRoomMessage", 10, (args, next) => {
+		hookFunction("ChatRoomMessage", 10, (args: any, next) => {
 			const data = args[0];
 
 			if (data?.Type === "Hidden" && data.Content === "BCXMsg" && typeof data.Sender === "number") {
@@ -221,7 +221,7 @@ export class ModuleMessaging extends BaseModule {
 			return next(args);
 		});
 
-		hookFunction("ServerAccountBeep", 10, (args, next) => {
+		hookFunction("ServerAccountBeep", 10, (args: any, next) => {
 			const data = args[0];
 
 			if (typeof data?.BeepType === "string" && ["Leash", "BCX"].includes(data.BeepType) && isObject(data.Message?.BCX)) {

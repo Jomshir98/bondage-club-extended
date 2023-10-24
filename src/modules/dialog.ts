@@ -51,6 +51,14 @@ function exitSearchMode(C: Character) {
 	}
 }
 
+export function GetDialogMenuButtonArray(): BCX_DialogMenuButton[] {
+	return DialogMenuButton;
+}
+
+export function SetDialogMenuButtonArray(newValue: BCX_DialogMenuButton[]): void {
+	DialogMenuButton = newValue as DialogMenuButton[];
+}
+
 export class ModuleDialog extends BaseModule {
 	load() {
 		OverridePlayerDialog("BCX_Search", "Filter items");
@@ -62,12 +70,12 @@ export class ModuleDialog extends BaseModule {
 			if (!allowSearchMode()) {
 				exitSearchMode(args[0]);
 			} else if (searchBar) {
-				DialogMenuButton = ["Exit", "BCX_SearchExit"];
+				SetDialogMenuButtonArray(["Exit", "BCX_SearchExit"]);
 				if (DialogInventory.length > 12) {
-					DialogMenuButton.push("Next");
+					GetDialogMenuButtonArray().push("Next");
 				}
 			} else {
-				DialogMenuButton.splice(1, 0, "BCX_Search");
+				GetDialogMenuButtonArray().splice(1, 0, "BCX_Search");
 			}
 		});
 
@@ -82,7 +90,7 @@ export class ModuleDialog extends BaseModule {
 		});
 
 		hookFunction("CommonKeyDown", 5, (args, next) => {
-			const ev = args[0] as KeyboardEvent;
+			const ev = args[0];
 			const sb = searchBar;
 			if (!sb &&
 				CurrentCharacter &&
@@ -112,7 +120,7 @@ export class ModuleDialog extends BaseModule {
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {
 			if (searchBar) {
-				const item = args[1] as Item;
+				const item = args[1];
 				if (!searchBar.value
 					.trim()
 					.toLocaleLowerCase()
@@ -150,16 +158,16 @@ export class ModuleDialog extends BaseModule {
 		// Remove some buttons, if there are too many
 		hookFunction("DialogMenuButtonBuild", 10, (args, next) => {
 			next(args);
-			const ICON_REMOVAL_CANDIDATES: (DialogMenuButton | BCX_DialogMenuButton)[] = [
+			const ICON_REMOVAL_CANDIDATES: BCX_DialogMenuButton[] = [
 				"Prev",
 				"BCX_Search",
 			];
 			for (const toRemove of ICON_REMOVAL_CANDIDATES) {
-				if (DialogMenuButton.length <= 9)
+				if (GetDialogMenuButtonArray().length <= 9)
 					break;
-				const index = DialogMenuButton.indexOf(toRemove);
+				const index = GetDialogMenuButtonArray().indexOf(toRemove);
 				if (index >= 0) {
-					DialogMenuButton.splice(index, 1);
+					GetDialogMenuButtonArray().splice(index, 1);
 				}
 			}
 		});

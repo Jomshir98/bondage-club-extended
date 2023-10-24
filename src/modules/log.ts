@@ -634,7 +634,7 @@ export class ModuleLog extends BaseModule {
 		}
 
 		hookFunction("ActivityOrgasmStart", 0, (args, next) => {
-			const C = args[0] as Character;
+			const C = args[0];
 			if (C.ID === 0 && (typeof ActivityOrgasmRuined === "undefined" || !ActivityOrgasmRuined)) {
 				logMessage("had_orgasm", LogEntryType.plaintext, `${Player.Name} had an orgasm`);
 			}

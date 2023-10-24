@@ -3,5 +3,10 @@
 	"compilerOptions": {
 		"types": ["@types/jest", "expect-puppeteer"]
 	},
-	"include": ["./**/*.d.ts", "../src/**/*.d.ts", "./**/*.ts"]
+	"include": [
+		"./**/*.d.ts",
+		"../src/**/*.d.ts",
+		"../node_modules/bc-stubs/bc/**/*.d.ts",
+		"./**/*.ts"
+	]
 }

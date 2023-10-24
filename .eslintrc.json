@@ -29,11 +29,12 @@
 				"@typescript-eslint/no-unsafe-return": "off",
 				"@typescript-eslint/no-unsafe-argument": "off",
 				"@typescript-eslint/no-floating-promises": "off",
+				"@typescript-eslint/no-explicit-any": "off",
+				"@typescript-eslint/no-unsafe-enum-comparison": "off",
 				// NOs
 				"no-throw-literal": "off",
 				"@typescript-eslint/no-throw-literal": "error",
 				"@typescript-eslint/restrict-plus-operands": ["error", {
-					"checkCompoundAssignments": true,
 					"allowAny": true
 				}],
 				// Warnings
@@ -63,7 +64,9 @@
 				"ts-expect-error": "allow-with-description"
 			}
 		],
-		"@typescript-eslint/no-parameter-properties": "error",
+		"@typescript-eslint/parameter-properties": ["error", {
+			"prefer": "class-property"
+		}],
 		"eqeqeq": [
 			"error",
 			"always",

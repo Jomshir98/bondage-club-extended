@@ -82,7 +82,7 @@ export function init() {
 				}
 			});
 			ServerSocket.off("AccountBeep", AccountBeepForwarder);
-			ServerSocket.on("AccountBeep", data => {
+			ServerSocket.on("AccountBeep", (data: any) => {
 				if (typeof data?.BeepType !== "string" || !["Leash", "BCX"].includes(data.BeepType) || !isObject(data.Message?.BCX)) {
 					AccountBeepForwarder(data);
 				}

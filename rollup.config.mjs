@@ -66,7 +66,15 @@ const config = {
 		progress({ clearLine: true }),
 		resolve({ browser: true }),
 		json(),
-		typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
+		typescript({
+			tsconfig: "./tsconfig.json",
+			inlineSources: true,
+			filterRoot: ".",
+			include: [
+				"node_modules/bc-stubs/bc/**/*.d.ts",
+				"./src/**/*"
+			]
+		}),
 		commonjs(),
 		copy({
 			targets: [

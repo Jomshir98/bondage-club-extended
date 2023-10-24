@@ -14,7 +14,7 @@ interface BCX_RuleStateAPI_Generic {
 	readonly ruleDefinition: any;
 
 	/** Current condition data of the rule */
-	readonly condition: any | undefined;
+	readonly condition: any;
 
 	/** If the rule is in effect (active and all conditions valid) */
 	readonly inEffect: boolean;

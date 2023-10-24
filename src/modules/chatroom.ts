@@ -100,8 +100,6 @@ class ChatRoomStatusManager {
 
 	private SendUpdate(type: ChatRoomStatusManagerStatusType, target: number | null = null) {
 		sendHiddenMessage("ChatRoomStatusEvent", { Type: type, Target: target }, target);
-		const NMod = isNModClient();
-		if (NMod) ServerSend("ChatRoomStatusEvent", { Type: type, Target: target });
 	}
 
 	InputChange() {
@@ -187,7 +185,7 @@ export class ModuleChatroom extends BaseModule {
 		ChatroomSM = new ChatRoomStatusManager();
 	}
 
-	private o_ChatRoomSM: any | null = null;
+	private o_ChatRoomSM: any = null;
 
 	load() {
 		if (typeof modStorage.typingIndicatorEnable !== "boolean") {
@@ -266,7 +264,7 @@ export class ModuleChatroom extends BaseModule {
 		hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
 			next(args);
 
-			const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
+			const [C, CharX, CharY, Zoom] = args;
 			const Char = getChatroomCharacter(C.MemberNumber!);
 			const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
 			const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
@@ -297,7 +295,7 @@ export class ModuleChatroom extends BaseModule {
 
 			if (ChatRoomHideIconState >= 2)
 				return;
-			const [C, CharX, CharY, Zoom] = args as [Character, number, number, number];
+			const [C, CharX, CharY, Zoom] = args;
 			switch (ChatroomSM.GetCharacterStatus(C)) {
 				case ChatRoomStatusManagerStatusType.Typing:
 					drawTypingIndicatorSpeechBubble(MainCanvas, CharX + 375 * Zoom, CharY + 54 * Zoom, 50 * Zoom, 48 * Zoom, 1);
@@ -357,7 +355,7 @@ export class ModuleChatroom extends BaseModule {
 			return next(args);
 		});
 		hookFunction("DrawStatus", 10, (args, next) => {
-			const C = args[0] as Character;
+			const C = args[0];
 			const char = getChatroomCharacter(C.MemberNumber!);
 			if (char?.BCXVersion != null &&
 				char.typingIndicatorEnable &&
@@ -400,7 +398,7 @@ export class ModuleChatroom extends BaseModule {
 			ChatroomSM.UpdateStatus();
 		});
 		// Suppress BC wardrobe indicator if BCX one is active
-		hookFunction("ServerSend", 5, (args, next) => {
+		hookFunction("ServerSend", 5, (args: any, next) => {
 			if (modStorage.screenIndicatorEnable &&
 				args[0] === "ChatRoomCharacterExpressionUpdate" &&
 				isObject(args[1]) &&
@@ -426,12 +424,6 @@ export class ModuleChatroom extends BaseModule {
 				}
 			}
 		});
-
-		if (NMod) {
-			this.o_ChatRoomSM = (window as any).ChatRoomSM;
-			(window as any).ChatRoomSM = ChatroomSM;
-			ServerSocket.on("ChatRoomMessageSync", queryAnnounce);
-		}
 	}
 
 	run() {
@@ -446,7 +438,6 @@ export class ModuleChatroom extends BaseModule {
 		if (this.o_ChatRoomSM) {
 			(window as any).ChatRoomSM = this.o_ChatRoomSM;
 		}
-		ServerSocket.off("ChatRoomMessageSync", queryAnnounce);
 		sendHiddenMessage("goodbye", undefined);
 
 		window.removeEventListener("keydown", DMSKeydown);

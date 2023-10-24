@@ -55,8 +55,8 @@ export function setDevelopmentMode(devel: boolean): boolean {
 			return false;
 		}
 		(window as any).BCX_Devel = true;
-		AssetGroup.forEach(G => G.Description = G.Name);
-		Asset.forEach(A => A.Description = A.Group.Name + ":" + A.Name);
+		AssetGroup.forEach(G => (G as Mutable<typeof G>).Description = G.Name);
+		Asset.forEach(A => (A as Mutable<typeof A>).Description = A.Group.Name + ":" + A.Name);
 		BackgroundSelectionAll.forEach(B => {
 			B.Description = B.Name;
 			B.Low = B.Description.toLowerCase();
@@ -119,7 +119,7 @@ export function ChatRoomActionMessage(msg: string, target: null | number = null,
 	ServerSend("ChatRoomChat", {
 		Content: "BCX_PLAYER_CUSTOM_DIALOG",
 		Type: "Action",
-		Target: target,
+		Target: target ?? undefined,
 		Dictionary: [
 			{ Tag: "MISSING PLAYER DIALOG: BCX_PLAYER_CUSTOM_DIALOG", Text: msg },
 			...dictionary,

@@ -137,7 +137,7 @@ export function initRules_bc_settings() {
 		},
 		tick(state) {
 			if (state.isEnforced && state.customData) {
-				const VALUE_CONVERSIONS: Record<string, number> = {
+				const VALUE_CONVERSIONS: Record<string, typeof Player.ItemPermission> = {
 					everyone: 0,
 					everyoneBlacklist: 1,
 					dominants: 2,

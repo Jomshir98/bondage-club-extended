@@ -71,7 +71,7 @@ export function initRules_bc_alter() {
 		load(state) {
 			let ignoreDeaf = false;
 			hookFunction("SpeechGarble", 2, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (state.isEnforced &&
 					state.customData &&
 					C.MemberNumber != null &&
@@ -86,7 +86,7 @@ export function initRules_bc_alter() {
 			}, ModuleCategory.Rules);
 			// depends on the function PreferenceIsPlayerInSensDep()
 			hookFunction("ChatRoomMessage", 9, (args, next) => {
-				const data = args[0] as Record<string, unknown>;
+				const data = args[0];
 				const C = args[0].Sender;
 				if (state.isEnforced &&
 					state.customData &&
@@ -165,7 +165,7 @@ export function initRules_bc_alter() {
 		load(state) {
 			let noBlind = false;
 			hookFunction("DrawCharacter", 0, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
 					noBlind = true;
 				}
@@ -173,7 +173,7 @@ export function initRules_bc_alter() {
 				noBlind = false;
 			}, ModuleCategory.Rules);
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
 					noBlind = true;
 				}
@@ -181,7 +181,7 @@ export function initRules_bc_alter() {
 				noBlind = false;
 			}, ModuleCategory.Rules);
 			hookFunction("ChatRoomClickCharacter", 0, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
 					noBlind = true;
 				}
@@ -287,7 +287,7 @@ export function initRules_bc_alter() {
 					eyes2?.Property?.Expression === "Closed" &&
 					CurrentModule === "Online" &&
 					CurrentScreen === "ChatRoom" &&
-					(args[0] as Character).IsPlayer() &&
+					args[0].IsPlayer() &&
 					state.customData?.affectPlayer
 				)
 					return;
@@ -393,7 +393,7 @@ export function initRules_bc_alter() {
 			});
 
 			hookFunction("DrawImageEx", 6, (args, next) => {
-				const Source = args[0] as string | HTMLImageElement | HTMLCanvasElement;
+				const Source = args[0];
 				if (inRoomDraw &&
 					(
 						ChatRoomCharacterDrawlist.some(C => C.Canvas === Source || C.CanvasBlink === Source) ||
@@ -533,7 +533,7 @@ export function initRules_bc_alter() {
 			},
 		},
 		load(state) {
-			hookFunction("ServerSend", 0, (args, next) => {
+			hookFunction("ServerSend", 0, (args: any, next) => {
 				if (args[0] === "ChatRoomChat" && isObject(args[1]) && typeof args[1].Content === "string" && args[1].Type === "Activity" && state.isEnforced) {
 					if (args[1].Content.startsWith("OrgasmFailPassive")) {
 						args[1].Content = "OrgasmFailPassive0";
@@ -548,7 +548,7 @@ export function initRules_bc_alter() {
 				next(args);
 			});
 			hookFunction("ActivityOrgasmPrepare", 5, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (state.isEnforced && state.customData && C.IsPlayer()) {
 					if (state.customData.orgasmHandling === "edge") {
 						if (C.ArousalSettings) {
@@ -580,13 +580,13 @@ export function initRules_bc_alter() {
 		defaultLimit: ConditionsLimit.limited,
 		load(state) {
 			hookFunction("DrawArousalMeter", 5, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID === 0 && state.isEnforced)
 					return;
 				return next(args);
 			});
 			hookFunction("ChatRoomClickCharacter", 5, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				const CharX = args[1];
 				const CharY = args[2];
 				const Zoom = args[3];
@@ -623,7 +623,7 @@ export function initRules_bc_alter() {
 		load() {
 			hookFunction("ChatRoomSyncMemberLeave", 3, (args, next) => {
 				next(args);
-				const R = args[0] as Record<string, number>;
+				const R = args[0];
 				if (gaveAdminTo.has(R.SourceMemberNumber)) {
 					gaveAdminTo.delete(R.SourceMemberNumber);
 				}
@@ -661,6 +661,7 @@ export function initRules_bc_alter() {
 						Private: ChatRoomData.Private,
 						Locked: ChatRoomData.Locked,
 					};
+					// @ts-expect-error because of Limit being forced to a string above to please the server
 					ServerSend("ChatRoomAdmin", { MemberNumber: Player.ID, Room: UpdatedRoom, Action: "Update" });
 					changed = true;
 				}
@@ -702,9 +703,9 @@ export function initRules_bc_alter() {
 						true
 					);
 					DrawButton(1840, 450, 60, 60, "", "#ebebe4", "Icons/Small/Preference.png", "", true);
-					DrawBackNextButton(1625, 575, 275, 60, TextGet("Game" + ChatAdminGame), "#ebebe4", "", () => "", () => "", true);
-					DrawButton(1486, 708, 64, 64, "", "#ebebe4", ChatAdminPrivate ? "Icons/Checked.png" : "", "", true);
-					DrawButton(1786, 708, 64, 64, "", "#ebebe4", ChatAdminLocked ? "Icons/Checked.png" : "", "", true);
+					DrawBackNextButton(1625, 550, 275, 60, TextGet("Game" + ChatAdminGame), "#ebebe4", "", () => "", () => "", true);
+					DrawButton(1486, 728, 64, 64, "", "#ebebe4", ChatAdminPrivate ? "Icons/Checked.png" : "", "", true);
+					DrawButton(1786, 728, 64, 64, "", "#ebebe4", ChatAdminLocked ? "Icons/Checked.png" : "", "", true);
 					MainCanvas.fillStyle = "#ffff88";
 					MainCanvas.fillRect(100, 850, 1125, 70);
 					MainCanvas.strokeStyle = "Black";
@@ -718,9 +719,9 @@ export function initRules_bc_alter() {
 					MouseIn(1300, 75, 600, 350) ||
 					MouseIn(1840, 450, 60, 60) ||
 					MouseIn(1300, 450, 500, 60) ||
-					MouseIn(1625, 575, 275, 60) ||
-					MouseIn(1486, 708, 64, 64) ||
-					MouseIn(1786, 708, 64, 64) ||
+					MouseIn(1625, 550, 275, 60) ||
+					MouseIn(1486, 728, 64, 64) ||
+					MouseIn(1786, 728, 64, 64) ||
 					MouseIn(125, 770, 250, 65) ||
 					MouseIn(390, 770, 250, 65)
 				))
@@ -880,7 +881,7 @@ export function initRules_bc_alter() {
 		},
 		load(state) {
 			hookFunction("ChatRoomCanBeLeashedBy", 4, (args, next) => {
-				const sourceMemberNumber = args[0] as number;
+				const sourceMemberNumber = args[0];
 				if (sourceMemberNumber !== 0 &&
 					sourceMemberNumber !== Player.MemberNumber &&
 					state.isEnforced &&
@@ -973,7 +974,7 @@ export function initRules_bc_alter() {
 		},
 		load(state) {
 			let beep = false;
-			hookFunction("ServerAccountBeep", 7, (args, next) => {
+			hookFunction("ServerAccountBeep", 7, (args: any, next) => {
 				const data = args[0];
 
 				if (isObject(data) &&
@@ -1003,11 +1004,7 @@ export function initRules_bc_alter() {
 						ChatRoomActionMessage(`The demand for SourceCharacter's presence is now enforced.`, null, [
 							{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 						]);
-						DialogLentLockpicks = false;
-						ChatRoomClearAllElements();
-						ServerSend("ChatRoomLeave", "");
-						ChatRoomSetLastChatRoom("");
-						ChatRoomLeashPlayer = null;
+						ChatRoomLeave();
 						ChatRoomStart(data.ChatRoomSpace, "", null, null, "Introduction", BackgroundsTagList);
 						CharacterDeleteAllOnline();
 
@@ -1045,7 +1042,7 @@ export function initRules_bc_alter() {
 			let appearanceCharacterAllowed: null | number = null;
 			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
 				appearanceCharacterAllowed = null;
-				const C = args[0] as Character;
+				const C = args[0];
 				const char = C.MemberNumber && getChatroomCharacter(C.MemberNumber);
 				if (!C.IsPlayer() && char && char.BCXVersion) {
 					sendQuery("rule_alt_allow_changing_appearance", undefined, char.MemberNumber).then(res => {
@@ -1057,7 +1054,7 @@ export function initRules_bc_alter() {
 				return next(args);
 			}, null);
 			hookFunction("WardrobeGroupAccessible", 4, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (!C.IsPlayer() && C.MemberNumber && C.MemberNumber === appearanceCharacterAllowed && C.OnlineSharedSettings) {
 					const AllowFullWardrobeAccess = C.OnlineSharedSettings.AllowFullWardrobeAccess;
 					const BlockBodyCosplay = C.OnlineSharedSettings.BlockBodyCosplay;
@@ -1078,7 +1075,7 @@ export function initRules_bc_alter() {
 				return state.inEffect && !!state.customData && getCharacterAccessLevel(memberNumber) <= state.customData.minimumRole;
 			};
 			hookFunction("ValidationCanAddOrRemoveItem", 4, (args, next) => {
-				const params = args[1] as AppearanceUpdateParameters;
+				const params = args[1];
 				if (allow(params.sourceMemberNumber) && params.C.IsPlayer() && params.C.OnlineSharedSettings) {
 					const AllowFullWardrobeAccess = params.C.OnlineSharedSettings.AllowFullWardrobeAccess;
 					const BlockBodyCosplay = params.C.OnlineSharedSettings.BlockBodyCosplay;

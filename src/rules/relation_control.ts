@@ -30,7 +30,7 @@ export function initRules_bc_relation_control() {
 				"ManagementCannotBeReleasedOnline",
 				"ManagementCanBeReleased",
 				"ManagementCannotBeReleased",
-			]) {
+			] as const) {
 				hookFunction(fun, 5, (args, next) => {
 					return !state.isEnforced && next(args);
 				}, ModuleCategory.Rules);
@@ -81,7 +81,7 @@ export function initRules_bc_relation_control() {
 			for (const fun of [
 				"ManagementCanBreakDatingLoverOnline",
 				"ManagementCanBreakUpLoverOnline",
-			]) {
+			] as const) {
 				hookFunction(fun, 5, (args, next) => {
 					return !state.isEnforced && next(args);
 				}, ModuleCategory.Rules);

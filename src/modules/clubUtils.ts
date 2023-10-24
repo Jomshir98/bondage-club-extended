@@ -137,6 +137,10 @@ function rollDice(sides: number, rolls: number) {
 	ChatRoomSendLocal(`You secretly roll a ${rolls}D${sides}. The result is: ${result.length === 1 ? result : result.join(",") + " = " + result.reduce((a, b) => a + b, 0).toString()}.`);
 }
 
+export function GetBackgroundTagListArray(): BCX_BackgroundTag[] {
+	return BackgroundsTagList;
+}
+
 const activitiesAllowed = new Set<number>();
 
 export class ModuleClubUtils extends BaseModule {
@@ -449,20 +453,20 @@ export class ModuleClubUtils extends BaseModule {
 			background.Tag.forEach(t => availableTags.add(t));
 		}
 		for (const tag of availableTags) {
-			if (!BackgroundsTagList.includes(tag)) {
-				BackgroundsTagList.push(tag);
+			if (!GetBackgroundTagListArray().includes(tag)) {
+				GetBackgroundTagListArray().push(tag);
 			}
 		}
 
 		// Add new backgrounds to the list
-		if (!BackgroundsTagList.includes(BACKGROUNDS_BCX_NAME)) {
-			BackgroundsTagList.push(BACKGROUNDS_BCX_NAME);
+		if (!GetBackgroundTagListArray().includes(BACKGROUNDS_BCX_NAME)) {
+			GetBackgroundTagListArray().push(BACKGROUNDS_BCX_NAME);
 		}
 
 		for (const background of backgroundList) {
 			if (BackgroundsList.some(i => i.Name === background))
 				continue;
-			BackgroundsList.push({ Name: background, Tag: [BACKGROUNDS_BCX_NAME] });
+			BackgroundsList.push({ Name: background, Tag: [BACKGROUNDS_BCX_NAME as BackgroundTag] });
 			OverridePlayerDialog(background, `[Hidden] ${background}`);
 		}
 
@@ -591,8 +595,9 @@ export class ModuleClubUtils extends BaseModule {
 	}
 
 	unload() {
-		remove(BackgroundsTagList, i => i === BACKGROUNDS_BCX_NAME);
-		remove(BackgroundsList, i => i.Tag.includes(BACKGROUNDS_BCX_NAME));
+		remove(GetBackgroundTagListArray(), i => i === BACKGROUNDS_BCX_NAME);
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+		remove(BackgroundsList, i => (i.Tag as BCX_BackgroundTag[]).includes(BACKGROUNDS_BCX_NAME));
 		// Refresh current background list, if already built
 		if (ChatCreateBackgroundList != null) {
 			ChatCreateBackgroundList = BackgroundsGenerateList(BackgroundSelectionTagList);

@@ -284,7 +284,7 @@ export class ModuleRelationhips extends BaseModule {
 		let shouldReplaceNickname = false;
 
 		hookFunction("CharacterNickname", 4, (args, next) => {
-			const C = args[0] as Character;
+			const C = args[0];
 			if (shouldReplaceNickname && modStorage.relationships && C) {
 				const entry = modStorage.relationships.find(r => r.memberNumber === C.MemberNumber);
 				if (entry) {
@@ -302,7 +302,7 @@ export class ModuleRelationhips extends BaseModule {
 		}, ModuleCategory.Relationships);
 
 		hookFunction("ChatRoomMessage", 4, (args, next) => {
-			const data = args[0] as IChatRoomMessage;
+			const data = args[0];
 			const original = shouldReplaceNickname;
 			if (
 				isObject(data) &&

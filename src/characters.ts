@@ -535,7 +535,7 @@ export class ModuleCharacter extends BaseModule {
 	load() {
 		hookFunction("CharacterLoadEffect", 0, (args, next) => {
 			next(args);
-			const C = args[0] as Character;
+			const C = args[0];
 			const character = typeof C.MemberNumber === "number" && getChatroomCharacter(C.MemberNumber);
 			if (character) {
 				for (const effect of character.Effects.Effect) {

@@ -6,8 +6,6 @@ interface Window {
 	BCX_Loaded?: boolean;
 }
 
-declare const LZString: import("lz-string").LZStringStatic;
-
 type Satisfies<T extends U, U> = T;
 
 type BCXSupporterType = undefined | "supporter" | "developer";
@@ -753,13 +751,13 @@ interface RoomTemplate {
 	Name: string;
 	Description: string;
 	Background: string;
-	Language: ChatRoomLanguage;
+	Language: ServerChatRoomLanguage;
 	Limit: string;
 	Admin: number[];
-	Game: ChatRoomGame;
+	Game: ServerChatRoomGame;
 	Private: boolean;
 	Locked: boolean;
-	BlockCategory: ChatRoomBlockCategory[];
+	BlockCategory: ServerChatRoomBlockCategory[];
 	AutoApply: true | undefined;
 }
 

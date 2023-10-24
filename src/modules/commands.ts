@@ -623,7 +623,7 @@ export class ModuleCommands extends BaseModule {
 				!chat.value.startsWith("..") &&
 				!firstTimeInit
 			) {
-				const e = args[0] as KeyboardEvent ?? event;
+				const e = args[0] ?? event;
 				e?.preventDefault();
 				e?.stopImmediatePropagation();
 
@@ -636,7 +636,7 @@ export class ModuleCommands extends BaseModule {
 				!chat.value.startsWith("!!") &&
 				!firstTimeInit
 			) {
-				const e = args[0] as KeyboardEvent ?? event;
+				const e = args[0] ?? event;
 				e?.preventDefault();
 				e?.stopImmediatePropagation();
 
@@ -648,7 +648,7 @@ export class ModuleCommands extends BaseModule {
 		});
 
 		hookFunction("ChatRoomMessage", 9, (args, next) => {
-			const data = args[0] as Record<string, unknown>;
+			const data = args[0];
 
 			const sender = typeof data.Sender === "number" && getChatroomCharacter(data.Sender);
 			if (data?.Type === "Whisper" &&
@@ -680,7 +680,7 @@ export class ModuleCommands extends BaseModule {
 		});
 
 		hookFunction("PropertyAutoPunishParseMessage", 6, (args, next) => {
-			const msg = args[1] as unknown;
+			const msg = args[1];
 			if (typeof msg === "string" && msg.startsWith(".") && !msg.startsWith(".."))
 				return false;
 			return next(args);

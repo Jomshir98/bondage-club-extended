@@ -342,12 +342,12 @@ export function initCommands_definitions() {
 			const Name = argv.slice(2).join(" ");
 			const Private = argv[0] === "private";
 			const playerNumber = Player.MemberNumber;
-			const Admin = [playerNumber, sender.MemberNumber];
 
 			if (!playerNumber) {
 				console.error("Player member number was unexpectedly undefined.");
 				return false;
 			}
+			const Admin: number[] = [playerNumber, sender.MemberNumber];
 			if (!/^[A-Za-z0-9\s]*$/.test(Name)) {
 				respond(`The room name part of the command contains characters that are not A-Z, numbers or whitespaces.`);
 				return false;
@@ -362,11 +362,7 @@ export function initCommands_definitions() {
 				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) },
 			]);
-			DialogLentLockpicks = false;
-			ChatRoomClearAllElements();
-			ServerSend("ChatRoomLeave", "");
-			ChatRoomSetLastChatRoom("");
-			ChatRoomLeashPlayer = null;
+			ChatRoomLeave();
 			CommonSetScreen("Online", "ChatSearch");
 			CharacterDeleteAllOnline();
 
@@ -384,6 +380,7 @@ export function initCommands_definitions() {
 				Ban: [],
 				Limit: 10,
 				BlockCategory: [],
+				Language: Player.LastChatRoomLanguage as ServerChatRoomLanguage,
 			});
 			ServerSend("ChatRoomJoin", { Name });
 			return true;
@@ -437,9 +434,7 @@ export function initCommands_definitions() {
 				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) },
 			]);
-			DialogLentLockpicks = false;
-			ChatRoomClearAllElements();
-			ServerSend("ChatRoomLeave", "");
+			ChatRoomLeave();
 			CharacterDeleteAllOnline();
 			CellLock(minutes);
 			return true;
@@ -489,9 +484,7 @@ export function initCommands_definitions() {
 				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) },
 			]);
-			DialogLentLockpicks = false;
-			ChatRoomClearAllElements();
-			ServerSend("ChatRoomLeave", "");
+			ChatRoomLeave();
 			CharacterDeleteAllOnline();
 			LogAdd("Committed", "Asylum", CurrentTime + time, true);
 			CommonSetScreen("Room", "AsylumEntrance");
@@ -631,8 +624,7 @@ export function initCommands_definitions() {
 				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 				{ Tag: "SourceCharacter", MemberNumber: sender.MemberNumber, Text: CharacterNickname(sender.Character) },
 			]);
-			ChatRoomClearAllElements();
-			ServerSend("ChatRoomLeave", "");
+			ChatRoomLeave();
 			CommonSetScreen("Room", "MaidQuarters");
 			// MaidQuartersMaid should be created by load
 			if (MaidQuartersMaid == null)

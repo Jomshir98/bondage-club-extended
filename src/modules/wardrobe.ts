@@ -1,4 +1,4 @@
-import { allowMode, isNModClient, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal, InfoBeep, isCosplay, isBody, smartGetAssetGroup } from "../utilsClub";
+import { allowMode, isBind, isCloth, DrawImageEx, itemColorsEquals, ChatRoomSendLocal, InfoBeep, isCosplay, isBody, smartGetAssetGroup } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { arrayUnique, clipboardAvailable, isObject } from "../utils";
@@ -477,11 +477,8 @@ export class ModuleWardrobe extends BaseModule {
 			modStorage.wardrobeDefaultExtended = true;
 		}
 
-		const NMod = isNModClient();
-		const NModWardrobe = NMod && typeof AppearanceMode !== "undefined";
-
 		hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
-			const C = args[0] as Character;
+			const C = args[0];
 			const char = C.MemberNumber && getChatroomCharacter(C.MemberNumber);
 			if (char && char.BCXVersion != null) {
 				char.getPermissionAccess("misc_wardrobe_item_import")
@@ -524,9 +521,9 @@ export class ModuleWardrobe extends BaseModule {
 
 		hookFunction("AppearanceRun", 2, (args, next) => {
 			next(args);
-			if (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") {
+			if (CharacterAppearanceMode === "Wardrobe") {
 				if (clipboardAvailable) {
-					const Y = NModWardrobe ? 265 : 125;
+					const Y = 125;
 					DrawButton(1380, Y, 50, 50, "", "White", "", "How does it work?");
 					DrawImageEx("Icons/Question.png", 1380 + 3, Y + 3, { Width: 44, Height: 44 });
 					const C = CharacterAppearanceSelection;
@@ -543,7 +540,7 @@ export class ModuleWardrobe extends BaseModule {
 					}
 				}
 			}
-			if (j_ShowHelp && (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe")) {
+			if (j_ShowHelp && CharacterAppearanceMode === "Wardrobe") {
 				MainCanvas.fillStyle = "#ffff88";
 				MainCanvas.fillRect(30, 190, 1240, 780);
 				MainCanvas.strokeStyle = "Black";
@@ -571,9 +568,9 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		hookFunction("AppearanceClick", 2, (args, next) => {
-			if (CharacterAppearanceMode === "Wardrobe" || NModWardrobe && AppearanceMode === "Wardrobe") {
+			if (CharacterAppearanceMode === "Wardrobe") {
 				if (clipboardAvailable) {
-					const Y = NModWardrobe ? 265 : 125;
+					const Y = 125;
 					// Help text toggle
 					if (MouseIn(1380, Y, 50, 50) || (MouseIn(30, 190, 1240, 780) && j_ShowHelp)) {
 						j_ShowHelp = !j_ShowHelp;
@@ -612,12 +609,8 @@ export class ModuleWardrobe extends BaseModule {
 					for (let W = CharacterAppearanceWardrobeOffset; W < Player.Wardrobe.length && W < CharacterAppearanceWardrobeOffset + 6; W++) {
 						if (MouseYIn(430 + (W - CharacterAppearanceWardrobeOffset) * 95, 65)) {
 
-							let slot = Player.Wardrobe[W];
+							const slot = Player.Wardrobe[W];
 							if (Array.isArray(slot)) {
-								// NMod unpack
-								if (slot.some(i => Array.isArray(i)) && typeof WardrobeExtractBundle === "function") {
-									slot = slot.map(i => Array.isArray(i) ? WardrobeExtractBundle(i) : i);
-								}
 								if (slot.every(i => isObject(i)) && openExtendedImport(slot, true) === null) {
 									return;
 								}
@@ -738,28 +731,28 @@ export class ModuleWardrobe extends BaseModule {
 
 		hookFunction("AppearanceMenuBuild", 5, (args, next) => {
 			next(args);
-			const C = args[0] as Character;
+			const C = args[0];
 			if (!allowSearchMode()) {
 				exitSearchMode(C);
 			} else if (searchBar) {
 				AppearanceMenu = [];
 				if (DialogInventory.length > 9)
 					AppearanceMenu.push("Next");
-				AppearanceMenu.push("BCX_SearchExit");
+				(AppearanceMenu as BCX_DialogMenuButton[]).push("BCX_SearchExit");
 				if (DialogMenuMode !== "permissions")
 					AppearanceMenu.push("Cancel");
 				AppearanceMenu.push("Accept");
 			} else {
-				AppearanceMenu.splice(AppearanceMenu.length - (AppearanceMenu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
+				(AppearanceMenu as BCX_DialogMenuButton[]).splice(AppearanceMenu.length - (AppearanceMenu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
 			}
 		});
 
 		hookFunction("AppearanceMenuClick", 4, (args, next) => {
 			const X = 2000 - AppearanceMenu.length * 117;
-			const C = args[0] as Character;
+			const C = args[0];
 			for (let B = 0; B < AppearanceMenu.length; B++) {
 				if (MouseXIn(X + 117 * B, 90)) {
-					const Button = AppearanceMenu[B];
+					const Button = (AppearanceMenu as BCX_DialogMenuButton[])[B];
 					if (Button === "BCX_Search") {
 						enterSearchMode(C);
 						return;
@@ -773,7 +766,7 @@ export class ModuleWardrobe extends BaseModule {
 		});
 
 		hookFunction("CommonKeyDown", 5, (args, next) => {
-			const ev = args[0] as KeyboardEvent;
+			const ev = args[0];
 			const sb = searchBar;
 			if (!sb &&
 				CharacterAppearanceSelection &&
@@ -791,7 +784,7 @@ export class ModuleWardrobe extends BaseModule {
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {
 			if (searchBar) {
-				const item = args[1] as Item;
+				const item = args[1];
 				if (!searchBar.value
 					.trim()
 					.toLocaleLowerCase()

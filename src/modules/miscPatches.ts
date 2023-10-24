@@ -3,6 +3,7 @@ import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { MiscCheat } from "../constants";
 import { modStorage, modStorageSync } from "./storage";
+import { GetDialogMenuButtonArray } from "./dialog";
 
 export const cheatChangeHooks: Partial<Record<MiscCheat, (enabled: boolean) => void>> = {};
 
@@ -93,11 +94,11 @@ export class ModuleMiscPatches extends BaseModule {
 		hookFunction("DialogMenuButtonClick", 5, (args, next) => {
 			// Finds the current icon
 			const C = CharacterGetCurrent();
-			for (let I = 0; I < DialogMenuButton.length; I++) {
+			for (let I = 0; I < GetDialogMenuButtonArray().length; I++) {
 				if ((MouseX >= 1885 - I * 110) && (MouseX <= 1975 - I * 110) && C) {
-					const hooks = DialogMenuButtonClickHooks.get(DialogMenuButton[I]);
+					const hooks = DialogMenuButtonClickHooks.get(GetDialogMenuButtonArray()[I]);
 					if (hooks?.some(hook => hook(C)))
-						return;
+						return true;
 				}
 			}
 			return next(args);
@@ -172,7 +173,7 @@ export class ModuleMiscPatches extends BaseModule {
 
 		// Cheats
 
-		hookFunction("Player.CanChangeClothesOn", 1, (args, next) => (allowMode && (args[0] as Character).IsPlayer()) || next(args));
+		hookFunction("Player.CanChangeClothesOn", 1, (args, next) => (allowMode && (args[0]).IsPlayer()) || next(args));
 		hookFunction("ChatRoomCanLeave", 0, (args, next) => allowMode || next(args));
 
 		// Anti-stupid-null(s)
@@ -187,12 +188,6 @@ export class ModuleMiscPatches extends BaseModule {
 				args[1] = "";
 			}
 			return next(args);
-		});
-
-		// Fix loading external images
-
-		patchFunction("DrawGetImage", {
-			"Img.src = Source;": 'Img.crossOrigin = "Anonymous";\n\t\tImg.src = Source;',
 		});
 
 		// fixes a bug in BC

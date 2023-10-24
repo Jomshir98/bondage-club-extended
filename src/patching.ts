@@ -29,7 +29,8 @@ bcModSDK.errorReporterHooks.hookChainExit = (fn, mods) => {
 	};
 };
 
-type PatchHook = (args: any[], next: (args: any[]) => any) => any;
+export declare type AnyFunction = (...args: any) => any;
+type PatchHook<TFunction extends AnyFunction = AnyFunction> = (args: [...Parameters<TFunction>], next: (args: [...Parameters<TFunction>]) => ReturnType<TFunction>) => ReturnType<TFunction>;
 
 interface IPatchedFunctionData {
 	name: string;
@@ -79,7 +80,13 @@ export function trackFunction(target: string): void {
 	initPatchableFunction(target);
 }
 
-export function hookFunction(target: string, priority: number, hook: PatchHook, module: ModuleCategory | null = null): void {
+type GetDotedPathType<Base, DotedKey extends string> = DotedKey extends `${infer Key1}.${infer Key2}` ? GetDotedPathType<GetDotedPathType<Base, Key1>, Key2> : DotedKey extends keyof Base ? Base[DotedKey] : never;
+
+export function hookFunction<TargetName extends string>(target: TargetName, priority: number, hook: PatchHook<GetDotedPathType<typeof globalThis, TargetName>>, module: ModuleCategory | null = null): void {
+	return hookFunctionSpecific<GetDotedPathType<typeof globalThis, TargetName>>(target, priority, hook, module);
+}
+
+export function hookFunctionSpecific<T extends AnyFunction>(target: string, priority: number, hook: PatchHook<T>, module: ModuleCategory | null = null): void {
 	const data = initPatchableFunction(target);
 
 	if (data.hooks.some(h => h.hook === hook)) {
@@ -87,7 +94,7 @@ export function hookFunction(target: string, priority: number, hook: PatchHook, 
 		return;
 	}
 
-	const removeCallback = modApi.hookFunction(target, priority, hook);
+	const removeCallback = modApi.hookFunction(target, priority, hook as PatchHook<AnyFunction>);
 
 	data.hooks.push({
 		hook,

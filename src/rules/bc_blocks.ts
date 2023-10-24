@@ -5,6 +5,7 @@ import { hookFunction } from "../patching";
 import { isNModClient } from "../utilsClub";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
+import { GetDialogMenuButtonArray } from "../modules/dialog";
 
 export function initRules_bc_blocks() {
 	const NMod = isNModClient();
@@ -26,11 +27,11 @@ export function initRules_bc_blocks() {
 			RedirectGetImage("Icons/BCX_Remote.png", "Icons/Remote.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID === 0 && state.isEnforced) {
-					const index = DialogMenuButton.indexOf("Remote");
+					const index = GetDialogMenuButtonArray().indexOf("Remote");
 					if (index >= 0) {
-						DialogMenuButton[index] = "BCX_RemoteDisabled";
+						GetDialogMenuButtonArray()[index] = "BCX_RemoteDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -76,11 +77,11 @@ export function initRules_bc_blocks() {
 			RedirectGetImage("Icons/BCX_Remote.png", "Icons/Remote.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID !== 0 && state.isEnforced) {
-					const index = DialogMenuButton.indexOf("Remote");
+					const index = GetDialogMenuButtonArray().indexOf("Remote");
 					if (index >= 0) {
-						DialogMenuButton[index] = "BCX_RemoteDisabled";
+						GetDialogMenuButtonArray()[index] = "BCX_RemoteDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -126,16 +127,16 @@ export function initRules_bc_blocks() {
 			OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
 			hookFunction("DialogCanUnlock", 0, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID === 0 && state.isEnforced)
 					return false;
 				return next(args);
 			}, ModuleCategory.Rules);
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
-				if (C.ID === 0 && state.isEnforced && DialogMenuButton.includes("InspectLock")) {
-					DialogMenuButton.splice(-1, 0, "BCX_UnlockDisabled");
+				const C = args[0];
+				if (C.ID === 0 && state.isEnforced && GetDialogMenuButtonArray().includes("InspectLock")) {
+					GetDialogMenuButtonArray().splice(-1, 0, "BCX_UnlockDisabled");
 				}
 			}, ModuleCategory.Rules);
 			hookDialogMenuButtonClick("Unlock", (C) => {
@@ -182,8 +183,8 @@ export function initRules_bc_blocks() {
 			OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
 			hookFunction("DialogCanUnlock", 0, (args, next) => {
-				const C = args[0] as Character;
-				const Item = args[1] as Item;
+				const C = args[0];
+				const Item = args[1];
 				const lock = InventoryGetLock(Item);
 				if (state.customData &&
 					C.ID !== 0 &&
@@ -205,9 +206,9 @@ export function initRules_bc_blocks() {
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
 				if (!ignore) {
-					const C = args[0] as Character;
-					if (C.ID !== 0 && state.isEnforced && DialogMenuButton.includes("InspectLock")) {
-						DialogMenuButton.splice(-1, 0, "BCX_UnlockDisabled");
+					const C = args[0];
+					if (C.ID !== 0 && state.isEnforced && GetDialogMenuButtonArray().includes("InspectLock")) {
+						GetDialogMenuButtonArray().splice(-1, 0, "BCX_UnlockDisabled");
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -243,11 +244,11 @@ export function initRules_bc_blocks() {
 			RedirectGetImage("Icons/BCX_PickLock.png", "Icons/PickLock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID === 0 && state.isEnforced) {
-					const index = DialogMenuButton.indexOf("PickLock");
+					const index = GetDialogMenuButtonArray().indexOf("PickLock");
 					if (index >= 0) {
-						DialogMenuButton[index] = "BCX_PickLockDisabled";
+						GetDialogMenuButtonArray()[index] = "BCX_PickLockDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -282,11 +283,11 @@ export function initRules_bc_blocks() {
 			RedirectGetImage("Icons/BCX_PickLock.png", "Icons/PickLock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID !== 0 && state.isEnforced) {
-					const index = DialogMenuButton.indexOf("PickLock");
+					const index = GetDialogMenuButtonArray().indexOf("PickLock");
 					if (index >= 0) {
-						DialogMenuButton[index] = "BCX_PickLockDisabled";
+						GetDialogMenuButtonArray()[index] = "BCX_PickLockDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -322,11 +323,11 @@ export function initRules_bc_blocks() {
 			RedirectGetImage("Icons/BCX_Lock.png", "Icons/Lock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID === 0 && state.isEnforced) {
-					const index = DialogMenuButton.indexOf("Lock");
+					const index = GetDialogMenuButtonArray().indexOf("Lock");
 					if (index >= 0) {
-						DialogMenuButton[index] = "BCX_LockDisabled";
+						GetDialogMenuButtonArray()[index] = "BCX_LockDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -361,11 +362,11 @@ export function initRules_bc_blocks() {
 			RedirectGetImage("Icons/BCX_Lock.png", "Icons/Lock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID !== 0 && state.isEnforced) {
-					const index = DialogMenuButton.indexOf("Lock");
+					const index = GetDialogMenuButtonArray().indexOf("Lock");
 					if (index >= 0) {
-						DialogMenuButton[index] = "BCX_LockDisabled";
+						GetDialogMenuButtonArray()[index] = "BCX_LockDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -399,14 +400,14 @@ export function initRules_bc_blocks() {
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("Player.CanChangeClothesOn", 2, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.IsPlayer() && state.isEnforced) {
 					return false;
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
 			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID === 0 && state.inEffect) {
 					state.trigger();
 				}
@@ -429,14 +430,14 @@ export function initRules_bc_blocks() {
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("Player.CanChangeClothesOn", 2, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (!C.IsPlayer() && state.isEnforced) {
 					return false;
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
 			hookFunction("CharacterAppearanceLoadCharacter", 0, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID !== 0 && state.inEffect) {
 					state.trigger();
 				}
@@ -681,7 +682,7 @@ export function initRules_bc_blocks() {
 			RedirectGetImage("Icons/BCX_Escape.png", "Icons/Escape.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C.ID === 0 && C.FocusGroup && state.isEnforced) {
 					const Item = InventoryGet(C, C.FocusGroup.Name);
 					if (Item && state.customData?.allowEasyItemsToggle) {
@@ -690,21 +691,21 @@ export function initRules_bc_blocks() {
 							return;
 						}
 					}
-					const index_remove = DialogMenuButton.indexOf("Remove");
-					const index_struggle = DialogMenuButton.indexOf("Struggle");
-					const index_dismount = DialogMenuButton.indexOf("Dismount");
-					const index_escape = DialogMenuButton.indexOf("Escape");
+					const index_remove = GetDialogMenuButtonArray().indexOf("Remove");
+					const index_struggle = GetDialogMenuButtonArray().indexOf("Struggle");
+					const index_dismount = GetDialogMenuButtonArray().indexOf("Dismount");
+					const index_escape = GetDialogMenuButtonArray().indexOf("Escape");
 					if (index_remove >= 0) {
-						DialogMenuButton[index_remove] = "BCX_RemoveDisabled";
+						GetDialogMenuButtonArray()[index_remove] = "BCX_RemoveDisabled";
 					}
 					if (index_struggle >= 0) {
-						DialogMenuButton[index_struggle] = "BCX_StruggleDisabled";
+						GetDialogMenuButtonArray()[index_struggle] = "BCX_StruggleDisabled";
 					}
 					if (index_dismount >= 0) {
-						DialogMenuButton[index_dismount] = "BCX_DismountDisabled";
+						GetDialogMenuButtonArray()[index_dismount] = "BCX_DismountDisabled";
 					}
 					if (index_escape >= 0) {
-						DialogMenuButton[index_escape] = "BCX_EscapeDisabled";
+						GetDialogMenuButtonArray()[index_escape] = "BCX_EscapeDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -768,7 +769,7 @@ export function initRules_bc_blocks() {
 			}, ModuleCategory.Rules);
 			hookFunction("AppearanceGetPreviewImageColor", 5, (args, next) => {
 				const toggleOn = state.customData?.onlyMoreDominantsToggle;
-				const C = args[0] as Character;
+				const C = args[0];
 				if (C && C.ID !== 0 && state.isEnforced && (toggleOn ? ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") : true)) {
 					return "grey";
 				}
@@ -880,7 +881,7 @@ export function initRules_bc_blocks() {
 		load(state) {
 			hookFunction("PreferenceSubscreenDifficultyRun", 5, (args, next) => {
 				next(args);
-				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? Player.Creation : Player.Difficulty.LastChange;
+				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? (Player.Creation ?? 0) : Player.Difficulty.LastChange;
 				if (
 					state.isEnforced &&
 					PreferenceDifficultyLevel != null &&
@@ -892,7 +893,7 @@ export function initRules_bc_blocks() {
 				}
 			});
 			hookFunction("PreferenceSubscreenDifficultyClick", 5, (args, next) => {
-				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? Player.Creation : Player.Difficulty.LastChange;
+				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? (Player.Creation ?? 0) : Player.Difficulty.LastChange;
 				if (
 					state.inEffect &&
 					PreferenceDifficultyLevel != null &&
@@ -926,9 +927,9 @@ export function initRules_bc_blocks() {
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
 				if (state.isEnforced) {
-					const index = DialogMenuButton.indexOf("Activity");
+					const index = GetDialogMenuButtonArray().indexOf("Activity");
 					if (index >= 0) {
-						DialogMenuButton[index] = "BCX_ActivityDisabled";
+						GetDialogMenuButtonArray()[index] = "BCX_ActivityDisabled";
 					}
 				}
 			}, ModuleCategory.Rules);
@@ -1084,7 +1085,7 @@ export function initRules_bc_blocks() {
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
 			hookFunction("DialogInventoryBuild", 1, (args, next) => {
-				const C = args[0] as Character;
+				const C = args[0];
 				const inventoryBackup = C.Inventory;
 				try {
 					if (state.isEnforced && !C.IsPlayer()) {

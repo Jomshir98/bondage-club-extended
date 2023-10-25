@@ -5,6 +5,9 @@
 	"author": "jomshir98 <jomshir98@protonmail.com>",
 	"license": "GPL-3.0",
 	"private": true,
+	"engines": {
+		"node": ">=18.x"
+	},
 	"scripts": {
 		"build": "rollup -c rollup.config.mjs",
 		"dev": "rollup -c rollup.config.mjs -w",

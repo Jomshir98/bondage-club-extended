@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.8-d4f50407";const BCX_DEVEL=true;
+    const BCX_VERSION="0.9.8-5296f162";const BCX_DEVEL=true;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -26615,7 +26615,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             hookFunction("DialogMenuButtonClick", 5, (args, next) => {
                 const C = CharacterGetCurrent();
                 for (let I = 0; I < GetDialogMenuButtonArray().length; I++) {
-                    if ((MouseX >= 1885 - I * 110) && (MouseX <= 1975 - I * 110) && C) {
+                    if (MouseIn(1885 - I * 110, 15, 90, 90) && C) {
                         const hooks = DialogMenuButtonClickHooks.get(GetDialogMenuButtonArray()[I]);
                         if (hooks === null || hooks === void 0 ? void 0 : hooks.some(hook => hook(C)))
                             return true;

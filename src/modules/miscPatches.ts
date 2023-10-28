@@ -95,7 +95,7 @@ export class ModuleMiscPatches extends BaseModule {
 			// Finds the current icon
 			const C = CharacterGetCurrent();
 			for (let I = 0; I < GetDialogMenuButtonArray().length; I++) {
-				if ((MouseX >= 1885 - I * 110) && (MouseX <= 1975 - I * 110) && C) {
+				if (MouseIn(1885 - I * 110, 15, 90, 90) && C) {
 					const hooks = DialogMenuButtonClickHooks.get(GetDialogMenuButtonArray()[I]);
 					if (hooks?.some(hook => hook(C)))
 						return true;

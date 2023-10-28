@@ -1,5 +1,15 @@
 # BCX Changelog
 
+## 0.9.8
+
+This update includes:
+ - Added a new reporter for detecting huge outgoing packets (these can cause disconnects, especially as Ben recently lowered the packet limit and is planning to lower it further)
+ - Added new singleplayer backgrounds to the background selector
+ - This update improves compatibility with BC releases up to R97
+
+Fixes:
+ - Fixed misalignment of the overlay of the rule "Limit bound admin power" due to the latest BC release
+
 ## 0.9.7
 
 This update includes:

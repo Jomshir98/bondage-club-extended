@@ -135,7 +135,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	PropertyAutoPunishParseMessage: ["B0B55044"],
 	ServerAccountBeep: ["F16771D4"],
 	ServerPlayerIsInChatRoom: ["E3771112"],
-	ServerSend: ["779A1C78"],
+	ServerSend: ["779A1C78", "D356D537"],
 	SpeechGarble: ["9D669F73"],
 	SpeechGetTotalGagLevel: ["C55B705A"],
 	StableGenericDrawProgress: ["6BACDAA2"],

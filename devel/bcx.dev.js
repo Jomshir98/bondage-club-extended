@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.8-5296f162";const BCX_DEVEL=true;
+    const BCX_VERSION="0.9.8-1b3d0d16";const BCX_DEVEL=true;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -495,7 +495,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         PropertyAutoPunishParseMessage: ["B0B55044"],
         ServerAccountBeep: ["F16771D4"],
         ServerPlayerIsInChatRoom: ["E3771112"],
-        ServerSend: ["779A1C78"],
+        ServerSend: ["779A1C78", "D356D537"],
         SpeechGarble: ["9D669F73"],
         SpeechGetTotalGagLevel: ["C55B705A"],
         StableGenericDrawProgress: ["6BACDAA2"],

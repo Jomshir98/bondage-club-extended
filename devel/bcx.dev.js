@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.8-1b3d0d16";const BCX_DEVEL=true;
+    const BCX_VERSION="0.9.8-e6c767dc";const BCX_DEVEL=true;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -28361,7 +28361,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         for (let sound of sounds) {
             sound = sound.toLocaleLowerCase();
             let ok = true;
-            let i = 0;
+            let i = -1;
             let fullMatch = allowPartialMatch;
             for (const c of message) {
                 if (/\p{L}/igu.test(c)) {

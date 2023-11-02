@@ -12,7 +12,7 @@ function checkMessageForSounds(sounds: string[], message: string, allowPartialMa
 	for (let sound of sounds) {
 		sound = sound.toLocaleLowerCase();
 		let ok = true;
-		let i = 0;
+		let i = -1;
 		let fullMatch = allowPartialMatch;
 		for (const c of message) {
 			if (/\p{L}/igu.test(c)) {

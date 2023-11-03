@@ -616,7 +616,7 @@ export function UnloadErrorReporter() {
 	}
 	// Server outgoing message
 	if (originalSocketEmit && (ServerSocket as any).__proto__.emit === bcxSocketEmit) {
-		(ServerSocket as any).__proto__.emitEvent = originalSocketEmit;
+		(ServerSocket as any).__proto__.emit = originalSocketEmit;
 		originalSocketEmit = undefined;
 	}
 	const canvas = document.getElementById("MainCanvas") as (HTMLCanvasElement | undefined);

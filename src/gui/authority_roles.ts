@@ -8,6 +8,7 @@ import { setSubscreen } from "../modules/gui";
 import { getCharacterName, DrawImageEx, showHelp } from "../utilsClub";
 import { Views, HELP_TEXTS } from "../helpTexts";
 import { GuiMemberSelect } from "./member_select";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 const PER_PAGE_COUNT = 6;
 
@@ -187,7 +188,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 			DrawBackNextButton(1430, 800, 300, 90, `Page ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 		} else if (this.failed) {
 			MainCanvas.textAlign = "center";
-			DrawText(`Failed to get role data from ${this.character.Name}. Maybe you have no access?`, 800, 480, "Black");
+			DrawQueryErrorMessage(`get role data from ${this.character.Name}`, 800);
 		} else {
 			MainCanvas.textAlign = "center";
 			DrawText("Loading...", 800, 480, "Black");

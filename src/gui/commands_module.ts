@@ -8,6 +8,7 @@ import { createInputElement, dictionaryProcess, positionElement } from "../utils
 import { GuiMainMenu } from "./mainmenu";
 import { CommandsGetList } from "../modules/commandsModule";
 import { GuiCommandsModuleViewDetails } from "./commands_module_viewDetails";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 type CommandListItem = {
 	name: BCX_Command;
@@ -128,7 +129,11 @@ export class GuiCommandsModule extends GuiSubscreen {
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		if (this.commandsData === null) {
-			DrawText(this.failed ? `Failed to get commands data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+			if (this.failed) {
+				DrawQueryErrorMessage(`get commands data from ${this.character.Name}`);
+			} else {
+				DrawText("Loading...", 1000, 480, "Black");
+			}
 			return;
 		}
 

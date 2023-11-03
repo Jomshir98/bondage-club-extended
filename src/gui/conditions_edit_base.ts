@@ -8,6 +8,7 @@ import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
 import { GuiMemberSelect } from "./member_select";
 import { ConditionsEvaluateRequirements } from "../modules/conditions";
 import { icon_star } from "../resources";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 import cloneDeep from "lodash-es/cloneDeep";
 
@@ -187,7 +188,11 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 		if (this.conditionCategoryData === null || this.conditionData === null) {
 			MainCanvas.textAlign = "center";
-			DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+			if (this.failed) {
+				DrawQueryErrorMessage(`get data from ${this.character.Name}`);
+			} else {
+				DrawText("Loading...", 1000, 480, "Black");
+			}
 			return true;
 		}
 

@@ -47,6 +47,14 @@ interface IPendingQuery {
 
 const pendingQueries: Map<string, IPendingQuery> = new Map();
 
+export function DrawQueryErrorMessage(subject: string, x: number = 1000): void {
+	DrawTextWrap(
+		`Failed to ${subject}. This can be caused by missing permission to interact with their items, the user having left the room meanwhile, or the user not having the BC tab focused.`,
+		200, 280, 2 * (x - 200), 400,
+		"Black"
+	);
+}
+
 export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_queries[T][0], target: number, timeout: number = 10_000): Promise<BCX_queries[T][1]> {
 	if (firstTimeInit) {
 		return Promise.reject("Unavailable during init");

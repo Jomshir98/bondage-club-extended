@@ -6,6 +6,7 @@ import { ConditionsLimit } from "../constants";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { Views, HELP_TEXTS } from "../helpTexts";
 import { clampWrap } from "../utils";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 const CATEGORIES: {
 	title: string;
@@ -78,7 +79,11 @@ export class GuiCursesAdd extends GuiSubscreen {
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		if (this.curseData === null) {
-			DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+			if (this.failed) {
+				DrawQueryErrorMessage(`get curse data from ${this.character.Name}`);
+			} else {
+				DrawText("Loading...", 1000, 480, "Black");
+			}
 			return;
 		}
 

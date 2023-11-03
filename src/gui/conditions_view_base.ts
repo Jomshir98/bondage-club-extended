@@ -5,6 +5,7 @@ import { GuiSubscreen } from "./subscreen";
 import { clamp, createInputElement, formatTimeInterval, positionElement, typedObjectAssumedEntries } from "../utils";
 import { DrawImageEx } from "../utilsClub";
 import { ConditionsLimit } from "../constants";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 const PER_COLUMN_COUNT = 7;
 const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
@@ -141,7 +142,11 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 
 		if (this.conditionCategoryData === null) {
 			MainCanvas.textAlign = "center";
-			DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+			if (this.failed) {
+				DrawQueryErrorMessage(`get data from ${this.character.Name}`);
+			} else {
+				DrawText("Loading...", 1000, 480, "Black");
+			}
 			return true;
 		}
 

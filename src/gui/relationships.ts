@@ -7,6 +7,7 @@ import { DrawImageEx, getCharacterName, showHelp } from "../utilsClub";
 import { clamp } from "../utils";
 import { GuiMemberSelect } from "./member_select";
 import { isValidNickname, NICKNAME_LENGTH_MAX } from "../modules/relationships";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 const PER_PAGE_COUNT = 6;
 
@@ -108,7 +109,11 @@ export class GuiRelationships extends GuiSubscreen {
 
 		if (this.relationshipsData == null) {
 			MainCanvas.textAlign = "center";
-			DrawText(this.failed ? `Failed to get role data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 800, 480, "Black");
+			if (this.failed) {
+				DrawQueryErrorMessage(`get role data from ${this.character.Name}`);
+			} else {
+				DrawText("Loading...", 1000, 480, "Black");
+			}
 			return;
 		}
 

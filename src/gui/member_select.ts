@@ -2,6 +2,7 @@ import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { GuiSubscreen } from "./subscreen";
 import { getCharacterName } from "../utilsClub";
 import { setSubscreen } from "../modules/gui";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 const PER_PAGE_COUNT = 8;
 
@@ -223,7 +224,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 			DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 		} else if (this.failed) {
 			MainCanvas.textAlign = "center";
-			DrawText(`Failed to get data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+			DrawQueryErrorMessage(`get data from ${this.character.Name}`);
 		} else {
 			MainCanvas.textAlign = "center";
 			DrawText("Loading...", 1000, 480, "Black");

@@ -5,6 +5,7 @@ import { getCharacterName } from "../utilsClub";
 import { AccessLevel } from "../modules/authority";
 import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
 import { ConditionsEvaluateRequirements } from "../modules/conditions";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 import cloneDeep from "lodash-es/cloneDeep";
 
@@ -161,7 +162,11 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 
 		if (this.conditionCategoryData === null) {
 			MainCanvas.textAlign = "center";
-			DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+			if (this.failed) {
+				DrawQueryErrorMessage(`get data from ${this.character.Name}`);
+			} else {
+				DrawText("Loading...", 1000, 480, "Black");
+			}
 			return true;
 		}
 

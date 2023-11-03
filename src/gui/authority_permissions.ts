@@ -10,6 +10,7 @@ import { GuiAuthorityDialogSelf } from "./authority_dialogSelf";
 import { setSubscreen } from "../modules/gui";
 import { Views, HELP_TEXTS } from "../helpTexts";
 import { createInputElement, positionElement } from "../utils";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 type PermListItem = (
 	{
@@ -225,7 +226,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 		} else if (this.failed) {
 			MainCanvas.textAlign = "center";
-			DrawText(`Failed to get permission data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+			DrawQueryErrorMessage(`get permission data from ${this.character.Name}`);
 		} else {
 			MainCanvas.textAlign = "center";
 			DrawText("Loading...", 1000, 480, "Black");

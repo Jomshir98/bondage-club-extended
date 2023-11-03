@@ -7,6 +7,7 @@ import { DrawImageEx, showHelp } from "../utilsClub";
 import { setSubscreen } from "../modules/gui";
 import { Views, HELP_TEXTS } from "../helpTexts";
 import { createInputElement, positionElement } from "../utils";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 const PER_PAGE_COUNT = 5;
 
@@ -191,7 +192,7 @@ export class GuiLog extends GuiSubscreen {
 			DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 		} else if (this.failed) {
 			MainCanvas.textAlign = "center";
-			DrawText(`Failed to get log data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+			DrawQueryErrorMessage(`get log data from ${this.character.Name}`);
 		} else {
 			MainCanvas.textAlign = "center";
 			DrawText("Loading...", 1000, 480, "Black");

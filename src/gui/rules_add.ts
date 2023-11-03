@@ -8,6 +8,7 @@ import { DrawImageEx, showHelp } from "../utilsClub";
 import { Views, HELP_TEXTS } from "../helpTexts";
 import { createInputElement, dictionaryProcess, positionElement } from "../utils";
 import { GuiRulesViewDescription } from "./rules_viewDescription";
+import { DrawQueryErrorMessage } from "../modules/messaging";
 
 type RuleListItem = {
 	name: BCX_Rule;
@@ -133,7 +134,11 @@ export class GuiRulesAdd extends GuiSubscreen {
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
 
 		if (this.rulesData === null) {
-			DrawText(this.failed ? `Failed to get rules data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+			if (this.failed) {
+				DrawQueryErrorMessage(`get rules data from ${this.character.Name}`);
+			} else {
+				DrawText("Loading...", 1000, 480, "Black");
+			}
 			return;
 		}
 

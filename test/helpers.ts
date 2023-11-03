@@ -22,7 +22,7 @@ async function doClosePage(page: Page): Promise<void> {
 	const jsCoverage = await page.coverage.stopJSCoverage();
 
 	const BCPath = path.resolve(process.cwd(), "../Bondage-College/BondageClub");
-	const BCXPath = path.resolve(process.cwd(), "./dist/bcx.dev.js");
+	const BCXPath = path.resolve(process.cwd(), "./dist/bcx.js");
 	const AllowedPath = path.resolve(process.cwd(), "..");
 
 	// Point to original .js files

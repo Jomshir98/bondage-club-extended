@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ESNext", "DOM"],
+		"types": [
+			"@types/node"
+		],
+		"moduleResolution": "Node",
+		"esModuleInterop": true,
+		"removeComments": true,
+		"strict": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noUncheckedIndexedAccess": true,
+		"resolveJsonModule": true
+	},
+	"include": [
+		"webpack.config.ts"
+	]
+}

@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"target": "ES2018",
 		"baseUrl": "./src",
-		"rootDir": "./src"
+		"rootDir": "./src",
+		"noEmit": false
 	},
 	"include": [
 		"node_modules/bc-stubs/bc/**/*.d.ts",

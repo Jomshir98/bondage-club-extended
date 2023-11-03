@@ -13,7 +13,7 @@ console.debug("BCX: Parse start...");
 (function () {
     'use strict';
 
-    const BCX_VERSION="0.9.8-e6c767dc";const BCX_DEVEL=false;
+    const BCX_VERSION="0.9.8-fc4d6cb3";const BCX_DEVEL=false;
 
     const icon_ExternalLink = `data:image/svg+xml;base64,
 PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxzdmcgeG1sbnM9Imh0dHA6
@@ -3628,7 +3628,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             else if (this.failed) {
                 MainCanvas.textAlign = "center";
-                DrawText(`Failed to get permission data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+                DrawQueryErrorMessage(`get permission data from ${this.character.Name}`);
             }
             else {
                 MainCanvas.textAlign = "center";
@@ -3895,7 +3895,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             else if (this.failed) {
                 MainCanvas.textAlign = "center";
-                DrawText(`Failed to get data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+                DrawQueryErrorMessage(`get data from ${this.character.Name}`);
             }
             else {
                 MainCanvas.textAlign = "center";
@@ -4103,7 +4103,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             else if (this.failed) {
                 MainCanvas.textAlign = "center";
-                DrawText(`Failed to get role data from ${this.character.Name}. Maybe you have no access?`, 800, 480, "Black");
+                DrawQueryErrorMessage(`get role data from ${this.character.Name}`, 800);
             }
             else {
                 MainCanvas.textAlign = "center";
@@ -33450,7 +33450,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             originalSocketEmitEvent = undefined;
         }
         if (originalSocketEmit && ServerSocket.__proto__.emit === bcxSocketEmit) {
-            ServerSocket.__proto__.emitEvent = originalSocketEmit;
+            ServerSocket.__proto__.emit = originalSocketEmit;
             originalSocketEmit = undefined;
         }
         const canvas = document.getElementById("MainCanvas");
@@ -33900,7 +33900,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             else if (this.failed) {
                 MainCanvas.textAlign = "center";
-                DrawText(`Failed to get log config data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+                DrawQueryErrorMessage(`get log config data from ${this.character.Name}`);
             }
             else {
                 MainCanvas.textAlign = "center";
@@ -34126,7 +34126,7 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             else if (this.failed) {
                 MainCanvas.textAlign = "center";
-                DrawText(`Failed to get log data from ${this.character.Name}. Maybe you have no access?`, 1000, 480, "Black");
+                DrawQueryErrorMessage(`get log data from ${this.character.Name}`);
             }
             else {
                 MainCanvas.textAlign = "center";
@@ -34587,7 +34587,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             if (this.relationshipsData == null) {
                 MainCanvas.textAlign = "center";
-                DrawText(this.failed ? `Failed to get role data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 800, 480, "Black");
+                if (this.failed) {
+                    DrawQueryErrorMessage(`get role data from ${this.character.Name}`);
+                }
+                else {
+                    DrawText("Loading...", 1000, 480, "Black");
+                }
                 return;
             }
             MainCanvas.textAlign = "left";
@@ -37564,7 +37569,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             if (this.conditionCategoryData === null || this.conditionData === null) {
                 MainCanvas.textAlign = "center";
-                DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                if (this.failed) {
+                    DrawQueryErrorMessage(`get data from ${this.character.Name}`);
+                }
+                else {
+                    DrawText("Loading...", 1000, 480, "Black");
+                }
                 return true;
             }
             if (this.changes && this.changes.timer !== null) {
@@ -38139,7 +38149,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             }
             if (this.conditionCategoryData === null) {
                 MainCanvas.textAlign = "center";
-                DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                if (this.failed) {
+                    DrawQueryErrorMessage(`get data from ${this.character.Name}`);
+                }
+                else {
+                    DrawText("Loading...", 1000, 480, "Black");
+                }
                 return true;
             }
             if (this.changes && this.changes.timer !== null && this.changes.timer <= 0) {
@@ -38553,7 +38568,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
             if (this.conditionCategoryData === null) {
                 MainCanvas.textAlign = "center";
-                DrawText(this.failed ? `Failed to get data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                if (this.failed) {
+                    DrawQueryErrorMessage(`get data from ${this.character.Name}`);
+                }
+                else {
+                    DrawText("Loading...", 1000, 480, "Black");
+                }
                 return true;
             }
             MainCanvas.beginPath();
@@ -38818,7 +38838,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
             DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
             if (this.curseData === null) {
-                DrawText(this.failed ? `Failed to get curse data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                if (this.failed) {
+                    DrawQueryErrorMessage(`get curse data from ${this.character.Name}`);
+                }
+                else {
+                    DrawText("Loading...", 1000, 480, "Black");
+                }
                 return;
             }
             DrawButton(1815, 305, 90, 90, "", this.curseData.access_changeLimits ? "White" : "#ddd", this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png", this.curseData.access_changeLimits ?
@@ -39389,7 +39414,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
             DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
             if (this.rulesData === null) {
-                DrawText(this.failed ? `Failed to get rules data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                if (this.failed) {
+                    DrawQueryErrorMessage(`get rules data from ${this.character.Name}`);
+                }
+                else {
+                    DrawText("Loading...", 1000, 480, "Black");
+                }
                 return;
             }
             DrawButton(1815, 305, 90, 90, "", this.rulesData.access_changeLimits ? "White" : "#ddd", this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png", this.rulesData.access_changeLimits ?
@@ -41671,7 +41701,12 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
             DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "BCX main menu");
             DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png");
             if (this.commandsData === null) {
-                DrawText(this.failed ? `Failed to get commands data from ${this.character.Name}. Maybe you have no access?` : "Loading...", 1000, 480, "Black");
+                if (this.failed) {
+                    DrawQueryErrorMessage(`get commands data from ${this.character.Name}`);
+                }
+                else {
+                    DrawText("Loading...", 1000, 480, "Black");
+                }
                 return;
             }
             DrawButton(1815, 305, 90, 90, "", this.commandsData.access_changeLimits ? "White" : "#ddd", this.permissionMode ? "Icons/Reset.png" : "Icons/Preference.png", this.commandsData.access_changeLimits ?
@@ -42707,6 +42742,9 @@ gEdTrWQmgoV4rsJMvJPiFpJ8u2c9WIX0JJ745gS6B7g/nYqlKq8gTMkDHgRuk9XTRuJbmf5ON9ik
         });
     }
     const pendingQueries = new Map();
+    function DrawQueryErrorMessage(subject, x = 1000) {
+        DrawTextWrap(`Failed to ${subject}. This can be caused by missing permission to interact with their items, the user having left the room meanwhile, or the user not having the BC tab focused.`, 200, 280, 2 * (x - 200), 400, "Black");
+    }
     function sendQuery(type, data, target, timeout = 10000) {
         if (firstTimeInit) {
             return Promise.reject("Unavailable during init");

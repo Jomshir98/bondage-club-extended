@@ -243,26 +243,16 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		DrawBackNextButton(25, 25, 340, 90, `Background ${backgroundIndex + 1} / ${Math.max(BACKGROUND_SELECTION.length, 1)}`, "White", "", () => "", () => "");
 
 		if (this.showHelp) {
-			MainCanvas.strokeStyle = "black";
-			MainCanvas.fillStyle = "#ffffff88";
-
-			MainCanvas.beginPath();
-			MainCanvas.rect(25, 300, 340, 450);
-			MainCanvas.fill();
-			MainCanvas.stroke();
+			DrawRect(25, 300, 340, 450, "#ffffff88");
+			DrawEmptyRect(25, 300, 340, 450, "black");
 
 			DrawText("Color legend", 195, 340, "Black", "#ddd");
 
-			MainCanvas.fillStyle = "#ffb";
-			MainCanvas.fillRect(50, 374, 290, 64);
-			MainCanvas.fillStyle = "#fff";
-			MainCanvas.fillRect(50, 438, 290, 64);
-			MainCanvas.fillStyle = "#88c";
-			MainCanvas.fillRect(50, 502, 290, 64);
-			MainCanvas.fillStyle = "#ccc";
-			MainCanvas.fillRect(50, 566, 290, 64);
-			MainCanvas.fillStyle = "#faa";
-			MainCanvas.fillRect(50, 630, 290, 64);
+			DrawRect(50, 374, 290, 64, "#ffb");
+			DrawRect(50, 438, 290, 64, "#fff");
+			DrawRect(50, 502, 290, 64, "#88c");
+			DrawRect(50, 566, 290, 64, "#ccc");
+			DrawRect(50, 630, 290, 64, "#faa");
 
 			MainCanvas.textAlign = "center";
 			DrawTextFit(`Items are added`, 50 + 295 / 2, 374 + 34, 276, "Black");
@@ -276,13 +266,8 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 
 		if (this.screenState === ScreenState.main) {
 
-			MainCanvas.strokeStyle = "black";
-			MainCanvas.fillStyle = "#ffffffcc";
-
-			MainCanvas.beginPath();
-			MainCanvas.rect(1000 - 30, 250 - 30, 750 + 60, 650 + 60);
-			MainCanvas.fill();
-			MainCanvas.stroke();
+			DrawRect(1000 - 30, 250 - 30, 750 + 60, 650 + 60, "#ffffffcc");
+			DrawEmptyRect(1000 - 30, 250 - 30, 750 + 60, 650 + 60, "black");
 
 			MainCanvas.fillStyle = "Black";
 
@@ -387,12 +372,8 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			}
 
 			if (warning) {
-				MainCanvas.fillStyle = "Pink";
-				MainCanvas.strokeStyle = "Black";
-				MainCanvas.beginPath();
-				MainCanvas.rect(1000 - 30, 180 - 40, 750 + 60, 70);
-				MainCanvas.fill();
-				MainCanvas.stroke();
+				DrawRect(1000 - 30, 180 - 40, 750 + 60, 70, "Pink");
+				DrawEmptyRect(1000 - 30, 180 - 40, 750 + 60, 70, "Black");
 				DrawTextFit(warning, 1370, 177, 800, "Black");
 			}
 
@@ -420,8 +401,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		const AssetGroups = AssetGroup.filter(category.filter);
 
 		MainCanvas.textAlign = "left";
-		MainCanvas.fillStyle = "#cccccc";
-		MainCanvas.fillRect(900 + 105, 165, 830, 64);
+		DrawRect(900 + 105, 165, 830, 64, "#cccccc");
 		DrawText(`Choose ${category.title}`, 900 + 390, 165 + 34, "Black");
 		MainCanvas.textAlign = "center";
 		DrawButton(900 + 120, 173, 200, 48, "<<< Back", "White");
@@ -449,20 +429,13 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			if (MouseIn(900 + 106 + 281 * column, 240 + 69 * row, 265, 54)) {
 				const Left = 900 + 106;
 				const Top = 240 + 690;
-				MainCanvas.fillStyle = "#FFFF88";
-				MainCanvas.lineWidth = 2;
-				MainCanvas.strokeStyle = "black";
-				MainCanvas.beginPath();
-				MainCanvas.rect(Left, Top, 826, 65);
-				MainCanvas.fill();
-				MainCanvas.stroke();
+				DrawRect(Left, Top, 826, 65, "#FFFF88");
+				DrawEmptyRect(Left, Top, 826, 65, "black", 2);
 				DrawTextFit(text, Left + 413, Top + 33, 820, "black");
 			}
 
 			if (!matches && enabledSlots.has(group.Name)) {
-				MainCanvas.strokeStyle = "#FF69B4";
-				MainCanvas.lineWidth = 4;
-				MainCanvas.strokeRect(900 + 106 + 281 * column - 2, 240 + 69 * row - 2, 265 + 4, 54 + 4);
+				DrawEmptyRect(900 + 106 + 281 * column - 2, 240 + 69 * row - 2, 265 + 4, 54 + 4, "#FF69B4", 4);
 			}
 		}
 	}
@@ -505,8 +478,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			.map(g => g.Property.LockedBy));
 
 		MainCanvas.textAlign = "left";
-		MainCanvas.fillStyle = "#cccccc";
-		MainCanvas.fillRect(900 + 105, 165, 830, 64);
+		DrawRect(900 + 105, 165, 830, 64, "#cccccc");
 		DrawText(`Choose lock types`, 900 + 390, 165 + 34, "Black");
 		MainCanvas.textAlign = "center";
 		DrawButton(900 + 120, 173, 200, 48, "<<< Back", "White");
@@ -522,9 +494,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			DrawButton(900 + 106 + 281 * column, 240 + 69 * row, 265, 54, lock.Description, color, undefined, undefined, !requested);
 
 			if (requested && enabledLocks.has(lock.Name)) {
-				MainCanvas.strokeStyle = "#FF69B4";
-				MainCanvas.lineWidth = 4;
-				MainCanvas.strokeRect(900 + 106 + 281 * column - 2, 240 + 69 * row - 2, 265 + 4, 54 + 4);
+				DrawEmptyRect(900 + 106 + 281 * column - 2, 240 + 69 * row - 2, 265 + 4, 54 + 4, "#FF69B4", 4);
 			}
 		}
 	}

@@ -96,10 +96,8 @@ export class GuiConditionViewRules extends GuiConditionView<"rules", RuleEntry> 
 	protected showDetailedDescriptionBackground(X: number): void {
 		const backgroundY = 170;
 
-		MainCanvas.fillStyle = "White";
-		MainCanvas.fillRect(X, backgroundY, 801, 600);
-		MainCanvas.strokeStyle = "Black";
-		MainCanvas.strokeRect(X, backgroundY, 801, 600);
+		DrawRect(X, backgroundY, 801, 600, "White");
+		DrawEmptyRect(X, backgroundY, 801, 600, "Black");
 	}
 
 	protected showDetailedDescriptionText(X: number, condition: ConditionsCategoryKeys["rules"], data: dataEntry): void {

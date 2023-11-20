@@ -144,10 +144,7 @@ export class GuiMainMenu extends GuiSubscreen {
 		}
 
 		if (this.character.isPlayer() && modStorage.menuShouldDisplayTutorialHelp) {
-			MainCanvas.beginPath();
-			MainCanvas.rect(950, 190, 850, 90);
-			MainCanvas.fillStyle = "Black";
-			MainCanvas.fill();
+			DrawRect(950, 190, 850, 90, "Black");
 			DrawText(`New advanced tutorial pages are now available ►`, 980, 190 + 45, "White");
 		}
 

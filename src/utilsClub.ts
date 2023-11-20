@@ -369,10 +369,8 @@ export function itemColorsEquals(color1: null | undefined | string | string[], c
 export function showHelp(helpText: string) {
 	DrawHoverElements.push(() => {
 		MainCanvas.save();
-		MainCanvas.fillStyle = "#ffff88";
-		MainCanvas.fillRect(1000, 190, 800, 600);
-		MainCanvas.strokeStyle = "Black";
-		MainCanvas.strokeRect(1000, 190, 800, 600);
+		DrawRect(1000, 190, 800, 600, "#ffff88");
+		DrawEmptyRect(1000, 190, 800, 600, "Black");
 		MainCanvas.textAlign = "left";
 		DrawTextWrap(helpText, 1020 - 760 / 2, 210, 760, 560, "black");
 		MainCanvas.restore();

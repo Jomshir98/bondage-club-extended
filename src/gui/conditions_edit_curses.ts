@@ -69,8 +69,7 @@ export class GuiConditionEditCurses extends GuiConditionEdit<"curses"> {
 		////// right side: special curse category options
 		if (data.data) {
 			if (useGlobalCategorySetting) {
-				MainCanvas.fillStyle = "#0052A3";
-				MainCanvas.fillRect(1045, 100, 74, 74);
+				DrawRect(1045, 100, 74, 74, "#0052A3");
 			}
 			DrawCheckbox(1050, 105, 64, 64, "Remove the item when the curse", itemRemove, !access || useGlobalCategorySetting);
 			MainCanvas.save();

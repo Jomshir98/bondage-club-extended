@@ -33,8 +33,7 @@ export class GuiGlobal extends GuiSubscreen {
 		}
 
 		// preset
-		MainCanvas.fillStyle = "#ddd";
-		MainCanvas.fillRect(840, 200, 950, 90);
+		DrawRect(840, 200, 950, 90, "#ddd");
 		DrawImageEx("Icons/Introduction.png", 840 + 20, 200 + 20, { Height: 50, Width: 50 });
 		DrawTextFit(`Your initially selected BCX preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
 

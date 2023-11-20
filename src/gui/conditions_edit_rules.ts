@@ -109,10 +109,8 @@ export class GuiConditionEditRules extends GuiConditionEdit<"rules"> {
 
 		// help text
 		if (this.showHelp) {
-			MainCanvas.fillStyle = "#ffff88";
-			MainCanvas.fillRect(95, 80, 800, 600);
-			MainCanvas.strokeStyle = "Black";
-			MainCanvas.strokeRect(95, 80, 800, 600);
+			DrawRect(95, 80, 800, 600, "#ffff88");
+			DrawEmptyRect(95, 80, 800, 600, "Black");
 			MainCanvas.textAlign = "left";
 			DrawTextWrap(HELP_TEXTS[Views.ConditionsEditRules], 115 - 760 / 2, 100, 760, 560, "black");
 		}

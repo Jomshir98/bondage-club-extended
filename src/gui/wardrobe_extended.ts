@@ -277,7 +277,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				DrawButton(1000, 250, 50, 50, "", color, undefined, undefined, disabled);
 				DrawTextFit("Clothes", 1100, 275, 300, "black");
 				if (checked === "partial") {
-					MainCanvas.fillRect(1000 + 8, 250 + 8, 34, 34);
+					DrawRect(1000 + 8, 250 + 8, 34, 34, "gray");
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 250 + 6, { Width: 38, Height: 38 });
 				}
@@ -291,7 +291,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				DrawButton(1000, 350, 50, 50, "", color, undefined, undefined, disabled);
 				DrawTextFit("Cosplay items", 1100, 375, 300, "black");
 				if (checked === "partial") {
-					MainCanvas.fillRect(1000 + 8, 350 + 8, 34, 34);
+					DrawRect(1000 + 8, 350 + 8, 34, 34, "gray");
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 350 + 6, { Width: 38, Height: 38 });
 				}
@@ -305,7 +305,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				DrawButton(1000, 450, 50, 50, "", color, undefined, undefined, disabled);
 				DrawTextFit("Body", 1100, 475, 300, "black", "white");
 				if (checked === "partial") {
-					MainCanvas.fillRect(1000 + 8, 450 + 8, 34, 34);
+					DrawRect(1000 + 8, 450 + 8, 34, 34, "gray");
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 450 + 6, { Width: 38, Height: 38 });
 				}
@@ -319,7 +319,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				DrawButton(1000, 550, 50, 50, "", color, undefined, undefined, disabled);
 				DrawTextFit("Restraints/items", 1100, 575, 300, "black");
 				if (checked === "partial") {
-					MainCanvas.fillRect(1000 + 8, 550 + 8, 34, 34);
+					DrawRect(1000 + 8, 550 + 8, 34, 34, "gray");
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 550 + 6, { Width: 38, Height: 38 });
 				}
@@ -331,7 +331,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				DrawButton(1000, 650, 50, 50, "", color, undefined, undefined, disabled);
 				DrawTextFit("Collar", 1100, 675, 300, "black");
 				if (checked === "partial") {
-					MainCanvas.fillRect(1000 + 8, 650 + 8, 34, 34);
+					DrawRect(1000 + 8, 650 + 8, 34, 34, "gray");
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 650 + 6, { Width: 38, Height: 38 });
 				}
@@ -343,7 +343,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				DrawButton(1000, 750, 50, 50, "", color, undefined, undefined, disabled);
 				DrawTextFit("Piercings", 1100, 775, 300, "black");
 				if (checked === "partial") {
-					MainCanvas.fillRect(1000 + 8, 750 + 8, 34, 34);
+					DrawRect(1000 + 8, 750 + 8, 34, 34, "gray");
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 750 + 6, { Width: 38, Height: 38 });
 				}
@@ -355,7 +355,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 				DrawButton(1000, 850, 50, 50, "", color, undefined, undefined, disabled);
 				DrawTextFit("Locks", 1100, 875, 300, "black");
 				if (checked === "partial") {
-					MainCanvas.fillRect(1000 + 8, 850 + 8, 34, 34);
+					DrawRect(1000 + 8, 850 + 8, 34, 34, "gray");
 				} else if (checked === "yes") {
 					DrawImageEx("./Icons/Checked.png", 1000 + 6, 850 + 6, { Width: 38, Height: 38 });
 				}

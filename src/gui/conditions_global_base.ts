@@ -233,7 +233,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 			const res = inChatroom &&
 				(requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
 			MainCanvas.fillStyle = (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(95, 620, 15, 64);
+			DrawRect(95, 620, 15, 64, MainCanvas.fillStyle);
 		}
 
 		// In room named

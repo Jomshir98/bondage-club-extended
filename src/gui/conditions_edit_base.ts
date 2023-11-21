@@ -226,12 +226,11 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 		// global-category-configuration-is-active highlighting
 		if (useGlobalCategorySetting) {
-			const temp = "#0052A3";
-			DrawRect(526, 546, 418, 68, temp);
-			DrawRect(120, 615, 74, 74, temp);
-			DrawRect(120, 695, 74, 74, temp);
-			DrawRect(120, 775, 74, 74, temp);
-			DrawRect(120, 855, 74, 74, temp);
+			DrawRect(526, 546, 418, 68, "#0052A3");
+			DrawRect(120, 615, 74, 74, "#0052A3");
+			DrawRect(120, 695, 74, 74, "#0052A3");
+			DrawRect(120, 775, 74, 74, "#0052A3");
+			DrawRect(120, 855, 74, 74, "#0052A3");
 		}
 
 		////// status and timer area
@@ -270,7 +269,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		MainCanvas.textAlign = "left";
 
 		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";
-		DrawRect(80, 620, 15, 304, MainCanvas.fillStyle);
+		DrawRect(80, 620, 15, 304, ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000");
 
 		// In room
 		DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
@@ -357,7 +356,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		}
 
 		////// global category configuration toggle
-		DrawCircle(1877 + 33, 800 + 30, 22, 0, "", "#0052A3");	DrawEmptyRect(1190, 830, 720, 104, "#0052A3");
+		DrawEmptyRect(1190, 830, 720, 104, "#0052A3");
 		DrawCheckbox(1210, 850, 64, 64, `Set to global ${this.conditionCategory} configuration`, useGlobalCategorySetting, !access);
 		DrawCircle(1877 + 33, 800 + 30, 22, 0, "", "#0052A3");
 		DrawImageEx("Icons/General.png", 1877 + 10, 800 + 7, {

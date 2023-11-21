@@ -167,7 +167,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			DrawTextFit(this.character.Name, 1111, 190, 189, "Black");
 			DrawText("is permitted", 1111, 235, "Black");
 			DrawText("Lowest permitted role", 1370, 235, "Black");
-			DrawEmptyRect(1335, 230, 1335, 230 + 610, "White");
+			DrawEmptyRect(1335, 230, 0, 610, "Black");
 
 			// filter
 			DrawText("Filter:", 130, 215, "Black");
@@ -199,9 +199,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						Width: 64,
 					});
 					// Permission name
-					const permissionAccessDependantColor = checkPermissionAccessData(e.permissionInfo, this.myAccessLevel) ? "White" : "#ddd";
-					DrawRect(200, Y, 1000, 64, permissionAccessDependantColor);
-					DrawEmptyRect(200, Y, 1000, 64, permissionAccessDependantColor);
+					DrawRect(200, Y, 1000, 64, checkPermissionAccessData(e.permissionInfo, this.myAccessLevel) ? "White" : "#ddd");
+					DrawEmptyRect(200, Y, 1000, 64, "Black");
 					DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
 					// Self checkbox
 					DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#ddd", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);

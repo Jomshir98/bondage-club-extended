@@ -231,13 +231,13 @@ export class GuiMemberSelect extends GuiSubscreen {
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
 
-		DrawEmptyRect(125, 176, 1441, 0, "#ddd");
+		DrawEmptyRect(125, 176, 1441, 0, "Black");
 
 		DrawText(`Name`, 383, 222, "Black");
 		DrawText(`Member number`, 780, 222, "Black");
 		DrawText(`Note`, 1100, 222, "Black");
 
-		DrawEmptyRect(125, 265, 1441, 0, "#ddd");
+		DrawEmptyRect(125, 265, 1441, 0, "Black");
 	}
 
 	Click() {

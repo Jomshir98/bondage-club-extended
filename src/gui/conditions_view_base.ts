@@ -151,7 +151,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		}
 
 		// Column separator
-		DrawEmptyRect(953, 160, 0, 620, "Gray");
+		DrawEmptyRect(953, 160, 0, 620, "Black");
 
 		for (let off = 0; off < PER_PAGE_COUNT; off++) {
 			const i = this.page * PER_PAGE_COUNT + off;

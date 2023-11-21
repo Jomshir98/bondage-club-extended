@@ -132,13 +132,13 @@ export class GuiRelationships extends GuiSubscreen {
 			const allow = e.memberNumber === Player.MemberNumber ? this.relationshipsData.access_modify_self : this.relationshipsData.access_modify_others;
 
 			// Relationships list
-			DrawEmptyRect(130, Y, 700, 64, "white");
+			DrawEmptyRect(130, Y, 700, 64, "Black", 2);
 			const name = `${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
 			DrawTextFit(name, 140, Y + 34, 680, "Black");
 
 			DrawCheckbox(880, Y, 64, 64, "", e.enforced, !allow);
 
-			DrawEmptyRect(994, Y, 500, 64, "white");
+			DrawEmptyRect(994, Y, 500, 64, "Black", 2);
 			DrawTextFit(e.newName, 1004, Y + 34, 480, "Black");
 
 			// hover text for toggle

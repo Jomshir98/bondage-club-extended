@@ -104,8 +104,7 @@ export class GuiCursesAdd extends GuiSubscreen {
 			const xOffset = ciOffset % 2 ? 845 : 0;
 
 			MainCanvas.textAlign = "left";
-			MainCanvas.fillStyle = "#cccccc";
-			MainCanvas.fillRect(xOffset + 105, 165, 830, 64);
+			DrawRect(xOffset + 105, 165, 830, 64, "#cccccc");
 			DrawText(category.title, xOffset + 120, 165 + 34, "Black");
 			MainCanvas.textAlign = "center";
 
@@ -147,12 +146,9 @@ export class GuiCursesAdd extends GuiSubscreen {
 
 		// permission mode legend
 		if (this.permissionMode) {
-			MainCanvas.fillStyle = "#50ff56";
-			MainCanvas.fillRect(1284, 75, 166, 64);
-			MainCanvas.fillStyle = "#f6fe78";
-			MainCanvas.fillRect(1284 + 1 * 166, 75, 166, 64);
-			MainCanvas.fillStyle = "#ffa7a7";
-			MainCanvas.fillRect(1284 + 2 * 166, 75, 165, 64);
+			DrawRect(1284, 75, 166, 64, "#50ff56");
+			DrawRect(1284 + 1 * 166, 75, 166, 64, "#f6fe78");
+			DrawRect(1284 + 2 * 166, 75, 165, 64, "#ffa7a7");
 
 			MainCanvas.textAlign = "center";
 			DrawText(`Normal`, 1284 + 166 / 2, 75 + 34, "Black");

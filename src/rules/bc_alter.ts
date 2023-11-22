@@ -706,10 +706,8 @@ export function initRules_bc_alter() {
 					DrawBackNextButton(1625, 550, 275, 60, TextGet("Game" + ChatAdminGame), "#ebebe4", "", () => "", () => "", true);
 					DrawButton(1486, 728, 64, 64, "", "#ebebe4", ChatAdminPrivate ? "Icons/Checked.png" : "", "", true);
 					DrawButton(1786, 728, 64, 64, "", "#ebebe4", ChatAdminLocked ? "Icons/Checked.png" : "", "", true);
-					MainCanvas.fillStyle = "#ffff88";
-					MainCanvas.fillRect(100, 850, 1125, 70);
-					MainCanvas.strokeStyle = "Black";
-					MainCanvas.strokeRect(100, 850, 1125, 70);
+					DrawRect(100, 850, 1125, 70, "#ffff88");
+					DrawEmptyRect(100, 850, 1125, 70, "Black");
 					DrawText("Some settings are not available due to a BCX rule.", 650, 885, "Black", "Gray");
 				}
 			});

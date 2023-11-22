@@ -108,10 +108,7 @@ export class ModuleGUI extends BaseModule {
 			if (firstTimeInit) {
 				if (C && C.isPlayer()) {
 					DrawButton(1815, 685, 90, 90, "", "White", icon_BCX);
-					MainCanvas.beginPath();
-					MainCanvas.rect(1300, 685, 500, 90);
-					MainCanvas.fillStyle = "Black";
-					MainCanvas.fill();
+					DrawRect(1300, 685, 500, 90, "Black");
 					DrawText(`You can find BCX here ►`, 1550, 685 + 45, "White");
 				}
 			} else if (C && C.BCXVersion !== null) {

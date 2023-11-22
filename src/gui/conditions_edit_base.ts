@@ -217,15 +217,8 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		drawIcon(MainCanvas, icon_star, 105, 91, 60, 60, 24, 1, 1.5, color, access && MouseIn(93, 80, 85, 80) ? "Cyan" : "black");
 
 		// Spacer
-		MainCanvas.beginPath();
-		MainCanvas.moveTo(98, 272);
-		MainCanvas.lineTo(960, 272);
-		MainCanvas.strokeStyle = "Gray";
-		MainCanvas.stroke();
-		MainCanvas.beginPath();
-		MainCanvas.moveTo(98, 540);
-		MainCanvas.lineTo(960, 540);
-		MainCanvas.stroke();
+		DrawEmptyRect(98, 272, 862, 0, "Gray", 1);
+		DrawEmptyRect(98, 540, 862, 0, "Gray", 1);
 
 		// on-off toggle
 		MainCanvas.textAlign = "left";
@@ -233,12 +226,11 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 
 		// global-category-configuration-is-active highlighting
 		if (useGlobalCategorySetting) {
-			MainCanvas.fillStyle = "#0052A3";
-			MainCanvas.fillRect(526, 546, 418, 68);
-			MainCanvas.fillRect(120, 615, 74, 74);
-			MainCanvas.fillRect(120, 695, 74, 74);
-			MainCanvas.fillRect(120, 775, 74, 74);
-			MainCanvas.fillRect(120, 855, 74, 74);
+			DrawRect(526, 546, 418, 68, "#0052A3");
+			DrawRect(120, 615, 74, 74, "#0052A3");
+			DrawRect(120, 695, 74, 74, "#0052A3");
+			DrawRect(120, 775, 74, 74, "#0052A3");
+			DrawRect(120, 855, 74, 74, "#0052A3");
 		}
 
 		////// status and timer area
@@ -276,8 +268,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "Any selected below" : "All selected below") : "Always in effect", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
 		MainCanvas.textAlign = "left";
 
-		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";
-		MainCanvas.fillRect(80, 620, 15, 304);
+		DrawRect(80, 620, 15, 304, ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000");
 
 		// In room
 		DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
@@ -291,8 +282,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
 			const res = inChatroom &&
 				(requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
-			MainCanvas.fillStyle = (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(95, 620, 15, 64);
+			DrawRect(95, 620, 15, 64, (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 		}
 
 		// In room named
@@ -308,8 +298,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 				ChatRoomData &&
 				typeof ChatRoomData.Name === "string" &&
 				ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
-			MainCanvas.fillStyle = (requirements.roomName.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(95, 700, 15, 64);
+			DrawRect(95, 700, 15, 64, (requirements.roomName.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 		}
 
 		// In presence of role
@@ -330,8 +319,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		DrawText(`room with role`, 324 + 115 + 14, 780 + 32, "Black", "Gray");
 		if (requirements.role) {
 			const res = this.conditionCategoryData.highestRoleInRoom != null && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
-			MainCanvas.fillStyle = (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(95, 780, 15, 64);
+			DrawRect(95, 780, 15, 64, (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 		}
 
 		// In presence of player
@@ -347,8 +335,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 			const inChatroom = ServerPlayerIsInChatRoom();
 			const res = inChatroom &&
 				getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player!.memberNumber);
-			MainCanvas.fillStyle = (requirements.player.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			MainCanvas.fillRect(95, 860, 15, 64);
+			DrawRect(95, 860, 15, 64, (requirements.player.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 			const input = document.getElementById("BCX_ConditionMemberNumber") as HTMLInputElement | undefined;
 			if (input && document.activeElement === input) {
 				DrawHoverElements.push(() => {
@@ -356,26 +343,17 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 						return;
 					const Left = 957;
 					const Top = 858;
-					MainCanvas.fillStyle = "#FFFF88";
-					MainCanvas.fillRect(Left, Top, 450, 65);
-					MainCanvas.lineWidth = 2;
-					MainCanvas.strokeStyle = "black";
-					MainCanvas.strokeRect(Left, Top, 450, 65);
+					DrawRect(Left, Top, 450, 65, "#FFFF88");
+					DrawEmptyRect(Left, Top, 450, 65, "black", 2);
 					DrawTextFit(getCharacterName(requirements.player.memberNumber, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
 			}
 		}
 
 		////// global category configuration toggle
-		MainCanvas.beginPath();
-		MainCanvas.rect(1190, 830, 720, 104);
-		MainCanvas.strokeStyle = "#0052A3";
-		MainCanvas.stroke();
+		DrawEmptyRect(1190, 830, 720, 104, "#0052A3");
 		DrawCheckbox(1210, 850, 64, 64, `Set to global ${this.conditionCategory} configuration`, useGlobalCategorySetting, !access);
-		MainCanvas.beginPath();
-		MainCanvas.ellipse(1877 + 33, 800 + 30, 22, 22, 360, 0, 360);
-		MainCanvas.fillStyle = "#0052A3";
-		MainCanvas.fill();
+		DrawCircle(1877 + 33, 800 + 30, 22, 0, "", "#0052A3");
 		DrawImageEx("Icons/General.png", 1877 + 10, 800 + 7, {
 			Height: 46,
 			Width: 46,

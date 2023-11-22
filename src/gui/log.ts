@@ -138,10 +138,8 @@ export class GuiLog extends GuiSubscreen {
 				MainCanvas.textAlign = "left";
 				const msg = logMessageRender(e, this.character);
 				if (this.showMore[off]) {
-					MainCanvas.fillStyle = "#ffff88";
-					MainCanvas.fillRect(200, Y - 32, 1030, 128);
-					MainCanvas.strokeStyle = "Black";
-					MainCanvas.strokeRect(200, Y - 32, 1030, 128);
+					DrawRect(200, Y - 32, 1030, 128, "#ffff88");
+					DrawEmptyRect(200, Y - 32, 1030, 128, "Black");
 					DrawTextWrap(msg, 200 - 970 / 2, Y - 32 + 5, 990, 128 - 10, "black", undefined, 3);
 				} else {
 					DrawButton(200, Y, 1030, 64, "", "White");
@@ -151,9 +149,7 @@ export class GuiLog extends GuiSubscreen {
 					}
 					DrawTextFit(msgSmall, 210, Y + 34, 1020, msgSmall.startsWith("[") ? "Gray" : "Black");
 				}
-				MainCanvas.beginPath();
-				MainCanvas.rect(1270, Y, 320, 64);
-				MainCanvas.stroke();
+				DrawEmptyRect(1270, Y, 320, 64, "Black");
 				DrawTextFit(new Date(e[0]).toLocaleString(), 1290, Y + 34, 300, "Black", "");
 				MainCanvas.textAlign = "center";
 

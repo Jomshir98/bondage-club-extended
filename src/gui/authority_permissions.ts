@@ -167,10 +167,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			DrawTextFit(this.character.Name, 1111, 190, 189, "Black");
 			DrawText("is permitted", 1111, 235, "Black");
 			DrawText("Lowest permitted role", 1370, 235, "Black");
-			MainCanvas.beginPath();
-			MainCanvas.moveTo(1335, 230);
-			MainCanvas.lineTo(1335, 230 + 610);
-			MainCanvas.stroke();
+			DrawEmptyRect(1335, 230, 0, 610, "Black");
 
 			// filter
 			DrawText("Filter:", 130, 215, "Black");
@@ -194,10 +191,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 
 				if (e.separator) {
 					// idea to highlight the section separator
-					MainCanvas.beginPath();
-					MainCanvas.rect(125, Y, 1173, 64);
-					MainCanvas.fillStyle = "#eeeeee";
-					MainCanvas.fill();
+					DrawRect(125, Y, 1173, 64, "#eeeeee");
 					DrawText(e.name, 140, Y + 34, "Black");
 				} else {
 					DrawImageEx(MODULE_ICONS[e.permissionInfo.category], 125, Y, {
@@ -205,11 +199,8 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 						Width: 64,
 					});
 					// Permission name
-					MainCanvas.beginPath();
-					MainCanvas.rect(200, Y, 1000, 64);
-					MainCanvas.fillStyle = checkPermissionAccessData(e.permissionInfo, this.myAccessLevel) ? "White" : "#ddd";
-					MainCanvas.fill();
-					MainCanvas.stroke();
+					DrawRect(200, Y, 1000, 64, checkPermissionAccessData(e.permissionInfo, this.myAccessLevel) ? "White" : "#ddd");
+					DrawEmptyRect(200, Y, 1000, 64, "Black");
 					DrawTextFit(e.permissionInfo.name, 210, Y + 34, 990, "Black");
 					// Self checkbox
 					DrawButton(1235, Y, 64, 64, "", e.editSelf ? "White" : "#ddd", e.permissionInfo.self ? "Icons/Checked.png" : "", undefined, !e.editSelf);

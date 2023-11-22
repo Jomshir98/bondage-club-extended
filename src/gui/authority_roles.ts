@@ -150,9 +150,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 				const Y = 210 + off * 95;
 
 				// Owner/Mistress list
-				MainCanvas.beginPath();
-				MainCanvas.rect(130, Y, 900, 64);
-				MainCanvas.stroke();
+				DrawEmptyRect(130, Y, 900, 64, "Black");
 				const msg = `${e.type} ${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
 				DrawTextFit(msg, 140, Y + 34, 590, "Black");
 

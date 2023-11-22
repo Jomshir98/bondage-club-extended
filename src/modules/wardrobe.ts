@@ -541,10 +541,8 @@ export class ModuleWardrobe extends BaseModule {
 				}
 			}
 			if (j_ShowHelp && CharacterAppearanceMode === "Wardrobe") {
-				MainCanvas.fillStyle = "#ffff88";
-				MainCanvas.fillRect(30, 190, 1240, 780);
-				MainCanvas.strokeStyle = "Black";
-				MainCanvas.strokeRect(30, 190, 1240, 780);
+				DrawRect(30, 190, 1240, 780, "#ffff88");
+				DrawEmptyRect(30, 190, 1240, 780, "Black");
 				MainCanvas.textAlign = "left";
 				DrawTextWrap(helpText, 30 - 1160 / 2, 210, 1200, 740, "black");
 				MainCanvas.textAlign = "center";
@@ -653,10 +651,8 @@ export class ModuleWardrobe extends BaseModule {
 				DrawButton(500, Y, 225, 50, "Import", (!allowBinds && j_WardrobeIncludeBinds) ? "#ddd" : "White", "", undefined, !allowBinds && j_WardrobeIncludeBinds);
 			}
 			if (j_ShowHelp) {
-				MainCanvas.fillStyle = "#ffff88";
-				MainCanvas.fillRect(30, 190, 1240, 780);
-				MainCanvas.strokeStyle = "Black";
-				MainCanvas.strokeRect(30, 190, 1240, 780);
+				DrawRect(30, 190, 1240, 780, "#ffff88");
+				DrawEmptyRect(30, 190, 1240, 780, "Black");
 				MainCanvas.textAlign = "left";
 				DrawTextWrap(helpText, 30 - 1160 / 2, 210, 1200, 740, "black");
 				MainCanvas.textAlign = "center";

@@ -263,7 +263,7 @@ export const ruleCustomDataHandlers: {
 				const e = page * PAGE_SIZE + i;
 				if (e >= value.length)
 					break;
-				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
+				DrawEmptyRect(1050, Y + 26 + i * 70, 766, 64, "black");
 				const msg = `${getCharacterName(value[e], "[unknown]")} (${value[e]})`;
 				DrawTextFit(msg, 1060, Y + 26 + i * 70 + 34, 380, "Black");
 				if (access) {
@@ -282,11 +282,8 @@ export const ruleCustomDataHandlers: {
 						return;
 					const Left = 580;
 					const Top = 630;
-					MainCanvas.fillStyle = "#FFFF88";
-					MainCanvas.fillRect(Left, Top, 450, 65);
-					MainCanvas.lineWidth = 2;
-					MainCanvas.strokeStyle = "black";
-					MainCanvas.strokeRect(Left, Top, 450, 65);
+					DrawRect(Left, Top, 450, 65, "#FFFF88");
+					DrawEmptyRect(Left, Top, 450, 65, "black", 2);
 					DrawTextFit(getCharacterName(val, "[unknown]"), Left + 225, Top + 33, 444, "black");
 				});
 			}
@@ -570,16 +567,14 @@ export const ruleCustomDataHandlers: {
 				if (MouseIn(1050, Y + 26 + i * 70, 766, 64)) {
 					DrawHoverElements.push(() => {
 						MainCanvas.save();
-						MainCanvas.fillStyle = "rgba(255, 255, 136, 0.9)";
-						MainCanvas.fillRect(1050, Y + 26, 766, 70 * PAGE_SIZE);
-						MainCanvas.strokeStyle = "Black";
-						MainCanvas.strokeRect(1050, Y + 26, 766, 70 * PAGE_SIZE);
+						DrawRect(1050, Y + 26, 766, 70 * PAGE_SIZE, "rgba(255, 255, 136, 0.9)");
+						DrawEmptyRect(1050, Y + 26, 766, 70 * PAGE_SIZE, "Black");
 						MainCanvas.textAlign = "left";
 						DrawTextWrap(msg + "   -   [click to copy into the empty input text field]", 1050 - 746 / 2, Y + 30, 756, 70 * PAGE_SIZE - 10, "black", undefined, 5);
 						MainCanvas.restore();
 					});
 				}
-				MainCanvas.strokeRect(1050, Y + 26 + i * 70, 766, 64);
+				DrawEmptyRect(1050, Y + 26 + i * 70, 766, 64, "black");
 				DrawTextFit(msg.length > 61 ? msg.substr(0, 60) + "\u2026" : msg, 1060, Y + 26 + i * 70 + 34, 750, "Black");
 				if (access) {
 					MainCanvas.textAlign = "center";

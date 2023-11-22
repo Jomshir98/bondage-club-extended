@@ -118,8 +118,7 @@ export class GuiRelationships extends GuiSubscreen {
 		}
 
 		MainCanvas.textAlign = "left";
-		MainCanvas.fillStyle = "#eeeeee";
-		MainCanvas.fillRect(130, 200, 1484, 64);
+		DrawRect(130, 200, 1484, 64, "#eeeeee");
 		DrawText("Actual character name", 140, 200 + 34, "Black");
 		DrawText("Enforce speaking it?", 740, 200 + 34, "Black");
 		DrawText("Custom name", 1260, 200 + 34, "Black");
@@ -133,13 +132,13 @@ export class GuiRelationships extends GuiSubscreen {
 			const allow = e.memberNumber === Player.MemberNumber ? this.relationshipsData.access_modify_self : this.relationshipsData.access_modify_others;
 
 			// Relationships list
-			MainCanvas.strokeRect(130, Y, 700, 64);
+			DrawEmptyRect(130, Y, 700, 64, "Black", 2);
 			const name = `${e.name === null ? "[unknown name]" : e.name} (${e.memberNumber})`;
 			DrawTextFit(name, 140, Y + 34, 680, "Black");
 
 			DrawCheckbox(880, Y, 64, 64, "", e.enforced, !allow);
 
-			MainCanvas.strokeRect(994, Y, 500, 64);
+			DrawEmptyRect(994, Y, 500, 64, "Black", 2);
 			DrawTextFit(e.newName, 1004, Y + 34, 480, "Black");
 
 			// hover text for toggle

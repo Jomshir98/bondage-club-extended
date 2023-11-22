@@ -210,11 +210,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 				DrawText(`${e.memberNumber}`, 780, Y + 34, "Black");
 				DrawText(`${e.type === ("Character" || "Player") ? "" : e.type}`, 1100, Y + 34, "Black");
 
-				MainCanvas.beginPath();
-				MainCanvas.moveTo(175, Y + 69);
-				MainCanvas.lineTo(1280, Y + 69);
-				MainCanvas.strokeStyle = "#ddd";
-				MainCanvas.stroke();
+				DrawEmptyRect(175, Y + 69, 1105, 0, "#ddd");
 				DrawButton(1340, Y, 150, 64, "Select", "White", "");
 
 			}
@@ -235,19 +231,13 @@ export class GuiMemberSelect extends GuiSubscreen {
 		MainCanvas.textAlign = "center";
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png", "Back");
 
-		MainCanvas.beginPath();
-		MainCanvas.moveTo(125, 176);
-		MainCanvas.lineTo(1566, 176);
-		MainCanvas.stroke();
+		DrawEmptyRect(125, 176, 1441, 0, "Black");
 
 		DrawText(`Name`, 383, 222, "Black");
 		DrawText(`Member number`, 780, 222, "Black");
 		DrawText(`Note`, 1100, 222, "Black");
 
-		MainCanvas.beginPath();
-		MainCanvas.moveTo(125, 265);
-		MainCanvas.lineTo(1566, 265);
-		MainCanvas.stroke();
+		DrawEmptyRect(125, 265, 1441, 0, "Black");
 	}
 
 	Click() {

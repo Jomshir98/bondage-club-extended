@@ -208,12 +208,9 @@ export class GuiCommandsModule extends GuiSubscreen {
 
 		// permission mode legend
 		if (this.permissionMode) {
-			MainCanvas.fillStyle = "#50ff56";
-			MainCanvas.fillRect(1739, 574, 166, 64);
-			MainCanvas.fillStyle = "#f6fe78";
-			MainCanvas.fillRect(1739, 638, 166, 64);
-			MainCanvas.fillStyle = "#ffa7a7";
-			MainCanvas.fillRect(1739, 702, 166, 64);
+			DrawRect(1739, 574, 166, 64, "#50ff56");
+			DrawRect(1739, 638, 166, 64, "#f6fe78");
+			DrawRect(1739, 702, 166, 64, "#ffa7a7");
 
 			MainCanvas.textAlign = "center";
 			DrawText(`Normal`, 1739 + 166 / 2, 574 + 34, "Black");

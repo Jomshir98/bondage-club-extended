@@ -151,10 +151,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		}
 
 		// Column separator
-		MainCanvas.beginPath();
-		MainCanvas.moveTo(953, 160);
-		MainCanvas.lineTo(953, 780);
-		MainCanvas.stroke();
+		DrawEmptyRect(953, 160, 0, 620, "Black");
 
 		for (let off = 0; off < PER_PAGE_COUNT; off++) {
 			const i = this.page * PER_PAGE_COUNT + off;
@@ -190,10 +187,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			MainCanvas.textAlign = "center";
 			DrawButton(X + 470, Y, 240, 60, "", e.data.active ? "#d8fed7" : "White");
 			if (useGlobalCategorySetting) {
-				MainCanvas.beginPath();
-				MainCanvas.ellipse(X + 470 + 33, Y + 30, 22, 22, 360, 0, 360);
-				MainCanvas.fillStyle = "#0052A3";
-				MainCanvas.fill();
+				DrawCircle(X + 470 + 33, Y + 30, 22, 0, "", "#0052A3");
 			}
 			DrawImageEx("Icons/General.png", X + 480, Y + 7, {
 				Height: 46,
@@ -236,10 +230,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		DrawButton(678, 885, 170, 46, "", accessFull ? "White" : "#ddd", "",
 			accessFull ? `Activate only global config ${this.conditionCategory}` : "You have no permission to use this", !accessFull);
 		DrawTextFit(`A. only`, 684 + 115 / 2, 885 + 25, 90, "Black", "");
-		MainCanvas.beginPath();
-		MainCanvas.ellipse(675 + 120 + 22, 885 + 23, 21, 21, 360, 0, 360);
-		MainCanvas.fillStyle = "#0052A3";
-		MainCanvas.fill();
+		DrawCircle(675 + 120 + 22, 885 + 23, 21, 0, "", "#0052A3");
 		DrawImageEx("Icons/General.png", 675 + 120, 885 + 1, {
 			Height: 44,
 			Width: 44,
@@ -250,10 +241,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		DrawButton(870, 885, 170, 46, "", accessFull ? "White" : "#ddd", "",
 			accessFull ? `Deactivate only global config ${this.conditionCategory}` : "You have no permission to use this", !accessFull);
 		DrawTextFit(`D. only`, 876 + 115 / 2, 885 + 25, 90, "Black", "");
-		MainCanvas.beginPath();
-		MainCanvas.ellipse(868 + 120 + 22, 885 + 23, 21, 21, 360, 0, 360);
-		MainCanvas.fillStyle = "#0052A3";
-		MainCanvas.fill();
+		DrawCircle(868 + 120 + 22, 885 + 23, 21, 0, "", "#0052A3");
 		DrawImageEx("Icons/General.png", 868 + 120, 885 + 1, {
 			Height: 44,
 			Width: 44,
@@ -263,10 +251,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		DrawButton(1068, 820, 505, 90, "", this.conditionCategoryData.access_configure ? "White" : "#ddd", "",
 			this.conditionCategoryData.access_configure ? `Existing ${this.conditionCategory} set to global ${this.conditionCategory} config are also changed` : "You have no permission to use this", !this.conditionCategoryData.access_configure);
 		DrawTextFit(`Change global ${this.conditionCategory} config`, 1018 + 680 / 2, 865, 400, "Black", "");
-		MainCanvas.beginPath();
-		MainCanvas.ellipse(1068 + 10 + 35, 820 + 44, 34, 34, 360, 0, 360);
-		MainCanvas.fillStyle = "#0052A3";
-		MainCanvas.fill();
+		DrawCircle(1068 + 10 + 35, 820 + 44, 34, 0, "", "#0052A3");
 		DrawImageEx("Icons/General.png", 1068 + 10, 820 + 10, {
 			Height: 70,
 			Width: 70,

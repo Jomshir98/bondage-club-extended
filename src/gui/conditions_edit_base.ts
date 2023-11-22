@@ -268,7 +268,6 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "Any selected below" : "All selected below") : "Always in effect", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
 		MainCanvas.textAlign = "left";
 
-		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";
 		DrawRect(80, 620, 15, 304, ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000");
 
 		// In room

@@ -217,8 +217,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 		DrawButton(530, 550, 410, 60, hasAnyRequirement ? (requirements.orLogic ? "Any selected below" : "All selected below") : "Always in effect", disabled || !hasAnyRequirement ? "#ddd" : "White", "", "", disabled || !hasAnyRequirement);
 		MainCanvas.textAlign = "left";
 
-		MainCanvas.fillStyle = ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000";
-		DrawRect(75, 620, 15, 304, MainCanvas.fillStyle);
+		DrawRect(75, 620, 15, 304, ConditionsEvaluateRequirements(requirements, this.conditionCategoryData.highestRoleInRoom) ? "#00FF22" : "#AA0000");
 
 		// In room
 		DrawCheckbox(125, 620, 64, 64, "when", !!requirements.room, disabled);
@@ -232,8 +231,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 			const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
 			const res = inChatroom &&
 				(requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
-			MainCanvas.fillStyle = (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			DrawRect(95, 620, 15, 64, MainCanvas.fillStyle);
+			DrawRect(95, 620, 15, 64, (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 		}
 
 		// In room named
@@ -249,8 +247,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 				ChatRoomData &&
 				typeof ChatRoomData.Name === "string" &&
 				ChatRoomData.Name.toLocaleLowerCase() === requirements.roomName.name.toLocaleLowerCase();
-			MainCanvas.fillStyle = (requirements.roomName.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			DrawRect(95, 700, 15, 64, MainCanvas.fillStyle);
+			DrawRect(95, 700, 15, 64, (requirements.roomName.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 		}
 
 		// In presence of role
@@ -271,8 +268,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 		DrawText(`room with role`, 324 + 115 + 14, 780 + 32, "Black", "Gray");
 		if (requirements.role) {
 			const res = this.conditionCategoryData.highestRoleInRoom != null && this.conditionCategoryData.highestRoleInRoom <= requirements.role.role;
-			MainCanvas.fillStyle = (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			DrawRect(95, 780, 15, 64, MainCanvas.fillStyle);
+			DrawRect(95, 780, 15, 64, (requirements.role.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 		}
 
 		// In presence of player
@@ -286,8 +282,7 @@ export abstract class GuiConditionGlobal<CAT extends ConditionsCategories> exten
 			const inChatroom = ServerPlayerIsInChatRoom();
 			const res = inChatroom &&
 				getAllCharactersInRoom().some(c => c.MemberNumber === requirements.player!.memberNumber);
-			MainCanvas.fillStyle = (requirements.player.inverted ? !res : res) ? "#00FF22" : "#AA0000";
-			DrawRect(95, 860, 15, 64, MainCanvas.fillStyle);
+			DrawRect(95, 860, 15, 64, (requirements.player.inverted ? !res : res) ? "#00FF22" : "#AA0000");
 			const input = document.getElementById("BCX_ConditionMemberNumber") as HTMLInputElement | undefined;
 			if (input && document.activeElement === input) {
 				DrawHoverElements.push(() => {

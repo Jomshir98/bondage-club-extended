@@ -686,8 +686,8 @@ export function initRules_bc_alter() {
 					);
 					DrawButton(1840, 450, 60, 60, "", "#ebebe4", "Icons/Small/Preference.png", "", true);
 					DrawBackNextButton(1625, 550, 275, 60, TextGet("Game" + ChatAdminGame), "#ebebe4", "", () => "", () => "", true);
-					DrawButton(1486, 728, 64, 64, "", "#ebebe4", ChatAdminPrivate ? "Icons/Checked.png" : "", "", true);
-					DrawButton(1786, 728, 64, 64, "", "#ebebe4", ChatAdminLocked ? "Icons/Checked.png" : "", "", true);
+					DrawButton(1426, 728, 64, 64, "", "#ebebe4", ChatAdminPrivate ? "Icons/Checked.png" : "", "", true);
+					DrawButton(1756, 728, 64, 64, "", "#ebebe4", ChatAdminLocked ? "Icons/Checked.png" : "", "", true);
 					DrawRect(100, 850, 1125, 70, "#ffff88");
 					DrawEmptyRect(100, 850, 1125, 70, "Black");
 					DrawText("Some settings are not available due to a BCX rule.", 650, 885, "Black", "Gray");
@@ -700,8 +700,8 @@ export function initRules_bc_alter() {
 					MouseIn(1840, 450, 60, 60) ||
 					MouseIn(1300, 450, 500, 60) ||
 					MouseIn(1625, 550, 275, 60) ||
-					MouseIn(1486, 728, 64, 64) ||
-					MouseIn(1786, 728, 64, 64) ||
+					MouseIn(1426, 728, 64, 64) ||
+					MouseIn(1756, 728, 64, 64) ||
 					MouseIn(125, 770, 250, 65) ||
 					MouseIn(390, 770, 250, 65)
 				))

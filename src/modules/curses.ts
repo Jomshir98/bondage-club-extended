@@ -1054,6 +1054,9 @@ export class ModuleCurses extends BaseModule {
 				Craft: ValidationVerifyCraftData(curse.Craft, asset).result,
 				Difficulty: curse.Difficulty != null ? curse.Difficulty : 0,
 			};
+			// re-init extended properties to avoid problems in recent BC versions
+			ExtendedItemInit(Player, currentItem, false, false);
+			curse.Property = curseCreateCurseItemInfo(currentItem).Property;
 			Player.Appearance.push(currentItem);
 			if (!changeType) changeType = "add";
 		}
@@ -1088,11 +1091,10 @@ export class ModuleCurses extends BaseModule {
 			if (!CommonArraysEqual(itemEffects, curseEffects)) {
 				itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
 			}
-			if (Object.keys(curseProperty).length === 0) {
-				delete curse.Property;
-			} else if (!isEqual(curse.Property, curseProperty)) {
-				curse.Property = curseProperty;
-			}
+
+			// re-init extended properties to avoid problems in recent BC versions
+			ExtendedItemInit(Player, currentItem, false, false);
+			curse.Property = curseCreateCurseItemInfo(currentItem).Property;
 		} else {
 			curse.Property = curseCreateCurseItemInfo(currentItem).Property;
 		}

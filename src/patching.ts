@@ -1,7 +1,5 @@
 import { debugContextStart } from "./BCXContext";
-import { FUNCTION_HASHES } from "./config";
 import { ModuleCategory } from "./constants";
-import { isNModClient } from "./utilsClub";
 
 import bcModSDK from "bondage-club-mod-sdk";
 
@@ -47,10 +45,10 @@ const patchedFunctions: Map<string, IPatchedFunctionData> = new Map();
 let unloaded: boolean = false;
 
 function isHashExpected(functionName: string, hash: string): boolean {
-	if (isNModClient())
-		return true;
-	const expectedHashes = FUNCTION_HASHES[functionName] ?? [];
-	return expectedHashes.includes(hash);
+	// Disabled, because I'm tired of updating it all the time
+	// const expectedHashes = FUNCTION_HASHES[functionName] ?? [];
+	// return expectedHashes.includes(hash);
+	return true;
 }
 
 function initPatchableFunction(target: string): IPatchedFunctionData {

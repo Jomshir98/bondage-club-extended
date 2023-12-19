@@ -123,7 +123,6 @@ export function debugGenerateSDKReport(verbose: boolean = false): string {
 export function cleanupErrorLocation(location: string): string {
 	return location
 		.replaceAll(window.location.href.substring(0, window.location.href.lastIndexOf("/")), "<url>")
-		.replace(/https:\/\/[^?/]+\/([^?]+)?bcx.js(?=$|\?|:)/, "<bcx>")
 		.replace(/\/\d{4,}\.html/, "/<numbers>.html")
 		.replace(/[?&]_=\d+(?=$|&|:)/, "");
 }

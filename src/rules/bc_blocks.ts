@@ -1086,6 +1086,8 @@ export function initRules_bc_blocks() {
 		load(state) {
 			hookFunction("DialogInventoryBuild", 1, (args, next) => {
 				const C = args[0];
+				if (C == null)
+					return next(args);
 				const inventoryBackup = C.Inventory;
 				try {
 					if (state.isEnforced && !C.IsPlayer()) {

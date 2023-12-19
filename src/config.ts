@@ -5,9 +5,9 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Server commit: b894fce7856593d16850721febc44b09c2ec94f7
 
-// Game commit: ab28f97a6d35e46604cb3e77f1879482231b7b42
+// Game commit: dfdc7d183331ab593bc3ff59e4e1f847808e3fd8
 export const SUPPORTED_BC_VERSIONS: readonly string[] = [
-	"R97",
+	"R99",
 ];
 
 export const FUNCTION_HASHES: Record<string, string[]> = {

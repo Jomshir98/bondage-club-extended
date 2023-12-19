@@ -80,6 +80,17 @@ interface BCX_Events {
 		 */
 		inBcxSubscreen: boolean;
 	};
+	/**
+	 * Triggers whenever BCX sends a "local" message to the chat.
+	 */
+	bcxLocalMessage: {
+		/** The actual message that is to be displayed */
+		message: string | Node;
+		/** Timeout of the message - if set, the message auto-hides after {timeout} milliseconds */
+		timeout?: number;
+		/** Sender metadata (used for displaying a membernumber on some messages) */
+		sender?: number;
+	};
 }
 
 interface BCX_ModAPI extends BCXEventEmitter<BCX_Events> {

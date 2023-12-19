@@ -4,6 +4,7 @@ import { getChatroomCharacter } from "./characters";
 import { RelationshipsGetNickname } from "./modules/relationships";
 import { BCX_VERSION_PARSED } from "./utils";
 import { supporterStatus } from "./modules/versionCheck";
+import { BCXGlobalEventSystem } from "./event";
 
 import { omit } from "lodash-es";
 
@@ -128,6 +129,15 @@ export function ChatRoomActionMessage(msg: string, target: null | number = null,
 }
 
 export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?: number): HTMLDivElement | null {
+	// Emit the message event asynchronously
+	BCX_setTimeout(() => {
+		BCXGlobalEventSystem.emitEvent("bcxLocalMessage", {
+			message: msg,
+			timeout,
+			sender,
+		});
+	}, 0);
+
 	// Adds the message and scrolls down unless the user has scrolled up
 	const div = document.createElement("div");
 	div.setAttribute("class", "ChatMessage ChatMessageLocalMessage");

@@ -1,5 +1,21 @@
 # BCX Changelog
 
+## 0.9.9
+
+This update includes:
+ - Added a new event for when BCX sends a local chat message
+ - Curses now attempt to fixup item properties after restoring them
+ - Improved messages for when BCX fails to get data from another character
+ - Changed many of BCX GUI draw functions to use BC's functions; this allows other mods to hook into them and potentially modify the UI [by dDeepLb]
+ - This update improves compatibility with BC releases up to R99
+ - Some development cleanup and tooling improvements
+
+Fixes:
+ - Fixed BCX registering clicks in character dialog menu when they actually were above/below the button
+ - Fixed rules making use of sound detection in a message skipping hte first letter of the message in some cases
+ - Fixed crash with the rule "Field of vision for eyes" in the latest release
+ - Fixed misalignment of the overlay of the rule "Limit bound admin power" due to the latest BC release (yet again)
+
 ## 0.9.8
 
 This update includes:

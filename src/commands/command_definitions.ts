@@ -188,7 +188,7 @@ export function initCommands_definitions() {
 				respond(`You cannot change into this pose as the rule '${ruleState.ruleDefinition.name}' forbids it.`);
 				return false;
 			}
-			CharacterSetActivePose(Player, pose);
+			PoseSetActive(Player, pose);
 			ServerSend("ChatRoomCharacterPoseUpdate", { Pose: Player.ActivePose });
 			if (!sender.isPlayer()) {
 				const text = armsTexts[argv[0].toLowerCase()];
@@ -241,7 +241,7 @@ export function initCommands_definitions() {
 				respond(`You cannot change into this pose as the rule '${ruleState.ruleDefinition.name}' forbids it.`);
 				return false;
 			}
-			CharacterSetActivePose(Player, pose);
+			PoseSetActive(Player, pose);
 			ServerSend("ChatRoomCharacterPoseUpdate", { Pose: Player.ActivePose });
 			if (!sender.isPlayer()) {
 				const text = legsTexts[argv[0].toLowerCase()];
@@ -293,7 +293,7 @@ export function initCommands_definitions() {
 				respond(`You cannot change into this pose as the rule '${ruleState.ruleDefinition.name}' forbids it.`);
 				return false;
 			}
-			CharacterSetActivePose(Player, pose);
+			PoseSetActive(Player, pose);
 			ServerSend("ChatRoomCharacterPoseUpdate", { Pose: Player.ActivePose });
 			if (!sender.isPlayer()) {
 				const text = "SENDER_NAME (SENDER_NUMBER) made you get on all fours";
@@ -618,7 +618,7 @@ export function initCommands_definitions() {
 				respond(`${Player.Name} must be able to walk and talk or the maids will not take her in for the job.`);
 				return false;
 			}
-			CharacterSetActivePose(Player, null);
+			PoseSetActive(Player, null);
 			const D = `(Two maids grab you and escort you to their quarters.  Another maid addresses you.)  ${sender.Name} sent you here to work.`;
 			ChatRoomActionMessage(`TargetCharacterName gets grabbed by two maids and escorted to the maid quarters to serve drinks, following SourceCharacter's (${sender.MemberNumber}) command.`, null, [
 				{ Tag: "TargetCharacterName", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },

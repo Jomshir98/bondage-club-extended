@@ -462,7 +462,7 @@ export function initRules_bc_blocks() {
 		},
 		load(state) {
 			let bypassPoseChange = false;
-			hookFunction("CharacterCanChangeToPose", 3, (args, next) => {
+			hookFunction("PoseCanChangeUnaided", 3, (args, next) => {
 				if (!bypassPoseChange && state.isEnforced && state.customData?.poseButtons.includes(args[1]))
 					return false;
 				return next(args);

@@ -33,7 +33,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	BackgroundSelectionRun: ["F7AF6FF2"],
 	CharacterAppearanceGenderAllowed: ["8A2D647F"],
 	CharacterAppearanceLoadCharacter: ["EB80DBCE"],
-	CharacterCanChangeToPose: ["F55FE4B0"],
+	PoseCanChangeUnaided: ["F55FE4B0"],
 	CharacterCanKneel: ["A5A325E3"],
 	CharacterLoadCanvas: ["BA6AD4FF"],
 	CharacterLoadEffect: ["BD6B6B4D"],

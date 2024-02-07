@@ -2,7 +2,7 @@ import { isNModClient, drawIcon, DrawImageEx, drawTypingIndicatorSpeechBubble } 
 import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "./_BaseModule";
-import { hookFunction, patchFunction } from "../patching";
+import { hookFunction } from "../patching";
 import { getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { modStorage } from "./storage";
 import cloneDeep from "lodash-es/cloneDeep";

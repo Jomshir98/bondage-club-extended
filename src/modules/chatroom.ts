@@ -257,10 +257,6 @@ export class ModuleChatroom extends BaseModule {
 			return next(args);
 		});
 
-		patchFunction("ChatRoomDrawCharacterOverlay", {
-			'DrawImageResize("Icons/Small/Admin.png", CharX + 390 * Zoom, CharY, 40 * Zoom, 40 * Zoom);': 'DrawImageResize("Icons/Small/Admin.png", CharX + 400 * Zoom, CharY, 40 * Zoom, 40 * Zoom);',
-		});
-
 		hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
 			next(args);
 

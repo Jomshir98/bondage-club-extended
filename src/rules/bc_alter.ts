@@ -356,6 +356,10 @@ export function initRules_bc_alter() {
 							limitTop = 0.58 + offset;
 						} else if (eyes1.Property?.Expression === "Lewd" || eyes2.Property?.Expression === "Lewd") {
 							limitBottom = 0.76 - offset;
+						} else if (eyes1.Property?.Expression === "LewdHeart" || eyes2.Property?.Expression === "LewdHeart") {
+							limitBottom = 0.76 - offset;
+						} else if (eyes1.Property?.Expression === "LewdHeartPink" || eyes2.Property?.Expression === "LewdHeartPink") {
+							limitBottom = 0.76 - offset;
 						} else if (eyes1.Property?.Expression === "VeryLewd" || eyes2.Property?.Expression === "VeryLewd") {
 							limitBottom = 0.93 - offset;
 						}

@@ -326,10 +326,6 @@ export class ModuleRelationhips extends BaseModule {
 			return res;
 		});
 
-		patchFunction("CommandParse", {
-			'TextGet("WhisperTo") + " " + TargetName + ": " + msg;': 'TextGet("WhisperTo") + " " + (WhisperTarget ? CharacterNickname(WhisperTarget) : TargetName) + ": " + msg;',
-		});
-
 		patchFunction("ChatRoomTarget", {
 			"TargetName = ChatRoomCharacter[C].Name;": "TargetName = CharacterNickname(ChatRoomCharacter[C]);",
 		});

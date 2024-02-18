@@ -7,7 +7,7 @@ export const VERSION_CHECK_BOT: number = 37685;
 
 // Game commit: dfdc7d183331ab593bc3ff59e4e1f847808e3fd8
 export const SUPPORTED_BC_VERSIONS: readonly string[] = [
-	"R99",
+	"R101",
 ];
 
 export const FUNCTION_HASHES: Record<string, string[]> = {
@@ -53,11 +53,11 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	ChatRoomCanBeLeashedBy: ["9EBEB784"],
 	ChatRoomCanLeave: ["7065F82F"],
 	ChatRoomClearAllElements: ["14DAAB05"],
-	ChatRoomClickCharacter: ["715D92A0"],
+	ChatRoomCharacterViewClickCharacter: ["715D92A0"],
 	ChatRoomCreateElement: ["9A3FD548"],
-	ChatRoomDrawBackground: ["AEE70C4E"],
-	ChatRoomDrawCharacter: ["8ED3DF88"],
-	ChatRoomDrawCharacterOverlay: ["06FB4CC3"],
+	ChatRoomCharacterViewDrawBackground: ["AEE70C4E"],
+	ChatRoomCharacterViewDraw: ["8ED3DF88"],
+	ChatRoomCharacterViewDrawOverlay: ["06FB4CC3"],
 	ChatRoomFirstTimeHelp: ["078BEEA9"],
 	ChatRoomIsOwnedByPlayer: ["82640FF9"],
 	ChatRoomKeyDown: ["B4BFDB0C"],

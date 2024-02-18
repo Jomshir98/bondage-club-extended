@@ -257,7 +257,7 @@ export class ModuleChatroom extends BaseModule {
 			return next(args);
 		});
 
-		hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
+		hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
 			next(args);
 
 			const [C, CharX, CharY, Zoom] = args;
@@ -286,7 +286,7 @@ export class ModuleChatroom extends BaseModule {
 			});
 		}
 
-		hookFunction("ChatRoomDrawCharacterOverlay", 0, (args, next) => {
+		hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
 			next(args);
 
 			if (ChatRoomHideIconState >= 2)

@@ -179,7 +179,7 @@ export function initRules_bc_alter() {
 					return;
 				return next(args);
 			});
-			hookFunction("ChatRoomDrawCharacter", 1, (args, next) => {
+			hookFunction("ChatRoomCharacterViewDraw", 1, (args, next) => {
 				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
 				const eyes1 = InventoryGet(Player, "Eyes");
 				const eyes2 = InventoryGet(Player, "Eyes2");
@@ -240,7 +240,7 @@ export function initRules_bc_alter() {
 			let limitBottom = 0;
 			const GRADIENT_TIP_POINT = 0.9;
 			let inRoomDraw = false;
-			hookFunction("ChatRoomDrawBackground", 6, (args, next) => {
+			hookFunction("ChatRoomCharacterViewDrawBackground", 6, (args, next) => {
 				next(args);
 
 				const Y = args[1];
@@ -264,7 +264,7 @@ export function initRules_bc_alter() {
 					MainCanvas.fillRect(0, bottomY, 1000, limitBottom * height);
 				}
 			});
-			hookFunction("ChatRoomDrawCharacter", 2, (args, next) => {
+			hookFunction("ChatRoomCharacterViewDraw", 2, (args, next) => {
 				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
 				limitTop = 0;
 				limitBottom = 0;
@@ -504,7 +504,7 @@ export function initRules_bc_alter() {
 					return;
 				return next(args);
 			});
-			hookFunction("ChatRoomClickCharacter", 5, (args, next) => {
+			hookFunction("ChatRoomCharacterViewClickCharacter", 5, (args, next) => {
 				const C = args[0];
 				const CharX = args[1];
 				const CharY = args[2];

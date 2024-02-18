@@ -1152,7 +1152,7 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
-			hookFunction("ChatRoomDrawCharacter", 1, (args, next) => {
+			hookFunction("ChatRoomCharacterViewDraw", 1, (args, next) => {
 				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
 
 				if (state.isEnforced && state.customData) {

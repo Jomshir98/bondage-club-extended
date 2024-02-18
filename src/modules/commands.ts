@@ -614,6 +614,8 @@ export class ModuleCommands extends BaseModule {
 		});
 
 		hookFunction("ChatRoomKeyDown", 10, (args, next) => {
+			const event = args[0];
+
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			// Tab for command completion
 			if (
@@ -628,6 +630,8 @@ export class ModuleCommands extends BaseModule {
 				e?.stopImmediatePropagation();
 
 				chat.value = "." + CommandAutocompleteCycle(chat.value.substr(1));
+
+				return true;
 			} else if (
 				KeyPress === 9 &&
 				ChatRoomTargetMemberNumber != null &&
@@ -642,6 +646,8 @@ export class ModuleCommands extends BaseModule {
 
 				WhisperCommandAutocompleteCycle(chat)
 					.catch(() => { /* NOOP */ });
+
+				return true;
 			} else {
 				return next(args);
 			}

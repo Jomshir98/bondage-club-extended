@@ -253,7 +253,8 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 	for (const cloth of data) {
 		if (
 			C.Appearance.some(a => a.Asset.Group.Name === cloth.Group) ||
-			!ValidationCanAccessCheck(C, cloth.Group, cloth.Name, cloth.Property?.Type)
+			// TODO: It would be nice to check new TypeRecord here
+			!ValidationCanAccessCheck(C, cloth.Group, cloth.Name, undefined)
 		) {
 			continue;
 		}

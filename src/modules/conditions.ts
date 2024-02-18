@@ -13,7 +13,7 @@ import zod, { ZodType } from "zod";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { AccessLevel, checkPermissionAccess, getHighestRoleInRoom } from "./authority";
 import { COMMAND_GENERIC_ERROR, Command_parseTime, Command_pickAutocomplete, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber } from "./commands";
-import { getCharacterName, isAssetGroupName } from "../utilsClub";
+import { getCharacterName } from "../utilsClub";
 import { BCX_setInterval } from "../BCXContext";
 import { ExportImportRegisterCategory } from "./export_import";
 
@@ -1192,28 +1192,6 @@ export class ModuleConditions extends BaseModule {
 	load() {
 		if (!isObject(modStorage.conditions)) {
 			modStorage.conditions = {};
-		}
-
-		// cursedItems migration
-		if (modStorage.cursedItems) {
-			const curses: ConditionsCategoryData<"curses"> = modStorage.conditions.curses = {
-				conditions: {},
-				limits: {},
-				requirements: {},
-				data: {
-					itemRemove: false,
-				},
-			};
-			for (const [group, data] of Object.entries(modStorage.cursedItems)) {
-				if (!isAssetGroupName(group))
-					continue;
-				curses.conditions[group] = {
-					active: true,
-					lastActive: false,
-					data,
-				};
-			}
-			delete modStorage.cursedItems;
 		}
 
 		for (const key of Object.keys(modStorage.conditions) as ConditionsCategories[]) {

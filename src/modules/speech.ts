@@ -79,7 +79,7 @@ export function falteringSpeech(message: string): string {
 function parseMsg(msg: string): SpeechMessageInfo | null {
 	const rawMessage = msg;
 	if (msg.startsWith("//")) {
-		msg = msg.substr(1);
+		msg = msg.substring(1);
 	} else if (msg.startsWith("/")) {
 		return {
 			type: "Command",

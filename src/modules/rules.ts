@@ -575,7 +575,7 @@ export const ruleCustomDataHandlers: {
 					});
 				}
 				DrawEmptyRect(1050, Y + 26 + i * 70, 766, 64, "black");
-				DrawTextFit(msg.length > 61 ? msg.substr(0, 60) + "\u2026" : msg, 1060, Y + 26 + i * 70 + 34, 750, "Black");
+				DrawTextFit(msg.length > 61 ? msg.substring(0, 60) + "\u2026" : msg, 1060, Y + 26 + i * 70 + 34, 750, "Black");
 				if (access) {
 					MainCanvas.textAlign = "center";
 					DrawButton(1836, Y + 26 + i * 70, 64, 64, "X", "White");

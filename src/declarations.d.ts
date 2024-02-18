@@ -782,11 +782,6 @@ interface ModStorage {
 	typingIndicatorEnable: boolean;
 	typingIndicatorHideBC: boolean;
 	screenIndicatorEnable: boolean;
-	/**
-	 * Maps item group to a cursed item, if there is any, otherwise undefined. Null if the group is cursed to be empty
-	 * @deprecated
-	 */
-	cursedItems: Record<string, CursedItemInfo | null>;
 	conditions: ConditionsStorage;
 	roomTemplates: (RoomTemplate | null)[];
 	roomSearchAutoFill: string;

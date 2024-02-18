@@ -593,9 +593,9 @@ export class ModuleCommands extends BaseModule {
 				if (/^[.\s]*$/.test(msg)) {
 					// Do not process as command
 				} else if (msg.startsWith("..")) {
-					chat.value = substituteBack = msg.substr(1);
+					chat.value = substituteBack = msg.substring(1);
 				} else if (msg.startsWith(".")) {
-					if (RunCommand(msg.substr(1))) {
+					if (RunCommand(msg.substring(1))) {
 						// Keeps the chat log in memory so it can be accessed with pageup/pagedown
 						ChatRoomLastMessage.push(msg);
 						ChatRoomLastMessageIndex = ChatRoomLastMessage.length;
@@ -629,7 +629,7 @@ export class ModuleCommands extends BaseModule {
 				e?.preventDefault();
 				e?.stopImmediatePropagation();
 
-				chat.value = "." + CommandAutocompleteCycle(chat.value.substr(1));
+				chat.value = "." + CommandAutocompleteCycle(chat.value.substring(1));
 
 				return true;
 			} else if (

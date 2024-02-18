@@ -283,6 +283,7 @@ export function showErrorOverlay(
 				navigator.clipboard.writeText(contentElem.value);
 			} else {
 				try {
+					// eslint-disable-next-line deprecation/deprecation
 					document.execCommand("copy");
 				} catch (err) {
 					/* Ignore */

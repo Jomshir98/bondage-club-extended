@@ -3,7 +3,7 @@ import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { patchFunction, hookFunction, trackFunction } from "../patching";
 import { ChatRoomActionMessage, getCharacterName, InfoBeep, updateChatroom } from "../utilsClub";
-import { ChatroomCharacter, getChatroomCharacter } from "../characters";
+import { getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";

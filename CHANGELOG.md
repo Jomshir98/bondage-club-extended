@@ -1,5 +1,20 @@
 # BCX Changelog
 
+## 0.9.10
+
+This update includes:
+ - Rule "Field of vision for eyes" was updated to work with heart-shaped eyes
+ - Some development cleanup and tooling improvements for detecting deprecations
+ - This update improves compatibility with BC releases up to R101
+
+Removed:
+ - Removed shift of some character overlay icons in chatroom to fit them better, as the patch got broken by BC updates
+ - Removed support for relationship renaming of whisper target in the chat input, as the patch got broken by BC updates
+ - Removed "Seeing whitelist" rule altogether, as it got broken by BC updates
+
+ Fixes:
+ - Fixed the position of BCX's auto-refresh feature toggle in the friend list overlapping with the changed position of the refresh button.
+
 ## 0.9.9
 
 This update includes:
@@ -12,7 +27,7 @@ This update includes:
 
 Fixes:
  - Fixed BCX registering clicks in character dialog menu when they actually were above/below the button
- - Fixed rules making use of sound detection in a message skipping hte first letter of the message in some cases
+ - Fixed rules making use of sound detection in a message skipping the first letter of the message in some cases
  - Fixed crash with the rule "Field of vision for eyes" in the latest release
  - Fixed misalignment of the overlay of the rule "Limit bound admin power" due to the latest BC release (yet again)
 

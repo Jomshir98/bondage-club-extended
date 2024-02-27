@@ -1,5 +1,6 @@
 import { debugContextStart } from "./BCXContext";
 import { ModuleCategory } from "./constants";
+import { isObject } from "./utils";
 
 import bcModSDK from "bondage-club-mod-sdk";
 
@@ -132,6 +133,46 @@ export function removeAllHooksByModule(module: ModuleCategory): boolean {
 export function patchFunction(target: string, patches: Record<string, string>): void {
 	initPatchableFunction(target);
 	modApi.patchFunction(target, patches);
+}
+
+export function replaceObjectPatchedMethods(path: string, object: Record<string, unknown>): void {
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	const patchMap = new Map<Function, [string, Function]>();
+	for (const [globalName, info] of bcModSDK.getPatchingInfo()) {
+		if (info.original && info.sdkEntrypoint) {
+			patchMap.set(info.original, [globalName, info.sdkEntrypoint]);
+		}
+	}
+
+	for (const [key, value] of Object.entries(object)) {
+		if (typeof value !== "function")
+			continue;
+
+		const patchTarget = patchMap.get(value);
+		if (patchTarget) {
+			console.debug(`BCX: Replacing referenced function "${patchTarget[0]}", found at ${path}.${key}`);
+			object[key] = patchTarget[1];
+		}
+	}
+}
+
+export function replacePatchedMethodsDeep(path: string, target: unknown, recursionSet: Set<unknown> = new Set()): void {
+	if ((!isObject(target) && !Array.isArray(target)) || recursionSet.has(target))
+		return;
+
+	recursionSet.add(target);
+
+	if (Array.isArray(target)) {
+		for (let i = 0; i < target.length; i++) {
+			replacePatchedMethodsDeep(`${path}[${i}]`, target[i], recursionSet);
+		}
+	} else if (isObject(target)) {
+		replaceObjectPatchedMethods(path, target);
+
+		for (const [key, value] of Object.entries(target)) {
+			replacePatchedMethodsDeep(`${path}.${key}`, value, recursionSet);
+		}
+	}
 }
 
 export function unload_patches() {

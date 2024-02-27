@@ -1,7 +1,7 @@
 import { detectOtherMods, InfoBeep } from "./utilsClub";
 import { VERSION } from "./config";
 import { init_modules, moduleInitPhase, unload_modules } from "./moduleManager";
-import { hookFunction, unload_patches } from "./patching";
+import { hookFunction, replacePatchedMethodsDeep, unload_patches } from "./patching";
 import { isObject } from "./utils";
 import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
 import { debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
@@ -14,19 +14,11 @@ export function loginInit(C: any) {
 	init();
 }
 
-function clearCaches() {
-	if (typeof CurrentScreenFunctions !== "undefined") {
-		const w = window as any;
-		CurrentScreenFunctions = {
-			Run: w[`${CurrentScreen}Run`],
-			Click: w[`${CurrentScreen}Click`],
-			Load: typeof w[`${CurrentScreen}Load`] === "function" ? w[`${CurrentScreen}Load`] : undefined,
-			Unload: typeof w[`${CurrentScreen}Unload`] === "function" ? w[`${CurrentScreen}Unload`] : undefined,
-			Resize: typeof w[`${CurrentScreen}Resize`] === "function" ? w[`${CurrentScreen}Resize`] : undefined,
-			KeyDown: typeof w[`${CurrentScreen}KeyDown`] === "function" ? w[`${CurrentScreen}KeyDown`] : undefined,
-			Exit: typeof w[`${CurrentScreen}Exit`] === "function" ? w[`${CurrentScreen}Exit`] : undefined,
-		};
-	}
+function replaceReferencedFunctions() {
+	// Run patching replacer on objects that hold references to patched functions
+	replacePatchedMethodsDeep("ChatRoomViews", ChatRoomViews);
+	replacePatchedMethodsDeep("CurrentScreenFunctions", CurrentScreenFunctions);
+	replacePatchedMethodsDeep("DialogSelfMenuOptions", DialogSelfMenuOptions);
 }
 
 export function init() {
@@ -58,7 +50,7 @@ export function init() {
 	});
 
 	// Loading into already loaded club - clear some caches
-	clearCaches();
+	replaceReferencedFunctions();
 
 	//#region Other mod compatability
 
@@ -104,9 +96,6 @@ export function unload(): true {
 	unload_modules();
 
 	UnloadErrorReporter();
-
-	// clear some caches
-	clearCaches();
 
 	delete window.BCX_Loaded;
 	console.log("BCX: Unloaded.");

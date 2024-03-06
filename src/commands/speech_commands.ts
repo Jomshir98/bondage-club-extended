@@ -63,11 +63,14 @@ export function initCommands_speech() {
 				}
 				next(args);
 			}, ModuleCategory.Commands);
-			hookFunction("CommonKeyDown", 4, (args, next) => {
-				if (sayText) {
-					count++;
+			hookFunction("ChatRoomKeyDown", 4, (args, next) => {
+				if (CurrentScreen === "ChatRoom" && sayText) {
+					const chatHasFocus = document.activeElement?.id === "InputChat";
+					if (chatHasFocus) {
+						count++;
+					}
 				}
-				next(args);
+				return next(args);
 			}, ModuleCategory.Commands);
 		},
 		// 2. do not allow sending anything else
@@ -182,11 +185,14 @@ export function initCommands_speech() {
 			}
 			next(args);
 		}, ModuleCategory.Commands);
-		hookFunction("CommonKeyDown", 4, (args, next) => {
-			if (typeTaskText) {
-				count++;
+		hookFunction("ChatRoomKeyDown", 4, (args, next) => {
+			if (CurrentScreen === "ChatRoom" && typeTaskText) {
+				const chatHasFocus = document.activeElement?.id === "InputChat";
+				if (chatHasFocus) {
+					count++;
+				}
 			}
-			next(args);
+			return next(args);
 		}, ModuleCategory.Commands);
 	}
 

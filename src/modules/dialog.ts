@@ -4,8 +4,6 @@ import { BaseModule } from "./_BaseModule";
 
 let searchBar: HTMLInputElement | null = null;
 let searchBarAutoClose = false;
-let struggleCooldown: number = 0;
-const STRUGGLE_COOLDOWN_TIME = 2_000;
 
 function allowSearchMode(): boolean {
 	return CurrentCharacter != null &&
@@ -87,35 +85,6 @@ export class ModuleDialog extends BaseModule {
 		HookDialogMenuButtonClick("BCX_SearchExit", (C) => {
 			exitSearchMode(C);
 			return true;
-		});
-
-		hookFunction("CommonKeyDown", 5, (args, next) => {
-			const ev = args[0];
-			const sb = searchBar;
-			if (!sb &&
-				CurrentCharacter &&
-				allowSearchMode() &&
-				ev.key.length === 1 &&
-				document.activeElement === MainCanvas.canvas &&
-				!ev.altKey && !ev.ctrlKey && !ev.metaKey &&
-				(struggleCooldown <= Date.now() || !["a", "s"].includes(ev.key.toLowerCase()))
-			) {
-				enterSearchMode(CurrentCharacter);
-				searchBarAutoClose = true;
-				return;
-			}
-			next(args);
-		});
-
-		hookFunction("StruggleStrengthDraw", 0, (args, next) => {
-			next(args);
-			// Prevent A/S spamming from writing into search right after struggle finishes
-			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
-		});
-		hookFunction("StableGenericDrawProgress", 0, (args, next) => {
-			next(args);
-			// Prevent A/S spamming from writing into search right after struggle finishes
-			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
 		});
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {

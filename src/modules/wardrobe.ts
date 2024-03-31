@@ -762,23 +762,6 @@ export class ModuleWardrobe extends BaseModule {
 			next(args);
 		});
 
-		hookFunction("CommonKeyDown", 5, (args, next) => {
-			const ev = args[0];
-			const sb = searchBar;
-			if (!sb &&
-				CharacterAppearanceSelection &&
-				allowSearchMode() &&
-				document.activeElement === MainCanvas.canvas &&
-				ev.key.length === 1 &&
-				!ev.altKey && !ev.ctrlKey && !ev.metaKey
-			) {
-				enterSearchMode(CharacterAppearanceSelection);
-				searchBarAutoClose = true;
-				return;
-			}
-			next(args);
-		});
-
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {
 			if (searchBar) {
 				const item = args[1];

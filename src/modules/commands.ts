@@ -619,7 +619,7 @@ export class ModuleCommands extends BaseModule {
 			const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 			// Tab for command completion
 			if (
-				KeyPress === 9 &&
+				event.key === "Tab" &&
 				chat &&
 				chat.value.startsWith(".") &&
 				!chat.value.startsWith("..") &&
@@ -633,7 +633,7 @@ export class ModuleCommands extends BaseModule {
 
 				return true;
 			} else if (
-				KeyPress === 9 &&
+				event.key === "Tab" &&
 				ChatRoomTargetMemberNumber != null &&
 				chat &&
 				chat.value.startsWith("!") &&

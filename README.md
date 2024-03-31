@@ -8,14 +8,25 @@ You can find instructions on how to run the script [HERE](https://jomshir98.gith
 
 # Development status
 
-Because of the current state of BC, the other projects we are working on (some not public yet) are much more fun for us.
+We have now been creating and maintaining BCX for almost three years and it has been over a year since we switched from active development to maintenance mode, but the situation is no longer sustainable for us.
+
+We would like to thank all of you for your wonderful support!
+When we first started working on BCX we never expected more than a tiny fraction of the playerbase to even know what it is and yet here we are. This wouldn't have been possible without you.
+
+But the times change and so do we. The state of BC and the rapid changes demand too much of our spare time that keeps us from actually fun things.
+
+**Therefore, we have to make the hard decision to let BCX stay mostly unmaintained from now on.**
+
+On the bright side we also aren't simply going away. There is a certain secret project some of you may already know about... and that project is very close to being made public! Stay tuned for more details that are soon to appear on the BC Scripting Community discord!
+
+~~Because of the current state of BC, the other projects we are working on (some not public yet) are much more fun for us.
 Therefore, we are pausing development of new major features indefinitely.
 We will however continue supporting BCX and make sure it runs well as new versions of BC come out.
 We might also implement minor features and improvements to existing ones, but nothing is guaranteed.
-We will however still be fixing reported issues.
+We will however still be fixing reported issues.~~
 
-By supporting us, you can make sure BCX stays maintained as BC continues changing, which sometimes means non-trivial work,
-as BC can change a lot between versions. Thank you!
+~~By supporting us, you can make sure BCX stays maintained as BC continues changing, which sometimes means non-trivial work,
+as BC can change a lot between versions. Thank you!~~
 
 # About
 

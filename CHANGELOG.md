@@ -1,4 +1,31 @@
+# Development status
+
+We have now been creating and maintaining BCX for almost three years and it has been over a year since we switched from active development to maintenance mode, but the situation is no longer sustainable for us.
+
+We would like to thank all of you for your wonderful support!
+When we first started working on BCX we never expected more than a tiny fraction of the playerbase to even know what it is and yet here we are. This wouldn't have been possible without you.
+
+But the times change and so do we. The state of BC and the rapid changes demand too much of our spare time that keeps us from actually fun things.
+
+**Therefore, we have to make the hard decision to let BCX stay mostly unmaintained from now on.**
+
+On the bright side we also aren't simply going away. There is a certain secret project some of you may already know about... and that project is very close to being made public! Stay tuned for more details that are soon to appear on the BC Scripting Community discord!
+
+
 # BCX Changelog
+
+## 1.0.0
+
+This update includes:
+- Updated BC ModSDK to 1.2.0 for better error reporting when functions in BC disappear for whatever reason between versions
+- This update improves compatibility with BC releases up to R102
+
+Removed:
+- Removed the "Field of vision for eyes" rule altogether, as it got broken by BC updates with no easy fix - the way backgrounds are drawn was reworked completely, so the rule would need complete rework as well
+- Removed "type to search" for both dialog and wardrobe, as it got broken by BC updates with no easy fix
+
+Fixes:
+- Fixed the detection of typing for the "Say" and "Typing task" commands [by iceriny]
 
 ## 0.9.10
 
@@ -12,7 +39,7 @@ Removed:
  - Removed support for relationship renaming of whisper target in the chat input, as the patch got broken by BC updates
  - Removed "Seeing whitelist" rule altogether, as it got broken by BC updates
 
- Fixes:
+Fixes:
  - Fixed the position of BCX's auto-refresh feature toggle in the friend list overlapping with the changed position of the refresh button.
 
 ## 0.9.9

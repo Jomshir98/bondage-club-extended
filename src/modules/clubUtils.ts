@@ -580,7 +580,7 @@ export class ModuleClubUtils extends BaseModule {
 				}
 				const level = Number.parseInt(parsed[1], 10);
 				const message = parsed[2].trim();
-				const garbled = callOriginal("SpeechGarbleByGagLevel", [level, message]) as string;
+				const garbled = callOriginal("SpeechGarbleByGagLevel", [level, message]);
 				chat.value = garbled;
 				return false;
 			}

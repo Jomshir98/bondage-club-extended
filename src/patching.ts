@@ -28,6 +28,17 @@ bcModSDK.errorReporterHooks.hookChainExit = (fn, mods) => {
 	};
 };
 
+if ("apiEndpointEnter" in bcModSDK.errorReporterHooks) {
+	bcModSDK.errorReporterHooks.apiEndpointEnter = (fn, mod) => {
+		const ctx = debugContextStart(`ModSDK ${fn} by ${mod}`, {
+			modArea: mod,
+		});
+		return () => {
+			ctx.end();
+		};
+	};
+}
+
 export declare type AnyFunction = (...args: any) => any;
 type PatchHook<TFunction extends AnyFunction = AnyFunction> = (args: [...Parameters<TFunction>], next: (args: [...Parameters<TFunction>]) => ReturnType<TFunction>) => ReturnType<TFunction>;
 
@@ -82,10 +93,6 @@ export function trackFunction(target: string): void {
 type GetDotedPathType<Base, DotedKey extends string> = DotedKey extends `${infer Key1}.${infer Key2}` ? GetDotedPathType<GetDotedPathType<Base, Key1>, Key2> : DotedKey extends keyof Base ? Base[DotedKey] : never;
 
 export function hookFunction<TargetName extends string>(target: TargetName, priority: number, hook: PatchHook<GetDotedPathType<typeof globalThis, TargetName>>, module: ModuleCategory | null = null): void {
-	return hookFunctionSpecific<GetDotedPathType<typeof globalThis, TargetName>>(target, priority, hook, module);
-}
-
-export function hookFunctionSpecific<T extends AnyFunction>(target: string, priority: number, hook: PatchHook<T>, module: ModuleCategory | null = null): void {
 	const data = initPatchableFunction(target);
 
 	if (data.hooks.some(h => h.hook === hook)) {
@@ -93,7 +100,7 @@ export function hookFunctionSpecific<T extends AnyFunction>(target: string, prio
 		return;
 	}
 
-	const removeCallback = modApi.hookFunction(target, priority, hook as PatchHook<AnyFunction>);
+	const removeCallback = modApi.hookFunction(target, priority, hook);
 
 	data.hooks.push({
 		hook,
@@ -181,8 +188,12 @@ export function unload_patches() {
 	modApi.unload();
 }
 
-export function callOriginal(target: string, args: any[]): any {
-	return modApi.callOriginal(target, args);
+export function callOriginal<TFunctionName extends string>(
+	target: TFunctionName,
+	args: [...Parameters<GetDotedPathType<typeof globalThis, TFunctionName>>],
+	context?: any
+): ReturnType<GetDotedPathType<typeof globalThis, TFunctionName>> {
+	return modApi.callOriginal(target, args, context);
 }
 
 export function getPatchedFunctionsHashes(includeExpected: boolean): [string, string][] {

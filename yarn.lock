@@ -1661,10 +1661,10 @@ body-parser@1.20.1:
     type-is "~1.6.18"
     unpipe "1.0.0"
 
-bondage-club-mod-sdk@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/bondage-club-mod-sdk/-/bondage-club-mod-sdk-1.1.0.tgz#a967a392c2166fab131bd0a818639c10e895ea0d"
-  integrity sha512-q+bmQejD1aQI9hkOqGbD8B562QsjA6YicGb3WVwYR8sN9/U9plwG5F0fjmS9BB5VFi2UYqAb4bSeCKC0r6LKBA==
+bondage-club-mod-sdk@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/bondage-club-mod-sdk/-/bondage-club-mod-sdk-1.2.0.tgz#3201611af7789f0da4059dc17ec8786eccd1b50c"
+  integrity sha512-S+li+PgX7Qo5yccS/R/eAXC4Opq8lc5AdhTPjC2XhWxDGTieUQKj3QJ4ZLgL8x0ySnK7h+DvlkRZd8+OT5JErQ==
 
 bonjour-service@^1.0.11:
   version "1.1.1"

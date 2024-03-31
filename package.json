@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@types/lodash-es": "^4.17.10",
-		"bondage-club-mod-sdk": "^1.1.0",
+		"bondage-club-mod-sdk": "^1.2.0",
 		"lodash-es": "^4.17.21",
 		"zod": "^3.22.4"
 	},

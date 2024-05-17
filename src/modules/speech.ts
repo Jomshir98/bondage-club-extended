@@ -208,7 +208,7 @@ export class ModuleSpeech extends BaseModule {
 								ChatRoomLastMessageIndex = Math.min(ChatRoomLastMessageIndex, ChatRoomLastMessage.length);
 							}
 						}
-						return;
+						return true;
 					}
 					args[0] = msg2;
 					currentlyProcessedMessage = {

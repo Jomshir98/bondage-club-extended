@@ -112,17 +112,6 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 		return msg.rawMessage;
 	}
 
-	const targetCharacter = ChatRoomCharacter.find(C => C.MemberNumber === ChatRoomTargetMemberNumber);
-	if (
-		(msg.type === "Chat" || msg.type === "Whisper") &&
-		targetCharacter != null &&
-		ChatRoomShouldBlockGaggedOOCMessage(msg.originalMessage, targetCharacter)
-	) {
-		// The message is to be blocked by BC, block it ourselves to prevent it from being deleted
-		ChatRoomMessage({ Content: "ChatRoomBlockGaggedOOC", Type: "Action", Sender: Player.MemberNumber! });
-		return null;
-	}
-
 	// Let hooks block the messsage
 	let result: SpeechHookAllow = SpeechHookAllow.ALLOW;
 	for (const hook of speechHooks) {

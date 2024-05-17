@@ -76,7 +76,7 @@ export class ModuleMiscPatches extends BaseModule {
 			modStorage.cheats = modStorage.cheats.filter(c => MiscCheat[c] !== undefined);
 		}
 
-		hookFunction("DialogFindPlayer", 10, (args, next) => {
+		hookFunction("InterfaceTextGet", 10, (args, next) => {
 			const override = PlayerDialogOverrides.get(args[0]);
 			if (override !== undefined)
 				return override;

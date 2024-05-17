@@ -217,7 +217,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 
 			// Pagination
 			const totalPages = Math.max(1, Math.ceil(this.roleList.length / PER_PAGE_COUNT));
-			DrawBackNextButton(1605, 800, 300, 90, `${DialogFindPlayer("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
+			DrawBackNextButton(1605, 800, 300, 90, `${InterfaceTextGet("Page")} ${this.page + 1} / ${totalPages}`, "White", "", () => "", () => "");
 		} else if (this.failed) {
 			MainCanvas.textAlign = "center";
 			DrawQueryErrorMessage(`get data from ${this.character.Name}`);

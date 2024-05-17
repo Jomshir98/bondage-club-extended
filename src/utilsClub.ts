@@ -67,7 +67,7 @@ export function setDevelopmentMode(devel: boolean): boolean {
 		delete (window as any).BCX_Devel;
 		AssetLoadDescription("Female3DCG");
 		BackgroundSelectionAll.forEach(B => {
-			B.Description = DialogFindPlayer(B.Name);
+			B.Description = BackgroundsTextGet(B.Name);
 			B.Low = B.Description.toLowerCase();
 		});
 		console.info("Developer mode disabled");
@@ -122,7 +122,7 @@ export function ChatRoomActionMessage(msg: string, target: null | number = null,
 		Type: "Action",
 		Target: target ?? undefined,
 		Dictionary: [
-			{ Tag: "MISSING PLAYER DIALOG: BCX_PLAYER_CUSTOM_DIALOG", Text: msg },
+			{ Tag: "MISSING TEXT IN \"Interface.csv\": BCX_PLAYER_CUSTOM_DIALOG", Text: msg },
 			...dictionary,
 		],
 	});

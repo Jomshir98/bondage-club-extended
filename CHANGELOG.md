@@ -14,6 +14,14 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.0.1-dev
+
+This update fixes compatibility with BC R104:
+- OOC is now always available in whispers
+- Chat messages and the UI now display properly
+- The whispering status icon being shown even without whispering
+- The retype rule being broken
+
 ## 1.0.0
 
 This update includes:

@@ -114,7 +114,7 @@ class ChatRoomStatusManager {
 				(value.startsWith(".") && !value.startsWith(".."))
 			) {
 				return this.InputEnd();
-			} else if (ChatRoomTargetMemberNumber !== null) {
+			} else if (ChatRoomTargetMemberNumber >= 0) {
 				this.TypingStatus = ChatRoomStatusManagerStatusType.Whisper;
 				this.WhisperTarget = ChatRoomTargetMemberNumber;
 			}

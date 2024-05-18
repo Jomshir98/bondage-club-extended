@@ -98,7 +98,7 @@ export function initRules_bc_speech_control() {
 		},
 		load(state) {
 			hookFunction("ChatRoomShouldBlockGaggedOOCMessage", 2, (args, next) => {
-				if (state.isEnforced && ChatRoomTargetMemberNumber !== null && !args[0].includes("(")) return false;
+				if (state.isEnforced && ChatRoomTargetMemberNumber >= 0 && !args[0].includes("(")) return false;
 				return next(args);
 			}, ModuleCategory.Rules);
 		},

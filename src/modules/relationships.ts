@@ -1,7 +1,7 @@
 import { cloneDeep, isEqual, pick, uniqBy } from "lodash-es";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { ModuleCategory, Preset } from "../constants";
-import { hookFunction, patchFunction, removeAllHooksByModule } from "../patching";
+import { hookFunction, removeAllHooksByModule } from "../patching";
 import { escapeRegExp, isObject } from "../utils";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { ExportImportRegisterCategory } from "./export_import";
@@ -318,16 +318,12 @@ export class ModuleRelationhips extends BaseModule {
 
 		hookFunction("CommandParse", 0, (args, next) => {
 			const original = shouldReplaceNickname;
-			if (ChatRoomTargetMemberNumber) {
+			if (ChatRoomTargetMemberNumber >= 0) {
 				shouldReplaceNickname = true;
 			}
 			const res = next(args);
 			shouldReplaceNickname = original;
 			return res;
-		});
-
-		patchFunction("ChatRoomTarget", {
-			"TargetName = ChatRoomCharacter[C].Name;": "TargetName = CharacterNickname(ChatRoomCharacter[C]);",
 		});
 	}
 

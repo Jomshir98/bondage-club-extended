@@ -94,7 +94,7 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 		return null;
 	}
 	return {
-		type: ChatRoomTargetMemberNumber >= 0 ? "Chat" : "Whisper",
+		type: ChatRoomTargetMemberNumber < 0 ? "Chat" : "Whisper",
 		rawMessage,
 		originalMessage: msg,
 		target: ChatRoomTargetMemberNumber,

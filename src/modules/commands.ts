@@ -634,7 +634,7 @@ export class ModuleCommands extends BaseModule {
 				return true;
 			} else if (
 				event.key === "Tab" &&
-				ChatRoomTargetMemberNumber != null &&
+				ChatRoomTargetMemberNumber >= 0 &&
 				chat &&
 				chat.value.startsWith("!") &&
 				!chat.value.startsWith("!!") &&

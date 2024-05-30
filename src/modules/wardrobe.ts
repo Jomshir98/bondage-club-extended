@@ -385,7 +385,7 @@ function allowSearchMode(): boolean {
 		DialogFocusItem == null;
 }
 
-function enterSearchMode(C: Character) {
+function enterSearchMode(C: Character, input?: string) {
 	if (!searchBar) {
 		searchBar = ElementCreateInput("BCXSearch", "text", "", "40");
 		searchBar.oninput = () => {
@@ -401,6 +401,9 @@ function enterSearchMode(C: Character) {
 			}
 		};
 		searchBar.focus();
+		searchBar.setAttribute("value", input ?? "");
+		const insPoint = input?.length ?? 0;
+		searchBar.setSelectionRange(insPoint, insPoint);
 		DialogInventoryBuild(C);
 		AppearancePreviewBuild(C, true);
 		AppearanceMenuBuild(C);
@@ -760,6 +763,23 @@ export class ModuleWardrobe extends BaseModule {
 				}
 			}
 			next(args);
+		});
+
+		hookFunction("AppearanceKeyDown", 5, (args, next) => {
+			const ev = args[0];
+			const sb = searchBar;
+			if (!sb &&
+				CharacterAppearanceSelection &&
+				allowSearchMode() &&
+				document.activeElement === MainCanvas.canvas &&
+				ev.key.length === 1 &&
+				!ev.altKey && !ev.ctrlKey && !ev.metaKey
+			) {
+				enterSearchMode(CharacterAppearanceSelection, ev.key);
+				searchBarAutoClose = true;
+				return true;
+			}
+			return next(args);
 		});
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {

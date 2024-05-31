@@ -1003,7 +1003,7 @@ export function initRules_bc_blocks() {
 				const Space = 870 / (ChatRoomMenuButtons.length - 1);
 				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
 					const Button = ChatRoomMenuButtons[B];
-					if (Button === "Admin" && active()) {
+					if (Button === "RoomAdmin" && active()) {
 						DrawButton(1005 + Space * B, 2, 120, 60, "", "Pink", "Icons/Rectangle/" + Button + ".png", TextGet("Menu" + Button));
 					}
 				}
@@ -1011,7 +1011,7 @@ export function initRules_bc_blocks() {
 			hookFunction("ChatRoomMenuClick", 6, (args, next) => {
 				const Space = 870 / (ChatRoomMenuButtons.length - 1);
 				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
-					if (MouseXIn(1005 + Space * B, 120) && ChatRoomMenuButtons[B] === "Admin" && active()) {
+					if (MouseXIn(1005 + Space * B, 120) && ChatRoomMenuButtons[B] === "RoomAdmin" && active()) {
 						state.triggerAttempt();
 						return false;
 					}

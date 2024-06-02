@@ -22,6 +22,7 @@ This update fixes compatibility with BC R104:
 - The whispering status icon being shown even without whispering
 - The retype rule being broken
 - The search auto-focus has been reimplemented
+- The "Forbid looking at room admin UI" rule was fixed
 
 ## 1.0.0
 

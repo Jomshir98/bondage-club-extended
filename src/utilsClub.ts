@@ -3,7 +3,6 @@ import { BCX_setTimeout } from "./BCXContext";
 import { getChatroomCharacter } from "./characters";
 import { RelationshipsGetNickname } from "./modules/relationships";
 import { BCX_VERSION_PARSED } from "./utils";
-import { supporterStatus } from "./modules/versionCheck";
 import { BCXGlobalEventSystem } from "./event";
 
 import { omit } from "lodash-es";

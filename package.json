@@ -9,7 +9,7 @@
 		"node": ">=18.x"
 	},
 	"scripts": {
-		"build": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack --env prod --fail-on-warnings",
+		"build": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack --env devel --fail-on-warnings",
 		"dev": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack serve --progress",
 		"typecheck": "tsc --noEmit -p .",
 		"typecheck:test": "tsc --noEmit -p ./test",

@@ -39,29 +39,11 @@ export class GuiGlobalModuleToggling extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 
-//		DrawButton(300, 800, 200, 80, "Confirm", this.changed ? "White" : "#ddd", undefined, undefined, !this.changed);
-
 		DrawButton(1520, 800, 200, 80, "Cancel", "White");
 	}
 
 	Click() {
 		if (MouseIn(1815, 75, 90, 90)) return this.Exit();
-
-//		for (let i = 0; i < TOGGLEABLE_MODULES.length; i++) {
-//			const module = TOGGLEABLE_MODULES[i];
-//			const PX = Math.floor(i / 5);
-//			const PY = i % 5;
-
-//			if (MouseIn(150 + 500 * PX, 240 + 110 * PY, 64, 64)) {
-//				if (this.enabledModules.has(module)) {
-//					this.enabledModules.delete(module);
-//				} else {
-//					this.enabledModules.add(module);
-//				}
-//				this.changed = true;
-//				return;
-//			}
-//		}
 
 		if (MouseIn(300, 800, 200, 80) && this.changed) {
 			if (setDisabledModules(TOGGLEABLE_MODULES.filter(i => !this.enabledModules.has(i)))) {

@@ -30,7 +30,7 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 
 		DrawText("This action cannot be undone!", 1000, 625, "Red", "Black");
 
-		DrawText("YOU ARE NOT ALLOWED TO RESET THE BCX. ACTION WILL NOT BE TAKEN", "Red", "Black");
+		DrawText("YOU ARE NOT ALLOWED TO RESET THE BCX. ACTION WILL NOT BE TAKEN", 1000, 750, "Red", "Black");
 
 		if (this.allowedConfirmTime === null) {
 			DrawText("Deleting...", 1000, 720, "Black");

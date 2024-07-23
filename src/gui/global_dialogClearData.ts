@@ -1,5 +1,5 @@
 import { setSubscreen } from "../modules/gui";
-import { clearAllData } from "../modules/storage";
+//import { clearAllData } from "../modules/storage";
 import { GuiSubscreen } from "./subscreen";
 
 export class GuiGlobalDialogClearData extends GuiSubscreen {

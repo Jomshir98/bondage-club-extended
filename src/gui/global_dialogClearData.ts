@@ -40,11 +40,9 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 		const now = Date.now();
 		if (now < this.allowedConfirmTime) {
 			DrawButton(300, 720, 200, 80, `Confirm (${Math.floor((this.allowedConfirmTime - now) / 1000)})`, "#ddd", undefined, undefined, true);
-		} else {
-			
+		} else {		
 			DrawButton(300, 720, 200, 80, "Confirm", "White");
 		}
-
 		DrawButton(1520, 720, 200, 80, "Cancel", "White");
 	}
 

@@ -37,12 +37,6 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 			return;
 		}
 
-		const now = Date.now();
-		if (now < this.allowedConfirmTime) {
-			DrawButton(300, 720, 200, 80, `Confirm (${Math.floor((this.allowedConfirmTime - now) / 1000)})`, "#ddd", undefined, undefined, true);
-		} else {		
-			DrawButton(300, 720, 200, 80, "Confirm", "White");
-		}
 		DrawButton(1520, 720, 200, 80, "Cancel", "White");
 	}
 
@@ -50,13 +44,10 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 		if (this.allowedConfirmTime === null) return;
 
 		if (MouseIn(1520, 720, 200, 80)) return this.Exit();
-
-		// if (MouseIn(300, 720, 200, 80) && Date.now() >= this.allowedConfirmTime) return this.Confirm();
 	}
 
 	Confirm() {
 		this.allowedConfirmTime = null;
-		//clearAllData();
 	}
 
 	Exit() {

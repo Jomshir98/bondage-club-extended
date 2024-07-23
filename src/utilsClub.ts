@@ -34,7 +34,7 @@ export let developmentMode: boolean = false;
 
 export function setAllowMode(allow: boolean): boolean {
 	if (allow) {
-		if (!BCX_VERSION_PARSED.dev && supporterStatus !== "developer") {
+		if (!BCX_VERSION_PARSED.dev) {
 			console.info("Cheats are only allowed in developer version");
 			return false;
 		}

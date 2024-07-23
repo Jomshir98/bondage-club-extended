@@ -30,6 +30,8 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 
 		DrawText("This action cannot be undone!", 1000, 625, "Red", "Black");
 
+		DrawText("YOU ARE NOT ALLOWED TO RESET THE BCX. ACTION WILL NOT BE TAKEN", "Red", "Black");
+
 		if (this.allowedConfirmTime === null) {
 			DrawText("Deleting...", 1000, 720, "Black");
 			return;
@@ -39,6 +41,7 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 		if (now < this.allowedConfirmTime) {
 			DrawButton(300, 720, 200, 80, `Confirm (${Math.floor((this.allowedConfirmTime - now) / 1000)})`, "#ddd", undefined, undefined, true);
 		} else {
+			
 			DrawButton(300, 720, 200, 80, "Confirm", "White");
 		}
 
@@ -50,12 +53,12 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 
 		if (MouseIn(1520, 720, 200, 80)) return this.Exit();
 
-		if (MouseIn(300, 720, 200, 80) && Date.now() >= this.allowedConfirmTime) return this.Confirm();
+		// if (MouseIn(300, 720, 200, 80) && Date.now() >= this.allowedConfirmTime) return this.Confirm();
 	}
 
 	Confirm() {
 		this.allowedConfirmTime = null;
-		clearAllData();
+		//clearAllData();
 	}
 
 	Exit() {

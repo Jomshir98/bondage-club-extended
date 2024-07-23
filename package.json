@@ -1,8 +1,8 @@
 {
 	"name": "bondage-club-extended",
-	"version": "1.0.1",
-	"repository": "git@github.com:jomshir98/bondage-club-extended.git",
-	"author": "jomshir98 <jomshir98@protonmail.com>",
+	"version": "2.0.1",
+	"repository": "git@github.com:kinksideofthemoon/bcx_reset_disable-dev.git",
+	"author": "Kink Side of the Moon (kinksideofmoon@protonmail.com",
 	"license": "GPL-3.0",
 	"private": true,
 	"engines": {

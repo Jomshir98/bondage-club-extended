@@ -224,7 +224,7 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 			minor: Number.parseInt(match[2], 10),
 			patch: Number.parseInt(match[3], 10),
 			extra: match[4],
-			dev: false,
+			dev: true,
 		};
 	}
 	return null;

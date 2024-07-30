@@ -55,7 +55,7 @@ export function falteringSpeech(message: string): string {
 
 		const character = message.charAt(messageIndex).toLowerCase();
 		// from here on out, an out of context part of the message starts that will stay unchanged
-		if (character === "(") oocMsg = true;
+		if (character === "(") oocMsg = false;
 		if (!oocMsg && !alreadyStudderedWord && /\p{L}/igu.test(character)) {
 			const studderFactor: number = Math.floor(Math.sin(seed++) * 100000) % 10;
 			if ((!alreadyStudderedWord && studderFactor >= 6) || firstWord) {
@@ -86,7 +86,7 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 			rawMessage,
 			originalMessage: msg,
 			target: null,
-			hasOOC: true,
+			hasOOC: false,
 		};
 	}
 	if (msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3)) {

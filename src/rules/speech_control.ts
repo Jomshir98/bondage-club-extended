@@ -88,7 +88,7 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "same as normal messages",
-		longDescription: "This rule alters PLAYER_NAME's outgoing whisper messages while gagged to be garbled the same way normal chat messages are. This means, that strength of the effect depends on the type of gag and (OOC text) is not affected. Note: While the rule is in effect, the BC immersion preference 'Prevent OOC & whispers while gagged' is altered, to allow gagged whispers, since those are now garbled by the rule. OOC prevention is not changed.",
+		longDescription: "This rule alters PLAYER_NAME's outgoing whisper messages while gagged to be garbled the same way normal chat messages are. This means, that strength of the effect depends on the type of gag and (OOC text) is not affected. Note: While the rule is in effect, the BC immersion preference 'Prevent OOC & whispers while gagged' is altered, to allow gagged whispers, since those are now garbled by the rule. OOC ARE ALSO AFFECTED.",
 		keywords: ["garbling", "whispering"],
 		defaultLimit: ConditionsLimit.limited,
 		init(state) {
@@ -117,7 +117,7 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk() || msg.type !== "Chat" && msg.type !== "Whisper";
+			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk();
 			registerSpeechHook({
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {

@@ -148,7 +148,7 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || msg.type !== "Chat" || msg.type !== "Whisper";
+			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC;
 			registerSpeechHook({
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {

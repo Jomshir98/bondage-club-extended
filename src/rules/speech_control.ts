@@ -98,7 +98,7 @@ export function initRules_bc_speech_control() {
 		},
 		load(state) {
 			hookFunction("ChatRoomShouldBlockGaggedOOCMessage", 2, (args, next) => {
-				if (state.isEnforced && ChatRoomTargetMemberNumber >= 0 && !args[0].includes("(")) return false;
+				if (state.isEnforced && ChatRoomTargetMemberNumber >= 0) return false;
 				return next(args);
 			}, ModuleCategory.Rules);
 		},
@@ -148,7 +148,7 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || msg.type !== "Chat" && msg.type !== "Whisper";
+			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || msg.type !== "Chat" || msg.type !== "Whisper";
 			registerSpeechHook({
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {

@@ -4,6 +4,7 @@ interface BCXVersion {
 	patch: number;
 	extra?: string;
 	dev?: boolean;
+	strict?: boolean;
 }
 
 //#region Rules

@@ -215,16 +215,18 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 			patch: Number.parseInt(devMatch[3], 10),
 			extra: devMatch[4],
 			dev: true,
+			strict: false,
 		};
 	}
-	const match = /^(\d+).(\d+).(\d+)-([0-f]+)$/.exec(version);
+	const match = /^(\d+).(\d+).(\d+)-STRICT-([0-f]+)$/.exec(version);
 	if (match) {
 		return {
 			major: Number.parseInt(match[1], 10),
 			minor: Number.parseInt(match[2], 10),
 			patch: Number.parseInt(match[3], 10),
 			extra: match[4],
-			dev: true,
+			dev: false,
+			strict: true,
 		};
 	}
 	return null;
@@ -243,6 +245,10 @@ export function BCXVersionCompare(a: BCXVersion, b: BCXVersion): number {
 	if ((a.dev ?? false) !== (b.dev ?? false)) {
 		return a.dev ? 1 : -1;
 	}
+	if ((a.strict ?? false) !== (b.strict ?? false)) {
+		return a.strict ? 1 : -1;
+	}
+
 	return 0;
 }
 
@@ -250,6 +256,9 @@ export function BCXVersionToString(ver: BCXVersion): string {
 	let res = `${ver.major}.${ver.minor}.${ver.patch}`;
 	if (ver.extra) {
 		res += `-${ver.extra}`;
+	}
+	if (ver.strict) {
+		res += `-STRICT`;
 	}
 	return res;
 }

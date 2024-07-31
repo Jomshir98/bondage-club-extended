@@ -69,7 +69,7 @@ export default async function (env: WebpackEnv): Promise<Configuration> {
 							passes: 2,
 						},
 						format: {
-							preamble: "// BCX: Bondage Club Extended",
+							preamble: "// BCX: Bondage Club Extended STRICT",
 						},
 					},
 					include: "bcx.js",

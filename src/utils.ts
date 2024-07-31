@@ -241,8 +241,6 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 			strict: false,
 		};
 	}
-
-
 	return null;
 }
 

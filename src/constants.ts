@@ -49,7 +49,7 @@ export const TOGGLEABLE_MODULES: readonly ModuleCategory[] = [
 	ModuleCategory.Rules,
 	ModuleCategory.Commands,
 	ModuleCategory.Relationships,
-	ModuleCategory.Global
+	ModuleCategory.Global,
 ];
 
 export enum ModuleInitPhase {

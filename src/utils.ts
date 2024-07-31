@@ -218,7 +218,19 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 			strict: false,
 		};
 	}
-	const match = /^(\d+).(\d+).(\d+)-STRICT-([0-f]+)$/.exec(version);
+	const strictMatch = /^(\d+).(\d+).(\d+)-STRICT-([0-f]+)$/.exec(version);
+	if (strictMatch) {
+		return {
+			major: Number.parseInt(strictMatch[1], 10),
+			minor: Number.parseInt(strictMatch[2], 10),
+			patch: Number.parseInt(strictMatch[3], 10),
+			extra: strictMatch[4],
+			dev: false,
+			strict: true,
+		};
+	}
+
+	const match = /^(\d+).(\d+).(\d+)-([0-f]+)$/.exec(version);
 	if (match) {
 		return {
 			major: Number.parseInt(match[1], 10),
@@ -226,9 +238,11 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 			patch: Number.parseInt(match[3], 10),
 			extra: match[4],
 			dev: false,
-			strict: true,
+			strict: false,
 		};
 	}
+
+
 	return null;
 }
 

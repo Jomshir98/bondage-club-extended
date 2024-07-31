@@ -31,7 +31,7 @@ export function init_modules(): boolean {
 			"Are you loading older version or is your data corrupted?\n" +
 			"Refusing to load."
 		);
-		//return false;
+		return false;
 		
 	}
 	if (!runMigration(oldVersion, BCX_VERSION_PARSED))

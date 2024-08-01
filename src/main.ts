@@ -85,9 +85,7 @@ export function init() {
 
 	//#endregion
 
-	const enabledForbiddenBCmods = isForbiddenModuleEnabled();
-
-	if (enabledForbiddenBCmods) {
+	if (isForbiddenModuleEnabled()) {
 		alert("Found forbidden BC modules. Please disable them first!");
 		console.log("Found forbidden BC modules. Please disable them first!");
 		window.BCX_Loaded = false;
@@ -102,15 +100,18 @@ export function init() {
 	ctx.end();
 }
 
-function isForbiddenModuleEnabled() {
+function isForbiddenModuleEnabled(): true | false {
 	const enabledForbiddenBCmods = bcModSDK.getModsInfo();
 
-	enabledForbiddenBCmods.array.forEach((element: bcModSDK.ModSDKModInfo) => {
+	let count = 0;
+
+	enabledForbiddenBCmods.forEach( (element: bcModSDK.ModSDKModInfo) => {
 		if (element.name in FORBIDDEN_BC_MODULES) {
-			return true;
+			count ++;
 		}
 	});
-	return false;
+
+	return (count>0)?false:true;
 }
 
 export function unload(): true {

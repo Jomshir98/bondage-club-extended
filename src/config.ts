@@ -148,3 +148,7 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 	WardrobeGroupAccessible: ["2D406A64"],
 	WardrobeRun: ["9616EB3A"],
 };
+
+export const FORBIDDEN_BC_MODULES: string[] = [
+	"ULTRAbc",
+];

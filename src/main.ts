@@ -90,7 +90,7 @@ export function init() {
 	console.log("Enabled Modules: " + bcModSDK.getModsInfo());
 
 	if (enabledForbiddenBCmods.length > 0) {
-		InfoBeep("Found forbidden BC modules. Please disable them first!" + enabledForbiddenBCmods.toString());
+		alert("Found forbidden BC modules. Please disable them first!")
 		console.log("Found forbidden BC modules. Please disable them first!");
 		console.log("Frobidden mods: " + FORBIDDEN_BC_MODULES)
 		window.BCX_Loaded = false;

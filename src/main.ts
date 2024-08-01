@@ -106,7 +106,7 @@ function isForbiddenModuleEnabled(): true | false {
 
 	let count = 0;
 
-	enabledForbiddenBCmods.forEach( (element: ModSDKModInfo) => {
+	enabledForbiddenBCmods.forEach( element => {
 		if (element.name in FORBIDDEN_BC_MODULES) {
 			count ++;
 		}

@@ -8,7 +8,6 @@ import { debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
 import { ModuleInitPhase } from "./constants";
 import bcModSDK from "bondage-club-mod-sdk";
 
-
 export function loginInit(C: any) {
 	if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
 		return;
@@ -91,8 +90,7 @@ export function init() {
 		console.log("Found forbidden BC modules. Please disable them first!");
 		window.BCX_Loaded = false;
 		unload();
-	}
-	else {
+	} else {
 		window.BCX_Loaded = true;
 		InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
 		console.log(`BCX loaded! Version: ${VERSION}`);
@@ -108,7 +106,7 @@ function isForbiddenModuleEnabled(): true | false {
 
 	enabledForbiddenBCmods.forEach( element => {
 		if (element.name in FORBIDDEN_BC_MODULES) {
-			count ++;
+			count++;
 		}
 	});
 

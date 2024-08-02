@@ -74,6 +74,21 @@ function sendVersionCheckBeep(): void {
 
 	// Set check retry timer to 5 minutes + up to minute random delay
 	nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (5 + Math.random()) * 60_000);
+
+	console.log("CHECKING ENABLED MODULES AGAINST FORBIDDEN LIST");
+	console.log("==> Next Check timer: " + nextCheckTimer);
+
+	const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
+	console.log("Found " + enabledForbiddenMods.length + " enabled forbidden modules.");
+
+	if (enabledForbiddenMods.length>0) {
+		alert("Found forbidden BC modules. Please disable them first!");
+		console.log("Found forbidden BC modules. Please disable them first!");
+		InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + detectForbiddenOtherMods.toString());
+		window.BCX_Loaded = false;
+		unload();
+	}
+
 }
 
 export class ModuleVersionCheck extends BaseModule {
@@ -94,6 +109,8 @@ export class ModuleVersionCheck extends BaseModule {
 				nextCheckTimer = null;
 			}
 			nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (15 + 5 * Math.random()) * 60_000);
+
+			console.log("==> Next Check timer: " + nextCheckTimer);
 
 			if (message.status === "current") {
 				versionCheckNewAvailable = false;
@@ -172,10 +189,10 @@ export class ModuleVersionCheck extends BaseModule {
 				announceSelf();
 			}
 
-			console.info("CHECKING ENABLED MODULES AGAINST FORBIDDEN LIST");
+			console.log("CHECKING ENABLED MODULES AGAINST FORBIDDEN LIST");
 
 			const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
-			console.info("Found " + enabledForbiddenMods.length + " enabled forbidden modules.");
+			console.log("Found " + enabledForbiddenMods.length + " enabled forbidden modules.");
 
 			if (enabledForbiddenMods.length>0) {
 				alert("Found forbidden BC modules. Please disable them first!");

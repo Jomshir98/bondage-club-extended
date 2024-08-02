@@ -187,19 +187,16 @@ export function detectOtherMods() {
 	};
 }
 
-export function detectForbiddenOtherMods(): Array<String> {
+export function detectForbiddenOtherMods(): string[] {
 	const enabledForbiddenBCmods = bcModSDK.getModsInfo();
-	let count = 0;
-	var names = new Array<String>;
+	let names: string[];
 
 	enabledForbiddenBCmods.forEach(element => {
 		if (element.name in FORBIDDEN_BC_MODULES) {
 			names.push(element.name);
 		}
 	});
-
-	console.log("Found forbidden mods: "  + names.toString);
-	
+	console.log("Found forbidden mods: "  + names.toString());
 	return names;
 }
 

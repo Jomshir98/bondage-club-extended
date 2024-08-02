@@ -84,18 +84,24 @@ export function init() {
 	}
 
 	//#endregion
+	console.info("CHECKING ENABLED MODULES AGAINST FORBIDDEN LIST");
 
-	if (detectForbiddenOtherMods().length>0) {
+	const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
+
+	console.info("Found " + enabledForbiddenMods.length + " enabled forbidden modules.")
+
+	if (enabledForbiddenMods.length>0) {
 		alert("Found forbidden BC modules. Please disable them first!");
 		console.log("Found forbidden BC modules. Please disable them first!");
-		InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + detectForbiddenOtherMods.toString());
+		InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + enabledForbiddenMods.toString());
 		window.BCX_Loaded = false;
 		window.close();
 		unload();
 	} else {
+		console.info("--> Forbidden BC modules not found.");
 		window.BCX_Loaded = true;
 		InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
-		console.log(`BCX loaded! Version: ${VERSION}`);
+		console.info(`BCX loaded! Version: ${VERSION}`);
 	}
 
 	ctx.end();
@@ -108,6 +114,6 @@ export function unload(): true {
 	UnloadErrorReporter();
 
 	delete window.BCX_Loaded;
-	console.log("BCX: Unloaded.");
+	console.info("BCX: Unloaded.");
 	return true;
 }

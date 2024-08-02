@@ -7,7 +7,7 @@ import { BCXGlobalEventSystem } from "./event";
 import { FORBIDDEN_BC_MODULES } from "./config";
 
 import { omit } from "lodash-es";
-import { bcModSDK } from "bondage-club-mod-sdk";
+import bcModSDK from "bondage-club-mod-sdk";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -186,7 +186,6 @@ export function detectOtherMods() {
 		BCE: w.BCE_VERSION !== undefined ? (`${w.BCE_VERSION}` || true) : false,
 	};
 }
-
 
 export function detectForbiddenOtherMods(): Array<String> {
 	const enabledForbiddenBCmods = bcModSDK.getModsInfo();

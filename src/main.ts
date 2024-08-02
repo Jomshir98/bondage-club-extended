@@ -96,8 +96,7 @@ export function init() {
 			window.BCX_Loaded = false;
 			window.close();
 			unload();
-		}
-		else {
+		} else {
 			console.info("--> Forbidden BC modules not found.");
 		}
 	};
@@ -107,7 +106,7 @@ export function init() {
 	window.BCX_Loaded = true;
 	InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
 	console.info(`BCX loaded! Version: ${VERSION}`);
-	
+
 	ctx.end();
 }
 

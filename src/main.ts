@@ -88,7 +88,7 @@ export function init() {
 
 	const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
 
-	console.info("Found " + enabledForbiddenMods.length + " enabled forbidden modules.")
+	console.info("Found " + enabledForbiddenMods.length + " enabled forbidden modules.");
 
 	if (enabledForbiddenMods.length>0) {
 		alert("Found forbidden BC modules. Please disable them first!");

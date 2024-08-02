@@ -85,6 +85,13 @@ export function init() {
 
 	//#endregion
 	console.log("CHECKING ENABLED MODULES AGAINST FORBIDDEN LIST");
+	console.log("---> Waiting 10s for the initialization of modules");
+	
+	let sleep = (ms: number) => {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	  };
+	
+	sleep (10000);
 
 	const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
 

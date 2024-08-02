@@ -8,6 +8,7 @@ import { FORBIDDEN_BC_MODULES } from "./config";
 
 import { omit } from "lodash-es";
 import bcModSDK from "bondage-club-mod-sdk";
+import { number } from "zod";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",

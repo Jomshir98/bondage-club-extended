@@ -190,7 +190,7 @@ export function detectOtherMods() {
 export function detectForbiddenOtherMods(): string[] {
 	console.info("Trying to fetch enabled BCX mods...");
 	const enabledForbiddenBCmods = bcModSDK.getModsInfo();
-	const names: string[] = new Array<string>;
+	const names: string[] = new Array<string>();
 	console.info("--> Enabled mods (according to bcModSDK): " + names.toString());
 	enabledForbiddenBCmods.forEach(element => {
 		if (element.name in FORBIDDEN_BC_MODULES) {

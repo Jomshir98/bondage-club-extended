@@ -4,8 +4,10 @@ import { getChatroomCharacter } from "./characters";
 import { RelationshipsGetNickname } from "./modules/relationships";
 import { BCX_VERSION_PARSED } from "./utils";
 import { BCXGlobalEventSystem } from "./event";
+import { FORBIDDEN_BC_MODULES } from "./config";
 
 import { omit } from "lodash-es";
+import { bcModSDK } from "bondage-club-mod-sdk";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -183,6 +185,23 @@ export function detectOtherMods() {
 		ImprovedStruggle: typeof w.OLDclick === "function" && typeof w.NEWclick === "function",
 		BCE: w.BCE_VERSION !== undefined ? (`${w.BCE_VERSION}` || true) : false,
 	};
+}
+
+
+export function detectForbiddenOtherMods(): Array<String> {
+	const enabledForbiddenBCmods = bcModSDK.getModsInfo();
+	let count = 0;
+	var names = new Array<String>;
+
+	enabledForbiddenBCmods.forEach(element => {
+		if (element.name in FORBIDDEN_BC_MODULES) {
+			names.push(element.name);
+		}
+	});
+
+	console.log("Found forbidden mods: "  + names.toString);
+	
+	return names;
 }
 
 interface DrawImageExOptions {

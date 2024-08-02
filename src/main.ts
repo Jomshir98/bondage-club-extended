@@ -4,7 +4,7 @@ import { init_modules, moduleInitPhase, unload_modules } from "./moduleManager";
 import { hookFunction, replacePatchedMethodsDeep, unload_patches } from "./patching";
 import { isObject } from "./utils";
 import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
-import { debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
+import { BCX_setInterval, debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
 import { ModuleInitPhase } from "./constants";
 import { detectForbiddenOtherMods } from "./utilsClub";
 
@@ -86,30 +86,27 @@ export function init() {
 	//#endregion
 	console.log("CHECKING ENABLED MODULES AGAINST FORBIDDEN LIST");
 	console.log("---> Waiting 10s for the initialization of modules");
-	
-	let sleep = (ms: number) => {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	  };
-	
-	sleep (10000);
 
-	const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
+	const waitForModulesInit = () => {
+		const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
+		console.log("Found " + enabledForbiddenMods.length + " enabled forbidden modules.");
+		if (enabledForbiddenMods.length>0) {
+			alert("Found forbidden BC modules. Please disable them first!");
+			console.log("Found forbidden BC modules. Please disable them first!");
+			InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + enabledForbiddenMods.toString());
+			window.BCX_Loaded = false;
+			window.close();
+			unload();
+		} else {
+			console.info("--> Forbidden BC modules not found.");
+		}
+	};
 
-	console.log("Found " + enabledForbiddenMods.length + " enabled forbidden modules.");
+	BCX_setInterval(waitForModulesInit, 5000);
 
-	if (enabledForbiddenMods.length>0) {
-		alert("Found forbidden BC modules. Please disable them first!");
-		console.log("Found forbidden BC modules. Please disable them first!");
-		InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + enabledForbiddenMods.toString());
-		window.BCX_Loaded = false;
-		window.close();
-		unload();
-	} else {
-		console.info("--> Forbidden BC modules not found.");
-		window.BCX_Loaded = true;
-		InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
-		console.info(`BCX loaded! Version: ${VERSION}`);
-	}
+	window.BCX_Loaded = true;
+	InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
+	console.info(`BCX loaded! Version: ${VERSION}`);
 
 	ctx.end();
 }

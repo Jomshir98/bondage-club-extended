@@ -1,12 +1,12 @@
 import { detectOtherMods, InfoBeep } from "./utilsClub";
-import { VERSION, FORBIDDEN_BC_MODULES } from "./config";
+import { VERSION } from "./config";
 import { init_modules, moduleInitPhase, unload_modules } from "./moduleManager";
 import { hookFunction, replacePatchedMethodsDeep, unload_patches } from "./patching";
 import { isObject } from "./utils";
 import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
 import { debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
 import { ModuleInitPhase } from "./constants";
-import bcModSDK from "bondage-club-mod-sdk";
+import { detectForbiddenOtherMods } from "./utilsClub";
 
 export function loginInit(C: any) {
 	if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
@@ -85,10 +85,12 @@ export function init() {
 
 	//#endregion
 
-	if (isForbiddenModuleEnabled()) {
+	if (detectForbiddenOtherMods.length>0) {
 		alert("Found forbidden BC modules. Please disable them first!");
 		console.log("Found forbidden BC modules. Please disable them first!");
+		InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + detectForbiddenOtherMods.toString);
 		window.BCX_Loaded = false;
+		window.close();
 		unload();
 	} else {
 		window.BCX_Loaded = true;
@@ -97,20 +99,6 @@ export function init() {
 	}
 
 	ctx.end();
-}
-
-function isForbiddenModuleEnabled(): true | false {
-	const enabledForbiddenBCmods = bcModSDK.getModsInfo();
-
-	let count = 0;
-
-	enabledForbiddenBCmods.forEach(element => {
-		if (element.name in FORBIDDEN_BC_MODULES) {
-			count++;
-		}
-	});
-
-	return (count>0)?false:true;
 }
 
 export function unload(): true {

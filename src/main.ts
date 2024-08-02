@@ -85,7 +85,7 @@ export function init() {
 
 	//#endregion
 
-	if (detectForbiddenOtherMods.length>0) {
+	if (detectForbiddenOtherMods().length>0) {
 		alert("Found forbidden BC modules. Please disable them first!");
 		console.log("Found forbidden BC modules. Please disable them first!");
 		InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + detectForbiddenOtherMods.toString());

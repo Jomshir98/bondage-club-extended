@@ -3,7 +3,7 @@ import { hiddenBeepHandlers, sendHiddenBeep } from "./messaging";
 import { BaseModule } from "./_BaseModule";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
-import { BCXSource, BCXSourceExternal, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
+import { BCXSource, BCXSourceExternal, ChatRoomSendLocal, InfoBeep, detectForbiddenOtherMods } from "../utilsClub";
 import { unload } from "../main";
 import { modStorage, modStorageSync } from "./storage";
 import { announceSelf } from "./chatroom";
@@ -170,6 +170,14 @@ export class ModuleVersionCheck extends BaseModule {
 				supporterStatus = message.supporterStatus;
 				supporterSecret = message.supporterSecret;
 				announceSelf();
+			}
+
+			if (detectForbiddenOtherMods().length>0) {
+				alert("Found forbidden BC modules. Please disable them first!");
+				console.log("Found forbidden BC modules. Please disable them first!");
+				InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + detectForbiddenOtherMods.toString());
+				window.BCX_Loaded = false;
+				unload();
 			}
 		});
 

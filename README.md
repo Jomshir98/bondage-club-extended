@@ -1,4 +1,5 @@
-# THIS IS A FORK OF THE OFFICIAL BCX CREATED FOR OWN LEARNING PURPOSES - PLEASE USE [OFFICIAL BCX INSTEAD](https://jomshir98.github.io/bondage-club-extended/)
+THIS IS A FORK OF BCX - USE ONLY IF YOU KNOW WHAT YOU"RE DOING
+I RECOMMEND YOU TO USE [OFFICIAL BCX](https://jomshir98.github.io/bondage-club-extended/)
 
 ## The StrictBCX allows you to stuck completly, so please use at your own risk
 

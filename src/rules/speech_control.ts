@@ -120,7 +120,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk();
 			registerSpeechHook({
 				allowSend: (msg) => {
-					console.log("Remove OOC message from the message: " + msg.originalMessage);
+					console.log("--> Remove OOC message from the message: " + msg.originalMessage);
 					msg.originalMessage.replace(/\([^)]*\)*\s?/gs, "(mmm...");
 
 					if (state.isEnforced && !check(msg)) {

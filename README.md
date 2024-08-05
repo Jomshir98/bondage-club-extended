@@ -8,7 +8,7 @@
 2. Disable your current BCX instance
 3. *Disable your UltraBC and BCTweaks mods*
 4. Install Tampermonkey:
-    - [Chrome]([https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+    - [Chrome](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
     - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
     - [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
 5. Open following page and confirm script installation: [link](https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcxloader.user.js)

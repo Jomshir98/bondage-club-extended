@@ -120,7 +120,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk();
 			registerSpeechHook({
 				allowSend: (msg) => {
-					console.log("Remove OOC message from the message: " + msg);
+					console.log("Remove OOC message from the message: " + msg.originalMessage);
 					msg.originalMessage.replace(/\([^)]*\)*\s?/gs, "");
 
 					if (state.isEnforced && !check(msg)) {
@@ -129,7 +129,7 @@ export function initRules_bc_speech_control() {
 					}
 					return SpeechHookAllow.ALLOW;
 				},
-				onSend: (msg) => {					
+				onSend: (msg) => {
 					if (state.inEffect && !check(msg)) {
 						state.trigger();
 					}
@@ -154,7 +154,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC;
 			registerSpeechHook({
 				allowSend: (msg) => {
-					console.log("Remove OOC message from the message: " + msg);
+					console.log("Remove OOC message from the message: " + msg.originalMessage);
 					msg.originalMessage.replace(/\([^)]*\)*\s?/gs, "");
 					if (state.isEnforced && !check(msg)) {
 						state.triggerAttempt();

@@ -5,13 +5,13 @@
 ## Instruction - how to install StrictBCX
 
 1. Check your own BCX. Enable all modules in BCX confituration (BCX Menu -> Global). Ensure that all modules are enabled
-2. Disable your current BCX instance, UltraBC and BCTweaks
-3. Install Tampermonkey:
-  [Chrome]([https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
-  [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
-  [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
-5. Open following page and confirm script installation: link
-4. Add StrictBCX to your tampermonkey with link: https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcx.js
-5. Enjoy!
+2. Disable your current BCX instance
+3. *Disable your UltraBC and BCTweaks mods*
+4. Install Tampermonkey:
+    - [Chrome]([https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+    - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
+    - [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
+5. Open following page and confirm script installation: [link](https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcxloader.user.js)
+6. Reload your game
 
 

@@ -61,7 +61,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				const sounds = state.customData?.soundWhitelist;
 				if (sounds && sounds.length > 0 && (msg.type === "Chat" || msg.type === "Whisper")) {
-					const message = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+					const message = (msg.originalMessage).toLocaleLowerCase();
 					return checkMessageForSounds(sounds, message);
 				}
 				return true;
@@ -117,7 +117,7 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk();
+			const check = (msg: SpeechMessageInfo): boolean => Player.CanTalk();
 			registerSpeechHook({
 				allowSend: (msg) => {
 					console.log("Remove OOC message from the message: " + msg.originalMessage);
@@ -151,7 +151,7 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC;
+			const check = (msg: SpeechMessageInfo): boolean => msg.hasOOC;
 			registerSpeechHook({
 				allowSend: (msg) => {
 					console.log("Remove OOC message from the message: " + msg.originalMessage);
@@ -201,7 +201,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || state.customData == null)
 					return true;
-				const words = Array.from((msg.noOOCMessage ?? msg.originalMessage).matchAll(/[^\t\p{Z}\v.:!?~,;^]+/gmu)).map(i => i[0]);
+				const words = Array.from((msg.originalMessage).matchAll(/[^\t\p{Z}\v.:!?~,;^]+/gmu)).map(i => i[0]);
 				if (state.customData.maxNumberOfWords && words.length > state.customData.maxNumberOfWords)
 					return false;
 				if (state.customData.maxWordLength && words.some(word => word.length > state.customData!.maxWordLength))
@@ -253,7 +253,7 @@ export function initRules_bc_speech_control() {
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.bannedWords)
 					return true;
 				transgression = state.customData?.bannedWords.find(i =>
-					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
+					(msg.originalMessage).toLocaleLowerCase().match(
 						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
 					)
 				);
@@ -304,7 +304,7 @@ export function initRules_bc_speech_control() {
 				if (msg.type !== "Emote" || !state.customData?.bannedWords)
 					return true;
 				transgression = state.customData?.bannedWords.find(i =>
-					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
+					(msg.originalMessage).toLocaleLowerCase().match(
 						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
 					)
 				);
@@ -847,7 +847,7 @@ export function initRules_bc_speech_control() {
 		// 3. do not allow sending anything else when enforced
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => (
-				(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase() === state.customData?.greetingSentence.trim().toLocaleLowerCase() &&
+				(msg.originalMessage).toLocaleLowerCase() === state.customData?.greetingSentence.trim().toLocaleLowerCase() &&
 				msg.type === "Chat"
 			);
 			registerSpeechHook({
@@ -1044,7 +1044,7 @@ export function initRules_bc_speech_control() {
 						)
 					) || !state.customData?.mandatoryWords?.length)
 					return true;
-				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+				const checkMsg = (msg.originalMessage).toLocaleLowerCase();
 				const sounds = state.customData?.mandatoryWords.filter(e => /^[\p{L}]*$/iu.test(e));
 				if (checkMsg.trim() === "") {
 					return true;
@@ -1098,7 +1098,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if (msg.type !== "Emote" || !state.customData?.mandatoryWords?.length)
 					return true;
-				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+				const checkMsg = (msg.originalMessage).toLocaleLowerCase();
 				const sounds = state.customData?.mandatoryWords.filter(e => /^[\p{L}]*$/iu.test(e));
 				if (checkMsg.trim() === "") {
 					return true;

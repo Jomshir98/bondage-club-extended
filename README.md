@@ -13,7 +13,7 @@ I RECOMMEND YOU TO USE [OFFICIAL BCX](https://jomshir98.github.io/bondage-club-e
     - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
     - [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
 5. Open following page and confirm script installation: [link](https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcxLoader.user.js)
-6. In line 23 change the link to: https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcx.js
+6. In line 23 change the link to: https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcx.js. The TamperMonkey loader shall look like this:         https://github.com/kinksideofthemoon/StrictBCX.github.io/blob/master/static_stable/bcxLoader.user.js
 7. Reload your game
 
 

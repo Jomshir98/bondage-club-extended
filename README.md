@@ -5,9 +5,8 @@
 ## Instruction - how to install StrictBCX
 
 1. Check your own BCX. Enable all modules in BCX confituration (BCX Menu -> Global). Ensure that all modules are enabled
-2. Disable UltraBC and 
-3. Disable your current BCX instance (for ex. in FUSAM)
-4. Add StrictBCX to your tampermonkey
+2. Disable your current BCX instance, UltraBC and BCTweaks
+3. Add StrictBCX to your tampermonkey with link: https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcx.js
 5. Enjoy!
 
 

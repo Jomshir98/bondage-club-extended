@@ -1,8 +1,6 @@
 import { ChatroomCharacter } from "../characters";
 import { setSubscreen } from "../modules/gui";
-import { GuiGlobalDialogClearData } from "./global_dialogClearData";
 import { GuiMainMenu } from "./mainmenu";
-import { GuiGlobalModuleToggling } from "./global_moduleToggling";
 import { GuiSubscreen } from "./subscreen";
 import { capitalizeFirstLetter } from "../utils";
 import { DrawImageEx } from "../utilsClub";
@@ -37,11 +35,7 @@ export class GuiGlobal extends GuiSubscreen {
 		DrawImageEx("Icons/Introduction.png", 840 + 20, 200 + 20, { Height: 50, Width: 50 });
 		DrawTextFit(`Your initially selected BCX preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
 
-		// Manage modules
-		DrawButton(120, 200, 400, 90, "Manage BCX modules", "White", "", "Enable/Disable individual modules");
-
-		// Emergency reset
-		DrawButton(1490, 800, 300, 90, "Clear all BCX data", "#FF3232", "", "Emergency reset of BCX");
+		DrawTextFit("YOU ARE USING STRICT VERSION OF BCX. USE IT AT YOUR OWN RISK.", 1400, 244, 850, "Red");
 
 		// Icon toggles
 		MainCanvas.textAlign = "left";
@@ -55,16 +49,6 @@ export class GuiGlobal extends GuiSubscreen {
 
 		if (!this.character.isPlayer())
 			return;
-
-		if (MouseIn(120, 200, 400, 90)) {
-			setSubscreen(new GuiGlobalModuleToggling());
-			return;
-		}
-
-		if (MouseIn(1490, 800, 300, 90)) {
-			setSubscreen(new GuiGlobalDialogClearData(this));
-			return;
-		}
 
 		// Icon toggles
 

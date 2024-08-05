@@ -6,7 +6,7 @@
 
 1. Check your own BCX. Enable all modules in BCX confituration (BCX Menu -> Global). Ensure that all modules are enabled
 2. Disable your current BCX instance
-3. #Disable your UltraBC and BCTweaks mods#
+3. !IMPORTANT! Disable your UltraBC and BCTweaks mods
 4. Install Tampermonkey:
     - [Chrome](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
     - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)

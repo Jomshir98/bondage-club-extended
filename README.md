@@ -6,7 +6,8 @@
 
 1. Check your own BCX. Enable all modules in BCX confituration (BCX Menu -> Global). Ensure that all modules are enabled
 2. Disable UltraBC and 
-3. Disable your current BCX - if you're using FUSAM - disable it with addon manager
-4. 
+3. Disable your current BCX instance (for ex. in FUSAM)
+4. Add StrictBCX to your tampermonkey
+5. Enjoy!
 
 

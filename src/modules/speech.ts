@@ -55,7 +55,7 @@ export function falteringSpeech(message: string): string {
 
 		const character = message.charAt(messageIndex).toLowerCase();
 		// from here on out, an out of context part of the message starts that will stay unchanged
-		if (character === "(") oocMsg = false;
+		if (character === "(") oocMsg = true;
 		if (!oocMsg && !alreadyStudderedWord && /\p{L}/igu.test(character)) {
 			const studderFactor: number = Math.floor(Math.sin(seed++) * 100000) % 10;
 			if ((!alreadyStudderedWord && studderFactor >= 6) || firstWord) {
@@ -93,6 +93,7 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 		// Emotes are handled in `ChatRoomSendEmote`
 		return null;
 	}
+
 	return {
 		type: ChatRoomTargetMemberNumber < 0 ? "Chat" : "Whisper",
 		rawMessage,

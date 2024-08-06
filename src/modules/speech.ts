@@ -76,7 +76,7 @@ export function falteringSpeech(message: string): string {
 	return message;
 }
 
-export function clearChat() {
+export function clearChat(msg: string) {
 	const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 	if (chat) {
 		chat.value = "";
@@ -212,7 +212,7 @@ export class ModuleSpeech extends BaseModule {
 					if (msg2 === null) {
 						// There is rule to force retype of rejected message
 						if (RulesGetRuleState("speech_force_retype").isEnforced) {
-							clearChat();
+							clearChat(msg);
 						}
 						return true;
 					}
@@ -292,7 +292,7 @@ export class ModuleSpeech extends BaseModule {
 			if (msg2 !== null) {
 				return next(["*" + msg2]);
 			} else if (RulesGetRuleState("speech_force_retype").isEnforced) {
-				clearChat();
+				clearChat(msg);
 			}
 		});
 

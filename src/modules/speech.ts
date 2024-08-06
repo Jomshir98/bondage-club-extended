@@ -76,8 +76,27 @@ export function falteringSpeech(message: string): string {
 	return message;
 }
 
-function parseMsg(msg: string): SpeechMessageInfo | null {
+export function clearChat(msg: string) {
+	const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+	if (chat) {
+		chat.value = "";
+	} else {
+		console.error("Chat element not found");
+	}
+	// Clear message history if matches
+	if (ChatRoomLastMessage.length > 0 && ChatRoomLastMessage.at(-1) === msg) {
+		ChatRoomLastMessage.splice(ChatRoomLastMessage.length - 1, 1);
+		ChatRoomLastMessageIndex = Math.min(ChatRoomLastMessageIndex, ChatRoomLastMessage.length);
+	}
+}
+
+function parseMsg(msg: string): (SpeechMessageInfo | null) {
 	const rawMessage = msg;
+	if (msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3)) {
+		// Emotes are handled in `ChatRoomSendEmote`
+		return null;
+	}
+
 	if (msg.startsWith("//")) {
 		msg = msg.substring(1);
 	} else if (msg.startsWith("/")) {
@@ -88,10 +107,6 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 			target: null,
 			hasOOC: false,
 		};
-	}
-	if (msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3)) {
-		// Emotes are handled in `ChatRoomSendEmote`
-		return null;
 	}
 
 	return {
@@ -108,6 +123,8 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
  * @returns The message that should be sent, or `null` if stopped
  */
 function processMsg(msg: SpeechMessageInfo): string | null {
+	console.log("Strat processMsg");
+	console.groupCollapsed();
 	// Don't modify commands this way
 	if (msg.type === "Command") {
 		return msg.rawMessage;
@@ -125,13 +142,17 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 			}
 		}
 	}
-	if (result === SpeechHookAllow.BLOCK)
-		return null;
 
+	if (result === SpeechHookAllow.BLOCK) {
+		console.log("Message " + msg.originalMessage + " was blocked.");
+		console.groupEnd();
+		return null;
+	}
 	let message = msg.originalMessage;
 	// Let hooks modify the message
 	for (const hook of speechHooks) {
 		if (hook.modify) {
+			console.log("Modify message: " + msg.originalMessage);
 			message = hook.modify(msg, message);
 		}
 	}
@@ -172,6 +193,7 @@ function setAntigarble(value: number): boolean {
 //#endregion
 
 export class ModuleSpeech extends BaseModule {
+
 	load() {
 
 		let currentlyProcessedMessage: {
@@ -190,13 +212,7 @@ export class ModuleSpeech extends BaseModule {
 					if (msg2 === null) {
 						// There is rule to force retype of rejected message
 						if (RulesGetRuleState("speech_force_retype").isEnforced) {
-							// Clear chat
-							ElementValue("InputChat", "");
-							// Clear message history if matches
-							if (ChatRoomLastMessage.length > 0 && ChatRoomLastMessage.at(-1) === msg) {
-								ChatRoomLastMessage.splice(ChatRoomLastMessage.length - 1, 1);
-								ChatRoomLastMessageIndex = Math.min(ChatRoomLastMessageIndex, ChatRoomLastMessage.length);
-							}
+							clearChat(msg);
 						}
 						return true;
 					}
@@ -276,10 +292,7 @@ export class ModuleSpeech extends BaseModule {
 			if (msg2 !== null) {
 				return next(["*" + msg2]);
 			} else if (RulesGetRuleState("speech_force_retype").isEnforced) {
-				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
-				if (chat) {
-					chat.value = "";
-				}
+				clearChat(msg);
 			}
 		});
 

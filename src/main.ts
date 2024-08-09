@@ -88,7 +88,6 @@ export function init() {
 	console.log("---> Waiting 10s for the initialization of modules");
 	const waitForModulesInit = () => {
 		const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
-		console.log("Found " + enabledForbiddenMods.length + " enabled forbidden modules.");
 		if (enabledForbiddenMods.length>0) {
 			alert("Found forbidden BC modules. Please disable them first!");
 			console.log("Found forbidden BC modules. Please disable them first!");
@@ -96,8 +95,6 @@ export function init() {
 			window.BCX_Loaded = false;
 			window.close();
 			unload();
-		} else {
-			console.info("--> Forbidden BC modules not found.");
 		}
 	};
 

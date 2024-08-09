@@ -2,8 +2,6 @@ import { ModuleInitPhase } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
 import { hookFunction } from "../patching";
 import { isObject } from "../utils";
-import { ChatRoomSendLocal } from "../utilsClub";
-import { registerCommand } from "./commands";
 import { RulesGetRuleState } from "./rules";
 import { BaseModule } from "./_BaseModule";
 
@@ -161,7 +159,7 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 }
 
 //#region Antigarble
-let antigarble = 0;
+const antigarble = 0;
 
 function agreeMessageHook(msg: SpeechMessageInfo) {
 	console.groupCollapsed("Agree message hook");
@@ -182,22 +180,6 @@ function agreeMessageHook(msg: SpeechMessageInfo) {
 	return result;
 }
 
-function setAntigarble(value: number): boolean {
-	if (![0, 1, 2].includes(value)) {
-		throw new Error("Bad antigarble value, expected 0/1/2");
-	}
-	if (value !== 0) {
-		const blockRule = RulesGetRuleState("speech_block_antigarble");
-		if (blockRule.isEnforced) {
-			blockRule.triggerAttempt();
-			return false;
-		} else if (blockRule.inEffect) {
-			blockRule.trigger();
-		}
-	}
-	antigarble = value;
-	return true;
-}
 //#endregion
 
 export class ModuleSpeech extends BaseModule {
@@ -265,11 +247,7 @@ export class ModuleSpeech extends BaseModule {
 			) {
 				const orig: any = data.Dictionary.find((i: unknown) => isObject(i) && i.Tag === "BCX_ORIGINAL_MESSAGE" && typeof i.Text === "string");
 				if (orig && data.Content !== orig.Text) {
-					if (antigarble === 2) {
-						data.Content = orig.Text;
-					} else {
-						data.Content += ` <> ${orig.Text}`;
-					}
+					data.Content += ` <> ${orig.Text}`;
 				}
 			}
 			return next(args);
@@ -305,19 +283,10 @@ export class ModuleSpeech extends BaseModule {
 		});
 
 		//#region Antigarble
-		const ANTIGARBLE_LEVELS: Record<string, number> = {
-			"0": 0,
-			"1": 1,
-			"2": 2,
-			"normal": 0,
-			"both": 1,
-			"ungarbled": 2,
-		};
-
 		hookFunction("SpeechGarble", 6, (args, next) => {
-			if (antigarble === 2) return args[1];
-			let res = next(args);
-			if (typeof res === "string" && res !== args[1] && antigarble === 1) res += ` <> ${args[1]}`;
+			//			if (antigarble === 2) return args[1];
+			const res = next(args);
+			//			if (typeof res === "string" && res !== args[1] && antigarble === 1) res += ` <> ${args[1]}`;
 			return res;
 		});
 		//#endregion

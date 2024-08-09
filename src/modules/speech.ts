@@ -128,6 +128,7 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 
 	if (msg.type === "Command") {
 		console.log("Command");
+		console.groupEnd();
 		return msg.rawMessage;
 	}
 
@@ -312,23 +313,6 @@ export class ModuleSpeech extends BaseModule {
 			"both": 1,
 			"ungarbled": 2,
 		};
-
-		const ANTIGARBLE_LEVEL_NAMES: string[] = Object.keys(ANTIGARBLE_LEVELS).filter(k => k.length > 1);
-
-		registerCommand("cheats", "antigarble", "<level> - Set garble prevention to show [normal|both|ungarbled] messages (only affects received messages!)", value => {
-			const val = ANTIGARBLE_LEVELS[value || ""];
-			if (val !== undefined) {
-				if (setAntigarble(val)) {
-					ChatRoomSendLocal(`Antigarble set to ${ANTIGARBLE_LEVEL_NAMES[val]}`);
-					return true;
-				}
-				return false;
-			}
-			ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
-			return false;
-		}, value => {
-			return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
-		});
 
 		hookFunction("SpeechGarble", 6, (args, next) => {
 			if (antigarble === 2) return args[1];

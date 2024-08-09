@@ -140,7 +140,7 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 		if (agreeMessageHook(msg) === SpeechHookAllow.BLOCK) {
 			console.log("Message shall be blocked.");
 			console.groupEnd();
-			result="";
+			return null;
 		}
 	}
 

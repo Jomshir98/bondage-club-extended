@@ -44,31 +44,41 @@ export function registerSpeechHook(hook: SpeechHook): void {
  * @returns {string} - Returns the message after studdering and random sounds have been added
  */
 export function falteringSpeech(message: string): string {
-	const soundList: string[] = ["uuh... ", "uhh... ", "...ah... ", "uhm... ", "mnn... ", "..nn... "];
-	let oocMsg: boolean = false;
+	const soundList: string[] = ["uuh", "ah", "uhm", "mnn", "nn", "fuck", "tie me up", "hardcore kink",
+		"bind me", "harder", "spank me", "blind me", "gag me", "never release", "strict", "punish", "forever", "love you", "restrain me",
+		"I love hardcore", "chain me", "aaaah",
+	];
+
+	const additions: string[] = ["", " ", "  ", ".", "..", "...", "....", ".....", "......", "......."];
+
+	const enhancedSoundList: string[] = [];
+
+	soundList.forEach((sound: string) => {
+		const prefix: string = additions[Math.floor(Math.random() * additions.length)];
+		const suffix: string = additions[Math.floor(Math.random() * additions.length)];
+		enhancedSoundList.push(prefix + sound + suffix);
+	});
+
+	console.log("sounds: " + JSON.stringify(enhancedSoundList));
+
 	let firstWord: boolean = true;
 	let alreadyStudderedWord: boolean = false;
 	let seed: number = message.length;
 	for (let messageIndex = 0; messageIndex < message.length; messageIndex++) {
-
 		const character = message.charAt(messageIndex).toLowerCase();
-		// from here on out, an out of context part of the message starts that will stay unchanged
-		if (character === "(") oocMsg = true;
-		if (!oocMsg && !alreadyStudderedWord && /\p{L}/igu.test(character)) {
+		if (!alreadyStudderedWord && /\p{L}/igu.test(character)) {
 			const studderFactor: number = Math.floor(Math.sin(seed++) * 100000) % 10;
 			if ((!alreadyStudderedWord && studderFactor >= 6) || firstWord) {
 				message = message.substring(0, messageIndex + 1) + "-" + message.substring(messageIndex, message.length);
 				seed++;
-				// One third chance to add a sound before a studdered word
-				if (Math.random() < 0.33 && !firstWord) {
-					message = message.substring(0, messageIndex) + soundList[Math.floor(Math.random() * soundList.length)] + message.substring(messageIndex, message.length);
+				if (Math.random() < 0.25 && !firstWord) {
+					message = message.substring(0, messageIndex) + enhancedSoundList[Math.floor(Math.random() * soundList.length)] + message.substring(messageIndex, message.length);
 				}
 				messageIndex += 2;
 				if (firstWord) firstWord = false;
 			}
 			alreadyStudderedWord = true;
 		}
-		if (character === ")") oocMsg = false;
 		if (character === " ") alreadyStudderedWord = false;
 	}
 	return message;
@@ -89,31 +99,28 @@ export function clearChat(msg: string) {
 }
 
 function parseMsg(msg: string): (SpeechMessageInfo | null) {
+
 	const rawMessage = msg;
-	if (msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3)) {
-		// Emotes are handled in `ChatRoomSendEmote`
-		return null;
-	}
 
 	if (msg.startsWith("//")) {
 		msg = msg.substring(1);
-	} else if (msg.startsWith("/")) {
-		return {
-			type: "Command",
-			rawMessage,
-			originalMessage: msg,
-			target: null,
-			hasOOC: false,
-		};
 	}
 
+	let type: "Chat" | "Emote" | "Whisper" | "Command" = "Chat";
+	type = ChatRoomTargetMemberNumber > 0 ? "Whisper": type;
+	type = msg.startsWith("/") ? "Command" : type;
+	type = msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3) ? "Emote" : type;
+
+	const noOOCMessage = msg.replace(/\([^)]*\)*\s?/gs, "");
+	const hasOOC: boolean = msg.includes("(");
+
 	return {
-		type: ChatRoomTargetMemberNumber < 0 ? "Chat" : "Whisper",
+		type,
 		rawMessage,
 		originalMessage: msg,
 		target: ChatRoomTargetMemberNumber,
-		noOOCMessage: msg.replace(/\([^)]*\)*\s?/gs, ""),
-		hasOOC: msg.includes("("),
+		noOOCMessage,
+		hasOOC,
 	};
 }
 
@@ -161,7 +168,6 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 const antigarble = 0;
 
 function agreeMessageHook(msg: SpeechMessageInfo) {
-	console.groupCollapsed("Agree message hook");
 	let result: SpeechHookAllow = SpeechHookAllow.ALLOW;
 	for (const hook of speechHooks) {
 		if (hook.allowSend) {
@@ -175,7 +181,6 @@ function agreeMessageHook(msg: SpeechMessageInfo) {
 			}
 		}
 	}
-	console.groupEnd();
 	return result;
 }
 

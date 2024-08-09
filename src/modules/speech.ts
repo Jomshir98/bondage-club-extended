@@ -124,8 +124,10 @@ function parseMsg(msg: string): (SpeechMessageInfo | null) {
  */
 function processMsg(msg: SpeechMessageInfo): string | null {
 	console.groupCollapsed("Processing message: " + msg.originalMessage);
-	// Don't modify commands this way
+	console.log("Message: " + JSON.stringify(msg, null, 2));
+
 	if (msg.type === "Command") {
+		console.log("Command");
 		return msg.rawMessage;
 	}
 
@@ -136,7 +138,7 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 		result = "/" + result;
 	} else {
 		if (agreeMessageHook(msg) === SpeechHookAllow.BLOCK) {
-			console.log("Message " + msg.originalMessage + " was blocked.");
+			console.log("Message shall be blocked.");
 			console.groupEnd();
 			result="";
 		}
@@ -144,10 +146,11 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 
 	for (const hook of speechHooks) {
 		if (hook.modify) {
-			console.log("Message " + msg.originalMessage + " was modified.");
+			console.log("Message shall be modified.");
 			result = hook.modify(msg, result);
 		}
 	}
+
 	for (const hook of speechHooks) {
 		if (hook.onSend) {
 			console.log("Send message");

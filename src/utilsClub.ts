@@ -196,7 +196,7 @@ export function detectForbiddenOtherMods(): string[] {
 			console.warn("--> Found forbidden mod: "  + element.name);
 		}
 	});
-	
+
 	return names;
 }
 

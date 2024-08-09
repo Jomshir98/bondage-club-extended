@@ -132,13 +132,13 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 	}
 
 	let result = msg.originalMessage;
-	
+
 	if (agreeMessageHook(msg) === SpeechHookAllow.BLOCK) {
-			console.log("Message shall be blocked.");
-			console.groupEnd();
-			return null;
+		console.log("Message shall be blocked.");
+		console.groupEnd();
+		return null;
 	}
-	
+
 	for (const hook of speechHooks) {
 		if (hook.modify) {
 			console.log("Message shall be modified.");

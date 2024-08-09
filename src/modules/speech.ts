@@ -129,51 +129,58 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 		return msg.rawMessage;
 	}
 
+	let result = msg.originalMessage;
+
+	if (result.startsWith("/")) {
+		console.log("Message starts with /");
+		result = "/" + result;
+	} else {
+		if (agreeMessageHook(msg) === SpeechHookAllow.BLOCK) {
+			console.log("Message " + msg.originalMessage + " was blocked.");
+			console.groupEnd();
+			result="";
+		}
+	}
+
+	for (const hook of speechHooks) {
+		if (hook.modify) {
+			console.log("Message " + msg.originalMessage + " was modified.");
+			result = hook.modify(msg, result);
+		}
+	}
+	for (const hook of speechHooks) {
+		if (hook.onSend) {
+			console.log("Send message");
+			hook.onSend(msg, result);
+		}
+	}
+
+	console.groupEnd();
+	return result;
+}
+
+//#region Antigarble
+let antigarble = 0;
+
+function agreeMessageHook(msg: SpeechMessageInfo) {
+	console.groupCollapsed("Agree message hook");
 	// Let hooks block the messsage
 	let result: SpeechHookAllow = SpeechHookAllow.ALLOW;
 	for (const hook of speechHooks) {
 		if (hook.allowSend) {
 			const hookResult = hook.allowSend(msg);
 			if (hookResult === SpeechHookAllow.ALLOW_BYPASS) {
+				console.log("--> Message hook: allow");
 				result = SpeechHookAllow.ALLOW_BYPASS;
 			} else if (hookResult === SpeechHookAllow.BLOCK && result === SpeechHookAllow.ALLOW) {
+				console.log("--> Message hook: block");
 				result = SpeechHookAllow.BLOCK;
 			}
 		}
 	}
-
-	if (result === SpeechHookAllow.BLOCK) {
-		console.log("Message " + msg.originalMessage + " was blocked.");
-		console.groupEnd();
-		return null;
-	}
-	let message = msg.originalMessage;
-	// Let hooks modify the message
-	for (const hook of speechHooks) {
-		if (hook.modify) {
-			console.log("Message " + msg.originalMessage + " was modified.");
-			message = hook.modify(msg, message);
-		}
-	}
-
-	// Let hooks react to actual message that will be sent
-	for (const hook of speechHooks) {
-		if (hook.onSend) {
-			hook.onSend(msg, message);
-		}
-	}
-
-	// Escape '/' if message starts with it
-	if (message.startsWith("/")) {
-		console.log("Message starts with /");
-		message = "/" + message;
-	}
 	console.groupEnd();
-	return message;
+	return result;
 }
-
-//#region Antigarble
-let antigarble = 0;
 
 function setAntigarble(value: number): boolean {
 	if (![0, 1, 2].includes(value)) {

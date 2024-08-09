@@ -115,7 +115,7 @@ function parseMsg(msg: string): (SpeechMessageInfo | null) {
 		originalMessage: msg,
 		target: ChatRoomTargetMemberNumber,
 		noOOCMessage: msg.replace(/\([^)]*\)*\s?/gs, ""),
-		hasOOC: msg.startsWith("("),
+		hasOOC: msg.includes("("),
 	};
 }
 
@@ -123,8 +123,7 @@ function parseMsg(msg: string): (SpeechMessageInfo | null) {
  * @returns The message that should be sent, or `null` if stopped
  */
 function processMsg(msg: SpeechMessageInfo): string | null {
-	console.log("Strat processMsg");
-	console.groupCollapsed();
+	console.groupCollapsed("Processing message: " + msg.originalMessage);
 	// Don't modify commands this way
 	if (msg.type === "Command") {
 		return msg.rawMessage;
@@ -152,7 +151,7 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 	// Let hooks modify the message
 	for (const hook of speechHooks) {
 		if (hook.modify) {
-			console.log("Modify message: " + msg.originalMessage);
+			console.log("Message " + msg.originalMessage + " was modified.");
 			message = hook.modify(msg, message);
 		}
 	}
@@ -166,8 +165,10 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 
 	// Escape '/' if message starts with it
 	if (message.startsWith("/")) {
+		console.log("Message starts with /");
 		message = "/" + message;
 	}
+	console.groupEnd();
 	return message;
 }
 

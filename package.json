@@ -21,6 +21,7 @@
 		"@types/lodash-es": "^4.17.10",
 		"bondage-club-mod-sdk": "^1.2.0",
 		"lodash-es": "^4.17.21",
+		"yarn": "^1.22.22",
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
@@ -33,7 +34,7 @@
 		"clean-webpack-plugin": "^4.0.0",
 		"copy-webpack-plugin": "^11.0.0",
 		"cross-env": "^7.0.3",
-		"eslint": "^8.52.0",
+		"eslint": "^8.57.0",
 		"eslint-plugin-deprecation": "^2.0.0",
 		"expect-puppeteer": "^9.0.1",
 		"express": "^4.18.2",

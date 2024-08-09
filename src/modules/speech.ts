@@ -146,10 +146,12 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 		}
 	}
 
-	for (const hook of speechHooks) {
-		if (hook.onSend) {
-			console.log("Send message");
-			hook.onSend(msg, result);
+	if (agreeMessageHook(msg) === SpeechHookAllow.ALLOW) {
+		for (const hook of speechHooks) {
+			if (hook.onSend) {
+				console.log("Send message");
+				hook.onSend(msg, result);
+			}
 		}
 	}
 
@@ -162,7 +164,6 @@ let antigarble = 0;
 
 function agreeMessageHook(msg: SpeechMessageInfo) {
 	console.groupCollapsed("Agree message hook");
-	// Let hooks block the messsage
 	let result: SpeechHookAllow = SpeechHookAllow.ALLOW;
 	for (const hook of speechHooks) {
 		if (hook.allowSend) {

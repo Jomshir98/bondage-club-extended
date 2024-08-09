@@ -191,12 +191,12 @@ export function detectForbiddenOtherMods(): string[] {
 	const enabledMods = bcModSDK.getModsInfo();
 	const names: string[] = new Array<string>();
 	enabledMods.forEach(element => {
-		console.log(element.name);
 		if (FORBIDDEN_BC_MODULES.includes(element.name)) {
 			names.push(element.name);
+			console.warn("--> Found forbidden mod: "  + element.name);
 		}
 	});
-	console.warn("--> Found forbidden mods: "  + names.toString());
+	
 	return names;
 }
 

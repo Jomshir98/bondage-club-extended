@@ -109,10 +109,20 @@ function parseMsg(msg: string): (SpeechMessageInfo | null) {
 	let type: "Chat" | "Emote" | "Whisper" | "Command" = "Chat";
 	type = ChatRoomTargetMemberNumber > 0 ? "Whisper": type;
 	type = msg.startsWith("/") ? "Command" : type;
-	type = msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3) ? "Emote" : type;
+	type = msg.startsWith("*") || msg.startsWith("/me") || msg.startsWith("/action") ||
+		(Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3) ? "Emote" : type;
 
 	const noOOCMessage = msg.replace(/\([^)]*\)*\s?/gs, "");
 	const hasOOC: boolean = msg.includes("(");
+
+	if (Player.ChatSettings?.MuStylePoses && msg.startsWith(":")) msg = msg.substring(1);
+	else {
+		msg = msg.replace(/^\*/, "").replace(/\*$/, "");
+		if (msg.startsWith("/me ")) msg = msg.replace("/me ", "");
+		if (msg.startsWith("/action ")) msg = msg.replace("/action ", "*");
+	}
+
+	msg = msg.trim();
 
 	return {
 		type,
@@ -127,7 +137,11 @@ function parseMsg(msg: string): (SpeechMessageInfo | null) {
 /**
  * @returns The message that should be sent, or `null` if stopped
  */
-function processMsg(msg: SpeechMessageInfo): string | null {
+function processMsg(msg: SpeechMessageInfo | null): string | null {
+	if (!msg) {
+		return null;
+	}
+
 	console.groupCollapsed("Processing message: " + msg.originalMessage);
 	console.log("Message: " + JSON.stringify(msg, null, 2));
 
@@ -142,6 +156,9 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 	if (agreeMessageHook(msg) === SpeechHookAllow.BLOCK) {
 		console.log("Message shall be blocked.");
 		console.groupEnd();
+		if (RulesGetRuleState("speech_force_retype").isEnforced) {
+			clearChat(msg.rawMessage);
+		}
 		return null;
 	}
 
@@ -202,10 +219,6 @@ export class ModuleSpeech extends BaseModule {
 					const msg2 = processMsg(info);
 					// Message is rejected
 					if (msg2 === null) {
-						// There is rule to force retype of rejected message
-						if (RulesGetRuleState("speech_force_retype").isEnforced) {
-							clearChat(msg);
-						}
 						return true;
 					}
 					args[0] = msg2;
@@ -261,26 +274,11 @@ export class ModuleSpeech extends BaseModule {
 
 		hookFunction("ChatRoomSendEmote", 5, (args, next) => {
 			const rawMessage = args[0];
-			let msg = rawMessage;
-			if (Player.ChatSettings?.MuStylePoses && msg.startsWith(":")) msg = msg.substring(1);
-			else {
-				msg = msg.replace(/^\*/, "").replace(/\*$/, "");
-				if (msg.startsWith("/me ")) msg = msg.replace("/me ", "");
-				if (msg.startsWith("/action ")) msg = msg.replace("/action ", "*");
-			}
-			msg = msg.trim();
-			const msg2 = processMsg({
-				type: "Emote",
-				rawMessage,
-				originalMessage: msg,
-				target: ChatRoomTargetMemberNumber,
-				noOOCMessage: msg,
-				hasOOC: false,
-			});
-			if (msg2 !== null) {
-				return next(["*" + msg2]);
-			} else if (RulesGetRuleState("speech_force_retype").isEnforced) {
-				clearChat(msg);
+			const result = parseMsg(rawMessage);
+			const msg = processMsg(result);
+
+			if (msg !== null && result?.type === "Emote") {
+				return next(["*" + msg]);
 			}
 		});
 

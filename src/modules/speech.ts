@@ -158,7 +158,6 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 	return result;
 }
 
-//#region Antigarble
 const antigarble = 0;
 
 function agreeMessageHook(msg: SpeechMessageInfo) {
@@ -179,8 +178,6 @@ function agreeMessageHook(msg: SpeechMessageInfo) {
 	console.groupEnd();
 	return result;
 }
-
-//#endregion
 
 export class ModuleSpeech extends BaseModule {
 

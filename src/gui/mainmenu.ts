@@ -9,7 +9,6 @@ import { GuiRelationships } from "./relationships";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";
 import { VERSION } from "../config";
-import { icon_discord, icon_ExternalLink, icon_heart, icon_patreon } from "../resources";
 import { drawIcon, DrawImageEx } from "../utilsClub";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { GuiConditionViewRules } from "./conditions_view_rules";
@@ -194,13 +193,10 @@ export class GuiMainMenu extends GuiSubscreen {
 			}
 			setSubscreen(new GuiTutorial(this.character, false));
 		}
-
 		// Changelog
 		if (MouseIn(1450, 590, 400, 90) && this.character.isPlayer()) {
 			window.open(`https://github.com/kinksideofthemoon/StrictBCX/releases/tag/${VERSION.replace(/-[0-f]+$/i, "")}`, "_blank");
 		}
-		
-
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];
 			const PX = Math.floor(i / 6);

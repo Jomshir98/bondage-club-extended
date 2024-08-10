@@ -9,7 +9,7 @@ import { GuiRelationships } from "./relationships";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";
 import { VERSION } from "../config";
-import { icon_ExternalLink, icon_heart} from "../resources";
+import { icon_ExternalLink, icon_heart } from "../resources";
 import { drawIcon, DrawImageEx } from "../utilsClub";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { GuiConditionViewRules } from "./conditions_view_rules";

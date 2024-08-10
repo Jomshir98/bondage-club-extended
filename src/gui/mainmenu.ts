@@ -104,9 +104,9 @@ export class GuiMainMenu extends GuiSubscreen {
 	Run() {
 		let heartSteps: [number, string][] | undefined;
 
-		DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
+		DrawText("- Bondage Club Extended STRICT -", 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png", "Show the BCX tutorial again");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png", "Show the StrictBCX tutorial again");
 
 		if (this.character.supporterStatus === "supporter") {
 			DrawText("BCX Supporter", 690, 125, "#DAA520", "#FFD700");
@@ -177,14 +177,6 @@ export class GuiMainMenu extends GuiSubscreen {
 			DrawText(`View changelog`, 1450 + 350 / 2, 635, "Black", "");
 			DrawImageEx(icon_ExternalLink, 1770, 620, { Width: 30, Height: 30 });
 			DrawButton(1450, 700, 400, 90, "", "White", "", "For saying 'thank you' with a tip");
-			MainCanvas.textAlign = "left";
-			DrawText(`BCX Patreon`, 1450 + 90, 745, "Black", "");
-			drawIcon(MainCanvas, icon_patreon, 1450 + 10, 693 + 17, 70, 70, 180, 1, 0, "Black", "");
-			DrawImageEx(icon_ExternalLink, 1770, 730, { Width: 30, Height: 30 });
-			DrawButton(1450, 810, 400, 90, "", "White", "", "Open invite to BCX Discord server");
-			DrawText(`BCX Discord`, 1455 + 90, 855, "Black", "");
-			drawIcon(MainCanvas, icon_discord, 1450 + 10, 810 + 17, 1, 1, 1, 1, 0, "#5865F2", "");
-			DrawImageEx(icon_ExternalLink, 1770, 840, { Width: 30, Height: 30 });
 			MainCanvas.textAlign = "center";
 		} else {
 			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 765, "Black", "");
@@ -205,16 +197,9 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		// Changelog
 		if (MouseIn(1450, 590, 400, 90) && this.character.isPlayer()) {
-			window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? "master" : "stable"}/CHANGELOG.md`, "_blank");
+			window.open(`https://github.com/kinksideofthemoon/StrictBCX/releases/tag/${VERSION.replace(/-[0-f]+$/i, "")}`, "_blank");
 		}
-		// Patreon
-		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {
-			window.open(`https://patreon.com/Jomshir98`, "_blank");
-		}
-		// Discord invite
-		if (MouseIn(1450, 810, 400, 90) && this.character.isPlayer()) {
-			window.open("https://discord.gg/SHJMjEh9VH", "_blank");
-		}
+		
 
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];

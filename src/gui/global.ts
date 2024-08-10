@@ -35,7 +35,7 @@ export class GuiGlobal extends GuiSubscreen {
 		DrawImageEx("Icons/Introduction.png", 840 + 20, 200 + 20, { Height: 50, Width: 50 });
 		DrawTextFit(`Your initially selected BCX preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
 
-		DrawTextFit("YOU ARE USING STRICT VERSION OF BCX. USE IT AT YOUR OWN RISK.", 1400, 244, 850, "Red");
+		DrawTextFit("YOU ARE USING STRICT VERSION OF BCX. USE IT AT YOUR OWN RISK.", 1800, 244, 850, "Red");
 
 		// Icon toggles
 		MainCanvas.textAlign = "left";

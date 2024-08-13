@@ -7,6 +7,7 @@ import { getChatroomCharacter } from "../characters";
 import { dictionaryProcess, escapeRegExp, isObject } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
+import leven from 'leven';
 
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
 	for (let sound of sounds) {
@@ -265,11 +266,15 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.bannedWords)
 					return true;
-				transgression = state.customData?.bannedWords.find(i =>
-					(msg.originalMessage).toLocaleLowerCase().match(
-						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
-					)
-				);
+
+				state.customData?.bannedWords.forEach((bannedWord: string): boolean | string => {
+					if (leven(msg.originalMessage, bannedWord) < 3) {
+						console.log("Found similarity to " + bannedWord + " in message: " + msg.originalMessage + ". Message blocked.");
+						transgression = bannedWord;
+						return bannedWord;
+					}
+					return false;
+				});
 				return transgression === undefined;
 			};
 			registerSpeechHook({

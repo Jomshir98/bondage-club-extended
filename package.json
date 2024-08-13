@@ -20,7 +20,9 @@
 	"dependencies": {
 		"@types/lodash-es": "^4.17.10",
 		"bondage-club-mod-sdk": "^1.2.0",
+		"leven": "^4.0.0",
 		"lodash-es": "^4.17.21",
+		"node-nlp-typescript": "^1.0.3",
 		"yarn": "^1.22.22",
 		"zod": "^3.22.4"
 	},
@@ -43,6 +45,7 @@
 		"jest-environment-node": "^29.7.0",
 		"mongodb-memory-server-core": "^9.0.1",
 		"nanoid": "^3.0.0",
+		"node-nlp": "^4.27.0",
 		"portfinder": "^1.0.32",
 		"puppeteer": "^21.4.1",
 		"simple-git": "^3.20.0",

@@ -281,8 +281,9 @@ export class ModuleChatroom extends BaseModule {
 
 		if (!NMod) {
 			hookFunction("ChatRoomCreateElement", 0, (args, next) => {
-				next(args);
+				const res = next(args);
 				ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
+				return res;
 			});
 		}
 

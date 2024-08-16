@@ -14,6 +14,15 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.0.2
+
+This update fixes compatibility with BC R107:
+- Fixed a missing tooltip on Search menu icon
+- The automatic refresh on the friend list is now part of BC, so it's been removed
+- The "Hide online friends if blind" was updated to work with new friendlist, thanks Rama!
+- A few small tweaks to account for changes between R104 and R107
+- The "Track BCX activation" has been temporarily disabled (it's still here, but doesn't do anything), as changes in BC have made unfeasable to track properly
+
 ## 1.0.1
 
 This update fixes compatibility with BC R104:

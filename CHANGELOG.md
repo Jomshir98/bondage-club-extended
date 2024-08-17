@@ -21,7 +21,8 @@ This update fixes compatibility with BC R107:
 - The automatic refresh on the friend list is now part of BC, so it's been removed
 - The "Hide online friends if blind" was updated to work with new friendlist, thanks Rama!
 - A few small tweaks to account for changes between R104 and R107
-- The "Track BCX activation" has been temporarily disabled (it's still here, but doesn't do anything), as changes in BC have made unfeasable to track properly
+- The "Track BCX activation" has been fixed
+- The fields in the Chat Admin screen are now properly made visible again when closing the preset screen
 
 ## 1.0.1
 

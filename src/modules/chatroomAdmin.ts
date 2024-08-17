@@ -502,6 +502,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 	if (MouseIn(124, 147, 90, 90)) {
 		overwriteMode = undefined;
 		onSecondPage = !onSecondPage;
+		ElementToggleGeneratedElements("ChatAdmin", true);
 		return;
 	}
 	if (MouseIn(800, 360, 380, 80)) {

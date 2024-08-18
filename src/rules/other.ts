@@ -245,7 +245,7 @@ export function initRules_other() {
 			});
 
 			if (state.inEffect && state.internalData !== undefined) {
-				const { permissions } = ServerUnPackItemPermissions(BCXLoginTimedata, Player);
+				const { permissions } = ServerUnPackItemPermissions(BCXLoginTimedata, Player.GetDifficulty() >= 3);
 				if (
 					!BCXLoadedBeforeLogin ||
 					!hasTrackingEntry(permissions, state.internalData)

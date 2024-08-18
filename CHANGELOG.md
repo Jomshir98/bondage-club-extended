@@ -23,6 +23,7 @@ This update fixes compatibility with BC R107:
 - A few small tweaks to account for changes between R104 and R107
 - The "Track BCX activation" has been fixed
 - The fields in the Chat Admin screen are now properly made visible again when closing the preset screen
+- Switched the "Restrict allowed body poses" to use the new pose changing machinery in BC, thanks Rama!
 
 ## 1.0.1
 

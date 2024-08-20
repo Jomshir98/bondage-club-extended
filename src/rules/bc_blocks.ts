@@ -461,31 +461,13 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
-			let bypassPoseChange = false;
-			hookFunction("PoseCanChangeUnaided", 3, (args, next) => {
-				if (!bypassPoseChange && state.isEnforced && state.customData?.poseButtons.includes(args[1]))
-					return false;
-				return next(args);
-			}, ModuleCategory.Rules);
-			hookFunction("ChatRoomCanAttemptStand", 3, (args, next) => {
-				if (state.isEnforced && state.customData?.poseButtons.includes("BaseLower"))
-					return false;
-				return next(args);
-			}, ModuleCategory.Rules);
-			hookFunction("ChatRoomCanAttemptKneel", 3, (args, next) => {
-				if (state.isEnforced && state.customData?.poseButtons.includes("Kneel"))
-					return false;
-				return next(args);
-			}, ModuleCategory.Rules);
-			hookFunction("CharacterCanKneel", 3, (args, next) => {
-				if (state.isEnforced && state.customData?.poseButtons.includes("Kneel") && !Player.IsKneeling())
-					return false;
-				if (state.isEnforced && state.customData?.poseButtons.includes("BaseLower") && Player.IsKneeling())
-					return false;
-				bypassPoseChange = true;
-				const res = next(args);
-				bypassPoseChange = false;
-				return res;
+			hookFunction("PoseCanChangeUnaidedStatus", 0, ([C, poseName, ...args], next) => {
+				const status = next([C, poseName, ...args]);
+				if (C?.IsPlayer() && state.isEnforced && state.customData?.poseButtons.includes(poseName)) {
+					return Math.min(status, PoseChangeStatus.NEVER_WITHOUT_AID) as PoseChangeStatus;
+				} else {
+					return status;
+				}
 			}, ModuleCategory.Rules);
 		},
 	});

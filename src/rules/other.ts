@@ -1,10 +1,16 @@
+import { patchFunction } from "../patching";
 import { BCXLoadedBeforeLogin, BCXLoginTimedata, BCX_setTimeout } from "../BCXContext";
 import { ConditionsLimit } from "../constants";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { registerWhisperCommand } from "../modules/commands";
 import { registerRule, RuleType } from "../modules/rules";
-import { formatTimeInterval, isObject } from "../utils";
+import { formatTimeInterval } from "../utils";
 import { ChatRoomSendLocal } from "../utilsClub";
+
+/**
+ * Overlay type for BC's Character PermissionsItems
+ */
+type BCXPermissionItems = Character["PermissionItems"] & Partial<{ "BCX/GoodGirl": ItemPermissions; }>;
 
 export function initRules_other() {
 	let lastAction = Date.now();
@@ -204,22 +210,18 @@ export function initRules_other() {
 	});
 	*/
 
-	const removeTrackingEntry = (hiddenItems: any[]) => {
-		for (; ;) {
-			const index = hiddenItems.findIndex(a => isObject(a) && typeof a.Name === "string" && a.Name.startsWith("GoodGirl") && a.Group === "BCX");
-			if (index < 0)
-				break;
-			hiddenItems.splice(index, 1);
-		}
+	const removeTrackingEntry = (permissionItems: Character["PermissionItems"]) => {
+		delete (permissionItems as BCXPermissionItems)["BCX/GoodGirl"];
 	};
 
-	const hasTrackingEntry = (hiddenItems: any[], token: number) => {
-		return hiddenItems.some(a => isObject(a) && a.Name === `GoodGirl${token}` && a.Group === "BCX");
+	const hasTrackingEntry = (permissionItems: Character["PermissionItems"], token: number) => {
+		return !!(permissionItems as BCXPermissionItems)["BCX/GoodGirl"]?.TypePermissions[token.toString()];
 	};
 
-	const addTrackingEntry = (hiddenItems: any[], token: number) => {
-		removeTrackingEntry(hiddenItems);
-		hiddenItems.push({ Name: `GoodGirl${token}`, Group: "BCX" });
+	const addTrackingEntry = (permissionItems: Character["PermissionItems"], token: number) => {
+		const perms = (permissionItems as BCXPermissionItems);
+		perms["BCX/GoodGirl"] ??= PreferencePermissionGetDefault();
+		perms["BCX/GoodGirl"]!.TypePermissions = { [token.toString()]: "Favorite" };
 	};
 
 	registerRule("other_track_BCX_activation", {
@@ -238,21 +240,25 @@ export function initRules_other() {
 		internalDataDefault: () => Math.floor(Math.random() * 1_000_000),
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
+			patchFunction("ServerUnPackItemPermissions", {
+				"let asset = AssetGet(\"Female3DCG\", Group, Name);": "let asset = Group !== 'BCX' ? AssetGet(\"Female3DCG\", Group, Name) : {};",
+			});
+
 			if (state.inEffect && state.internalData !== undefined) {
+				const { permissions } = ServerUnPackItemPermissions(BCXLoginTimedata, Player.GetDifficulty() >= 3);
 				if (
 					!BCXLoadedBeforeLogin ||
-					!Array.isArray(BCXLoginTimedata.HiddenItems) ||
-					!hasTrackingEntry(BCXLoginTimedata.HiddenItems, state.internalData)
+					!hasTrackingEntry(permissions, state.internalData)
 				) {
 					BCX_setTimeout(() => {
 						state.trigger();
 						state.internalData = Math.floor(Math.random() * 1_000_000);
-						addTrackingEntry(Player.HiddenItems, state.internalData);
+						addTrackingEntry(Player.PermissionItems, state.internalData);
 						ServerPlayerBlockItemsSync();
 					}, 3_500);
 				} else {
 					state.internalData = Math.floor(Math.random() * 1_000_000);
-					addTrackingEntry(Player.HiddenItems, state.internalData);
+					addTrackingEntry(Player.PermissionItems, state.internalData);
 					ServerPlayerBlockItemsSync();
 				}
 			}
@@ -260,18 +266,18 @@ export function initRules_other() {
 		stateChange(state, newState) {
 			if (newState) {
 				state.internalData = Math.floor(Math.random() * 1_000_000);
-				addTrackingEntry(Player.HiddenItems, state.internalData);
+				addTrackingEntry(Player.PermissionItems, state.internalData);
 				ServerPlayerBlockItemsSync();
 			} else {
-				removeTrackingEntry(Player.HiddenItems);
+				removeTrackingEntry(Player.PermissionItems);
 				ServerPlayerBlockItemsSync();
 			}
 		},
 		tick(state) {
 			if (state.inEffect && state.internalData !== undefined) {
-				if (!hasTrackingEntry(Player.HiddenItems, state.internalData) || Math.random() < 0.01) {
+				if (!hasTrackingEntry(Player.PermissionItems, state.internalData) || Math.random() < 0.01) {
 					state.internalData = Math.floor(Math.random() * 1_000_000);
-					addTrackingEntry(Player.HiddenItems, state.internalData);
+					addTrackingEntry(Player.PermissionItems, state.internalData);
 					ServerPlayerBlockItemsSync();
 				}
 			}

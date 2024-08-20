@@ -348,7 +348,7 @@ type BCX_Rule =
 
 type RuleCustomData = {
 	block_restrict_allowed_poses: {
-		poseButtons: AssetPoseName[];
+		poseButtons: string[];
 	};
 	block_entering_rooms: {
 		roomList: string[];

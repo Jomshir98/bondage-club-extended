@@ -190,6 +190,8 @@ export function detectOtherMods() {
 export function detectForbiddenOtherMods(): string[] {
 	const enabledMods = bcModSDK.getModsInfo();
 	const names: string[] = new Array<string>();
+	const { BondageClubTools }= detectOtherMods();
+	if (BondageClubTools) names.push("BC Tools");
 	enabledMods.forEach(element => {
 		if (FORBIDDEN_BC_MODULES.includes(element.name)) {
 			names.push(element.name);

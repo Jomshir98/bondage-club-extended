@@ -64,8 +64,8 @@ export function SetDialogMenuButtonArray(newValue: BCX_DialogMenuButton[]): void
 
 export class ModuleDialog extends BaseModule {
 	load() {
-		OverridePlayerDialog("BCX_Search", "Filter items");
-		OverridePlayerDialog("BCX_SearchExit", "");
+		OverridePlayerDialog("DialogMenuBCX_Search", "Filter items");
+		OverridePlayerDialog("DialogMenuBCX_SearchExit", "");
 		RedirectGetImage("Icons/BCX_Search.png", "Icons/Search.png");
 		RedirectGetImage("Icons/BCX_SearchExit.png", "Icons/Remove.png");
 		hookFunction("DialogMenuButtonBuild", 5, (args, next) => {

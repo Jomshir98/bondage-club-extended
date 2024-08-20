@@ -124,7 +124,7 @@ function parseThemeRoom(value: string): void {
 	currentThemeRoom.Type = typeof parsed.Type === "number" && ThemeRoomType[parsed.Type] !== undefined ? parsed.Type : ThemeRoomType.Other;
 	currentThemeRoom.Setting = typeof parsed.Setting === "number" && ThemeRoomSetting[parsed.Setting] !== undefined ? parsed.Setting : undefined;
 	currentThemeRoom.Limits = new Set(Array.isArray(parsed.Limits) ? parsed.Limits.filter(i => THEME_ROOM_LIMITS.includes(i)) : []);
-	currentThemeRoom.BlockCategories = Array.isArray(parsed.BlockCategories) ? parsed.BlockCategories.filter(i => typeof i === "string") : [];
+	currentThemeRoom.BlockCategories = Array.isArray(parsed.BlockCategories) ? parsed.BlockCategories.filter(i => typeof i === "string") as ServerChatRoomBlockCategory[] : [];
 	currentThemeRoom.Background = typeof parsed.Background === "string" ? parsed.Background : "";
 	currentThemeRoom.IntroText = typeof parsed.IntroText === "string" ? parsed.IntroText : "";
 }
@@ -502,6 +502,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 	if (MouseIn(124, 147, 90, 90)) {
 		overwriteMode = undefined;
 		onSecondPage = !onSecondPage;
+		ElementToggleGeneratedElements("ChatAdmin", true);
 		return;
 	}
 	if (MouseIn(800, 360, 380, 80)) {

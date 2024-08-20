@@ -1,7 +1,7 @@
 import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
-import { patchFunction, hookFunction, trackFunction } from "../patching";
+import { hookFunction, trackFunction } from "../patching";
 import { ChatRoomActionMessage, getCharacterName, InfoBeep, updateChatroom } from "../utilsClub";
 import { getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
@@ -672,24 +672,29 @@ export function initRules_bc_alter() {
 			},
 		},
 		load(state) {
-			patchFunction("FriendListLoadFriendList", {
-				"data.forEach(friend => {": 'data.forEach(friend => { if (typeof friend.MemberNumber !== "number") return;',
-			});
-			patchFunction("FriendListLoadFriendList", {
-				"FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;": "if (typeof friend.MemberNumber === 'number') FriendListContent += `<div class='FriendListLinkColumn' onClick='FriendListBeep(${friend.MemberNumber})'> ${BeepCaption} </div>`;",
-			});
 			hookFunction("FriendListLoadFriendList", 1, (args, next) => {
-				const data = args[0] as any[];
+				const ret = next(args);
+
 				const allowList = state.customData?.allowedMembers;
 				if (state.isEnforced && allowList && Player.GetBlindLevel() >= 3) {
-					data.forEach((friend: any) => {
-						if (!allowList.includes(friend.MemberNumber)) {
-							friend.MemberName = "Someone";
-							friend.MemberNumber = "######";
+					document.querySelectorAll(".friend-list-row").forEach(row => {
+						// Check that all expected elements are present
+						const memberNumberEl = row.querySelector(".MemberNumber");
+						const memberNameEl = row.querySelector(".MemberName");
+						const beepButton = row.querySelector<HTMLButtonElement>("button.fl-online-friends-content");
+						if (!memberNumberEl || !memberNameEl || !beepButton) {
+							return;
+						}
+
+						const memberNumber = Number.parseInt(memberNumberEl.textContent ?? "nan", 10);
+						if (!allowList.includes(memberNumber)) {
+							beepButton.disabled = true;
+							memberNumberEl.textContent = "######";
+							memberNameEl.textContent = "Someone";
 						}
 					});
 				}
-				return next(args);
+				return ret;
 			});
 		},
 	});

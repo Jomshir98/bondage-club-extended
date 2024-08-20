@@ -348,7 +348,7 @@ type BCX_Rule =
 
 type RuleCustomData = {
 	block_restrict_allowed_poses: {
-		poseButtons: string[];
+		poseButtons: AssetPoseName[];
 	};
 	block_entering_rooms: {
 		roomList: string[];
@@ -761,8 +761,6 @@ interface ModStorage {
 	preset: import("./constants").Preset;
 	menuShouldDisplayTutorialHelp?: true;
 	chatShouldDisplayFirstTimeHelp?: true;
-	/** Toggle, if friendlist autorefresh is enabled */
-	FLAutorefresh?: true;
 	/** Toggle, if player chose to hide BCX icon in chatroom */
 	chatroomIconHidden?: true;
 	/** Toggle, if player chose to hide the supporter status */

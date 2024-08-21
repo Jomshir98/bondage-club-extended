@@ -142,25 +142,23 @@ function processMsg(msg: SpeechMessageInfo | null): string | null {
 	if (!msg) {
 		return null;
 	}
+	let result: string | null = msg.originalMessage;
 
 	console.groupCollapsed("Processing message: " + msg.originalMessage);
 	console.log("Message: " + JSON.stringify(msg, null, 2));
 
 	if (msg.type === "Command") {
 		console.log("Command");
+
 		FORBIDDEN_BC_COMMANDS.forEach(element => {
 			if (msg.rawMessage.includes(element)) {
 				console.log("Command " + msg.rawMessage + " is forbidden");
-				console.groupEnd();
-				return null;
-			} else {
-				console.groupEnd();
-				return msg.rawMessage;
+				result = null;
 			}
 		});
+		console.groupEnd();
+		return result;
 	}
-
-	let result = msg.originalMessage;
 
 	if (agreeMessageHook(msg) === SpeechHookAllow.BLOCK) {
 		console.log("Message shall be blocked.");

@@ -4,6 +4,7 @@ import { hookFunction } from "../patching";
 import { isObject } from "../utils";
 import { RulesGetRuleState } from "./rules";
 import { BaseModule } from "./_BaseModule";
+import { FORBIDDEN_BC_COMMANDS } from "../config";
 
 export interface SpeechMessageInfo {
 	readonly type: "Chat" | "Emote" | "Whisper" | "Command";
@@ -147,8 +148,16 @@ function processMsg(msg: SpeechMessageInfo | null): string | null {
 
 	if (msg.type === "Command") {
 		console.log("Command");
-		console.groupEnd();
-		return msg.rawMessage;
+		FORBIDDEN_BC_COMMANDS.forEach(element => {
+			if (msg.rawMessage.includes(element)) {
+				console.log("Command " + msg.rawMessage + " is forbidden");
+				console.groupEnd();
+				return null;
+			} else {
+				console.groupEnd();
+				return msg.rawMessage;
+			}
+		});
 	}
 
 	let result = msg.originalMessage;

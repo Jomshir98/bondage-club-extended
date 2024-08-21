@@ -154,3 +154,9 @@ export const FORBIDDEN_BC_MODULES: string[] = [
 	"BCTweaks",
 	"BC Tools",
 ];
+
+export const FORBIDDEN_BC_COMMANDS: string[] = [
+	"versions",
+	"safeword",
+	"unlock",
+];

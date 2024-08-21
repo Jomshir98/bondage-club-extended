@@ -770,6 +770,13 @@ export class ModuleCommands extends BaseModule {
 			respond(response);
 			return true;
 		}, null, false);
+
+		registerCommand("utility", "versions", "- Check current version of StrictBCX", (msg) => {
+			ChatRoomActionMessage(BCX_VERSION);
+			return true;
+		});
+
+		aliasCommand("action", "a");
 	}
 
 	unload() {

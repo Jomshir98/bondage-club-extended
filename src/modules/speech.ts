@@ -6,6 +6,10 @@ import { RulesGetRuleState } from "./rules";
 import { BaseModule } from "./_BaseModule";
 import { FORBIDDEN_BC_COMMANDS } from "../config";
 
+import { SENTRY_CONFIG } from "../config";
+import * as Sentry from "@sentry/browser";
+Sentry.init(SENTRY_CONFIG);
+
 export interface SpeechMessageInfo {
 	readonly type: "Chat" | "Emote" | "Whisper" | "Command";
 	readonly target: number | null;

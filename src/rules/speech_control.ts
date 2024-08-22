@@ -9,6 +9,10 @@ import { ChatRoomSendLocal } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 import leven from "leven";
 
+import { SENTRY_CONFIG } from "../config";
+import * as Sentry from "@sentry/browser";
+Sentry.init(SENTRY_CONFIG);
+
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
 	for (let sound of sounds) {
 		sound = sound.toLocaleLowerCase();

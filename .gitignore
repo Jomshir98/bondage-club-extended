@@ -2,6 +2,8 @@ node_modules
 dist
 /docs
 /coverage
+/.vs
+/.vscode
 .node-version
 
 # Sentry Config File
@@ -11,3 +13,6 @@ dist
 /.vs/StrictBCX/v17/.wsuo
 /.vs/StrictBCX/v17/DocumentLayout.json
 /.vs/StrictBCX/FileContentIndex
+/.vs/slnx.sqlite
+/.vs/VSWorkspaceState.json
+/.vscode/settings.json

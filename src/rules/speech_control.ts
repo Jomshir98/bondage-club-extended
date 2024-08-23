@@ -268,6 +268,7 @@ export function initRules_bc_speech_control() {
 		init(state) {
 			let transgression: undefined | string;
 			const check = (msg: SpeechMessageInfo): boolean => {
+				transgression = undefined;
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.bannedWords)
 					return true;
 				state.customData?.bannedWords.forEach((bannedWord: string): undefined | string => {
@@ -275,7 +276,7 @@ export function initRules_bc_speech_control() {
 					messageArray.forEach((msgWord: string): undefined | string => {
 						if (leven(msgWord, bannedWord) < 2) {
 							console.log("Found similarity to " + bannedWord + " in message: " + msg.originalMessage + ". Message blocked.");
-							transgression = msgWord + "(similar to" + bannedWord + ")";
+							transgression = msgWord + "(similar to " + bannedWord + ")";
 							return bannedWord;
 						}
 						return undefined;

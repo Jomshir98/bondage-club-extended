@@ -274,7 +274,7 @@ export function initRules_bc_speech_control() {
 				state.customData?.bannedWords.forEach((bannedWord: string): undefined | string => {
 					const messageArray = msg.originalMessage.split(" ");
 					messageArray.forEach((msgWord: string): undefined | string => {
-						if (leven(msgWord.replace(/(.)\1+/g, '$1'), bannedWord.replace(/(.)\1+/g, '$1')) < 1) {
+						if (leven(msgWord.replace(/(.)\1+/g, "$1"), bannedWord.replace(/(.)\1+/g, "$1")) < 1) {
 							console.log("Found similarity to " + bannedWord + " in message: " + msg.originalMessage + ". Message blocked.");
 							transgression = msgWord + "(similar to " + bannedWord + ")";
 							return bannedWord;

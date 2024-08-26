@@ -20,7 +20,7 @@ setTimeout(
 			const n = document.createElement("script");
 			n.setAttribute("language", "JavaScript");
 			n.setAttribute("crossorigin", "anonymous");
-			n.setAttribute("src", "https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcx.js");
+			n.setAttribute("src", "https://kinksideofthemoon.github.io/StrictBCX/devel/bcx.js");
 			n.onload = () => n.remove();
 			document.head.appendChild(n);
 		}

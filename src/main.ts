@@ -104,6 +104,8 @@ export function init() {
 	InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
 	console.info(`BCX loaded! Version: ${VERSION}`);
 
+	checkWCEAntiGarble();
+
 	ctx.end();
 }
 
@@ -116,4 +118,16 @@ export function unload(): true {
 	delete window.BCX_Loaded;
 	console.info("BCX: Unloaded.");
 	return true;
+}
+
+function checkWCEAntiGarble(): boolean {
+
+	if (Player.OnlineSettings?.BCE) {
+		console.log("BCE Online Settings: ");
+		console.groupCollapsed();
+		console.log(Player.OnlineSettings.BCE);
+		console.groupEnd();
+	}
+
+	return false;
 }

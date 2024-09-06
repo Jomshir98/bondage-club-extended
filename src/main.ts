@@ -120,12 +120,27 @@ export function unload(): true {
 	return true;
 }
 
+interface wceSettings {
+	[index: string]: string;
+}
+
 function checkWCEAntiGarble(): boolean {
-	console.log("WCE Settings");
-	console.groupCollapsed();
-	console.log(parseJSON(localStorage.getItem("antiGarble")));
-	console.log(parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC)));
-	console.groupEnd();
+
+	const settings: wceSettings | null = parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC));
+
+	if (settings) {
+		console.log("WCE Settings");
+		console.groupCollapsed();
+		console.log(parseJSON(localStorage.getItem("antiGarble")));
+		console.log(parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC)));
+		console.groupEnd();
+
+		settings.antiGarble = "false";
+		settings.antiDef = "false";
+
+		Player.ExtensionSettings.FBC = LZString.compressToBase64(JSON.stringify(settings));
+		ServerPlayerExtensionSettingsSync("FBC");
+	}
 	return false;
 }
 

@@ -5,6 +5,7 @@ import { isObject } from "../utils";
 import { RulesGetRuleState } from "./rules";
 import { BaseModule } from "./_BaseModule";
 import { FORBIDDEN_BC_COMMANDS } from "../config";
+import { checkWCEAntiGarble } from "../main";
 
 import { SENTRY_CONFIG } from "../config";
 import * as Sentry from "@sentry/browser";
@@ -143,6 +144,11 @@ function parseMsg(msg: string): (SpeechMessageInfo | null) {
  * @returns The message that should be sent, or `null` if stopped
  */
 function processMsg(msg: SpeechMessageInfo | null): string | null {
+
+	if (checkWCEAntiGarble()) {
+		return null;
+	}
+
 	if (!msg) {
 		return null;
 	}

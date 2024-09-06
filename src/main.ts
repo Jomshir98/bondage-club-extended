@@ -124,9 +124,11 @@ interface wceSettings {
 	[index: string]: string;
 }
 
-function checkWCEAntiGarble(): boolean {
+export function checkWCEAntiGarble(): boolean {
 
 	const settings: wceSettings | null = parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC));
+
+	const bceKey: string = `bce.settings.${Player?.AccountName}`;
 
 	if (settings) {
 		console.log("WCE Settings");
@@ -139,7 +141,9 @@ function checkWCEAntiGarble(): boolean {
 		settings.antiDef = "false";
 
 		Player.ExtensionSettings.FBC = LZString.compressToBase64(JSON.stringify(settings));
+		localStorage.setItem(bceKey, JSON.stringify(settings));
 		ServerPlayerExtensionSettingsSync("FBC");
+		return true;
 	}
 	return false;
 }

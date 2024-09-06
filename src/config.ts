@@ -169,7 +169,7 @@ export const FORBIDDEN_BC_COMMANDS: string[] = [
 export const SENTRY_CONFIG: Sentry.BrowserOptions = {
 	dsn: "https://55ab768d8a3f2e0278b494ae6876f982@o4507753726214144.ingest.de.sentry.io/4507753729163344",
 	maxBreadcrumbs: 50,
-	debug: true,
+	debug: false,
 	release: BCX_VERSION,
 	environment: "devel",
 	integrations: [

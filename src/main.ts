@@ -137,13 +137,16 @@ export function checkWCEAntiGarble(): boolean {
 		console.log(parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC)));
 		console.groupEnd();
 
-		settings.antiGarble = "false";
-		settings.antiDef = "false";
+		if (settings.antiGarble === "true") {
+			settings.antiGarble = "false";
+			settings.antiDef = "false";
 
-		Player.ExtensionSettings.FBC = LZString.compressToBase64(JSON.stringify(settings));
-		localStorage.setItem(bceKey, JSON.stringify(settings));
-		ServerPlayerExtensionSettingsSync("FBC");
-		return true;
+			Player.ExtensionSettings.FBC = LZString.compressToBase64(JSON.stringify(settings));
+			localStorage.setItem(bceKey, JSON.stringify(settings));
+			ServerPlayerExtensionSettingsSync("FBC");
+			return true;
+		}
+		return false;
 	}
 	return false;
 }

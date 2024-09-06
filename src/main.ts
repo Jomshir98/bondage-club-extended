@@ -121,13 +121,25 @@ export function unload(): true {
 }
 
 function checkWCEAntiGarble(): boolean {
-
-	if (Player.OnlineSettings?.BCE) {
-		console.log("BCE Online Settings: ");
-		console.groupCollapsed();
-		console.log(Player.OnlineSettings.BCE);
-		console.groupEnd();
-	}
+	console.log("WCE Settings");
+	console.groupCollapsed();
+	console.log(parseJSON(localStorage.getItem("antiGarble")));
+	console.log(parseJSON(LZString.decompressFromBase64(
+		Player.ExtensionSettings.FBC || (Player.OnlineSettings?.BCE ?? "")
+	) || null));
+	console.groupEnd();
 
 	return false;
+}
+
+export function parseJSON<T>(jsonString: string | null): T | null {
+	if (jsonString === null) {
+		return null;
+	}
+	try {
+		return JSON.parse(jsonString) as T;
+	} catch (e) {
+		console.error("parsing JSON", e);
+		return null;
+	}
 }

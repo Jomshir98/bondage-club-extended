@@ -124,11 +124,8 @@ function checkWCEAntiGarble(): boolean {
 	console.log("WCE Settings");
 	console.groupCollapsed();
 	console.log(parseJSON(localStorage.getItem("antiGarble")));
-	console.log(parseJSON(LZString.decompressFromBase64(
-		Player.ExtensionSettings.FBC || (Player.OnlineSettings?.BCE ?? "")
-	) || null));
+	console.log(parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC)));
 	console.groupEnd();
-
 	return false;
 }
 

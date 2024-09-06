@@ -23,12 +23,11 @@ function initWait() {
 		});
 		InfoBeep(`StrictBCX Ready!`);
 		console.log(`StrictBCX Ready!`);
-		Sentry.captureMessage("StrictBCX loaded");
 	} else {
 		console.debug("StrictBCX: Already logged in, init");
 		init();
 	}
 }
-
+Sentry.captureMessage("StrictBCX loaded");
 init_findBCXSource();
 initWait();

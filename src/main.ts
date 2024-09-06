@@ -128,26 +128,39 @@ export function checkWCEAntiGarble(): boolean {
 
 	const settings: wceSettings | null = parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC));
 
-	const bceKey: string = `bce.settings.${Player?.AccountName}`;
+	const bceKey: string= `bce.settings.${Player?.AccountName}`;
+	const localSettings: string | null = parseJSON(localStorage.getItem(bceKey));
+
+	console.groupCollapsed("WCE AntiGarble");
+
+	if (localSettings) {
+		console.log("Local Settings");
+		console.log(localSettings);
+	}
+
+	// if (JSON.parse(localSettings) === "true") {
+	// 	localStorage.setItem("antiGarble", "false");
+	// }
 
 	if (settings) {
-		console.log("WCE Settings");
-		console.groupCollapsed();
-		console.log(parseJSON(localStorage.getItem("antiGarble")));
-		console.log(parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC)));
-		console.groupEnd();
+		console.log("Remote Settings");
+		console.log(settings);
 
 		if (settings.antiGarble === "true") {
+			console.log("Found antiGarble enabled (" + settings.antiGarble + ")");
 			settings.antiGarble = "false";
 			settings.antiDef = "false";
 
 			Player.ExtensionSettings.FBC = LZString.compressToBase64(JSON.stringify(settings));
 			localStorage.setItem(bceKey, JSON.stringify(settings));
 			ServerPlayerExtensionSettingsSync("FBC");
+			console.groupEnd();
 			return true;
 		}
+		console.groupEnd();
 		return false;
 	}
+	console.groupEnd();
 	return false;
 }
 

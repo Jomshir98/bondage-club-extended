@@ -9,7 +9,7 @@ import { checkWCEAntiGarble } from "../main";
 
 import { SENTRY_CONFIG } from "../config";
 import * as Sentry from "@sentry/browser";
-import { InfoBeep } from "utilsClub";
+import { InfoBeep } from "../utilsClub";
 Sentry.init(SENTRY_CONFIG);
 
 export interface SpeechMessageInfo {

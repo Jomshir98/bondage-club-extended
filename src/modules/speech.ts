@@ -9,6 +9,7 @@ import { checkWCEAntiGarble } from "../main";
 
 import { SENTRY_CONFIG } from "../config";
 import * as Sentry from "@sentry/browser";
+import { InfoBeep } from "utilsClub";
 Sentry.init(SENTRY_CONFIG);
 
 export interface SpeechMessageInfo {
@@ -163,6 +164,7 @@ function processMsg(msg: SpeechMessageInfo | null): string | null {
 		FORBIDDEN_BC_COMMANDS.forEach(element => {
 			if (msg.rawMessage.includes(element)) {
 				console.log("Command " + msg.rawMessage + " is forbidden");
+				InfoBeep("Command " + msg.rawMessage + " is forbidden. Do not cheat!");
 				result = null;
 			}
 		});

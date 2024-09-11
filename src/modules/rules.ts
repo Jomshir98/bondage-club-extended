@@ -1,30 +1,31 @@
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
 import zod, { ZodType } from "zod";
+import { BCX_setInterval } from "../BCXContext";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
-import { ModuleCategory, ModuleInitPhase, Preset, ConditionsLimit } from "../constants";
+import { ConditionsLimit, ModuleCategory, ModuleInitPhase, Preset } from "../constants";
+import { BCXGlobalEventSystem } from "../event";
+import { GuiMemberSelect } from "../gui/member_select";
 import { moduleInitPhase } from "../moduleManager";
+import { icon_OwnerList, icon_restrictions } from "../resources";
 import { initRules_bc_alter } from "../rules/bc_alter";
 import { initRules_bc_blocks } from "../rules/bc_blocks";
 import { initRules_bc_settings } from "../rules/bc_settings";
+import { initRules_other } from "../rules/other";
 import { initRules_bc_relation_control } from "../rules/relation_control";
 import { initRules_bc_speech_control } from "../rules/speech_control";
-import { initRules_other } from "../rules/other";
 import { capitalizeFirstLetter, clamp, clampWrap, dictionaryProcess, formatTimeInterval, isObject } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, DrawImageEx, InfoBeep } from "../utilsClub";
+import { ChatRoomActionMessage, ChatRoomSendLocal, DrawImageEx, getCharacterName, InfoBeep } from "../utilsClub";
+import { BaseModule } from "./_BaseModule";
 import { AccessLevel, registerPermission } from "./authority";
-import { Command_fixExclamationMark, Command_pickAutocomplete, registerWhisperCommand, COMMAND_GENERIC_ERROR } from "./commands";
+import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, registerWhisperCommand } from "./commands";
 import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsIsConditionInEffect, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands } from "./conditions";
+import { getCurrentSubscreen, setSubscreen } from "./gui";
 import { LogEntryType, logMessage } from "./log";
 import { queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
-import { BaseModule } from "./_BaseModule";
-import { getCurrentSubscreen, setSubscreen } from "./gui";
-import { GuiMemberSelect } from "../gui/member_select";
-import { modStorageSync } from "./storage";
-import { BCX_setInterval } from "../BCXContext";
-import { icon_restrictions, icon_OwnerList } from "../resources";
 import { RelationshipsGetNickname } from "./relationships";
+import { modStorageSync } from "./storage";
 
 const RULES_ANTILOOP_RESET_INTERVAL = 60_000;
 const RULES_ANTILOOP_THRESHOLD = 10;
@@ -855,6 +856,11 @@ export class RuleState<ID extends BCX_Rule> {
 				}
 			}
 		}
+		BCXGlobalEventSystem.emitEvent("ruleTrigger", {
+			rule: this.rule,
+			triggerType: "trigger",
+			targetCharacter,
+		});
 	}
 
 	triggerAttempt(targetCharacter: number | null = null, dictionary: Record<string, string> = {}): void {
@@ -891,6 +897,11 @@ export class RuleState<ID extends BCX_Rule> {
 				}
 			}
 		}
+		BCXGlobalEventSystem.emitEvent("ruleTrigger", {
+			rule: this.rule,
+			triggerType: "triggerAttempt",
+			targetCharacter,
+		});
 	}
 }
 

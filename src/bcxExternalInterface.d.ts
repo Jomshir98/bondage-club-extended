@@ -69,6 +69,25 @@ interface BCX_Events {
 		group: string;
 	};
 	/**
+	 * Triggers whenever a rule triggers (either by BCX or by external API)
+	 * @note If you need extra data about rule's configuration, use `BCX_ModAPI.getRuleState`
+	 */
+	ruleTrigger: {
+		/** The rule that was triggered */
+		rule: BCX_Rule;
+		/**
+		 * Type of trigger that happened:
+		 * - `trigger` - The action this rule dected did happen (e.g. because the rule was not enforced)
+		 * - `triggerAttempt` - The action was caught by the rule and did not happen
+		 */
+		triggerType: "trigger" | "triggerAttempt";
+		/**
+		 * Character that was being targetted (e.g. for whisper/beep rules, possibly few others).
+		 * Most rules do not use this.
+		 */
+		targetCharacter: number | null;
+	};
+	/**
 	 * Triggers whenever player changes subscreen in BCX.
 	 * Note, that some changes might not be observable by outside mod (e.g. when user simply switches to different subscreen).
 	 * This can trigger even outside of `InformationSheet` screen.

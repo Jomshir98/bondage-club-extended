@@ -85,7 +85,7 @@ export function init_findBCXSource(): void {
 		const match = /^((https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?)bcx(\.dev)?\.js($|\?)/i.exec(elem.src);
 		if (match) {
 			BCXSource = match[1];
-			console.debug("BCX: Using detected source:", BCXSource);
+			console.debug("HardCoreClub: Using detected source:", BCXSource);
 			return;
 		}
 	}
@@ -95,12 +95,12 @@ export function init_findBCXSource(): void {
 		const match = /^(https:\/\/[^?/]+\/(?:[^?]+?)?)(?:bcx(\.dev)?\.js)?(?:$|\?)/i.exec(externalSrc);
 		if (match) {
 			BCXSource = match[1];
-			console.log("BCX: External BCX_SOURCE supplied:", BCXSource);
+			console.log("HardCoreClub: External BCX_SOURCE supplied:", BCXSource);
 			return;
 		}
-		console.warn("BCX: External BCX_SOURCE supplied, but malformed, ignoring", externalSrc);
+		console.warn("HardCoreClub: External BCX_SOURCE supplied, but malformed, ignoring", externalSrc);
 	}
-	const msg = "BCX: Failed to find BCX's source! Some functions will not work properly. Are you using the official version?";
+	const msg = "HardCoreClub: Failed to find BCX's source! Some functions will not work properly. Are you using the official version?";
 	console.error(msg);
 	alert(msg);
 }

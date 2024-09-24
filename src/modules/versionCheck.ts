@@ -87,11 +87,11 @@ export class ModuleVersionCheck extends BaseModule {
 	load() {
 		hiddenBeepHandlers.set("versionResponse", (sender, message: BCX_beep_versionResponse) => {
 			if (sender !== VERSION_CHECK_BOT) {
-				console.warn(`BCX: got versionResponse from unexpected sender ${sender}, ignoring`);
+				console.warn(`HardCoreClub: got versionResponse from unexpected sender ${sender}, ignoring`);
 				return;
 			}
 			if (!isObject(message) || typeof message.status !== "string") {
-				console.warn(`BCX: bad versionResponse`, message);
+				console.warn(`HardCoreClub: bad versionResponse`, message);
 				return;
 			}
 
@@ -172,7 +172,7 @@ export class ModuleVersionCheck extends BaseModule {
 				alert("The BCX version you are trying to load is too old and either contains critical bugs or " +
 					"is no longer compatible with the current Bondage Club release version. Please update your BCX.");
 			} else {
-				console.warn(`BCX: bad versionResponse status "${message.status}"`);
+				console.warn(`HardCoreClub: bad versionResponse status "${message.status}"`);
 			}
 
 			if (supporterStatus !== message.supporterStatus || supporterSecret !== message.supporterSecret) {
@@ -185,16 +185,16 @@ export class ModuleVersionCheck extends BaseModule {
 
 		hiddenBeepHandlers.set("supporterCheckResult", (sender, message: BCX_beeps["supporterCheckResult"]) => {
 			if (sender !== VERSION_CHECK_BOT) {
-				console.warn(`BCX: got supporterCheckResult from unexpected sender ${sender}, ignoring`);
+				console.warn(`HardCoreClub: got supporterCheckResult from unexpected sender ${sender}, ignoring`);
 				return;
 			}
 			if (!isObject(message) || typeof message.memberNumber !== "number" || (message.status !== undefined && typeof message.status !== "string")) {
-				console.warn(`BCX: bad supporterCheckResult`, message);
+				console.warn(`HardCoreClub: bad supporterCheckResult`, message);
 				return;
 			}
 			const status = otherSupporterStatus.get(message.memberNumber);
 			if (!status) {
-				console.warn(`BCX: supporterCheckResult unknown memberNumber`, message);
+				console.warn(`HardCoreClub: supporterCheckResult unknown memberNumber`, message);
 				return;
 			}
 			status.status = message.status;

@@ -91,7 +91,7 @@ export class GuiMainMenu extends GuiSubscreen {
 			this.disabledModules = data;
 		}).catch(e => {
 			this.disabledModules = [];
-			console.error(`BCX: error getting disabled modules`, e);
+			console.error(`HardCoreClub: error getting disabled modules`, e);
 		});
 	}
 
@@ -104,7 +104,7 @@ export class GuiMainMenu extends GuiSubscreen {
 	Run() {
 		let heartSteps: [number, string][] | undefined;
 
-		DrawText("- Bondage Club Extended STRICT -", 125, 125, "Black", "Gray");
+		DrawText("- Hard Core Club -", 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png", "Show the StrictBCX tutorial again");
 

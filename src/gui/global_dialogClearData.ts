@@ -20,7 +20,7 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 	Run() {
 		MainCanvas.textAlign = "center";
 
-		DrawText(`- Permanent deletion of ALL Bondage Club Extended data -`, 1000, 125, "Black");
+		DrawText(`- Permanent deletion of ALL HardCoreClub data -`, 1000, 125, "Black");
 
 		DrawText("- Warning -", 1000, 225, "Black", "Black");
 		DrawText("If you confirm, all BCX data (including settings, curses, logs, ...) will be permanently deleted!", 1000, 325, "Black");

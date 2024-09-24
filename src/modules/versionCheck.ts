@@ -112,9 +112,9 @@ export class ModuleVersionCheck extends BaseModule {
 					versionCheckDidNotify = true;
 
 					if (ServerPlayerIsInChatRoom()) {
-						ChatRoomSendLocal("New BCX version is available! You can upgrade by logging in again.");
+						ChatRoomSendLocal("New HardCoreClub version is available! You can upgrade by logging in again.");
 					} else {
-						InfoBeep("New BCX version is available! You can upgrade by logging in again.", 10_000);
+						InfoBeep("New HardCoreClub version is available! You can upgrade by logging in again.", 10_000);
 					}
 				}
 			} else if (message.status === "deprecated") {
@@ -145,12 +145,12 @@ export class ModuleVersionCheck extends BaseModule {
 					// Title
 					const titleElem = document.createElement("h1");
 					win.appendChild(titleElem);
-					titleElem.innerText = "Deprecated BCX version";
+					titleElem.innerText = "Deprecated HardCoreClub version";
 
 					// Description
 					const descriptionElement = document.createElement("p");
 					win.appendChild(descriptionElement);
-					descriptionElement.innerText = "The BCX version you are using is too old and either contains critical bugs or " +
+					descriptionElement.innerText = "The HardCoreClub version you are using is too old and either contains critical bugs or " +
 						"is no longer compatible with the current Bondage Club release version.\n" +
 						"Unless you are using additional mods preventing this, please refresh the page and log into the club again to load the newest version.";
 
@@ -169,7 +169,7 @@ export class ModuleVersionCheck extends BaseModule {
 				}
 			} else if (message.status === "unsupported") {
 				unload();
-				alert("The BCX version you are trying to load is too old and either contains critical bugs or " +
+				alert("The HardCoreClub version you are trying to load is too old and either contains critical bugs or " +
 					"is no longer compatible with the current Bondage Club release version. Please update your BCX.");
 			} else {
 				console.warn(`HardCoreClub: bad versionResponse status "${message.status}"`);

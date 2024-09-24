@@ -1,9 +1,9 @@
 THIS IS A FORK OF BCX - USE ONLY IF YOU KNOW WHAT YOU"RE DOING
 I RECOMMEND YOU TO USE [OFFICIAL BCX](https://jomshir98.github.io/bondage-club-extended/)
 
-## The StrictBCX allows you to stuck completly, so please use at your own risk
+## The HardCoreClub allows you to stuck completly, so please use at your own risk
 
-## Instruction - how to install StrictBCX
+## Instruction - how to install HardCoreClub
 
 1. Check your own BCX. Enable all modules in BCX confituration (BCX Menu -> Global). Ensure that all modules are enabled
 2. Disable your current BCX instance
@@ -15,5 +15,5 @@ I RECOMMEND YOU TO USE [OFFICIAL BCX](https://jomshir98.github.io/bondage-club-e
 5. Open following page and confirm script installation: [link](https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcxLoader.user.js)
 6. Reload your game
 
-## Instruction - how to install StrictBCX with Book marks
+## Instruction - how to install HardCoreClub with Book marks
 javascript:(function(){if(window.BCX_Loaded===undefined){let n=document.createElement("script");n.setAttribute("language","JavaScript");n.setAttribute("crossorigin","anonymous");n.setAttribute("src","https://kinksideofthemoon.github.io/StrictBCX/devel/bcx.js"+Date.now());n.onload=()=>n.remove();document.head.appendChild(n);}})();

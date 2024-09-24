@@ -71,7 +71,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 				this.failed = false;
 				this.onDataChange();
 			} else {
-				console.warn(`BCX: Condition ${this.conditionCategory}:${this.conditionName} not found in list from ${this.character}`);
+				console.warn(`HardCoreClub: Condition ${this.conditionCategory}:${this.conditionName} not found in list from ${this.character}`);
 				this.conditionCategoryData = null;
 				this.conditionData = null;
 				this.failed = true;
@@ -79,7 +79,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 				this.Exit();
 			}
 		}, err => {
-			console.error(`BCX: Failed to get condition info for ${this.conditionCategory}:${this.conditionName} from ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get condition info for ${this.conditionCategory}:${this.conditionName} from ${this.character}`, err);
 			this.failed = true;
 		});
 	}

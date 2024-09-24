@@ -670,7 +670,7 @@ export class ModuleCommands extends BaseModule {
 					data.Content.startsWith("!") &&
 					!data.Content.startsWith("!!")
 				) {
-					console.debug(`BCX: Console command from ${sender}: ${text}`, data);
+					console.debug(`HardCoreClub: Console command from ${sender}: ${text}`, data);
 					RunWhisperCommand(text.substring(1), sender, (msg) => {
 						ServerSend("ChatRoomChat", {
 							Content: `[BCX]\n${msg}`,

@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         StrictBCX - Bondage Club Extended (Loader)
+// @name         HardCoreClub (Loader)
 // @namespace    BCX
 // @version      1.0.5
 // @description  Loader of Jomshir's "Bondage Club Extended" mod with the STRICT modification by Kink Side Of Moon
@@ -20,7 +20,7 @@ setTimeout(
 			const n = document.createElement("script");
 			n.setAttribute("language", "JavaScript");
 			n.setAttribute("crossorigin", "anonymous");
-			n.setAttribute("src", "https://kinksideofthemoon.github.io/StrictBCX/devel/bcx.js");
+			n.setAttribute("src", "https://rufflan.github.io/HardCroeClub/devel/bcx.js");
 			n.onload = () => n.remove();
 			document.head.appendChild(n);
 		}

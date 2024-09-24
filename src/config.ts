@@ -165,6 +165,8 @@ export const FORBIDDEN_BC_COMMANDS: string[] = [
 	"wcegotoroom",
 	"whisper",
 	"leave",
+	"safewordspecific",
+	"wardrobe",
 ];
 
 export const SENTRY_CONFIG: Sentry.BrowserOptions = {

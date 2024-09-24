@@ -33,15 +33,15 @@ export class GuiGlobal extends GuiSubscreen {
 		// preset
 		DrawRect(840, 200, 950, 90, "#ddd");
 		DrawImageEx("Icons/Introduction.png", 840 + 20, 200 + 20, { Height: 50, Width: 50 });
-		DrawTextFit(`Your initially selected BCX preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
+		DrawTextFit(`Your initially selected Hard Core Club preset was: "${capitalizeFirstLetter(Preset[getCurrentPreset()])}"`, 1300, 244, 850, "Black");
 
-		DrawTextFit("YOU ARE USING STRICT VERSION OF BCX. USE IT AT YOUR OWN RISK.", 1800, 244, 850, "Red");
+		DrawTextFit("YOU ARE USING Hard Core Club. USE IT AT YOUR OWN RISK.", 1800, 244, 850, "Red");
 
 		// Icon toggles
 		MainCanvas.textAlign = "left";
-		DrawCheckbox(125, 350, 64, 64, "Show BCX icons above characters in chatroom", !modStorage.chatroomIconHidden);
+		DrawCheckbox(125, 350, 64, 64, "Show Hard Core Club icons above characters in chatroom", !modStorage.chatroomIconHidden);
 		const isSupporter = supporterStatus !== undefined;
-		DrawCheckbox(125, 450, 64, 64, "Show your BCX Supporter Heart to all BCX users", isSupporter && !modStorage.supporterHidden, !isSupporter);
+		DrawCheckbox(125, 450, 64, 64, "Show your Hard Core Club Supporter Heart to all BCX users", isSupporter && !modStorage.supporterHidden, !isSupporter);
 	}
 
 	Click() {

@@ -58,9 +58,9 @@ export function init() {
 	const { BondageClubTools } = detectOtherMods();
 
 	if (BondageClubTools) {
-		console.warn("BCX: Bondage Club Tools detected!");
+		console.warn("HardCoreClub: Bondage Club Tools detected!");
 		if ((window as any).BCX_BondageClubToolsPatch === true) {
-			console.info("BCX: Bondage Club Tools already patched, skip!");
+			console.info("HardCoreClub: Bondage Club Tools already patched, skip!");
 		} else {
 			(window as any).BCX_BondageClubToolsPatch = true;
 			const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
@@ -116,7 +116,7 @@ export function unload(): true {
 	UnloadErrorReporter();
 
 	delete window.BCX_Loaded;
-	console.info("BCX: Unloaded.");
+	console.info("HardCoreClub: Unloaded.");
 	return true;
 }
 

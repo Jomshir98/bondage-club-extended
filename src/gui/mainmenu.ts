@@ -162,7 +162,7 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		if (this.character.isPlayer()) {
-			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 500, "Black", "");
+			DrawText(`Your Hard Core Club version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 500, "Black", "");
 			DrawButton(1450, 590, 400, 90, "", "White", "", "Open changelog on GitHub");
 			if (versionCheckNewAvailable === true) {
 				const tick = Date.now() % 6_000;
@@ -179,7 +179,7 @@ export class GuiMainMenu extends GuiSubscreen {
 			DrawButton(1450, 700, 400, 90, "", "White", "", "For saying 'thank you' with a tip");
 			MainCanvas.textAlign = "center";
 		} else {
-			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 765, "Black", "");
+			DrawText(`Your Hard Core Club version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 765, "Black", "");
 			DrawText(`${this.character.Name}'s BCX version: ${this.character.BCXVersion?.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 845, "Black", "");
 		}
 	}

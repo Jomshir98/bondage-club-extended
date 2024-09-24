@@ -50,7 +50,7 @@ export function registerPermission(name: BCX_Permissions, data: PermissionSetup)
 	}
 	for (const [k, v] of Object.entries(data.defaults)) {
 		if (v[1] === AccessLevel.self && !v[0]) {
-			console.error(`BCX: register permission "${name}": default for ${k} has invalid self value`);
+			console.error(`HardCoreClub: register permission "${name}": default for ${k} has invalid self value`);
 		}
 	}
 	permissions.set(name, {
@@ -162,7 +162,7 @@ export function setPermissionSelfAccess(permission: BCX_Permissions, self: boole
 				checkPermissionAccess(permission, characterToCheck)
 			);
 		if (!allowed) {
-			console.warn(`BCX: Unauthorized self permission edit attempt for "${permission}" by ${characterToCheck}`);
+			console.warn(`HardCoreClub: Unauthorized self permission edit attempt for "${permission}" by ${characterToCheck}`);
 			return false;
 		}
 	}
@@ -215,7 +215,7 @@ export function setPermissionMinAccess(permission: BCX_Permissions, min: AccessL
 				)
 			);
 		if (!allowed) {
-			console.warn(`BCX: Unauthorized min permission edit attempt for "${permission}" by ${characterToCheck}`);
+			console.warn(`HardCoreClub: Unauthorized min permission edit attempt for "${permission}" by ${characterToCheck}`);
 			return false;
 		}
 	}
@@ -475,12 +475,12 @@ export class ModuleAuthority extends BaseModule {
 				(data.edit === "min" && typeof data.target !== "number") ||
 				(data.edit === "self" && typeof data.target !== "boolean")
 			) {
-				console.warn(`BCX: Bad editPermission query from ${sender}`, data);
+				console.warn(`HardCoreClub: Bad editPermission query from ${sender}`, data);
 				return undefined;
 			}
 
 			if (!permissions.has(data.permission)) {
-				console.warn(`BCX: editPermission query from ${sender}; unknown permission`, data);
+				console.warn(`HardCoreClub: editPermission query from ${sender}; unknown permission`, data);
 				return undefined;
 			}
 
@@ -494,7 +494,7 @@ export class ModuleAuthority extends BaseModule {
 					throw new Error("Assertion failed");
 				}
 				if (AccessLevel[data.target] === undefined) {
-					console.warn(`BCX: editPermission query from ${sender}; unknown access level`, data);
+					console.warn(`HardCoreClub: editPermission query from ${sender}; unknown access level`, data);
 					return false;
 				}
 				return setPermissionMinAccess(data.permission, data.target, sender);
@@ -524,7 +524,7 @@ export class ModuleAuthority extends BaseModule {
 				data.action !== "add" && data.action !== "remove" ||
 				typeof data.target !== "number"
 			) {
-				console.warn(`BCX: Bad editRole query from ${sender}`, data);
+				console.warn(`HardCoreClub: Bad editRole query from ${sender}`, data);
 				return undefined;
 			}
 
@@ -756,15 +756,15 @@ export class ModuleAuthority extends BaseModule {
 			};
 			for (const [k, v] of Object.entries(modStorage.permissions)) {
 				if (transitionDictionary[k] !== undefined) {
-					console.info(`BCX: Updating permission name "${k}"->"${transitionDictionary[k]}"`);
+					console.info(`HardCoreClub: Updating permission name "${k}"->"${transitionDictionary[k]}"`);
 				}
 				const perm = permissions.get(transitionDictionary[k] ?? k);
 				if (!Array.isArray(v) || typeof v[0] !== "boolean" || typeof v[1] !== "number") {
-					console.warn(`BCX: Storage: bad permission ${k}`);
+					console.warn(`HardCoreClub: Storage: bad permission ${k}`);
 				} else if (AccessLevel[v[1]] === undefined) {
-					console.warn(`BCX: Storage: bad permission ${k} level ${v[1]}`);
+					console.warn(`HardCoreClub: Storage: bad permission ${k} level ${v[1]}`);
 				} else if (perm === undefined) {
-					console.warn(`BCX: Storage: unknown permission ${k}`);
+					console.warn(`HardCoreClub: Storage: unknown permission ${k}`);
 				} else {
 					perm.self = v[0];
 					perm.min = v[1];

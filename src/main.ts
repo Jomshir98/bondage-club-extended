@@ -91,7 +91,7 @@ export function init() {
 		if (enabledForbiddenMods.length>0) {
 			alert("Found forbidden BC modules. Please disable them first!");
 			console.log("Found forbidden BC modules. Please disable them first!");
-			InfoBeep("StrictBCX Found forbidden BC modules. Please disable them first! The list of mods: " + enabledForbiddenMods.toString());
+			InfoBeep("HardCoreClub Found forbidden BC modules. Please disable them first! The list of mods: " + enabledForbiddenMods.toString());
 			window.BCX_Loaded = false;
 			window.close();
 			unload();

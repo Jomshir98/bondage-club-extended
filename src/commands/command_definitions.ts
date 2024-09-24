@@ -628,7 +628,7 @@ export function initCommands_definitions() {
 			CommonSetScreen("Room", "MaidQuarters");
 			// MaidQuartersMaid should be created by load
 			if (MaidQuartersMaid == null)
-				throw new Error("BCX: Missing MaidQuartersMaid when expected");
+				throw new Error("HardCoreClub: Missing MaidQuartersMaid when expected");
 			CharacterSetCurrent(MaidQuartersMaid);
 			MaidQuartersMaid.CurrentDialog = D;
 			MaidQuartersMaid.Stage = "205";

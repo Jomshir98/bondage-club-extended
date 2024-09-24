@@ -101,8 +101,8 @@ export function init() {
 	BCX_setInterval(waitForModulesInit, 10000);
 
 	window.BCX_Loaded = true;
-	InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
-	console.info(`BCX loaded! Version: ${VERSION}`);
+	InfoBeep(`HardCoreClub loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
+	console.info(`HardCoreClub loaded! Version: ${VERSION}`);
 
 	checkWCEAntiGarble();
 

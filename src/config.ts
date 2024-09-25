@@ -171,25 +171,4 @@ export const FORBIDDEN_BC_COMMANDS: string[] = [
 ];
 
 export const SENTRY_CONFIG: Sentry.BrowserOptions = {
-	dsn: "https://55ab768d8a3f2e0278b494ae6876f982@o4507753726214144.ingest.de.sentry.io/4507753729163344",
-	maxBreadcrumbs: 50,
-	debug: false,
-	release: BCX_VERSION,
-	environment: "devel",
-	integrations: [
-		Sentry.browserTracingIntegration(),
-		Sentry.browserProfilingIntegration(),
-		Sentry.replayIntegration(),
-		Sentry.feedbackIntegration({
-		// Additional SDK configuration goes in here, for example:
-			colorScheme: "system",
-			isNameRequired: true,
-		}),
-	],
-	tracesSampleRate: 1.0,
-
-	tracePropagationTargets: ["localhost", /^https:\/\/www.bondage - europe.com/],
-	replaysSessionSampleRate: 0.1,
-	replaysOnErrorSampleRate: 1.0,
-	profilesSampleRate: 1.0,
 };

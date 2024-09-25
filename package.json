@@ -9,18 +9,15 @@
     "node": ">=18.x"
   },
   "scripts": {
-    "build": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack --env prod --fail-on-warnings && yarn sentry:sourcemaps",
+    "build": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack --env prod --fail-on-warnings",
     "dev": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack serve --progress",
     "typecheck": "tsc --noEmit -p .",
     "typecheck:test": "tsc --noEmit -p ./test",
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint --fix .",
     "test": "jest",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org kinksideofmoon --project javascript ./dist && sentry-cli sourcemaps upload --org kinksideofmoon --project javascript ./dist"
   },
   "dependencies": {
-    "@sentry/browser": "^8.26.0",
-    "@sentry/cli": "^2.33.1",
     "@types/lodash-es": "^4.17.10",
     "bondage-club-mod-sdk": "^1.2.0",
     "leven": "^4.0.0",

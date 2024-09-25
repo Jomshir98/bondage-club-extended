@@ -2,13 +2,11 @@ import { InfoBeep, init_findBCXSource } from "./utilsClub";
 import { hookFunction } from "./patching";
 import { init, loginInit } from "./main";
 import { isObject } from "./utils";
-import { SENTRY_CONFIG } from "./config";
+
 
 import "./modules";
 
-import * as Sentry from "@sentry/browser";
 
-Sentry.init(SENTRY_CONFIG);
 
 function initWait() {
 	console.debug("HardCoreClub: Init wait");
@@ -28,6 +26,6 @@ function initWait() {
 		init();
 	}
 }
-Sentry.captureMessage("HardCoreClub loaded");
+
 init_findBCXSource();
 initWait();

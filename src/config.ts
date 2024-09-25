@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/browser";
+
 
 /* eslint-disable quote-props */
 export const VERSION = BCX_VERSION;
@@ -170,6 +170,3 @@ export const FORBIDDEN_BC_COMMANDS: string[] = [
 	"cum",
 	"w",
 ];
-
-export const SENTRY_CONFIG: Sentry.BrowserOptions = {
-};

@@ -9,9 +9,6 @@ import { modStorage, modStorageSync } from "./storage";
 import { announceSelf } from "./chatroom";
 import { hookFunction } from "../patching";
 
-import { SENTRY_CONFIG } from "../config";
-import * as Sentry from "@sentry/browser";
-Sentry.init(SENTRY_CONFIG);
 
 let nextCheckTimer: number | null = null;
 export let versionCheckNewAvailable: boolean | null = null;

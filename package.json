@@ -15,7 +15,7 @@
     "typecheck:test": "tsc --noEmit -p ./test",
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint --fix .",
-    "test": "jest",
+    "test": "jest"
   },
   "dependencies": {
     "@types/lodash-es": "^4.17.10",

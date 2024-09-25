@@ -1,3 +1,5 @@
+@LucyVolNex i tried add you to project. i think you can work in that
+
 THIS IS A FORK OF BCX - USE ONLY IF YOU KNOW WHAT YOU"RE DOING
 I RECOMMEND YOU TO USE [OFFICIAL BCX](https://jomshir98.github.io/bondage-club-extended/)
 

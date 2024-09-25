@@ -1,5 +1,3 @@
-
-
 /* eslint-disable quote-props */
 export const VERSION = BCX_VERSION;
 

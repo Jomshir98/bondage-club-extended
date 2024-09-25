@@ -2,11 +2,7 @@ import { InfoBeep, init_findBCXSource } from "./utilsClub";
 import { hookFunction } from "./patching";
 import { init, loginInit } from "./main";
 import { isObject } from "./utils";
-
-
 import "./modules";
-
-
 
 function initWait() {
 	console.debug("HardCoreClub: Init wait");

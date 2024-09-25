@@ -9,7 +9,6 @@ import { modStorage, modStorageSync } from "./storage";
 import { announceSelf } from "./chatroom";
 import { hookFunction } from "../patching";
 
-
 let nextCheckTimer: number | null = null;
 export let versionCheckNewAvailable: boolean | null = null;
 let versionCheckDidNotify = false;

@@ -7,10 +7,7 @@ import { BaseModule } from "./_BaseModule";
 import { FORBIDDEN_BC_COMMANDS } from "../config";
 import { checkWCEAntiGarble } from "../main";
 
-
 import { InfoBeep } from "../utilsClub";
-
-
 export interface SpeechMessageInfo {
 	readonly type: "Chat" | "Emote" | "Whisper" | "Command";
 	readonly target: number | null;

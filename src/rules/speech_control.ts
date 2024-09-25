@@ -9,7 +9,6 @@ import { ChatRoomSendLocal } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 import leven from "leven";
 
-
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
 	for (let sound of sounds) {
 		sound = sound.toLocaleLowerCase();

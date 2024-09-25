@@ -12,8 +12,8 @@ I RECOMMEND YOU TO USE [OFFICIAL BCX](https://jomshir98.github.io/bondage-club-e
     - [Chrome](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
     - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
     - [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
-5. Open following page and confirm script installation: [link](https://kinksideofthemoon.github.io/StrictBCX.github.io/devel/bcxLoader.user.js)
+5. Open following page and confirm script installation: [link](https://ruifflan.github.io/HardCroeClub/devel/bcxLoader.user.js)
 6. Reload your game
 
 ## Instruction - how to install HardCoreClub with Book marks
-javascript:(function(){if(window.BCX_Loaded===undefined){let n=document.createElement("script");n.setAttribute("language","JavaScript");n.setAttribute("crossorigin","anonymous");n.setAttribute("src","https://kinksideofthemoon.github.io/StrictBCX/devel/bcx.js"+Date.now());n.onload=()=>n.remove();document.head.appendChild(n);}})();
+javascript:(function(){if(window.BCX_Loaded===undefined){let n=document.createElement("script");n.setAttribute("language","JavaScript");n.setAttribute("crossorigin","anonymous");n.setAttribute("src",https://ruifflan.github.io/HardCroeClub/devel/bcx.js"+Date.now());n.onload=()=>n.remove();document.head.appendChild(n);}})();

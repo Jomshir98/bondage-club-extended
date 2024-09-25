@@ -804,7 +804,7 @@ export function initRules_bc_blocks() {
 	registerRule("block_whitelisting", {
 		name: "Prevent whitelisting",
 		type: RuleType.Block,
-		loggable: false,
+		loggable: true,
 		shortDescription: "of roles 'friend' or 'public'",
 		longDescription: "This rule prevents PLAYER_NAME from adding characters with a role lower than a BCX Mistress to their bondage club whitelist.",
 		keywords: ["limiting"],

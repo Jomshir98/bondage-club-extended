@@ -1,8 +1,8 @@
 {
-  "name": "bondage-club-extended-mod-STRICT",
+  "name": "HardCoreClub-STRICT",
   "version": "1.0.2-STRICT",
-  "repository": "git@github.com:kinksideofthemoon/bcx_reset_disable-dev.git",
-  "author": "Kink Side of the Moon (kinksideofmoon@protonmail.com",
+  "repository": "git@github.com:Rufflan/HardCroeClub.git",
+  "author": "Rufflan (hwkm0818@gmail.com)",
   "license": "GPL-3.0",
   "private": true,
   "engines": {

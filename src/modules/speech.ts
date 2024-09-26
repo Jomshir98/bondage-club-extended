@@ -158,7 +158,7 @@ function processMsg(msg: SpeechMessageInfo | null): string | null {
 		console.log("Command");
 
 		FORBIDDEN_BC_COMMANDS.forEach(element => {
-			if (msg.rawMessage.includes(element)) {
+			if (msg.rawMessage.indexOf(element) === 1) {
 				console.log("Command " + msg.rawMessage + " is forbidden");
 				InfoBeep("Command " + msg.rawMessage + " is forbidden. Do not cheat!");
 				result = null;

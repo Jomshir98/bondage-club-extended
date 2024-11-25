@@ -29,9 +29,23 @@ function enterSearchMode(C: Character, input?: string) {
 				if (searchBarAutoClose && !searchBar.value) {
 					exitSearchMode(C);
 					MainCanvas.canvas.focus();
-				} else {
+					return;
+				} else if (GameVersion === "R110") {
 					DialogInventoryBuild(C);
 					DialogMenuButtonBuild(C);
+					return;
+				}
+
+				// @ts-expect-error: >= R111
+				const gridID: undefined | string = DialogMenuMapping[DialogMenuMode]?.ids.grid;
+				if (gridID) {
+					const query = searchBar.value.toLocaleLowerCase().split(" ").map(i => i.trim());
+					document.querySelectorAll(`#${gridID} > .dialog-grid-button`).forEach(button => {
+						const name = button.getAttribute("name")?.toLocaleLowerCase() ?? "";
+						const description = button.querySelector(".button-label")?.textContent?.toLocaleLowerCase() ?? "";
+						const queryMatch = query.some(i => name.includes(i) || description.includes(i));
+						button.toggleAttribute("data-unload", !queryMatch);
+					});
 				}
 			}
 		};
@@ -39,7 +53,11 @@ function enterSearchMode(C: Character, input?: string) {
 		searchBar.setAttribute("value", input ?? "");
 		const insPoint = input?.length ?? 0;
 		searchBar.setSelectionRange(insPoint, insPoint);
-		DialogInventoryBuild(C);
+		if (GameVersion === "R110") {
+			DialogInventoryBuild(C);
+		} else {
+			ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
+		}
 		DialogMenuButtonBuild(C);
 	}
 }
@@ -49,8 +67,18 @@ function exitSearchMode(C: Character) {
 		searchBar.remove();
 		searchBar = null;
 		searchBarAutoClose = false;
-		DialogInventoryBuild(C);
 		DialogMenuButtonBuild(C);
+		if (GameVersion === "R110") {
+			DialogInventoryBuild(C);
+			return;
+		}
+
+		// @ts-expect-error: >= R111
+		const gridID: undefined | string = DialogMenuMapping[DialogMenuMode]?.ids.grid;
+		if (gridID) {
+			document.querySelectorAll(`#${gridID} > .dialog-grid-button`).forEach(button => button.toggleAttribute("data-unload", false));
+		}
+
 	}
 }
 
@@ -122,7 +150,7 @@ export class ModuleDialog extends BaseModule {
 		});
 
 		hookFunction("DialogInventoryAdd", 5, (args, next) => {
-			if (searchBar) {
+			if (GameVersion === "R110" && searchBar) {
 				const item = args[1];
 				if (!searchBar.value
 					.trim()
@@ -139,12 +167,21 @@ export class ModuleDialog extends BaseModule {
 			next(args);
 		});
 
-		hookFunction("DialogDrawItemMenu", 0, (args, next) => {
-			if (searchBar) {
-				ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
-			}
-			next(args);
-		});
+		if (GameVersion === "R110") {
+			hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+				if (searchBar) {
+					ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
+				}
+				return next(args);
+			});
+		} else {
+			hookFunction("DialogResize", 0, (args, next) => {
+				if (searchBar) {
+					ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
+				}
+				return next(args);
+			});
+		}
 
 		hookFunction("DialogChangeFocusToGroup", 0, (args, next) => {
 			exitSearchMode(CharacterGetCurrent() ?? Player);
@@ -152,10 +189,18 @@ export class ModuleDialog extends BaseModule {
 		});
 
 		hookFunction("DialogItemClick", 0, (args, next) => {
-			next(args);
-			if (DialogMenuMode !== "permissions") {
-				exitSearchMode(CharacterGetCurrent() ?? Player);
+			const ret = next(args);
+			if (GameVersion === "R110") {
+				if (DialogMenuMode !== "permissions") {
+					exitSearchMode(CharacterGetCurrent() ?? Player);
+				}
+			} else { // >= R111
+				// @ts-expect-error: New R111 parameter
+				const C = args[1] as Character;
+				exitSearchMode(C);
 			}
+
+			return ret;
 		});
 
 		// Remove some buttons, if there are too many
@@ -179,14 +224,18 @@ export class ModuleDialog extends BaseModule {
 	run() {
 		const C = CharacterGetCurrent();
 		if (C) {
-			DialogInventoryBuild(C);
+			if (GameVersion === "R110") {
+				DialogInventoryBuild(C);
+			}
 			DialogMenuButtonBuild(C);
 		}
 	}
 
 	unload() {
 		exitSearchMode(CharacterGetCurrent() ?? Player);
-		DialogInventoryBuild(CharacterGetCurrent() ?? Player);
+		if (GameVersion === "R110") {
+			DialogInventoryBuild(CharacterGetCurrent() ?? Player);
+		}
 		DialogMenuButtonBuild(CharacterGetCurrent() ?? Player);
 	}
 }

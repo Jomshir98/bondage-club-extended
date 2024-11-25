@@ -156,12 +156,15 @@ export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
 
-		hookFunction("DialogDrawItemMenu", 0, (args, next) => {
-			if (developmentMode) {
-				DialogTextDefault = args[0].FocusGroup?.Description || "";
-			}
-			return next(args);
-		});
+		if (GameVersion === "R110") {
+			hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+				if (developmentMode) {
+					// @ts-expect-error R110 compatibility
+					DialogTextDefault = args[0].FocusGroup?.Description || "";
+				}
+				return next(args);
+			});
+		}
 
 		DialogSelfMenuOptions.forEach(opt => {
 			if (opt.Name === "Pose") {

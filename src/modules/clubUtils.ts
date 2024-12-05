@@ -323,7 +323,7 @@ export class ModuleClubUtils extends BaseModule {
 							ServerSend("ChatRoomAdmin", { MemberNumber: character.MemberNumber, Action: "Promote" });
 						}
 					}
-				} else if (subcommand === "promote" || subcommand === "demote" || subcommand === "kick" || subcommand === "ban" || subcommand === "permaban") {
+				} else if (subcommand === "promote" || subcommand === "demote" || subcommand === "whitelist" || subcommand === "unwhitelist" || subcommand === "kick" || subcommand === "ban" || subcommand === "permaban") {
 					if (args.length === 1) {
 						ChatRoomSendLocal(`Needs at least one character name oder member number as <target> in '.room ${subcommand} <target1> <target2> <targetN>'`);
 						return false;
@@ -347,6 +347,15 @@ export class ModuleClubUtils extends BaseModule {
 							return !targetsToDemote.has(target);
 						});
 						updateChatroom({ Admin });
+					} else if (subcommand === "whitelist") {
+						const Whitelist = arrayUnique(ChatRoomData.Whitelist.concat(targets));
+						updateChatroom({ Whitelist });
+					} else if (subcommand === "unwhitelist") {
+						const targetsToUnwhitelist = new Set(targets);
+						const Whitelist = ChatRoomData.Whitelist.filter((target) => {
+							return !targetsToUnwhitelist.has(target);
+						});
+						updateChatroom({ Whitelist });
 					} else if (subcommand === "kick") {
 						for (const target of targets) {
 							ServerSend("ChatRoomAdmin", { MemberNumber: target, Action: "Kick", Publish: false });
@@ -381,6 +390,7 @@ export class ModuleClubUtils extends BaseModule {
 						Locked: template.Locked,
 						Game: template.Game,
 						Admin: template.Admin,
+						Whitelist: template.Whitelist,
 						Limit: size,
 						BlockCategory: template.BlockCategory,
 					});
@@ -396,6 +406,7 @@ export class ModuleClubUtils extends BaseModule {
 						`.room permaban <...targets> - Bans and blacklists all specified player names or numbers\n` +
 						`.room <promote/demote> <...targets> - Adds or removes admin on all specified player names or numbers\n` +
 						`.room promoteall - Gives admin to all non-admin players in the room\n` +
+						`.room <whitelist/unwhitelist> <...targets> - Whitelists or unwhitelists all specified player names or numbers in the room\n` +
 						`.room template <1/2/3/4> - Changes the room according to the given BCX room template slot`
 					);
 				}

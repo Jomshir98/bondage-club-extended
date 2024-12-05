@@ -30,5 +30,9 @@ export function runMigration(originalVersion: BCXVersion, currentVersion: BCXVer
 		}
 	}
 
+	if (BCXVersionCompare(originalVersion, { major: 1, minor: 0, patch: 3 }) < 0) {
+		modStorage.roomTemplates?.filter(t => t && !t.Whitelist).forEach(t => t!.Whitelist = []);
+	}
+
 	return true;
 }

@@ -770,7 +770,6 @@ export function initRules_bc_alter() {
 						CharacterDeleteAllOnline();
 
 						// join
-						ChatRoomPlayerCanJoin = true;
 						ServerSend("ChatRoomJoin", { Name: data.ChatRoomName });
 					}, state.customData.summonTime * 1000);
 				}

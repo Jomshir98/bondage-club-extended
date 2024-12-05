@@ -367,7 +367,6 @@ export function initCommands_definitions() {
 			CharacterDeleteAllOnline();
 
 			// join
-			ChatRoomPlayerCanJoin = true;
 			ServerSend("ChatRoomCreate", {
 				Name,
 				Description: "",

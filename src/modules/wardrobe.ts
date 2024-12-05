@@ -123,7 +123,7 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 		const test = (item: Item) => {
 			if (isBind(item)) {
 				// For each blocked group
-				for (const block of (item.Asset.Block || []).concat(Array.isArray(item.Property?.Block) ? item.Property!.Block : [])) {
+				for (const block of (item.Asset.Block || []).concat(Array.isArray(item.Property?.Block) ? item.Property.Block : [])) {
 					if (matchedGroups.has(block) || !AssetGroup.some(g => g.Name === block))
 						continue;
 					matchedGroups.add(block);

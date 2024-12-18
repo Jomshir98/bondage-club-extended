@@ -30,10 +30,6 @@ function enterSearchMode(C: Character, input?: string) {
 					exitSearchMode(C);
 					MainCanvas.canvas.focus();
 					return;
-				} else if (GameVersion === "R110") {
-					DialogInventoryBuild(C);
-					DialogMenuButtonBuild(C);
-					return;
 				}
 
 				// @ts-expect-error: >= R111
@@ -53,11 +49,7 @@ function enterSearchMode(C: Character, input?: string) {
 		searchBar.setAttribute("value", input ?? "");
 		const insPoint = input?.length ?? 0;
 		searchBar.setSelectionRange(insPoint, insPoint);
-		if (GameVersion === "R110") {
-			DialogInventoryBuild(C);
-		} else {
-			ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
-		}
+		ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
 		DialogMenuButtonBuild(C);
 	}
 }
@@ -68,10 +60,6 @@ function exitSearchMode(C: Character) {
 		searchBar = null;
 		searchBarAutoClose = false;
 		DialogMenuButtonBuild(C);
-		if (GameVersion === "R110") {
-			DialogInventoryBuild(C);
-			return;
-		}
 
 		// @ts-expect-error: >= R111
 		const gridID: undefined | string = DialogMenuMapping[DialogMenuMode]?.ids.grid;
@@ -149,39 +137,12 @@ export class ModuleDialog extends BaseModule {
 			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
 		});
 
-		hookFunction("DialogInventoryAdd", 5, (args, next) => {
-			if (GameVersion === "R110" && searchBar) {
-				const item = args[1];
-				if (!searchBar.value
-					.trim()
-					.toLocaleLowerCase()
-					.split(" ")
-					.every(i =>
-						item.Asset.Description.toLocaleLowerCase().includes(i) ||
-						item.Asset.Name.toLocaleLowerCase().includes(i)
-					)
-				) {
-					return;
-				}
+		hookFunction("DialogResize", 0, (args, next) => {
+			if (searchBar) {
+				ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
 			}
-			next(args);
+			return next(args);
 		});
-
-		if (GameVersion === "R110") {
-			hookFunction("DialogDrawItemMenu", 0, (args, next) => {
-				if (searchBar) {
-					ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
-				}
-				return next(args);
-			});
-		} else {
-			hookFunction("DialogResize", 0, (args, next) => {
-				if (searchBar) {
-					ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
-				}
-				return next(args);
-			});
-		}
 
 		hookFunction("DialogChangeFocusToGroup", 0, (args, next) => {
 			exitSearchMode(CharacterGetCurrent() ?? Player);
@@ -190,14 +151,8 @@ export class ModuleDialog extends BaseModule {
 
 		hookFunction("DialogItemClick", 0, (args, next) => {
 			const ret = next(args);
-			if (GameVersion === "R110") {
-				if (DialogMenuMode !== "permissions") {
-					exitSearchMode(CharacterGetCurrent() ?? Player);
-				}
-			} else { // >= R111
-				const C = args[1] as Character;
-				exitSearchMode(C);
-			}
+			const C = args[1];
+			exitSearchMode(C);
 
 			return ret;
 		});
@@ -223,18 +178,12 @@ export class ModuleDialog extends BaseModule {
 	run() {
 		const C = CharacterGetCurrent();
 		if (C) {
-			if (GameVersion === "R110") {
-				DialogInventoryBuild(C);
-			}
 			DialogMenuButtonBuild(C);
 		}
 	}
 
 	unload() {
 		exitSearchMode(CharacterGetCurrent() ?? Player);
-		if (GameVersion === "R110") {
-			DialogInventoryBuild(CharacterGetCurrent() ?? Player);
-		}
 		DialogMenuButtonBuild(CharacterGetCurrent() ?? Player);
 	}
 }

@@ -48,7 +48,7 @@ export function initRules_bc_blocks() {
 				return false;
 			});
 			hookFunction("DialogItemClick", 3, (args, next) => {
-				const C = GameVersion !== "R110" ? args[1] : (Player.FocusGroup != null ? Player : CurrentCharacter);
+				const C = args[1];
 				if (C && C.ID === 0 && state.isEnforced && args[0].Asset.Name === "VibratorRemote") {
 					state.triggerAttempt();
 					return;
@@ -98,7 +98,7 @@ export function initRules_bc_blocks() {
 				return false;
 			});
 			hookFunction("DialogItemClick", 3, (args, next) => {
-				const C = GameVersion !== "R110" ? args[1] : (Player.FocusGroup != null ? Player : CurrentCharacter);
+				const C = args[1];
 				if (C && C.ID !== 0 && state.isEnforced && args[0].Asset.Name === "VibratorRemote") {
 					state.triggerAttempt(C.MemberNumber);
 					return;
@@ -737,7 +737,7 @@ export function initRules_bc_blocks() {
 			hookFunction("DialogItemClick", 5, (args, next) => {
 				if (state.inEffect && state.customData) {
 					const toggleOn = state.customData.onlyMoreDominantsToggle;
-					const C = GameVersion !== "R110" ? args[1] : (Player.FocusGroup != null ? Player : CurrentCharacter);
+					const C = args[1];
 					if (C && C.ID !== 0 && (toggleOn ? ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") : true)) {
 						if (state.isEnforced) {
 							state.triggerAttempt(C.MemberNumber);

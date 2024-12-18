@@ -1,5 +1,4 @@
 import { allowMode, developmentMode, setAllowMode, setDevelopmentMode } from "../utilsClub";
-import { hookFunction } from "../patching";
 import { j_WardrobeExportSelectionClothes, j_WardrobeImportSelectionClothes } from "./wardrobe";
 import { InvisibilityEarbuds } from "./clubUtils";
 import { BaseModule } from "./_BaseModule";
@@ -155,16 +154,6 @@ export const consoleInterface: ConsoleInterface = Object.freeze(new ConsoleInter
 export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
-
-		if (GameVersion === "R110") {
-			hookFunction("DialogDrawItemMenu", 0, (args, next) => {
-				if (developmentMode) {
-					// @ts-expect-error R110 compatibility
-					DialogTextDefault = args[0].FocusGroup?.Description || "";
-				}
-				return next(args);
-			});
-		}
 
 		DialogSelfMenuOptions.forEach(opt => {
 			if (opt.Name === "Pose") {

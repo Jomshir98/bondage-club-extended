@@ -1626,9 +1626,9 @@ batch@0.6.1:
   resolved "https://registry.yarnpkg.com/batch/-/batch-0.6.1.tgz#dc34314f4e679318093fc760272525f94bf25c16"
   integrity sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==
 
-"bc-stubs@github:bananarama92/BC-stubs#v110.0.2":
-  version "110.0.2"
-  resolved "https://codeload.github.com/bananarama92/BC-stubs/tar.gz/15a8ee93c88b6eb485e13f7102147f5661b3d98a"
+"bc-stubs@github:bananarama92/BC-stubs#v111.0.0":
+  version "111.0.0"
+  resolved "https://codeload.github.com/bananarama92/BC-stubs/tar.gz/a06f8e48e0da9fba08686824be36fbd8c1114928"
   dependencies:
     socket.io-client "4.6.1"
 

@@ -208,7 +208,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 				MainCanvas.textAlign = "center";
 				DrawText(`${e.name}`, 383, Y + 34, "Black");
 				DrawText(`${e.memberNumber}`, 780, Y + 34, "Black");
-				DrawText(`${e.type === ("Character" || "Player") ? "" : e.type}`, 1100, Y + 34, "Black");
+				DrawText(`${(e.type === "Character" || e.type === "Player") ? "" : e.type}`, 1100, Y + 34, "Black");
 
 				DrawEmptyRect(175, Y + 69, 1105, 0, "#ddd");
 				DrawButton(1340, Y, 150, 64, "Select", "White", "");

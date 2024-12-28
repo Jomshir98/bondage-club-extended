@@ -29,9 +29,19 @@ function enterSearchMode(C: Character, input?: string) {
 				if (searchBarAutoClose && !searchBar.value) {
 					exitSearchMode(C);
 					MainCanvas.canvas.focus();
-				} else {
-					DialogInventoryBuild(C);
-					DialogMenuButtonBuild(C);
+					return;
+				}
+
+				// @ts-expect-error: >= R111
+				const gridID: undefined | string = DialogMenuMapping[DialogMenuMode]?.ids.grid;
+				if (gridID) {
+					const query = searchBar.value.toLocaleLowerCase().split(" ").map(i => i.trim());
+					document.querySelectorAll(`#${gridID} > .dialog-grid-button`).forEach(button => {
+						const name = button.getAttribute("name")?.toLocaleLowerCase() ?? "";
+						const description = button.querySelector(".button-label")?.textContent?.toLocaleLowerCase() ?? "";
+						const queryMatch = query.some(i => name.includes(i) || description.includes(i));
+						button.toggleAttribute("data-unload", !queryMatch);
+					});
 				}
 			}
 		};
@@ -39,7 +49,7 @@ function enterSearchMode(C: Character, input?: string) {
 		searchBar.setAttribute("value", input ?? "");
 		const insPoint = input?.length ?? 0;
 		searchBar.setSelectionRange(insPoint, insPoint);
-		DialogInventoryBuild(C);
+		ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
 		DialogMenuButtonBuild(C);
 	}
 }
@@ -49,8 +59,14 @@ function exitSearchMode(C: Character) {
 		searchBar.remove();
 		searchBar = null;
 		searchBarAutoClose = false;
-		DialogInventoryBuild(C);
 		DialogMenuButtonBuild(C);
+
+		// @ts-expect-error: >= R111
+		const gridID: undefined | string = DialogMenuMapping[DialogMenuMode]?.ids.grid;
+		if (gridID) {
+			document.querySelectorAll(`#${gridID} > .dialog-grid-button`).forEach(button => button.toggleAttribute("data-unload", false));
+		}
+
 	}
 }
 
@@ -121,29 +137,11 @@ export class ModuleDialog extends BaseModule {
 			struggleCooldown = Date.now() + STRUGGLE_COOLDOWN_TIME;
 		});
 
-		hookFunction("DialogInventoryAdd", 5, (args, next) => {
-			if (searchBar) {
-				const item = args[1];
-				if (!searchBar.value
-					.trim()
-					.toLocaleLowerCase()
-					.split(" ")
-					.every(i =>
-						item.Asset.Description.toLocaleLowerCase().includes(i) ||
-						item.Asset.Name.toLocaleLowerCase().includes(i)
-					)
-				) {
-					return;
-				}
-			}
-			next(args);
-		});
-
-		hookFunction("DialogDrawItemMenu", 0, (args, next) => {
+		hookFunction("DialogResize", 0, (args, next) => {
 			if (searchBar) {
 				ElementPositionFix("BCXSearch", 40, 1005, 25, 625, 60);
 			}
-			next(args);
+			return next(args);
 		});
 
 		hookFunction("DialogChangeFocusToGroup", 0, (args, next) => {
@@ -152,10 +150,11 @@ export class ModuleDialog extends BaseModule {
 		});
 
 		hookFunction("DialogItemClick", 0, (args, next) => {
-			next(args);
-			if (DialogMenuMode !== "permissions") {
-				exitSearchMode(CharacterGetCurrent() ?? Player);
-			}
+			const ret = next(args);
+			const C = args[1];
+			exitSearchMode(C);
+
+			return ret;
 		});
 
 		// Remove some buttons, if there are too many
@@ -179,14 +178,12 @@ export class ModuleDialog extends BaseModule {
 	run() {
 		const C = CharacterGetCurrent();
 		if (C) {
-			DialogInventoryBuild(C);
 			DialogMenuButtonBuild(C);
 		}
 	}
 
 	unload() {
 		exitSearchMode(CharacterGetCurrent() ?? Player);
-		DialogInventoryBuild(CharacterGetCurrent() ?? Player);
 		DialogMenuButtonBuild(CharacterGetCurrent() ?? Player);
 	}
 }

@@ -462,8 +462,8 @@ function ChatSettingsExtraRun() {
 	if (onThemeRoomSubpage) {
 		return ChatSettingsThemeRoomRun();
 	}
-	DrawText("Back", 169, 110, "Black", "Gray");
-	DrawButton(124, 147, 90, 90, "", "White", "Icons/West.png");
+	DrawText("Back", 169, 95, "Black", "Gray");
+	DrawButton(124, 132, 90, 90, "", "White", "Icons/West.png");
 
 	DrawText("Standardize your room description so the room's purpose is clear and it can easily be filtered:", 1000, 300, "Black", "Gray");
 	DrawButton(800, 360, 380, 80, "Create a theme room", "white");
@@ -499,7 +499,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 	if (onThemeRoomSubpage) {
 		return ChatSettingsThemeRoomClick();
 	}
-	if (MouseIn(124, 147, 90, 90)) {
+	if (MouseIn(124, 132, 90, 90)) {
 		overwriteMode = undefined;
 		onSecondPage = !onSecondPage;
 		ElementToggleGeneratedElements(CurrentScreen, true);
@@ -562,6 +562,7 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 				Locked: create ? (ChatCreateLocked ? ChatCreateLocked : false) : ChatAdminLocked,
 				Game: create ? ChatCreateGame : ChatAdminGame,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList")!.trim()) : [],
+				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist")!.trim()) : [],
 				Limit: ElementValue("InputSize") ? ElementValue("InputSize")!.trim() : "",
 				Language: create ? ChatCreateLanguage : ChatAdminLanguage,
 				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory),
@@ -603,25 +604,25 @@ export class ModuleChatroomAdmin extends BaseModule {
 			ChatSettingsExtraExit();
 		});
 		patchFunction("ChatCreateRun", {
-			'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
+			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',
 		});
 		patchFunction("ChatCreateRun", {
-			'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
+			'ElementPosition("InputName", 815, 100, 820);': 'ElementPosition("InputName", 865, 100, 720);',
 		});
 		patchFunction("ChatCreateRun", {
-			'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
+			'DrawText(TextGet("RoomLanguage"), 250, 190,': 'DrawText(TextGet("RoomLanguage"), 390, 190,',
 		});
 		patchFunction("ChatCreateRun", {
-			"DrawButton(405, 172,": "DrawButton(505, 172,",
+			"DrawButton(405, 157,": "DrawButton(505, 157,",
 		});
 		patchFunction("ChatCreateRun", {
-			'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
+			'DrawText(TextGet("RoomSize"), 850, 190,': 'DrawText(TextGet("RoomSize"), 950, 190,',
 		});
 		patchFunction("ChatCreateRun", {
-			'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
+			'ElementPosition("InputSize", 1099, 185, 250);': 'ElementPosition("InputSize", 1149, 185, 150);',
 		});
 		patchFunction("ChatCreateClick", {
-			"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
+			"if (MouseIn(405, 157,": "if (MouseIn(505, 157,",
 		});
 		hookFunction("ChatCreateRun", 0, (args, next) => {
 			onRoomCreateScreen = true;
@@ -630,9 +631,9 @@ export class ModuleChatroomAdmin extends BaseModule {
 			}
 			next(args);
 			if (!ChatCreateShowBackgroundMode) {
-				DrawText("More", 169, 110, "Black", "Gray");
-				DrawButton(124, 147, 90, 90, "", "White", icon_BCX);
-				if (MouseIn(124, 147, 90, 90)) DrawButtonHover(-36, 70, 64, 64, `More options [BCX]`);
+				DrawText("More", 169, 95, "Black", "Gray");
+				DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
+				if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
 			}
 		});
 		hookFunction("ChatAdminExit", 0, (args, next) => {
@@ -651,6 +652,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 				const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
 				const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
 				const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
+				const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
 				const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
 
 				if (inputName) inputName.value = template.Name;
@@ -660,6 +662,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 				ChatCreateLocked = template.Locked;
 				ChatCreateGame = template.Game;
 				if (inputAdminList) inputAdminList.value = template.Admin.toString();
+				if (inputWhitelist) inputWhitelist.value = template.Whitelist.toString();
 				if (inputSize) inputSize.value = template.Limit;
 				if (template.Language) ChatCreateLanguage = template.Language;
 				ChatBlockItemCategory = template.BlockCategory;
@@ -675,6 +678,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 					const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
 					const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
 					const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
+					const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
 					const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
 
 					if (inputName) inputName.value = data.Name;
@@ -684,13 +688,14 @@ export class ModuleChatroomAdmin extends BaseModule {
 					ChatCreateLocked = data.Locked;
 					ChatCreateGame = data.Game;
 					if (inputAdminList) inputAdminList.value = data.Admin.toString();
+					if (inputWhitelist) inputWhitelist.value = data.Whitelist.toString();
 					if (inputSize) inputSize.value = data.Limit;
 					if (data.Language) ChatCreateLanguage = data.Language;
 					ChatBlockItemCategory = data.BlockCategory;
 				});
 			}
 			// click event for second page button
-			if (MouseIn(124, 147, 90, 90)) {
+			if (MouseIn(124, 132, 90, 90)) {
 				onSecondPage = !onSecondPage;
 				ElementToggleGeneratedElements("ChatCreate", false);
 				return;
@@ -699,25 +704,25 @@ export class ModuleChatroomAdmin extends BaseModule {
 		});
 		//#region Second page button (on room admin screen)
 		patchFunction("ChatAdminRun", {
-			'DrawText(TextGet("RoomName"), 250, 120,': 'DrawText(TextGet("RoomName"), 370, 120,',
+			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',
 		});
 		patchFunction("ChatAdminRun", {
-			'ElementPosition("InputName", 815, 115, 820);': 'ElementPosition("InputName", 865, 115, 720);',
+			'ElementPosition("InputName", 815, 100, 820);': 'ElementPosition("InputName", 865, 100, 720);',
 		});
 		patchFunction("ChatAdminRun", {
-			'DrawText(TextGet("RoomLanguage"), 250, 205,': 'DrawText(TextGet("RoomLanguage"), 390, 205,',
+			'DrawText(TextGet("RoomLanguage"), 250, 190,': 'DrawText(TextGet("RoomLanguage"), 390, 190,',
 		});
 		patchFunction("ChatAdminRun", {
-			"DrawButton(405, 172,": "DrawButton(505, 172,",
+			"DrawButton(405, 157,": "DrawButton(505, 157,",
 		});
 		patchFunction("ChatAdminRun", {
-			'DrawText(TextGet("RoomSize"), 850, 205,': 'DrawText(TextGet("RoomSize"), 950, 205,',
+			'DrawText(TextGet("RoomSize"), 850, 190,': 'DrawText(TextGet("RoomSize"), 950, 190,',
 		});
 		patchFunction("ChatAdminRun", {
-			'ElementPosition("InputSize", 1099, 200, 250);': 'ElementPosition("InputSize", 1149, 200, 150);',
+			'ElementPosition("InputSize", 1099, 185, 250);': 'ElementPosition("InputSize", 1149, 185, 150);',
 		});
 		patchFunction("ChatAdminClick", {
-			"if (MouseIn(405, 172,": "if (MouseIn(505, 172,",
+			"if (MouseIn(405, 157,": "if (MouseIn(505, 157,",
 		});
 		hookFunction("ChatAdminRun", 0, (args, next) => {
 			onRoomCreateScreen = false;
@@ -725,9 +730,9 @@ export class ModuleChatroomAdmin extends BaseModule {
 				return ChatSettingsExtraRun();
 			}
 			next(args);
-			DrawText("More", 169, 110, "Black", "Gray");
-			DrawButton(124, 147, 90, 90, "", "White", icon_BCX);
-			if (MouseIn(124, 147, 90, 90)) DrawButtonHover(-36, 70, 64, 64, `More options [BCX]`);
+			DrawText("More", 169, 95, "Black", "Gray");
+			DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
+			if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
 		});
 		//#endregion
 		hookFunction("ChatAdminClick", 0, (args, next) => {
@@ -736,6 +741,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 					const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
 					const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
 					const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
+					const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
 					const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
 
 					if (inputName) inputName.value = data.Name;
@@ -745,13 +751,14 @@ export class ModuleChatroomAdmin extends BaseModule {
 					ChatAdminLocked = data.Locked;
 					ChatAdminGame = data.Game;
 					if (inputAdminList) inputAdminList.value = data.Admin.toString();
+					if (inputWhitelist) inputWhitelist.value = data.Whitelist.toString();
 					if (inputSize) inputSize.value = data.Limit;
 					if (data.Language) ChatAdminLanguage = data.Language;
 					ChatAdminBlockCategory = data.BlockCategory;
 				});
 			}
 			// click event for second page button
-			if (MouseIn(124, 147, 90, 90)) {
+			if (MouseIn(124, 132, 90, 90)) {
 				onSecondPage = !onSecondPage;
 				ElementToggleGeneratedElements("ChatAdmin", false);
 				return;

@@ -749,6 +749,7 @@ interface RoomTemplate {
 	Language: ServerChatRoomLanguage;
 	Limit: string;
 	Admin: number[];
+	Whitelist: number[];
 	Game: ServerChatRoomGame;
 	Private: boolean;
 	Locked: boolean;

@@ -1701,9 +1701,9 @@ batch@0.6.1:
   resolved "https://registry.npmjs.org/batch/-/batch-0.6.1.tgz"
   integrity sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==
 
-"bc-stubs@github:bananarama92/BC-stubs#v107.0.0":
-  version "107.0.0"
-  resolved "https://codeload.github.com/bananarama92/BC-stubs/tar.gz/f5bd1331c34f4ddc0d27ea63579dbe29119b8c06"
+"bc-stubs@github:bananarama92/BC-stubs#v111.0.0":
+  version "111.0.0"
+  resolved "https://codeload.github.com/bananarama92/BC-stubs/tar.gz/a06f8e48e0da9fba08686824be36fbd8c1114928"
   dependencies:
     socket.io-client "4.6.1"
 
@@ -5387,10 +5387,10 @@ type-is@~1.6.18:
     media-typer "0.3.0"
     mime-types "~2.1.24"
 
-typescript@^5.2.2:
-  version "5.2.2"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-5.2.2.tgz"
-  integrity sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==
+typescript@^5.7.2:
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.7.2.tgz#3169cf8c4c8a828cde53ba9ecb3d2b1d5dd67be6"
+  integrity sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==
 
 unbzip2-stream@1.4.3:
   version "1.4.3"

@@ -1062,9 +1062,10 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		if (curse.curseProperty) {
-			const itemProperty = currentItem.Property = (currentItem.Property ?? {}) as Record<string, unknown>;
-			const curseProperty = (curse.Property ?? {}) as Record<string, unknown>;
-			for (const key of arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)))) {
+			const itemProperty = currentItem.Property = (currentItem.Property ?? {});
+			const curseProperty = curse.Property ?? {};
+			const uniqueProperties = arrayUnique(Object.keys(curseProperty).concat(Object.keys(itemProperty)) as (keyof ItemProperties)[]);
+			for (const key of uniqueProperties) {
 				if (key === "Effect")
 					continue;
 
@@ -1081,6 +1082,7 @@ export class ModuleCurses extends BaseModule {
 				} else if (typeof curseProperty[key] !== typeof itemProperty[key] ||
 					!isEqual(curseProperty[key], itemProperty[key])
 				) {
+					// @ts-expect-error overwrite property with one from curse
 					itemProperty[key] = cloneDeep(curseProperty[key]);
 					if (!changeType) changeType = "update";
 				}
@@ -1088,7 +1090,7 @@ export class ModuleCurses extends BaseModule {
 			const itemIgnoredEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => CURSE_IGNORED_EFFECTS.includes(i)) : [];
 			const itemEffects = Array.isArray(itemProperty.Effect) ? itemProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)).sort() : [];
 			const curseEffects = Array.isArray(curseProperty.Effect) ? curseProperty.Effect.filter(i => !CURSE_IGNORED_EFFECTS.includes(i)).sort() : [];
-			if (!CommonArraysEqual(itemEffects, curseEffects)) {
+			if (!CommonArraysEqual(curseEffects, itemEffects)) {
 				itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
 			}
 

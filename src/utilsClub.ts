@@ -3,10 +3,11 @@ import { BCX_setTimeout } from "./BCXContext";
 import { getChatroomCharacter } from "./characters";
 import { RelationshipsGetNickname } from "./modules/relationships";
 import { BCX_VERSION_PARSED } from "./utils";
-import { supporterStatus } from "./modules/versionCheck";
 import { BCXGlobalEventSystem } from "./event";
+import { FORBIDDEN_BC_MODULES } from "./config";
 
 import { omit } from "lodash-es";
+import bcModSDK from "bondage-club-mod-sdk";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -34,7 +35,7 @@ export let developmentMode: boolean = false;
 
 export function setAllowMode(allow: boolean): boolean {
 	if (allow) {
-		if (!BCX_VERSION_PARSED.dev && supporterStatus !== "developer") {
+		if (!BCX_VERSION_PARSED.dev) {
 			console.info("Cheats are only allowed in developer version");
 			return false;
 		}
@@ -84,7 +85,7 @@ export function init_findBCXSource(): void {
 		const match = /^((https:\/\/[^?/]+|http:\/\/localhost(?::[0-9]+)?)\/([^?]+)?)bcx(\.dev)?\.js($|\?)/i.exec(elem.src);
 		if (match) {
 			BCXSource = match[1];
-			console.debug("BCX: Using detected source:", BCXSource);
+			console.debug("HardCoreClub: Using detected source:", BCXSource);
 			return;
 		}
 	}
@@ -94,12 +95,12 @@ export function init_findBCXSource(): void {
 		const match = /^(https:\/\/[^?/]+\/(?:[^?]+?)?)(?:bcx(\.dev)?\.js)?(?:$|\?)/i.exec(externalSrc);
 		if (match) {
 			BCXSource = match[1];
-			console.log("BCX: External BCX_SOURCE supplied:", BCXSource);
+			console.log("HardCoreClub: External BCX_SOURCE supplied:", BCXSource);
 			return;
 		}
-		console.warn("BCX: External BCX_SOURCE supplied, but malformed, ignoring", externalSrc);
+		console.warn("HardCoreClub: External BCX_SOURCE supplied, but malformed, ignoring", externalSrc);
 	}
-	const msg = "BCX: Failed to find BCX's source! Some functions will not work properly. Are you using the official version?";
+	const msg = "HardCoreClub: Failed to find BCX's source! Some functions will not work properly. Are you using the official version?";
 	console.error(msg);
 	alert(msg);
 }
@@ -184,6 +185,21 @@ export function detectOtherMods() {
 		ImprovedStruggle: typeof w.OLDclick === "function" && typeof w.NEWclick === "function",
 		BCE: w.BCE_VERSION !== undefined ? (`${w.BCE_VERSION}` || true) : false,
 	};
+}
+
+export function detectForbiddenOtherMods(): string[] {
+	const enabledMods = bcModSDK.getModsInfo();
+	const names: string[] = new Array<string>();
+	const { BondageClubTools }= detectOtherMods();
+	if (BondageClubTools) names.push("BC Tools");
+	enabledMods.forEach(element => {
+		if (FORBIDDEN_BC_MODULES.includes(element.name)) {
+			names.push(element.name);
+			console.warn("--> Found forbidden mod: "  + element.name);
+		}
+	});
+
+	return names;
 }
 
 interface DrawImageExOptions {

@@ -9,7 +9,7 @@ import { GuiRelationships } from "./relationships";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";
 import { VERSION } from "../config";
-import { icon_discord, icon_ExternalLink, icon_heart, icon_patreon } from "../resources";
+import { icon_ExternalLink, icon_heart } from "../resources";
 import { drawIcon, DrawImageEx } from "../utilsClub";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { GuiConditionViewRules } from "./conditions_view_rules";
@@ -91,7 +91,7 @@ export class GuiMainMenu extends GuiSubscreen {
 			this.disabledModules = data;
 		}).catch(e => {
 			this.disabledModules = [];
-			console.error(`BCX: error getting disabled modules`, e);
+			console.error(`HardCoreClub: error getting disabled modules`, e);
 		});
 	}
 
@@ -104,9 +104,9 @@ export class GuiMainMenu extends GuiSubscreen {
 	Run() {
 		let heartSteps: [number, string][] | undefined;
 
-		DrawText("- Bondage Club Extended -", 125, 125, "Black", "Gray");
+		DrawText("- Hard Core Club -", 125, 125, "Black", "Gray");
 		DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png", "Show the BCX tutorial again");
+		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Question.png", "Show the StrictBCX tutorial again");
 
 		if (this.character.supporterStatus === "supporter") {
 			DrawText("BCX Supporter", 690, 125, "#DAA520", "#FFD700");
@@ -162,7 +162,7 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		if (this.character.isPlayer()) {
-			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 500, "Black", "");
+			DrawText(`Your Hard Core Club version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 500, "Black", "");
 			DrawButton(1450, 590, 400, 90, "", "White", "", "Open changelog on GitHub");
 			if (versionCheckNewAvailable === true) {
 				const tick = Date.now() % 6_000;
@@ -177,17 +177,9 @@ export class GuiMainMenu extends GuiSubscreen {
 			DrawText(`View changelog`, 1450 + 350 / 2, 635, "Black", "");
 			DrawImageEx(icon_ExternalLink, 1770, 620, { Width: 30, Height: 30 });
 			DrawButton(1450, 700, 400, 90, "", "White", "", "For saying 'thank you' with a tip");
-			MainCanvas.textAlign = "left";
-			DrawText(`BCX Patreon`, 1450 + 90, 745, "Black", "");
-			drawIcon(MainCanvas, icon_patreon, 1450 + 10, 693 + 17, 70, 70, 180, 1, 0, "Black", "");
-			DrawImageEx(icon_ExternalLink, 1770, 730, { Width: 30, Height: 30 });
-			DrawButton(1450, 810, 400, 90, "", "White", "", "Open invite to BCX Discord server");
-			DrawText(`BCX Discord`, 1455 + 90, 855, "Black", "");
-			drawIcon(MainCanvas, icon_discord, 1450 + 10, 810 + 17, 1, 1, 1, 1, 0, "#5865F2", "");
-			DrawImageEx(icon_ExternalLink, 1770, 840, { Width: 30, Height: 30 });
 			MainCanvas.textAlign = "center";
 		} else {
-			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 765, "Black", "");
+			DrawText(`Your Hard Core Club version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 765, "Black", "");
 			DrawText(`${this.character.Name}'s BCX version: ${this.character.BCXVersion?.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 845, "Black", "");
 		}
 	}
@@ -202,20 +194,9 @@ export class GuiMainMenu extends GuiSubscreen {
 			}
 			setSubscreen(new GuiTutorial(this.character, false));
 		}
-
-		// Changelog
 		if (MouseIn(1450, 590, 400, 90) && this.character.isPlayer()) {
-			window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? "master" : "stable"}/CHANGELOG.md`, "_blank");
+			window.open(`https://github.com/kinksideofthemoon/StrictBCX/releases/tag/${VERSION.replace(/-[0-f]+$/i, "")}`, "_blank");
 		}
-		// Patreon
-		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {
-			window.open(`https://patreon.com/Jomshir98`, "_blank");
-		}
-		// Discord invite
-		if (MouseIn(1450, 810, 400, 90) && this.character.isPlayer()) {
-			window.open("https://discord.gg/SHJMjEh9VH", "_blank");
-		}
-
 		for (let i = 0; i < MAIN_MENU_ITEMS.length; i++) {
 			const e = MAIN_MENU_ITEMS[i];
 			const PX = Math.floor(i / 6);

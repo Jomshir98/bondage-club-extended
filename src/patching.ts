@@ -71,9 +71,9 @@ function initPatchableFunction(target: string): IPatchedFunctionData {
 	if (!result) {
 		const originalHash = modApi.getOriginalHash(target);
 		if (!isHashExpected(target, originalHash)) {
-			console.warn(`BCX: Patched function ${target} has unknown hash ${originalHash}`);
+			console.warn(`HardCoreClub: Patched function ${target} has unknown hash ${originalHash}`);
 		}
-		console.debug(`BCX: Initialized ${target} for patching, hash ${originalHash}`);
+		console.debug(`HardCoreClub: Initialized ${target} for patching, hash ${originalHash}`);
 
 		result = {
 			name: target,
@@ -96,7 +96,7 @@ export function hookFunction<TargetName extends string>(target: TargetName, prio
 	const data = initPatchableFunction(target);
 
 	if (data.hooks.some(h => h.hook === hook)) {
-		console.error(`BCX: Duplicate hook for "${target}"`, hook);
+		console.error(`HardCoreClub: Duplicate hook for "${target}"`, hook);
 		return;
 	}
 
@@ -157,7 +157,7 @@ export function replaceObjectPatchedMethods(path: string, object: Record<string,
 
 		const patchTarget = patchMap.get(value);
 		if (patchTarget) {
-			console.debug(`BCX: Replacing referenced function "${patchTarget[0]}", found at ${path}.${key}`);
+			console.debug(`HardCoreClub: Replacing referenced function "${patchTarget[0]}", found at ${path}.${key}`);
 			object[key] = patchTarget[1];
 		}
 	}

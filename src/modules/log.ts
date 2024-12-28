@@ -429,7 +429,7 @@ export class ModuleLog extends BaseModule {
 				typeof data.category !== "string" ||
 				typeof data.target !== "number"
 			) {
-				console.warn(`BCX: Bad logConfigEdit query from ${sender}`, data);
+				console.warn(`HardCoreClub: Bad logConfigEdit query from ${sender}`, data);
 				return undefined;
 			}
 			return logConfigSet(data.category, data.target, sender);
@@ -442,7 +442,7 @@ export class ModuleLog extends BaseModule {
 				(data.message !== null && typeof data.message !== "string") ||
 				![-1, 0, 1].includes(data.value)
 			) {
-				console.warn(`BCX: Bad logPraise query from ${sender}`, data);
+				console.warn(`HardCoreClub: Bad logPraise query from ${sender}`, data);
 				return undefined;
 			}
 			return logPraise(data.value, data.message, sender);
@@ -594,7 +594,7 @@ export class ModuleLog extends BaseModule {
 			typeof e[1] === "number" &&
 			typeof e[2] === "number"
 		)) {
-			console.error("BCX: Some log entries have invalid format, reseting whole log!");
+			console.error("HardCoreClub: Some log entries have invalid format, reseting whole log!");
 			logClear(null);
 		}
 
@@ -615,19 +615,19 @@ export class ModuleLog extends BaseModule {
 			};
 			for (const k of Object.keys(modStorage.logConfig) as BCX_LogCategory[]) {
 				if (transitionDictionary[k] !== undefined) {
-					console.info(`BCX: Updating log config name "${k}"->"${transitionDictionary[k]}"`);
+					console.info(`HardCoreClub: Updating log config name "${k}"->"${transitionDictionary[k]}"`);
 					modStorage.logConfig[transitionDictionary[k]] = modStorage.logConfig[k];
 					delete modStorage.logConfig[k];
 					continue;
 				}
 				if (logConfigDefaults[k] === undefined) {
-					console.info(`BCX: Removing unknown log config category "${k}"`);
+					console.info(`HardCoreClub: Removing unknown log config category "${k}"`);
 					delete modStorage.logConfig[k];
 				}
 			}
 			for (const k of Object.keys(logConfigDefaults) as BCX_LogCategory[]) {
 				if (modStorage.logConfig[k] === undefined) {
-					console.info(`BCX: Adding missing log category "${k}"`);
+					console.info(`HardCoreClub: Adding missing log category "${k}"`);
 					modStorage.logConfig[k] = logConfigDefaults[k];
 				}
 			}

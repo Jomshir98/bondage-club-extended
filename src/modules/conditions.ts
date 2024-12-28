@@ -110,7 +110,7 @@ export function guard_ConditionsCategoryPublicData<C extends ConditionsCategorie
 			([condition, conditionData]) => {
 				const res = guard_ConditionsConditionPublicData(category, condition, conditionData);
 				if (!res && allowInvalidConditionRemoval) {
-					console.warn(`BCX: Removing invalid ${condition}:${category} condition from public data`, conditionData);
+					console.warn(`HardCoreClub: Removing invalid ${condition}:${category} condition from public data`, conditionData);
 					delete d.conditions[condition];
 					return true;
 				}
@@ -1197,44 +1197,44 @@ export class ModuleConditions extends BaseModule {
 		for (const key of Object.keys(modStorage.conditions) as ConditionsCategories[]) {
 			const handler = conditionHandlers.get(key);
 			if (!handler || !moduleIsEnabled(handler.category)) {
-				console.debug(`BCX: Removing unknown or disabled conditions category ${key}`);
+				console.debug(`HardCoreClub: Removing unknown or disabled conditions category ${key}`);
 				delete modStorage.conditions[key];
 				continue;
 			}
 			const data: ConditionsCategoryData<ConditionsCategories> | undefined = modStorage.conditions[key];
 			if (!isObject(data) || !isObject(data.conditions)) {
-				console.warn(`BCX: Removing category ${key} with invalid data`);
+				console.warn(`HardCoreClub: Removing category ${key} with invalid data`);
 				delete modStorage.conditions[key];
 				continue;
 			}
 			if (data.timer !== undefined && typeof data.timer !== "number") {
-				console.warn(`BCX: Removing category ${key} invalid timer`, data.timer);
+				console.warn(`HardCoreClub: Removing category ${key} invalid timer`, data.timer);
 				delete data.timer;
 			}
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
 			if (data.timerRemove !== undefined && data.timerRemove !== true) {
-				console.warn(`BCX: Removing category ${key} invalid timerRemove`, data.timerRemove);
+				console.warn(`HardCoreClub: Removing category ${key} invalid timerRemove`, data.timerRemove);
 				delete data.timerRemove;
 			}
 			if (!isObject(data.limits)) {
-				console.warn(`BCX: Resetting category ${key} limits with invalid data`);
+				console.warn(`HardCoreClub: Resetting category ${key} limits with invalid data`);
 				data.limits = {};
 			}
 			for (const [condition, limitValue] of typedObjectAssumedEntries(data.limits)) {
 				if (!handler.loadValidateConditionKey(condition)) {
-					console.warn(`BCX: Unknown condition ${key}:${condition} limit, removing it`);
+					console.warn(`HardCoreClub: Unknown condition ${key}:${condition} limit, removing it`);
 					delete data.limits[condition];
 				} else if (typeof limitValue !== "number" ||
 					limitValue === (handler.getDefaultLimits()[condition] ?? ConditionsLimit.normal) ||
 					ConditionsLimit[limitValue] === undefined
 				) {
-					console.warn(`BCX: Bad condition ${key}:${condition} limit value, removing it`, limitValue);
+					console.warn(`HardCoreClub: Bad condition ${key}:${condition} limit value, removing it`, limitValue);
 					delete data.limits[condition];
 				}
 			}
 
 			if (!guard_ConditionsConditionRequirements(data.requirements)) {
-				console.warn(`BCX: Resetting category ${key} requirements with invalid data`);
+				console.warn(`HardCoreClub: Resetting category ${key} requirements with invalid data`);
 				data.requirements = {};
 			}
 
@@ -1244,7 +1244,7 @@ export class ModuleConditions extends BaseModule {
 				if (!conditiondata)
 					continue;
 				if (!handler.loadValidateConditionKey(condition)) {
-					console.warn(`BCX: Unknown condition ${key}:${condition}, removing it`);
+					console.warn(`HardCoreClub: Unknown condition ${key}:${condition}, removing it`);
 					delete data.conditions[condition];
 					continue;
 				} else if (!handler.loadValidateCondition(condition, conditiondata)) {
@@ -1259,24 +1259,24 @@ export class ModuleConditions extends BaseModule {
 					// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
 					conditiondata.favorite !== undefined && conditiondata.favorite !== true
 				) {
-					console.warn(`BCX: Condition ${key}:${condition} has bad data, removing it`);
+					console.warn(`HardCoreClub: Condition ${key}:${condition} has bad data, removing it`);
 					delete data.conditions[condition];
 					continue;
 				} else if (ConditionsGetConditionLimit(key, condition) === ConditionsLimit.blocked) {
-					console.warn(`BCX: Condition ${key}:${condition} became blocked while active, removing it`);
+					console.warn(`HardCoreClub: Condition ${key}:${condition} became blocked while active, removing it`);
 					delete data.conditions[condition];
 					continue;
 				}
 				if (conditiondata.timerRemove && !conditiondata.active) {
-					console.warn(`BCX: Condition ${key}:${condition} had timerRemove while inactive, cleaning up`);
+					console.warn(`HardCoreClub: Condition ${key}:${condition} had timerRemove while inactive, cleaning up`);
 					delete conditiondata.timerRemove;
 				}
 				if (typeof conditiondata.lastActive !== "boolean") {
-					console.warn(`BCX: Condition ${key}:${condition} missing lastActive, adding`);
+					console.warn(`HardCoreClub: Condition ${key}:${condition} missing lastActive, adding`);
 					conditiondata.lastActive = false;
 				}
 				if (conditiondata.addedBy !== undefined && !Number.isInteger(conditiondata.addedBy)) {
-					console.warn(`BCX: Condition ${key}:${condition} bad addedBy, cleaning up`, conditiondata.addedBy);
+					console.warn(`HardCoreClub: Condition ${key}:${condition} bad addedBy, cleaning up`, conditiondata.addedBy);
 					delete conditiondata.addedBy;
 				}
 			}
@@ -1284,7 +1284,7 @@ export class ModuleConditions extends BaseModule {
 
 		for (const [key, handler] of conditionHandlers.entries()) {
 			if (moduleIsEnabled(handler.category) && !isObject(modStorage.conditions[key])) {
-				console.debug(`BCX: Adding missing conditions category ${key}`);
+				console.debug(`HardCoreClub: Adding missing conditions category ${key}`);
 				(modStorage.conditions as Record<ConditionsCategories, ConditionsCategoryData>)[key] = {
 					conditions: {},
 					limits: {},

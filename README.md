@@ -16,4 +16,4 @@ I RECOMMEND YOU TO USE [OFFICIAL BCX](https://jomshir98.github.io/bondage-club-e
 6. Reload your game
 
 ## Instruction - how to install HardCoreClub with Book marks
-javascript:(function(){if(window.BCX_Loaded===undefined){let n=document.createElement("script");n.setAttribute("language","JavaScript");n.setAttribute("crossorigin","anonymous");n.setAttribute("src",https://ruifflan.github.io/HardCroeClub/devel/bcx.js"+Date.now());n.onload=()=>n.remove();document.head.appendChild(n);}})();
+javascript:(function(){if(window.BCX_Loaded===undefined){let n=document.createElement("script");n.setAttribute("language","JavaScript");n.setAttribute("crossorigin","anonymous");n.setAttribute("src",https://ruifflan.github.io/HardCroeClub/devel/bcx.js?"+Date.now());n.onload=()=>n.remove();document.head.appendChild(n);}})();

@@ -483,7 +483,7 @@ export function ConditionsRemoveCondition<C extends ConditionsCategories>(catego
 	let changed = false;
 	for (const condition of conditions) {
 		if (categoryData.conditions[condition]) {
-			handler.stateChangeHandler(condition, categoryData.conditions[condition]!, false);
+			handler.stateChangeHandler(condition, categoryData.conditions[condition], false);
 			delete categoryData.conditions[condition];
 			changed = true;
 		}
@@ -870,7 +870,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		if (!categoryData.conditions[condition]) {
 			return respond(`This ${categorySingular} doesn't exist`);
 		}
-		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]!, sender);
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
 		conditionData.active = active === "yes";
 		respond(ConditionsUpdate(category, condition, conditionData, sender) ? `Ok.` : COMMAND_GENERIC_ERROR);
 	} else if (subcommand === "triggers") {
@@ -881,7 +881,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 		if (!categoryData.conditions[condition]) {
 			return respond(`This ${categorySingular} doesn't exist`);
 		}
-		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]!, sender);
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
 		const keyword = (argv[2] || "").toLocaleLowerCase();
 		if (!keyword) {
 			if (!conditionData.requirements) {
@@ -1037,7 +1037,7 @@ export function ConditionsRunSubcommand(category: ConditionsCategories, argv: st
 				`timer <${CSHelp}> autoremove <yes/no> - Set if the ${categorySingular} is removed when the timer runs out or just disables itself`
 			);
 		}
-		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition]!, sender);
+		const conditionData = ConditionsMakeConditionPublicData(handler, condition, categoryData.conditions[condition], sender);
 		if (keyword === "disable") {
 			conditionData.timer = null;
 			conditionData.timerRemove = false;
@@ -1150,7 +1150,7 @@ export function ConditionsAutocompleteSubcommand(category: ConditionsCategories,
 			return Command_pickAutocomplete(argv[3], ["yes", "no"]);
 		} else if (argv[2].toLocaleLowerCase() === "logic") {
 			return Command_pickAutocomplete(argv[3], ["and", "or"]);
-		} else if (categoryData.conditions[condition]!.requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
+		} else if (categoryData.conditions[condition].requirements && ConditionsCommandTriggersKeywords.includes(argv[2].toLocaleLowerCase())) {
 			return ConditionsCommandTriggersAutocomplete(argv.slice(2), sender);
 		}
 	} else if (subcommand === "globaltriggers") {

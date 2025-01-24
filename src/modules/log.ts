@@ -146,11 +146,11 @@ export function logConfigSet(category: BCX_LogCategory, accessLevel: LogAccessLe
 
 	if (character) {
 		logMessage("log_config_change", LogEntryType.plaintext, `${character} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
-			`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]!]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`);
+			`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`);
 		if (!character.isPlayer()) {
 			ChatRoomSendLocal(
 				`${character.toNicknamedString()} changed log configuration "${LOG_CONFIG_NAMES[category]}" ` +
-				`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]!]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`,
+				`from "${LOG_LEVEL_NAMES[modStorage.logConfig[category]]}" to "${LOG_LEVEL_NAMES[accessLevel]}"`,
 				undefined, character.MemberNumber
 			);
 		}

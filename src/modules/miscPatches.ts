@@ -25,7 +25,7 @@ export function cheatSetEnabled(cheat: MiscCheat, enabled: boolean) {
 		modStorage.cheats = modStorage.cheats.filter(c => c !== cheat);
 	}
 	if (cheatChangeHooks[cheat]) {
-		cheatChangeHooks[cheat]!(enabled);
+		cheatChangeHooks[cheat](enabled);
 	}
 	modStorageSync();
 }

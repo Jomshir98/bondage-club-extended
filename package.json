@@ -6,7 +6,7 @@
 	"license": "GPL-3.0",
 	"private": true,
 	"engines": {
-		"node": ">=18.x"
+		"node": ">=22.x"
 	},
 	"scripts": {
 		"build": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack --env prod --fail-on-warnings",

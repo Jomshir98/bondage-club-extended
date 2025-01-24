@@ -497,7 +497,7 @@ export function initRules_bc_blocks() {
 				}, ModuleCategory.Rules);
 			}
 			hookFunction("CommonSetScreen", 5, (args, next) => {
-				if (args[0] === "Online" && args[1] === "ChatCreate") {
+				if (args[0] === "Online" && args[1] === "ChatAdmin" && ChatAdminMode === "create") {
 					if (state.isEnforced) {
 						state.triggerAttempt();
 						return;

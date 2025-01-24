@@ -33,13 +33,18 @@ export const CURSE_IGNORED_EFFECTS = ["Lock"];
 const CURSE_IGNORED_ITEMS = ["SlaveCollar", "ClubSlaveCollar"];
 
 /** Screens on which curses don't trigger at all */
-const CURSE_INACTIVE_SCREENS: string[] = [
-	"Appearance",
-	"Wardrobe",
-	"ChatSelect",
-	"ChatSearch",
-	"ChatCreate",
+const CURSE_INACTIVE_SCREENS: (() => boolean)[] = [
+	() => CurrentScreen === "Appearance",
+	() => CurrentScreen === "Wardrobe",
+	() => CurrentScreen === "ChatSelect",
+	() => CurrentScreen === "ChatSearch",
+	() => CurrentScreen === "ChatAdmin" && ChatAdminMode === "create",
 ];
+
+// Pause curses on certain screens and when talking with NPC altogether
+function isCursePaused() {
+	return CURSE_INACTIVE_SCREENS.some(v => v) || CurrentCharacter?.IsNpc();
+}
 
 export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
 	const result: ItemProperties = {};
@@ -999,8 +1004,7 @@ export class ModuleCurses extends BaseModule {
 			}
 		}
 
-		// Pause curses on certain screens and when talking with NPC altogether
-		if (CURSE_INACTIVE_SCREENS.includes(CurrentScreen) || CurrentCharacter?.IsNpc())
+		if (isCursePaused())
 			return;
 
 		const curse = condition.data;

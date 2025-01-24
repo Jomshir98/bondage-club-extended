@@ -510,9 +510,10 @@ function ChatSettingsExtraClick(apply: (data: RoomTemplate) => void) {
 				Game: ChatAdminData!.Game!,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList").trim()) : [],
 				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist").trim()) : [],
-				Limit: ElementValue("InputSize") ? ElementValue("InputSize").trim() : "",
+				Limit: ElementValue("InputSize") ? parseInt(ElementValue("InputSize").trim(), 10) : 10,
 				Language: ChatAdminData!.Language!,
 				BlockCategory: cloneDeep(ChatAdminData!.BlockCategory)!,
+				Custom: ChatAdminData!.Custom!,
 				AutoApply: modStorage.roomTemplates[i]?.AutoApply,
 			};
 			modStorageSync();
@@ -543,6 +544,7 @@ function applyTemplate(template: RoomTemplate) {
 	if (inputSize) inputSize.value = String(template.Limit);
 	if (template.Language) ChatAdminData!.Language = template.Language;
 	ChatAdminData!.BlockCategory = template.BlockCategory!;
+	ChatAdminData!.Custom = template.Custom;
 }
 
 export class ModuleChatroomAdmin extends BaseModule {

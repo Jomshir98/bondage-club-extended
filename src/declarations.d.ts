@@ -742,18 +742,11 @@ interface CommandDisplayDefinition {
 	defaultLimit: import("./constants").ConditionsLimit;
 }
 
-interface RoomTemplate {
-	Name: string;
-	Description: string;
-	Background: string;
-	Language: ServerChatRoomLanguage;
-	Limit: string;
-	Admin: number[];
-	Whitelist: number[];
-	Game: ServerChatRoomGame;
-	Private: boolean;
-	Locked: boolean;
-	BlockCategory: ServerChatRoomBlockCategory[];
+interface RoomTemplate extends Omit<ServerChatRoomData, "Ban" | "MapData" | "Space" | "Character"> {
+	Ban?: never;
+	MapData?: never;
+	Space?: never;
+	Character?: never;
 	AutoApply: true | undefined;
 }
 

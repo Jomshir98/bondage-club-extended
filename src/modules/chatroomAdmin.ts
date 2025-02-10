@@ -8,6 +8,7 @@ import cloneDeep from "lodash-es/cloneDeep";
 import { RulesGetRuleState } from "./rules";
 import { InfoBeep } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
+import { isEqual } from "lodash-es";
 
 enum ThemeRoomType {
 	Afk = 0,
@@ -501,12 +502,17 @@ function ChatSettingsExtraClick(apply: (data: RoomTemplate) => void) {
 			return;
 		}
 		if (((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
+			// FIXME: remove post-R113
+			// eslint-disable-next-line deprecation/deprecation
+			const visibility = ChatAdminData?.Private ? ["Admin", "Whitelist"] as ServerChatRoomRole[] : ChatAdminData!.Visibility!;
+			// eslint-disable-next-line deprecation/deprecation
+			const access = ChatAdminData?.Locked ? ["Admin", "Whitelist"] as ServerChatRoomRole[] : ChatAdminData!.Access!;
 			modStorage.roomTemplates[i] = {
 				Name: ElementValue("InputName") ? ElementValue("InputName").trim() : "",
 				Description: ElementValue("InputDescription") ? ElementValue("InputDescription").trim() : "",
 				Background: ChatAdminData!.Background!,
-				Private: ChatAdminData!.Private!,
-				Locked: ChatAdminData!.Locked!,
+				Visibility: visibility,
+				Access: access,
 				Game: ChatAdminData!.Game!,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList").trim()) : [],
 				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist").trim()) : [],
@@ -533,10 +539,26 @@ function applyTemplate(template: RoomTemplate) {
 	const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
 	const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
 
+	const access = "Locked" in template ? (template.Locked ? ["Admin", "Whitelist"] : ["All"]) as ServerChatRoomRole[] : undefined;
+	const visibility = "Private" in template ? (template.Private ? ["Admin", "Whitelist"] : ["All"]) as ServerChatRoomRole[] : undefined;
+
 	if (inputName) inputName.value = template.Name ?? "";
 	if (inputDescription) inputDescription.value = template.Description ?? "";
 	ChatAdminData!.Background = template.Background;
+	if (typeof ChatAdminAccessModeValues !== "undefined") {
+		ChatAdminData!.Access = access ?? template.Access;
+		ChatAdminAccessModeIndex = ChatAdminAccessModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Access!));
+		if (ChatAdminAccessModeIndex < 0) ChatAdminAccessModeIndex = 0;
+	}
+	if (typeof ChatAdminVisibilityModeValues !== "undefined") {
+		ChatAdminData!.Visibility = visibility ?? template.Visibility;
+		ChatAdminVisibilityModeIndex = ChatAdminVisibilityModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Visibility!));
+		if (ChatAdminVisibilityModeIndex < 0) ChatAdminVisibilityModeIndex = 0;
+	}
+	// FIXME: remove post-R113
+	// eslint-disable-next-line deprecation/deprecation
 	ChatAdminData!.Private = template.Private;
+	// eslint-disable-next-line deprecation/deprecation
 	ChatAdminData!.Locked = template.Locked;
 	ChatAdminData!.Game = template.Game;
 	if (inputAdminList) inputAdminList.value = template.Admin?.toString() ?? "";

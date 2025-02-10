@@ -13,7 +13,7 @@ import zod, { ZodType } from "zod";
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { AccessLevel, checkPermissionAccess, getHighestRoleInRoom } from "./authority";
 import { COMMAND_GENERIC_ERROR, Command_parseTime, Command_pickAutocomplete, Command_selectCharacterAutocomplete, Command_selectCharacterMemberNumber } from "./commands";
-import { getCharacterName } from "../utilsClub";
+import { getCharacterName, isRoomPrivate } from "../utilsClub";
 import { BCX_setInterval } from "../BCXContext";
 import { ExportImportRegisterCategory } from "./export_import";
 
@@ -673,7 +673,7 @@ export function ConditionsCategoryUpdate<C extends ConditionsCategories>(categor
 
 export function ConditionsEvaluateRequirements(requirements: ConditionsConditionRequirements, highestRoleInRoom?: AccessLevel | null): boolean {
 	const inChatroom = ServerPlayerIsInChatRoom();
-	const chatroomPrivate = inChatroom && ChatRoomData != null && ChatRoomData.Private;
+	const chatroomPrivate = inChatroom && ChatRoomData != null && isRoomPrivate(ChatRoomData);
 	const results: boolean[] = [];
 	if (requirements.room) {
 		const res = inChatroom &&

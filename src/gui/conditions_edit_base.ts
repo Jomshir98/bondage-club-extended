@@ -1,7 +1,7 @@
 import { ChatroomCharacter, getAllCharactersInRoom } from "../characters";
 import { setSubscreen } from "../modules/gui";
 import { GuiSubscreen } from "./subscreen";
-import { DrawImageEx, getCharacterName, drawIcon } from "../utilsClub";
+import { DrawImageEx, getCharacterName, drawIcon, isRoomPrivate } from "../utilsClub";
 import { AccessLevel } from "../modules/authority";
 import { ConditionsLimit } from "../constants";
 import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
@@ -279,7 +279,7 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 		DrawText(`room`, 324 + 115 + 14 + 130 + 14, 620 + 32, "Black", "Gray");
 		if (requirements.room) {
 			const inChatroom = ServerPlayerIsInChatRoom();
-			const chatroomPrivate = inChatroom && ChatRoomData && ChatRoomData.Private;
+			const chatroomPrivate = inChatroom && ChatRoomData && isRoomPrivate(ChatRoomData);
 			const res = inChatroom &&
 				(requirements.room.type === "public" ? !chatroomPrivate : chatroomPrivate);
 			DrawRect(95, 620, 15, 64, (requirements.room.inverted ? !res : res) ? "#00FF22" : "#AA0000");

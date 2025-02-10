@@ -2,7 +2,7 @@ import { ChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, removeAllHooksByModule } from "../patching";
 import { clamp, dictionaryProcess, isObject } from "../utils";
-import { ChatRoomSendLocal } from "../utilsClub";
+import { ChatRoomSendLocal, isRoomPrivate } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
@@ -643,7 +643,7 @@ export class ModuleLog extends BaseModule {
 
 		hookFunction("ChatRoomSync", 0, (args, next) => {
 			const data = args[0];
-			if (data.Private) {
+			if (isRoomPrivate(data)) {
 				logMessage("entered_private_room", LogEntryType.plaintext, `${Player.Name} entered private room "${data.Name}"`);
 			} else {
 				logMessage("entered_public_room", LogEntryType.plaintext, `${Player.Name} entered public room "${data.Name}"`);

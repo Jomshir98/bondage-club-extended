@@ -17,7 +17,8 @@ function allowSearchMode(): boolean {
 				CurrentCharacter.AllowItem
 			)
 		) &&
-		DialogIntro() !== "" &&
+		// @ts-expect-error: new parameter added in R113; still inert as of R112
+		DialogIntro(CurrentCharacter) !== "" &&
 		(DialogMenuMode === "items" || DialogMenuMode === "permissions");
 }
 

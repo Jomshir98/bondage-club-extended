@@ -205,7 +205,7 @@ export class ChatroomCharacter {
 				throw new Error("Bad data");
 			}
 			for (const k of Object.keys(data) as BCX_LogCategory[]) {
-				if (data[k] == null || LOG_CONFIG_NAMES[k] === undefined || LogAccessLevel[data[k]!] === undefined) {
+				if (data[k] == null || LOG_CONFIG_NAMES[k] === undefined || LogAccessLevel[data[k]] === undefined) {
 					delete data[k];
 				}
 			}

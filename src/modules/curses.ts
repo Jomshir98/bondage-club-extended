@@ -928,7 +928,7 @@ export class ModuleCurses extends BaseModule {
 				args[5] = (color: any) => {
 					if (ItemColorCharacter === Player && ItemColorItem) {
 						// Original code
-						const newColors = ItemColorState!.colors.slice();
+						const newColors = ItemColorState.colors.slice();
 						ItemColorPickerIndices.forEach(i => newColors[i] = color);
 						ItemColorItem.Color = newColors;
 						CharacterLoadCanvas(ItemColorCharacter);

@@ -555,15 +555,15 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 		}
 		if (((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
 			modStorage.roomTemplates[i] = {
-				Name: ElementValue("InputName") ? ElementValue("InputName")!.trim() : "",
-				Description: ElementValue("InputDescription") ? ElementValue("InputDescription")!.trim() : "",
+				Name: ElementValue("InputName") ? ElementValue("InputName").trim() : "",
+				Description: ElementValue("InputDescription") ? ElementValue("InputDescription").trim() : "",
 				Background: create ? ChatCreateBackgroundSelect : ChatAdminBackgroundSelect,
 				Private: create ? (ChatCreatePrivate ? ChatCreatePrivate : false) : ChatAdminPrivate,
 				Locked: create ? (ChatCreateLocked ? ChatCreateLocked : false) : ChatAdminLocked,
 				Game: create ? ChatCreateGame : ChatAdminGame,
-				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList")!.trim()) : [],
-				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist")!.trim()) : [],
-				Limit: ElementValue("InputSize") ? ElementValue("InputSize")!.trim() : "",
+				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList").trim()) : [],
+				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist").trim()) : [],
+				Limit: ElementValue("InputSize") ? ElementValue("InputSize").trim() : "",
 				Language: create ? ChatCreateLanguage : ChatAdminLanguage,
 				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory),
 				AutoApply: modStorage.roomTemplates[i]?.AutoApply,

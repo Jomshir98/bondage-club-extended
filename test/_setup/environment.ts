@@ -54,7 +54,7 @@ class PuppeteerEnvironment extends NodeEnvironment {
 				global.context = browser.defaultBrowserContext();
 				break;
 			case "incognito":
-				global.context = await browser.createIncognitoBrowserContext();
+				global.context = await browser.createBrowserContext();
 				break;
 			default:
 				throw new Error(
@@ -68,7 +68,7 @@ class PuppeteerEnvironment extends NodeEnvironment {
 
 		// Close context
 		if (global.context) {
-			if (global.context.isIncognito()) {
+			if (global.puppeteerConfig.browserContext === "incognito") {
 				await global.context.close();
 			}
 			global.context = undefined;

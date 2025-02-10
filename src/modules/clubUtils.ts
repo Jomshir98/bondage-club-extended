@@ -607,7 +607,6 @@ export class ModuleClubUtils extends BaseModule {
 
 	unload() {
 		remove(GetBackgroundTagListArray(), i => i === BACKGROUNDS_BCX_NAME);
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 		remove(BackgroundsList, i => (i.Tag as BCX_BackgroundTag[]).includes(BACKGROUNDS_BCX_NAME));
 		// Refresh current background list, if already built
 		if (ChatCreateBackgroundList != null) {

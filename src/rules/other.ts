@@ -221,7 +221,7 @@ export function initRules_other() {
 	const addTrackingEntry = (permissionItems: Character["PermissionItems"], token: number) => {
 		const perms = (permissionItems as BCXPermissionItems);
 		perms["BCX/GoodGirl"] ??= PreferencePermissionGetDefault();
-		perms["BCX/GoodGirl"]!.TypePermissions = { [token.toString()]: "Favorite" };
+		perms["BCX/GoodGirl"].TypePermissions = { [token.toString()]: "Favorite" };
 	};
 
 	registerRule("other_track_BCX_activation", {

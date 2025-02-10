@@ -246,6 +246,4 @@ const conf = [
 	}
 ];
 
-console.log(conf);
-
 export default conf;

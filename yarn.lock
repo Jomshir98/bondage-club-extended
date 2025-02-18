@@ -1692,10 +1692,10 @@ batch@0.6.1:
   resolved "https://registry.yarnpkg.com/batch/-/batch-0.6.1.tgz#dc34314f4e679318093fc760272525f94bf25c16"
   integrity sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==
 
-bc-stubs@BC-stubs@v113.0.0-Beta1:
-  version "113.0.0-Beta.1"
-  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-113.0.0-Beta.1.tgz#9b7ab4e230db65ea5568b6e07d1102f3934af285"
-  integrity sha512-7IpcgNZbSzok6vkZrfWChyKKRscl1K2dzMH8bkKpbTzxxRTxCKNhn2WRsLjhqwMHTdRIJTME6GBbniGff9Gslg==
+bc-stubs@BC-stubs@113.0.0:
+  version "113.0.0"
+  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-113.0.0.tgz#b8b3a31553f1e530cfdda5c38ab13f7afbf46b12"
+  integrity sha512-2n+ZyHlTj0ASunlQEYUIvO2nfZdtdISCDw5b/xvJC38iXczdY4XN28G+W6Z8Qdb0vHSmcOlUyFtmW3FreXJBNg==
   dependencies:
     socket.io-client "4.6.1"
 

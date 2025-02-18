@@ -1,6 +1,6 @@
 {
 	"name": "bondage-club-extended",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"repository": "git@github.com:jomshir98/bondage-club-extended.git",
 	"author": "jomshir98 <jomshir98@protonmail.com>",
 	"license": "GPL-3.0",
@@ -32,7 +32,7 @@
 		"@types/jest": "^29.5.6",
 		"@typescript-eslint/eslint-plugin": "^8.21.0",
 		"@typescript-eslint/parser": "^8.21.0",
-		"bc-stubs": "BC-stubs@v113.0.0-Beta1",
+		"bc-stubs": "BC-stubs@113.0.0",
 		"clean-webpack-plugin": "^4.0.0",
 		"copy-webpack-plugin": "^12.0.2",
 		"cross-env": "^7.0.3",

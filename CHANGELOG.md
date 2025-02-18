@@ -14,6 +14,18 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.0.4
+
+This update fixes compatibility with BC R113:
+- The BC stubs were updated to match
+- The merging of the room admin screen required a few changes but cleaned up a lot of code
+- Custom room data is now saved in room templates
+- Follow up to the changes in 1.0.3
+
+## 1.0.3
+
+- Compatibility for room whitelist changes
+
 ## 1.0.2
 
 This update fixes compatibility with BC R107:

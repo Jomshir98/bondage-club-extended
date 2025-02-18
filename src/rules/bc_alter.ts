@@ -2,7 +2,7 @@ import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { hookFunction, trackFunction } from "../patching";
-import { ChatRoomActionMessage, getCharacterName, InfoBeep, updateChatroom } from "../utilsClub";
+import { ChatRoomActionMessage, getCharacterName, InfoBeep, isRoomLocked, isRoomPrivate, updateChatroom } from "../utilsClub";
 import { getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
@@ -452,18 +452,18 @@ export function initRules_bc_alter() {
 			hookFunction("ChatAdminRun", 0, (args, next) => {
 				next(args);
 				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {
-					DrawButton(505, 172, 300, 60, TextGet("Language" + ChatAdminLanguage), "#ebebe4", "", "", true);
+					DrawButton(505, 172, 300, 60, TextGet("Language" + ChatAdminDefaultLanguage), "#ebebe4", "", "", true);
 					DrawButton(125, 770, 250, 65, TextGet("AddOwnerAdminList"), "#ebebe4", "", "", true);
 					DrawButton(390, 770, 250, 65, TextGet("AddLoverAdminList"), "#ebebe4", "", "", true);
-					DrawBackNextButton(1300, 450, 500, 60, BackgroundsTextGet(ChatAdminBackgroundSelect), "#ebebe4", "",
-						() => BackgroundsTextGet((ChatAdminBackgroundIndex === 0) ? ChatCreateBackgroundList![ChatCreateBackgroundList!.length - 1] : ChatCreateBackgroundList![ChatAdminBackgroundIndex - 1]),
-						() => BackgroundsTextGet((ChatAdminBackgroundIndex >= ChatCreateBackgroundList!.length - 1) ? ChatCreateBackgroundList![0] : ChatCreateBackgroundList![ChatAdminBackgroundIndex + 1]),
+					DrawBackNextButton(1300, 450, 500, 60, BackgroundsTextGet(ChatAdminData!.Background!), "#ebebe4", "",
+						() => BackgroundsTextGet((ChatAdminBackgroundIndex === 0) ? ChatAdminBackgroundList![ChatAdminBackgroundList!.length - 1] : ChatAdminBackgroundList![ChatAdminBackgroundIndex - 1]),
+						() => BackgroundsTextGet((ChatAdminBackgroundIndex >= ChatAdminBackgroundList!.length - 1) ? ChatAdminBackgroundList![0] : ChatAdminBackgroundList![ChatAdminBackgroundIndex + 1]),
 						true
 					);
 					DrawButton(1840, 450, 60, 60, "", "#ebebe4", "Icons/Small/Preference.png", "", true);
-					DrawBackNextButton(1625, 550, 275, 60, TextGet("Game" + ChatAdminGame), "#ebebe4", "", () => "", () => "", true);
-					DrawButton(1426, 728, 64, 64, "", "#ebebe4", ChatAdminPrivate ? "Icons/Checked.png" : "", "", true);
-					DrawButton(1756, 728, 64, 64, "", "#ebebe4", ChatAdminLocked ? "Icons/Checked.png" : "", "", true);
+					DrawBackNextButton(1625, 550, 275, 60, TextGet("Game" + ChatAdminData!.Game), "#ebebe4", "", () => "", () => "", true);
+					DrawButton(1426, 728, 64, 64, "", "#ebebe4", isRoomPrivate(ChatAdminData!) ? "Icons/Checked.png" : "", "", true);
+					DrawButton(1756, 728, 64, 64, "", "#ebebe4", isRoomLocked(ChatAdminData!) ? "Icons/Checked.png" : "", "", true);
 					DrawRect(100, 850, 1125, 70, "#ffff88");
 					DrawEmptyRect(100, 850, 1125, 70, "Black");
 					DrawText("Some settings are not available due to a BCX rule.", 650, 885, "Black", "Gray");

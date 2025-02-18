@@ -8,6 +8,7 @@ import cloneDeep from "lodash-es/cloneDeep";
 import { RulesGetRuleState } from "./rules";
 import { InfoBeep } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
+import { isEqual } from "lodash-es";
 
 enum ThemeRoomType {
 	Afk = 0,
@@ -71,7 +72,6 @@ const ROOM_TEMPLATES_COUNT = 4;
 
 let overwriteMode: number | undefined;
 let onSecondPage: boolean = false;
-let onRoomCreateScreen: boolean = false;
 
 //#region theme rooms
 const MAX_DESCRIPTION_CHARS = 80; // it is 100, but font is getting way too small
@@ -189,12 +189,6 @@ function ThemeRoomLoad(): void {
 	});
 }
 
-function ChatSettingsExtraExit() {
-	if (onThemeRoomSubpage) {
-		ChatSettingsThemeRoomExit();
-	}
-}
-
 // Sub page within the second page for the theme room creation form
 function ChatSettingsThemeRoomRun() {
 	MainCanvas.textAlign = "left";
@@ -285,9 +279,9 @@ function PasteListener(ev: ClipboardEvent) {
 function ChatSettingsThemeRoomClick() {
 
 	if (MouseIn(1480, 75, 420, 245)) {
-		ElementToggleGeneratedElements("ChatCreate", false);
-		BackgroundSelectionMake(ChatCreateBackgroundList!,
-			ChatCreateBackgroundList!.indexOf(onRoomCreateScreen ? ChatCreateBackgroundSelect : ChatAdminBackgroundSelect), Name => {
+		ElementToggleGeneratedElements("ChatAdmin", false);
+		BackgroundSelectionMake(ChatAdminBackgroundList as string[],
+			(ChatAdminBackgroundList as string[]).indexOf(ChatAdminData!.Background!), Name => {
 				currentThemeRoom.Background = Name;
 			}
 		);
@@ -407,13 +401,9 @@ function ChatSettingsThemeRoomClick() {
 	if (MouseIn(1450, 830, 180, 64)) {
 		const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
 
-		if (onRoomCreateScreen) {
-			ChatBlockItemCategory = currentThemeRoom.BlockCategories;
-			ChatCreateBackgroundSelect = currentThemeRoom.Background;
-		} else {
-			ChatAdminBlockCategory = currentThemeRoom.BlockCategories;
-			ChatAdminBackgroundSelect = currentThemeRoom.Background;
-		}
+		ChatAdminData!.BlockCategory = currentThemeRoom.BlockCategories;
+		ChatAdminData!.Background = currentThemeRoom.Background;
+
 		if (inputDescription) inputDescription.value = `[${TR_TYPE_NAMES[currentThemeRoom.Type]}]` +
 			`${currentThemeRoom.Setting ? " [" + ThemeRoomSetting[currentThemeRoom.Setting] + "]" : ""}` +
 			`${currentThemeRoom.Limits.size === 0 ? "" : " [" + stringifyLimits(currentThemeRoom) + "]"}`;
@@ -439,13 +429,8 @@ function ToggleThemeRoomSetting(newSetting: ThemeRoomSetting) {
 }
 
 function ChatSettingsThemeRoomLoad() {
-	if (onRoomCreateScreen) {
-		currentThemeRoom.Background = ChatCreateBackgroundSelect;
-		currentThemeRoom.BlockCategories = ChatBlockItemCategory.slice();
-	} else {
-		currentThemeRoom.Background = ChatAdminBackgroundSelect;
-		currentThemeRoom.BlockCategories = ChatAdminBlockCategory.slice();
-	}
+	currentThemeRoom.Background = ChatAdminData!.Background!;
+	currentThemeRoom.BlockCategories = [...ChatAdminData!.BlockCategory!];
 }
 
 function ChatSettingsThemeRoomExit() {
@@ -457,45 +442,8 @@ function ChatSettingsThemeRoomExit() {
 }
 //#endregion
 
-// Second page for the chat room settings screen that is used in both the room creation and room administration variants
-function ChatSettingsExtraRun() {
-	if (onThemeRoomSubpage) {
-		return ChatSettingsThemeRoomRun();
-	}
-	DrawText("Back", 169, 95, "Black", "Gray");
-	DrawButton(124, 132, 90, 90, "", "White", "Icons/West.png");
-
-	DrawText("Standardize your room description so the room's purpose is clear and it can easily be filtered:", 1000, 300, "Black", "Gray");
-	DrawButton(800, 360, 380, 80, "Create a theme room", "white");
-
-	DrawText("Templates for storing / overwriting current room information & settings (press a name to toggle auto-apply)", 1000, 650, "Black", "Gray");
-
-	for (let i = 0; i < ROOM_TEMPLATES_COUNT; i++) {
-		const X = 124 + i * 455;
-		const template = modStorage.roomTemplates?.[i];
-		let templateName: string = template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -";
-		const tick = Date.now() % 6_000;
-		if (template?.AutoApply && tick < 3_000) {
-			templateName = "- auto-applied default -";
-		}
-
-		if (template) DrawImageEx("Backgrounds/" + template.Background + ".jpg", X, 700, { Alpha: MouseIn(X, 700, 400, 200) ? 0.3 : 1, Width: 400, Height: 200 });
-		DrawButton(X, 700, 340, 64, "", template ? template.AutoApply ? "rgba(136 , 136 , 204, 0.5)" : "rgba(255, 255, 255, 0.5)" : "#ddd", "", !template ? undefined : "Use as room creation dialog default", !template);
-		DrawTextFit(templateName, X + 170, 700 + 34, 325, "Black", "Gray");
-		DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", !template ? undefined : "Delete template", !template);
-		if (overwriteMode === i) {
-			DrawButton(X, 835, 150, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
-			DrawText("Load", X + 51, 835 + 32, "Black");
-			DrawButton(X + 170, 835, 230, 64, "Overwrite ?", "rgba(255, 242, 0, 0.2)", "");
-		} else {
-			DrawButton(X, 835, 230, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
-			DrawText("Load", X + 51, 835 + 32, "Black");
-			DrawButton(X + 250, 835, 150, 64, "    Save", "rgba(255, 255, 255, 0.2)", "");
-		}
-	}
-}
 // Click events for the second page of the chat room settings screen with a callback to transport data to the two patched click event functions
-function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => void) {
+function ChatSettingsExtraClick(apply: (data: RoomTemplate) => void) {
 	if (onThemeRoomSubpage) {
 		return ChatSettingsThemeRoomClick();
 	}
@@ -554,18 +502,24 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 			return;
 		}
 		if (((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
+			// FIXME: remove post-R113
+			// eslint-disable-next-line deprecation/deprecation
+			const visibility = ChatAdminData?.Private ? ["Admin", "Whitelist"] as ServerChatRoomRole[] : ChatAdminData!.Visibility!;
+			// eslint-disable-next-line deprecation/deprecation
+			const access = ChatAdminData?.Locked ? ["Admin", "Whitelist"] as ServerChatRoomRole[] : ChatAdminData!.Access!;
 			modStorage.roomTemplates[i] = {
-				Name: ElementValue("InputName") ? ElementValue("InputName")!.trim() : "",
-				Description: ElementValue("InputDescription") ? ElementValue("InputDescription")!.trim() : "",
-				Background: create ? ChatCreateBackgroundSelect : ChatAdminBackgroundSelect,
-				Private: create ? (ChatCreatePrivate ? ChatCreatePrivate : false) : ChatAdminPrivate,
-				Locked: create ? (ChatCreateLocked ? ChatCreateLocked : false) : ChatAdminLocked,
-				Game: create ? ChatCreateGame : ChatAdminGame,
-				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList")!.trim()) : [],
-				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist")!.trim()) : [],
-				Limit: ElementValue("InputSize") ? ElementValue("InputSize")!.trim() : "",
-				Language: create ? ChatCreateLanguage : ChatAdminLanguage,
-				BlockCategory: cloneDeep(create ? ChatBlockItemCategory : ChatAdminBlockCategory),
+				Name: ElementValue("InputName") ? ElementValue("InputName").trim() : "",
+				Description: ElementValue("InputDescription") ? ElementValue("InputDescription").trim() : "",
+				Background: ChatAdminData!.Background!,
+				Visibility: visibility,
+				Access: access,
+				Game: ChatAdminData!.Game!,
+				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList").trim()) : [],
+				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist").trim()) : [],
+				Limit: ElementValue("InputSize") ? parseInt(ElementValue("InputSize").trim(), 10) : 10,
+				Language: ChatAdminData!.Language!,
+				BlockCategory: cloneDeep(ChatAdminData!.BlockCategory)!,
+				Custom: ChatAdminData!.Custom!,
 				AutoApply: modStorage.roomTemplates[i]?.AutoApply,
 			};
 			modStorageSync();
@@ -576,6 +530,43 @@ function ChatSettingsExtraClick(create: boolean, apply: (data: RoomTemplate) => 
 			return;
 		}
 	}
+}
+
+function applyTemplate(template: RoomTemplate) {
+	const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
+	const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
+	const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
+	const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
+	const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
+
+	const access = "Locked" in template ? (template.Locked ? ["Admin", "Whitelist"] : ["All"]) as ServerChatRoomRole[] : undefined;
+	const visibility = "Private" in template ? (template.Private ? ["Admin", "Whitelist"] : ["All"]) as ServerChatRoomRole[] : undefined;
+
+	if (inputName) inputName.value = template.Name ?? "";
+	if (inputDescription) inputDescription.value = template.Description ?? "";
+	ChatAdminData!.Background = template.Background;
+	if (typeof ChatAdminAccessModeValues !== "undefined") {
+		ChatAdminData!.Access = access ?? template.Access;
+		ChatAdminAccessModeIndex = ChatAdminAccessModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Access!));
+		if (ChatAdminAccessModeIndex < 0) ChatAdminAccessModeIndex = 0;
+	}
+	if (typeof ChatAdminVisibilityModeValues !== "undefined") {
+		ChatAdminData!.Visibility = visibility ?? template.Visibility;
+		ChatAdminVisibilityModeIndex = ChatAdminVisibilityModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Visibility!));
+		if (ChatAdminVisibilityModeIndex < 0) ChatAdminVisibilityModeIndex = 0;
+	}
+	// FIXME: remove post-R113
+	// eslint-disable-next-line deprecation/deprecation
+	ChatAdminData!.Private = template.Private;
+	// eslint-disable-next-line deprecation/deprecation
+	ChatAdminData!.Locked = template.Locked;
+	ChatAdminData!.Game = template.Game;
+	if (inputAdminList) inputAdminList.value = template.Admin?.toString() ?? "";
+	if (inputWhitelist) inputWhitelist.value = template.Whitelist?.toString() ?? "";
+	if (inputSize) inputSize.value = String(template.Limit);
+	if (template.Language) ChatAdminData!.Language = template.Language;
+	ChatAdminData!.BlockCategory = template.BlockCategory!;
+	ChatAdminData!.Custom = template.Custom;
 }
 
 export class ModuleChatroomAdmin extends BaseModule {
@@ -598,111 +589,29 @@ export class ModuleChatroomAdmin extends BaseModule {
 			}
 		}
 
-		//#region Second page button (on room create screen)
-		hookFunction("ChatCreateExit", 0, (args, next) => {
-			next(args);
-			ChatSettingsExtraExit();
-		});
-		patchFunction("ChatCreateRun", {
-			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',
-		});
-		patchFunction("ChatCreateRun", {
-			'ElementPosition("InputName", 815, 100, 820);': 'ElementPosition("InputName", 865, 100, 720);',
-		});
-		patchFunction("ChatCreateRun", {
-			'DrawText(TextGet("RoomLanguage"), 250, 190,': 'DrawText(TextGet("RoomLanguage"), 390, 190,',
-		});
-		patchFunction("ChatCreateRun", {
-			"DrawButton(405, 157,": "DrawButton(505, 157,",
-		});
-		patchFunction("ChatCreateRun", {
-			'DrawText(TextGet("RoomSize"), 850, 190,': 'DrawText(TextGet("RoomSize"), 950, 190,',
-		});
-		patchFunction("ChatCreateRun", {
-			'ElementPosition("InputSize", 1099, 185, 250);': 'ElementPosition("InputSize", 1149, 185, 150);',
-		});
-		patchFunction("ChatCreateClick", {
-			"if (MouseIn(405, 157,": "if (MouseIn(505, 157,",
-		});
-		hookFunction("ChatCreateRun", 0, (args, next) => {
-			onRoomCreateScreen = true;
-			if (onSecondPage) {
-				return ChatSettingsExtraRun();
-			}
-			next(args);
-			if (!ChatCreateShowBackgroundMode) {
-				DrawText("More", 169, 95, "Black", "Gray");
-				DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
-				if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
-			}
-		});
+		//#region Second page button
 		hookFunction("ChatAdminExit", 0, (args, next) => {
 			next(args);
-			ChatSettingsExtraExit();
+			if (onThemeRoomSubpage) {
+				ChatSettingsThemeRoomExit();
+			}
 			// needed to auto apply a template correctly again
 			ChatBlockItemReturnData = {};
 		});
-		hookFunction("ChatCreateLoad", 0, (args, next) => {
+		hookFunction("ChatAdminLoad", 0, (args, next) => {
 			next(args);
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
-			if (template &&
+			if (ChatAdminMode === "create" &&
+				template &&
 				BackgroundSelectionPreviousScreen !== CurrentScreen &&
 				Object.keys(ChatBlockItemReturnData).length === 0
 			) {
-				const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
-				const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
-				const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
-				const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
-				const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
-
-				if (inputName) inputName.value = template.Name;
-				if (inputDescription) inputDescription.value = template.Description;
-				ChatCreateBackgroundSelect = template.Background;
-				ChatCreatePrivate = template.Private;
-				ChatCreateLocked = template.Locked;
-				ChatCreateGame = template.Game;
-				if (inputAdminList) inputAdminList.value = template.Admin.toString();
-				if (inputWhitelist) inputWhitelist.value = template.Whitelist.toString();
-				if (inputSize) inputSize.value = template.Limit;
-				if (template.Language) ChatCreateLanguage = template.Language;
-				ChatBlockItemCategory = template.BlockCategory;
+				applyTemplate(template);
 			}
 			// needed to auto apply a template correctly again
 			BackgroundSelectionPreviousScreen = "";
 			ChatBlockItemReturnData = {};
 		});
-		//#endregion
-		hookFunction("ChatCreateClick", 0, (args, next) => {
-			if (onSecondPage) {
-				return ChatSettingsExtraClick(onRoomCreateScreen, (data) => {
-					const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
-					const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
-					const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
-					const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
-					const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
-
-					if (inputName) inputName.value = data.Name;
-					if (inputDescription) inputDescription.value = data.Description;
-					ChatCreateBackgroundSelect = data.Background;
-					ChatCreatePrivate = data.Private;
-					ChatCreateLocked = data.Locked;
-					ChatCreateGame = data.Game;
-					if (inputAdminList) inputAdminList.value = data.Admin.toString();
-					if (inputWhitelist) inputWhitelist.value = data.Whitelist.toString();
-					if (inputSize) inputSize.value = data.Limit;
-					if (data.Language) ChatCreateLanguage = data.Language;
-					ChatBlockItemCategory = data.BlockCategory;
-				});
-			}
-			// click event for second page button
-			if (MouseIn(124, 132, 90, 90)) {
-				onSecondPage = !onSecondPage;
-				ElementToggleGeneratedElements("ChatCreate", false);
-				return;
-			}
-			next(args);
-		});
-		//#region Second page button (on room admin screen)
 		patchFunction("ChatAdminRun", {
 			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',
 		});
@@ -725,40 +634,59 @@ export class ModuleChatroomAdmin extends BaseModule {
 			"if (MouseIn(405, 157,": "if (MouseIn(505, 157,",
 		});
 		hookFunction("ChatAdminRun", 0, (args, next) => {
-			onRoomCreateScreen = false;
 			if (onSecondPage) {
-				return ChatSettingsExtraRun();
+				if (onThemeRoomSubpage) {
+					return ChatSettingsThemeRoomRun();
+				}
+				DrawText("Back", 169, 95, "Black", "Gray");
+				DrawButton(124, 132, 90, 90, "", "White", "Icons/West.png");
+
+				DrawText("Standardize your room description so the room's purpose is clear and it can easily be filtered:", 1000, 300, "Black", "Gray");
+				DrawButton(800, 360, 380, 80, "Create a theme room", "white");
+
+				DrawText("Templates for storing / overwriting current room information & settings (press a name to toggle auto-apply)", 1000, 650, "Black", "Gray");
+
+				for (let i = 0; i < ROOM_TEMPLATES_COUNT; i++) {
+					const X = 124 + i * 455;
+					const template = modStorage.roomTemplates?.[i];
+					let templateName: string = template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -";
+					const tick = Date.now() % 6_000;
+					if (template?.AutoApply && tick < 3_000) {
+						templateName = "- auto-applied default -";
+					}
+
+					if (template) DrawImageEx("Backgrounds/" + template.Background + ".jpg", X, 700, { Alpha: MouseIn(X, 700, 400, 200) ? 0.3 : 1, Width: 400, Height: 200 });
+					DrawButton(X, 700, 340, 64, "", template ? template.AutoApply ? "rgba(136 , 136 , 204, 0.5)" : "rgba(255, 255, 255, 0.5)" : "#ddd", "", !template ? undefined : "Use as room creation dialog default", !template);
+					DrawTextFit(templateName, X + 170, 700 + 34, 325, "Black", "Gray");
+					DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", !template ? undefined : "Delete template", !template);
+					if (overwriteMode === i) {
+						DrawButton(X, 835, 150, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
+						DrawText("Load", X + 51, 835 + 32, "Black");
+						DrawButton(X + 170, 835, 230, 64, "Overwrite ?", "rgba(255, 242, 0, 0.2)", "");
+					} else {
+						DrawButton(X, 835, 230, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
+						DrawText("Load", X + 51, 835 + 32, "Black");
+						DrawButton(X + 250, 835, 150, 64, "    Save", "rgba(255, 255, 255, 0.2)", "");
+					}
+				}
+				return;
 			}
 			next(args);
-			DrawText("More", 169, 95, "Black", "Gray");
-			DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
-			if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
+			if (!ChatAdminPreviewBackgroundMode) {
+				DrawText("More", 169, 95, "Black", "Gray");
+				DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
+				if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
+			}
 		});
 		//#endregion
 		hookFunction("ChatAdminClick", 0, (args, next) => {
 			if (onSecondPage) {
-				return ChatSettingsExtraClick(onRoomCreateScreen, (data) => {
-					const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
-					const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
-					const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
-					const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
-					const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
-
-					if (inputName) inputName.value = data.Name;
-					if (inputDescription) inputDescription.value = data.Description;
-					ChatAdminBackgroundSelect = data.Background;
-					ChatAdminPrivate = data.Private;
-					ChatAdminLocked = data.Locked;
-					ChatAdminGame = data.Game;
-					if (inputAdminList) inputAdminList.value = data.Admin.toString();
-					if (inputWhitelist) inputWhitelist.value = data.Whitelist.toString();
-					if (inputSize) inputSize.value = data.Limit;
-					if (data.Language) ChatAdminLanguage = data.Language;
-					ChatAdminBlockCategory = data.BlockCategory;
+				return ChatSettingsExtraClick((data) => {
+					applyTemplate(data);
 				});
 			}
 			// click event for second page button
-			if (MouseIn(124, 132, 90, 90)) {
+			if (MouseIn(124, 132, 90, 90) && !ChatAdminPreviewBackgroundMode) {
 				onSecondPage = !onSecondPage;
 				ElementToggleGeneratedElements("ChatAdmin", false);
 				return;

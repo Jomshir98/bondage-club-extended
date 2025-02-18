@@ -381,7 +381,7 @@ export class ModuleClubUtils extends BaseModule {
 						ChatRoomSendLocal(`Unable to find a valid room template in slot ${slot}. You likely need to set one in the chat room creation screen.`);
 						return false;
 					}
-					const size = Number.parseInt(template.Limit, 10);
+					const size = typeof template.Limit === "number" ? template.Limit : Number.parseInt(template.Limit as unknown as string, 10);
 					updateChatroom({
 						Name: template.Name,
 						Description: template.Description,
@@ -393,6 +393,7 @@ export class ModuleClubUtils extends BaseModule {
 						Whitelist: template.Whitelist,
 						Limit: size,
 						BlockCategory: template.BlockCategory,
+						Custom: template.Custom,
 					});
 				} else {
 					ChatRoomSendLocal(
@@ -600,18 +601,17 @@ export class ModuleClubUtils extends BaseModule {
 
 	run() {
 		// Refresh current background list, if already built
-		if (ChatCreateBackgroundList != null) {
-			ChatCreateBackgroundList = BackgroundsGenerateList(BackgroundSelectionTagList);
+		if (ChatAdminBackgroundList != null) {
+			ChatAdminBackgroundList = BackgroundsGenerateList(BackgroundSelectionTagList);
 		}
 	}
 
 	unload() {
 		remove(GetBackgroundTagListArray(), i => i === BACKGROUNDS_BCX_NAME);
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 		remove(BackgroundsList, i => (i.Tag as BCX_BackgroundTag[]).includes(BACKGROUNDS_BCX_NAME));
 		// Refresh current background list, if already built
-		if (ChatCreateBackgroundList != null) {
-			ChatCreateBackgroundList = BackgroundsGenerateList(BackgroundSelectionTagList);
+		if (ChatAdminBackgroundList != null) {
+			ChatAdminBackgroundList = BackgroundsGenerateList(BackgroundSelectionTagList);
 		}
 	}
 }

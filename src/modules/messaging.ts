@@ -57,7 +57,7 @@ export function DrawQueryErrorMessage(subject: string, x: number = 1000): void {
 
 export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_queries[T][0], target: number, timeout: number = 10_000): Promise<BCX_queries[T][1]> {
 	if (firstTimeInit) {
-		return Promise.reject("Unavailable during init");
+		return Promise.reject(new Error("Unavailable during init"));
 	}
 
 	return new Promise((resolve, reject) => {
@@ -69,7 +69,7 @@ export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_querie
 			timeout: BCX_setTimeout(() => {
 				console.warn("HardCoreClub: Query timed out", target, type);
 				pendingQueries.delete(id);
-				reject("Timed out");
+				reject(new Error("Timed out"));
 			}, timeout),
 		};
 		pendingQueries.set(id, info);

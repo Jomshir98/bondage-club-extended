@@ -742,18 +742,15 @@ interface CommandDisplayDefinition {
 	defaultLimit: import("./constants").ConditionsLimit;
 }
 
-interface RoomTemplate {
-	Name: string;
-	Description: string;
-	Background: string;
-	Language: ServerChatRoomLanguage;
-	Limit: string;
-	Admin: number[];
-	Whitelist: number[];
-	Game: ServerChatRoomGame;
-	Private: boolean;
-	Locked: boolean;
-	BlockCategory: ServerChatRoomBlockCategory[];
+// FIXME: remove post-R113
+// @ts-expect-error Because the Locked/Private are still marked as mandatory on the upstream type
+interface RoomTemplate extends Omit<ServerChatRoomData, "Ban" | "MapData" | "Space" | "Character"> {
+	Locked?: boolean;
+	Private?: boolean;
+	Ban?: never;
+	MapData?: never;
+	Space?: never;
+	Character?: never;
 	AutoApply: true | undefined;
 }
 

@@ -38,7 +38,7 @@ export default async (_jestConfig: JestConfig) => {
 				checkMD5: false,
 			},
 			instance: {
-				storageEngine: "ephemeralForTest",
+				storageEngine: "wiredTiger",
 				args: ["--setParameter", "diagnosticDataCollectionEnabled=false"],
 			},
 		});

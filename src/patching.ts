@@ -143,7 +143,7 @@ export function patchFunction(target: string, patches: Record<string, string>): 
 }
 
 export function replaceObjectPatchedMethods(path: string, object: Record<string, unknown>): void {
-	// eslint-disable-next-line @typescript-eslint/ban-types
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 	const patchMap = new Map<Function, [string, Function]>();
 	for (const [globalName, info] of bcModSDK.getPatchingInfo()) {
 		if (info.original && info.sdkEntrypoint) {

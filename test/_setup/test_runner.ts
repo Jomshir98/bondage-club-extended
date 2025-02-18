@@ -19,6 +19,6 @@ export default function (...args: unknown[]) {
 		return result;
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-require-imports
 	return require("jest-circus/runner")(...args);
 }

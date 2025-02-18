@@ -63,7 +63,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 			this.failed = false;
 			this.rebuildList();
 		}, err => {
-			console.error(`BCX: Failed to get rules info for ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get rules info for ${this.character}`, err);
 			this.rulesData = null;
 			this.failed = true;
 			this.rebuildList();
@@ -370,7 +370,7 @@ export class GuiRulesAdd extends GuiSubscreen {
 
 	HasAccess(item: RuleListItem): boolean {
 		if (!this.rulesData) {
-			throw new Error(`BCX: Rules data was unexpectedly 'null'`);
+			throw new Error(`HardCoreClub: Rules data was unexpectedly 'null'`);
 		}
 		const accessLevel = this.rulesData.limits[item.name] ?? ConditionsLimit.normal;
 		return [this.rulesData.access_normal, this.rulesData.access_limited, false][accessLevel];

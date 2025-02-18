@@ -25,7 +25,7 @@ export function finalizeFirstTimeInit() {
 	firstTimeInit = false;
 	modStorage.chatShouldDisplayFirstTimeHelp = true;
 	modStorageSync();
-	console.log("BCX: First time init finalized");
+	console.log("HardCoreClub: First time init finalized");
 	announceSelf(true);
 }
 
@@ -54,7 +54,7 @@ export function switchStorageLocation(location: StorageLocations) {
 	}
 	if (modStorageLocation === location)
 		return;
-	console.info(`BCX: Switching storage location to: ${StorageLocations[location]}`);
+	console.info(`HardCoreClub: Switching storage location to: ${StorageLocations[location]}`);
 	modStorageLocation = location;
 	storageClearData();
 	modStorageSync();
@@ -66,7 +66,7 @@ export function modStorageSync() {
 	if (deletionPending || firstTimeInit)
 		return;
 	if (!Player.OnlineSettings) {
-		console.error("BCX: Player OnlineSettings not defined during storage sync!");
+		console.error("HardCoreClub: Player OnlineSettings not defined during storage sync!");
 		return;
 	}
 
@@ -117,14 +117,14 @@ export class ModuleStorage extends BaseModule {
 
 		saved = localStorage.getItem(getLocalStorageName());
 		if (typeof saved === "string") {
-			console.info(`BCX: Detected storage location: local storage`);
+			console.info(`HardCoreClub: Detected storage location: local storage`);
 			modStorageLocation = StorageLocations.LocalStorage;
 		}
 
 		if (typeof saved !== "string") {
 			if (!isObject(Player.OnlineSettings)) {
-				console.error("BCX: Missing OnlineSettings during load");
-				alert("BCX: Failed to load data, please see console for more details");
+				console.error("HardCoreClub: Missing OnlineSettings during load");
+				alert("HardCoreClub: Failed to load data, please see console for more details");
 				return false;
 			}
 			saved = Player.OnlineSettings.BCX;
@@ -134,7 +134,7 @@ export class ModuleStorage extends BaseModule {
 		if (typeof saved !== "string") {
 			const backupSave = localStorage.getItem(getLocalStorageNameBackup());
 			if (typeof backupSave === "string" &&
-				confirm("BCX: Error loading saved data, but found local backup.\nDo you want to load the backup?")
+				confirm("HardCoreClub: Error loading saved data, but found local backup.\nDo you want to load the backup?")
 			) {
 				saved = backupSave;
 			}
@@ -148,19 +148,19 @@ export class ModuleStorage extends BaseModule {
 				}
 				modStorage = storage;
 			} catch (error) {
-				console.error("BCX: Error while loading saved data, full reset.", error);
-				if (confirm(`BCX Failed to load saved data! Continue anyway, resetting all data?\n(${error})`)) {
+				console.error("HardCoreClub: Error while loading saved data, full reset.", error);
+				if (confirm(`HardCoreClub Failed to load saved data! Continue anyway, resetting all data?\n(${error})`)) {
 					firstTimeInit = true;
 				} else {
 					return false;
 				}
 			}
 		} else if (saved !== undefined) {
-			console.error("BCX: Unknown save data type:", saved);
-			alert("BCX: Failed to load data, please see console for more details");
+			console.error("HardCoreClub: Unknown save data type:", saved);
+			alert("HardCoreClub: Failed to load data, please see console for more details");
 			return false;
 		} else {
-			console.log("BCX: First time init");
+			console.log("HardCoreClub: First time init");
 			firstTimeInit = true;
 		}
 		return true;

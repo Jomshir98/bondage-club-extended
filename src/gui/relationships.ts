@@ -56,7 +56,7 @@ export class GuiRelationships extends GuiSubscreen {
 			this.failed = false;
 			this.onDataChange();
 		}, err => {
-			console.error(`BCX: Failed to get relationships data from ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get relationships data from ${this.character}`, err);
 			this.relationshipsData = null;
 			this.failed = true;
 			this.onDataChange();

@@ -832,7 +832,7 @@ export class RuleState<ID extends BCX_Rule> {
 				targetName = targetChar ? CharacterNickname(targetChar.Character) : getCharacterName(targetCharacter, "[unknown]");
 			}
 			if (texts.infoBeep) {
-				InfoBeep("BCX: " + dictionaryProcess(texts.infoBeep, {
+				InfoBeep("HardCoreClub: " + dictionaryProcess(texts.infoBeep, {
 					PLAYER_NAME: RelationshipsGetNickname(Player.MemberNumber) ?? CharacterNickname(Player),
 					TARGET_PLAYER: RelationshipsGetNickname(targetCharacter ?? Player.MemberNumber) ?? targetName,
 					...dictionary,
@@ -873,7 +873,7 @@ export class RuleState<ID extends BCX_Rule> {
 			}
 			const infoBeep = texts.attempt_infoBeep ?? texts.infoBeep;
 			if (infoBeep) {
-				InfoBeep("BCX: " + dictionaryProcess(infoBeep, {
+				InfoBeep("HardCoreClub: " + dictionaryProcess(infoBeep, {
 					PLAYER_NAME: RelationshipsGetNickname(Player.MemberNumber) ?? CharacterNickname(Player),
 					TARGET_PLAYER: RelationshipsGetNickname(targetCharacter ?? Player.MemberNumber) ?? targetName,
 					...dictionary,
@@ -1073,7 +1073,7 @@ export class ModuleRules extends BaseModule {
 				const info = data.data;
 				const descriptor = rules.get(rule);
 				if (!descriptor) {
-					console.error(`BCX: Bad data for rule ${rule}: descriptor not found, removing it`);
+					console.error(`HardCoreClub: Bad data for rule ${rule}: descriptor not found, removing it`);
 					return false;
 				}
 
@@ -1083,49 +1083,49 @@ export class ModuleRules extends BaseModule {
 					// eslint-disable-next-line @typescript-eslint/no-unnecessary-boolean-literal-compare
 					(info.log !== undefined && info.log !== false)
 				) {
-					console.error(`BCX: Bad data for rule ${rule}, removing it`, info);
+					console.error(`HardCoreClub: Bad data for rule ${rule}, removing it`, info);
 					return false;
 				}
 
 				if (descriptor.dataDefinition) {
 					if (!isObject(info.customData)) {
-						console.warn(`BCX: Missing custom data for rule ${rule}, fixing`);
+						console.warn(`HardCoreClub: Missing custom data for rule ${rule}, fixing`);
 						info.customData = {};
 					}
 					for (const k of Object.keys(info.customData)) {
 						if (!(descriptor.dataDefinition as Record<string, any>)[k]) {
-							console.warn(`BCX: Unknown custom data attribute '${k}' for rule ${rule}, cleaning up`, info.customData[k]);
+							console.warn(`HardCoreClub: Unknown custom data attribute '${k}' for rule ${rule}, cleaning up`, info.customData[k]);
 							delete info.customData[k];
 						}
 					}
 					for (const [k, def] of Object.entries<RuleCustomDataEntryDefinition>(descriptor.dataDefinition)) {
 						const handler: RuleCustomDataHandler = ruleCustomDataHandlers[def.type];
 						if (!handler) {
-							console.error(`BCX: Custom data for rule ${rule} unknown type ${def.type}, removing it`, info);
+							console.error(`HardCoreClub: Custom data for rule ${rule} unknown type ${def.type}, removing it`, info);
 							return false;
 						}
 						if (!handler.validate(info.customData[k], def)) {
-							console.warn(`BCX: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, replacing with default`, info.customData[k]);
+							console.warn(`HardCoreClub: Bad custom data ${k} for rule ${rule}, expected type ${def.type}, replacing with default`, info.customData[k]);
 							info.customData[k] = (typeof def.default === "function" ? def.default() : def.default);
 						}
 					}
 				} else if (info.customData !== undefined) {
-					console.error(`BCX: Custom data for rule ${rule} without data definition, removing it`, info);
+					console.error(`HardCoreClub: Custom data for rule ${rule} without data definition, removing it`, info);
 					return false;
 				}
 
 				if (descriptor.internalDataValidate) {
 					if (!descriptor.internalDataValidate(info.internalData)) {
 						if (info.internalData === undefined && descriptor.internalDataDefault) {
-							console.warn(`BCX: Missing internal data for rule ${rule}, fixing`);
+							console.warn(`HardCoreClub: Missing internal data for rule ${rule}, fixing`);
 							info.internalData = descriptor.internalDataDefault();
 						} else {
-							console.error(`BCX: Bad internal data for rule ${rule}, removing it`, info);
+							console.error(`HardCoreClub: Bad internal data for rule ${rule}, removing it`, info);
 							return false;
 						}
 					}
 				} else if (info.internalData !== undefined) {
-					console.error(`BCX: Internal data for rule ${rule} without validator, removing it`, info);
+					console.error(`HardCoreClub: Internal data for rule ${rule} without validator, removing it`, info);
 					return false;
 				}
 

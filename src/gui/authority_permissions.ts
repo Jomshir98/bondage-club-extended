@@ -68,7 +68,7 @@ export class GuiAuthorityPermissions extends GuiSubscreen {
 			this.failed = false;
 			this.rebuildList();
 		}, err => {
-			console.error(`BCX: Failed to get permission info for ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get permission info for ${this.character}`, err);
 			this.permissionData = null;
 			this.failed = true;
 			this.rebuildList();

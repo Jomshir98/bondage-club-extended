@@ -28,7 +28,7 @@ export const HELP_TEXTS: Record<Views, string> = {
 		"roles that can be used to set various things in BCX can be seen on the right. The higher up a role is, the more authority it has. " +
 		"For instance, if something applies or is permitted for a Mistress, it also always is for an Owner. Any number of " +
 		"Owners and Mistresses can be set. Check their current power over BCX with the button on the right.",
-	[Views.AuthorityPermissions]: "The heart of BCX: Allows to configure the permissions to set up and use most of " +
+	[Views.AuthorityPermissions]: "The heart of HardCoreClub: Allows to configure the permissions to set up and use most of " +
 		"BCX. Default settings depend on the initial BCX setup preset selected. " +
 		"Self access is the checkbox next to every permission and the lowest access role is to its right. " +
 		"Example: If 'allow forbidding self access', 'allow granting self access', 'allow lowest access modification' have the checkbox removed " +

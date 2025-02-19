@@ -58,7 +58,7 @@ export function curseMakeSavedProperty(properties: ItemProperties | undefined): 
 						result.Effect = effect;
 					}
 				} else {
-					console.error(`BCX: Bad effect of properties: `, properties.Effect);
+					console.error(`HardCoreClub: Bad effect of properties: `, properties.Effect);
 				}
 			} else if (!CURSE_IGNORED_PROPERTIES.includes(key) && properties[key] !== undefined) {
 				// @ts-expect-error: Copying member between same type objects
@@ -114,12 +114,12 @@ export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, 
 	const group = AssetGroup.find(g => g.Name === Group);
 
 	if (!group || (typeof curseProperty !== "boolean" && curseProperty !== null)) {
-		console.error(`BCX: Attempt to curse with invalid data`, Group, curseProperty);
+		console.error(`HardCoreClub: Attempt to curse with invalid data`, Group, curseProperty);
 		return false;
 	}
 
 	if (group.Category === "Appearance" && !group.AllowCustomize) {
-		console.warn(`BCX: Attempt to curse non-customizable slot`, Group);
+		console.warn(`HardCoreClub: Attempt to curse non-customizable slot`, Group);
 		return false;
 	}
 
@@ -130,7 +130,7 @@ export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, 
 	const currentItem = InventoryGet(Player, Group);
 
 	if (!currentItem && !group.AllowNone) {
-		console.error(`BCX: Refusing to curse empty group that doesn't allow none`);
+		console.error(`HardCoreClub: Refusing to curse empty group that doesn't allow none`);
 		return false;
 	}
 
@@ -143,7 +143,7 @@ export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, 
 		}
 
 		if (!curseAllowItemCurseProperty(currentItem.Asset) && curseProperty) {
-			console.warn(`BCX: Attempt to curse properties of item ${currentItem.Asset.Group.Name}:${currentItem.Asset.Name}, while not allowed`);
+			console.warn(`HardCoreClub: Attempt to curse properties of item ${currentItem.Asset.Group.Name}:${currentItem.Asset.Name}, while not allowed`);
 			curseProperty = false;
 		}
 
@@ -188,7 +188,7 @@ export function curseBatch(mode: "items" | "clothes" | "body", includingEmpty: b
 	} else if (mode === "body") {
 		assetGroups = AssetGroup.filter(i => i.Category === "Appearance" && !i.Clothing && i.AllowCustomize && (includingEmpty || InventoryGet(Player, i.Name)));
 	} else {
-		console.error(`BCX: Attempt to curse in invalid mode`, mode);
+		console.error(`HardCoreClub: Attempt to curse in invalid mode`, mode);
 		return false;
 	}
 
@@ -379,7 +379,7 @@ export class ModuleCurses extends BaseModule {
 						continue;
 					const group = AssetGroup.find(g => g.Name === k);
 					if (!group) {
-						console.warn(`BCX: Unknown group ${k}`);
+						console.warn(`HardCoreClub: Unknown group ${k}`);
 						continue;
 					}
 
@@ -608,7 +608,7 @@ export class ModuleCurses extends BaseModule {
 
 				if (info === null) {
 					if (!assetGroup.AllowNone) {
-						console.warn(`BCX: Invalid empty cursed slot without none allowed for '${group}', removing it`, info);
+						console.warn(`HardCoreClub: Invalid empty cursed slot without none allowed for '${group}', removing it`, info);
 						return false;
 					}
 					return true;
@@ -618,24 +618,24 @@ export class ModuleCurses extends BaseModule {
 					typeof info.Name !== "string" ||
 					typeof info.curseProperty !== "boolean"
 				) {
-					console.error(`BCX: Bad data for cursed item in group ${group}, removing it`, info);
+					console.error(`HardCoreClub: Bad data for cursed item in group ${group}, removing it`, info);
 					return false;
 				}
 
 				if (info.itemRemove && !assetGroup.AllowNone) {
-					console.warn(`BCX: Invalid itemRemove for curse ${group}:${info.Name}, removing it`, info);
+					console.warn(`HardCoreClub: Invalid itemRemove for curse ${group}:${info.Name}, removing it`, info);
 					return false;
 				}
 
 				if (AssetGet("Female3DCG", group, info.Name) == null) {
-					console.warn(`BCX: Unknown cursed item ${group}:${info.Name}, removing it`, info);
+					console.warn(`HardCoreClub: Unknown cursed item ${group}:${info.Name}, removing it`, info);
 					return false;
 				}
 				return true;
 			},
 			loadCategorySpecificGlobalData: (data) => {
 				if (!isObject(data)) {
-					console.warn("BCX: Bad curses global data, resetting");
+					console.warn("HardCoreClub: Bad curses global data, resetting");
 					data = {
 						itemRemove: false,
 					};
@@ -679,13 +679,13 @@ export class ModuleCurses extends BaseModule {
 
 				const asset = AssetGet(Player.AssetFamily, condition, data.data.Name);
 				if (!asset) {
-					console.warn(`BCX: Curse asset ${condition}:${data.data.Name} not found during update`);
+					console.warn(`HardCoreClub: Curse asset ${condition}:${data.data.Name} not found during update`);
 					return false;
 				}
 
 				data.data.curseProperty = updateData.curseProperties;
 				if (!curseAllowItemCurseProperty(asset) && data.data.curseProperty) {
-					console.warn(`BCX: Attempt to curse properties of item ${condition}:${data.data.Name}, while not allowed`);
+					console.warn(`HardCoreClub: Attempt to curse properties of item ${condition}:${data.data.Name}, while not allowed`);
 					data.data.curseProperty = false;
 				}
 
@@ -988,7 +988,7 @@ export class ModuleCurses extends BaseModule {
 	curseTick(group: AssetGroupName, condition: ConditionsConditionData<"curses">): void {
 		const assetGroup = AssetGroupGet(Player.AssetFamily, group);
 		if (!assetGroup) {
-			console.error(`BCX: AssetGroup not found for curse ${group}`, condition);
+			console.error(`HardCoreClub: AssetGroup not found for curse ${group}`, condition);
 			return;
 		}
 
@@ -1034,7 +1034,7 @@ export class ModuleCurses extends BaseModule {
 
 		const asset = AssetGet("Female3DCG", group, curse.Name);
 		if (!asset) {
-			console.error(`BCX: Asset not found for curse ${group}:${curse.Name}`, curse);
+			console.error(`HardCoreClub: Asset not found for curse ${group}:${curse.Name}`, curse);
 			return;
 		}
 

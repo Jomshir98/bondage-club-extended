@@ -67,7 +67,7 @@ export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_querie
 			resolve,
 			reject,
 			timeout: BCX_setTimeout(() => {
-				console.warn("BCX: Query timed out", target, type);
+				console.warn("HardCoreClub: Query timed out", target, type);
 				pendingQueries.delete(id);
 				reject(new Error("Timed out"));
 			}, timeout),
@@ -105,7 +105,7 @@ export function sendQuery<T extends keyof BCX_queries>(type: T, data: BCX_querie
 async function handleQuery(sender: ChatroomCharacter, message: BCX_message_query): Promise<BCX_message_queryAnswer> {
 	const handler = queryHandlers[message.query] as (sender: ChatroomCharacter, data: any) => any;
 	if (!handler) {
-		console.warn("BCX: Query no handler", sender, message);
+		console.warn("HardCoreClub: Query no handler", sender, message);
 		return {
 			id: message.id,
 			ok: false,
@@ -125,7 +125,7 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 		typeof message.id !== "string" ||
 		typeof message.query !== "string"
 	) {
-		console.warn(`BCX: Invalid query`, sender, message);
+		console.warn(`HardCoreClub: Invalid query`, sender, message);
 		return;
 	}
 
@@ -152,12 +152,12 @@ hiddenMessageHandlers.set("query", (sender, message: BCX_message_query) => {
 function handleQueryAnswer(sender: number, message: BCX_message_queryAnswer): void {
 	const info = pendingQueries.get(message.id);
 	if (!info) {
-		console.warn(`BCX: Response to unknown query`, sender, message);
+		console.warn(`HardCoreClub: Response to unknown query`, sender, message);
 		return;
 	}
 
 	if (info.target !== info.target) {
-		console.warn(`BCX: Response to query not from target`, sender, message, info);
+		console.warn(`HardCoreClub: Response to query not from target`, sender, message, info);
 		return;
 	}
 
@@ -176,7 +176,7 @@ hiddenMessageHandlers.set("queryAnswer", (sender, message: BCX_message_queryAnsw
 		typeof message.id !== "string" ||
 		typeof message.ok !== "boolean"
 	) {
-		console.warn(`BCX: Invalid queryAnswer`, sender, message);
+		console.warn(`HardCoreClub: Invalid queryAnswer`, sender, message);
 		return;
 	}
 
@@ -211,14 +211,14 @@ export class ModuleMessaging extends BaseModule {
 				if (data.Sender === Player.MemberNumber || firstTimeInit)
 					return;
 				if (!isObject(data.Dictionary)) {
-					console.warn("BCX: Hidden message no Dictionary", data);
+					console.warn("HardCoreClub: Hidden message no Dictionary", data);
 					return;
 				}
 				const { type, message } = data.Dictionary;
 				if (typeof type === "string") {
 					const handler = hiddenMessageHandlers.get(type as keyof BCX_messages);
 					if (handler === undefined) {
-						console.warn("BCX: Hidden message no handler", data.Sender, type, message);
+						console.warn("HardCoreClub: Hidden message no handler", data.Sender, type, message);
 					} else {
 						handler(data.Sender, message);
 					}
@@ -237,7 +237,7 @@ export class ModuleMessaging extends BaseModule {
 				if (typeof type === "string") {
 					const handler = hiddenBeepHandlers.get(type as keyof BCX_beeps);
 					if (handler === undefined) {
-						console.warn("BCX: Hidden beep no handler", data.MemberNumber, type, message);
+						console.warn("HardCoreClub: Hidden beep no handler", data.MemberNumber, type, message);
 					} else {
 						handler(data.MemberNumber, message);
 					}

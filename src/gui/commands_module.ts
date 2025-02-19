@@ -62,7 +62,7 @@ export class GuiCommandsModule extends GuiSubscreen {
 			this.failed = false;
 			this.rebuildList();
 		}, err => {
-			console.error(`BCX: Failed to get commands info for ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get commands info for ${this.character}`, err);
 			this.commandsData = null;
 			this.failed = true;
 			this.rebuildList();
@@ -299,7 +299,7 @@ export class GuiCommandsModule extends GuiSubscreen {
 
 	HasAccess(item: CommandListItem): boolean {
 		if (!this.commandsData) {
-			throw new Error(`BCX: Commands data was unexpectedly 'null'`);
+			throw new Error(`HardCoreClub: Commands data was unexpectedly 'null'`);
 		}
 		const accessLevel = this.commandsData.limits[item.name] ?? ConditionsLimit.normal;
 		return [this.commandsData.access_normal, this.commandsData.access_limited, false][accessLevel];

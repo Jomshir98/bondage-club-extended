@@ -74,7 +74,7 @@ export class GuiAuthorityRoles extends GuiSubscreen {
 			this.failed = false;
 			this.rebuildList();
 		}, err => {
-			console.error(`BCX: Failed to get role info for ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get role info for ${this.character}`, err);
 			this.roleData = null;
 			this.failed = true;
 			this.rebuildList();

@@ -43,7 +43,7 @@ const CURSE_INACTIVE_SCREENS: (() => boolean)[] = [
 
 // Pause curses on certain screens and when talking with NPC altogether
 function isCursePaused() {
-	return CURSE_INACTIVE_SCREENS.some(v => v) || CurrentCharacter?.IsNpc();
+	return CURSE_INACTIVE_SCREENS.some(v => v()) || CurrentCharacter?.IsNpc();
 }
 
 export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {

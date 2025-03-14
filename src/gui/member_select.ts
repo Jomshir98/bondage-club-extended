@@ -89,7 +89,7 @@ export class GuiMemberSelect extends GuiSubscreen {
 		if (!this.character.isPlayer()) {
 			this.roleList.push({
 				type: "Player",
-				memberNumber: Player.MemberNumber!,
+				memberNumber: Player.MemberNumber,
 				name: Player.Name,
 			});
 		}

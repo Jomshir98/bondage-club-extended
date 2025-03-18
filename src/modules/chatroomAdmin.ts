@@ -604,7 +604,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 			if (ChatAdminMode === "create" &&
 				template &&
 				BackgroundSelectionReturnScreen?.[1] !== CurrentScreen &&
-				ChatBlockItemReturnScreen
+				!ChatBlockItemReturnScreen
 			) {
 				applyTemplate(template);
 			}

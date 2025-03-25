@@ -1,6 +1,7 @@
 /** Package version, provided by rollup */
 declare const BCX_VERSION: string;
 declare const BCX_DEVEL: boolean;
+declare const BCX_SAVE_AUTH: string;
 
 interface Window {
 	BCX_Loaded?: boolean;
@@ -779,4 +780,8 @@ interface ModStorage {
 	relationships: import("./modules/relationships").RelationshipData[];
 	wardrobeDefaultExtended: boolean;
 	compatibilityCheckerWarningIgnore?: string;
+}
+
+interface ExtensionSettings {
+	BCX?: string | null;
 }

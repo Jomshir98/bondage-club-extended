@@ -1,0 +1,59 @@
+textarea.bookmarklink {
+	width: 50em;
+	max-width: 90%;
+	height: 8em;
+}
+
+body.stable .onlyDevel {
+	display: none;
+}
+
+body.devel .onlyStable {
+	display: none;
+}
+
+table, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+td {
+	padding: 0.2em;
+	vertical-align: middle;
+}
+
+tr {
+	height: 2em;
+}
+
+.browser, .platform {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 0.1em;
+}
+
+.browser > img, .platform > img {
+	height: 1.3em;
+	margin-right: 0.3em;
+}
+
+td.green {
+	background-color: #90ee90;
+}
+
+td.orange {
+	background-color: #FFC374;
+}
+
+td.red {
+	background-color: #f08080;
+}
+
+td.gray {
+	background-color: lightgray;
+}
+
+thead td {
+	font-weight: bold;
+}

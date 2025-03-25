@@ -51,8 +51,8 @@ function storageClearData() {
 	if (Player.OnlineSettings?.BCX !== undefined) {
 		delete Player.OnlineSettings.BCX;
 		Player.OnlineSettings.BCXDataCleared = Date.now();
+		ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
 	}
-	ServerAccountUpdate.QueueData({ OnlineSettings: Player.OnlineSettings }, true);
 
 	// Localstorage and backup
 	localStorage.removeItem(getLocalStorageName());

@@ -26,6 +26,8 @@ jobs:
     - run: yarn lint
 
     - run: yarn build
+      env:
+        BCX_SAVE_AUTH: ${{ secrets.BCX_SAVE_AUTH }}
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4

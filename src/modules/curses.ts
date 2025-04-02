@@ -24,10 +24,13 @@ const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
 const CURSES_ANTILOOP_THRESHOLD = 10;
 const CURSES_ANTILOOP_SUSPEND_TIME = 600_000;
 
-const CURSE_IGNORED_PROPERTIES_CUSTOM = [
-	"HeartRate", // Futuristic bra
-];
-export const CURSE_IGNORED_PROPERTIES = ValidationModifiableProperties.concat(CURSE_IGNORED_PROPERTIES_CUSTOM);
+export const CURSE_IGNORED_PROPERTIES = new Set([
+	...ValidationModifiableProperties,
+
+	// Consists of transient and/or highly mutable properties such as the futuristic bra's `HeartRate`
+	...CraftingPropertyExclude,
+]);
+
 export const CURSE_IGNORED_EFFECTS = ["Lock"];
 // Ignore slave collars, as they are forced by BC
 const CURSE_IGNORED_ITEMS = ["SlaveCollar", "ClubSlaveCollar"];
@@ -60,7 +63,7 @@ export function curseMakeSavedProperty(properties: ItemProperties | undefined): 
 				} else {
 					console.error(`BCX: Bad effect of properties: `, properties.Effect);
 				}
-			} else if (!CURSE_IGNORED_PROPERTIES.includes(key) && properties[key] !== undefined) {
+			} else if (!CURSE_IGNORED_PROPERTIES.has(key) && properties[key] !== undefined) {
 				// @ts-expect-error: Copying member between same type objects
 				result[key] = cloneDeep(properties[key]);
 			}
@@ -1073,7 +1076,7 @@ export class ModuleCurses extends BaseModule {
 				if (key === "Effect")
 					continue;
 
-				if (CURSE_IGNORED_PROPERTIES.includes(key)) {
+				if (CURSE_IGNORED_PROPERTIES.has(key)) {
 					delete curseProperty[key];
 					continue;
 				}

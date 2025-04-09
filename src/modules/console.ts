@@ -155,11 +155,13 @@ export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
 
-		DialogSelfMenuOptions.forEach(opt => {
-			if (opt.Name === "Pose") {
-				opt.IsAvailable = () => true;
-			}
-		});
+		if (GameVersion === "R114") {
+			DialogSelfMenuOptions.forEach(opt => {
+				if (opt.Name === "Pose") {
+					opt.IsAvailable = () => true;
+				}
+			});
+		}
 	}
 
 	run() {

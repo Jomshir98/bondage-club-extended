@@ -10,6 +10,28 @@ import { BCX_setTimeout } from "../BCXContext";
 import { queryHandlers, sendQuery } from "../modules/messaging";
 import { isValidNickname } from "../modules/relationships";
 
+// >= R115 stuff
+
+interface MenuButtonValidateData {
+	state: null | "hidden" | "disabled";
+	status?: null | string;
+}
+
+type MenuButtonValidator = (
+	button: HTMLButtonElement,
+	properties: { C: PlayerCharacter; },
+	equippedItem?: Item | null
+) => MenuButtonValidateData | null;
+
+declare const DialogSelfMenuMapping: {
+	Expression: DialogMenu & {
+		menubarEventListeners: Record<string, {
+			click(button: HTMLButtonElement, ev: MouseEvent, properties: { C: PlayerCharacter; }, equippedItem?: null | Item): any;
+			validate?: Record<string, MenuButtonValidator>;
+		}>;
+	};
+};
+
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
 		name: "Sensory deprivation: Sound",
@@ -174,11 +196,18 @@ export function initRules_bc_alter() {
 			return false;
 		},
 		load(state) {
-			hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
-				if (state.isEnforced && MouseIn(220, 50, 90, 90))
-					return;
-				return next(args);
-			});
+			if (GameVersion === "R114") {
+				hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
+					if (state.isEnforced && MouseIn(220, 50, 90, 90))
+						return;
+					return next(args);
+				});
+			} else {
+				(DialogSelfMenuMapping.Expression.menubarEventListeners.blindness.validate ??= {}).bcx = () => {
+					return state.isEnforced ? { state: "disabled", status: 'Restricted by BCX rule: "Fully blind when eyes are closed"' } : null;
+				};
+			}
+
 			hookFunction("ChatRoomCharacterViewDraw", 1, (args, next) => {
 				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
 				const eyes1 = InventoryGet(Player, "Eyes");
@@ -212,6 +241,17 @@ export function initRules_bc_alter() {
 					return;
 				return next(args);
 			});
+		},
+		stateChange(state, newState) {
+			if (
+				newState
+				&& GameVersion !== "R114"
+				&& (DialogSelfMenuSelected as unknown) === "Expression" // Remove `unknown` cast once R115 stubs are available
+				&& DialogSelfMenuMapping.Expression.C.IsPlayer()
+			) {
+				// If the expression menu is open, reload it in order to re-evaluate the disabled state of the `blindness` menu button
+				DialogSelfMenuMapping.Expression.Reload();
+			}
 		},
 	});
 

@@ -17,6 +17,8 @@ const STATIC_DEVEL_DIR = join(__dirname, "static_devel");
 const STATIC_STABLE_DIR = join(__dirname, "static_stable");
 const RESOURCES_DIR = join(__dirname, "resources");
 
+const BCX_SAVE_AUTH = typeof process.env.BCX_SAVE_AUTH === "string" ? process.env.BCX_SAVE_AUTH : "";
+
 interface WebpackEnv {
 	prod?: boolean;
 }
@@ -87,6 +89,7 @@ export default async function (env: WebpackEnv): Promise<Configuration> {
 			new DefinePlugin({
 				BCX_VERSION: JSON.stringify(BCX_VERSION),
 				BCX_DEVEL: JSON.stringify(BCX_DEVEL),
+				BCX_SAVE_AUTH: JSON.stringify(BCX_SAVE_AUTH),
 			}),
 			new BannerPlugin({
 				banner: `// BCX: Bondage Club Extended

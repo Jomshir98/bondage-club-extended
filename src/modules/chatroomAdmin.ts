@@ -596,21 +596,21 @@ export class ModuleChatroomAdmin extends BaseModule {
 				ChatSettingsThemeRoomExit();
 			}
 			// needed to auto apply a template correctly again
-			ChatBlockItemReturnData = {};
+			ChatBlockItemReturnScreen = null;
 		});
 		hookFunction("ChatAdminLoad", 0, (args, next) => {
 			next(args);
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
 			if (ChatAdminMode === "create" &&
 				template &&
-				BackgroundSelectionPreviousScreen !== CurrentScreen &&
-				Object.keys(ChatBlockItemReturnData).length === 0
+				BackgroundSelectionReturnScreen?.[1] !== CurrentScreen &&
+				!ChatBlockItemReturnScreen
 			) {
 				applyTemplate(template);
 			}
 			// needed to auto apply a template correctly again
-			BackgroundSelectionPreviousScreen = "";
-			ChatBlockItemReturnData = {};
+			BackgroundSelectionReturnScreen = null;
+			ChatBlockItemReturnScreen = null;
 		});
 		patchFunction("ChatAdminRun", {
 			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',

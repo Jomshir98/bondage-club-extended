@@ -80,7 +80,7 @@ export function itemMergeProperties(sourceProperty: Partial<ItemProperties> | un
 			continue;
 
 		// Curses skip some properties
-		if (!includeNoncursableProperties && CURSE_IGNORED_PROPERTIES.includes(key))
+		if (!includeNoncursableProperties && CURSE_IGNORED_PROPERTIES.has(key))
 			continue;
 
 		// Update base properties

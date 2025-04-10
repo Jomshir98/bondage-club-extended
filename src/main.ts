@@ -19,7 +19,9 @@ function replaceReferencedFunctions() {
 	// Run patching replacer on objects that hold references to patched functions
 	replacePatchedMethodsDeep("ChatRoomViews", ChatRoomViews);
 	replacePatchedMethodsDeep("CurrentScreenFunctions", CurrentScreenFunctions);
-	replacePatchedMethodsDeep("DialogSelfMenuOptions", DialogSelfMenuOptions);
+	if (GameVersion === "R114") {
+		replacePatchedMethodsDeep("DialogSelfMenuOptions", DialogSelfMenuOptions);
+	}
 }
 
 export function init() {

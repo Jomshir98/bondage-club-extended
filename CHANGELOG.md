@@ -14,6 +14,16 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.0
+
+This update introduces a new format for BCX data storage, improves handling of save data integrity and loading behavior, and moves BCX data storage to a more appropriate location that didn't exist when BCX was made.
+
+> [!WARNING]
+>
+> While existing data is migrated seamlessly, this update is **not backward compatible**.
+>
+> After updating to this version, you will not be able to easily downgrade to an older version.
+
 ## 1.0.4
 
 This update fixes compatibility with BC R113:

@@ -1,6 +1,6 @@
 {
 	"name": "HardCoreClub-STRICT",
-  "version": "1.0.5-STRICT",
+  "version": "1.1.0-STRICT",
 	"repository": "git@github.com:Rufflan/HardCroeClub.git",
 	"author": "Rufflan (hwkm0818@gmail.com)",
 	"license": "GPL-3.0",
@@ -21,6 +21,8 @@
 		"@types/lodash-es": "^4.17.10",
 		"bondage-club-mod-sdk": "^1.2.0",
 		"lodash-es": "^4.17.21",
+		"safe-buffer": "5.2.1",
+		"sha.js": "2.4.11",
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
@@ -32,7 +34,7 @@
 		"@types/jest": "^29.5.6",
 		"@typescript-eslint/eslint-plugin": "^8.21.0",
 		"@typescript-eslint/parser": "^8.21.0",
-		"bc-stubs": "BC-stubs@113.0.0",
+		"bc-stubs": "114.0.0-Beta.1",
 		"clean-webpack-plugin": "^4.0.0",
 		"copy-webpack-plugin": "^12.0.2",
 		"cross-env": "^7.0.3",

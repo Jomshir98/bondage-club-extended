@@ -161,7 +161,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.OnlineSharedSettings?.DisablePickingLocksOnSelf,
-		set: value => Player.OnlineSharedSettings!.DisablePickingLocksOnSelf = value,
+		set: value => Player.OnlineSharedSettings.DisablePickingLocksOnSelf = value,
 	});
 
 	toggleSettingHelper({
@@ -170,7 +170,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.GameplaySettings?.OfflineLockedRestrained,
-		set: value => Player.GameplaySettings!.OfflineLockedRestrained = value,
+		set: value => Player.GameplaySettings.OfflineLockedRestrained = value,
 	});
 
 	toggleSettingHelper({
@@ -179,7 +179,7 @@ export function initRules_bc_settings() {
 		defaultValue: false,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.GameplaySettings?.EnableSafeword,
-		set: value => Player.GameplaySettings!.EnableSafeword = value,
+		set: value => Player.GameplaySettings.EnableSafeword = value,
 	});
 
 	// "Arousal" settings
@@ -237,7 +237,7 @@ export function initRules_bc_settings() {
 		defaultValue: false,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.ArousalSettings?.DisableAdvancedVibes,
-		set: value => Player.ArousalSettings!.DisableAdvancedVibes = value,
+		set: value => Player.ArousalSettings.DisableAdvancedVibes = value,
 	});
 
 	registerRule("setting_arousal_stutter", {
@@ -276,7 +276,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSettings?.EnableAfkTimer,
-		set: value => Player.OnlineSettings!.EnableAfkTimer = value,
+		set: value => Player.OnlineSettings.EnableAfkTimer = value,
 	});
 
 	toggleSettingHelper({
@@ -285,7 +285,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSharedSettings?.AllowFullWardrobeAccess,
-		set: value => Player.OnlineSharedSettings!.AllowFullWardrobeAccess = value,
+		set: value => Player.OnlineSharedSettings.AllowFullWardrobeAccess = value,
 	});
 
 	toggleSettingHelper({
@@ -294,7 +294,7 @@ export function initRules_bc_settings() {
 		defaultValue: false,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSharedSettings?.BlockBodyCosplay,
-		set: value => Player.OnlineSharedSettings!.BlockBodyCosplay = value,
+		set: value => Player.OnlineSharedSettings.BlockBodyCosplay = value,
 	});
 
 	// "Immersion" settings
@@ -362,7 +362,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.ImmersionSettings?.BlindAdjacent,
-		set: value => Player.ImmersionSettings!.BlindAdjacent = value,
+		set: value => Player.ImmersionSettings.BlindAdjacent = value,
 	});
 
 	toggleSettingHelper({
@@ -371,7 +371,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.ImmersionSettings?.ChatRoomMuffle,
-		set: value => Player.ImmersionSettings!.ChatRoomMuffle = value,
+		set: value => Player.ImmersionSettings.ChatRoomMuffle = value,
 	});
 
 	toggleSettingHelper({
@@ -380,7 +380,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.GameplaySettings?.DisableAutoRemoveLogin,
-		set: value => Player.GameplaySettings!.DisableAutoRemoveLogin = value,
+		set: value => Player.GameplaySettings.DisableAutoRemoveLogin = value,
 	});
 
 	toggleSettingHelper({
@@ -389,7 +389,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.OnlineSharedSettings?.AllowPlayerLeashing,
-		set: value => Player.OnlineSharedSettings!.AllowPlayerLeashing = value,
+		set: value => Player.OnlineSharedSettings.AllowPlayerLeashing = value,
 	});
 
 	registerRule("setting_room_rejoin", {
@@ -435,7 +435,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.normal,
 		get: () => Player.ImmersionSettings?.StimulationEvents,
-		set: value => Player.ImmersionSettings!.StimulationEvents = value,
+		set: value => Player.ImmersionSettings.StimulationEvents = value,
 	});
 
 	toggleSettingHelper({
@@ -444,7 +444,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.limited,
 		get: () => Player.ImmersionSettings?.AllowTints,
-		set: value => Player.ImmersionSettings!.AllowTints = value,
+		set: value => Player.ImmersionSettings.AllowTints = value,
 	});
 
 	// "Graphics" settings
@@ -455,7 +455,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.GraphicsSettings?.AllowBlur,
-		set: value => Player.GraphicsSettings!.AllowBlur = value,
+		set: value => Player.GraphicsSettings.AllowBlur = value,
 	});
 
 	toggleSettingHelper({
@@ -464,7 +464,7 @@ export function initRules_bc_settings() {
 		defaultValue: true,
 		defaultLimit: ConditionsLimit.blocked,
 		get: () => Player.GraphicsSettings?.InvertRoom,
-		set: value => Player.GraphicsSettings!.InvertRoom = value,
+		set: value => Player.GraphicsSettings.InvertRoom = value,
 	});
 
 	// "Misc" module settings

@@ -1692,10 +1692,10 @@ batch@0.6.1:
   resolved "https://registry.npmjs.org/batch/-/batch-0.6.1.tgz"
   integrity sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==
 
-bc-stubs@BC-stubs@113.0.0:
-  version "113.0.0"
-  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-113.0.0.tgz#b8b3a31553f1e530cfdda5c38ab13f7afbf46b12"
-  integrity sha512-2n+ZyHlTj0ASunlQEYUIvO2nfZdtdISCDw5b/xvJC38iXczdY4XN28G+W6Z8Qdb0vHSmcOlUyFtmW3FreXJBNg==
+bc-stubs@114.0.0-Beta.1:
+  version "114.0.0-Beta.1"
+  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-114.0.0-Beta.1.tgz#9ff20be3f1624f87013d6a9b4e821ece9dee9542"
+  integrity sha512-ad720Kz3CoC1sIwQV1SC9U9W5ed28eDmPRgCzCl17hkkEhzc/IvVvYe6Z0kL32nYIC5iA16XivMt2jdd29qheg==
   dependencies:
     socket.io-client "4.6.1"
 
@@ -4757,7 +4757,7 @@ rxjs@^7.8.1:
   dependencies:
     tslib "^2.1.0"
 
-safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.1.0, safe-buffer@~5.2.0:
+safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@~5.2.0:
   version "5.2.1"
   resolved "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz"
   integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==
@@ -4872,6 +4872,14 @@ setprototypeof@1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
+
+sha.js@2.4.11:
+  version "2.4.11"
+  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.11.tgz#37a5cf0b81ecbc6943de109ba2960d1b26584ae7"
+  integrity sha512-QMEp5B7cftE7APOjk5Y6xgrbWu+WkLVQwk8JNjZ8nKRciZaByEW6MubieAiToS7+dwvrjGhH8jRXz3MVd0AYqQ==
+  dependencies:
+    inherits "^2.0.1"
+    safe-buffer "^5.0.1"
 
 shallow-clone@^3.0.0:
   version "3.0.1"

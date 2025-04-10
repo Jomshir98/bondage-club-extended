@@ -4,8 +4,9 @@ import { init_modules, moduleInitPhase, unload_modules } from "./moduleManager";
 import { hookFunction, replacePatchedMethodsDeep, unload_patches } from "./patching";
 import { isObject } from "./utils";
 import { InitErrorReporter, UnloadErrorReporter } from "./errorReporting";
-import { debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
+import { BCX_setInterval, debugContextStart, SetLoadedBeforeLogin } from "./BCXContext";
 import { ModuleInitPhase } from "./constants";
+import { detectForbiddenOtherMods } from "./utilsClub";
 
 export function loginInit(C: any) {
 	if (window.BCX_Loaded || moduleInitPhase !== ModuleInitPhase.construct)
@@ -59,9 +60,9 @@ export function init() {
 	const { BondageClubTools } = detectOtherMods();
 
 	if (BondageClubTools) {
-		console.warn("BCX: Bondage Club Tools detected!");
+		console.warn("HardCoreClub: Bondage Club Tools detected!");
 		if ((window as any).BCX_BondageClubToolsPatch === true) {
-			console.info("BCX: Bondage Club Tools already patched, skip!");
+			console.info("HardCoreClub: Bondage Club Tools already patched, skip!");
 		} else {
 			(window as any).BCX_BondageClubToolsPatch = true;
 			const ChatRoomMessageForwarder = ServerSocket.listeners("ChatRoomMessage").find(i => i.toString().includes("window.postMessage"));
@@ -85,10 +86,27 @@ export function init() {
 	}
 
 	//#endregion
+	console.log("CHECKING ENABLED MODULES AGAINST FORBIDDEN LIST");
+	console.log("---> Waiting 10s for the initialization of modules");
+	const waitForModulesInit = () => {
+		const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
+		if (enabledForbiddenMods.length>0) {
+			alert("Found forbidden BC modules. Please disable them first!");
+			console.log("Found forbidden BC modules. Please disable them first!");
+			InfoBeep("HardCoreClub Found forbidden BC modules. Please disable them first! The list of mods: " + enabledForbiddenMods.toString());
+			window.BCX_Loaded = false;
+			window.close();
+			unload();
+		}
+	};
+
+	BCX_setInterval(waitForModulesInit, 10000);
 
 	window.BCX_Loaded = true;
-	InfoBeep(`BCX loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
-	console.log(`BCX loaded! Version: ${VERSION}`);
+	InfoBeep(`HardCoreClub loaded! Version: ${VERSION.replace(/-[0-f]+$/i, "")}`);
+	console.info(`HardCoreClub loaded! Version: ${VERSION}`);
+
+	checkWCEAntiGarble();
 
 	ctx.end();
 }
@@ -100,6 +118,57 @@ export function unload(): true {
 	UnloadErrorReporter();
 
 	delete window.BCX_Loaded;
-	console.log("BCX: Unloaded.");
+	console.info("HardCoreClub: Unloaded.");
 	return true;
+}
+
+interface wceSettings {
+	[index: string]: string | boolean;
+}
+
+export function checkWCEAntiGarble(): boolean {
+
+	const settings: wceSettings | null = parseJSON(LZString.decompressFromBase64(Player.ExtensionSettings.FBC));
+
+	const bceKey: string= `bce.settings.${Player?.AccountName}`;
+	const localSettings: wceSettings | null = parseJSON(localStorage.getItem(bceKey));
+
+	console.groupCollapsed("WCE AntiGarble");
+
+	if (localSettings) {
+		console.log("Local Settings");
+		console.log(localSettings);
+		if (localSettings.antiGarble) {
+			InfoBeep("Talking disabled if WCE AntiGarble activated. Don't cheat!");
+			console.groupEnd();
+			return true;
+		}
+	}
+
+	if (settings) {
+		console.log("Remote Settings");
+		console.log(settings);
+
+		if (settings.antiGarble === "true") {
+			console.log("Found antiGarble enabled (" + settings.antiGarble + ")");
+			console.groupEnd();
+			return true;
+		}
+		console.groupEnd();
+		return false;
+	}
+	console.groupEnd();
+	return false;
+}
+
+export function parseJSON<T>(jsonString: string | null): T | null {
+	if (jsonString === null) {
+		return null;
+	}
+	try {
+		return JSON.parse(jsonString) as T;
+	} catch (e) {
+		console.error("parsing JSON", e);
+		return null;
+	}
 }

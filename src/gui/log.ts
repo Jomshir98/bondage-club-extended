@@ -59,7 +59,7 @@ export class GuiLog extends GuiSubscreen {
 			this.failed = false;
 			this.refreshScreen();
 		}, err => {
-			console.error(`BCX: Failed to get log data for ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get log data for ${this.character}`, err);
 			this.logData = null;
 			this.failed = true;
 			this.refreshScreen();

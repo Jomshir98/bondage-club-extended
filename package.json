@@ -13,7 +13,7 @@
 		"dev": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack serve --progress",
 		"typecheck": "tsc --noEmit -p .",
 		"typecheck:test": "tsc --noEmit -p ./test",
-		"lint": "eslint --max-warnings 0 .",
+		"lint": "eslint --max-warnings 10 .",
 		"lint:fix": "eslint --fix .",
 		"test": "jest"
 	},

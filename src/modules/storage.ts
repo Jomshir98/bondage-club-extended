@@ -266,10 +266,6 @@ export class ModuleStorage extends BaseModule {
 					throw new Error("Failed to verify save signature. Did you use an unofficial fork?");
 				}
 
-				if (hasAuth && !BCX_SAVE_AUTH) {
-					
-				}
-
 				modStorage = storage;
 			} catch (error) {
 				console.error("HardCoreClub: Error while loading saved data, full reset.", error);

@@ -267,12 +267,7 @@ export class ModuleStorage extends BaseModule {
 				}
 
 				if (hasAuth && !BCX_SAVE_AUTH) {
-					if (!confirm("You are attempting to load an unofficial BCX version.\n" +
-						"If you continue, you will not be able to return to the official version without resetting all data.\n" +
-						"Are you sure you want to continue?"
-					)) {
-						return false;
-					}
+					
 				}
 
 				modStorage = storage;

@@ -1096,6 +1096,7 @@ export function initRules_bc_blocks() {
 		load(state) {
 			// Partially implemented externally
 			hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
+				// @ts-expect-error temporary, removed in R115
 				const I = DialogFacialExpressions.findIndex(a => a.Appearance.Asset.Group.Name === "Emoticon");
 				if (state.inEffect && MouseIn(20, 185 + 100 * I, 90, 90)) {
 					if (state.isEnforced) {

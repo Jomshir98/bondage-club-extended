@@ -10,28 +10,6 @@ import { BCX_setTimeout } from "../BCXContext";
 import { queryHandlers, sendQuery } from "../modules/messaging";
 import { isValidNickname } from "../modules/relationships";
 
-// >= R115 stuff
-
-interface MenuButtonValidateData {
-	state: null | "hidden" | "disabled";
-	status?: null | string;
-}
-
-type MenuButtonValidator = (
-	button: HTMLButtonElement,
-	properties: { C: PlayerCharacter; },
-	equippedItem?: Item | null
-) => MenuButtonValidateData | null;
-
-declare const DialogSelfMenuMapping: {
-	Expression: DialogMenu & {
-		menubarEventListeners: Record<string, {
-			click(button: HTMLButtonElement, ev: MouseEvent, properties: { C: PlayerCharacter; }, equippedItem?: null | Item): any;
-			validate?: Record<string, MenuButtonValidator>;
-		}>;
-	};
-};
-
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
 		name: "Sensory deprivation: Sound",
@@ -245,8 +223,7 @@ export function initRules_bc_alter() {
 		stateChange(state, newState) {
 			if (
 				newState
-				&& GameVersion !== "R114"
-				&& (DialogSelfMenuSelected as unknown) === "Expression" // Remove `unknown` cast once R115 stubs are available
+				&& DialogSelfMenuSelected === "Expression"
 				&& DialogSelfMenuMapping.Expression.C.IsPlayer()
 			) {
 				// If the expression menu is open, reload it in order to re-evaluate the disabled state of the `blindness` menu button

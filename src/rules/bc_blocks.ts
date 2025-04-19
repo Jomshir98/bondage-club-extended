@@ -1094,14 +1094,13 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			// Partially implemented externally
-			hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
-				// @ts-expect-error temporary, removed in R115
-				const I = DialogFacialExpressions.findIndex(a => a.Appearance.Asset.Group.Name === "Emoticon");
-				if (state.inEffect && MouseIn(20, 185 + 100 * I, 90, 90)) {
+			hookFunction("DialogSelfMenuMapping.Expression._ClickButton", 5, (args, next) => {
+				const C = args[1];
+				const clickedItem = args[2];
+				if (C.IsPlayer() && state.inEffect && clickedItem.Group === "Emoticon" && clickedItem.Expression) {
 					if (state.isEnforced) {
 						state.triggerAttempt();
-						return;
+						return 'Restricted by BCX rule: "Prevent changing own emoticon"';
 					}
 					state.trigger();
 				}

@@ -174,17 +174,9 @@ export function initRules_bc_alter() {
 			return false;
 		},
 		load(state) {
-			if (GameVersion === "R114") {
-				hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
-					if (state.isEnforced && MouseIn(220, 50, 90, 90))
-						return;
-					return next(args);
-				});
-			} else {
-				(DialogSelfMenuMapping.Expression.menubarEventListeners.blindness.validate ??= {}).bcx = () => {
-					return state.isEnforced ? { state: "disabled", status: 'Restricted by BCX rule: "Fully blind when eyes are closed"' } : null;
-				};
-			}
+			(DialogSelfMenuMapping.Expression.menubarEventListeners.blindness.validate ??= {}).bcx = () => {
+				return state.isEnforced ? { state: "disabled", status: 'Restricted by BCX rule: "Fully blind when eyes are closed"' } : null;
+			};
 
 			hookFunction("ChatRoomCharacterViewDraw", 1, (args, next) => {
 				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;

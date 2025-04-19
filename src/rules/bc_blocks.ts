@@ -449,10 +449,14 @@ export function initRules_bc_blocks() {
 	registerRule("block_restrict_allowed_poses", {
 		name: "Restrict allowed body poses",
 		type: RuleType.Block,
-		loggable: false,
 		longDescription: "Allows to restrict the body poses PLAYER_NAME is able to get into by herself.",
 		keywords: ["controling", "limiting", "preventing", "changing"],
 		defaultLimit: ConditionsLimit.normal,
+		triggerTexts: {
+			infoBeep: "You are not allowed to change into this pose!",
+			attempt_log: "PLAYER_NAME tried to change to a forbidden pose",
+			log: "PLAYER_NAME changed to a forbidden pose",
+		},
 		dataDefinition: {
 			poseButtons: {
 				type: "poseSelect",
@@ -461,6 +465,20 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
+			// @ts-expect-error bcx rule handling
+			DialogSelfMenuMapping.Pose.clickStatusCallbacks.bcx_block_restrict_allowed_poses = function (C: Character, pose: Pose) {
+				if (C.IsPlayer() && state.isEnforced && state.customData?.poseButtons.includes(pose.Name)) {
+					return 'Restricted by BCX rule: "Restrict allowed body poses"';
+				}
+			};
+			hookFunction("DialogSelfMenuMapping.Pose._ClickButton", 5, (args, next) => {
+				const C = args[1];
+				const clickedPose = args[2];
+				if (C.IsPlayer() && state.isLogged && state.customData?.poseButtons.includes(clickedPose.Name)) {
+					state.triggerAttempt();
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 			hookFunction("PoseCanChangeUnaidedStatus", 0, ([C, poseName, ...args], next) => {
 				const status = next([C, poseName, ...args]);
 				if (C?.IsPlayer() && state.isEnforced && state.customData?.poseButtons.includes(poseName)) {

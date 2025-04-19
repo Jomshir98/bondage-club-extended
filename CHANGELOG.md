@@ -14,6 +14,14 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.1
+
+This update fixes compatibility with BC R115:
+- The set of properties to be ignored by curses was expanded, which should hopefully handle more items
+- The "Fully blind when eyes are closed" rule was adapted to R115 changes
+- The "Prevent changing own emoticon" rule was adapted to R115 changes
+- The "Restrict allowed body poses" rule can now fully block pose changes from the UI; thus it can now be toggled into soft, log-only mode.
+
 ## 1.1.0
 
 This update introduces a new format for BCX data storage, improves handling of save data integrity and loading behavior, and moves BCX data storage to a more appropriate location that didn't exist when BCX was made.

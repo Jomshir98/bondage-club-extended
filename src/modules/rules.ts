@@ -823,6 +823,11 @@ export class RuleState<ID extends BCX_Rule> {
 		this.ruleDefinition = definition;
 	}
 
+	/**
+	 * Trigger a rule violation.
+	 *
+	 * This will flag a rule violation, possibly announce it into the room, save it into the behavior log, etc.
+	 */
 	trigger(targetCharacter: number | null = null, dictionary: Record<string, string> = {}): void {
 		const texts = this.ruleDefinition.triggerTexts;
 		if (texts) {
@@ -863,6 +868,11 @@ export class RuleState<ID extends BCX_Rule> {
 		});
 	}
 
+	/**
+	 * Trigger an attempted rule violation.
+	 *
+	 * @see {@link RuleState.trigger()}. The difference with `trigger()` is that BCX was able to fully block the attempt.
+	 */
 	triggerAttempt(targetCharacter: number | null = null, dictionary: Record<string, string> = {}): void {
 		const texts = this.ruleDefinition.triggerTexts;
 		if (texts) {

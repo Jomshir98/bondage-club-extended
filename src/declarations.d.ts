@@ -313,6 +313,7 @@ type BCX_Rule =
 	| "speech_force_retype"
 	| "greet_room_order"
 	| "greet_new_guests"
+	| "farewell_on_slow_leave"
 	// | "speech_restrained_speech"
 	| "speech_alter_faltering"
 	| "speech_mandatory_words"
@@ -476,6 +477,9 @@ type RuleCustomData = {
 		affectEmotes: boolean;
 	};
 	greet_new_guests: {
+		greetingSentence: string;
+	};
+	farewell_on_slow_leave: {
 		greetingSentence: string;
 	};
 	// speech_restrained_speech: {

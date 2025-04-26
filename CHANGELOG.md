@@ -14,6 +14,11 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.X
+
+This update adds the following:
+- Added a new "Farewell on slow leave" rule that makes the affected player say a specific message when one of the room's guests leaves the room (only slow leaves).
+
 ## 1.1.2
 
 This update restores a few of the rules removed in the earlier versions:

@@ -947,6 +947,60 @@ export function initRules_bc_speech_control() {
 		},
 	});
 
+	registerRule("greet_on_slow_leave", {
+		name: "Greet on leave",
+		type: RuleType.Speech,
+		loggable: false,
+		shortDescription: "only when under slow leave",
+		longDescription: "Forces PLAYER_NAME to greet people when leaving the room (only if slow leave). Only does it once per 10 minutes per room. Can start with * or ** for emote.",
+		keywords: ["say", "present", "introduce", "leave", "slow"],
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			greetingSentence: {
+				type: "string",
+				default: "",
+				description: `The sentence that will be said.`,
+				options: /^([^/.].*)?$/,
+			},
+		},
+		load(state) {
+			const GREET_DELAY = 600_000;
+			const lastGreet: Map<string, number> = new Map<string, number>();
+			hookFunction("ChatRoomAttemptLeave", -1000, (args, next) => {
+				next(args);
+				if (state.customData && state.isEnforced) {
+					const chatRoomName = ChatRoomData && typeof ChatRoomData.Name === "string" && ChatRoomData.Name.toLocaleLowerCase();
+					const greetingType = state.customData.greetingSentence.startsWith("*") ? "Emote" : "Chat";
+					const greeting = greetingType === "Emote" ? state.customData.greetingSentence.substring(1) : state.customData.greetingSentence;
+
+					if (chatRoomName) {
+						if (lastGreet.has(chatRoomName)) {
+							return;
+						}
+
+						// Timeout to let other hooks possibly block the leave attempt
+						BCX_setTimeout(() => {
+							// Check if the player succeeded in initiating a slow leave
+							if (ChatRoomIsLeavingSlowly()) {
+								lastGreet.set(chatRoomName, Date.now());
+
+								// Clean up the debounce map after the delay
+								BCX_setTimeout(() => {
+									lastGreet.delete(chatRoomName);
+								}, GREET_DELAY);
+
+								ServerSend("ChatRoomChat", {
+									Content: greeting,
+									Type: greetingType,
+								});
+							}
+						}, 100);
+					}
+				}
+			}, ModuleCategory.Rules);
+		},
+	});
+
 	// Restrained speech:
 	// the wearer is unable to speak freely, she is given a set of sentences/targets allowed and can only use those with the #name talk command.
 	// The given sentences can contain the %target% placeholder to have the target inserted into the sentence. The given sentences can contain

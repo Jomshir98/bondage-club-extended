@@ -5,8 +5,10 @@ import { registerSpeechHook, SpeechMessageInfo, falteringSpeech, SpeechHookAllow
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
 import { dictionaryProcess, escapeRegExp, isObject } from "../utils";
-import { ChatRoomSendLocal } from "../utilsClub";
+import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
+import { modStorage } from "../modules/storage";
+import { moduleIsEnabled } from "../modules/presets";
 
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
 	for (let sound of sounds) {
@@ -890,15 +892,21 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "when they join the current room",
-		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in. Setting an emote as a greeting is also supported by starting the set message with one or two '*' characters.",
+		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in. Setting an emote as a greeting is also supported by starting the set message with one or two '*' characters. %name% is replaced by the name from the relationships module or their normal name. The %titled_name% prepends Master/Mistress/Owner.",
 		keywords: ["say", "present", "introduce"],
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			greetingSentence: {
 				type: "string",
 				default: "",
-				description: "The sentence that will be used to greet new guests:",
+				description: `The sentence that will be used to greet new guests:`,
 				options: /^([^/.].*)?$/,
+			},
+			minimumRole: {
+				type: "roleSelector",
+				default: AccessLevel.public,
+				description: "Minimum role that will be greeted",
+				Y: 450,
 			},
 		},
 		load(state) {
@@ -932,14 +940,38 @@ export function initRules_bc_speech_control() {
 								nextGreet.get(C.MemberNumber)! >= Date.now()
 							)
 						) return;
+
 						nextGreet.set(C.MemberNumber, 0);
-						if (state.customData.greetingSentence.startsWith("*")) {
-							const message = state.customData.greetingSentence.slice(1);
+
+						if (state.customData.minimumRole && getCharacterAccessLevel(C.MemberNumber) > state.customData.minimumRole) {
+							return;
+						}
+
+						const characterAccessLevel = getCharacterAccessLevel(C.MemberNumber);
+						const isOwner = characterAccessLevel === AccessLevel.owner || characterAccessLevel === AccessLevel.clubowner;
+						let title = isOwner ? "Owner" : (C.GetGenders().includes("M") ? "Master" : "Mistress");
+						let name = getCharacterName(C.MemberNumber, "[unknown]");
+
+						if (moduleIsEnabled(ModuleCategory.Relationships) && modStorage.relationships) {
+							const nickName = modStorage.relationships?.find(r => r.memberNumber === C.MemberNumber)?.nickname;
+
+							if (nickName) {
+								name = nickName;
+								title = "";
+							}
+						}
+
+						let sentence = state.customData.greetingSentence;
+						sentence = sentence.replace(/%titled_name%/g, title ? `${title} ${name}` : name);
+						sentence = sentence.replace(/%name%/g, name);
+
+						if (sentence.startsWith("*")) {
+							const message = sentence.slice(1);
 							ServerSend("ChatRoomChat", { Content: message, Type: "Emote", Target: C.MemberNumber });
 							ServerSend("ChatRoomChat", { Content: message, Type: "Emote", Target: Player.MemberNumber });
 						} else {
-							ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: C.MemberNumber });
-							ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: Player.MemberNumber });
+							ServerSend("ChatRoomChat", { Content: sentence, Type: "Chat", Target: C.MemberNumber });
+							ServerSend("ChatRoomChat", { Content: sentence, Type: "Chat", Target: Player.MemberNumber });
 						}
 					}, 5_000);
 				}

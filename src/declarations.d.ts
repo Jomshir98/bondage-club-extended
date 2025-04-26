@@ -478,6 +478,7 @@ type RuleCustomData = {
 	};
 	greet_new_guests: {
 		greetingSentence: string;
+		minimumRole: Exclude<import("./modules/authority").AccessLevel, 0>;
 	};
 	farewell_on_slow_leave: {
 		greetingSentence: string;

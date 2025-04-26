@@ -554,53 +554,40 @@ export function initRules_bc_blocks() {
 			// TODO: Fix for NMod
 			if (!NMod) {
 				hookFunction("ChatSearchJoin", 5, (args, next) => {
+					let triggered = false;
 					if (state.inEffect && state.customData && state.customData.roomList.length > 0) {
 						// Scans results
-						let X = 25;
-						let Y = 25;
-						for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
+						CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
 							// If the player clicked on a valid room
-							if (MouseIn(X, Y, 630, 85)) {
-								if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
+							if (MouseIn(x, y, width, height)) {
+								if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
 									if (state.isEnforced) {
 										state.triggerAttempt();
-										return;
+										triggered = true;
+										return true;
 									} else {
 										state.trigger();
+										triggered = true;
 									}
 								}
 							}
-
-							// Moves the next window position
-							X += 660;
-							if (X > 1500) {
-								X = 25;
-								Y += 109;
-							}
-						}
+							return false;
+						});
 					}
-					next(args);
+					if (!triggered || !state.isEnforced) return next(args);
 				}, ModuleCategory.Rules);
 				hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
 					next(args);
 					if (state.isEnforced && state.customData && state.customData.roomList.length > 0) {
 						// Scans results
-						let X = 25;
-						let Y = 25;
-						for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
-							if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
-								DrawButton(X, Y, 630, 85, "", "#88c", undefined, "Blocked by BCX", true);
-								DrawTextFit((ChatSearchResult[C].Friends != null && ChatSearchResult[C].Friends.length > 0 ? "(" + ChatSearchResult[C].Friends.length + ") " : "") + ChatSearchMuffle(ChatSearchResult[C].Name) + " - " + ChatSearchMuffle(ChatSearchResult[C].Creator) + " " + ChatSearchResult[C].MemberCount + "/" + ChatSearchResult[C].MemberLimit + "", X + 315, Y + 25, 620, "black");
-								DrawTextFit(ChatSearchMuffle(ChatSearchResult[C].Description), X + 315, Y + 62, 620, "black");
+						CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
+							if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
+								DrawButton(x, y, width, height, "", "#88c", undefined, "Blocked by BCX", true);
+								DrawTextFit((room.Friends != null && room.Friends.length > 0 ? "(" + room.Friends.length + ") " : "") + ChatSearchMuffle(room.Name) + " - " + ChatSearchMuffle(room.Creator) + " " + room.MemberCount + "/" + room.MemberLimit + "", x + 315, y + 25, 620, "black");
+								DrawTextFit(ChatSearchMuffle(room.Description), x + 315, y + 62, 620, "black");
 							}
-
-							// Moves the next window position
-							X += 660;
-							if (X > 1500) {
-								X = 25;
-								Y += 109;
-							}
-						}
+							return false;
+						});
 					}
 				}, ModuleCategory.Rules);
 			}

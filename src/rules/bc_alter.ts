@@ -3,34 +3,12 @@ import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { hookFunction, trackFunction } from "../patching";
 import { ChatRoomActionMessage, getCharacterName, InfoBeep, isRoomLocked, isRoomPrivate, updateChatroom } from "../utilsClub";
-import { getChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
 import { queryHandlers, sendQuery } from "../modules/messaging";
 import { isValidNickname } from "../modules/relationships";
-
-// >= R115 stuff
-
-interface MenuButtonValidateData {
-	state: null | "hidden" | "disabled";
-	status?: null | string;
-}
-
-type MenuButtonValidator = (
-	button: HTMLButtonElement,
-	properties: { C: PlayerCharacter; },
-	equippedItem?: Item | null
-) => MenuButtonValidateData | null;
-
-declare const DialogSelfMenuMapping: {
-	Expression: DialogMenu & {
-		menubarEventListeners: Record<string, {
-			click(button: HTMLButtonElement, ev: MouseEvent, properties: { C: PlayerCharacter; }, equippedItem?: null | Item): any;
-			validate?: Record<string, MenuButtonValidator>;
-		}>;
-	};
-};
 
 export function initRules_bc_alter() {
 	registerRule("alt_restrict_hearing", {
@@ -169,6 +147,84 @@ export function initRules_bc_alter() {
 		},
 	});
 
+	registerRule("alt_seeing_whitelist", {
+		name: "Seeing whitelist",
+		type: RuleType.Alt,
+		loggable: false,
+		shortDescription: "of members whom PLAYER_NAME can always see",
+		longDescription: "This rule defines a list of members whose appearance can always be seen normally by PLAYER_NAME - independent of any blinding items or seeing impairing BCX rules on PLAYER_NAME.",
+		keywords: ["sight", "blindness", "bypass", "ignore", "antiblind", "blindfold", "eyes", "seeing"],
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			whitelistedMembers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Members still seen while under blindness:",
+			},
+		},
+		load(state) {
+			let noBlind = false;
+			hookFunction("DrawCharacter", 0, (args, next) => {
+				const C = args[0];
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
+				const C = args[0];
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomCharacterViewClickCharacter", 0, (args, next) => {
+				const C = args[0];
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomMessage", 0, (args, next) => {
+				let C: ChatroomCharacter | null = null;
+				if (typeof args[0]?.Sender === "number") {
+					C = getChatroomCharacter(args[0].Sender);
+				}
+				if (C && state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("Player.GetBlindLevel", 6, (args, next) => {
+				if (noBlind)
+					return 0;
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomUpdateDisplay", 0, (args, next) => {
+				next(args);
+				if (state.isEnforced && state.customData) {
+					if (ChatRoomCharacterViewCharacterCount === 1) {
+						ChatRoomCharacterDrawlist = [Player];
+					}
+					ChatRoomSenseDepBypass = true;
+					for (const C of ChatRoomCharacter) {
+						if (C.MemberNumber != null && !ChatRoomCharacterDrawlist.includes(C) && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+							ChatRoomCharacterDrawlist.push(C);
+						}
+					}
+					ChatRoomCharacterDrawlist.sort((a, b) => {
+						return ChatRoomCharacter.indexOf(a) - ChatRoomCharacter.indexOf(b);
+					});
+					ChatRoomCharacterViewCharacterCount = ChatRoomCharacterDrawlist.length;
+				}
+			});
+		},
+	});
+
 	registerRule("alt_eyes_fullblind", {
 		name: "Fully blind when eyes are closed",
 		type: RuleType.Alt,
@@ -196,17 +252,9 @@ export function initRules_bc_alter() {
 			return false;
 		},
 		load(state) {
-			if (GameVersion === "R114") {
-				hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
-					if (state.isEnforced && MouseIn(220, 50, 90, 90))
-						return;
-					return next(args);
-				});
-			} else {
-				(DialogSelfMenuMapping.Expression.menubarEventListeners.blindness.validate ??= {}).bcx = () => {
-					return state.isEnforced ? { state: "disabled", status: 'Restricted by BCX rule: "Fully blind when eyes are closed"' } : null;
-				};
-			}
+			(DialogSelfMenuMapping.Expression.menubarEventListeners.blindness.validate ??= {}).bcx = () => {
+				return state.isEnforced ? { state: "disabled", status: 'Restricted by BCX rule: "Fully blind when eyes are closed"' } : null;
+			};
 
 			hookFunction("ChatRoomCharacterViewDraw", 1, (args, next) => {
 				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
@@ -245,13 +293,160 @@ export function initRules_bc_alter() {
 		stateChange(state, newState) {
 			if (
 				newState
-				&& GameVersion !== "R114"
-				&& (DialogSelfMenuSelected as unknown) === "Expression" // Remove `unknown` cast once R115 stubs are available
+				&& DialogSelfMenuSelected === "Expression"
 				&& DialogSelfMenuMapping.Expression.C.IsPlayer()
 			) {
 				// If the expression menu is open, reload it in order to re-evaluate the disabled state of the `blindness` menu button
 				DialogSelfMenuMapping.Expression.Reload();
 			}
+		},
+	});
+
+	registerRule("alt_field_of_vision", {
+		name: "Field of vision for eyes",
+		type: RuleType.Alt,
+		loggable: false,
+		longDescription: "This rule blacks out the bottom half of the room view when eyes are looking up and the upper half when eyes are looking down.",
+		keywords: ["seeing", "limit", "angle", "room", "blindfold", "partially", "movement", "gaze", "gazing", "teasing", "viewing", "looking"],
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			affectPlayer: {
+				type: "toggle",
+				default: false,
+				description: "Player sees the effect also on herself",
+			},
+			hideNames: {
+				type: "toggle",
+				default: false,
+				description: "Hide names and icons during the effect",
+				Y: 440,
+			},
+		},
+		load(state) {
+			let limitTop = 0;
+			let limitBottom = 0;
+			const GRADIENT_TIP_POINT = 0.9;
+			let inRoomDraw = false;
+			hookFunction("DrawRoomBackground", 6, (args, next) => {
+				next(args);
+
+				const bounds = args[1];
+				if (limitTop > 0) {
+					const Grad = MainCanvas.createLinearGradient(0, bounds.y, 0, bounds.y + limitTop * bounds.h);
+					Grad.addColorStop(0, "#000");
+					Grad.addColorStop(GRADIENT_TIP_POINT, "#000");
+					Grad.addColorStop(1, "rgba(0,0,0,0)");
+					MainCanvas.fillStyle = Grad;
+					MainCanvas.fillRect(bounds.x, bounds.y, bounds.w, limitTop * bounds.h);
+				}
+				if (limitBottom > 0) {
+					const bottomY = bounds.y + (1 - limitBottom) * bounds.h;
+					const Grad = MainCanvas.createLinearGradient(0, bottomY + limitBottom * bounds.h, 0, bottomY);
+					Grad.addColorStop(0, "#000");
+					Grad.addColorStop(GRADIENT_TIP_POINT, "#000");
+					Grad.addColorStop(1, "rgba(0,0,0,0)");
+					MainCanvas.fillStyle = Grad;
+					MainCanvas.fillRect(bounds.x, bottomY, bounds.w, limitBottom * bounds.h);
+				}
+			});
+			hookFunction("ChatRoomCharacterViewDraw", 2, (args, next) => {
+				const ChatRoomHideIconStateBackup = ChatRoomHideIconState;
+				limitTop = 0;
+				limitBottom = 0;
+
+				if (state.isEnforced) {
+					const offset = Player.IsKneeling() ? 0.28 : 0;
+					const eyes1 = InventoryGet(Player, "Eyes");
+					const eyes2 = InventoryGet(Player, "Eyes2");
+					if (eyes1 && eyes2) {
+						if (eyes1.Property?.Expression === "Shy" || eyes2.Property?.Expression === "Shy") {
+							limitTop = 0.58 + offset;
+						} else if (eyes1.Property?.Expression === "Lewd" || eyes2.Property?.Expression === "Lewd") {
+							limitBottom = 0.76 - offset;
+						} else if (eyes1.Property?.Expression === "LewdHeart" || eyes2.Property?.Expression === "LewdHeart") {
+							limitBottom = 0.76 - offset;
+						} else if (eyes1.Property?.Expression === "LewdHeartPink" || eyes2.Property?.Expression === "LewdHeartPink") {
+							limitBottom = 0.76 - offset;
+						} else if (eyes1.Property?.Expression === "VeryLewd" || eyes2.Property?.Expression === "VeryLewd") {
+							limitBottom = 0.93 - offset;
+						}
+					}
+
+					if (CharacterAppearsInverted(Player)) {
+						[limitTop, limitBottom] = [limitBottom, limitTop];
+					}
+				}
+
+				if (limitTop || limitBottom) {
+					inRoomDraw = true;
+					if (state.customData?.hideNames) {
+						ChatRoomHideIconState = 3;
+					}
+				}
+				next(args);
+
+				inRoomDraw = false;
+				ChatRoomHideIconState = ChatRoomHideIconStateBackup;
+			});
+
+			let DrawC: Character | null = null;
+			hookFunction("DrawCharacter", 0, (args, next) => {
+				DrawC = args[0];
+				const res = next(args);
+				DrawC = null;
+				return res;
+			});
+
+			hookFunction("DrawImageEx", 6, (args, next) => {
+				const SourceCanvas = args[0];
+				if (inRoomDraw &&
+					(
+						ChatRoomCharacterDrawlist.some(C => C.Canvas === SourceCanvas || C.CanvasBlink === SourceCanvas) ||
+						TempCanvas.canvas === SourceCanvas
+					) &&
+					SourceCanvas instanceof HTMLCanvasElement &&
+					DrawC &&
+					(!DrawC.IsPlayer() || state.customData?.affectPlayer)
+				) {
+					const CharacterCanvas = document.createElement("canvas").getContext("2d")!;
+					CharacterCanvas.canvas.width = 500;
+					CharacterCanvas.canvas.height = CanvasDrawHeight;
+
+					CharacterCanvas.globalCompositeOperation = "copy";
+					CharacterCanvas.drawImage(SourceCanvas, 0, 0);
+
+					CharacterCanvas.globalCompositeOperation = "source-atop";
+
+					const HeightRatio = DrawC.HeightRatio;
+					const YOffset = CharacterAppearanceYOffset(DrawC, HeightRatio);
+					const YCutOff = YOffset >= 0 || CurrentScreen === "ChatRoom";
+					const YStart = CanvasUpperOverflow + (YCutOff ? -YOffset / HeightRatio : 0);
+					const SourceHeight = 1000 / HeightRatio + (YCutOff ? 0 : -YOffset / HeightRatio);
+
+					const [top, bottom] = CharacterAppearsInverted(DrawC) ? [limitBottom, limitTop] : [limitTop, limitBottom];
+
+					if (top) {
+						const Grad = CharacterCanvas.createLinearGradient(0, YStart, 0, YStart + SourceHeight * top);
+						Grad.addColorStop(0, "#000");
+						Grad.addColorStop(GRADIENT_TIP_POINT, "#000");
+						Grad.addColorStop(1, "rgba(0,0,0,0)");
+						CharacterCanvas.fillStyle = Grad;
+						CharacterCanvas.fillRect(0, YStart, SourceCanvas.width, SourceHeight * top);
+					}
+					if (bottom) {
+						const Y = YStart + (1 - bottom) * SourceHeight;
+						const Grad = CharacterCanvas.createLinearGradient(0, YStart + SourceHeight, 0, Y);
+						Grad.addColorStop(0, "#000");
+						Grad.addColorStop(GRADIENT_TIP_POINT, "#000");
+						Grad.addColorStop(1, "rgba(0,0,0,0)");
+						CharacterCanvas.fillStyle = Grad;
+						CharacterCanvas.fillRect(0, Y, SourceCanvas.width, SourceCanvas.height - Y);
+					}
+
+					args[0] = CharacterCanvas.canvas;
+				}
+				return next(args);
+			});
 		},
 	});
 

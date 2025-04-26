@@ -154,14 +154,6 @@ export const consoleInterface: ConsoleInterface = Object.freeze(new ConsoleInter
 export class ModuleConsole extends BaseModule {
 	load() {
 		window.bcx = consoleInterface;
-
-		if (GameVersion === "R114") {
-			DialogSelfMenuOptions.forEach(opt => {
-				if (opt.Name === "Pose") {
-					opt.IsAvailable = () => true;
-				}
-			});
-		}
 	}
 
 	run() {

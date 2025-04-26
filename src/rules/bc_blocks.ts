@@ -449,10 +449,14 @@ export function initRules_bc_blocks() {
 	registerRule("block_restrict_allowed_poses", {
 		name: "Restrict allowed body poses",
 		type: RuleType.Block,
-		loggable: false,
 		longDescription: "Allows to restrict the body poses PLAYER_NAME is able to get into by herself.",
 		keywords: ["controling", "limiting", "preventing", "changing"],
 		defaultLimit: ConditionsLimit.normal,
+		triggerTexts: {
+			infoBeep: "You are not allowed to change into this pose!",
+			attempt_log: "PLAYER_NAME tried to change to a forbidden pose",
+			log: "PLAYER_NAME changed to a forbidden pose",
+		},
 		dataDefinition: {
 			poseButtons: {
 				type: "poseSelect",
@@ -461,6 +465,20 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
+			// @ts-expect-error bcx rule handling
+			DialogSelfMenuMapping.Pose.clickStatusCallbacks.bcx_block_restrict_allowed_poses = function (C: Character, pose: Pose) {
+				if (C.IsPlayer() && state.isEnforced && state.customData?.poseButtons.includes(pose.Name)) {
+					return 'Restricted by BCX rule: "Restrict allowed body poses"';
+				}
+			};
+			hookFunction("DialogSelfMenuMapping.Pose._ClickButton", 5, (args, next) => {
+				const C = args[1];
+				const clickedPose = args[2];
+				if (C.IsPlayer() && state.isLogged && state.customData?.poseButtons.includes(clickedPose.Name)) {
+					state.triggerAttempt();
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 			hookFunction("PoseCanChangeUnaidedStatus", 0, ([C, poseName, ...args], next) => {
 				const status = next([C, poseName, ...args]);
 				if (C?.IsPlayer() && state.isEnforced && state.customData?.poseButtons.includes(poseName)) {
@@ -536,53 +554,40 @@ export function initRules_bc_blocks() {
 			// TODO: Fix for NMod
 			if (!NMod) {
 				hookFunction("ChatSearchJoin", 5, (args, next) => {
+					let triggered = false;
 					if (state.inEffect && state.customData && state.customData.roomList.length > 0) {
 						// Scans results
-						let X = 25;
-						let Y = 25;
-						for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
+						CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
 							// If the player clicked on a valid room
-							if (MouseIn(X, Y, 630, 85)) {
-								if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
+							if (MouseIn(x, y, width, height)) {
+								if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
 									if (state.isEnforced) {
 										state.triggerAttempt();
-										return;
+										triggered = true;
+										return true;
 									} else {
 										state.trigger();
+										triggered = true;
 									}
 								}
 							}
-
-							// Moves the next window position
-							X += 660;
-							if (X > 1500) {
-								X = 25;
-								Y += 109;
-							}
-						}
+							return false;
+						});
 					}
-					next(args);
+					if (!triggered || !state.isEnforced) return next(args);
 				}, ModuleCategory.Rules);
 				hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
 					next(args);
 					if (state.isEnforced && state.customData && state.customData.roomList.length > 0) {
 						// Scans results
-						let X = 25;
-						let Y = 25;
-						for (let C = ChatSearchResultOffset; C < ChatSearchResult.length && C < (ChatSearchResultOffset + 24); C++) {
-							if (!state.customData.roomList.some(name => name.toLocaleLowerCase() === ChatSearchResult[C].Name.toLocaleLowerCase())) {
-								DrawButton(X, Y, 630, 85, "", "#88c", undefined, "Blocked by BCX", true);
-								DrawTextFit((ChatSearchResult[C].Friends != null && ChatSearchResult[C].Friends.length > 0 ? "(" + ChatSearchResult[C].Friends.length + ") " : "") + ChatSearchMuffle(ChatSearchResult[C].Name) + " - " + ChatSearchMuffle(ChatSearchResult[C].Creator) + " " + ChatSearchResult[C].MemberCount + "/" + ChatSearchResult[C].MemberLimit + "", X + 315, Y + 25, 620, "black");
-								DrawTextFit(ChatSearchMuffle(ChatSearchResult[C].Description), X + 315, Y + 62, 620, "black");
+						CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
+							if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
+								DrawButton(x, y, width, height, "", "#88c", undefined, "Blocked by BCX", true);
+								DrawTextFit((room.Friends != null && room.Friends.length > 0 ? "(" + room.Friends.length + ") " : "") + ChatSearchMuffle(room.Name) + " - " + ChatSearchMuffle(room.Creator) + " " + room.MemberCount + "/" + room.MemberLimit + "", x + 315, y + 25, 620, "black");
+								DrawTextFit(ChatSearchMuffle(room.Description), x + 315, y + 62, 620, "black");
 							}
-
-							// Moves the next window position
-							X += 660;
-							if (X > 1500) {
-								X = 25;
-								Y += 109;
-							}
-						}
+							return false;
+						});
 					}
 				}, ModuleCategory.Rules);
 			}
@@ -1091,13 +1096,13 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			// Partially implemented externally
-			hookFunction("DialogClickExpressionMenu", 5, (args, next) => {
-				const I = DialogFacialExpressions.findIndex(a => a.Appearance.Asset.Group.Name === "Emoticon");
-				if (state.inEffect && MouseIn(20, 185 + 100 * I, 90, 90)) {
+			hookFunction("DialogSelfMenuMapping.Expression._ClickButton", 5, (args, next) => {
+				const C = args[1];
+				const clickedItem = args[2];
+				if (C.IsPlayer() && state.inEffect && clickedItem.Group === "Emoticon" && clickedItem.Expression) {
 					if (state.isEnforced) {
 						state.triggerAttempt();
-						return;
+						return 'Restricted by BCX rule: "Prevent changing own emoticon"';
 					}
 					state.trigger();
 				}

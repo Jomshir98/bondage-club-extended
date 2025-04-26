@@ -269,6 +269,7 @@ type BCX_Rule =
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"
+	| "alt_field_of_vision"
 	| "alt_blindfolds_fullblind"
 	| "alt_always_slow"
 	| "alt_set_leave_slowing"
@@ -386,6 +387,10 @@ type RuleCustomData = {
 	};
 	alt_set_leave_slowing: {
 		leaveTime: number;
+	};
+	alt_field_of_vision: {
+		affectPlayer: boolean;
+		hideNames: boolean;
 	};
 	alt_control_orgasms: {
 		orgasmHandling: string;

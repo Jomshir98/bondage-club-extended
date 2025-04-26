@@ -14,6 +14,13 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.2
+
+This update restores a few of the rules removed in the earlier versions:
+- The "Restrict entering rooms" rule was fixed and now functions properly
+- The "Seeing whitelist" rule was fixed to work with the map room changes
+- The "Field of vision for eyes" rule was fixed to work with the consolidated background draw changes.
+
 ## 1.1.1
 
 This update fixes compatibility with BC R115:

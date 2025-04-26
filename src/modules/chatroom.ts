@@ -201,7 +201,7 @@ export class ModuleChatroom extends BaseModule {
 		hiddenMessageHandlers.set("hello", (sender, message: BCX_message_hello) => {
 			const char = getChatroomCharacter(sender);
 			if (!char) {
-				console.warn(`BCX: Hello from character not found in room`, sender);
+				console.warn(`HardCoreClub: Hello from character not found in room`, sender);
 				return;
 			}
 			if (
@@ -209,11 +209,11 @@ export class ModuleChatroom extends BaseModule {
 				(message.supporterStatus !== undefined && typeof message.supporterStatus !== "string") ||
 				(message.supporterSecret !== undefined && typeof message.supporterSecret !== "string")
 			) {
-				console.warn(`BCX: Invalid hello`, sender, message);
+				console.warn(`HardCoreClub: Invalid hello`, sender, message);
 				return;
 			}
 			// if (char.BCXVersion !== message.version) {
-			// 	console.log(`BCX: ${char.Character.Name} (${char.Character.MemberNumber}) uses BCX version ${message.version}`);
+			// 	console.log(`HardCoreClub: ${char.Character.Name} (${char.Character.MemberNumber}) uses BCX version ${message.version}`);
 			// }
 			char.BCXVersion = message.version;
 			// Apply effects

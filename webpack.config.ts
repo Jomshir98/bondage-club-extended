@@ -71,7 +71,7 @@ export default async function (env: WebpackEnv): Promise<Configuration> {
 							passes: 2,
 						},
 						format: {
-							preamble: "// BCX: Bondage Club Extended",
+							preamble: "// BCX: Bondage Club Extended STRICT",
 						},
 					},
 					include: "bcx.js",
@@ -98,11 +98,11 @@ if (typeof window.ImportBondageCollege !== "function") {
 	throw "Dependency not met";
 }
 if (window.BCX_Loaded !== undefined) {
-	alert("BCX is already detected in current window. To reload, please refresh the window.");
+	alert("HardCoreClub is already detected in current window. To reload, please refresh the window.");
 	throw "Already loaded";
 }
 window.BCX_Loaded = false;
-console.debug("BCX: Parse start...");
+console.debug("HardCoreClub: Parse start...");
 `,
 				raw: true,
 			}),

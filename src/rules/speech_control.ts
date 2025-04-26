@@ -949,16 +949,15 @@ export function initRules_bc_speech_control() {
 
 						const characterAccessLevel = getCharacterAccessLevel(C.MemberNumber);
 						const isOwner = characterAccessLevel === AccessLevel.owner || characterAccessLevel === AccessLevel.clubowner;
-						let title = isOwner ? 'Owner' : (C.GetGenders().includes("M") ? "Master" : "Mistress");
+						let title = isOwner ? "Owner" : (C.GetGenders().includes("M") ? "Master" : "Mistress");
 						let name = getCharacterName(C.MemberNumber, "[unknown]");
 
-						if (moduleIsEnabled(ModuleCategory.Relationships) && modStorage.relationships)
-						{
+						if (moduleIsEnabled(ModuleCategory.Relationships) && modStorage.relationships) {
 							const nickName = modStorage.relationships?.find(r => r.memberNumber === C.MemberNumber)?.nickname;
 
 							if (nickName) {
 								name = nickName;
-								title = '';
+								title = "";
 							}
 						}
 
@@ -979,7 +978,7 @@ export function initRules_bc_speech_control() {
 			}, ModuleCategory.Rules);
 		},
 	});
-	
+
 	// Restrained speech:
 	// the wearer is unable to speak freely, she is given a set of sentences/targets allowed and can only use those with the #name talk command.
 	// The given sentences can contain the %target% placeholder to have the target inserted into the sentence. The given sentences can contain

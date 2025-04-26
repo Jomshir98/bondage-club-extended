@@ -3,7 +3,7 @@ import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { hookFunction, trackFunction } from "../patching";
 import { ChatRoomActionMessage, getCharacterName, InfoBeep, isRoomLocked, isRoomPrivate, updateChatroom } from "../utilsClub";
-import { getChatroomCharacter } from "../characters";
+import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
@@ -144,6 +144,84 @@ export function initRules_bc_alter() {
 				}
 				return Math.min(res, Player.GameplaySettings?.SensDepChatLog === "SensDepLight" ? 2 : 3);
 			}, ModuleCategory.Rules);
+		},
+	});
+
+	registerRule("alt_seeing_whitelist", {
+		name: "Seeing whitelist",
+		type: RuleType.Alt,
+		loggable: false,
+		shortDescription: "of members whom PLAYER_NAME can always see",
+		longDescription: "This rule defines a list of members whose appearance can always be seen normally by PLAYER_NAME - independent of any blinding items or seeing impairing BCX rules on PLAYER_NAME.",
+		keywords: ["sight", "blindness", "bypass", "ignore", "antiblind", "blindfold", "eyes", "seeing"],
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			whitelistedMembers: {
+				type: "memberNumberList",
+				default: [],
+				description: "Members still seen while under blindness:",
+			},
+		},
+		load(state) {
+			let noBlind = false;
+			hookFunction("DrawCharacter", 0, (args, next) => {
+				const C = args[0];
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
+				const C = args[0];
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomCharacterViewClickCharacter", 0, (args, next) => {
+				const C = args[0];
+				if (state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomMessage", 0, (args, next) => {
+				let C: ChatroomCharacter | null = null;
+				if (typeof args[0]?.Sender === "number") {
+					C = getChatroomCharacter(args[0].Sender);
+				}
+				if (C && state.isEnforced && state.customData && C.MemberNumber != null && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+					noBlind = true;
+				}
+				next(args);
+				noBlind = false;
+			}, ModuleCategory.Rules);
+			hookFunction("Player.GetBlindLevel", 6, (args, next) => {
+				if (noBlind)
+					return 0;
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("ChatRoomUpdateDisplay", 0, (args, next) => {
+				next(args);
+				if (state.isEnforced && state.customData) {
+					if (ChatRoomCharacterViewCharacterCount === 1) {
+						ChatRoomCharacterDrawlist = [Player];
+					}
+					ChatRoomSenseDepBypass = true;
+					for (const C of ChatRoomCharacter) {
+						if (C.MemberNumber != null && !ChatRoomCharacterDrawlist.includes(C) && state.customData.whitelistedMembers.includes(C.MemberNumber)) {
+							ChatRoomCharacterDrawlist.push(C);
+						}
+					}
+					ChatRoomCharacterDrawlist.sort((a, b) => {
+						return ChatRoomCharacter.indexOf(a) - ChatRoomCharacter.indexOf(b);
+					});
+					ChatRoomCharacterViewCharacterCount = ChatRoomCharacterDrawlist.length;
+				}
+			});
 		},
 	});
 

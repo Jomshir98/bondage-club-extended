@@ -477,6 +477,7 @@ type RuleCustomData = {
 	};
 	greet_new_guests: {
 		greetingSentence: string;
+		minimumRole: Exclude<import("./modules/authority").AccessLevel, 0>;
 	};
 	// speech_restrained_speech: {
 	// 	listOfAllowedSentences: string[];

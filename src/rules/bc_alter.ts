@@ -330,6 +330,8 @@ export function initRules_bc_alter() {
 			hookFunction("DrawRoomBackground", 6, (args, next) => {
 				next(args);
 
+				if (!inRoomDraw) return;
+
 				const bounds = args[1];
 				if (limitTop > 0) {
 					const Grad = MainCanvas.createLinearGradient(0, bounds.y, 0, bounds.y + limitTop * bounds.h);

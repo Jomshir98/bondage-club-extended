@@ -154,16 +154,8 @@ export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?:
 	if (timeout) BCX_setTimeout(() => div.remove(), timeout);
 
 	// Returns the focus on the chat box
-	const Refocus = document.activeElement?.id === "InputChat";
-	const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
-	const ChatLog = document.getElementById("TextAreaChatLog");
-	if (ChatLog != null) {
-		ChatLog.appendChild(div);
-		if (ShouldScrollDown) ElementScrollToEnd("TextAreaChatLog");
-		if (Refocus) ElementFocus("InputChat");
-		return div;
-	}
-	return null;
+	ChatRoomAppendChat(div);
+	return document.getElementById("TextAreaChatLog") ? div : null;
 }
 
 export function isNModClient(): boolean {

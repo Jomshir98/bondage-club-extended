@@ -280,8 +280,8 @@ function ChatSettingsThemeRoomClick() {
 
 	if (MouseIn(1480, 75, 420, 245)) {
 		ElementToggleGeneratedElements("ChatAdmin", false);
-		BackgroundSelectionMake(ChatAdminBackgroundList as string[],
-			(ChatAdminBackgroundList as string[]).indexOf(ChatAdminData!.Background!), Name => {
+		BackgroundSelectionMake(ChatSearchBackgroundTagList,
+			ChatAdminData!.Background!, Name => {
 				currentThemeRoom.Background = Name;
 			}
 		);
@@ -603,13 +603,11 @@ export class ModuleChatroomAdmin extends BaseModule {
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
 			if (ChatAdminMode === "create" &&
 				template &&
-				BackgroundSelectionReturnScreen?.[1] !== CurrentScreen &&
 				!ChatBlockItemReturnScreen
 			) {
 				applyTemplate(template);
 			}
 			// needed to auto apply a template correctly again
-			BackgroundSelectionReturnScreen = null;
 			ChatBlockItemReturnScreen = null;
 		});
 		patchFunction("ChatAdminRun", {

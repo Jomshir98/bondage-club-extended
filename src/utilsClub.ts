@@ -58,18 +58,10 @@ export function setDevelopmentMode(devel: boolean): boolean {
 		(window as any).BCX_Devel = true;
 		AssetGroup.forEach(G => (G as Mutable<typeof G>).Description = G.Name);
 		Asset.forEach(A => (A as Mutable<typeof A>).Description = A.Group.Name + ":" + A.Name);
-		BackgroundSelectionAll.forEach(B => {
-			B.Description = B.Name;
-			B.Low = B.Description.toLowerCase();
-		});
 		console.warn("Developer mode enabled");
 	} else {
 		delete (window as any).BCX_Devel;
 		AssetLoadDescription("Female3DCG");
-		BackgroundSelectionAll.forEach(B => {
-			B.Description = BackgroundsTextGet(B.Name);
-			B.Low = B.Description.toLowerCase();
-		});
 		console.info("Developer mode disabled");
 	}
 	developmentMode = devel;
@@ -109,10 +101,7 @@ export function getVisibleGroupName(group: AssetGroup): string {
 }
 
 export function InfoBeep(msg: string, timer: number = 3000) {
-	ServerBeep = {
-		Timer: CommonTime() + timer,
-		Message: msg,
-	};
+	ServerShowBeep(msg, timer, { silent: true });
 }
 
 export function ChatRoomActionMessage(msg: string, target: null | number = null, dictionary: ChatMessageDictionaryEntry[] = []) {

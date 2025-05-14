@@ -2,7 +2,7 @@ import { Command_pickAutocomplete, Command_selectCharacter, Command_selectCharac
 import { BaseModule } from "./_BaseModule";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, updateChatroom } from "../utilsClub";
 import { registerCommand } from "./commands";
-import { callOriginal, hookFunction } from "../patching";
+import { callOriginal, hookFunction, patchFunction } from "../patching";
 import { RulesGetRuleState } from "./rules";
 import backgroundList from "../generated/backgroundList.json";
 import remove from "lodash-es/remove";
@@ -492,6 +492,16 @@ export class ModuleClubUtils extends BaseModule {
 		hookFunction("BackgroundSelectionRun", 0, (args, next) => {
 			if (BackgroundSelectionOffset >= BackgroundSelectionView.length) BackgroundSelectionOffset = 0;
 			next(args);
+		});
+
+		patchFunction("BackgroundSelectionMake", {
+			"BackgroundSelectionList = BackgroundsGenerateList(BackgroundSelectionTagList)":
+			`BackgroundSelectionList = BackgroundsGenerateList(BackgroundSelectionTagList.filter(t => t !== "${BACKGROUNDS_BCX_NAME}"))`,
+		});
+
+		patchFunction("BackgroundSelectionTagChanged", {
+			"BackgroundSelectionList = BackgroundsGenerateList(this.value !== BackgroundsTagNone ? [/** @type {BackgroundTag} */(this.value)] : BackgroundSelectionTagList);":
+			`BackgroundSelectionList = BackgroundsGenerateList(this.value !== BackgroundsTagNone ? [/** @type {BackgroundTag} */(this.value)] : BackgroundSelectionTagList.filter(t => t !== "${BACKGROUNDS_BCX_NAME}"));`,
 		});
 
 		//#endregion

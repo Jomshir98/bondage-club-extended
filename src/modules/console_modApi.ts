@@ -6,6 +6,7 @@ import { isObject } from "../utils";
 import { ConditionsGetCondition, ConditionsIsConditionInEffect } from "./conditions";
 import { sendQuery } from "./messaging";
 import { RulesGetRuleState, RuleState } from "./rules";
+import { AccessLevel, getCharacterAccessLevel } from "./authority";
 
 export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
 	readonly modName: string;
@@ -169,6 +170,20 @@ export class ModAPI extends TypedEventEmitter<BCX_Events> implements BCX_ModAPI 
 		} finally {
 			context.end();
 		}
+	}
+
+	getCharacterRole(target: number): BCX_CharacterRole {
+		const map: Record<AccessLevel, BCX_CharacterRole | null> = {
+			[AccessLevel.self]: "self",
+			[AccessLevel.clubowner]: "clubowner",
+			[AccessLevel.owner]: "owner",
+			[AccessLevel.lover]: "lover",
+			[AccessLevel.mistress]: "mistress",
+			[AccessLevel.whitelist]: "whitelist",
+			[AccessLevel.friend]: "friend",
+			[AccessLevel.public]: "public",
+		};
+		return map[getCharacterAccessLevel(target)] ?? "public";
 	}
 
 	sendQuery<T extends keyof BCX_queries>(

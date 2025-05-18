@@ -14,6 +14,14 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.4
+
+This update changes the following:
+- Switched to `ChatRoomAppendChat()` for appending BCX messages to the chat log
+- Updated dependencies to BC R116
+- Updated backgrounds and fixed missing text errors in the background viewer
+- Made hidden backgrounds only appear in their own tag and not the "all tags" list
+
 ## 1.1.3
 
 This update adds the following:

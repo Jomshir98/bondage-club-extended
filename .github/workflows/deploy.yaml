@@ -7,6 +7,8 @@ on:
 
 jobs:
   deploy:
+    env: 
+      SENTRY_AUTH_TOKEN: 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
     runs-on: ubuntu-latest
     environment: stable
     steps:

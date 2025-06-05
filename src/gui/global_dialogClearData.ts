@@ -1,5 +1,5 @@
 import { setSubscreen } from "../modules/gui";
-import { clearAllData } from "../modules/storage";
+//import { clearAllData } from "../modules/storage";
 import { GuiSubscreen } from "./subscreen";
 
 export class GuiGlobalDialogClearData extends GuiSubscreen {
@@ -20,7 +20,7 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 	Run() {
 		MainCanvas.textAlign = "center";
 
-		DrawText(`- Permanent deletion of ALL Bondage Club Extended data -`, 1000, 125, "Black");
+		DrawText(`- Permanent deletion of ALL HardCoreClub data -`, 1000, 125, "Black");
 
 		DrawText("- Warning -", 1000, 225, "Black", "Black");
 		DrawText("If you confirm, all BCX data (including settings, curses, logs, ...) will be permanently deleted!", 1000, 325, "Black");
@@ -30,16 +30,11 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 
 		DrawText("This action cannot be undone!", 1000, 625, "Red", "Black");
 
+		DrawText("YOU ARE NOT ALLOWED TO RESET THE BCX. ACTION WILL NOT BE TAKEN", 1000, 750, "Red", "Black");
+
 		if (this.allowedConfirmTime === null) {
 			DrawText("Deleting...", 1000, 720, "Black");
 			return;
-		}
-
-		const now = Date.now();
-		if (now < this.allowedConfirmTime) {
-			DrawButton(300, 720, 200, 80, `Confirm (${Math.floor((this.allowedConfirmTime - now) / 1000)})`, "#ddd", undefined, undefined, true);
-		} else {
-			DrawButton(300, 720, 200, 80, "Confirm", "White");
 		}
 
 		DrawButton(1520, 720, 200, 80, "Cancel", "White");
@@ -49,13 +44,10 @@ export class GuiGlobalDialogClearData extends GuiSubscreen {
 		if (this.allowedConfirmTime === null) return;
 
 		if (MouseIn(1520, 720, 200, 80)) return this.Exit();
-
-		if (MouseIn(300, 720, 200, 80) && Date.now() >= this.allowedConfirmTime) return this.Confirm();
 	}
 
 	Confirm() {
 		this.allowedConfirmTime = null;
-		clearAllData();
 	}
 
 	Exit() {

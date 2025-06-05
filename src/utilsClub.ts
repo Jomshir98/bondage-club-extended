@@ -59,18 +59,10 @@ export function setDevelopmentMode(devel: boolean): boolean {
 		(window as any).BCX_Devel = true;
 		AssetGroup.forEach(G => (G as Mutable<typeof G>).Description = G.Name);
 		Asset.forEach(A => (A as Mutable<typeof A>).Description = A.Group.Name + ":" + A.Name);
-		BackgroundSelectionAll.forEach(B => {
-			B.Description = B.Name;
-			B.Low = B.Description.toLowerCase();
-		});
 		console.warn("Developer mode enabled");
 	} else {
 		delete (window as any).BCX_Devel;
 		AssetLoadDescription("Female3DCG");
-		BackgroundSelectionAll.forEach(B => {
-			B.Description = BackgroundsTextGet(B.Name);
-			B.Low = B.Description.toLowerCase();
-		});
 		console.info("Developer mode disabled");
 	}
 	developmentMode = devel;
@@ -110,10 +102,7 @@ export function getVisibleGroupName(group: AssetGroup): string {
 }
 
 export function InfoBeep(msg: string, timer: number = 3000) {
-	ServerBeep = {
-		Timer: CommonTime() + timer,
-		Message: msg,
-	};
+	ServerShowBeep(msg, timer, { silent: true });
 }
 
 export function ChatRoomActionMessage(msg: string, target: null | number = null, dictionary: ChatMessageDictionaryEntry[] = []) {
@@ -155,16 +144,8 @@ export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?:
 	if (timeout) BCX_setTimeout(() => div.remove(), timeout);
 
 	// Returns the focus on the chat box
-	const Refocus = document.activeElement?.id === "InputChat";
-	const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
-	const ChatLog = document.getElementById("TextAreaChatLog");
-	if (ChatLog != null) {
-		ChatLog.appendChild(div);
-		if (ShouldScrollDown) ElementScrollToEnd("TextAreaChatLog");
-		if (Refocus) ElementFocus("InputChat");
-		return div;
-	}
-	return null;
+	ChatRoomAppendChat(div);
+	return document.getElementById("TextAreaChatLog") ? div : null;
 }
 
 export function isNModClient(): boolean {

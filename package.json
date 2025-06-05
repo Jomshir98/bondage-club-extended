@@ -1,6 +1,6 @@
 {
 	"name": "HardCoreClub-STRICT",
-  "version": "1.1.2-STRICT",
+  "version": "1.1.4-STRICT",
 	"repository": "git@github.com:Rufflan/HardCroeClub.git",
 	"author": "Rufflan (hwkm0818@gmail.com)",
 	"license": "GPL-3.0",
@@ -34,7 +34,7 @@
 		"@types/jest": "^29.5.6",
 		"@typescript-eslint/eslint-plugin": "^8.21.0",
 		"@typescript-eslint/parser": "^8.21.0",
-		"bc-stubs": "115.0.1",
+		"bc-stubs": "^116.0.0-Beta.1",
 		"clean-webpack-plugin": "^4.0.0",
 		"copy-webpack-plugin": "^12.0.2",
 		"cross-env": "^7.0.3",

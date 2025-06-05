@@ -5,9 +5,10 @@ import { registerSpeechHook, SpeechMessageInfo, falteringSpeech, SpeechHookAllow
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
 import { dictionaryProcess, escapeRegExp, isObject } from "../utils";
-import { ChatRoomSendLocal } from "../utilsClub";
+import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
-import leven from "leven";
+import { modStorage } from "../modules/storage";
+import { moduleIsEnabled } from "../modules/presets";
 
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
 	for (let sound of sounds) {
@@ -943,15 +944,21 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "when they join the current room",
-		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in. Setting an emote as a greeting is also supported by starting the set message with one or two '*' characters.",
+		longDescription: "Forces PLAYER_NAME to greet people newly entering the current chat room with the set sentence. NOTE: Only PLAYER_NAME and the new guest can see the message not to make it spammy. After a new person has been greeted, she will not be greeted for 10 minutes after she left (including disconnect) the room PLAYER_NAME is in. Setting an emote as a greeting is also supported by starting the set message with one or two '*' characters. %name% is replaced by the name from the relationships module or their normal name. The %titled_name% prepends Master/Mistress/Owner.",
 		keywords: ["say", "present", "introduce"],
 		defaultLimit: ConditionsLimit.limited,
 		dataDefinition: {
 			greetingSentence: {
 				type: "string",
 				default: "",
-				description: "The sentence that will be used to greet new guests:",
+				description: `The sentence that will be used to greet new guests:`,
 				options: /^([^/.].*)?$/,
+			},
+			minimumRole: {
+				type: "roleSelector",
+				default: AccessLevel.public,
+				description: "Minimum role that will be greeted",
+				Y: 450,
 			},
 		},
 		load(state) {
@@ -985,16 +992,94 @@ export function initRules_bc_speech_control() {
 								nextGreet.get(C.MemberNumber)! >= Date.now()
 							)
 						) return;
+
 						nextGreet.set(C.MemberNumber, 0);
-						if (state.customData.greetingSentence.startsWith("*")) {
-							const message = state.customData.greetingSentence.slice(1);
+
+						if (state.customData.minimumRole && getCharacterAccessLevel(C.MemberNumber) > state.customData.minimumRole) {
+							return;
+						}
+
+						const characterAccessLevel = getCharacterAccessLevel(C.MemberNumber);
+						const isOwner = characterAccessLevel === AccessLevel.owner || characterAccessLevel === AccessLevel.clubowner;
+						let title = isOwner ? "Owner" : (C.GetGenders().includes("M") ? "Master" : "Mistress");
+						let name = getCharacterName(C.MemberNumber, "[unknown]");
+
+						if (moduleIsEnabled(ModuleCategory.Relationships) && modStorage.relationships) {
+							const nickName = modStorage.relationships?.find(r => r.memberNumber === C.MemberNumber)?.nickname;
+
+							if (nickName) {
+								name = nickName;
+								title = "";
+							}
+						}
+
+						let sentence = state.customData.greetingSentence;
+						sentence = sentence.replace(/%titled_name%/g, title ? `${title} ${name}` : name);
+						sentence = sentence.replace(/%name%/g, name);
+
+						if (sentence.startsWith("*")) {
+							const message = sentence.slice(1);
 							ServerSend("ChatRoomChat", { Content: message, Type: "Emote", Target: C.MemberNumber });
 							ServerSend("ChatRoomChat", { Content: message, Type: "Emote", Target: Player.MemberNumber });
 						} else {
-							ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: C.MemberNumber });
-							ServerSend("ChatRoomChat", { Content: state.customData.greetingSentence, Type: "Chat", Target: Player.MemberNumber });
+							ServerSend("ChatRoomChat", { Content: sentence, Type: "Chat", Target: C.MemberNumber });
+							ServerSend("ChatRoomChat", { Content: sentence, Type: "Chat", Target: Player.MemberNumber });
 						}
 					}, 5_000);
+				}
+			}, ModuleCategory.Rules);
+		},
+	});
+
+	registerRule("farewell_on_slow_leave", {
+		name: "Farewell on leave",
+		type: RuleType.Speech,
+		loggable: false,
+		shortDescription: "only when under slow leave",
+		longDescription: "Forces PLAYER_NAME to say farewells to people leaving the room slowly. Only does it once per 10 minutes per room. Can start with * or ** for emote.",
+		keywords: ["say", "present", "introduce", "leave", "slow"],
+		defaultLimit: ConditionsLimit.limited,
+		dataDefinition: {
+			greetingSentence: {
+				type: "string",
+				default: "",
+				description: `The phrase that will be used to say goodbye to guests:`,
+				options: /^([^/.].*)?$/,
+			},
+		},
+		load(state) {
+			const GREET_DELAY = 600_000;
+			const lastGreet: Map<string, number> = new Map<string, number>();
+			hookFunction("ChatRoomAttemptLeave", -1000, (args, next) => {
+				next(args);
+				if (state.customData && state.isEnforced) {
+					const chatRoomName = ChatRoomData && typeof ChatRoomData.Name === "string" && ChatRoomData.Name.toLocaleLowerCase();
+					const greetingType = state.customData.greetingSentence.startsWith("*") ? "Emote" : "Chat";
+					const greeting = greetingType === "Emote" ? state.customData.greetingSentence.substring(1) : state.customData.greetingSentence;
+
+					if (chatRoomName) {
+						if (lastGreet.has(chatRoomName)) {
+							return;
+						}
+
+						// Timeout to let other hooks possibly block the leave attempt
+						BCX_setTimeout(() => {
+							// Check if the player succeeded in initiating a slow leave
+							if (ChatRoomIsLeavingSlowly()) {
+								lastGreet.set(chatRoomName, Date.now());
+
+								// Clean up the debounce map after the delay
+								BCX_setTimeout(() => {
+									lastGreet.delete(chatRoomName);
+								}, GREET_DELAY);
+
+								ServerSend("ChatRoomChat", {
+									Content: greeting,
+									Type: greetingType,
+								});
+							}
+						}, 100);
+					}
 				}
 			}, ModuleCategory.Rules);
 		},

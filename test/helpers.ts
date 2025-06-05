@@ -143,7 +143,7 @@ export async function TestLoadBCX(page: Page): Promise<void> {
 		url: httpAddressBcx,
 	});
 
-	await page.waitForFunction(() => !!ServerBeep && typeof ServerBeep === "object" &&
-		(ServerBeep.Message === "BCX Ready!" || ServerBeep.Message.startsWith("BCX loaded!"))
+	await page.waitForFunction(() => !!ServerBeepQueue && Array.isArray(ServerBeepQueue) && typeof ServerBeepQueue[0] === "object" &&
+		(ServerBeepQueue[0].Message === "BCX Ready!" || ServerBeepQueue[0].Message.startsWith("BCX loaded!"))
 	);
 }

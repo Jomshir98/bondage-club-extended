@@ -2,10 +2,9 @@ import { Command_pickAutocomplete, Command_selectCharacter, Command_selectCharac
 import { BaseModule } from "./_BaseModule";
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, updateChatroom } from "../utilsClub";
 import { registerCommand } from "./commands";
-import { callOriginal, hookFunction } from "../patching";
+import { callOriginal, hookFunction, patchFunction } from "../patching";
 import { RulesGetRuleState } from "./rules";
 import backgroundList from "../generated/backgroundList.json";
-import { OverridePlayerDialog } from "./miscPatches";
 import remove from "lodash-es/remove";
 import { arrayUnique, shuffleArray } from "../utils";
 import { modStorage } from "./storage";
@@ -479,12 +478,30 @@ export class ModuleClubUtils extends BaseModule {
 			if (BackgroundsList.some(i => i.Name === background))
 				continue;
 			BackgroundsList.push({ Name: background, Tag: [BACKGROUNDS_BCX_NAME as BackgroundTag] });
-			OverridePlayerDialog(background, `[Hidden] ${background}`);
 		}
+
+		hookFunction("BackgroundsTextGet", 0, (args, next) => {
+			const name = next(args);
+			if (name.startsWith("MISSING")) {
+				const background = backgroundList.find(bg => bg === args[0]);
+				return `[Hidden] ${background ?? args[0]}`;
+			}
+			return name;
+		});
 
 		hookFunction("BackgroundSelectionRun", 0, (args, next) => {
 			if (BackgroundSelectionOffset >= BackgroundSelectionView.length) BackgroundSelectionOffset = 0;
 			next(args);
+		});
+
+		patchFunction("BackgroundSelectionMake", {
+			"BackgroundSelectionList = BackgroundsGenerateList(BackgroundSelectionTagList)":
+			`BackgroundSelectionList = BackgroundsGenerateList(BackgroundSelectionTagList.filter(t => t !== "${BACKGROUNDS_BCX_NAME}"))`,
+		});
+
+		patchFunction("BackgroundSelectionTagChanged", {
+			"BackgroundSelectionList = BackgroundsGenerateList(this.value !== BackgroundsTagNone ? [/** @type {BackgroundTag} */(this.value)] : BackgroundSelectionTagList);":
+			`BackgroundSelectionList = BackgroundsGenerateList(this.value !== BackgroundsTagNone ? [/** @type {BackgroundTag} */(this.value)] : BackgroundSelectionTagList.filter(t => t !== "${BACKGROUNDS_BCX_NAME}"));`,
 		});
 
 		//#endregion

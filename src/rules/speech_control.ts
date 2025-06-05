@@ -9,6 +9,7 @@ import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 import { modStorage } from "../modules/storage";
 import { moduleIsEnabled } from "../modules/presets";
+import leven from "leven";
 
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
 	for (let sound of sounds) {

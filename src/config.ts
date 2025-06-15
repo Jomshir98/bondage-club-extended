@@ -146,7 +146,6 @@ export const FUNCTION_HASHES: Record<string, string[]> = {
 };
 
 export const FORBIDDEN_BC_MODULES: string[] = [
-	"ULTRAbc",
 	"BCTweaks",
 	"BC Tools",
 ];

@@ -41,7 +41,7 @@ function enterSearchMode(C: Character, input?: string) {
 						const name = button.getAttribute("name")?.toLocaleLowerCase() ?? "";
 						const description = button.querySelector(".button-label")?.textContent?.toLocaleLowerCase() ?? "";
 						const queryMatch = query.some(i => name.includes(i) || description.includes(i));
-						button.toggleAttribute("data-unload", !queryMatch);
+						button.toggleAttribute("hidden", !queryMatch);
 					});
 				}
 			}
@@ -65,7 +65,7 @@ function exitSearchMode(C: Character) {
 		// @ts-expect-error: >= R111
 		const gridID: undefined | string = DialogMenuMapping[DialogMenuMode]?.ids.grid;
 		if (gridID) {
-			document.querySelectorAll(`#${gridID} > .dialog-grid-button`).forEach(button => button.toggleAttribute("data-unload", false));
+			document.querySelectorAll(`#${gridID} > .dialog-grid-button`).forEach(button => button.toggleAttribute("hidden", false));
 		}
 
 	}

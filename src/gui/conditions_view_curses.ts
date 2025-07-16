@@ -105,7 +105,7 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 	protected loadCondition(condition: ConditionsCategoryKeys["curses"], data: ConditionsConditionPublicData<"curses">): [string, CurseEntry] | null {
 		const group = AssetGroup.find(g => g.Name === condition);
 		if (!group) {
-			console.warn(`BCX: Unknown group ${condition}`);
+			console.warn(`HardCoreClub: Unknown group ${condition}`);
 			return null;
 		}
 		if (data.data === null) {

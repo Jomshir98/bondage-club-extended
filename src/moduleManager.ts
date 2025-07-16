@@ -57,7 +57,7 @@ export function unload_modules() {
 
 export function reload_modules(): boolean {
 	if (moduleInitPhase !== ModuleInitPhase.ready) {
-		console.error("BCX: Attempt to reload modules, while not ready");
+		console.error("HardCoreClub: Attempt to reload modules, while not ready");
 		return false;
 	}
 	for (const m of modules) {
@@ -68,7 +68,7 @@ export function reload_modules(): boolean {
 
 export function modules_applyPreset(preset: Preset): boolean {
 	if (moduleInitPhase !== ModuleInitPhase.ready) {
-		console.error("BCX: Attempt to apply preset to modules, while not ready");
+		console.error("HardCoreClub: Attempt to apply preset to modules, while not ready");
 		return false;
 	}
 	for (const m of modules) {

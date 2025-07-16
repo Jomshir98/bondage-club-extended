@@ -103,7 +103,7 @@ export function initRules_bc_settings() {
 				if (state.isEnforced && state.customData) {
 					const current = get();
 					if (current == null) {
-						console.error(`BCX: Undfined value while forcing setting ${setting}`);
+						console.error(`HardCoreClub: Undfined value while forcing setting ${setting}`);
 						return false;
 					}
 					if (current !== state.customData.value) {

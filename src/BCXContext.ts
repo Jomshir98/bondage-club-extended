@@ -69,17 +69,17 @@ export function debugContextStart(name: string, { root = false, modArea, extraIn
 			}
 			const index = contextStack.indexOf(context);
 			if (index < 0) {
-				console.warn(`BCX: Debug context end while it is not on stack`, context, new Error());
+				console.warn(`HardCoreClub Debug context end while it is not on stack`, context, new Error());
 			} else {
 				const toRemove = contextStack.length - index;
 				const removed = contextStack.splice(index, toRemove);
-				console.warn(`BCX: Debug context end while not on top of the stack (depth ${toRemove})`, removed, new Error());
+				console.warn(`HardCoreClub Debug context end while not on top of the stack (depth ${toRemove})`, removed, new Error());
 			}
 		},
 	};
 
 	if (root && contextStack.length > 0) {
-		console.warn(`BCX: Root context when we already have context`, contextStack, new Error());
+		console.warn(`HardCoreClub Root context when we already have context`, contextStack, new Error());
 		contextStack = [];
 	}
 

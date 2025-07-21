@@ -14,6 +14,10 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.6
+
+This update fixes some missing background images that were added to BC.
+
 ## 1.1.5
 
 This update fixes the type-to-search feature being broken.

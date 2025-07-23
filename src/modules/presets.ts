@@ -29,7 +29,7 @@ export function applyPreset(preset: Preset) {
 
 export function setDisabledModules(modules: ModuleCategory[]): boolean {
 	if (!Array.isArray(modStorage.disabledModules)) {
-		console.error("BCX: Attempt to set disabled modules before initializetion");
+		console.error("HardCoreClub: Attempt to set disabled modules before initializetion");
 		return false;
 	}
 

@@ -65,7 +65,7 @@ export class GuiCursesAdd extends GuiSubscreen {
 			}
 			this.failed = false;
 		}, err => {
-			console.error(`BCX: Failed to get permission info for ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get permission info for ${this.character}`, err);
 			this.curseData = null;
 			this.failed = true;
 		});

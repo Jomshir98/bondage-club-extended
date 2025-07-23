@@ -9,6 +9,7 @@ import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 import { modStorage } from "../modules/storage";
 import { moduleIsEnabled } from "../modules/presets";
+import leven from "leven";
 
 function checkMessageForSounds(sounds: string[], message: string, allowPartialMatch: boolean = true): boolean {
 	for (let sound of sounds) {
@@ -63,7 +64,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				const sounds = state.customData?.soundWhitelist;
 				if (sounds && sounds.length > 0 && (msg.type === "Chat" || msg.type === "Whisper")) {
-					const message = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+					const message = (msg.originalMessage).toLocaleLowerCase();
 					return checkMessageForSounds(sounds, message);
 				}
 				return true;
@@ -90,7 +91,12 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "same as normal messages",
-		longDescription: "This rule alters PLAYER_NAME's outgoing whisper messages while gagged to be garbled the same way normal chat messages are. This means, that strength of the effect depends on the type of gag and (OOC text) is not affected. Note: While the rule is in effect, the BC immersion preference 'Prevent OOC & whispers while gagged' is altered, to allow gagged whispers, since those are now garbled by the rule. OOC prevention is not changed.",
+		longDescription:
+			"This rule alters PLAYER_NAME's outgoing whisper messages while gagged to be garbled the same way normal chat messages are. " +
+			"This means, that strength of the effect depends on the type of gag and (OOC text) is not affected. Note: While the rule is in effect, " +
+			"the BC immersion preference 'Prevent OOC & whispers while gagged' is altered, to allow gagged whispers, " +
+			"since those are now garbled by the rule. OOC ARE ALSO AFFECTED.",
+
 		keywords: ["garbling", "whispering"],
 		defaultLimit: ConditionsLimit.limited,
 		init(state) {
@@ -100,7 +106,7 @@ export function initRules_bc_speech_control() {
 		},
 		load(state) {
 			hookFunction("ChatRoomShouldBlockGaggedOOCMessage", 2, (args, next) => {
-				if (state.isEnforced && ChatRoomTargetMemberNumber >= 0 && !args[0].includes("(")) return false;
+				if (state.isEnforced && ChatRoomTargetMemberNumber >= 0) return false;
 				return next(args);
 			}, ModuleCategory.Rules);
 		},
@@ -119,17 +125,20 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk() || msg.type !== "Chat" && msg.type !== "Whisper";
+
+			//const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk();
+
 			registerSpeechHook({
 				allowSend: (msg) => {
-					if (state.isEnforced && !check(msg)) {
+					if (state.isEnforced && msg.hasOOC && !Player.CanTalk()) {
 						state.triggerAttempt();
+						console.log("OOC talk was blocked while gagged");
 						return SpeechHookAllow.BLOCK;
 					}
 					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
-					if (state.inEffect && !check(msg)) {
+					if (state.inEffect && msg.hasOOC) {
 						state.trigger();
 					}
 				},
@@ -141,7 +150,9 @@ export function initRules_bc_speech_control() {
 		name: "Block OOC chat",
 		type: RuleType.Speech,
 		shortDescription: "blocks use of OOC in messages",
-		longDescription: "This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages at any moment. This is a very extreme rule and should be used with great caution!",
+		longDescription:
+			"This rule forbids PLAYER_NAME to use OOC (messages between round brackets) in chat or OOC whisper messages at any moment." +
+			" This is a very extreme rule and should be used with great caution!",
 		keywords: ["parentheses", "prevent", "forbid"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use OOC in messages!",
@@ -150,17 +161,20 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || msg.type !== "Chat" && msg.type !== "Whisper";
+
+			//const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC;
+
 			registerSpeechHook({
 				allowSend: (msg) => {
-					if (state.isEnforced && !check(msg)) {
+					if (state.isEnforced && msg.hasOOC) {
+						console.log("OOC talk whas blocked");
 						state.triggerAttempt();
 						return SpeechHookAllow.BLOCK;
 					}
 					return SpeechHookAllow.ALLOW;
 				},
 				onSend: (msg) => {
-					if (state.inEffect && !check(msg)) {
+					if (state.inEffect && msg.hasOOC) {
 						state.trigger();
 					}
 				},
@@ -172,7 +186,10 @@ export function initRules_bc_speech_control() {
 		name: "Doll talk",
 		type: RuleType.Speech,
 		shortDescription: "allows only short sentences with simple words",
-		longDescription: "This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too. Both limits are configurable independently. Doesn't affect OOC text, but does affect whispers. Note: Setting '0' means this part is not limited (∞), as there is another rule to forbid open talking completely.",
+		longDescription:
+			"This rule forbids PLAYER_NAME to use any words longer than set limit and limits number of words too." +
+			" Both limits are configurable independently. Doesn't affect OOC text, but does affect whispers." +
+			" Note: Setting '0' means this part is not limited (∞), as there is another rule to forbid open alking completely.",
 		keywords: ["limit", "restrict", "length", "count"],
 		triggerTexts: {
 			infoBeep: "You broke the doll talk rule!",
@@ -198,7 +215,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || state.customData == null)
 					return true;
-				const words = Array.from((msg.noOOCMessage ?? msg.originalMessage).matchAll(/[^\t\p{Z}\v.:!?~,;^]+/gmu)).map(i => i[0]);
+				const words = Array.from((msg.originalMessage).matchAll(/[^\t\p{Z}\v.:!?~,;^]+/gmu)).map(i => i[0]);
 				if (state.customData.maxNumberOfWords && words.length > state.customData.maxNumberOfWords)
 					return false;
 				if (state.customData.maxWordLength && words.some(word => word.length > state.customData!.maxWordLength))
@@ -226,7 +243,9 @@ export function initRules_bc_speech_control() {
 		name: "Forbid saying certain words in chat",
 		type: RuleType.Speech,
 		shortDescription: "based on a configurable blacklist",
-		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect emotes and OOC text, but does affect whispers.",
+		longDescription:
+			"This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. " +
+			"Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect emotes and OOC text, but does affect whispers.",
 		keywords: ["limit", "restrict", "blacklist", "blocklist", "forbidden"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
@@ -247,13 +266,23 @@ export function initRules_bc_speech_control() {
 		init(state) {
 			let transgression: undefined | string;
 			const check = (msg: SpeechMessageInfo): boolean => {
+				transgression = undefined;
 				if ((msg.type !== "Chat" && msg.type !== "Whisper") || !state.customData?.bannedWords)
 					return true;
-				transgression = state.customData?.bannedWords.find(i =>
-					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
-						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
-					)
-				);
+				state.customData?.bannedWords.forEach((bannedWord: string): undefined | string => {
+					const messageArray = msg.originalMessage.split(" ");
+					messageArray.forEach((msgWord: string): undefined | string => {
+						const msgToCheck: string = msgWord.replace(/\b(\w+)\b.*\b\1\b/g, "$1");
+						console.log("Message to Check: " + msgToCheck);
+						if (leven(msgToCheck.replace(/(.)\1+/g, "$1"), bannedWord.replace(/(.)\1+/g, "$1")) < 1) {
+							console.log("Found similarity to " + bannedWord + " in message: " + msg.originalMessage + ". Message blocked.");
+							transgression = msgWord + "(similar to " + bannedWord + ")";
+							return bannedWord;
+						}
+						return undefined;
+					});
+					return transgression;
+				});
 				return transgression === undefined;
 			};
 			registerSpeechHook({
@@ -277,7 +306,9 @@ export function initRules_bc_speech_control() {
 		name: "Forbid saying certain words in emotes",
 		type: RuleType.Speech,
 		shortDescription: "based on a configurable blacklist",
-		longDescription: "This rule forbids PLAYER_NAME to use certain words as part of any emote messages. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No').",
+		longDescription:
+			"This rule forbids PLAYER_NAME to use certain words as part of any emote messages. The list of banned words can be configured. " +
+			"Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No').",
 		keywords: ["limit", "restrict", "blacklist", "blocklist", "forbidden"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
@@ -301,7 +332,7 @@ export function initRules_bc_speech_control() {
 				if (msg.type !== "Emote" || !state.customData?.bannedWords)
 					return true;
 				transgression = state.customData?.bannedWords.find(i =>
-					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
+					(msg.originalMessage).toLocaleLowerCase().match(
 						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
 					)
 				);
@@ -360,7 +391,11 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "only allow a set number of chat messages per minute",
-		longDescription: "This rule limits PLAYER_NAME's ability to send a message to all people inside a chat room to only the set number per minute. Does not affect whispers or emotes, but does affect OOC. Note: Setting '0' will have no effect, as there is another rule to forbid open talking completely.",
+		longDescription:
+			"This rule limits PLAYER_NAME's ability to send a message to all people inside a chat room to only the set number per minute. " +
+			"Does not affect whispers or emotes, but does affect OOC. Note: Setting '0' will have no effect, as there is another rule to " +
+			"forbid open talking completely.",
+
 		keywords: ["limit", "restrict", "loud", "saying", "speaking", "chatting", "slow", "fast"],
 		triggerTexts: {
 			infoBeep: "You exceeded the number of allowed chat messages per minute!",
@@ -437,7 +472,9 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "only allow a set number of emotes per minute",
-		longDescription: "This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room to only the set number per minute. Note: Setting '0' will have no effect, as there is another rule to forbid using emotes completely.",
+		longDescription:
+			"This rule forbids PLAYER_NAME to send an emote (with * or /me) to all people inside a chat room to only the set number per minute. " +
+			"Note: Setting '0' will have no effect, as there is another rule to forbid using emotes completely.",
 		keywords: ["restrict", "emoting", "acting", "slow", "fast"],
 		triggerTexts: {
 			infoBeep: "You exceeded the number of allowed emotes per minute!",
@@ -478,7 +515,9 @@ export function initRules_bc_speech_control() {
 		name: "Restrict sending whispers",
 		type: RuleType.Speech,
 		shortDescription: "except to defined roles",
-		longDescription: "This rule forbids PLAYER_NAME to whisper anything to most people inside a chat room, except to the defined roles. Also affects whispered OOC messages.",
+		longDescription:
+			"This rule forbids PLAYER_NAME to whisper anything to most people inside a chat room, except to the defined roles. " +
+			"Also affects whispered OOC messages.",
 		keywords: ["limit", "forbid", "whispering", "allowlist", "block", "whitelist"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to whisper to TARGET_PLAYER!",
@@ -520,7 +559,12 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "except from defined roles",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set (text field is not empty). PLAYER_NAME won't get any indication that she would have received a whisper unless the rule is not enforced, in which case she will see both the whisper and the auto reply. This rule can also be used (by dommes) to prevent getting unwanted whispers from strangers in public.",
+		longDescription:
+			"This rule prevents PLAYER_NAME from receiving any whispers, except from the defined roles. If someone tries to send PLAYER_NAME " +
+			"a whisper message while this rule blocks them from doing so, they get an auto reply whisper, if the rule has an auto reply set " +
+			"(text field is not empty). PLAYER_NAME won't get any indication that she would have received a whisper unless the rule is not enforced, " +
+			" in which case she will see both the whisper and the auto reply. This rule can also be used (by dommes) to prevent getting unwanted whispers" +
+			"from strangers in public.",
 		keywords: ["limit", "forbid", "prevent", "whispering", "hearing", "listening", "allowlist", "block", "whitelist"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
@@ -575,7 +619,10 @@ export function initRules_bc_speech_control() {
 		name: "Restrict sending beep messages",
 		type: RuleType.Speech,
 		shortDescription: "except to selected members",
-		longDescription: "This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. Sending beeps without a message is not affected. Optionally, it can be set that PLAYER_NAME is only forbidden to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
+		longDescription:
+			"This rule forbids PLAYER_NAME to send any beeps with message, except to the defined list of member numbers. " +
+			"Sending beeps without a message is not affected. Optionally, it can be set that PLAYER_NAME is only forbidden " +
+			"to send beeps while she is unable to use her hands (e.g. fixed to a cross).",
 		triggerTexts: {
 			infoBeep: "You broke the rule that forbids sending a beep message to TARGET_PLAYER!",
 			attempt_log: "PLAYER_NAME broke a rule by trying to send a beep message to TARGET_PLAYER",
@@ -624,7 +671,13 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "and beep messages, except from selected members",
-		longDescription: "This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that she would have received a beep unless the rule is not enforced, in which case she will see both the beep and the auto reply. Optionally, the rule can be set to only activate while PLAYER_NAME is unable to use her hands (e.g. fixed to a cross).",
+		longDescription:
+			"This rule prevents PLAYER_NAME from receiving any beep (regardless if the beep carries a message or not), except for " +
+			"beeps from the defined list of member numbers. If someone tries to send PLAYER_NAME a beep message while this rule blocks " +
+			"them from doing so, they get an auto reply beep, if the rule has an auto reply set. PLAYER_NAME won't get any indication that " +
+			"she would have received a beep unless the rule is not enforced, in which case she will see both the beep and the auto reply. " +
+			"Optionally, the rule can be set to only activate while PLAYER_NAME is unable to use her hands (e.g. fixed to a cross).",
+
 		keywords: ["limit", "forbid", "prevent", "reading", "whitelist", "allowlist"],
 		defaultLimit: ConditionsLimit.blocked,
 		dataDefinition: {
@@ -844,7 +897,7 @@ export function initRules_bc_speech_control() {
 		// 3. do not allow sending anything else when enforced
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => (
-				(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase() === state.customData?.greetingSentence.trim().toLocaleLowerCase() &&
+				(msg.originalMessage).toLocaleLowerCase() === state.customData?.greetingSentence.trim().toLocaleLowerCase() &&
 				msg.type === "Chat"
 			);
 			registerSpeechHook({
@@ -1125,7 +1178,7 @@ export function initRules_bc_speech_control() {
 						)
 					) || !state.customData?.mandatoryWords?.length)
 					return true;
-				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+				const checkMsg = (msg.originalMessage).toLocaleLowerCase();
 				const sounds = state.customData?.mandatoryWords.filter(e => /^[\p{L}]*$/iu.test(e));
 				if (checkMsg.trim() === "") {
 					return true;
@@ -1179,7 +1232,7 @@ export function initRules_bc_speech_control() {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				if (msg.type !== "Emote" || !state.customData?.mandatoryWords?.length)
 					return true;
-				const checkMsg = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
+				const checkMsg = (msg.originalMessage).toLocaleLowerCase();
 				const sounds = state.customData?.mandatoryWords.filter(e => /^[\p{L}]*$/iu.test(e));
 				if (checkMsg.trim() === "") {
 					return true;
@@ -1270,7 +1323,9 @@ export function initRules_bc_speech_control() {
 		type: RuleType.Speech,
 		loggable: false,
 		shortDescription: "force PLAYER_NAME to talk as if they were gagged",
-		longDescription: `This rule forces PLAYER_NAME to talk as if they were gagged, automatically garbling all of their speech. This rule does not affect OOC. This rule only affects whispers if the rule "Garble whispers while gagged" is also in effect.`,
+		longDescription:
+			"This rule forces PLAYER_NAME to talk as if they were gagged, automatically garbling all of their speech. " +
+			"This rule does not affect OOC. This rule only affects whispers if the rule \"Garble whispers while gagged\" is also in effect.",
 		keywords: ["saying", "talking", "gagtalk", "garbling", "forced"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {

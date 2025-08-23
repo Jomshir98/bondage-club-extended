@@ -5,6 +5,7 @@ type RuleDisplayDefinition<ID extends BCX_Rule> = any;
 type ConditionsConditionData<category extends string = string> = any;
 type RuleCustomData = Record<BCX_Rule, any>;
 type RuleInternalData = Record<BCX_Rule, any>;
+type BCX_queries = Record<string, [any, any]>;
 
 /* End of area to uncomment */
 
@@ -149,6 +150,28 @@ interface BCX_ModAPI extends BCXEventEmitter<BCX_Events> {
 
 	/** Returns info about how a slot is cursed */
 	getCurseInfo(group: AssetGroupName): BCX_CurseInfo | null;
+
+	/**
+	 * Sends a BCX query to another character in the same room, or to Player.
+	 * This allows same level of access to BCX data as BCX itself has for others, which includes almost all actions possible through UI (but there are exceptions).
+	 * Requests done to "Player" will have the same limitations user has when interacting with the UI.
+	 *
+	 * This is a very low-level API and properly forming and interpretting the requests requires care.
+	 * Also note, that this method sends requests to other characters, which might respond in an arbitrary way or not at all.
+	 * Also consider that using this with different target than "Player" sends a message through BC's server and is subject to rate limiting.
+	 * @param type - The type of query to send
+	 * @param data - Data for the query
+	 * @param target - MemberNumber to target; "Player" is alias for `Player.MemberNumber`
+	 * @param timeout - Timeout after which the query fails, in milliseconds; defaults to 10 seconds
+	 * @returns Promise that resolves to the query answer or rejects if the request failed
+	 * @see BCX_queries in messages.d.ts for list of possible queries, their expected data and answers
+	 */
+	sendQuery<T extends keyof BCX_queries>(
+		type: T,
+		data: BCX_queries[T][0],
+		target: number | "Player",
+		timeout?: number,
+	): Promise<BCX_queries[T][1]>;
 }
 
 interface BCX_ConsoleInterface {

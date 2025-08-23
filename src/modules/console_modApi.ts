@@ -4,6 +4,7 @@ import { reportManualError } from "../errorReporting";
 import { BCXGlobalEventSystem, TypedEventEmitter } from "../event";
 import { isObject } from "../utils";
 import { ConditionsGetCondition, ConditionsIsConditionInEffect } from "./conditions";
+import { sendQuery } from "./messaging";
 import { RulesGetRuleState, RuleState } from "./rules";
 
 export class ModRuleState<ID extends BCX_Rule> implements BCX_RuleStateAPI<ID> {
@@ -168,5 +169,29 @@ export class ModAPI extends TypedEventEmitter<BCX_Events> implements BCX_ModAPI 
 		} finally {
 			context.end();
 		}
+	}
+
+	sendQuery<T extends keyof BCX_queries>(
+		type: T,
+		data: BCX_queries[T][0],
+		target: number | "Player",
+		timeout: number = 10_000
+	): Promise<BCX_queries[T][1]> {
+		if (typeof type !== "string") {
+			throw new Error("Invalid type specified");
+		}
+		if (target !== "Player" && (typeof target !== "number" || !Number.isSafeInteger(target))) {
+			throw new Error("Invalid target specified");
+		}
+		if (typeof timeout !== "number" || Number.isNaN(timeout) || timeout < 0) {
+			throw new Error("Invalid timeout specified");
+		}
+
+		// Clone both sent and received data to avoid any sneaky references getting into internal data structures
+		return sendQuery(type, cloneDeep(data), target === "Player" ? Player.MemberNumber : target, timeout)
+			.then((result) => cloneDeep(result))
+			.catch((err) => {
+				throw new Error("Error processing query", { cause: err });
+			});
 	}
 }

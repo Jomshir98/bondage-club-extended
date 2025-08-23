@@ -139,6 +139,14 @@ interface BCX_Events {
 		/** Sender metadata (used for displaying a membernumber on some messages) */
 		sender?: number;
 	};
+	/**
+	 * This is a generic event sent out by anyone in the room (including Player) when _something_ in BCX configuration changes,
+	 * which might warrant requesting updated data from the user, if you hold onto any such data in your logic.
+	 */
+	somethingChanged: {
+		/** MemberNumber of the sender. `Player.MemberNumber` will be used when triggered by this BCX instance. */
+		sender: number;
+	};
 }
 
 interface BCX_ModAPI extends BCXEventEmitter<BCX_Events> {

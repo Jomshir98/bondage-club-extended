@@ -1,3 +1,13 @@
+// Uncomment this if you are not using rest of BCX declaration files (declarations.d.ts, messages.d.ts)
+/*
+type BCX_Rule = string;
+type RuleDisplayDefinition<ID extends BCX_Rule> = any;
+type ConditionsConditionData<category extends string = string> = any;
+type RuleCustomData = Record<BCX_Rule, any>;
+type RuleInternalData = Record<BCX_Rule, any>;
+
+/* End of area to uncomment */
+
 interface BCXVersion {
 	major: number;
 	minor: number;
@@ -43,7 +53,6 @@ interface BCX_RuleStateAPI_Generic {
 	triggerAttempt(targetCharacter?: number | null, dictionary?: Record<string, string>): void;
 }
 
-// If using full BCX declarations (remove if not)
 interface BCX_RuleStateAPI<ID extends BCX_Rule> extends BCX_RuleStateAPI_Generic {
 	readonly rule: ID;
 	readonly ruleDefinition: RuleDisplayDefinition<ID>;
@@ -54,9 +63,28 @@ interface BCX_RuleStateAPI<ID extends BCX_Rule> extends BCX_RuleStateAPI_Generic
 	readonly internalData: ID extends keyof RuleInternalData ? (RuleInternalData[ID] | undefined) : undefined;
 }
 
-// If not using full BCX declarations (uncomment if not)
-// type BCX_Rule = string;
-// type BCX_RuleStateAPI<ID extends BCX_Rule> = BCX_RuleStateAPI_Generic;
+//#endregion
+
+//#region Curses
+
+interface BCX_CurseInfo {
+	/** Whether the curse is active or disabled */
+	readonly active: boolean;
+
+	/** The group this info is for */
+	readonly group: AssetGroupName;
+	/** BC asset the curse keeps, or `null` if the group is cursed to be empty */
+	readonly asset: Asset | null;
+
+	/** What color the item is cursed with */
+	readonly color?: ItemColor;
+	/** Whether properties are cursed (if set, `Property` is enforced, otherwise only applied on item re-apply) */
+	readonly curseProperty: boolean;
+	/** The properties that are enforced */
+	readonly property?: ItemProperties;
+	/** Crafting data, always cursed */
+	readonly craft?: CraftingItem;
+}
 
 //#endregion
 
@@ -118,6 +146,9 @@ interface BCX_ModAPI extends BCXEventEmitter<BCX_Events> {
 
 	/** Returns state handler for a rule or `null` for unknown rule */
 	getRuleState<ID extends BCX_Rule>(rule: ID): BCX_RuleStateAPI<ID> | null;
+
+	/** Returns info about how a slot is cursed */
+	getCurseInfo(group: AssetGroupName): BCX_CurseInfo | null;
 }
 
 interface BCX_ConsoleInterface {

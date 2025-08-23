@@ -123,7 +123,7 @@ class ConsoleInterface implements BCX_ConsoleInterface {
 	showDebugReport(): void {
 		showErrorOverlay(
 			"BCX Debug Report",
-			"This is manually created debug report.\n" +
+			"This is a manually created debug report.\n" +
 			"You can use the 'Close' button at the bottom to close this overlay.",
 			debugGenerateReport()
 		);

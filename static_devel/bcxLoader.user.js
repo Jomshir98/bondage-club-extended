@@ -6,6 +6,7 @@
 // @author       Jomshir98/Kink Side of Moon
 // @include      /^https:\/\/(www\.)?bondageprojects\.elementfx\.com\/R\d+\/(BondageClub|\d+)(\/((index|\d+)\.html)?)?$/
 // @include      /^https:\/\/(www\.)?bondage-europe\.com\/R\d+\/(BondageClub|\d+)(\/((index|\d+)\.html)?)?$/
+// @include      /^https:\/\/(www\.)?bondage-asia\.com\/Club\/R\d+(\/((index|\d+)\.html)?)?$/
 // @homepage     https://github.com/kinksideofthemoon/StrictBCX.github.io
 // @source       https://github.com/kinksideofthemoon/StrictBCX.github.io
 // @downloadURL  https://github.com/kinksideofthemoon/StrictBCX.github.io

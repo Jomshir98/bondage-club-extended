@@ -523,7 +523,7 @@ export function initRules_bc_blocks() {
 						state.trigger();
 					}
 				}
-				next(args);
+				return next(args);
 			}, ModuleCategory.Rules);
 		},
 	});

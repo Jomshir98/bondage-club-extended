@@ -383,8 +383,9 @@ export class ModuleChatroom extends BaseModule {
 
 		// Screen indicator
 		hookFunction("CommonSetScreen", 0, (args, next) => {
-			next(args);
+			const ret = next(args);
 			ChatroomSM.UpdateStatus();
+			return ret;
 		});
 		hookFunction("ItemColorStateBuild", 0, (args, next) => {
 			next(args);

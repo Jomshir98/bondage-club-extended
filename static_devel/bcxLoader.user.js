@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         BCX - Bondage Club Extended (Loader)
 // @namespace    BCX
-// @version      2.0.6
+// @version      2.0.7
 // @description  Loader of Jomshir's "Bondage Club Extended" mod
 // @author       Jomshir98
 // @include      /^https:\/\/(www\.)?bondageprojects\.elementfx\.com\/R\d+\/(BondageClub|\d+)(\/((index|\d+)\.html)?)?$/
 // @include      /^https:\/\/(www\.)?bondage-europe\.com\/R\d+\/(BondageClub|\d+)(\/((index|\d+)\.html)?)?$/
-// @include      /^https:\/\/(www\.)?bondage-asia\.com\/Club\/R\d+(\/((index|\d+)\.html)?)?$/
+// @include      /^https:\/\/(www\.)?bondage-asia\.com\/club\/R\d+(\/((index|\d+)\.html)?)?$/
 // @homepage     https://github.com/jomshir98/bondage-club-extended#readme
 // @source       https://github.com/jomshir98/bondage-club-extended
 // @downloadURL  https://jomshir98.github.io/bondage-club-extended/devel/bcxLoader.user.js

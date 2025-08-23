@@ -109,14 +109,6 @@
 		"semi": "off",
 		"@typescript-eslint/semi": ["warn", "always"],
 		"indent": "off",
-		"@typescript-eslint/indent": [
-			"warn",
-			"tab",
-			{
-				"SwitchCase": 1,
-				"ignoredNodes": ["ConditionalExpression"]
-			}
-		],
 		"comma-dangle": "off",
 		"@typescript-eslint/comma-dangle": ["warn", {
 			"arrays": "always-multiline",

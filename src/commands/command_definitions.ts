@@ -424,8 +424,8 @@ export function initCommands_definitions() {
 				time += i;
 			}
 			const minutes = time / 60_000;
-			if (minutes < 1 || minutes > 60) {
-				respond(`Time needs to be between 1 minute and 1 hour`);
+			if (minutes < 1) {
+				respond(`Time needs to be more than 1 hour`);
 				return false;
 			}
 			InfoBeep(`Two maids locked you into a timer cell, following ${sender}'s command.`, 8_000);
@@ -474,7 +474,7 @@ export function initCommands_definitions() {
 				}
 				time += i;
 			}
-			if (time < 60 * 1000 || time > 7 * 24 * 60 * 60 * 1000) {
+			if (time < 60 * 1000) {
 				respond(`Time needs to be between 1 minute and 1 week`);
 				return false;
 			}
@@ -531,7 +531,7 @@ export function initCommands_definitions() {
 				}
 				time += i;
 			}
-			if (time < 60 * 1000 || time > 7 * 24 * 60 * 60 * 1000) {
+			if (time < 60 * 1000) {
 				respond(`Time needs to be between 1 minute and 1 week`);
 				return false;
 			}
@@ -627,7 +627,7 @@ export function initCommands_definitions() {
 			CommonSetScreen("Room", "MaidQuarters");
 			// MaidQuartersMaid should be created by load
 			if (MaidQuartersMaid == null)
-				throw new Error("BCX: Missing MaidQuartersMaid when expected");
+				throw new Error("HardCoreClub: Missing MaidQuartersMaid when expected");
 			CharacterSetCurrent(MaidQuartersMaid);
 			MaidQuartersMaid.CurrentDialog = D;
 			MaidQuartersMaid.Stage = "205";

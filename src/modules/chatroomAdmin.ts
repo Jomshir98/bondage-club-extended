@@ -107,18 +107,18 @@ function serializeThemeRoom(value: ThemeRoom): string {
 function parseThemeRoom(value: string): void {
 	let parsed: Record<keyof ThemeRoom, unknown>;
 	if (value.length < 1) {
-		InfoBeep(`BCX: Import error: No data`, 5_000);
+		InfoBeep(`HardCoreClub: Import error: No data`, 5_000);
 		return;
 	}
 	try {
 		parsed = JSON.parse(value) as Record<keyof ThemeRoom, unknown>;
 		if (!isObject(parsed)) {
-			InfoBeep(`BCX: Import error: Bad data`, 5_000);
+			InfoBeep(`HardCoreClub: Import error: Bad data`, 5_000);
 			return;
 		}
 	} catch (error) {
 		console.warn(error);
-		InfoBeep(`BCX: Import error: Bad data`, 5_000);
+		InfoBeep(`HardCoreClub: Import error: Bad data`, 5_000);
 		return;
 	}
 	currentThemeRoom.Type = typeof parsed.Type === "number" && ThemeRoomType[parsed.Type] !== undefined ? parsed.Type : ThemeRoomType.Other;
@@ -291,14 +291,14 @@ function ChatSettingsThemeRoomClick() {
 		if (MouseIn(1480, 340, 193, 50)) {
 			BCX_setTimeout(async () => {
 				await navigator.clipboard.writeText(serializeThemeRoom(currentThemeRoom));
-				InfoBeep(`BCX: Copied to clipboard!`, 5_000);
+				InfoBeep(`HardCoreClub: Copied to clipboard!`, 5_000);
 			}, 0);
 		}
 		// Import button
 		if (MouseIn(1705, 340, 193, 50)) {
 			BCX_setTimeout(async () => {
 				if (typeof navigator.clipboard.readText !== "function") {
-					InfoBeep(`BCX: Please press Ctrl+V`, 5_000);
+					InfoBeep(`HardCoreClub: Please press Ctrl+V`, 5_000);
 					return;
 				}
 				const data = await navigator.clipboard.readText();
@@ -368,7 +368,7 @@ function ChatSettingsThemeRoomClick() {
 				currentThemeRoom.Limits.add(a);
 				if (stringifyLimits(currentThemeRoom).length + 2 > MAX_SPACE_FOR_TR_LIMITS) {
 					currentThemeRoom.Limits.delete(a);
-					InfoBeep(`BCX: No more space to add this limit.`, 5_000);
+					InfoBeep(`HardCoreClub: No more space to add this limit.`, 5_000);
 				}
 			}
 		}
@@ -584,7 +584,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 		}
 		for (let i = 0; i < modStorage.roomTemplates.length; i++) {
 			if (modStorage.roomTemplates[i] !== null && !isObject(modStorage.roomTemplates[i])) {
-				console.warn(`BCX: Resetting invalid room template slot ${i}`, modStorage.roomTemplates[i]);
+				console.warn(`HardCoreClub: Resetting invalid room template slot ${i}`, modStorage.roomTemplates[i]);
 				modStorage.roomTemplates[i] = null;
 			}
 		}

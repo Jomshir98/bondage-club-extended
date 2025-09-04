@@ -266,6 +266,18 @@ export class ModuleStorage extends BaseModule {
 					throw new Error("Failed to verify save signature. Did you use an unofficial fork?");
 				}
 
+				if (hasAuth && !BCX_SAVE_AUTH) {
+					// Note to fork developers (updated 2025-08-23)
+					// Please do NOT remove this warning. Instead use a different save location than `ExtensionSettings.BCX`.
+					// Thank you
+					if (!confirm("You are attempting to load an unofficial BCX version.\n" +
+						"If you continue, you will not be able to return to the official version without resetting all data.\n" +
+						"Are you sure you want to continue?"
+					)) {
+						return false;
+					}
+				}
+
 				modStorage = storage;
 			} catch (error) {
 				console.error("HardCoreClub: Error while loading saved data, full reset.", error);

@@ -66,7 +66,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			this.failed = false;
 			this.onDataChange();
 		}, err => {
-			console.error(`BCX: Failed to get condition info for ${this.conditionCategory} from ${this.character}`, err);
+			console.error(`HardCoreClub: Failed to get condition info for ${this.conditionCategory} from ${this.character}`, err);
 			this.conditionCategoryData = null;
 			this.failed = true;
 			this.onDataChange();

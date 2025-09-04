@@ -732,7 +732,7 @@ export function initRules_bc_alter() {
 				if (state.isEnforced && Player.IsRestrained() &&
 					ActionType !== "Kick" && ActionType !== "Ban"
 				) {
-					InfoBeep(`BCX: You are not allowed to use this while restrained.`, 7_000);
+					InfoBeep(`HardCoreClub: You are not allowed to use this while restrained.`, 7_000);
 					DialogLeave();
 					return;
 				}

@@ -14,7 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: '18'
+      - run: env SENTRY_AUTH_TOKEN=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
       - run: yarn install --frozen-lockfile
       - run: yarn build
 

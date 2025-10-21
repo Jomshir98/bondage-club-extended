@@ -282,6 +282,23 @@ export class ModuleSpeech extends BaseModule {
 			}
 		});
 
+		hookFunction("ChatRoomSendWhisper", 5, (args, next) => {
+			const [target, msg] = args;
+			const msg2 = processMsg({
+				type: "Whisper",
+				rawMessage: msg,
+				originalMessage: msg,
+				target,
+				noOOCMessage: msg,
+				hasOOC: msg.includes("("),
+			});
+			if (msg2 !== null) {
+				return next(args);
+			}
+			// Just say we processed it
+			return true;
+		});
+
 		//#region Antigarble
 		const ANTIGARBLE_LEVELS: Record<string, number> = {
 			"0": 0,

@@ -1,4 +1,4 @@
-import { isNModClient, drawIcon, DrawImageEx, drawTypingIndicatorSpeechBubble } from "../utilsClub";
+import { drawIcon, DrawImageEx, drawTypingIndicatorSpeechBubble } from "../utilsClub";
 import { VERSION } from "../config";
 import { hiddenMessageHandlers, sendHiddenMessage } from "./messaging";
 import { BaseModule } from "./_BaseModule";
@@ -277,15 +277,11 @@ export class ModuleChatroom extends BaseModule {
 			}
 		});
 
-		const NMod = isNModClient();
-
-		if (!NMod) {
-			hookFunction("ChatRoomCreateElement", 0, (args, next) => {
-				const res = next(args);
-				ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
-				return res;
-			});
-		}
+		hookFunction("ChatRoomCreateElement", 0, (args, next) => {
+			const res = next(args);
+			ChatroomSM.SetInputElement(document.getElementById("InputChat") as HTMLTextAreaElement);
+			return res;
+		});
 
 		hookFunction("ChatRoomCharacterViewDrawOverlay", 0, (args, next) => {
 			next(args);

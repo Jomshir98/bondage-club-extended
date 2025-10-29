@@ -1,4 +1,4 @@
-import { allowMode, isNModClient } from "../utilsClub";
+import { allowMode } from "../utilsClub";
 import { BaseModule } from "./_BaseModule";
 import { hookFunction, patchFunction } from "../patching";
 import { MiscCheat } from "../constants";
@@ -133,25 +133,21 @@ export class ModuleMiscPatches extends BaseModule {
 			return next(args);
 		});
 
-		const NMod = isNModClient();
-
-		if (!NMod) {
-			patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
-			hookFunction("LoginMistressItems", 0, (args, next) => {
-				next(args);
-				if (!cheatIsEnabled(MiscCheat.GiveMistressKey) && !LogQuery("ClubMistress", "Management")) {
-					for (const item of MISTRESS_CHEAT_ONLY_ITEMS) {
-						InventoryDelete(Player, item, "ItemMisc", false);
-					}
+		patchFunction("LoginMistressItems", { 'LogQuery("ClubMistress", "Management")': "true" });
+		hookFunction("LoginMistressItems", 0, (args, next) => {
+			next(args);
+			if (!cheatIsEnabled(MiscCheat.GiveMistressKey) && !LogQuery("ClubMistress", "Management")) {
+				for (const item of MISTRESS_CHEAT_ONLY_ITEMS) {
+					InventoryDelete(Player, item, "ItemMisc", false);
 				}
-			});
-			cheatChangeHooks[MiscCheat.GiveMistressKey] = () => {
-				LoginMistressItems();
-				ServerPlayerInventorySync();
-			};
+			}
+		});
+		cheatChangeHooks[MiscCheat.GiveMistressKey] = () => {
+			LoginMistressItems();
+			ServerPlayerInventorySync();
+		};
 
-			patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
-		}
+		patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
 
 		cheatChangeHooks[MiscCheat.GivePandoraKey] = enabled => {
 			for (const item of PANDORA_CHEAT_ONLY_ITEMS) {

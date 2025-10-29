@@ -172,13 +172,14 @@ function ThemeRoomLoad(): void {
 
 	// notify player that they have a room greeting set for this room
 	hookFunction("ChatRoomSync", 4, (args, next) => {
-		next(args);
+		const ret = next(args);
 		if (!greetingActiveNotificationGiven && roomGreeting !== "" && ChatRoomPlayerIsAdmin()) {
 			greetingActiveNotificationGiven = true;
 			ChatRoomSendLocal("Every person newly joining this room will be greeted with the introduction message you set during theme room creation. " +
 				"You and everyone else in the room will not see the greeting. It will also only be sent while you are room admin. " +
 				"Leaving this room will cancel sending it.");
 		}
+		return ret;
 	});
 
 	// delete room greeting when player leaves the room
@@ -599,7 +600,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 			ChatBlockItemReturnScreen = null;
 		});
 		hookFunction("ChatAdminLoad", 0, (args, next) => {
-			next(args);
+			const ret = next(args);
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
 			if (ChatAdminMode === "create" &&
 				template &&
@@ -609,6 +610,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 			}
 			// needed to auto apply a template correctly again
 			ChatBlockItemReturnScreen = null;
+			return ret;
 		});
 		patchFunction("ChatAdminRun", {
 			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',

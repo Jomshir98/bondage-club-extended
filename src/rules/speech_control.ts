@@ -831,7 +831,7 @@ export function initRules_bc_speech_control() {
 			hookFunction("ChatRoomSync", 0, (args, next) => {
 				const data = args[0];
 				if (data.Name !== lastRoomName) alreadyGreeted = false;
-				next(args);
+				const ret = next(args);
 				// 2. populate chat field with the default text from the rule
 				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 				if (chat && state.customData && state.inEffect && !alreadyGreeted && data.Name !== lastRoomName) {
@@ -839,6 +839,7 @@ export function initRules_bc_speech_control() {
 				} else {
 					alreadyGreeted = true;
 				}
+				return ret;
 			}, ModuleCategory.Rules);
 		},
 		// 3. do not allow sending anything else when enforced

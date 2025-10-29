@@ -12,7 +12,9 @@ export function initRules_bc_settings() {
 			OnlineSettings: Player.OnlineSettings,
 			OnlineSharedSettings: Player.OnlineSharedSettings,
 			GraphicsSettings: Player.GraphicsSettings,
-			ItemPermission: Player.ItemPermission,
+			AllowedInteractions: Player.AllowedInteractions,
+			// FIXME: can be removed once the server stops depending on it
+			ItemPermission: Player.AllowedInteractions,
 		});
 	}
 
@@ -137,15 +139,15 @@ export function initRules_bc_settings() {
 		},
 		tick(state) {
 			if (state.isEnforced && state.customData) {
-				const VALUE_CONVERSIONS: Record<string, typeof Player.ItemPermission> = {
+				const VALUE_CONVERSIONS: Record<string, typeof Player.AllowedInteractions> = {
 					everyone: 0,
 					everyoneBlacklist: 1,
 					dominants: 2,
 					whitelist: 3,
 				};
 				const wanted = VALUE_CONVERSIONS[state.customData.value] ?? 0;
-				if (Player.ItemPermission !== wanted) {
-					Player.ItemPermission = wanted;
+				if (Player.AllowedInteractions !== wanted) {
+					Player.AllowedInteractions = wanted;
 					state.trigger();
 					preferenceSync();
 					return true;

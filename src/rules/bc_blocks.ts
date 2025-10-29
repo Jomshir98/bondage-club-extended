@@ -518,7 +518,7 @@ export function initRules_bc_blocks() {
 				if (args[0] === "Online" && args[1] === "ChatAdmin" && ChatAdminMode === "create") {
 					if (state.isEnforced) {
 						state.triggerAttempt();
-						return;
+						return Promise.resolve();
 					} else if (state.inEffect) {
 						state.trigger();
 					}
@@ -1026,7 +1026,7 @@ export function initRules_bc_blocks() {
 					if (time && time > 0) {
 						LogDelete("ForceGGTS", "Asylum", true);
 					}
-					return false;
+					return Promise.resolve();
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

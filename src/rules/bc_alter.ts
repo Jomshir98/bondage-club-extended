@@ -678,13 +678,14 @@ export function initRules_bc_alter() {
 		},
 		load(state) {
 			hookFunction("ChatAdminLoad", 0, (args, next) => {
-				next(args);
+				const ret = next(args);
 				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {
 					document.getElementById("InputName")?.setAttribute("disabled", "disabled");
 					document.getElementById("InputDescription")?.setAttribute("disabled", "disabled");
 					document.getElementById("InputSize")?.setAttribute("disabled", "disabled");
 					document.getElementById("InputAdminList")?.setAttribute("disabled", "disabled");
 				}
+				return ret;
 			});
 			hookFunction("ChatAdminRun", 0, (args, next) => {
 				next(args);
@@ -1003,7 +1004,7 @@ export function initRules_bc_alter() {
 							{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 						]);
 						ChatRoomLeave();
-						ChatRoomStart(data.ChatRoomSpace, "", null, null, "Introduction", BackgroundsTagList);
+						ChatSearchStart(data.ChatRoomSpace, undefined, { Background: "Introduction" });
 						CharacterDeleteAllOnline();
 
 						// join

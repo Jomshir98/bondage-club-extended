@@ -61,7 +61,7 @@ export function initCommands_speech() {
 					sayText = "";
 					senderNumber = null;
 				}
-				next(args);
+				return next(args);
 			}, ModuleCategory.Commands);
 			hookFunction("ChatRoomKeyDown", 4, (args, next) => {
 				if (CurrentScreen === "ChatRoom" && sayText) {
@@ -183,7 +183,7 @@ export function initCommands_speech() {
 			if (data.Name !== lastRoomName) {
 				resetTypeTask();
 			}
-			next(args);
+			return next(args);
 		}, ModuleCategory.Commands);
 		hookFunction("ChatRoomKeyDown", 4, (args, next) => {
 			if (CurrentScreen === "ChatRoom" && typeTaskText) {

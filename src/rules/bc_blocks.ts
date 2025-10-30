@@ -1,7 +1,7 @@
 import { ModuleCategory, ConditionsLimit } from "../constants";
 import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerDialog, RedirectGetImage } from "../modules/miscPatches";
 import { registerRule, RuleType } from "../modules/rules";
-import { hookFunction } from "../patching";
+import { hookFunction, patchFunction } from "../patching";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
 import { GetDialogMenuButtonArray } from "../modules/dialog";
@@ -546,43 +546,63 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
-			hookFunction("ChatSearchJoin", 5, (args, next) => {
-				let triggered = false;
-				if (state.inEffect && state.customData && state.customData.roomList.length > 0) {
-					// Scans results
-					CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
-						// If the player clicked on a valid room
-						if (MouseIn(x, y, width, height)) {
-							if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
-								if (state.isEnforced) {
-									state.triggerAttempt();
-									triggered = true;
-									return true;
-								} else {
-									state.trigger();
-									triggered = true;
-								}
-							}
+			const isRoomBlocked = (roomName: string) => state.inEffect && !state.customData?.roomList.some(name => name.toLocaleLowerCase() === roomName.toLocaleLowerCase());
+			if (GameVersion === "R121") {
+				// @ts-expect-error playing global games
+				window._bcxIsRoomBlocked = isRoomBlocked;
+				const enterBlockedRoom = (roomName: string): boolean => {
+					if (!isRoomBlocked(roomName)) return false;
+					if (state.isEnforced) {
+						state.triggerAttempt();
+						return true;
+					}
+					state.trigger();
+					return false;
+				};
+				// @ts-expect-error playing global games
+				window._bcxEnterBlockedRoom = enterBlockedRoom;
+				patchFunction("ChatSearchCreateGridRoom", {
+					// Patch up the pre-R122 way of knowing if there's a tooltip or not
+					'const hasTooltip = room.Friends.length > 0 || room.MemberCount >= room.MemberLimit || room.Game != "" || room.BlockCategory.length > 0;':
+					'const hasTooltip = room.Friends.length > 0 || room.MemberCount >= room.MemberLimit || room.Game != "" || room.BlockCategory.length > 0 || _bcxIsRoomBlocked(room.Name);',
+					// Patch up the pre-R122 way of doing the join RPC directly
+					'ServerSend("ChatRoomJoin", { Name: room.Name });':
+					'if (!_bcxEnterBlockedRoom(room.Name))\nServerSend("ChatRoomJoin", { Name: room.Name });',
+				});
+			} else {
+				hookFunction("ChatSearchJoin", 5, (args, next) => {
+					const [roomName] = args;
+					let triggered = false;
+					if (isRoomBlocked(roomName)) {
+						if (state.isEnforced) {
+							state.triggerAttempt();
+							triggered = true;
+							return true;
+						} else {
+							state.trigger();
+							triggered = true;
 						}
-						return false;
-					});
+					}
+					if (!triggered || !state.isEnforced) return next(args);
+				}, ModuleCategory.Rules);
+			}
+			hookFunction("ChatSearchCreateGridRoomTooltip", 5, (args, next) => {
+				const tooltips = next(args);
+				const [roomResult] = args;
+				if (isRoomBlocked(roomResult.Name)) {
+					tooltips.appendChild(ElementCreate({
+						tag: "span",
+						classList: ["chat-search-room-tooltip-entry", "chat-search-room-tooltip-bcx-blocked"],
+						children: [
+							"Blocked by BCX",
+						],
+						style: {
+							"background-color": "#88c",
+						},
+					}));
 				}
-				if (!triggered || !state.isEnforced) return next(args);
-			}, ModuleCategory.Rules);
-			hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
-				next(args);
-				if (state.isEnforced && state.customData && state.customData.roomList.length > 0) {
-					// Scans results
-					CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
-						if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
-							DrawButton(x, y, width, height, "", "#88c", undefined, "Blocked by BCX", true);
-							DrawTextFit((room.Friends != null && room.Friends.length > 0 ? "(" + room.Friends.length + ") " : "") + ChatSearchMuffle(room.Name) + " - " + ChatSearchMuffle(room.Creator) + " " + room.MemberCount + "/" + room.MemberLimit + "", x + 315, y + 25, 620, "black");
-							DrawTextFit(ChatSearchMuffle(room.Description), x + 315, y + 62, 620, "black");
-						}
-						return false;
-					});
-				}
-			}, ModuleCategory.Rules);
+				return tooltips;
+			});
 		},
 	});
 

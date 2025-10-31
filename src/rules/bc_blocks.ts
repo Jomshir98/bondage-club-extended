@@ -566,8 +566,8 @@ export function initRules_bc_blocks() {
 					'const hasTooltip = room.Friends.length > 0 || room.MemberCount >= room.MemberLimit || room.Game != "" || room.BlockCategory.length > 0;':
 					'const hasTooltip = room.Friends.length > 0 || room.MemberCount >= room.MemberLimit || room.Game != "" || room.BlockCategory.length > 0 || _bcxIsRoomBlocked(room.Name);',
 					// Patch up the pre-R122 way of doing the join RPC directly
-					'ServerSend("ChatRoomJoin", { Name: room.Name });':
-					'if (!_bcxEnterBlockedRoom(room.Name))\nServerSend("ChatRoomJoin", { Name: room.Name });',
+					"ChatSearchTempHiddenRooms.push(room.CreatorMemberNumber);\n\t\t\t\treturn;\n\t\t\t}\n":
+					"ChatSearchTempHiddenRooms.push(room.CreatorMemberNumber);\n\t\t\t\treturn;\n\t\t\t}\nif (_bcxEnterBlockedRoom(room.Name)) return;\n",
 				});
 			} else {
 				hookFunction("ChatSearchJoin", 5, (args, next) => {

@@ -76,7 +76,7 @@ export function falteringSpeech(message: string): string {
 	return message;
 }
 
-function parseMsg(msg: string): SpeechMessageInfo | null {
+function parseMsg(msg: string, target?: number): SpeechMessageInfo | null {
 	const rawMessage = msg;
 	if (msg.startsWith("//")) {
 		msg = msg.substring(1);
@@ -94,10 +94,10 @@ function parseMsg(msg: string): SpeechMessageInfo | null {
 		return null;
 	}
 	return {
-		type: ChatRoomTargetMemberNumber < 0 ? "Chat" : "Whisper",
+		type: (target ?? ChatRoomTargetMemberNumber) < 0 ? "Chat" : "Whisper",
 		rawMessage,
 		originalMessage: msg,
-		target: ChatRoomTargetMemberNumber,
+		target: target ?? ChatRoomTargetMemberNumber,
 		noOOCMessage: msg.replace(/\([^)]*\)*\s?/gs, ""),
 		hasOOC: msg.includes("("),
 	};
@@ -173,18 +173,38 @@ function setAntigarble(value: number): boolean {
 export class ModuleSpeech extends BaseModule {
 	load() {
 
-		let currentlyProcessedMessage: {
-			result: string;
-			original: string;
-			target: number | null;
-		} | null = null;
+		let currentlyProcessedMessage: SpeechMessageInfo | null = null;
 
+		/**
+		 * Okay, there's a lot going on here, so let's go through it slowly.
+		 * There are many ways of sending messages, the main one being stuff submitted from
+		 * InputChat (so {@link ChatRoomSendChat}). But there's also things calling in either
+		 * {@link ChatRoomSendEmote} or {@link ChatRoomSendWhisper}.
+		 * As we'd like to enforce rules on all of those, the state of {@link currentlyProcessedMessage}
+		 * is gonna be used to know the first case from the other two.
+		 */
+
+		// We're sending something, pre-parse the message
+		hookFunction("ChatRoomSendChat", 5, (args, next) => {
+			const inputChat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+			const msg = inputChat?.value.trim() ?? "";
+			if (msg.length) {
+				const info = parseMsg(msg);
+				if (info?.type !== "Command")
+					currentlyProcessedMessage = info;
+			}
+			const ret = next(args);
+			currentlyProcessedMessage = null;
+			return ret;
+		});
+
+		// Intercept commands first, in case this is from a Enter-submitted input from chat
 		hookFunction("CommandParse", 5, (args, next) => {
 			const msg = args[0].trim();
-			if (msg) {
-				const info = parseMsg(msg);
-				if (info) {
-					const msg2 = processMsg(info);
+			if (msg && currentlyProcessedMessage) {
+				currentlyProcessedMessage = parseMsg(msg);
+				if (currentlyProcessedMessage) {
+					const msg2 = processMsg(currentlyProcessedMessage);
 					// Message is rejected
 					if (msg2 === null) {
 						// There is rule to force retype of rejected message
@@ -200,16 +220,9 @@ export class ModuleSpeech extends BaseModule {
 						return true;
 					}
 					args[0] = msg2;
-					currentlyProcessedMessage = {
-						result: msg2.startsWith("//") ? msg2.substring(1) : msg2,
-						original: info.originalMessage.startsWith("//") ? info.originalMessage.substring(1) : info.originalMessage,
-						target: info.target,
-					};
 				}
 			}
-			const res = next(args);
-			currentlyProcessedMessage = null;
-			return res;
+			return next(args);
 		});
 
 		//#region Antigarble for pre-garbled whispers
@@ -220,12 +233,12 @@ export class ModuleSpeech extends BaseModule {
 				isObject(data) &&
 				(data.Type === "Whisper" || data.Type === "Chat") &&
 				(typeof data.Target === "number" ? data.Target : null) === currentlyProcessedMessage.target &&
-				data.Content !== currentlyProcessedMessage.original
+				data.Content !== currentlyProcessedMessage.originalMessage
 			) {
 				if (!Array.isArray(data.Dictionary)) {
 					data.Dictionary = [];
 				}
-				(data.Dictionary as ChatMessageDictionary).push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: currentlyProcessedMessage.original });
+				(data.Dictionary as ChatMessageDictionary).push({ Tag: "BCX_ORIGINAL_MESSAGE", Text: currentlyProcessedMessage.originalMessage });
 			}
 			return next(args);
 		});
@@ -251,10 +264,8 @@ export class ModuleSpeech extends BaseModule {
 		});
 		//#endregion
 
-		// Even if not modified by hook, the hash is very important
-		hookFunction("CommandParse", 0, (args, next) => next(args));
-
 		hookFunction("ChatRoomSendEmote", 5, (args, next) => {
+			if (currentlyProcessedMessage) return next(args); // We already processed that from the CommandParse hook above
 			const rawMessage = args[0];
 			let msg = rawMessage;
 			if (Player.ChatSettings?.MuStylePoses && msg.startsWith(":")) msg = msg.substring(1);
@@ -264,14 +275,10 @@ export class ModuleSpeech extends BaseModule {
 				if (msg.startsWith("/action ")) msg = msg.replace("/action ", "*");
 			}
 			msg = msg.trim();
-			const msg2 = processMsg({
-				type: "Emote",
-				rawMessage,
-				originalMessage: msg,
-				target: ChatRoomTargetMemberNumber,
-				noOOCMessage: msg,
-				hasOOC: false,
-			});
+			currentlyProcessedMessage = parseMsg(msg);
+			if (!currentlyProcessedMessage) return next(args);
+
+			const msg2 = processMsg(currentlyProcessedMessage);
 			if (msg2 !== null) {
 				return next(["*" + msg2]);
 			} else if (RulesGetRuleState("speech_force_retype").isEnforced) {
@@ -283,15 +290,11 @@ export class ModuleSpeech extends BaseModule {
 		});
 
 		hookFunction("ChatRoomSendWhisper", 5, (args, next) => {
+			if (currentlyProcessedMessage) return next(args); // We already processed that from the CommandParse hook above
 			const [target, msg] = args;
-			const msg2 = processMsg({
-				type: "Whisper",
-				rawMessage: msg,
-				originalMessage: msg,
-				target,
-				noOOCMessage: msg,
-				hasOOC: msg.includes("("),
-			});
+			currentlyProcessedMessage = parseMsg(msg, target);
+			if (!currentlyProcessedMessage) return next(args);
+			const msg2 = processMsg(currentlyProcessedMessage);
 			if (msg2 !== null) {
 				return next(args);
 			}

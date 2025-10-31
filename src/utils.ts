@@ -161,6 +161,7 @@ export function createInputElement(type: string, maxLength?: number): HTMLInputE
 	if (maxLength) {
 		input.maxLength = maxLength;
 	}
+	// eslint-disable-next-line @typescript-eslint/no-misused-promises
 	input.addEventListener("keydown", GameKeyDown);
 	input.className = "HideOnPopup";
 	return input;

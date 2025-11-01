@@ -633,7 +633,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 		patchFunction("ChatAdminClick", {
 			"if (MouseIn(405, 157,": "if (MouseIn(505, 157,",
 		});
-		hookFunction("ChatAdminRun", 0, (args, next) => {
+		hookFunction("ChatAdminRun", 11, (args, next) => {
 			if (onSecondPage) {
 				if (onThemeRoomSubpage) {
 					return ChatSettingsThemeRoomRun();
@@ -671,27 +671,34 @@ export class ModuleChatroomAdmin extends BaseModule {
 				}
 				return;
 			}
-			next(args);
+			return next(args);
+		});
+		hookFunction("ChatAdminRun", 0, (args, next) => {
 			if (!ChatAdminPreviewBackgroundMode) {
 				DrawText("More", 169, 95, "Black", "Gray");
 				DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
 				if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
 			}
+			return next(args);
 		});
 		//#endregion
-		hookFunction("ChatAdminClick", 0, (args, next) => {
+		hookFunction("ChatAdminClick", 10, (args, next) => {
 			if (onSecondPage) {
-				return ChatSettingsExtraClick((data) => {
+				ChatSettingsExtraClick((data) => {
 					applyTemplate(data);
 				});
+				return true;
 			}
+			return next(args);
+		});
+		hookFunction("ChatAdminClick", 0, (args, next) => {
 			// click event for second page button
 			if (MouseIn(124, 132, 90, 90) && !ChatAdminPreviewBackgroundMode) {
 				onSecondPage = !onSecondPage;
 				ElementToggleGeneratedElements("ChatAdmin", false);
-				return;
+				return true;
 			}
-			next(args);
+			return next(args);
 		});
 	}
 

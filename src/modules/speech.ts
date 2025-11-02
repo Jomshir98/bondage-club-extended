@@ -77,6 +77,19 @@ export function falteringSpeech(message: string): string {
 }
 
 function parseMsg(msg: string, target?: number): SpeechMessageInfo | null {
+	// All of those are just garbage being passed through as is from CommandParse and back into the input stream
+	const replaceStraySlashCommands = (m: string): string => {
+		if (m.startsWith("/me ")) {
+			return m.replace("/me ", "*");
+		} else if (m.startsWith("/action ")) {
+			return m.replace("/action ", "**");
+		} else if (m.startsWith("/attempt ")) {
+			return m.replace("/attempt ", "*");
+		} else {
+			return m;
+		}
+	};
+	msg = replaceStraySlashCommands(msg);
 	const rawMessage = msg;
 	if (msg.startsWith("//")) {
 		msg = msg.substring(1);
@@ -90,8 +103,19 @@ function parseMsg(msg: string, target?: number): SpeechMessageInfo | null {
 		};
 	}
 	if (msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3)) {
-		// Emotes are handled in `ChatRoomSendEmote`
-		return null;
+		if (Player.ChatSettings?.MuStylePoses && msg.startsWith(":")) {
+			msg = msg.substring(1);
+		} else {
+			msg = msg.replace(/^\*/, "").replace(/\*$/, "");
+		}
+		return {
+			type: "Emote",
+			rawMessage,
+			originalMessage: msg,
+			target: null,
+			noOOCMessage: msg,
+			hasOOC: false,
+		};
 	}
 	return {
 		type: (target ?? ChatRoomTargetMemberNumber) < 0 ? "Chat" : "Whisper",
@@ -127,7 +151,7 @@ function processMsg(msg: SpeechMessageInfo): string | null {
 	if (result === SpeechHookAllow.BLOCK)
 		return null;
 
-	let message = msg.originalMessage;
+	let message = msg.type === "Emote" ? msg.rawMessage : msg.originalMessage;
 	// Let hooks modify the message
 	for (const hook of speechHooks) {
 		if (hook.modify) {
@@ -264,18 +288,27 @@ export class ModuleSpeech extends BaseModule {
 		});
 		//#endregion
 
+		hookFunction("ChatRoomSendAttemptEmote", 5, (args, next) => {
+			if (currentlyProcessedMessage) return next(args); // We already processed that from the CommandParse hook above
+			const rawMessage = args[0];
+			currentlyProcessedMessage = parseMsg(rawMessage.trim());
+			if (!currentlyProcessedMessage) return next(args);
+
+			const msg2 = processMsg(currentlyProcessedMessage);
+			if (msg2 !== null) {
+				return next(["*" + msg2]);
+			} else if (RulesGetRuleState("speech_force_retype").isEnforced) {
+				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
+				if (chat) {
+					chat.value = "";
+				}
+			}
+		});
+
 		hookFunction("ChatRoomSendEmote", 5, (args, next) => {
 			if (currentlyProcessedMessage) return next(args); // We already processed that from the CommandParse hook above
 			const rawMessage = args[0];
-			let msg = rawMessage;
-			if (Player.ChatSettings?.MuStylePoses && msg.startsWith(":")) msg = msg.substring(1);
-			else {
-				msg = msg.replace(/^\*/, "").replace(/\*$/, "");
-				if (msg.startsWith("/me ")) msg = msg.replace("/me ", "");
-				if (msg.startsWith("/action ")) msg = msg.replace("/action ", "*");
-			}
-			msg = msg.trim();
-			currentlyProcessedMessage = parseMsg(msg);
+			currentlyProcessedMessage = parseMsg(rawMessage.trim());
 			if (!currentlyProcessedMessage) return next(args);
 
 			const msg2 = processMsg(currentlyProcessedMessage);

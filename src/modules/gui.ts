@@ -117,6 +117,12 @@ export class ModuleGUI extends BaseModule {
 			}
 		});
 
+		const unloadInfoSheet = () => {
+			// @ts-expect-error waiting on bc-stubs
+			// eslint-disable-next-line
+			if (window.InformationSheetUnload) InformationSheetUnload();
+		};
+
 		hookFunction("InformationSheetClick", 10, (args, next) => {
 			if (this._currentSubscreen) {
 				return this._currentSubscreen.Click();
@@ -125,10 +131,12 @@ export class ModuleGUI extends BaseModule {
 			const C = this.getInformationSheetCharacter();
 			if (MouseIn(1815, 685, 90, 90)) {
 				if (firstTimeInit) {
+					unloadInfoSheet();
 					if (C && C.isPlayer()) {
 						this.currentSubscreen = new GuiTutorial(C, true);
 					}
 				} else if (C && C.BCXVersion !== null && C.playerHasAccessToCharacter()) {
+					unloadInfoSheet();
 					this.currentSubscreen = new GuiMainMenu(C);
 				}
 			} else {
@@ -138,7 +146,8 @@ export class ModuleGUI extends BaseModule {
 
 		hookFunction("InformationSheetExit", 10, (args, next) => {
 			if (this._currentSubscreen) {
-				return this._currentSubscreen.Exit();
+				this._currentSubscreen.Exit();
+				return;
 			}
 
 			return next(args);

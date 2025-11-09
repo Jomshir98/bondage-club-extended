@@ -225,4 +225,12 @@ export class GuiMainMenu extends GuiSubscreen {
 			}
 		}
 	}
+
+	Exit(): void {
+		super.Exit();
+		InformationSheetLoad();
+		// @ts-expect-error waiting on bc-stubs
+		// eslint-disable-next-line
+		if (window.InformationSheetResize) InformationSheetResize();
+	}
 }

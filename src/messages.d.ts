@@ -76,12 +76,6 @@ type BCX_logAllowedActions = {
 	leaveMessage: boolean;
 };
 
-/**
- * Queries BCX can send to other characters in the same room, or to oneself.
- * Keys represent the name of the query, while values are `[question, answer]` pairs.
- *
- * `answer` cannot be `undefined`, as that is used to signal an error.
- */
 type BCX_queries = {
 	disabledModules: [undefined, import("./constants").ModuleCategory[]];
 	commandHint: [string, [string, string][]];

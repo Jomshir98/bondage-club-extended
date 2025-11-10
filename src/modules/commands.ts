@@ -7,7 +7,6 @@ import { firstTimeInit, modStorage, modStorageSync } from "./storage";
 import { queryHandlers, sendQuery } from "./messaging";
 import { RulesGetRuleState } from "./rules";
 import { isValidNickname } from "./relationships";
-import { debugGenerateReport, showErrorOverlay } from "../errorReporting";
 
 interface ICommandInfo {
 	description: string | null;
@@ -738,17 +737,6 @@ export class ModuleCommands extends BaseModule {
 			return Command_pickAutocomplete(args.trim(), COMMAND_CATEGORIES_VISIBLE);
 		});
 		aliasCommand("help", "?");
-
-		registerCommand("utility", "debugreport", "- Create a debug report", (msg) => {
-			showErrorOverlay(
-				"BCX Debug Report",
-				"This is a manually created debug report.\n" +
-				"You can use the 'Close' button at the bottom to close this overlay.",
-				debugGenerateReport()
-			);
-			return true;
-		});
-		aliasCommand("debugreport", "debug");
 
 		registerCommand("utility", "action", "- Send custom (action) [alias: .a ]", (msg) => {
 			const blockRule = RulesGetRuleState("block_action");

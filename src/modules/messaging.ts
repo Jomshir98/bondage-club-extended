@@ -7,7 +7,6 @@ import { firstTimeInit } from "./storage";
 import { ModuleInitPhase } from "../constants";
 import { BCX_setTimeout } from "../BCXContext";
 import cloneDeep from "lodash-es/cloneDeep";
-import { BCXGlobalEventSystem } from "../event";
 
 export const hiddenMessageHandlers: Map<keyof BCX_messages, (sender: number, message: any) => void> = new Map();
 export const hiddenBeepHandlers: Map<keyof BCX_beeps, (sender: number, message: any) => void> = new Map();
@@ -17,11 +16,6 @@ export const queryHandlers: {
 } = {};
 
 export const changeHandlers: ((source: number) => void)[] = [];
-changeHandlers.push((source) => {
-	BCXGlobalEventSystem.emitEvent("somethingChanged", {
-		sender: source,
-	});
-});
 
 export function sendHiddenMessage<T extends keyof BCX_messages>(type: T, message: BCX_messages[T], Target: number | null = null) {
 	if (!ServerPlayerIsInChatRoom() || firstTimeInit)

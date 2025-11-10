@@ -991,7 +991,8 @@ export class ModuleCurses extends BaseModule {
 					return next(args);
 				}
 
-				const curse = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name)?.data;
+				const curseCondition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
+				const curse = curseCondition?.data;
 				if (!curse) {
 					return next(args);
 				}
@@ -1020,7 +1021,7 @@ export class ModuleCurses extends BaseModule {
 							modStorageSync();
 						}
 					};
-				} else {
+				} else if (curseCondition.active) {
 					options.disabled = true;
 					options.heading = [
 						ElementCreate({ tag: "q", children: [ItemColorItem.Asset.Description] }),

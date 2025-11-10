@@ -678,13 +678,14 @@ export function initRules_bc_alter() {
 		},
 		load(state) {
 			hookFunction("ChatAdminLoad", 0, (args, next) => {
-				next(args);
+				const ret = next(args);
 				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {
 					document.getElementById("InputName")?.setAttribute("disabled", "disabled");
 					document.getElementById("InputDescription")?.setAttribute("disabled", "disabled");
 					document.getElementById("InputSize")?.setAttribute("disabled", "disabled");
 					document.getElementById("InputAdminList")?.setAttribute("disabled", "disabled");
 				}
+				return ret;
 			});
 			hookFunction("ChatAdminRun", 0, (args, next) => {
 				next(args);
@@ -994,7 +995,7 @@ export function initRules_bc_alter() {
 						{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 					]);
 					beep = true;
-					BCX_setTimeout(() => {
+					BCX_setTimeout(async () => {
 						// Check if rule is still in effect or if we are already there
 						if (!state.isEnforced || (ServerPlayerIsInChatRoom() && ChatRoomData?.Name === data.ChatRoomName)) return;
 
@@ -1002,9 +1003,13 @@ export function initRules_bc_alter() {
 						ChatRoomActionMessage(`The demand for SourceCharacter's presence is now enforced.`, null, [
 							{ Tag: "SourceCharacter", MemberNumber: Player.MemberNumber, Text: CharacterNickname(Player) },
 						]);
-						ChatRoomLeave();
-						ChatRoomStart(data.ChatRoomSpace, "", null, null, "Introduction", BackgroundsTagList);
-						CharacterDeleteAllOnline();
+						ChatRoomLeave(true);
+
+						// reset lobby
+						const { Female, Male } = Player.GenderSettings.AutoJoinSearch;
+						const screen: ScreenSpecifier = Female || Male ? ["Room", "MainHall"] : ["Online", "ChatSelect"];
+						ChatSearchStart(data.ChatRoomSpace, screen, { Background: "Introduction" });
+						await CommonWaitFor(() => CommonArraysEqual(CommonGetScreen(), ["Online", "ChatSearch"]));
 
 						// join
 						ServerSend("ChatRoomJoin", { Name: data.ChatRoomName });

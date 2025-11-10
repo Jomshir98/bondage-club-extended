@@ -1,14 +1,12 @@
 import { ModuleCategory, ConditionsLimit } from "../constants";
 import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerDialog, RedirectGetImage } from "../modules/miscPatches";
 import { registerRule, RuleType } from "../modules/rules";
-import { hookFunction } from "../patching";
-import { isNModClient } from "../utilsClub";
+import { hookFunction, patchFunction } from "../patching";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
 import { GetDialogMenuButtonArray } from "../modules/dialog";
 
 export function initRules_bc_blocks() {
-	const NMod = isNModClient();
 
 	registerRule("block_remoteuse_self", {
 		name: "Forbid using remotes on self",
@@ -505,20 +503,17 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
-			// TODO: Fix for NMod
-			if (!NMod) {
-				hookFunction("ChatSearchRun", 0, (args, next) => {
-					next(args);
-					if (state.isEnforced && ChatSearchMode === "") {
-						DrawButton(1685, 885, 90, 90, "", "Gray", "Icons/Plus.png", TextGet("CreateRoom") + "(Blocked by BCX)", true);
-					}
-				}, ModuleCategory.Rules);
-			}
+			hookFunction("ChatSearchRun", 0, (args, next) => {
+				next(args);
+				if (state.isEnforced && ChatSearchMode === "") {
+					DrawButton(1685, 885, 90, 90, "", "Gray", "Icons/Plus.png", TextGet("CreateRoom") + "(Blocked by BCX)", true);
+				}
+			}, ModuleCategory.Rules);
 			hookFunction("CommonSetScreen", 5, (args, next) => {
 				if (args[0] === "Online" && args[1] === "ChatAdmin" && ChatAdminMode === "create") {
 					if (state.isEnforced) {
 						state.triggerAttempt();
-						return;
+						return Promise.resolve();
 					} else if (state.inEffect) {
 						state.trigger();
 					}
@@ -551,46 +546,63 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
-			// TODO: Fix for NMod
-			if (!NMod) {
+			const isRoomBlocked = (roomName: string) => state.inEffect && !state.customData?.roomList.some(name => name.toLocaleLowerCase() === roomName.toLocaleLowerCase());
+			if (GameVersion === "R121") {
+				// @ts-expect-error playing global games
+				window._bcxIsRoomBlocked = isRoomBlocked;
+				const enterBlockedRoom = (roomName: string): boolean => {
+					if (!isRoomBlocked(roomName)) return false;
+					if (state.isEnforced) {
+						state.triggerAttempt();
+						return true;
+					}
+					state.trigger();
+					return false;
+				};
+				// @ts-expect-error playing global games
+				window._bcxEnterBlockedRoom = enterBlockedRoom;
+				patchFunction("ChatSearchCreateGridRoom", {
+					// Patch up the pre-R122 way of knowing if there's a tooltip or not
+					'const hasTooltip = room.Friends.length > 0 || room.MemberCount >= room.MemberLimit || room.Game != "" || room.BlockCategory.length > 0;':
+					'const hasTooltip = room.Friends.length > 0 || room.MemberCount >= room.MemberLimit || room.Game != "" || room.BlockCategory.length > 0 || _bcxIsRoomBlocked(room.Name);',
+					// Patch up the pre-R122 way of doing the join RPC directly
+					"ChatSearchTempHiddenRooms.push(room.CreatorMemberNumber);\n\t\t\t\treturn;\n\t\t\t}\n":
+					"ChatSearchTempHiddenRooms.push(room.CreatorMemberNumber);\n\t\t\t\treturn;\n\t\t\t}\nif (_bcxEnterBlockedRoom(room.Name)) return;\n",
+				});
+			} else {
 				hookFunction("ChatSearchJoin", 5, (args, next) => {
+					const [roomName] = args;
 					let triggered = false;
-					if (state.inEffect && state.customData && state.customData.roomList.length > 0) {
-						// Scans results
-						CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
-							// If the player clicked on a valid room
-							if (MouseIn(x, y, width, height)) {
-								if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
-									if (state.isEnforced) {
-										state.triggerAttempt();
-										triggered = true;
-										return true;
-									} else {
-										state.trigger();
-										triggered = true;
-									}
-								}
-							}
-							return false;
-						});
+					if (isRoomBlocked(roomName)) {
+						if (state.isEnforced) {
+							state.triggerAttempt();
+							triggered = true;
+							return true;
+						} else {
+							state.trigger();
+							triggered = true;
+						}
 					}
 					if (!triggered || !state.isEnforced) return next(args);
 				}, ModuleCategory.Rules);
-				hookFunction("ChatSearchNormalDraw", 5, (args, next) => {
-					next(args);
-					if (state.isEnforced && state.customData && state.customData.roomList.length > 0) {
-						// Scans results
-						CommonGenerateGrid(ChatSearchResult, ChatSearchResultOffset, ChatSearchListParams, (room, x, y, width, height) => {
-							if (state.customData && !state.customData.roomList.some(name => name.toLocaleLowerCase() === room.Name.toLocaleLowerCase())) {
-								DrawButton(x, y, width, height, "", "#88c", undefined, "Blocked by BCX", true);
-								DrawTextFit((room.Friends != null && room.Friends.length > 0 ? "(" + room.Friends.length + ") " : "") + ChatSearchMuffle(room.Name) + " - " + ChatSearchMuffle(room.Creator) + " " + room.MemberCount + "/" + room.MemberLimit + "", x + 315, y + 25, 620, "black");
-								DrawTextFit(ChatSearchMuffle(room.Description), x + 315, y + 62, 620, "black");
-							}
-							return false;
-						});
-					}
-				}, ModuleCategory.Rules);
 			}
+			hookFunction("ChatSearchCreateGridRoomTooltip", 5, (args, next) => {
+				const tooltips = next(args);
+				const [roomResult] = args;
+				if (isRoomBlocked(roomResult.Name)) {
+					tooltips.appendChild(ElementCreate({
+						tag: "span",
+						classList: ["chat-search-room-tooltip-entry", "chat-search-room-tooltip-bcx-blocked"],
+						children: [
+							"Blocked by BCX",
+						],
+						style: {
+							"background-color": "#88c",
+						},
+					}));
+				}
+				return tooltips;
+			});
 		},
 	});
 
@@ -783,23 +795,20 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
-			// TODO: Fix for NMod
-			if (!NMod) {
-				hookFunction("ChatRoomListUpdate", 6, (args, next) => {
-					const CN = parseInt(args[2], 10);
-					if (state.isEnforced &&
-						state.customData &&
-						(args[0] === Player.BlackList || args[0] === Player.GhostList) &&
-						args[1] &&
-						typeof CN === "number" &&
-						getCharacterAccessLevel(CN) <= state.customData.minimumRole
-					) {
-						state.triggerAttempt(CN);
-						return;
-					}
-					return next(args);
-				}, ModuleCategory.Rules);
-			}
+			hookFunction("ChatRoomListUpdate", 6, (args, next) => {
+				const CN = parseInt(args[2], 10);
+				if (state.isEnforced &&
+					state.customData &&
+					(args[0] === Player.BlackList || args[0] === Player.GhostList) &&
+					args[1] &&
+					typeof CN === "number" &&
+					getCharacterAccessLevel(CN) <= state.customData.minimumRole
+				) {
+					state.triggerAttempt(CN);
+					return;
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 		},
 	});
 
@@ -815,22 +824,19 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
-			// TODO: Fix for NMod
-			if (!NMod) {
-				hookFunction("ChatRoomListUpdate", 6, (args, next) => {
-					const CN = parseInt(args[2], 10);
-					if (state.isEnforced &&
-						args[0] === Player.WhiteList &&
-						args[1] &&
-						typeof CN === "number" &&
-						getCharacterAccessLevel(CN) > AccessLevel.mistress
-					) {
-						state.triggerAttempt(CN);
-						return;
-					}
-					return next(args);
-				}, ModuleCategory.Rules);
-			}
+			hookFunction("ChatRoomListUpdate", 6, (args, next) => {
+				const CN = parseInt(args[2], 10);
+				if (state.isEnforced &&
+					args[0] === Player.WhiteList &&
+					args[1] &&
+					typeof CN === "number" &&
+					getCharacterAccessLevel(CN) > AccessLevel.mistress
+				) {
+					state.triggerAttempt(CN);
+					return;
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
 		},
 	});
 
@@ -1023,7 +1029,7 @@ export function initRules_bc_blocks() {
 					if (time && time > 0) {
 						LogDelete("ForceGGTS", "Asylum", true);
 					}
-					return false;
+					return Promise.resolve();
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

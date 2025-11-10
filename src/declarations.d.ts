@@ -308,7 +308,7 @@ type BCX_Rule =
 	| "speech_restrict_beep_receive"
 	| "speech_greet_order"
 	| "speech_block_antigarble"
-	// | "speech_replace_spoken_words"
+	| "speech_replace_spoken_words"
 	// | "speech_using_honorifics"
 	| "speech_force_retype"
 	| "greet_room_order"
@@ -466,9 +466,9 @@ type RuleCustomData = {
 	speech_limit_emotes: {
 		maxNumberOfEmotes: number;
 	};
-	// speech_replace_spoken_words: {
-	// 	stringWithReplacingSyntax: string;
-	// },
+	speech_replace_spoken_words: {
+		stringWithReplacingSyntax: string;
+	};
 	// speech_using_honorifics: {
 	// 	stringWithRuleSyntax: string;
 	// },

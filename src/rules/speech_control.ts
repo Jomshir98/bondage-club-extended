@@ -796,7 +796,18 @@ export function initRules_bc_speech_control() {
 		// Implemented externally
 	});
 
-	/* TODO: Implement
+	const parseStringReplacingSyntax = (data: string | undefined) => {
+		const replacements = new Map<string, string>();
+		const matches = data?.matchAll(/\[(?<words>(?:[^,;]+,?)+);(?<substitute>[^\];]+)\],?/g) ?? [];
+		for (const match of matches) {
+			const words = match.groups?.words.split(",").map(s => s.trim()) ?? [];
+			for (const word of words) {
+				replacements.set(word, match.groups?.substitute ?? "");
+			}
+		}
+		return replacements;
+	};
+
 	registerRule("speech_replace_spoken_words", {
 		name: "Replace spoken words",
 		type: RuleType.Speech,
@@ -809,11 +820,23 @@ export function initRules_bc_speech_control() {
 				type: "string",
 				default: "[I,me;this cutie],[spoken_word;replaced_with_this_word]",
 				description: "List in syntax: [word1;substitute1],[w2,w3,...;s2],...",
-				options: /^([^/.*()][^()]*)?$/
-			}
-		}
+				options: /^([^/.*()][^()]*)?$/,
+			},
+		},
+		init(state) {
+			registerSpeechHook({
+				modify(info, message) {
+					if (state.isEnforced) {
+						const replaceSpokenMap = parseStringReplacingSyntax(state.customData?.stringWithReplacingSyntax);
+						for (const [word, sub] of replaceSpokenMap.entries()) {
+							message = message.replaceAll(word, sub);
+						}
+					}
+					return message;
+				},
+			});
+		},
 	});
-	*/
 
 	/* TODO: Implement
 	// TODO: { TARGET_PLAYER: `${msg.target ? getCharacterName(msg.target, "[unknown]") : "[unknown]"} (${msg.target})` }
@@ -884,7 +907,7 @@ export function initRules_bc_speech_control() {
 			hookFunction("ChatRoomSync", 0, (args, next) => {
 				const data = args[0];
 				if (data.Name !== lastRoomName) alreadyGreeted = false;
-				next(args);
+				const ret = next(args);
 				// 2. populate chat field with the default text from the rule
 				const chat = document.getElementById("InputChat") as HTMLTextAreaElement | null;
 				if (chat && state.customData && state.inEffect && !alreadyGreeted && data.Name !== lastRoomName) {
@@ -892,6 +915,7 @@ export function initRules_bc_speech_control() {
 				} else {
 					alreadyGreeted = true;
 				}
+				return ret;
 			}, ModuleCategory.Rules);
 		},
 		// 3. do not allow sending anything else when enforced

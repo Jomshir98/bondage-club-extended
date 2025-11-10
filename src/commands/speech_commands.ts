@@ -61,7 +61,7 @@ export function initCommands_speech() {
 					sayText = "";
 					senderNumber = null;
 				}
-				next(args);
+				return next(args);
 			}, ModuleCategory.Commands);
 			hookFunction("ChatRoomKeyDown", 4, (args, next) => {
 				if (CurrentScreen === "ChatRoom" && sayText) {
@@ -183,7 +183,7 @@ export function initCommands_speech() {
 			if (data.Name !== lastRoomName) {
 				resetTypeTask();
 			}
-			next(args);
+			return next(args);
 		}, ModuleCategory.Commands);
 		hookFunction("ChatRoomKeyDown", 4, (args, next) => {
 			if (CurrentScreen === "ChatRoom" && typeTaskText) {
@@ -200,7 +200,7 @@ export function initCommands_speech() {
 	function TypeTaskInit() {
 		const check = (msg: SpeechMessageInfo): boolean => (
 			(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase() === typeTaskText.trim().toLocaleLowerCase() &&
-			msg.type === "Whisper" && (ChatRoomTargetMemberNumber === senderNumber)
+			msg.type === "Whisper" && (msg.target === senderNumber)
 		);
 		registerSpeechHook({
 			allowSend: (msg) => {
@@ -252,7 +252,7 @@ export function initCommands_speech() {
 						return SpeechHookAllow.ALLOW_BYPASS;
 					} else {
 						// failure 2: whispered to the wrong target -> block
-						if (ChatRoomTargetMemberNumber !== senderNumber) {
+						if (msg.target !== senderNumber) {
 							ChatRoomSendLocal(`You are not allowed to whisper to someone else than ${getCharacterNickname(senderNumber, "[unknown name]")} (${senderNumber}) while you have not finished your typing task.`);
 							return SpeechHookAllow.BLOCK;
 						}
@@ -288,11 +288,16 @@ export function initCommands_speech() {
 			respond(`Currently ${Player.Name} has a ${typeTaskForce ? "forced" : "non-forced"} typetask-command ordered. These two commands cannot be combined.`);
 			return false;
 		}
-		if (typeTaskText && argv.length === 1 && argv[0] === "cancel") {
-			respond(`You canceled ${Player.Name}'s typetask-command. She is now able to chat normally again.`);
-			ChatRoomSendLocal(`${sender.toNicknamedString()} canceled your typetask-command. You are now able to chat normally again.`);
-			resetTypeTask();
-			return true;
+		if (argv.length === 1 && argv[0] === "cancel") {
+			if (typeTaskText) {
+				respond(`You canceled ${Player.Name}'s typing task. She is now able to chat normally again.`);
+				ChatRoomSendLocal(`${sender.toNicknamedString()} canceled your typing task. You are now able to chat normally again.`);
+				resetTypeTask();
+				return true;
+			} else {
+				respond(`${Player.Name} had no typing task in progress.`);
+				return true;
+			}
 		}
 		if (typeTaskText) {
 			respond(`${Player.Name} already has a typing task currently. Please wait until she is done or cancel the current one with '.typetask cancel'.`);

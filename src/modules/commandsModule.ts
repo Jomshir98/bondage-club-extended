@@ -238,7 +238,7 @@ export class ModuleCommandsModule extends BaseModule {
 			permission_changeLimits: "commands_change_limits",
 			loadValidateConditionKey: (command): command is BCX_Command  => guard_BCX_Command(command),
 			loadValidateCondition: (command) => {
-				console.error(`BCX: Removing unexpected command condition ${command}`);
+				console.error(`HardCoreClub: Removing unexpected command condition ${command}`);
 				return false;
 			},
 			loadCategorySpecificGlobalData: () => undefined,

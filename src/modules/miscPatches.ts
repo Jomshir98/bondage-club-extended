@@ -13,7 +13,7 @@ export function cheatIsEnabled(cheat: MiscCheat): boolean {
 
 export function cheatSetEnabled(cheat: MiscCheat, enabled: boolean) {
 	if (!Array.isArray(modStorage.cheats)) {
-		console.error(`BCX: Attempt to set cheat, while not initalized`);
+		console.error(`HardCoreClub: Attempt to set cheat, while not initalized`);
 		return;
 	}
 

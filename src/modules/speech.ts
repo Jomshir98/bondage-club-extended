@@ -2,11 +2,12 @@ import { ModuleInitPhase } from "../constants";
 import { moduleInitPhase } from "../moduleManager";
 import { hookFunction } from "../patching";
 import { isObject } from "../utils";
-import { ChatRoomSendLocal } from "../utilsClub";
-import { registerCommand } from "./commands";
 import { RulesGetRuleState } from "./rules";
 import { BaseModule } from "./_BaseModule";
+import { FORBIDDEN_BC_COMMANDS } from "../config";
+import { checkWCEAntiGarble } from "../main";
 
+import { InfoBeep } from "../utilsClub";
 export interface SpeechMessageInfo {
 	readonly type: "Chat" | "Emote" | "Whisper" | "Command";
 	readonly target: number | null;
@@ -46,31 +47,41 @@ export function registerSpeechHook(hook: SpeechHook): void {
  * @returns {string} - Returns the message after studdering and random sounds have been added
  */
 export function falteringSpeech(message: string): string {
-	const soundList: string[] = ["uuh... ", "uhh... ", "...ah... ", "uhm... ", "mnn... ", "..nn... "];
-	let oocMsg: boolean = false;
+	const soundList: string[] = ["uuh", "ah", "uhm", "mnn", "nn", "fuck", "tie me up", "hardcore kink",
+		"bind me", "harder", "spank me", "blind me", "gag me", "never release", "strict", "punish", "forever", "love you", "restrain me",
+		"I love hardcore", "chain me", "aaaah",
+	];
+
+	const additions: string[] = ["", " ", "  ", ".", "..", "...", "....", ".....", "......", "......."];
+
+	const enhancedSoundList: string[] = [];
+
+	soundList.forEach((sound: string) => {
+		const prefix: string = additions[Math.floor(Math.random() * additions.length)];
+		const suffix: string = additions[Math.floor(Math.random() * additions.length)];
+		enhancedSoundList.push(prefix + sound + suffix);
+	});
+
+	console.log("sounds: " + JSON.stringify(enhancedSoundList));
+
 	let firstWord: boolean = true;
 	let alreadyStudderedWord: boolean = false;
 	let seed: number = message.length;
 	for (let messageIndex = 0; messageIndex < message.length; messageIndex++) {
-
 		const character = message.charAt(messageIndex).toLowerCase();
-		// from here on out, an out of context part of the message starts that will stay unchanged
-		if (character === "(") oocMsg = true;
-		if (!oocMsg && !alreadyStudderedWord && /\p{L}/igu.test(character)) {
+		if (!alreadyStudderedWord && /\p{L}/igu.test(character)) {
 			const studderFactor: number = Math.floor(Math.sin(seed++) * 100000) % 10;
 			if ((!alreadyStudderedWord && studderFactor >= 6) || firstWord) {
 				message = message.substring(0, messageIndex + 1) + "-" + message.substring(messageIndex, message.length);
 				seed++;
-				// One third chance to add a sound before a studdered word
-				if (Math.random() < 0.33 && !firstWord) {
-					message = message.substring(0, messageIndex) + soundList[Math.floor(Math.random() * soundList.length)] + message.substring(messageIndex, message.length);
+				if (Math.random() < 0.25 && !firstWord) {
+					message = message.substring(0, messageIndex) + enhancedSoundList[Math.floor(Math.random() * soundList.length)] + message.substring(messageIndex, message.length);
 				}
 				messageIndex += 2;
 				if (firstWord) firstWord = false;
 			}
 			alreadyStudderedWord = true;
 		}
-		if (character === ")") oocMsg = false;
 		if (character === " ") alreadyStudderedWord = false;
 	}
 	return message;
@@ -91,16 +102,9 @@ function parseMsg(msg: string, target?: number): SpeechMessageInfo | null {
 	};
 	msg = replaceStraySlashCommands(msg);
 	const rawMessage = msg;
+
 	if (msg.startsWith("//")) {
 		msg = msg.substring(1);
-	} else if (msg.startsWith("/")) {
-		return {
-			type: "Command",
-			rawMessage,
-			originalMessage: msg,
-			target: null,
-			hasOOC: true,
-		};
 	}
 	if (msg.startsWith("*") || (Player.ChatSettings?.MuStylePoses && msg.startsWith(":") && msg.length > 3)) {
 		if (Player.ChatSettings?.MuStylePoses && msg.startsWith(":")) {
@@ -117,6 +121,9 @@ function parseMsg(msg: string, target?: number): SpeechMessageInfo | null {
 			hasOOC: false,
 		};
 	}
+
+	msg = msg.trim();
+
 	return {
 		type: (target ?? ChatRoomTargetMemberNumber) < 0 ? "Chat" : "Whisper",
 		rawMessage,
@@ -130,71 +137,86 @@ function parseMsg(msg: string, target?: number): SpeechMessageInfo | null {
 /**
  * @returns The message that should be sent, or `null` if stopped
  */
-function processMsg(msg: SpeechMessageInfo): string | null {
-	// Don't modify commands this way
-	if (msg.type === "Command") {
-		return msg.rawMessage;
+function processMsg(msg: SpeechMessageInfo | null): string | null {
+
+	if (checkWCEAntiGarble()) {
+		return null;
 	}
 
-	// Let hooks block the messsage
-	let result: SpeechHookAllow = SpeechHookAllow.ALLOW;
-	for (const hook of speechHooks) {
-		if (hook.allowSend) {
-			const hookResult = hook.allowSend(msg);
-			if (hookResult === SpeechHookAllow.ALLOW_BYPASS) {
-				result = SpeechHookAllow.ALLOW_BYPASS;
-			} else if (hookResult === SpeechHookAllow.BLOCK && result === SpeechHookAllow.ALLOW) {
-				result = SpeechHookAllow.BLOCK;
-			}
-		}
-	}
-	if (result === SpeechHookAllow.BLOCK)
+	if (!msg) {
 		return null;
+	}
+	let result: string | null = msg.originalMessage;
+
+	console.groupCollapsed("Processing message: " + msg.originalMessage);
+	console.log("Message: " + JSON.stringify(msg, null, 2));
+
+	if (msg.type === "Command") {
+		console.log("Command");
+
+		FORBIDDEN_BC_COMMANDS.forEach(element => {
+			if (msg.rawMessage.indexOf(element) === 1) {
+				console.log("Command " + msg.rawMessage + " is forbidden");
+				InfoBeep("Command " + msg.rawMessage + " is forbidden. Do not cheat!");
+				result = null;
+			}
+		});
+		console.groupEnd();
+		return result;
+	}
+
+	if (agreeMessageHook(msg) === SpeechHookAllow.BLOCK) {
+		console.log("Message shall be blocked.");
+		console.groupEnd();
+		if (RulesGetRuleState("speech_force_retype").isEnforced) {
+			clearChat(msg.rawMessage);
+		}
+		return null;
+	}
 
 	let message = msg.type === "Emote" ? msg.rawMessage : msg.originalMessage;
 	// Let hooks modify the message
 	for (const hook of speechHooks) {
 		if (hook.modify) {
-			message = hook.modify(msg, message);
+			console.log("Message shall be modified.");
+			result = hook.modify(msg, result);
 		}
 	}
 
-	// Let hooks react to actual message that will be sent
+	if (agreeMessageHook(msg) === SpeechHookAllow.ALLOW) {
+		for (const hook of speechHooks) {
+			if (hook.onSend) {
+				console.log("Send message");
+				hook.onSend(msg, result);
+			}
+		}
+	}
+
+	console.groupEnd();
+	return result;
+}
+
+const antigarble = 0;
+
+function agreeMessageHook(msg: SpeechMessageInfo) {
+	let result: SpeechHookAllow = SpeechHookAllow.ALLOW;
 	for (const hook of speechHooks) {
-		if (hook.onSend) {
-			hook.onSend(msg, message);
+		if (hook.allowSend) {
+			const hookResult = hook.allowSend(msg);
+			if (hookResult === SpeechHookAllow.ALLOW_BYPASS) {
+				console.log("--> Message hook: allow");
+				result = SpeechHookAllow.ALLOW_BYPASS;
+			} else if (hookResult === SpeechHookAllow.BLOCK && result === SpeechHookAllow.ALLOW) {
+				console.log("--> Message hook: block");
+				result = SpeechHookAllow.BLOCK;
+			}
 		}
 	}
-
-	// Escape '/' if message starts with it
-	if (message.startsWith("/")) {
-		message = "/" + message;
-	}
-	return message;
+	return result;
 }
-
-//#region Antigarble
-let antigarble = 0;
-
-function setAntigarble(value: number): boolean {
-	if (![0, 1, 2].includes(value)) {
-		throw new Error("Bad antigarble value, expected 0/1/2");
-	}
-	if (value !== 0) {
-		const blockRule = RulesGetRuleState("speech_block_antigarble");
-		if (blockRule.isEnforced) {
-			blockRule.triggerAttempt();
-			return false;
-		} else if (blockRule.inEffect) {
-			blockRule.trigger();
-		}
-	}
-	antigarble = value;
-	return true;
-}
-//#endregion
 
 export class ModuleSpeech extends BaseModule {
+
 	load() {
 
 		let currentlyProcessedMessage: SpeechMessageInfo | null = null;
@@ -231,16 +253,6 @@ export class ModuleSpeech extends BaseModule {
 					const msg2 = processMsg(currentlyProcessedMessage);
 					// Message is rejected
 					if (msg2 === null) {
-						// There is rule to force retype of rejected message
-						if (RulesGetRuleState("speech_force_retype").isEnforced) {
-							// Clear chat
-							ElementValue("InputChat", "");
-							// Clear message history if matches
-							if (ChatRoomLastMessage.length > 0 && ChatRoomLastMessage.at(-1) === msg) {
-								ChatRoomLastMessage.splice(ChatRoomLastMessage.length - 1, 1);
-								ChatRoomLastMessageIndex = Math.min(ChatRoomLastMessageIndex, ChatRoomLastMessage.length);
-							}
-						}
 						return true;
 					}
 					args[0] = msg2;
@@ -277,11 +289,7 @@ export class ModuleSpeech extends BaseModule {
 			) {
 				const orig: any = data.Dictionary.find((i: unknown) => isObject(i) && i.Tag === "BCX_ORIGINAL_MESSAGE" && typeof i.Text === "string");
 				if (orig && data.Content !== orig.Text) {
-					if (antigarble === 2) {
-						data.Content = orig.Text;
-					} else {
-						data.Content += ` <> ${orig.Text}`;
-					}
+					data.Content += ` <> ${orig.Text}`;
 				}
 			}
 			return next(args);
@@ -356,16 +364,13 @@ export class ModuleSpeech extends BaseModule {
 				}
 				return false;
 			}
-			ChatRoomSendLocal(`Invalid antigarble level; use ${ANTIGARBLE_LEVEL_NAMES.join("/")}`);
-			return false;
-		}, value => {
-			return ANTIGARBLE_LEVEL_NAMES.filter(k => k.length > 1 && k.startsWith(value));
 		});
 
+		//#region Antigarble
 		hookFunction("SpeechGarble", 6, (args, next) => {
-			if (antigarble === 2) return args[1];
-			let res = next(args);
-			if (typeof res === "string" && res !== args[1] && antigarble === 1) res += ` <> ${args[1]}`;
+			//			if (antigarble === 2) return args[1];
+			const res = next(args);
+			//			if (typeof res === "string" && res !== args[1] && antigarble === 1) res += ` <> ${args[1]}`;
 			return res;
 		});
 		//#endregion

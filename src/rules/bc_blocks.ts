@@ -609,7 +609,6 @@ export function initRules_bc_blocks() {
 	registerRule("block_leaving_room", {
 		name: "Prevent leaving the room",
 		type: RuleType.Block,
-		loggable: false,
 		shortDescription: "while defined roles are inside",
 		longDescription: "This rule prevents PLAYER_NAME from leaving the room they are currently inside while at least one character with the set minimum role or a higher one is present inside. NOTE: Careful when setting the minimum role too low. If it is set to public for instance, it would mean that PLAYER_NAME can only leave the room when they are alone in it.",
 		keywords: ["controling", "limiting", "stopping", "exiting"],
@@ -779,7 +778,6 @@ export function initRules_bc_blocks() {
 	registerRule("block_blacklisting", {
 		name: "Prevent blacklisting",
 		type: RuleType.Block,
-		loggable: false,
 		shortDescription: "and ghosting of the defined roles",
 		longDescription: "This rule prevents PLAYER_NAME from adding characters with the set minimum role or a higher one to their bondage club blacklist and ghostlist.",
 		keywords: ["limiting"],
@@ -817,7 +815,6 @@ export function initRules_bc_blocks() {
 	registerRule("block_whitelisting", {
 		name: "Prevent whitelisting",
 		type: RuleType.Block,
-		loggable: false,
 		shortDescription: "of roles 'friend' or 'public'",
 		longDescription: "This rule prevents PLAYER_NAME from adding characters with a role lower than a BCX Mistress to their bondage club whitelist.",
 		keywords: ["limiting"],

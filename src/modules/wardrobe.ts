@@ -233,7 +233,7 @@ export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): 
 			messages,
 		};
 	} catch (error) {
-		saved("BCX: Failed crafted data validation because of crash:", error);
+		saved("HardCoreClub: Failed crafted data validation because of crash:", error);
 		return {
 			result: undefined,
 			messages: [`Validation failed: ${error}`],
@@ -279,7 +279,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 					}
 					const craftValidation = ValidationVerifyCraftData(cloth.Craft, A);
 					if (craftValidation.messages.length > 0) {
-						console.warn(`BCX: Crafted item validation failed:\n${craftValidation.messages.join("\n")}`);
+						console.warn(`HardCoreClub: Crafted item validation failed:\n${craftValidation.messages.join("\n")}`);
 					}
 					item.Craft = craftValidation.result;
 				}
@@ -494,7 +494,7 @@ export class ModuleWardrobe extends BaseModule {
 						}
 					})
 					.catch(err => {
-						console.warn("BCX: Failed to get permission to import wardrobe restraints:", err);
+						console.warn("HardCoreClub: Failed to get permission to import wardrobe restraints:", err);
 						j_WardrobeBindsAllowedCharacter = -1;
 					});
 			} else {

@@ -3,7 +3,7 @@ import { hiddenBeepHandlers, sendHiddenBeep } from "./messaging";
 import { BaseModule } from "./_BaseModule";
 import { isObject } from "../utils";
 import { BCX_setTimeout } from "../BCXContext";
-import { BCXSource, BCXSourceExternal, ChatRoomSendLocal, InfoBeep } from "../utilsClub";
+import { BCXSource, BCXSourceExternal, ChatRoomSendLocal, InfoBeep, detectForbiddenOtherMods } from "../utilsClub";
 import { unload } from "../main";
 import { modStorage, modStorageSync } from "./storage";
 import { announceSelf } from "./chatroom";
@@ -74,17 +74,20 @@ function sendVersionCheckBeep(): void {
 
 	// Set check retry timer to 5 minutes + up to minute random delay
 	nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (5 + Math.random()) * 60_000);
+
+	checkForForbiddenMods();
+
 }
 
 export class ModuleVersionCheck extends BaseModule {
 	load() {
 		hiddenBeepHandlers.set("versionResponse", (sender, message: BCX_beep_versionResponse) => {
 			if (sender !== VERSION_CHECK_BOT) {
-				console.warn(`BCX: got versionResponse from unexpected sender ${sender}, ignoring`);
+				console.warn(`HardCoreClub: got versionResponse from unexpected sender ${sender}, ignoring`);
 				return;
 			}
 			if (!isObject(message) || typeof message.status !== "string") {
-				console.warn(`BCX: bad versionResponse`, message);
+				console.warn(`HardCoreClub: bad versionResponse`, message);
 				return;
 			}
 
@@ -95,6 +98,8 @@ export class ModuleVersionCheck extends BaseModule {
 			}
 			nextCheckTimer = BCX_setTimeout(sendVersionCheckBeep, (15 + 5 * Math.random()) * 60_000);
 
+			console.log("==> Next Check timer: " + nextCheckTimer);
+
 			if (message.status === "current") {
 				versionCheckNewAvailable = false;
 			} else if (message.status === "newAvailable") {
@@ -103,9 +108,9 @@ export class ModuleVersionCheck extends BaseModule {
 					versionCheckDidNotify = true;
 
 					if (ServerPlayerIsInChatRoom()) {
-						ChatRoomSendLocal("New BCX version is available! You can upgrade by logging in again.");
+						ChatRoomSendLocal("New HardCoreClub version is available! You can upgrade by logging in again.");
 					} else {
-						InfoBeep("New BCX version is available! You can upgrade by logging in again.", 10_000);
+						InfoBeep("New HardCoreClub version is available! You can upgrade by logging in again.", 10_000);
 					}
 				}
 			} else if (message.status === "deprecated") {
@@ -136,12 +141,12 @@ export class ModuleVersionCheck extends BaseModule {
 					// Title
 					const titleElem = document.createElement("h1");
 					win.appendChild(titleElem);
-					titleElem.innerText = "Deprecated BCX version";
+					titleElem.innerText = "Deprecated HardCoreClub version";
 
 					// Description
 					const descriptionElement = document.createElement("p");
 					win.appendChild(descriptionElement);
-					descriptionElement.innerText = "The BCX version you are using is too old and either contains critical bugs or " +
+					descriptionElement.innerText = "The HardCoreClub version you are using is too old and either contains critical bugs or " +
 						"is no longer compatible with the current Bondage Club release version.\n" +
 						"Unless you are using additional mods preventing this, please refresh the page and log into the club again to load the newest version.";
 
@@ -160,10 +165,10 @@ export class ModuleVersionCheck extends BaseModule {
 				}
 			} else if (message.status === "unsupported") {
 				unload();
-				alert("The BCX version you are trying to load is too old and either contains critical bugs or " +
+				alert("The HardCoreClub version you are trying to load is too old and either contains critical bugs or " +
 					"is no longer compatible with the current Bondage Club release version. Please update your BCX.");
 			} else {
-				console.warn(`BCX: bad versionResponse status "${message.status}"`);
+				console.warn(`HardCoreClub: bad versionResponse status "${message.status}"`);
 			}
 
 			if (supporterStatus !== message.supporterStatus || supporterSecret !== message.supporterSecret) {
@@ -171,20 +176,21 @@ export class ModuleVersionCheck extends BaseModule {
 				supporterSecret = message.supporterSecret;
 				announceSelf();
 			}
+			checkForForbiddenMods();
 		});
 
 		hiddenBeepHandlers.set("supporterCheckResult", (sender, message: BCX_beeps["supporterCheckResult"]) => {
 			if (sender !== VERSION_CHECK_BOT) {
-				console.warn(`BCX: got supporterCheckResult from unexpected sender ${sender}, ignoring`);
+				console.warn(`HardCoreClub: got supporterCheckResult from unexpected sender ${sender}, ignoring`);
 				return;
 			}
 			if (!isObject(message) || typeof message.memberNumber !== "number" || (message.status !== undefined && typeof message.status !== "string")) {
-				console.warn(`BCX: bad supporterCheckResult`, message);
+				console.warn(`HardCoreClub: bad supporterCheckResult`, message);
 				return;
 			}
 			const status = otherSupporterStatus.get(message.memberNumber);
 			if (!status) {
-				console.warn(`BCX: supporterCheckResult unknown memberNumber`, message);
+				console.warn(`HardCoreClub: supporterCheckResult unknown memberNumber`, message);
 				return;
 			}
 			status.status = message.status;
@@ -212,3 +218,15 @@ export class ModuleVersionCheck extends BaseModule {
 		}
 	}
 }
+function checkForForbiddenMods() {
+	const enabledForbiddenMods: string[] = detectForbiddenOtherMods();
+
+	if (enabledForbiddenMods.length > 0) {
+		alert("Found forbidden BC modules. Please disable them first!");
+		console.log("Found forbidden BC modules. Please disable them first!");
+		InfoBeep("HardCoreClub Found forbidden BC modules. Please disable them first! The list of mods: " + detectForbiddenOtherMods.toString());
+		window.BCX_Loaded = false;
+		unload();
+	}
+}
+

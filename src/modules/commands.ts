@@ -51,14 +51,14 @@ let firstTimeHelp: HTMLDivElement | null = null;
 export function CommandsShowFirstTimeHelp() {
 	if (!firstTimeHelp && modStorage.chatShouldDisplayFirstTimeHelp) {
 		firstTimeHelp = ChatRoomSendLocal(
-			`[ BCX commands tutorial ]\n` +
-			`BCX also provides helpful chat commands.\n` +
+			`[ Hard Core Club commands tutorial ]\n` +
+			`Hard Core Club also provides helpful chat commands.\n` +
 			`All commands start with a dot ( . )\n` +
 			`The commands also support auto-completion: While writing a command, press 'Tab' to try automatically completing the currently typed word.\n` +
-			`Other club members can also use commands of your BCX, without needing BCX themselves. They will get a list of all commands they have permission using by whispering '!help' ( ! instead of . ) to you.\n` +
+			`Other club members can also use commands of your Hard Core Club, without needing Hard Core Club themselves. They will get a list of all commands they have permission using by whispering '!help' ( ! instead of . ) to you.\n` +
 			`Note: Messages colored like this text can only be seen by you and no one else.\n` +
 			`\n` +
-			`To complete this tutorial, use '.help' command by writing '.he' and pressing 'Tab' to complete it to '.help', it will show you list of available BCX commands.`
+			`To complete this tutorial, use '.help' command by writing '.he' and pressing 'Tab' to complete it to '.help', it will show you list of available Hard Core Club commands.`
 		);
 	}
 }
@@ -671,10 +671,10 @@ export class ModuleCommands extends BaseModule {
 					data.Content.startsWith("!") &&
 					!data.Content.startsWith("!!")
 				) {
-					console.debug(`BCX: Console command from ${sender}: ${text}`, data);
+					console.debug(`HardCoreClub: Console command from ${sender}: ${text}`, data);
 					RunWhisperCommand(text.substring(1), sender, (msg) => {
 						ServerSend("ChatRoomChat", {
-							Content: `[BCX]\n${msg}`,
+							Content: `[HardCoreClub]\n${msg}`,
 							Type: "Whisper",
 							Target: sender.MemberNumber,
 						});
@@ -707,7 +707,7 @@ export class ModuleCommands extends BaseModule {
 			arg = arg.trim().toLocaleLowerCase();
 			if (!arg) {
 				ChatRoomSendLocal(
-					`BCX commands are organized into categories\n` +
+					`HardCoreClub commands are organized into categories\n` +
 					`To view help texts for all commands in a category, use '.help <category>' (e.g. '.help utility')\n` +
 					`\n` +
 					`List of categories:\n` +
@@ -782,6 +782,13 @@ export class ModuleCommands extends BaseModule {
 			respond(response);
 			return true;
 		}, null, false);
+
+		registerCommand("utility", "versions", "- Check current version of HardCoreClub", (msg) => {
+			ChatRoomActionMessage(BCX_VERSION);
+			return true;
+		});
+
+		aliasCommand("action", "a");
 	}
 
 	unload() {

@@ -26,7 +26,7 @@ export class GuiExportImportMain extends GuiSubscreen {
 			this.disabledModules = data;
 		}).catch(e => {
 			this.disabledModules = [];
-			console.error(`BCX: error getting disabled modules`, e);
+			console.error(`HardCoreClub: error getting disabled modules`, e);
 		});
 	}
 

@@ -764,29 +764,45 @@ export function initRules_bc_speech_control() {
 		},
 	});
 
-	/* TODO: Implement
-	// TODO: { TARGET_PLAYER: `${msg.target ? getCharacterName(msg.target, "[unknown]") : "[unknown]"} (${msg.target})` }
 	registerRule("speech_using_honorifics", {
 		name: "Using honorifics",
 		type: RuleType.Speech,
 		shortDescription: "in front of specific names in all chat, whisper and OOC messages",
 		longDescription: "Define a listing of words (e.g. Miss, Mistress, ...) where one of them always needs to be typed before any one out of a listing of names (e.g. Julia, Eve, ...) in all chat, whisper and OOC messages. Needs a certain syntax (e.g. [Goddess,Mistress;Lily,Clare],[slut;Mona], ...)",
 		triggerTexts: {
-			infoBeep: "You broke a rule to always use a honorific when speaking TARGET_PLAYER's name!",
-			attempt_log: "PLAYER_NAME almost broke a rule by forgetting to be polite to TARGET_PLAYER",
-			log: "PLAYER_NAME broke a rule by forgetting to be polite to TARGET_PLAYER"
+			infoBeep: "You broke a rule to always use a honorific when speaking TARGET_NAME's name!",
+			attempt_log: "PLAYER_NAME almost broke a rule by forgetting to be polite to TARGET_NAME",
+			log: "PLAYER_NAME broke a rule by forgetting to be polite to TARGET_NAME",
 		},
+		keywords: ["force", "respect"],
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
 			stringWithRuleSyntax: {
 				type: "string",
-				default: "",
-				description: "List in syntax: [honorific1;name1],[h2,h3,...;n2,n3,...],...",
-				options: /^([^/.*()\s][^()]*)?$/
-			}
-		}
+				default: "[Sandra,Mia;Goddess],[Bert;Sir]",
+				description: "List in syntax: [name1,name2;honorific1],[n2,n3,...;h2],...",
+				options: /^([^/.*()\s][^()]*)?$/,
+			},
+		},
+		init(state) {
+			registerSpeechHook({
+				allowSend(info) {
+					let status = SpeechHookAllow.ALLOW;
+					if (state.isEnforced) {
+						const replaceSpokenMap = parseStringReplacingSyntax(state.customData?.stringWithRuleSyntax);
+						for (const [name, honorific] of replaceSpokenMap.entries()) {
+							const rx = new RegExp(`(?<!\\b${honorific}\\s+)${name}`, "g");
+							if (rx.test(info.rawMessage)) {
+								state.trigger(null, { "TARGET_NAME": `${honorific} ${name}` });
+								status = SpeechHookAllow.BLOCK;
+							}
+						}
+					}
+					return status;
+				},
+			});
+		},
 	});
-	*/
 
 	registerRule("speech_force_retype", {
 		name: "Force to retype",

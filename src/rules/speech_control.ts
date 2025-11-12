@@ -776,7 +776,8 @@ export function initRules_bc_speech_control() {
 					if (state.isEnforced) {
 						const replaceSpokenMap = parseStringReplacingSyntax(state.customData?.stringWithReplacingSyntax);
 						for (const [word, sub] of replaceSpokenMap.entries()) {
-							message = message.replaceAll(new RegExp(`\b${escapeRegExp(word)}\b`), sub);
+							const rx = new RegExp(`\\b${escapeRegExp(word)}\\b`, "g");
+							message = message.replaceAll(rx, sub);
 						}
 					}
 					return message;

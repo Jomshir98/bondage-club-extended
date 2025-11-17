@@ -18,6 +18,7 @@ import { BCXGlobalEventSystem } from "../event";
 
 import cloneDeep from "lodash-es/cloneDeep";
 import isEqual from "lodash-es/isEqual";
+import { omitBy, isNil } from "lodash-es";
 import zod, { ZodType } from "zod";
 
 const CURSES_ANTILOOP_RESET_INTERVAL = 60_000;
@@ -1179,14 +1180,15 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		// Crafted properties are always cursed
-		const validatedCurseCraft = ValidationVerifyCraftData(curse.Craft, asset).result;
-		if (!isEqual(ValidationVerifyCraftData(currentItem.Craft, currentItem.Asset).result, validatedCurseCraft)) {
-			if (validatedCurseCraft === undefined) {
+		const craftOld = ValidationVerifyCraftData(curse.Craft, asset).result;
+		const craftNew = ValidationVerifyCraftData(currentItem.Craft, currentItem.Asset).result;
+		if (!isEqual(omitBy(craftOld, isNil), omitBy(craftNew, isNil))) {
+			if (craftOld === undefined) {
 				delete currentItem.Craft;
 			} else {
 				currentItem.Craft = {
 					...(isObject(currentItem.Craft) ? currentItem.Craft : {}),
-					...validatedCurseCraft,
+					...craftOld,
 				};
 			}
 			if (!changeType) changeType = "update";

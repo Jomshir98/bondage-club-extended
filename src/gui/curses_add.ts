@@ -40,11 +40,29 @@ export class GuiCursesAdd extends GuiSubscreen {
 	private permissionMode: boolean = false;
 	private page: number = 0;
 
+	private grid: CommonGenerateGridParameters = {
+		x: 106,
+		y: 240,
+		width: 2000 - 106 - 220,
+		height: 1000 - 240 - 120,
+		itemWidth: 265,
+		itemHeight: 54,
+		itemMarginX: 16,
+		itemMarginY: 15,
+		direction: "vertical",
+	};
+
+	private curseOccupiedBtn: RectTuple = [1272, 173, 265, 48];
+	private curseAllBtn: RectTuple = [this.curseOccupiedBtn[0] + 280, 173, 200, 48];
+
 	private showHelp: boolean = false;
 
 	constructor(character: ChatroomCharacter) {
 		super();
 		this.character = character;
+
+		// @ts-expect-error shut up
+		if (!window.bcGrid) window.bcGrid = this.grid;
 	}
 
 	Load() {
@@ -96,53 +114,47 @@ export class GuiCursesAdd extends GuiSubscreen {
 			!this.curseData.access_changeLimits
 		);
 
-		for (let ciOffset = 0; ciOffset < 2; ciOffset++) {
-			const ci = this.page * 2 + ciOffset;
-			if (ci >= CATEGORIES.length)
-				break;
-			const category = CATEGORIES[ci];
-			const xOffset = ciOffset % 2 ? 845 : 0;
+		const category = CATEGORIES[this.page];
+		const xOffset = 0;
 
-			MainCanvas.textAlign = "left";
-			DrawRect(xOffset + 105, 165, 830, 64, "#cccccc");
-			DrawText(category.title, xOffset + 120, 165 + 34, "Black");
-			MainCanvas.textAlign = "center";
+		MainCanvas.textAlign = "left";
+		DrawRect(xOffset + 105, 165, 1672, 64, "#cccccc");
+		DrawText(category.title, xOffset + 120, 165 + 34, "Black");
+		MainCanvas.textAlign = "center";
 
-			if (!this.permissionMode) {
-				DrawButton(xOffset + 440, 173, 265, 48, "Curse occupied", "White", undefined, "Curse all occupied slots at once");
-				DrawButton(xOffset + 720, 173, 200, 48, "Curse all", "White", undefined, "Curse all slots at once");
-			}
-
-			const AssetGroups = AssetGroup.filter(category.filter);
-			for (let i = 0; i < AssetGroups.length; i++) {
-				const row = i % 10;
-				const column = Math.floor(i / 10);
-				const group = AssetGroups[i];
-
-				const currentItem = InventoryGet(this.character.Character, group.Name);
-
-				const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
-				const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
-				const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
-				let color: string;
-				let text: string;
-				if (this.permissionMode) {
-					color = ["#50ff56", "#f6fe78", "#ffa7a7"][accessLevel];
-					text = ["Normal", "Limited", "Blocked"][accessLevel];
-				} else {
-					color = itemIsCursed ? "#88c" :
-						!allowCurse ? "#ccc" :
-							(currentItem ? "Gold" : "White");
-					text = itemIsCursed ? "Already cursed" :
-						!allowCurse ? "You have no permission to curse this" :
-							(currentItem ? currentItem.Asset.Description : "Nothing");
-				}
-
-				DrawButton(xOffset + 106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
-					color, undefined,
-					text, itemIsCursed || !allowCurse || this.permissionMode);
-			}
+		if (!this.permissionMode) {
+			DrawButton(...this.curseOccupiedBtn, "Curse occupied", "White", undefined, "Curse all occupied slots at once");
+			DrawButton(...this.curseAllBtn, "Curse all", "White", undefined, "Curse all slots at once");
 		}
+
+		const AssetGroups = AssetGroup.filter(category.filter);
+		const curseData = this.curseData;
+		CommonGenerateGrid(AssetGroups, 0, this.grid, (group, x, y, width, height) => {
+			const currentItem = InventoryGet(this.character.Character, group.Name);
+
+			const itemIsCursed = curseData.conditions[group.Name] !== undefined;
+			const accessLevel = curseData.limits[group.Name] ?? ConditionsLimit.normal;
+			const allowCurse = [curseData.access_normal, curseData.access_limited, false][accessLevel];
+			let color: string;
+			let text: string;
+			if (this.permissionMode) {
+				color = ["#50ff56", "#f6fe78", "#ffa7a7"][accessLevel];
+				text = ["Normal", "Limited", "Blocked"][accessLevel];
+			} else {
+				color = itemIsCursed ? "#88c" :
+					!allowCurse ? "#ccc" :
+						(currentItem ? "Gold" : "White");
+				text = itemIsCursed ? "Already cursed" :
+					!allowCurse ? "You have no permission to curse this" :
+						(currentItem ? currentItem.Asset.Description : "Nothing");
+			}
+
+			// DrawButton(xOffset + 106 + 281 * column, 240 + 69 * row, 265, 54, getVisibleGroupName(group),
+			DrawButton(x, y, width, height, getVisibleGroupName(group),
+				color, undefined,
+				text, itemIsCursed || !allowCurse || this.permissionMode);
+			return false;
+		});
 
 		// permission mode legend
 		if (this.permissionMode) {
@@ -162,7 +174,7 @@ export class GuiCursesAdd extends GuiSubscreen {
 		}
 
 		// Pagination
-		const totalPages = Math.ceil(CATEGORIES.length / 2);
+		const totalPages = Math.ceil(CATEGORIES.length);
 		DrawBackNextButton(1605, 865, 300, 90, `Page ${this.page + 1} / ${Math.max(totalPages, 1)}`, "White", "", () => "", () => "");
 	}
 
@@ -182,46 +194,39 @@ export class GuiCursesAdd extends GuiSubscreen {
 			return;
 		}
 
-		for (let ciOffset = 0; ciOffset < 2; ciOffset++) {
-			const ci = this.page * 2 + ciOffset;
-			if (ci >= CATEGORIES.length)
-				break;
-			const category = CATEGORIES[ci];
-			const xOffset = ciOffset % 2 ? 845 : 0;
+		const category = CATEGORIES[this.page];
 
-			if (MouseIn(xOffset + 440, 173, 265, 48) && !this.permissionMode) {
-				this.character.curseBatch(category.batchType, false);
-				return;
-			}
-
-			if (MouseIn(xOffset + 720, 173, 200, 48) && !this.permissionMode) {
-				this.character.curseBatch(category.batchType, true);
-				return;
-			}
-
-			const AssetGroups = AssetGroup.filter(category.filter);
-			for (let i = 0; i < AssetGroups.length; i++) {
-				const row = i % 10;
-				const column = Math.floor(i / 10);
-				const group = AssetGroups[i];
-
-				const itemIsCursed = this.curseData.conditions[group.Name] !== undefined;
-				const accessLevel = this.curseData.limits[group.Name] ?? ConditionsLimit.normal;
-				const allowCurse = [this.curseData.access_normal, this.curseData.access_limited, false][accessLevel];
-
-				if (MouseIn(xOffset + 106 + 281 * column, 240 + 69 * row, 265, 54)) {
-					if (this.permissionMode) {
-						this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
-					} else if (!itemIsCursed && allowCurse) {
-						this.character.curseItem(group.Name, null);
-					}
-					return;
-				}
-			}
+		if (MouseIn(...this.curseOccupiedBtn) && !this.permissionMode) {
+			this.character.curseBatch(category.batchType, false);
+			return;
 		}
 
+		if (MouseIn(...this.curseAllBtn) && !this.permissionMode) {
+			this.character.curseBatch(category.batchType, true);
+			return;
+		}
+
+		const AssetGroups = AssetGroup.filter(category.filter);
+		const curseData = this.curseData;
+		CommonGenerateGrid(AssetGroups, 0, this.grid, (group, x, y, width, height) => {
+
+			const itemIsCursed = curseData.conditions[group.Name] !== undefined;
+			const accessLevel = curseData.limits[group.Name] ?? ConditionsLimit.normal;
+			const allowCurse = [curseData.access_normal, curseData.access_limited, false][accessLevel];
+
+			if (MouseIn(x, y, width, height)) {
+				if (this.permissionMode) {
+					this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
+				} else if (!itemIsCursed && allowCurse) {
+					this.character.curseItem(group.Name, null);
+				}
+				return true;
+			}
+			return false;
+		});
+
 		// Pagination
-		const totalPages = Math.ceil(CATEGORIES.length / 2);
+		const totalPages = CATEGORIES.length;
 		if (MouseIn(1605, 865, 150, 90)) {
 			this.page = clampWrap(this.page - 1, 0, totalPages - 1);
 			return true;

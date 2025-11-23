@@ -1,5 +1,5 @@
 import { hookFunction } from "../patching";
-import { HookDialogMenuButtonClick, OverridePlayerDialog, RedirectGetImage } from "./miscPatches";
+import { HookDialogMenuButtonClick, RedirectGetImage, AddInterfaceText } from "./miscPatches";
 import { BaseModule } from "./_BaseModule";
 
 let searchBar: HTMLInputElement | null = null;
@@ -79,10 +79,14 @@ export function SetDialogMenuButtonArray(newValue: BCX_DialogMenuButton[]): void
 	DialogMenuButton = newValue as DialogMenuButton[];
 }
 
+export function AddDialogMenuButtonName(keyword: string, value: string) {
+	AddInterfaceText(`DialogMenu${keyword}`, value);
+}
+
 export class ModuleDialog extends BaseModule {
 	load() {
-		OverridePlayerDialog("DialogMenuBCX_Search", "Filter items");
-		OverridePlayerDialog("DialogMenuBCX_SearchExit", "");
+		AddDialogMenuButtonName("BCX_Search", "Filter items");
+		AddDialogMenuButtonName("BCX_SearchExit", "");
 		RedirectGetImage("Icons/BCX_Search.png", "Icons/Search.png");
 		RedirectGetImage("Icons/BCX_SearchExit.png", "Icons/Remove.png");
 		hookFunction("DialogMenuButtonBuild", 5, (args, next) => {

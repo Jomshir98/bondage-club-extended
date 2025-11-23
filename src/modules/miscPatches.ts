@@ -37,10 +37,10 @@ export function cheatToggle(cheat: MiscCheat) {
 const MISTRESS_CHEAT_ONLY_ITEMS = ["MistressPadlock", "MistressPadlockKey", "MistressTimerPadlock"];
 const PANDORA_CHEAT_ONLY_ITEMS = ["PandoraPadlock", "PandoraPadlockKey"];
 
-const PlayerDialogOverrides: Map<string, string> = new Map();
+const InterfaceTextAdditions: Map<string, string> = new Map();
 
-export function OverridePlayerDialog(keyword: string, value: string) {
-	PlayerDialogOverrides.set(keyword, value);
+export function AddInterfaceText(keyword: string, value: string) {
+	InterfaceTextAdditions.set(keyword, value);
 }
 
 const GetImageRedirects: Map<string, string> = new Map();
@@ -77,7 +77,7 @@ export class ModuleMiscPatches extends BaseModule {
 		}
 
 		hookFunction("InterfaceTextGet", 10, (args, next) => {
-			const override = PlayerDialogOverrides.get(args[0]);
+			const override = InterfaceTextAdditions.get(args[0]);
 			if (override !== undefined)
 				return override;
 			return next(args);

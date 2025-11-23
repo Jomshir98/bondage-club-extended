@@ -1,10 +1,10 @@
 import { ModuleCategory, ConditionsLimit } from "../constants";
-import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, OverridePlayerDialog, RedirectGetImage } from "../modules/miscPatches";
+import { HookDialogMenuButtonClick as hookDialogMenuButtonClick, RedirectGetImage } from "../modules/miscPatches";
 import { registerRule, RuleType } from "../modules/rules";
 import { hookFunction, patchFunction } from "../patching";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { getAllCharactersInRoom } from "../characters";
-import { GetDialogMenuButtonArray } from "../modules/dialog";
+import { AddDialogMenuButtonName, GetDialogMenuButtonArray } from "../modules/dialog";
 
 export function initRules_bc_blocks() {
 
@@ -21,7 +21,7 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			OverridePlayerDialog("BCX_RemoteDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_RemoteDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Remote.png", "Icons/Remote.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
@@ -71,7 +71,7 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			OverridePlayerDialog("BCX_RemoteDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_RemoteDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Remote.png", "Icons/Remote.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
@@ -122,7 +122,7 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_UnlockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
 			hookFunction("DialogCanUnlock", 0, (args, next) => {
 				const C = args[0];
@@ -178,7 +178,7 @@ export function initRules_bc_blocks() {
 		},
 		load(state) {
 			let ignore = false;
-			OverridePlayerDialog("BCX_UnlockDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_UnlockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Unlock.png", "Icons/Unlock.png");
 			hookFunction("DialogCanUnlock", 0, (args, next) => {
 				const C = args[0];
@@ -238,7 +238,7 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			OverridePlayerDialog("BCX_PickLockDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_PickLockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_PickLock.png", "Icons/PickLock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
@@ -277,7 +277,7 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			OverridePlayerDialog("BCX_PickLockDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_PickLockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_PickLock.png", "Icons/PickLock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
@@ -317,7 +317,7 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			OverridePlayerDialog("BCX_LockDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_LockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Lock.png", "Icons/Lock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
@@ -356,7 +356,7 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			OverridePlayerDialog("BCX_LockDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_LockDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Lock.png", "Icons/Lock.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);
@@ -670,10 +670,10 @@ export function initRules_bc_blocks() {
 		},
 		load(state) {
 			let score: number = 999;
-			OverridePlayerDialog("BCX_RemoveDisabled", "Usage blocked by BCX");
-			OverridePlayerDialog("BCX_StruggleDisabled", "Usage blocked by BCX");
-			OverridePlayerDialog("BCX_DismountDisabled", "Usage blocked by BCX");
-			OverridePlayerDialog("BCX_EscapeDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_RemoveDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_StruggleDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_DismountDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_EscapeDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Remove.png", "Icons/Remove.png");
 			RedirectGetImage("Icons/BCX_Struggle.png", "Icons/Struggle.png");
 			RedirectGetImage("Icons/BCX_Dismount.png", "Icons/Dismount.png");
@@ -914,7 +914,7 @@ export function initRules_bc_blocks() {
 		keywords: ["limiting", "forbid", "controling"],
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
-			OverridePlayerDialog("BCX_ActivityDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_ActivityDisabled", "Usage blocked by BCX");
 			RedirectGetImage("Icons/BCX_Activity.png", "Icons/Activity.png");
 			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
 				next(args);

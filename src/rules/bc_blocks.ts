@@ -587,9 +587,16 @@ export function initRules_bc_blocks() {
 				}, ModuleCategory.Rules);
 			}
 			hookFunction("ChatSearchCreateGridRoomTooltip", 5, (args, next) => {
-				const tooltips = next(args);
+				let tooltips = next(args);
 				const [roomResult] = args;
 				if (isRoomBlocked(roomResult.Name)) {
+					if (tooltips === undefined) {
+						tooltips = ElementCreate({
+							tag: "div",
+							attributes: { id: `chat-search-room-tooltip-${args[1]}` },
+							classList: ["chat-search-room-tooltip"],
+						});
+					}
 					tooltips.appendChild(ElementCreate({
 						tag: "span",
 						classList: ["chat-search-room-tooltip-entry", "chat-search-room-tooltip-bcx-blocked"],

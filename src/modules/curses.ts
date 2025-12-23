@@ -949,89 +949,54 @@ export class ModuleCurses extends BaseModule {
 			return result;
 		}, ModuleCategory.Curses);
 
-		if (GameVersion === "R121") {
-			hookFunction("ColorPickerDraw", 0, (args, next) => {
-				const Callback = args[5] as (Color: string) => void;
-				if (Callback === ItemColorOnPickerChange) {
-					args[5] = (color: any) => {
-						if (ItemColorCharacter === Player && ItemColorItem) {
-							// Original code
-							const newColors = ItemColorState.colors.slice();
-							ItemColorPickerIndices.forEach(i => newColors[i] = color);
-							ItemColorItem.Color = newColors;
-							CharacterLoadCanvas(ItemColorCharacter);
-							// Curse color change code
-							const condition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
-							const curse = condition?.data;
-							if (curse &&
-								!itemColorsEquals(curse.Color, ItemColorItem.Color) &&
-								checkPermissionAccess("curses_color", getPlayerCharacter())
-							) {
-								if (ItemColorItem.Color) {
-									curse.Color = cloneDeep(ItemColorItem.Color);
-								} else {
-									delete curse.Color;
-								}
-								modStorageSync();
-							}
-						} else {
-							Callback(color);
-						}
-					};
-				}
+		hookFunction("ColorPickerReload", 0, (_args, _next) => {
+			// Shenanigens to get rid of the `never` types due to a lack of R122 `ColorPickerReload` declarations
+			const args = _args as [options?: null | ColorPickerInitOptions];
+			const next = _next as never as (arg: typeof args) => null | HTMLElement;
+
+			if (!ItemColorCharacter?.IsPlayer() || !ItemColorItem) {
 				return next(args);
-			});
-		} else {
-			// @ts-expect-error: Waiting for the R122 types here
-			hookFunction("ColorPickerReload", 0, (_args, _next) => {
-				// Shenanigens to get rid of the `never` types due to a lack of R122 `ColorPickerReload` declarations
-				const args = _args as [options?: null | ColorPickerInitOptions];
-				const next = _next as never as (arg: typeof args) => null | HTMLElement;
+			}
 
-				if (!ItemColorCharacter?.IsPlayer() || !ItemColorItem) {
-					return next(args);
-				}
-
-				const curseCondition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
-				const curse = curseCondition?.data;
-				if (!curse) {
-					return next(args);
-				}
-
-				// Either propogate the player's color changes to the curse data or disable the color picker
-				const options = args[0] ??= {};
-				if (checkPermissionAccess("curses_color", getPlayerCharacter())) {
-					const originalExit = options.onExit;
-					options.onExit = (state, save, ...rest) => {
-						originalExit?.(state, save, ...rest);
-						if (!save) {
-							return;
-						}
-
-						// Interpret colors/opacities in their default state as "don't curse them"
-						let sync = false;
-						if (!CommonArraysEqual(state.colors, state.initialColors)) {
-							curse.Color = CommonArraysEqual(state.colors, state.defaultColors) ? undefined : cloneDeep(state.colors);
-							sync = true;
-						}
-						if (!CommonArraysEqual(state.opacity, state.initialOpacity)) {
-							(curse.Property ??= {}).Opacity = CommonArraysEqual(state.opacity, state.defaultOpacity) ? undefined : cloneDeep(state.opacity);
-							sync = true;
-						}
-						if (sync) {
-							modStorageSync();
-						}
-					};
-				} else if (curseCondition.active) {
-					options.disabled = true;
-					options.heading = [
-						ElementCreate({ tag: "q", children: [ItemColorItem.Asset.Description] }),
-						" coloring disabled by BCX curse",
-					];
-				}
+			const curseCondition = ConditionsGetCondition("curses", ItemColorItem.Asset.Group.Name);
+			const curse = curseCondition?.data;
+			if (!curse) {
 				return next(args);
-			});
-		}
+			}
+
+			// Either propogate the player's color changes to the curse data or disable the color picker
+			const options = args[0] ??= {};
+			if (checkPermissionAccess("curses_color", getPlayerCharacter())) {
+				const originalExit = options.onExit;
+				options.onExit = (state, save, ...rest) => {
+					originalExit?.(state, save, ...rest);
+					if (!save) {
+						return;
+					}
+
+					// Interpret colors/opacities in their default state as "don't curse them"
+					let sync = false;
+					if (!CommonArraysEqual(state.colors, state.initialColors)) {
+						curse.Color = CommonArraysEqual(state.colors, state.defaultColors) ? undefined : cloneDeep(state.colors);
+						sync = true;
+					}
+					if (!CommonArraysEqual(state.opacity, state.initialOpacity)) {
+						(curse.Property ??= {}).Opacity = CommonArraysEqual(state.opacity, state.defaultOpacity) ? undefined : cloneDeep(state.opacity);
+						sync = true;
+					}
+					if (sync) {
+						modStorageSync();
+					}
+				};
+			} else if (curseCondition.active) {
+				options.disabled = true;
+				options.heading = [
+					ElementCreate({ tag: "q", children: [ItemColorItem.Asset.Description] }),
+					" coloring disabled by BCX curse",
+				];
+			}
+			return next(args);
+		});
 
 		trackFunction("CharacterAppearanceGenderAllowed");
 	}

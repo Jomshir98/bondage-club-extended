@@ -503,17 +503,12 @@ function ChatSettingsExtraClick(apply: (data: RoomTemplate) => void) {
 			return;
 		}
 		if (((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
-			// FIXME: remove post-R113
-			// eslint-disable-next-line deprecation/deprecation
-			const visibility = ChatAdminData?.Private ? ["Admin", "Whitelist"] as ServerChatRoomRole[] : ChatAdminData!.Visibility!;
-			// eslint-disable-next-line deprecation/deprecation
-			const access = ChatAdminData?.Locked ? ["Admin", "Whitelist"] as ServerChatRoomRole[] : ChatAdminData!.Access!;
 			modStorage.roomTemplates[i] = {
 				Name: ElementValue("InputName") ? ElementValue("InputName").trim() : "",
 				Description: ElementValue("InputDescription") ? ElementValue("InputDescription").trim() : "",
 				Background: ChatAdminData!.Background!,
-				Visibility: visibility,
-				Access: access,
+				Visibility: ChatAdminData!.Visibility!,
+				Access: ChatAdminData!.Access!,
 				Game: ChatAdminData!.Game!,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList").trim()) : [],
 				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist").trim()) : [],
@@ -556,11 +551,6 @@ function applyTemplate(template: RoomTemplate) {
 		ChatAdminVisibilityModeIndex = ChatAdminVisibilityModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Visibility!));
 		if (ChatAdminVisibilityModeIndex < 0) ChatAdminVisibilityModeIndex = 0;
 	}
-	// FIXME: remove post-R113
-	// eslint-disable-next-line deprecation/deprecation
-	ChatAdminData!.Private = template.Private;
-	// eslint-disable-next-line deprecation/deprecation
-	ChatAdminData!.Locked = template.Locked;
 	ChatAdminData!.Game = template.Game;
 	if (inputAdminList) inputAdminList.value = template.Admin?.toString() ?? "";
 	if (inputWhitelist) inputWhitelist.value = template.Whitelist?.toString() ?? "";

@@ -538,17 +538,9 @@ function SubdivideTextSize(Text: string, Width: number, MaxLine?: number): strin
 }
 
 export function isRoomPrivate(room: ServerChatRoomData | ServerChatRoomSearchData | ServerChatRoomSettings) {
-	if (typeof ChatRoomDataIsPrivate !== "undefined") {
-		return ChatRoomDataIsPrivate(room);
-	}
-	// eslint-disable-next-line deprecation/deprecation
-	return (room.Visibility && !CommonArraysEqual(room?.Visibility, ChatRoomVisibilityMode.PUBLIC)) ?? room.Private ?? false;
+	return ChatRoomDataIsPrivate(room);
 }
 
 export function isRoomLocked(room: ServerChatRoomData | ServerChatRoomSearchData | ServerChatRoomSettings) {
-	if (typeof ChatRoomDataIsLocked !== "undefined") {
-		return ChatRoomDataIsLocked(room);
-	}
-	// eslint-disable-next-line deprecation/deprecation
-	return (room.Access && !CommonArraysEqual(room?.Access, ChatRoomAccessMode.PUBLIC)) ?? room.Locked ?? false;
+	return ChatRoomDataIsLocked(room);
 }

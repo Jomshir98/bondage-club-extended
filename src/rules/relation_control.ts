@@ -19,7 +19,7 @@ export function initRules_bc_relation_control() {
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatRoomOwnershipOptionIs", 5, (args, next) => {
-				const Option = args[0] as string;
+				const Option = args[0] as string; // FIXME: that cast can be removed after R124
 				if (state.isEnforced && Option === "CanStartTrial")
 					return false;
 				return next(args);
@@ -56,7 +56,7 @@ export function initRules_bc_relation_control() {
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatRoomLovershipOptionIs", 5, (args, next) => {
-				const Option = args[0] as string;
+				const Option = args[0] as string; // FIXME: that cast can be removed after R124
 				if (state.isEnforced && (Option === "CanOfferBeginDating" || Option === "CanBeginDating"))
 					return false;
 				return next(args);
@@ -105,8 +105,8 @@ export function initRules_bc_relation_control() {
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
 			hookFunction("ChatRoomOwnershipOptionIs", 5, (args, next) => {
-				const Option = args[0] as string;
-				if (state.isEnforced && Option === "Propose")
+				const Option = args[0] as string; // FIXME: that cast can be removed after R124
+				if (state.isEnforced && Option === "CanOfferStartTrial")
 					return false;
 				return next(args);
 			}, ModuleCategory.Rules);

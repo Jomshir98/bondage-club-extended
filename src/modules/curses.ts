@@ -10,7 +10,7 @@ import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset, ConditionsLimit } from "../constants";
 import { callOriginal, hookFunction, removeAllHooksByModule, trackFunction } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
-import { ConditionsAutocompleteSubcommand, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate } from "./conditions";
+import { ConditionsAutocompleteSubcommand, ConditionsConditionBlockedByRule, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate, ConditionsCategoryInfluencedByRule } from "./conditions";
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
 import { BCX_setInterval } from "../BCXContext";
 import { ValidationVerifyCraftData } from "./wardrobe";
@@ -242,6 +242,9 @@ export function curseLift(Group: AssetGroupName, character: ChatroomCharacter | 
 
 	const curse = ConditionsGetCondition("curses", Group);
 	if (curse) {
+		if (ConditionsConditionBlockedByRule("curses", curse, character))
+			return false;
+
 		const group = AssetGroup.find(g => g.Name === Group);
 		if (character && group) {
 			const itemName = curse.data && AssetGet(Player.AssetFamily, Group, curse.data.Name)?.Description;
@@ -267,10 +270,12 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
-	if (character && (!checkPermissionAccess("curses_normal", character) || !checkPermissionAccess("curses_limited", character)))
-		return false;
-
 	if (character) {
+		if (!checkPermissionAccess("curses_normal", character) || !checkPermissionAccess("curses_limited", character)) return false;
+
+		// As we don't check individual curses, we block liftAll globally when influencing rules are active
+		if (ConditionsCategoryInfluencedByRule("curses", character)) return false;
+
 		logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
 		if (!character.isPlayer()) {
 			ChatRoomSendLocal(`${character.toNicknamedString()} lifted all curses on you`);

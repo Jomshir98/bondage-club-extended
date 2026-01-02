@@ -983,6 +983,28 @@ export function initRules_bc_blocks() {
 		// Implemented externally
 	});
 
+	registerRule("block_curses_self_by_others", {
+		name: "Prevent accessing curses by others",
+		loggable: false,
+		type: RuleType.Block,
+		shortDescription: "PLAYER_NAME accessing curses placed on herself by others",
+		longDescription: "This rule forbids PLAYER_NAME from accessing (or removing) any curses that were placed on her by other BCX users. This additionally blocks bulk actions and editing the global config to prevent bypassing this rule. PLAYER_NAME can still access (and remove) curses she herself placed. This rule does not affect PLAYER_NAME's permissions to use another users' BCX.",
+		keywords: ["limiting", "preventing", "controling", "accessing", "self", "rights"],
+		defaultLimit: ConditionsLimit.blocked,
+		// Implemented externally
+	});
+
+	registerRule("block_rules_self_by_others", {
+		name: "Prevent accessing rules by others",
+		loggable: false,
+		type: RuleType.Block,
+		shortDescription: "PLAYER_NAME accessing rules placed on herself by others",
+		longDescription: "This rule forbids PLAYER_NAME from accessing (or removing) any rules that were placed on her by other BCX users. This additionally blocks bulk actions and editing the global config to prevent bypassing this rule. PLAYER_NAME can still access (and remove) rules she herself placed. This rule does not affect PLAYER_NAME's permissions to use another users' BCX.",
+		keywords: ["limiting", "preventing", "controling", "accessing", "self", "rights"],
+		defaultLimit: ConditionsLimit.blocked,
+		// Implemented externally
+	});
+
 	registerRule("block_room_admin_UI", {
 		name: "Forbid looking at room admin UI",
 		type: RuleType.Block,

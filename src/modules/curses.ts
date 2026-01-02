@@ -129,7 +129,7 @@ export function curseDefaultItemCurseProperty(asset: Asset): boolean {
 		!asset.DynamicScriptDraw;
 }
 
-export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, character: ChatroomCharacter | null): boolean {
+export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, character: ChatroomCharacter | null, showMessage: boolean = true): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
@@ -179,7 +179,7 @@ export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, 
 		ConditionsSetCondition("curses", Group, newCurse, character);
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${group.AllowNone ? currentItem.Asset.Description : group.Description}`);
-			if (!character.isPlayer()) {
+			if (showMessage && !character.isPlayer()) {
 				ChatRoomSendLocal(`${character.toNicknamedString()} cursed the ${group.AllowNone ? currentItem.Asset.Description : group.Description} on you`);
 			}
 		}
@@ -187,7 +187,7 @@ export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, 
 		ConditionsSetCondition("curses", Group, null, character);
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
-			if (!character.isPlayer()) {
+			if (showMessage && !character.isPlayer()) {
 				ChatRoomSendLocal(`${character.toNicknamedString()} put a curse on you, forcing part of your body to stay exposed (${getVisibleGroupName(group)})`);
 			}
 		}
@@ -227,7 +227,7 @@ export function curseBatch(mode: "items" | "clothes" | "body", includingEmpty: b
 			continue;
 		if (character && !ConditionsCheckAccess("curses", group.Name, character))
 			continue;
-		if (!curseItem(group.Name, null, null))
+		if (!curseItem(group.Name, null, character, false))
 			return false;
 	}
 	return true;

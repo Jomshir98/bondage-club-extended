@@ -6,7 +6,7 @@ import { AccessLevel } from "../modules/authority";
 import { ConditionsLimit } from "../constants";
 import { capitalizeFirstLetter, formatTimeInterval } from "../utils";
 import { GuiMemberSelect } from "./member_select";
-import { ConditionsEvaluateRequirements } from "../modules/conditions";
+import { ConditionsConditionBlockedByRule, ConditionsEvaluateRequirements, ConditionsGetCondition } from "../modules/conditions";
 import { icon_star } from "../resources";
 import { DrawQueryErrorMessage } from "../modules/messaging";
 
@@ -160,6 +160,14 @@ export abstract class GuiConditionEdit<CAT extends ConditionsCategories> extends
 	protected checkAccess(): boolean {
 		if (!this.conditionCategoryData)
 			return false;
+
+		if (this.character.MemberNumber === Player.MemberNumber) {
+			// Get self's internal condition data to ensure we aren't relying on the *_view_originator authority (as public data does).
+			const internalData = ConditionsGetCondition(this.conditionCategory, this.conditionName);
+			if (internalData && ConditionsConditionBlockedByRule(this.conditionCategory, internalData, this.character))
+				return false;
+		}
+
 		const limit = this.conditionCategoryData.limits[this.conditionName] ?? ConditionsLimit.normal;
 		return [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][limit];
 	}

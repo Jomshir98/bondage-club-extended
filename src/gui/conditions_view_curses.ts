@@ -1,4 +1,5 @@
 import { ChatroomCharacter } from "../characters";
+import { ConditionsCategoryInfluencedByRule } from "../modules/conditions";
 import { curseAllowItemCurseProperty } from "../modules/curses";
 import { setSubscreen } from "../modules/gui";
 import { DrawImageEx, getVisibleGroupName, showHelp } from "../utilsClub";
@@ -29,7 +30,7 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 		DrawButton(120, 820, 250, 90, "Add new curse", "White", "",
 			"Place new curses on body, items or clothes");
 
-		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
+		const access = (this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited) && !ConditionsCategoryInfluencedByRule(this.conditionCategory, this.character);
 		DrawButton(400, 820, 250, 90, "Lift all curses", access ? "White" : "#ddd", "",
 			access ? "Remove all curses on body, items or clothes" : "You have no permission to use this", !access);
 
@@ -49,7 +50,7 @@ export class GuiConditionViewCurses extends GuiConditionView<"curses", CurseEntr
 			return true;
 		}
 
-		const access = this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited;
+		const access = (this.conditionCategoryData.access_normal || this.conditionCategoryData.access_limited) && !ConditionsCategoryInfluencedByRule(this.conditionCategory, this.character);
 		if (access && MouseIn(400, 820, 250, 90)) {
 			this.character.curseLiftAll();
 			return true;

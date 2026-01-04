@@ -260,6 +260,8 @@ type BCX_Rule =
 	| "block_mainhall_maidrescue"
 	| "block_action"
 	| "block_BCX_permissions"
+	| "block_curses_self_by_others"
+	| "block_rules_self_by_others"
 	| "block_room_admin_UI"
 	| "block_using_ggts"
 	| "block_club_slave_work"

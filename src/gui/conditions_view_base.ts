@@ -6,6 +6,7 @@ import { clamp, createInputElement, formatTimeInterval, positionElement, typedOb
 import { DrawImageEx } from "../utilsClub";
 import { ConditionsLimit } from "../constants";
 import { DrawQueryErrorMessage } from "../modules/messaging";
+import { ConditionsCategoryInfluencedByRule, ConditionsConditionBlockedByRule, ConditionsGetCondition } from "../modules/conditions";
 
 const PER_COLUMN_COUNT = 7;
 const PER_PAGE_COUNT = PER_COLUMN_COUNT * 2;
@@ -96,7 +97,13 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 			if (res === null)
 				continue;
 
-			const access = [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][this.conditionCategoryData.limits[condition] ?? ConditionsLimit.normal];
+			let access = [this.conditionCategoryData.access_normal, this.conditionCategoryData.access_limited, false][this.conditionCategoryData.limits[condition] ?? ConditionsLimit.normal];
+			if (this.character.MemberNumber === Player.MemberNumber) {
+				// Get self's internal condition data to ensure we aren't relying on the *_view_originator authority (as public data does).
+				const internalData = ConditionsGetCondition(this.conditionCategory, condition);
+				if (internalData && ConditionsConditionBlockedByRule(this.conditionCategory, internalData, this.character))
+					access = false;
+			}
 
 			if (filter.some(i =>
 				!condition.toLocaleLowerCase().includes(i) &&
@@ -223,7 +230,8 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		MainCanvas.textAlign = "center";
 
 		// activate/deactivate buttons
-		const accessFull = this.conditionCategoryData.access_normal && this.conditionCategoryData.access_limited;
+		const categoryInfluencedByRule = ConditionsCategoryInfluencedByRule(this.conditionCategory, this.character);
+		const accessFull = this.conditionCategoryData.access_normal && this.conditionCategoryData.access_limited && !categoryInfluencedByRule;
 		DrawButton(678, 820, 170, 50, "", accessFull ? "White" : "#ddd", "",
 			accessFull ? `Switch all added ${this.conditionCategory} to active` : "You have no permission to use this", !accessFull);
 		DrawTextFit(`Activate all`, 680 + 170 / 2, 820 + 25, 145, "Black", "");
@@ -248,8 +256,9 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		});
 
 		// change global config button
-		DrawButton(1068, 820, 505, 90, "", this.conditionCategoryData.access_configure ? "White" : "#ddd", "",
-			this.conditionCategoryData.access_configure ? `Existing ${this.conditionCategory} set to global ${this.conditionCategory} config are also changed` : "You have no permission to use this", !this.conditionCategoryData.access_configure);
+		const canGlobalConfig = this.conditionCategoryData.access_configure && !categoryInfluencedByRule;
+		DrawButton(1068, 820, 505, 90, "", canGlobalConfig ? "White" : "#ddd", "",
+			canGlobalConfig ? `Existing ${this.conditionCategory} set to global ${this.conditionCategory} config are also changed` : "You have no permission to use this", !canGlobalConfig);
 		DrawTextFit(`Change global ${this.conditionCategory} config`, 1018 + 680 / 2, 865, 400, "Black", "");
 		DrawCircle(1068 + 10 + 35, 820 + 44, 34, 0, "", "#0052A3");
 		DrawImageEx("Icons/General.png", 1068 + 10, 820 + 10, {
@@ -324,7 +333,8 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		}
 
 		// activate/deactivate buttons
-		const accessFull = this.conditionCategoryData.access_normal && this.conditionCategoryData.access_limited;
+		const categoryInfluencedByRule = ConditionsCategoryInfluencedByRule(this.conditionCategory, this.character);
+		const accessFull = this.conditionCategoryData.access_normal && this.conditionCategoryData.access_limited && !categoryInfluencedByRule;
 		if (accessFull && MouseIn(678, 820, 170, 50)) {
 			this.character.conditionUpdateMultiple(
 				this.conditionCategory,
@@ -370,7 +380,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 		}
 
 		// change global config button
-		if (this.conditionCategoryData.access_configure && MouseIn(1068, 820, 505, 90)) {
+		if (this.conditionCategoryData.access_configure && !categoryInfluencedByRule && MouseIn(1068, 820, 505, 90)) {
 			this.openGlobalConfig();
 			return true;
 		}

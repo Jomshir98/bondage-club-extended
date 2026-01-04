@@ -138,6 +138,25 @@ export function debugPrettifyError(error: unknown): string {
 	return `${error}`;
 }
 
+function debugTransformThing(event: PromiseRejectionEvent): ErrorEvent {
+	const info: ErrorEventInit = {
+		message: "Unhandled promise rejection",
+		error: event.reason,
+	};
+	if (event.reason instanceof Error) {
+		info.message = `${event.reason.message} (unhandled rejection)`;
+
+		// We're about to reconstruct filename:lineno:colno info from the first stack frame
+		const stack = `${event.reason.stack}`.split("\n");
+		const lastFrameLoc = stack[1].match(/\((.*):(\d+):(\d+)\)$/) ?? [null, "", 0, 0];
+		info.filename = lastFrameLoc[1];
+		info.lineno = parseInt(lastFrameLoc[2], 10);
+		info.colno = parseInt(lastFrameLoc[3], 10);
+	}
+	const error = new ErrorEvent("ErrorEvent", info);
+	return error;
+}
+
 export function debugGenerateReportErrorEvent(event: ErrorEvent): string {
 	const currentMod = contextCurrentModArea();
 
@@ -454,6 +473,27 @@ export function onUnhandledError(event: ErrorEvent) {
 	);
 }
 
+export function onUnhandledRejection(event: PromiseRejectionEvent) {
+	if (!firstError)
+		return;
+	firstError = false;
+	const currentMod = contextCurrentModArea();
+	// Display error window
+	showErrorOverlay(
+		"Crash Handler (by ModSDK)",
+		"The Crash Handler provided by ModSDK detected an unhandled promise rejection error, which most likely crashed the Bondage Club.<br />" +
+		"While reporting this error, please use the information below to help us find the source faster.<br />" +
+		"You can use the 'Close' button at the bottom to continue, however BC may no longer work correctly until you reload the current tab." +
+		(
+			currentMod === "BCX" ? sourceBasedErrorMessage.bcx :
+				currentMod === "" ? sourceBasedErrorMessage.bc :
+					currentMod == null ? sourceBasedErrorMessage.unknown :
+						sourceBasedErrorMessage.knownMod(currentMod)
+		),
+		debugGenerateReportErrorEvent(debugTransformThing(event))
+	);
+}
+
 export function reportManualError(description: string, error: unknown) {
 	console.error(`BCX: Error report: ${description}\n`, error);
 	if (!firstError)
@@ -571,6 +611,7 @@ function bcxRaf(this: any, fn: FrameRequestCallback): number {
 
 export function InitErrorReporter() {
 	window.addEventListener("error", onUnhandledError);
+	window.addEventListener("unhandledrejection", onUnhandledRejection);
 	// Server message origin
 	if (originalSocketEmitEvent === undefined && typeof (ServerSocket as any)?.__proto__?.emitEvent === "function") {
 		originalSocketEmitEvent = (ServerSocket as any).__proto__.emitEvent;

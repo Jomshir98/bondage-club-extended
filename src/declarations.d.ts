@@ -292,7 +292,6 @@ type BCX_Rule =
 	| "rc_sub_new"
 	| "rc_sub_leave"
 	| "speech_specific_sound"
-	| "speech_garble_whispers"
 	| "speech_block_gagged_ooc"
 	| "speech_block_ooc"
 	| "speech_doll_talk"

@@ -14,6 +14,14 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.11
+
+This update changes the following:
+- Update to BC R123
+- Fix the broken localization for some of the Dialog buttons
+- Fix a crash in case a room has no tooltip
+- Fix the rc_sub_new rule being broken
+
 ## 1.1.10
 
 This update fixes the curses group UI and a curse application loop caused by a change in BC R122.

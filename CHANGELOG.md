@@ -14,6 +14,16 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.12
+
+This update changes the following:
+- Updated to BC R124
+- Removed `speech_garble_whispers` rule since BC works like that by default now
+- Improved the crash reporter to report promise rejection errors as well as normal errors
+- Bulk curse changes now properly store the responsible character info
+- Implement rules blocking self access to curses/rules placed by others
+
+
 ## 1.1.11
 
 This update changes the following:

@@ -829,24 +829,26 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		load(state) {
-			hookFunction("DialogItemClick", 5, (args, next) => {
-				if (state.inEffect) {
-					const C = args[1];
-					if (C && C.IsPlayer()) {
-						if (state.isEnforced) {
-							state.triggerAttempt();
-							return;
-						} else {
-							state.trigger();
-						}
-					}
+			// @ts-expect-error bcx rule handling
+			DialogMenuMapping.items.clickStatusCallbacks.bcx_block_tying_self = function (C: Character) {
+				if (state.inEffect && state.isEnforced && C.IsPlayer()) {
+					return 'Restricted by BCX rule: "Forbid tying up self"';
+				}
+			};
+			hookFunction("DialogMenuMapping.items._ClickButton", 0, (args, next) => {
+				const C = args[1];
+				if (state.inEffect && C.IsPlayer()) {
+					// This triggers when an item *is* used on self (i.e. not blocked by disable)
+					if (state.isLogged) state.trigger();
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-			hookFunction("AppearanceGetPreviewImageColor", 5, (args, next) => {
-				const C = args[0];
-				if (C && C.IsPlayer()) {
-					return "grey";
+			// We are hooking the eventListener directly here as DialogMenuMapping does not implement _ClickDisabledButton
+			hookFunction("DialogMenuMapping.items.eventListeners._ClickDisabledButton", 0, (args, next) => {
+				const C = DialogMenuMapping.items.C;
+				if (state.inEffect && state.isEnforced && C.IsPlayer()) {
+					// This triggers when an item use is blocked by disable
+					if (state.isLogged) state.triggerAttempt();
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
@@ -873,26 +875,31 @@ export function initRules_bc_blocks() {
 			},
 		},
 		load(state) {
-			hookFunction("DialogItemClick", 5, (args, next) => {
-				if (state.inEffect && state.customData) {
-					const toggleOn = state.customData.onlyMoreDominantsToggle;
-					const C = args[1];
-					if (C && C.ID !== 0 && (toggleOn ? ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") : true)) {
-						if (state.isEnforced) {
-							state.triggerAttempt(C.MemberNumber);
-							return;
-						} else {
-							state.trigger(C.MemberNumber);
-						}
-					}
+			const dominantCheck = (C: Character): boolean =>
+				state.customData?.onlyMoreDominantsToggle ?
+					ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") :
+					true;
+
+			// @ts-expect-error bcx rule handling
+			DialogMenuMapping.items.clickStatusCallbacks.bcx_block_tying_self = function (C: Character) {
+				if (state.inEffect && state.isEnforced && !C.IsPlayer() && dominantCheck(C)) {
+					return 'Restricted by BCX rule: "Forbid tying up others"';
+				}
+			};
+			hookFunction("DialogMenuMapping.items._ClickButton", 0, (args, next) => {
+				const C = args[1];
+				if (state.inEffect && !C.IsPlayer() && dominantCheck(C)) {
+					// This triggers when an item *is* used on self (i.e. not blocked by disable)
+					if (state.isLogged) state.trigger();
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
-			hookFunction("AppearanceGetPreviewImageColor", 5, (args, next) => {
-				const toggleOn = state.customData?.onlyMoreDominantsToggle;
-				const C = args[0];
-				if (C && C.ID !== 0 && state.isEnforced && (toggleOn ? ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") : true)) {
-					return "grey";
+			// We are hooking the eventListener directly here as DialogMenuMapping does not implement _ClickDisabledButton
+			hookFunction("DialogMenuMapping.items.eventListeners._ClickDisabledButton", 0, (args, next) => {
+				const C = DialogMenuMapping.items.C;
+				if (state.inEffect && state.isEnforced && !C.IsPlayer() && dominantCheck(C)) {
+					// This triggers when an item use is blocked by disable
+					if (state.isLogged) state.triggerAttempt();
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

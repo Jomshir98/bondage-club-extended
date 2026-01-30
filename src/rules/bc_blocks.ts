@@ -737,6 +737,122 @@ export function initRules_bc_blocks() {
 		},
 	});
 
+	registerRule("block_freeing_others", {
+		name: "Forbid freeing others",
+		type: RuleType.Block,
+		longDescription: "This rule forbids PLAYER_NAME to remove any items from other characters. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score by the original asset maker, such as hand-held items, plushies, etc. This means that custom crafted properties given to an item such as 'decoy' are not factored in.",
+		keywords: ["limiting", "untying", "unbinding", "bondage"],
+		triggerTexts: {
+			infoBeep: "You are not allowed to remove an item from TARGET_PLAYER!",
+			attempt_log: "PLAYER_NAME tried to remove an item from TARGET_PLAYER, which was forbidden",
+			log: "PLAYER_NAME removed an item from TARGET_PLAYER, which was forbidden",
+		},
+		defaultLimit: ConditionsLimit.normal,
+		dataDefinition: {
+			allowEasyItemsToggle: {
+				type: "toggle",
+				default: false,
+				description: "Still allow removing low difficulty items",
+			},
+		},
+		load(state) {
+			let score: number = 999;
+			AddDialogMenuButtonName("BCX_RemoveDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_StruggleDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_DismountDisabled", "Usage blocked by BCX");
+			AddDialogMenuButtonName("BCX_EscapeDisabled", "Usage blocked by BCX");
+			RedirectGetImage("Icons/BCX_Remove.png", "Icons/Remove.png");
+			RedirectGetImage("Icons/BCX_Struggle.png", "Icons/Struggle.png");
+			RedirectGetImage("Icons/BCX_Dismount.png", "Icons/Dismount.png");
+			RedirectGetImage("Icons/BCX_Escape.png", "Icons/Escape.png");
+			hookFunction("DialogMenuButtonBuild", 0, (args, next) => {
+				next(args);
+				const C = args[0];
+				if (!C.IsPlayer() && C.FocusGroup && state.isEnforced) {
+					const Item = InventoryGet(C, C.FocusGroup.Name);
+					if (Item && state.customData?.allowEasyItemsToggle) {
+						score = (Item.Asset.Difficulty ?? 0) + (typeof Item.Property?.Difficulty === "number" ? Item.Property.Difficulty : 0);
+						if (score <= 1) {
+							return;
+						}
+					}
+					const index_remove = GetDialogMenuButtonArray().indexOf("Remove");
+					const index_struggle = GetDialogMenuButtonArray().indexOf("Struggle");
+					const index_dismount = GetDialogMenuButtonArray().indexOf("Dismount");
+					const index_escape = GetDialogMenuButtonArray().indexOf("Escape");
+					if (index_remove >= 0) {
+						GetDialogMenuButtonArray()[index_remove] = "BCX_RemoveDisabled";
+					}
+					if (index_struggle >= 0) {
+						GetDialogMenuButtonArray()[index_struggle] = "BCX_StruggleDisabled";
+					}
+					if (index_dismount >= 0) {
+						GetDialogMenuButtonArray()[index_dismount] = "BCX_DismountDisabled";
+					}
+					if (index_escape >= 0) {
+						GetDialogMenuButtonArray()[index_escape] = "BCX_EscapeDisabled";
+					}
+				}
+			}, ModuleCategory.Rules);
+			const trigger = (C: Character): boolean => {
+				if (!C.IsPlayer() && state.inEffect && score > 1) {
+					state.trigger(C.MemberNumber);
+				}
+				return false;
+			};
+			const attempt = (C: Character): boolean => {
+				if (!C.IsPlayer() && state.inEffect && score > 1) {
+					state.triggerAttempt(C.MemberNumber);
+				}
+				return false;
+			};
+			hookDialogMenuButtonClick("Remove", trigger);
+			hookDialogMenuButtonClick("BCX_RemoveDisabled", attempt);
+			hookDialogMenuButtonClick("Struggle", trigger);
+			hookDialogMenuButtonClick("BCX_StruggleDisabled", attempt);
+			hookDialogMenuButtonClick("Dismount", trigger);
+			hookDialogMenuButtonClick("BCX_DismountDisabled", attempt);
+			hookDialogMenuButtonClick("Escape", trigger);
+			hookDialogMenuButtonClick("BCX_EscapeDisabled", attempt);
+		},
+	});
+
+	registerRule("block_tying_self", {
+		name: "Forbid tying up self",
+		type: RuleType.Block,
+		longDescription: "This rule forbids PLAYER_NAME to use any items on herself.",
+		keywords: ["limiting", "prevent", "restraints", "bondage"],
+		triggerTexts: {
+			infoBeep: "You are not allowed to use an item on yourself!",
+			attempt_log: "PLAYER_NAME tried to use an item on herself, which was forbidden",
+			log: "PLAYER_NAME used an item on herself, which was forbidden",
+		},
+		defaultLimit: ConditionsLimit.normal,
+		load(state) {
+			hookFunction("DialogItemClick", 5, (args, next) => {
+				if (state.inEffect) {
+					const C = args[1];
+					if (C && C.IsPlayer()) {
+						if (state.isEnforced) {
+							state.triggerAttempt();
+							return;
+						} else {
+							state.trigger();
+						}
+					}
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+			hookFunction("AppearanceGetPreviewImageColor", 5, (args, next) => {
+				const C = args[0];
+				if (C && C.IsPlayer()) {
+					return "grey";
+				}
+				return next(args);
+			}, ModuleCategory.Rules);
+		},
+	});
+
 	registerRule("block_tying_others", {
 		name: "Forbid tying up others",
 		type: RuleType.Block,

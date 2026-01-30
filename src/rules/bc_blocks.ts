@@ -465,21 +465,32 @@ export function initRules_bc_blocks() {
 		load(state) {
 			// @ts-expect-error bcx rule handling
 			DialogSelfMenuMapping.Pose.clickStatusCallbacks.bcx_block_restrict_allowed_poses = function (C: Character, pose: Pose) {
-				if (C.IsPlayer() && state.isEnforced && state.customData?.poseButtons.includes(pose.Name)) {
+				if (state.inEffect && state.isEnforced && C.IsPlayer() && state.customData?.poseButtons.includes(pose.Name)) {
 					return 'Restricted by BCX rule: "Restrict allowed body poses"';
 				}
 			};
-			hookFunction("DialogSelfMenuMapping.Pose._ClickButton", 5, (args, next) => {
+			hookFunction("DialogSelfMenuMapping.Pose._ClickButton", 0, (args, next) => {
 				const C = args[1];
 				const clickedPose = args[2];
-				if (C.IsPlayer() && state.isLogged && state.customData?.poseButtons.includes(clickedPose.Name)) {
-					state.triggerAttempt();
+				if (state.inEffect && C.IsPlayer() && state.customData?.poseButtons.includes(clickedPose.Name)) {
+					// This triggers when a restricted pose *is* selected (i.e. not blocked by disable)
+					if (state.isLogged) state.trigger();
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
+			// We are hooking the eventListener directly here as DialogMenuMapping does not implement _ClickDisabledButton
+			hookFunction("DialogSelfMenuMapping.Pose.eventListeners._ClickDisabledButton", 0, function (this: HTMLButtonElement, args, next) {
+				const C = DialogSelfMenuMapping.Pose.C;
+				const clickedPose = DialogSelfMenuMapping.Pose._GetClickedObject(this);
+				if (state.inEffect && state.isEnforced && C.IsPlayer() && clickedPose && state.customData?.poseButtons.includes(clickedPose.Name)) {
+					// This triggers when a restricted pose is attempted to be selected, but is blocked by disable
+					if (state.isLogged) state.triggerAttempt();
+				}
+				return next(args);
+			});
 			hookFunction("PoseCanChangeUnaidedStatus", 0, ([C, poseName, ...args], next) => {
 				const status = next([C, poseName, ...args]);
-				if (C?.IsPlayer() && state.isEnforced && state.customData?.poseButtons.includes(poseName)) {
+				if (state.inEffect && state.isEnforced && C?.IsPlayer() && state.customData?.poseButtons.includes(poseName)) {
 					return Math.min(status, PoseChangeStatus.NEVER_WITHOUT_AID) as PoseChangeStatus;
 				} else {
 					return status;

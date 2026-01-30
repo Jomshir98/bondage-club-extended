@@ -251,6 +251,8 @@ type BCX_Rule =
 	| "block_entering_rooms"
 	| "block_leaving_room"
 	| "block_freeing_self"
+	| "block_freeing_others"
+	| "block_tying_self"
 	| "block_tying_others"
 	| "block_blacklisting"
 	| "block_whitelisting"
@@ -361,6 +363,9 @@ type RuleCustomData = {
 		minimumRole: import("./modules/authority").AccessLevel;
 	};
 	block_freeing_self: {
+		allowEasyItemsToggle: boolean;
+	};
+	block_freeing_others: {
 		allowEasyItemsToggle: boolean;
 	};
 	block_tying_others: {

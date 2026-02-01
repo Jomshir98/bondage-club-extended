@@ -364,9 +364,11 @@ type RuleCustomData = {
 	};
 	block_freeing_self: {
 		allowEasyItemsToggle: boolean;
+		blockSwappingToggle: boolean;
 	};
 	block_freeing_others: {
 		allowEasyItemsToggle: boolean;
+		blockSwappingToggle: boolean;
 	};
 	block_tying_others: {
 		onlyMoreDominantsToggle: boolean;

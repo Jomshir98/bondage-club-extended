@@ -671,7 +671,7 @@ export function initRules_bc_blocks() {
 		name: "Forbid freeing self",
 		type: RuleType.Block,
 		shortDescription: "PLAYER_NAME removing any items from PLAYER_NAME's body",
-		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score by the original asset maker, such as hand-held items, plushies, etc. This means that custom crafted properties given to an item such as 'decoy' are not factored in.",
+		longDescription: "This rule forbids PLAYER_NAME to remove any items from her own body. Other people can still remove them. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score by the original asset maker, such as hand-held items, plushies, etc. This means that custom crafted properties given to an item such as 'decoy' are not factored in. It also has a toggle to prevent swapping items.",
 		keywords: ["limiting", "untying", "unbinding", "bondage"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to remove an item from your body!",
@@ -685,9 +685,15 @@ export function initRules_bc_blocks() {
 				default: false,
 				description: "Still allow removing low difficulty items",
 			},
+			blockSwappingToggle: {
+				type: "toggle",
+				default: false,
+				description: "Also block swapping items",
+				Y: 530,
+			},
 		},
 		load(state) {
-			let score: number = 999;
+			let cachedScore: number = 999;
 			AddDialogMenuButtonName("BCX_RemoveDisabled", "Usage blocked by BCX");
 			AddDialogMenuButtonName("BCX_StruggleDisabled", "Usage blocked by BCX");
 			AddDialogMenuButtonName("BCX_DismountDisabled", "Usage blocked by BCX");
@@ -702,11 +708,11 @@ export function initRules_bc_blocks() {
 				if (C.ID === 0 && C.FocusGroup && state.isEnforced) {
 					const Item = InventoryGet(C, C.FocusGroup.Name);
 					if (Item && state.customData?.allowEasyItemsToggle) {
-						score = (Item.Asset.Difficulty ?? 0) + (typeof Item.Property?.Difficulty === "number" ? Item.Property.Difficulty : 0);
-						if (score <= 1) {
+						cachedScore = (Item.Asset.Difficulty ?? 0) + (typeof Item.Property?.Difficulty === "number" ? Item.Property.Difficulty : 0);
+						if (cachedScore <= 1) {
 							return;
 						}
-					}
+					} else cachedScore = 999;
 					const index_remove = GetDialogMenuButtonArray().indexOf("Remove");
 					const index_struggle = GetDialogMenuButtonArray().indexOf("Struggle");
 					const index_dismount = GetDialogMenuButtonArray().indexOf("Dismount");
@@ -725,14 +731,23 @@ export function initRules_bc_blocks() {
 					}
 				}
 			}, ModuleCategory.Rules);
+			// @ts-expect-error bcx rule handling
+			DialogMenuMapping.items.clickStatusCallbacks.bcx_block_freeing_self = function (C: Character, currentItem: Item, equippedItem: Item) {
+				if (!C.IsPlayer() || !state.inEffect || !state.isEnforced) return;
+				if (state.customData?.allowEasyItemsToggle && cachedScore <= 1) return;
+				if (!equippedItem || !state.customData?.blockSwappingToggle) return;
+				if (currentItem.Asset.Name === equippedItem.Asset.Name && currentItem.Craft === equippedItem.Craft) return;
+
+				return 'Restricted by BCX rule: "Forbid freeing self"';
+			};
 			const trigger = (C: Character): boolean => {
-				if (C.ID === 0 && state.inEffect && score > 1) {
+				if (C.ID === 0 && state.inEffect && cachedScore > 1) {
 					state.trigger();
 				}
 				return false;
 			};
 			const attempt = (C: Character): boolean => {
-				if (C.ID === 0 && state.inEffect && score > 1) {
+				if (C.ID === 0 && state.inEffect && cachedScore > 1) {
 					state.triggerAttempt();
 				}
 				return false;
@@ -745,13 +760,33 @@ export function initRules_bc_blocks() {
 			hookDialogMenuButtonClick("BCX_DismountDisabled", attempt);
 			hookDialogMenuButtonClick("Escape", trigger);
 			hookDialogMenuButtonClick("BCX_EscapeDisabled", attempt);
+			hookFunction("DialogMenuMapping.items._ClickButton", 0, (args, next) => {
+				const C = args[1];
+				const currentItem = args[2];
+				const equippedItem = args[3];
+				if (state.customData?.blockSwappingToggle && equippedItem) {
+					if (currentItem.Asset.Name !== equippedItem.Asset.Name || currentItem.Craft !== equippedItem.Craft)
+						trigger(C);
+				}
+				return next(args);
+			});
+			hookFunction("DialogMenuMapping.items.eventListeners._ClickDisabledButton", 0, function (this: HTMLButtonElement, args, next) {
+				const C = DialogMenuMapping.items.C;
+				const currentItem = DialogMenuMapping.items._GetClickedObject(this);
+				const equippedItem = DialogMenuMapping.items.focusGroup ? InventoryGet(C, DialogMenuMapping.items.focusGroup.Name) : null;
+				if (state.customData?.blockSwappingToggle && currentItem && equippedItem) {
+					if (currentItem.Asset.Name !== equippedItem.Asset.Name || currentItem.Craft !== equippedItem.Craft)
+						attempt(C);
+				}
+				return next(args);
+			});
 		},
 	});
 
 	registerRule("block_freeing_others", {
 		name: "Forbid freeing others",
 		type: RuleType.Block,
-		longDescription: "This rule forbids PLAYER_NAME to remove any items from other characters. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score by the original asset maker, such as hand-held items, plushies, etc. This means that custom crafted properties given to an item such as 'decoy' are not factored in.",
+		longDescription: "This rule forbids PLAYER_NAME to remove any items from other characters. The rule has a toggle to optionally still allow to remove items which were given a low difficulty score by the original asset maker, such as hand-held items, plushies, etc. This means that custom crafted properties given to an item such as 'decoy' are not factored in. It also has a toggle to prevent swapping items.",
 		keywords: ["limiting", "untying", "unbinding", "bondage"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to remove an item from TARGET_PLAYER!",
@@ -765,9 +800,15 @@ export function initRules_bc_blocks() {
 				default: false,
 				description: "Still allow removing low difficulty items",
 			},
+			blockSwappingToggle: {
+				type: "toggle",
+				default: false,
+				description: "Also block swapping items",
+				Y: 530,
+			},
 		},
 		load(state) {
-			let score: number = 999;
+			let cachedScore: number = 999;
 			AddDialogMenuButtonName("BCX_RemoveDisabled", "Usage blocked by BCX");
 			AddDialogMenuButtonName("BCX_StruggleDisabled", "Usage blocked by BCX");
 			AddDialogMenuButtonName("BCX_DismountDisabled", "Usage blocked by BCX");
@@ -782,11 +823,11 @@ export function initRules_bc_blocks() {
 				if (!C.IsPlayer() && C.FocusGroup && state.isEnforced) {
 					const Item = InventoryGet(C, C.FocusGroup.Name);
 					if (Item && state.customData?.allowEasyItemsToggle) {
-						score = (Item.Asset.Difficulty ?? 0) + (typeof Item.Property?.Difficulty === "number" ? Item.Property.Difficulty : 0);
-						if (score <= 1) {
+						cachedScore = (Item.Asset.Difficulty ?? 0) + (typeof Item.Property?.Difficulty === "number" ? Item.Property.Difficulty : 0);
+						if (cachedScore <= 1) {
 							return;
 						}
-					}
+					} else cachedScore = 999;
 					const index_remove = GetDialogMenuButtonArray().indexOf("Remove");
 					const index_struggle = GetDialogMenuButtonArray().indexOf("Struggle");
 					const index_dismount = GetDialogMenuButtonArray().indexOf("Dismount");
@@ -805,14 +846,23 @@ export function initRules_bc_blocks() {
 					}
 				}
 			}, ModuleCategory.Rules);
+			// @ts-expect-error bcx rule handling
+			DialogMenuMapping.items.clickStatusCallbacks.bcx_block_freeing_others = function (C: Character, currentItem: Item, equippedItem: Item) {
+				if (!C.IsPlayer() || !state.inEffect || !state.isEnforced) return;
+				if (state.customData?.allowEasyItemsToggle && cachedScore <= 1) return;
+				if (!equippedItem || !state.customData?.blockSwappingToggle) return;
+				if (currentItem.Asset.Name === equippedItem.Asset.Name && currentItem.Craft === equippedItem.Craft) return;
+
+				return 'Restricted by BCX rule: "Forbid freeing others"';
+			};
 			const trigger = (C: Character): boolean => {
-				if (!C.IsPlayer() && state.inEffect && score > 1) {
+				if (!C.IsPlayer() && state.inEffect && cachedScore > 1) {
 					state.trigger(C.MemberNumber);
 				}
 				return false;
 			};
 			const attempt = (C: Character): boolean => {
-				if (!C.IsPlayer() && state.inEffect && score > 1) {
+				if (!C.IsPlayer() && state.inEffect && cachedScore > 1) {
 					state.triggerAttempt(C.MemberNumber);
 				}
 				return false;
@@ -825,6 +875,26 @@ export function initRules_bc_blocks() {
 			hookDialogMenuButtonClick("BCX_DismountDisabled", attempt);
 			hookDialogMenuButtonClick("Escape", trigger);
 			hookDialogMenuButtonClick("BCX_EscapeDisabled", attempt);
+			hookFunction("DialogMenuMapping.items._ClickButton", 0, (args, next) => {
+				const C = args[1];
+				const currentItem = args[2];
+				const equippedItem = args[3];
+				if (state.customData?.blockSwappingToggle && equippedItem) {
+					if (currentItem.Asset.Name !== equippedItem.Asset.Name || currentItem.Craft !== equippedItem.Craft)
+						trigger(C);
+				}
+				return next(args);
+			});
+			hookFunction("DialogMenuMapping.items.eventListeners._ClickDisabledButton", 0, function (this: HTMLButtonElement, args, next) {
+				const C = DialogMenuMapping.items.C;
+				const currentItem = DialogMenuMapping.items._GetClickedObject(this);
+				const equippedItem = DialogMenuMapping.items.focusGroup ? InventoryGet(C, DialogMenuMapping.items.focusGroup.Name) : null;
+				if (state.customData?.blockSwappingToggle && currentItem && equippedItem) {
+					if (currentItem.Asset.Name !== equippedItem.Asset.Name || currentItem.Craft !== equippedItem.Craft)
+						attempt(C);
+				}
+				return next(args);
+			});
 		},
 	});
 

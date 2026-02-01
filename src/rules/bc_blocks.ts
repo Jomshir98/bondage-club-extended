@@ -892,7 +892,7 @@ export function initRules_bc_blocks() {
 					true;
 
 			// @ts-expect-error bcx rule handling
-			DialogMenuMapping.items.clickStatusCallbacks.bcx_block_tying_self = function (C: Character) {
+			DialogMenuMapping.items.clickStatusCallbacks.bcx_block_tying_others = function (C: Character) {
 				if (state.inEffect && state.isEnforced && !C.IsPlayer() && dominantCheck(C)) {
 					return 'Restricted by BCX rule: "Forbid tying up others"';
 				}

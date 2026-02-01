@@ -712,7 +712,7 @@ export function initRules_bc_blocks() {
 						if (cachedScore <= 1) {
 							return;
 						}
-					}
+					} else cachedScore = 999;
 					const index_remove = GetDialogMenuButtonArray().indexOf("Remove");
 					const index_struggle = GetDialogMenuButtonArray().indexOf("Struggle");
 					const index_dismount = GetDialogMenuButtonArray().indexOf("Dismount");
@@ -827,7 +827,7 @@ export function initRules_bc_blocks() {
 						if (cachedScore <= 1) {
 							return;
 						}
-					}
+					} else cachedScore = 999;
 					const index_remove = GetDialogMenuButtonArray().indexOf("Remove");
 					const index_struggle = GetDialogMenuButtonArray().indexOf("Struggle");
 					const index_dismount = GetDialogMenuButtonArray().indexOf("Dismount");

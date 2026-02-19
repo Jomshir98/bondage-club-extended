@@ -606,7 +606,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',
 		});
 		patchFunction("ChatAdminRun", {
-			'ElementPosition("InputName", 815, 100, 820);': 'ElementPosition("InputName", 865, 100, 720);',
+			'ElementPosition("InputName", 780, 100, 750);': 'ElementPosition("InputName", 830, 100, 650);',
 		});
 		patchFunction("ChatAdminRun", {
 			'DrawText(TextGet("RoomLanguage"), 250, 190,': 'DrawText(TextGet("RoomLanguage"), 390, 190,',
@@ -618,7 +618,7 @@ export class ModuleChatroomAdmin extends BaseModule {
 			'DrawText(TextGet("RoomSize"), 850, 190,': 'DrawText(TextGet("RoomSize"), 950, 190,',
 		});
 		patchFunction("ChatAdminRun", {
-			'ElementPosition("InputSize", 1099, 185, 250);': 'ElementPosition("InputSize", 1149, 185, 150);',
+			'ElementPosition("InputSize", 1064, 185, 180);': 'ElementPosition("InputSize", 1106, 185, 96);',
 		});
 		patchFunction("ChatAdminClick", {
 			"if (MouseIn(405, 157,": "if (MouseIn(505, 157,",

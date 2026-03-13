@@ -9,7 +9,7 @@ import { GuiRelationships } from "./relationships";
 import { GuiSubscreen } from "./subscreen";
 import { setSubscreen } from "../modules/gui";
 import { VERSION } from "../config";
-import { icon_discord, icon_ExternalLink, icon_heart, icon_patreon } from "../resources";
+import { icon_discord, icon_ExternalLink, icon_heart } from "../resources";
 import { drawIcon, DrawImageEx } from "../utilsClub";
 import { GuiConditionViewCurses } from "./conditions_view_curses";
 import { GuiConditionViewRules } from "./conditions_view_rules";
@@ -162,25 +162,21 @@ export class GuiMainMenu extends GuiSubscreen {
 
 		MainCanvas.textAlign = "center";
 		if (this.character.isPlayer()) {
-			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 500, "Black", "");
-			DrawButton(1450, 590, 400, 90, "", "White", "", "Open changelog on GitHub");
+			DrawText(`Your BCX version: ${VERSION.replace(/-[0-f]+$/i, "")}`, 1450 + 400 / 2, 610, "Black", "");
+			DrawButton(1450, 700, 400, 90, "", "White", "", "Open changelog on GitHub");
 			if (versionCheckNewAvailable === true) {
 				const tick = Date.now() % 6_000;
 				if (tick < 3_000) {
-					DrawText(`New version available`, 1450 + 400 / 2, 555, "Red", "Black");
+					DrawText(`New version available`, 1450 + 400 / 2, 665, "Red", "Black");
 				} else {
-					DrawText(`Login again to upgrade`, 1450 + 400 / 2, 555, "Red", "Black");
+					DrawText(`Login again to upgrade`, 1450 + 400 / 2, 665, "Red", "Black");
 				}
 			} else if (versionCheckNewAvailable === false) {
-				DrawText(`This is the latest version`, 1450 + 400 / 2, 555, "Black", "");
+				DrawText(`This is the latest version`, 1450 + 400 / 2, 665, "Black", "");
 			}
-			DrawText(`View changelog`, 1450 + 350 / 2, 635, "Black", "");
-			DrawImageEx(icon_ExternalLink, 1770, 620, { Width: 30, Height: 30 });
-			DrawButton(1450, 700, 400, 90, "", "White", "", "For saying 'thank you' with a tip");
-			MainCanvas.textAlign = "left";
-			DrawText(`BCX Patreon`, 1450 + 90, 745, "Black", "");
-			drawIcon(MainCanvas, icon_patreon, 1450 + 10, 693 + 17, 70, 70, 180, 1, 0, "Black", "");
+			DrawText(`View changelog`, 1450 + 350 / 2, 745, "Black", "");
 			DrawImageEx(icon_ExternalLink, 1770, 730, { Width: 30, Height: 30 });
+			MainCanvas.textAlign = "left";
 			DrawButton(1450, 810, 400, 90, "", "White", "", "Open invite to BCX Discord server");
 			DrawText(`BCX Discord`, 1455 + 90, 855, "Black", "");
 			drawIcon(MainCanvas, icon_discord, 1450 + 10, 810 + 17, 1, 1, 1, 1, 0, "#5865F2", "");
@@ -204,12 +200,8 @@ export class GuiMainMenu extends GuiSubscreen {
 		}
 
 		// Changelog
-		if (MouseIn(1450, 590, 400, 90) && this.character.isPlayer()) {
-			window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? "master" : "stable"}/CHANGELOG.md`, "_blank");
-		}
-		// Patreon
 		if (MouseIn(1450, 700, 400, 90) && this.character.isPlayer()) {
-			window.open(`https://patreon.com/Jomshir98`, "_blank");
+			window.open(`https://github.com/Jomshir98/bondage-club-extended/blob/${BCX_DEVEL ? "master" : "stable"}/CHANGELOG.md`, "_blank");
 		}
 		// Discord invite
 		if (MouseIn(1450, 810, 400, 90) && this.character.isPlayer()) {

@@ -148,7 +148,7 @@ function debugTransformThing(event: PromiseRejectionEvent): ErrorEvent {
 
 		// We're about to reconstruct filename:lineno:colno info from the first stack frame
 		const stack = `${event.reason.stack}`.split("\n");
-		const lastFrameLoc = stack[1]?.match(/\((.*):(\d+):(\d+)\)$/) ?? [null, "", 0, 0];
+		const lastFrameLoc = stack[1]?.match(/\((.*):(\d+):(\d+)\)$/) ?? stack[0]?.match(/\((.*):(\d+):(\d+)\)$/) ?? [null, "", 0, 0];
 		info.filename = lastFrameLoc[1];
 		info.lineno = parseInt(lastFrameLoc[2], 10);
 		info.colno = parseInt(lastFrameLoc[3], 10);

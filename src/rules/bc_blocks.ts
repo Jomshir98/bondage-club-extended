@@ -655,14 +655,22 @@ export function initRules_bc_blocks() {
 					return false;
 				return next(args);
 			}, ModuleCategory.Rules);
-			hookFunction("ChatRoomMenuClick", 6, (args, next) => {
-				const Space = 870 / (ChatRoomMenuButtons.length - 1);
-				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
-					if (MouseXIn(1005 + Space * B, 120) && ChatRoomMenuButtons[B] === "Exit" && active()) {
-						state.triggerAttempt();
-					}
+
+			hookFunction("ChatRoomTopMenuSync", 6, (args, next) => {
+				const ret = next(args);
+
+				const button = ElementWrap("chat-room-menu-Exit");
+				const rule = state.rule.toLocaleLowerCase().replaceAll("_", "-");
+				const dataAttr = `data-bcx-${rule}`;
+
+				if (button && button.getAttribute(dataAttr) !== "true") {
+					button.addEventListener("bcClickDisabled", () => {
+						if (active()) state.triggerAttempt();
+					});
+					button.setAttribute(dataAttr, "true");
 				}
-				return next(args);
+
+				return ret;
 			}, ModuleCategory.Rules);
 		},
 	});
@@ -1223,25 +1231,33 @@ export function initRules_bc_blocks() {
 		load(state) {
 			const active = (): boolean => state.isEnforced && Player.IsBlind();
 
-			hookFunction("ChatRoomMenuDraw", 6, (args, next) => {
-				next(args);
-				const Space = 870 / (ChatRoomMenuButtons.length - 1);
-				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
-					const Button = ChatRoomMenuButtons[B];
-					if (Button === "RoomAdmin" && active()) {
-						DrawButton(1005 + Space * B, 2, 120, 60, "", "Pink", "Icons/Rectangle/" + Button + ".png", TextGet("Menu" + Button));
-					}
+			hookFunction("ChatRoomMenuButtonVisualState", 6, (args, next) => {
+				if (args[0] !== "RoomAdmin") return next(args);
+
+				const ret = next(args);
+
+				if (active()) {
+					// @ts-expect-error bc-stubs doesn't have this yet
+					ret.state = "Blocked";
 				}
+				return ret;
 			}, ModuleCategory.Rules);
-			hookFunction("ChatRoomMenuClick", 6, (args, next) => {
-				const Space = 870 / (ChatRoomMenuButtons.length - 1);
-				for (let B = 0; B < ChatRoomMenuButtons.length; B++) {
-					if (MouseXIn(1005 + Space * B, 120) && ChatRoomMenuButtons[B] === "RoomAdmin" && active()) {
-						state.triggerAttempt();
-						return false;
-					}
+
+			hookFunction("ChatRoomTopMenuSync", 6, (args, next) => {
+				const ret = next(args);
+
+				const button = ElementWrap("chat-room-menu-RoomAdmin");
+				const rule = state.rule.toLocaleLowerCase().replaceAll("_", "-");
+				const dataAttr = `data-bcx-${rule}`;
+
+				if (button && button.getAttribute(dataAttr) !== "true") {
+					button.addEventListener("bcClickDisabled", () => {
+						if (active()) state.triggerAttempt();
+					});
+					button.setAttribute(dataAttr, "true");
 				}
-				return next(args);
+
+				return ret;
 			}, ModuleCategory.Rules);
 		},
 	});

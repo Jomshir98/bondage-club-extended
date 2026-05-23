@@ -509,15 +509,17 @@ export function initRules_bc_alter() {
 			},
 		},
 		init(state) {
-			hookFunction("ChatRoomMenuClick", 2, (args, next) => {
-				if (!state.isEnforced)
+
+			hookFunction("ChatRoomMenuPerformAction", 2, (args, next) => {
+				if (!state.isEnforced || args[0] !== "Exit")
 					return next(args);
 
 				const oldSlowTimer = ChatRoomSlowtimer;
-				next(args);
+				const res = next(args);
 				if (state.customData && oldSlowTimer === 0 && ChatRoomSlowtimer > 0) {
 					ChatRoomSlowtimer = CurrentTime + state.customData.leaveTime * 1000;
 				}
+				return res;
 			});
 		},
 	});

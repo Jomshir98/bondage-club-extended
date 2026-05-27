@@ -220,7 +220,8 @@ export class GuiMainMenu extends GuiSubscreen {
 
 	Exit(): void {
 		super.Exit();
-		InformationSheetLoad();
-		InformationSheetResize();
+		InformationSheetLoad().then(() => {
+			InformationSheetResize();
+		});
 	}
 }

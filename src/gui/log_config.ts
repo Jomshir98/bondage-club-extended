@@ -139,7 +139,9 @@ export class GuiLogConfig extends GuiSubscreen {
 				MainCanvas.textAlign = "center";
 				if (this.allowConfigure) {
 					DrawBackNextButton(1270, Y, 170, 64, LOG_LEVEL_NAMES[e.access], "White", "",
+						// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 						() => (e.access > 0 ? LOG_LEVEL_NAMES[(e.access - 1) as LogAccessLevel] : ""),
+						// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 						() => (e.access < 2 ? LOG_LEVEL_NAMES[(e.access + 1) as LogAccessLevel] : "")
 					);
 				} else {
@@ -200,9 +202,11 @@ export class GuiLogConfig extends GuiSubscreen {
 				const Y = 290 + off * 100;
 
 				if (e.access > 0 && MouseIn(1270, Y, 85, 64) && this.allowConfigure) {
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 					this.character.setLogConfig(e.category, (e.access - 1) as LogAccessLevel);
 					return;
 				} else if (e.access < 2 && MouseIn(1355, Y, 85, 64) && this.allowConfigure) {
+					// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 					this.character.setLogConfig(e.category, (e.access + 1) as LogAccessLevel);
 					return;
 				}

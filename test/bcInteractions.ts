@@ -288,10 +288,9 @@ export class BCInteractionManager {
 				const wantedLine = window.BCTest_wantedDialogLine;
 				if (wantedLine && Player.FocusGroup == null && CurrentCharacter != null && CurrentCharacter.FocusGroup == null) {
 					const displayedLines: DialogLine[] = [];
-					for (let D = 0; D < CurrentCharacter.Dialog.length; D++) {
-						// eslint-disable-next-line eqeqeq
-						if ((CurrentCharacter.Dialog[D].Stage == CurrentCharacter.Stage) && (CurrentCharacter.Dialog[D].Option != null) && DialogPrerequisite(D)) {
-							displayedLines.push(CurrentCharacter.Dialog[D]);
+					for (const line of CurrentCharacter.Dialog) {
+						if (line.Stage === CurrentCharacter.Stage && line.Option && DialogPrerequisite(line)) {
+							displayedLines.push(line);
 						}
 					}
 

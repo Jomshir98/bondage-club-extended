@@ -574,7 +574,7 @@ export class ModuleLog extends BaseModule {
 				return res + `Done!`;
 			},
 			importPermissions: ["log_configure"],
-			importValidator: zod.record(zod.nativeEnum(LogAccessLevel)),
+			importValidator: zod.record(zod.string(), zod.enum(LogAccessLevel)),
 		});
 	}
 

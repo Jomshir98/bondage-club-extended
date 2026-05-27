@@ -51,12 +51,12 @@ describe("BC Registration and login", () => {
 
 			const nameInput = await bc.page.$("#InputName");
 			AssertNotNullable(nameInput);
-			await nameInput.click({ clickCount: 3 });
+			await nameInput.click();
 			await nameInput.type(account.accountName);
 
 			const passwordInput = await bc.page.$("#InputPassword");
 			AssertNotNullable(passwordInput);
-			await passwordInput.click({ clickCount: 3 });
+			await passwordInput.click();
 			await passwordInput.type(account.password);
 
 			await bc.clickButton({

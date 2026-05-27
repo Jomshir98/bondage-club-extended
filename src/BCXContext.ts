@@ -97,7 +97,7 @@ export function debugMakeContextReport(): string {
 			const ctx = contextStack[i];
 			res += `> ${ctx.name}\n`;
 			if (ctx.extraInfo) {
-				let extra = "";
+				let extra;
 				try {
 					extra = ctx.extraInfo();
 				} catch (error) {

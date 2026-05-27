@@ -1346,11 +1346,11 @@ export class ModuleRules extends BaseModule {
 					const validator: ZodType<ConditionsCategorySpecificPublicData["rules"]> = zod.object({
 						enforce: zod.boolean(),
 						log: zod.boolean(),
-						customData: zod.record(zod.any()).optional(),
+						customData: zod.record(zod.string(), zod.any()).optional(),
 					});
 					const validationResult = validator.safeParse(data);
 					if (!validationResult.success) {
-						return [false, JSON.stringify(validationResult.error.format(), undefined, "\t")];
+						return [false, JSON.stringify(zod.treeifyError(validationResult.error), undefined, "\t")];
 					}
 					const validatedData = validationResult.data;
 					const definition = rules.get(condition);

@@ -176,7 +176,7 @@ export function clearAllData() {
 
 export class ModuleStorage extends BaseModule {
 	init() {
-		let saved: any = null;
+		let saved: any;
 
 		saved = localStorage.getItem(getLocalStorageName());
 		if (typeof saved === "string") {

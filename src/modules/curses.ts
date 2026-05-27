@@ -885,7 +885,7 @@ export class ModuleCurses extends BaseModule {
 					}).nullable();
 					const validationResult = validator.safeParse(data);
 					if (!validationResult.success) {
-						return [false, JSON.stringify(validationResult.error.format(), undefined, "\t")];
+						return [false, JSON.stringify(zod.treeifyError(validationResult.error), undefined, "\t")];
 					}
 					const validatedData = validationResult.data;
 					if (validatedData != null && AssetGet("Female3DCG", condition, validatedData.Name) == null) {
@@ -951,10 +951,7 @@ export class ModuleCurses extends BaseModule {
 			return result;
 		}, ModuleCategory.Curses);
 
-		hookFunction("ColorPickerReload", 0, (_args, _next) => {
-			// Shenanigens to get rid of the `never` types due to a lack of R122 `ColorPickerReload` declarations
-			const args = _args as [options?: null | ColorPickerInitOptions];
-			const next = _next as never as (arg: typeof args) => null | HTMLElement;
+		hookFunction("ColorPickerReload", 0, (args, next) => {
 
 			if (!ItemColorCharacter?.IsPlayer() || !ItemColorItem) {
 				return next(args);

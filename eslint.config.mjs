@@ -1,6 +1,4 @@
-import stylisticTs from "@stylistic/eslint-plugin-ts";
-import { fixupPluginRules } from "@eslint/compat";
-import deprecation from "eslint-plugin-deprecation";
+import stylisticTs from "@stylistic/eslint-plugin";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
 import path from "node:path";
@@ -44,7 +42,7 @@ const conf = [
 
 			parser: tsParser,
 			parserOptions: {
-				projectService: true,
+				// projectService: true,
 				tsconfigRootDir: import.meta.dirname,
 				project: ["./tsconfig.json", "./test/tsconfig.json", "./tsconfig.webpack.json"],
 			},
@@ -144,7 +142,7 @@ const conf = [
 
 			"@stylistic/ts/quotes": ["warn", "double", {
 				avoidEscape: true,
-				allowTemplateLiterals: true,
+				allowTemplateLiterals: "always",
 			}],
 
 			"@typescript-eslint/array-type": ["warn"],
@@ -216,13 +214,6 @@ const conf = [
 		...config,
 		files: ["**/*.ts"],
 	})),
-	...compat.extends(
-		"plugin:deprecation/recommended",
-	).map(config => ({
-		...config,
-		plugins: { deprecation: fixupPluginRules(config.plugins.deprecation) },
-		files: ["**/*.ts"],
-	})),
 	{
 		rules: {
 			"@typescript-eslint/no-unsafe-member-access": "off",
@@ -242,6 +233,7 @@ const conf = [
 			"@typescript-eslint/no-unnecessary-boolean-literal-compare": "warn",
 			"dot-notation": "off",
 			"@typescript-eslint/dot-notation": "warn",
+			"@typescript-eslint/no-deprecated": "error",
 		},
 	}
 ];

@@ -579,19 +579,18 @@ export function initRules_bc_speech_control() {
 			},
 		},
 		load(state) {
-			hookFunction("FriendListBeepMenuSend", 5, (args, next) => {
+			hookFunction("ServerSendBeepMessage", 5, (args, next) => {
+				const [target] = args;
 				if (state.inEffect &&
 					state.customData &&
-					(document.getElementById("FriendListBeepTextArea") as HTMLTextAreaElement | null)?.value &&
-					FriendListBeepTarget != null &&
-					!state.customData.whitelistedMemberNumbers.includes(FriendListBeepTarget) &&
+					!state.customData.whitelistedMemberNumbers.includes(target) &&
 					(!Player.CanInteract() || !state.customData.onlyWhenBound)
 				) {
 					if (state.isEnforced) {
-						state.triggerAttempt(FriendListBeepTarget);
+						state.triggerAttempt(target);
 						return;
 					}
-					state.trigger(FriendListBeepTarget);
+					state.trigger(target);
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

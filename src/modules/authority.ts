@@ -624,6 +624,7 @@ export class ModuleAuthority extends BaseModule {
 					}
 					respond(result);
 					result = "";
+					void result;
 				}
 			} else if (permissionsList[subcommand as BCX_Permissions] !== undefined) {
 				const subcommand2 = (argv[1] || "").toLocaleLowerCase();
@@ -731,7 +732,7 @@ export class ModuleAuthority extends BaseModule {
 				return res + `Done!`;
 			},
 			importPermissions: ["authority_grant_self", "authority_revoke_self", "authority_edit_min"],
-			importValidator: zod.record(zod.tuple([zod.boolean(), zod.nativeEnum(AccessLevel)])),
+			importValidator: zod.record(zod.string(), zod.tuple([zod.boolean(), zod.enum(AccessLevel)])),
 		});
 	}
 

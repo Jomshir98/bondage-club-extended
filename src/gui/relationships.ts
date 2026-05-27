@@ -68,8 +68,8 @@ export class GuiRelationships extends GuiSubscreen {
 
 		this.relationshipsList = [];
 
-		let Input_NameAdd = document.getElementById("BCX_NameAdd") as HTMLInputElement | undefined;
-		let Input_NewNameAdd = document.getElementById("BCX_NewNameAdd") as HTMLInputElement | undefined;
+		const Input_NameAdd = document.getElementById("BCX_NameAdd") as HTMLInputElement | undefined;
+		const Input_NewNameAdd = document.getElementById("BCX_NewNameAdd") as HTMLInputElement | undefined;
 
 		if (this.relationshipsData == null) {
 			Input_NameAdd?.remove();
@@ -78,11 +78,11 @@ export class GuiRelationships extends GuiSubscreen {
 		}
 
 		if (!Input_NameAdd) {
-			Input_NameAdd = ElementCreateInput("BCX_NameAdd", "text", this.memberNumberPrefill?.toString() ?? "", "8");
+			ElementCreateInput("BCX_NameAdd", "text", this.memberNumberPrefill?.toString() ?? "", "8");
 			this.memberNumberPrefill = null;
 		}
 		if (!Input_NewNameAdd) {
-			Input_NewNameAdd = ElementCreateInput("BCX_NewNameAdd", "text", "", String(NICKNAME_LENGTH_MAX));
+			ElementCreateInput("BCX_NewNameAdd", "text", "", String(NICKNAME_LENGTH_MAX));
 		}
 
 		this.relationshipsList = this.relationshipsData.relationships.map(entry => ({

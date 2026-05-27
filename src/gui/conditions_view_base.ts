@@ -201,7 +201,7 @@ export abstract class GuiConditionView<CAT extends ConditionsCategories, ExtraDa
 				Width: 46,
 			});
 			// shows time left (XXd -> XXh -> XXm -> XXs) or ∞
-			let timeLeftText: string = "n/a";
+			let timeLeftText: string;
 			if (e.data.timer === null) {
 				timeLeftText = "∞";
 			} else {

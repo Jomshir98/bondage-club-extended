@@ -5,6 +5,7 @@
 		"types": [
 			"@types/node"
 		],
+		"module": "esnext",
 		"moduleResolution": "Node",
 		"esModuleInterop": true,
 		"removeComments": true,

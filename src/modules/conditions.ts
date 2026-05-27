@@ -31,7 +31,7 @@ export const schema_ConditionsConditionRequirements: ZodType<ConditionsCondition
 		inverted: zod.literal(true).optional(),
 	}).optional(),
 	role: zod.object({
-		role: zod.nativeEnum(AccessLevel),
+		role: zod.enum(AccessLevel),
 		inverted: zod.literal(true).optional(),
 	}).optional(),
 	player: zod.object({
@@ -278,7 +278,7 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 					timerRemove: zod.boolean(),
 					data: zod.custom((data) => handler.validateCategorySpecificGlobalData(data as ConditionsCategorySpecificGlobalData[C])),
 				}) as ZodType<ConditionsCategoryConfigurableData>,
-				conditions: zod.record(zod.object({
+				conditions: zod.record(zod.string(), zod.object({
 					active: zod.boolean(),
 					data: zod.unknown().optional(),
 					timer: zod.number().nullable(),
@@ -314,7 +314,7 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 			return res + `Done!`;
 		},
 		importPermissions: [handler.permission_changeLimits],
-		importValidator: zod.record(zod.nativeEnum(ConditionsLimit)),
+		importValidator: zod.record(zod.string(), zod.enum(ConditionsLimit)),
 	});
 }
 

@@ -587,7 +587,6 @@ export function initRules_bc_blocks() {
 					if (isRoomBlocked(roomName)) {
 						if (state.isEnforced) {
 							state.triggerAttempt();
-							triggered = true;
 							return true;
 						} else {
 							state.trigger();
@@ -1237,7 +1236,6 @@ export function initRules_bc_blocks() {
 				const ret = next(args);
 
 				if (active()) {
-					// @ts-expect-error bc-stubs doesn't have this yet
 					ret.state = "Blocked";
 				}
 				return ret;

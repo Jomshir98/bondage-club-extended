@@ -126,6 +126,9 @@ export function modStorageSync() {
 		}
 
 		const checkParsedData = JSON.parse(LZString.decompressFromBase64(serializedData)!);
+		if (!isObject(checkParsedData)) {
+			throw new Error("Invalid data in storage");
+		}
 
 		if (!isMatch(modStorage, checkParsedData)) {
 			console.warn("Current data:\n", modStorage, "\nSaved data:\n", checkParsedData);
@@ -173,7 +176,7 @@ export function clearAllData() {
 
 export class ModuleStorage extends BaseModule {
 	init() {
-		let saved: any = null;
+		let saved: any;
 
 		saved = localStorage.getItem(getLocalStorageName());
 		if (typeof saved === "string") {
@@ -244,10 +247,11 @@ export class ModuleStorage extends BaseModule {
 					}
 				}
 
-				const storage: Partial<ModStorage> = JSON.parse(LZString.decompressFromBase64(saved)!);
-				if (!isObject(storage)) {
+				const parsed = JSON.parse(LZString.decompressFromBase64(saved)!);
+				if (!isObject(parsed)) {
 					throw new Error("Bad data");
 				}
+				const storage: Partial<ModStorage> = parsed;
 				const saveBCXVersion: BCXVersion | null = typeof storage.version === "string" ? parseBCXVersion(storage.version) : { major: 0, minor: 0, patch: 0 };
 				// We know for a fact, that all versions in online storage should be parsable. No future version will use that place
 				if (modStorageLocation === StorageLocations.OnlineSettings && storage.version !== undefined && saveBCXVersion == null) {

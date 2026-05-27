@@ -302,7 +302,7 @@ export function showErrorOverlay(
 				navigator.clipboard.writeText(contentElem.value);
 			} else {
 				try {
-					// eslint-disable-next-line deprecation/deprecation
+					// eslint-disable-next-line @typescript-eslint/no-deprecated
 					document.execCommand("copy");
 				} catch (err) {
 					/* Ignore */
@@ -583,8 +583,8 @@ function bcxSocketEmit(this: any, ...args: unknown[]) {
 }
 
 // Click origin
-let originalClick: undefined | ((event: MouseEvent) => void);
-function bcxClick(this: any, event: MouseEvent) {
+let originalClick: undefined | ((event: PointerEvent) => void);
+function bcxClick(this: any, event: PointerEvent) {
 	const ctx = debugContextStart(`Canvas click`, {
 		root: true,
 		modArea: "",

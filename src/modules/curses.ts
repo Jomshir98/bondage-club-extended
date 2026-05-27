@@ -51,22 +51,19 @@ function isCursePaused() {
 	return CURSE_INACTIVE_SCREENS.some(v => v()) || CurrentCharacter?.IsNpc();
 }
 
-// R122 type backport
-interface ColorPickerInitOptions {
-	/** A callback to-be executed upon closing the color picker. */
-	onExit?: (colorState: {
-		colors: string[];
-		opacity: number[];
-		initialColors: string[];
-		initialOpacity: number[];
-		defaultColors: string[];
-		defaultOpacity: number[];
-	}, save: boolean, root: null | HTMLElement) => void;
-	/** Whether the color picker should be disabled or not */
-	disabled?: boolean;
-	/** A custom heading to-be assigned to the color picker's `<h1>` element */
-	heading?: string | Element | readonly (string | Element)[];
-}
+const BCColorSchema = zod.custom<BCColor>((val) => {
+	if (typeof val !== "string") return false;
+
+	return (
+		["Default", "Black", "White", "Asian"].includes(val) ||
+		/^#(?:[0-9a-fA-F]{3}){1,2}$/.test(val)
+	);
+});
+
+const ItemColorSchema = zod.union([
+	BCColorSchema,
+	zod.array(BCColorSchema),
+]);
 
 export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
 	const result: ItemProperties = {};
@@ -880,7 +877,7 @@ export class ModuleCurses extends BaseModule {
 					const validator: ZodType<CursedItemInfo | null> = zod.object({
 						Name: zod.string(),
 						curseProperty: zod.boolean(),
-						Color: zod.union([zod.string(), zod.array(zod.string())]).optional(),
+						Color: ItemColorSchema.optional(),
 						Difficulty: zod.number().optional(),
 						Property: zod.custom<ItemProperties>(isObject).optional(),
 						Craft: zod.any(),
@@ -888,7 +885,7 @@ export class ModuleCurses extends BaseModule {
 					}).nullable();
 					const validationResult = validator.safeParse(data);
 					if (!validationResult.success) {
-						return [false, JSON.stringify(validationResult.error.format(), undefined, "\t")];
+						return [false, JSON.stringify(zod.treeifyError(validationResult.error), undefined, "\t")];
 					}
 					const validatedData = validationResult.data;
 					if (validatedData != null && AssetGet("Female3DCG", condition, validatedData.Name) == null) {
@@ -954,10 +951,7 @@ export class ModuleCurses extends BaseModule {
 			return result;
 		}, ModuleCategory.Curses);
 
-		hookFunction("ColorPickerReload", 0, (_args, _next) => {
-			// Shenanigens to get rid of the `never` types due to a lack of R122 `ColorPickerReload` declarations
-			const args = _args as [options?: null | ColorPickerInitOptions];
-			const next = _next as never as (arg: typeof args) => null | HTMLElement;
+		hookFunction("ColorPickerReload", 0, (args, next) => {
 
 			if (!ItemColorCharacter?.IsPlayer() || !ItemColorItem) {
 				return next(args);

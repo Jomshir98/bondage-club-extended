@@ -107,7 +107,7 @@ export class ModuleMiscPatches extends BaseModule {
 		hookFunction("AsylumEntranceCanWander", 0, () => true);
 
 		hookFunction("CheatFactor", 1, (args, next) => {
-			const [CheatName, Factor] = args as [string, number];
+			const [CheatName, Factor] = args;
 
 			if (CheatName === "CantLoseMistress" && cheatIsEnabled(MiscCheat.CantLoseMistress)) {
 				return Factor;

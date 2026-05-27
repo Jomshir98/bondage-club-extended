@@ -8,7 +8,7 @@ export function TestBrowserGlobals(): JestPuppeteerGlobal {
 	return globalThis as unknown as JestPuppeteerGlobal;
 }
 
-const handlePageError = (error: Error) => {
+const handlePageError = (error: unknown) => {
 	process.emit("uncaughtException", error);
 };
 

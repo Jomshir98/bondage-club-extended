@@ -1,15 +1,18 @@
 import { join } from "path";
-import { BannerPlugin, Configuration, DefinePlugin, RuleSetRule } from "webpack";
+import type { Configuration, RuleSetRule } from "webpack";
+import webpack from "webpack";
+const { BannerPlugin, DefinePlugin } = webpack;
 import "webpack-dev-server";
 import CopyPlugin from "copy-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 
-import packageJson from "./package.json";
+import packageJson from "./package.json" with { type: "json" };
 import simpleGit from "simple-git";
 
 const WEBPACK_DEV_SERVER_PORT = 8082;
 
+const __dirname = import.meta.dirname;
 const SRC_DIR = join(__dirname, "src");
 const DIST_DIR = join(__dirname, "dist");
 const STATIC_DIR = join(__dirname, "static");

@@ -159,13 +159,13 @@ export class ModuleClubUtils extends BaseModule {
 	load() {
 		registerCommandParsed("utility", "dice", "[dice sides | <rolls>d<dice sides>] - Shows only you the result of rolling a dice the given number of times",
 			(args) => {
-				let sides: number = 6;
-				let rolls: number = 1;
 				// no argument
 				if (args.length < 1) {
 					rollDice(6, 1);
 					// at least one argument
 				} else {
+					let sides: number;
+					let rolls: number;
 					// check first argument
 					if (/^[0-9]+$/.test(args[0])) {
 						sides = Number.parseInt(args[0], 10);
@@ -380,7 +380,7 @@ export class ModuleClubUtils extends BaseModule {
 						ChatRoomSendLocal(`Unable to find a valid room template in slot ${slot}. You likely need to set one in the chat room creation screen.`);
 						return false;
 					}
-					const size = typeof template.Limit === "number" ? template.Limit : Number.parseInt(template.Limit as unknown as string, 10);
+					const size = typeof template.Limit === "number" ? template.Limit : Number.parseInt(template.Limit, 10);
 					updateChatroom({
 						Name: template.Name,
 						Description: template.Description,
@@ -590,8 +590,8 @@ export class ModuleClubUtils extends BaseModule {
 			}
 		);
 		hookFunction("ActivityCheckPrerequisite", 6, (args, next) => {
-			const prereq = args[0] as string;
-			const acted = args[2] as Character;
+			const prereq = args[0];
+			const acted = args[2];
 			if (!prereq.startsWith("Has") && !prereq.startsWith("TargetHas") && acted.MemberNumber != null && activitiesAllowed.has(acted.MemberNumber))
 				return true;
 			return next(args);

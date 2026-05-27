@@ -71,7 +71,7 @@ export class GuiLog extends GuiSubscreen {
 
 		this.logEntries = [];
 
-		let NoteField = document.getElementById("BCX_NoteField") as HTMLInputElement | undefined;
+		const NoteField = document.getElementById("BCX_NoteField") as HTMLInputElement | undefined;
 
 		if (this.logData === null) {
 			this.filterInput.remove();
@@ -88,7 +88,7 @@ export class GuiLog extends GuiSubscreen {
 		if (!this.allowLeaveMessage && NoteField) {
 			NoteField.remove();
 		} else if (this.allowLeaveMessage && !NoteField) {
-			NoteField = ElementCreateInput("BCX_NoteField", "text", "", "30");
+			ElementCreateInput("BCX_NoteField", "text", "", "30");
 		}
 
 		const filter = this.filterInput.value.trim().toLocaleLowerCase().split(" ");

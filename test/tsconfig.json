@@ -1,7 +1,8 @@
 {
 	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
-		"types": ["@types/jest", "expect-puppeteer"]
+		"types": ["@types/jest", "expect-puppeteer"],
+		"skipLibCheck": true,
 	},
 	"include": [
 		"./**/*.d.ts",

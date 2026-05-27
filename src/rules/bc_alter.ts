@@ -695,7 +695,7 @@ export function initRules_bc_alter() {
 					DrawButton(505, 172, 300, 60, TextGet("Language" + ChatAdminDefaultLanguage), "#ebebe4", "", "", true);
 					DrawButton(125, 770, 250, 65, TextGet("AddOwnerAdminList"), "#ebebe4", "", "", true);
 					DrawButton(390, 770, 250, 65, TextGet("AddLoverAdminList"), "#ebebe4", "", "", true);
-					DrawBackNextButton(1300, 450, 500, 60, BackgroundsTextGet(ChatAdminData!.Background!), "#ebebe4", "",
+					DrawBackNextButton(1300, 450, 500, 60, BackgroundsTextGet(ChatAdminData!.Background), "#ebebe4", "",
 						() => BackgroundsTextGet((ChatAdminBackgroundIndex === 0) ? ChatAdminBackgroundList![ChatAdminBackgroundList!.length - 1] : ChatAdminBackgroundList![ChatAdminBackgroundIndex - 1]),
 						() => BackgroundsTextGet((ChatAdminBackgroundIndex >= ChatAdminBackgroundList!.length - 1) ? ChatAdminBackgroundList![0] : ChatAdminBackgroundList![ChatAdminBackgroundIndex + 1]),
 						true

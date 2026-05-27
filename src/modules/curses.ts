@@ -51,22 +51,19 @@ function isCursePaused() {
 	return CURSE_INACTIVE_SCREENS.some(v => v()) || CurrentCharacter?.IsNpc();
 }
 
-// R122 type backport
-interface ColorPickerInitOptions {
-	/** A callback to-be executed upon closing the color picker. */
-	onExit?: (colorState: {
-		colors: string[];
-		opacity: number[];
-		initialColors: string[];
-		initialOpacity: number[];
-		defaultColors: string[];
-		defaultOpacity: number[];
-	}, save: boolean, root: null | HTMLElement) => void;
-	/** Whether the color picker should be disabled or not */
-	disabled?: boolean;
-	/** A custom heading to-be assigned to the color picker's `<h1>` element */
-	heading?: string | Element | readonly (string | Element)[];
-}
+const BCColorSchema = zod.custom<BCColor>((val) => {
+	if (typeof val !== "string") return false;
+
+	return (
+		["Default", "Black", "White", "Asian"].includes(val) ||
+		/^#(?:[0-9a-fA-F]{3}){1,2}$/.test(val)
+	);
+});
+
+const ItemColorSchema = zod.union([
+	BCColorSchema,
+	zod.array(BCColorSchema),
+]);
 
 export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
 	const result: ItemProperties = {};
@@ -880,7 +877,7 @@ export class ModuleCurses extends BaseModule {
 					const validator: ZodType<CursedItemInfo | null> = zod.object({
 						Name: zod.string(),
 						curseProperty: zod.boolean(),
-						Color: zod.union([zod.string(), zod.array(zod.string())]).optional(),
+						Color: ItemColorSchema.optional(),
 						Difficulty: zod.number().optional(),
 						Property: zod.custom<ItemProperties>(isObject).optional(),
 						Craft: zod.any(),

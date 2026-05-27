@@ -3,7 +3,7 @@ export let BCXLoginTimedata: Record<string, unknown> = {};
 
 export function SetLoadedBeforeLogin(loginData: Record<string, unknown>) {
 	BCXLoadedBeforeLogin = true;
-	BCXLoginTimedata = JSON.parse(JSON.stringify(loginData));
+	BCXLoginTimedata = structuredClone(loginData);
 }
 
 export function BCX_setInterval(handler: () => void, timeout?: number): number {

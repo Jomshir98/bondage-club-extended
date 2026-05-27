@@ -31,7 +31,7 @@ type BCX_DialogMenuButton =
 	| "BCX_ActivityDisabled"
 	| "BCX_Search"
 	| "BCX_SearchExit"
-	| DialogMenuButton;
+	| DialogMenuButtonType;
 
 type BCX_BackgroundTag =
 	| "[BCX] Hidden"
@@ -104,7 +104,7 @@ type BCX_LogCategory =
 interface CursedItemInfo {
 	Name: string;
 	curseProperty: boolean;
-	Color?: string | string[];
+	Color?: ItemColor;
 	Difficulty?: number;
 	Property?: ItemProperties;
 	Craft?: CraftingItem;
@@ -561,7 +561,7 @@ type RuleCustomData = {
 		restore: boolean;
 	};
 	setting_sensdep: {
-		value: SettingsSensDepName;
+		value: ImmersionSensDepName;
 		disableExamine: boolean;
 		hideMessages: boolean;
 	};

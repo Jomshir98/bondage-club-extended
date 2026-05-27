@@ -76,7 +76,7 @@ export function GetDialogMenuButtonArray(): BCX_DialogMenuButton[] {
 }
 
 export function SetDialogMenuButtonArray(newValue: BCX_DialogMenuButton[]): void {
-	DialogMenuButton = newValue as DialogMenuButton[];
+	DialogMenuButton = newValue as DialogMenuButtonType[];
 }
 
 export function AddDialogMenuButtonName(keyword: string, value: string) {

@@ -123,7 +123,7 @@ function parseThemeRoom(value: string): void {
 	}
 	currentThemeRoom.Type = typeof parsed.Type === "number" && ThemeRoomType[parsed.Type] !== undefined ? parsed.Type : ThemeRoomType.Other;
 	currentThemeRoom.Setting = typeof parsed.Setting === "number" && ThemeRoomSetting[parsed.Setting] !== undefined ? parsed.Setting : undefined;
-	currentThemeRoom.Limits = new Set(Array.isArray(parsed.Limits) ? parsed.Limits.filter(i => THEME_ROOM_LIMITS.includes(i)) : []);
+	currentThemeRoom.Limits = new Set(Array.isArray(parsed.Limits) ? parsed.Limits.filter(i => typeof i === "string" && THEME_ROOM_LIMITS.includes(i)) as string[] : []);
 	currentThemeRoom.BlockCategories = Array.isArray(parsed.BlockCategories) ? parsed.BlockCategories.filter(i => typeof i === "string") as ServerChatRoomBlockCategory[] : [];
 	currentThemeRoom.Background = typeof parsed.Background === "string" ? parsed.Background : "";
 	currentThemeRoom.IntroText = typeof parsed.IntroText === "string" ? parsed.IntroText : "";
@@ -282,7 +282,7 @@ function ChatSettingsThemeRoomClick() {
 	if (MouseIn(1480, 75, 420, 245)) {
 		ElementToggleGeneratedElements("ChatAdmin", false);
 		BackgroundSelectionMake(ChatSearchBackgroundTagList,
-			ChatAdminData!.Background!, Name => {
+			ChatAdminData!.Background, Name => {
 				currentThemeRoom.Background = Name;
 			}
 		);
@@ -431,7 +431,7 @@ function ToggleThemeRoomSetting(newSetting: ThemeRoomSetting) {
 
 function ChatSettingsThemeRoomLoad() {
 	currentThemeRoom.Background = ChatAdminData!.Background!;
-	currentThemeRoom.BlockCategories = [...ChatAdminData!.BlockCategory!];
+	currentThemeRoom.BlockCategories = [...ChatAdminData!.BlockCategory];
 }
 
 function ChatSettingsThemeRoomExit() {
@@ -506,15 +506,15 @@ function ChatSettingsExtraClick(apply: (data: RoomTemplate) => void) {
 			modStorage.roomTemplates[i] = {
 				Name: ElementValue("InputName") ? ElementValue("InputName").trim() : "",
 				Description: ElementValue("InputDescription") ? ElementValue("InputDescription").trim() : "",
-				Background: ChatAdminData!.Background!,
-				Visibility: ChatAdminData!.Visibility!,
-				Access: ChatAdminData!.Access!,
-				Game: ChatAdminData!.Game!,
+				Background: ChatAdminData!.Background,
+				Visibility: ChatAdminData!.Visibility,
+				Access: ChatAdminData!.Access,
+				Game: ChatAdminData!.Game,
 				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList").trim()) : [],
 				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist").trim()) : [],
 				Limit: ElementValue("InputSize") ? parseInt(ElementValue("InputSize").trim(), 10) : 10,
-				Language: ChatAdminData!.Language!,
-				BlockCategory: cloneDeep(ChatAdminData!.BlockCategory)!,
+				Language: ChatAdminData!.Language,
+				BlockCategory: cloneDeep(ChatAdminData!.BlockCategory),
 				Custom: ChatAdminData!.Custom!,
 				AutoApply: modStorage.roomTemplates[i]?.AutoApply,
 			};
@@ -543,12 +543,12 @@ function applyTemplate(template: RoomTemplate) {
 	ChatAdminData!.Background = template.Background;
 	if (typeof ChatAdminAccessModeValues !== "undefined") {
 		ChatAdminData!.Access = access ?? template.Access;
-		ChatAdminAccessModeIndex = ChatAdminAccessModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Access!));
+		ChatAdminAccessModeIndex = ChatAdminAccessModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Access));
 		if (ChatAdminAccessModeIndex < 0) ChatAdminAccessModeIndex = 0;
 	}
 	if (typeof ChatAdminVisibilityModeValues !== "undefined") {
 		ChatAdminData!.Visibility = visibility ?? template.Visibility;
-		ChatAdminVisibilityModeIndex = ChatAdminVisibilityModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Visibility!));
+		ChatAdminVisibilityModeIndex = ChatAdminVisibilityModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Visibility));
 		if (ChatAdminVisibilityModeIndex < 0) ChatAdminVisibilityModeIndex = 0;
 	}
 	ChatAdminData!.Game = template.Game;

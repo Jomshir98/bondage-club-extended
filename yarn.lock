@@ -786,6 +786,11 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/quickjs-emscripten/-/quickjs-emscripten-0.23.0.tgz#db4ecfd499a9765ab24002c3b696d02e6d32a12c"
   integrity sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==
 
+"@total-typescript/ts-reset@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@total-typescript/ts-reset/-/ts-reset-0.6.1.tgz#aebb29b6a79bb404e4cf618da6a392c94ed73a45"
+  integrity sha512-cka47fVSo6lfQDIATYqb/vO1nvFfbPw7uWLayIXIhGETj0wcOOlrlkobOMDNQOFr9QOafegUPq13V2+6vtD7yg==
+
 "@tsconfig/node10@^1.0.7":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@tsconfig/node10/-/node10-1.0.11.tgz#6ee46400685f130e278128c7b38b7e031ff5b2f2"
@@ -1692,11 +1697,12 @@ batch@0.6.1:
   resolved "https://registry.yarnpkg.com/batch/-/batch-0.6.1.tgz#dc34314f4e679318093fc760272525f94bf25c16"
   integrity sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==
 
-bc-stubs@^123.0.0-Beta.3:
-  version "123.0.0-Beta.3"
-  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-123.0.0-Beta.3.tgz#8f8903cbc0b081e59451c5630966da77560e86b8"
-  integrity sha512-RELyHtkCkK4b06YbYwYmVk5IPfZWmzdjQDCaEEjLglxznEf/LXE9444GnUUpQDFJ3wSCWnIUBLNAQUHA/4x/JA==
+bc-stubs@128:
+  version "128.0.0"
+  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-128.0.0.tgz#e1a5371c63743059a40cc2d69d38e802f349b942"
+  integrity sha512-12myItRFlzVnDB5xm2cVh0lmZJOE2xgKd4vXpxD3AEhUn3YmRYEanrYrzphc14R+Jha2OqxZlyfPAfR15kwE/A==
   dependencies:
+    "@total-typescript/ts-reset" "^0.6.1"
     socket.io-client "4.6.1"
 
 binary-extensions@^2.0.0:

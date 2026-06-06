@@ -436,8 +436,15 @@ type RuleCustomData = {
 	alt_allow_changing_appearance: {
 		minimumRole: import("./modules/authority").AccessLevel;
 	};
+	speech_block_gagged_ooc: {
+		allowWhispers: boolean;
+	};
+	speech_block_ooc: {
+		allowWhispers: boolean;
+	};
 	speech_specific_sound: {
 		soundWhitelist: string[];
+		allowWhispers: boolean;
 	};
 	speech_doll_talk: {
 		maxWordLength: number;

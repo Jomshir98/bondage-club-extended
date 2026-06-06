@@ -50,11 +50,19 @@ export function initRules_bc_speech_control() {
 		},
 		defaultLimit: ConditionsLimit.normal,
 		dataDefinition: {
+			allowWhispers: {
+				Y: 370,
+				type: "toggle",
+				default: false,
+				description: "Allow whispers",
+			},
 			soundWhitelist: {
+				Y: 490,
 				type: "stringList",
 				default: [],
 				description: "Set the allowed sounds:",
 				options: {
+					pageSize: 3,
 					validate: /^\p{L}*$/iu,
 				},
 			},
@@ -62,7 +70,7 @@ export function initRules_bc_speech_control() {
 		init(state) {
 			const check = (msg: SpeechMessageInfo): boolean => {
 				const sounds = state.customData?.soundWhitelist;
-				if (sounds && sounds.length > 0 && (msg.type === "Chat" || msg.type === "Whisper")) {
+				if (sounds && sounds.length > 0 && (msg.type === "Chat" || !state.customData.allowWhispers && msg.type === "Whisper")) {
 					const message = (msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase();
 					return checkMessageForSounds(sounds, message);
 				}
@@ -96,9 +104,17 @@ export function initRules_bc_speech_control() {
 			attempt_log: "PLAYER_NAME tried to use OOC in a message while gagged",
 			log: "PLAYER_NAME used OOC in a message while gagged",
 		},
+		dataDefinition: {
+			allowWhispers: {
+				Y: 370,
+				type: "toggle",
+				default: false,
+				description: "Allow whispers",
+			},
+		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk() || msg.type !== "Chat" && msg.type !== "Whisper";
+			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || Player.CanTalk() || msg.type !== "Chat" && (state.customData?.allowWhispers || msg.type !== "Whisper");
 			registerSpeechHook({
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {
@@ -127,9 +143,17 @@ export function initRules_bc_speech_control() {
 			attempt_log: "PLAYER_NAME tried to use OOC in a message",
 			log: "PLAYER_NAME used OOC in a message",
 		},
+		dataDefinition: {
+			allowWhispers: {
+				Y: 370,
+				type: "toggle",
+				default: false,
+				description: "Allow whispers",
+			},
+		},
 		defaultLimit: ConditionsLimit.blocked,
 		init(state) {
-			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || msg.type !== "Chat" && msg.type !== "Whisper";
+			const check = (msg: SpeechMessageInfo): boolean => !msg.hasOOC || msg.type !== "Chat" && (state.customData?.allowWhispers || msg.type !== "Whisper");
 			registerSpeechHook({
 				allowSend: (msg) => {
 					if (state.isEnforced && !check(msg)) {

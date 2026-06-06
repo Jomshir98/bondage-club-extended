@@ -312,7 +312,7 @@ type BCX_Rule =
 	| "speech_greet_order"
 	| "speech_block_antigarble"
 	| "speech_replace_spoken_words"
-	// | "speech_using_honorifics"
+	| "speech_using_honorifics"
 	| "speech_force_retype"
 	| "greet_room_order"
 	| "greet_new_guests"
@@ -477,9 +477,9 @@ type RuleCustomData = {
 	speech_replace_spoken_words: {
 		stringWithReplacingSyntax: string;
 	};
-	// speech_using_honorifics: {
-	// 	stringWithRuleSyntax: string;
-	// },
+	speech_using_honorifics: {
+		stringWithRuleSyntax: string;
+	};
 	greet_room_order: {
 		greetingSentence: string;
 		affectEmotes: boolean;

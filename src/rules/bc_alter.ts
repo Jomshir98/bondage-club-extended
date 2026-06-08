@@ -679,50 +679,20 @@ export function initRules_bc_alter() {
 			attempt_infoBeep: "You are forbidden from changing room settings while restrained",
 		},
 		load(state) {
-			hookFunction("ChatAdminLoad", 0, (args, next) => {
+			hookFunction("ChatAdminCanEdit", 0, (args, next) => {
 				const ret = next(args);
 				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {
-					document.getElementById("InputName")?.setAttribute("disabled", "disabled");
-					document.getElementById("InputDescription")?.setAttribute("disabled", "disabled");
-					document.getElementById("InputSize")?.setAttribute("disabled", "disabled");
-					document.getElementById("InputAdminList")?.setAttribute("disabled", "disabled");
+					return false;
 				}
 				return ret;
 			});
 			hookFunction("ChatAdminRun", 0, (args, next) => {
 				next(args);
 				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {
-					DrawButton(505, 172, 300, 60, TextGet("Language" + ChatAdminDefaultLanguage), "#ebebe4", "", "", true);
-					DrawButton(125, 770, 250, 65, TextGet("AddOwnerAdminList"), "#ebebe4", "", "", true);
-					DrawButton(390, 770, 250, 65, TextGet("AddLoverAdminList"), "#ebebe4", "", "", true);
-					DrawBackNextButton(1300, 450, 500, 60, BackgroundsTextGet(ChatAdminData!.Background), "#ebebe4", "",
-						() => BackgroundsTextGet((ChatAdminBackgroundIndex === 0) ? ChatAdminBackgroundList![ChatAdminBackgroundList!.length - 1] : ChatAdminBackgroundList![ChatAdminBackgroundIndex - 1]),
-						() => BackgroundsTextGet((ChatAdminBackgroundIndex >= ChatAdminBackgroundList!.length - 1) ? ChatAdminBackgroundList![0] : ChatAdminBackgroundList![ChatAdminBackgroundIndex + 1]),
-						true
-					);
-					DrawButton(1840, 450, 60, 60, "", "#ebebe4", "Icons/Small/Preference.png", "", true);
-					DrawBackNextButton(1625, 550, 275, 60, TextGet("Game" + ChatAdminData!.Game), "#ebebe4", "", () => "", () => "", true);
-					DrawButton(1426, 728, 64, 64, "", "#ebebe4", isRoomPrivate(ChatAdminData!) ? "Icons/Checked.png" : "", "", true);
-					DrawButton(1756, 728, 64, 64, "", "#ebebe4", isRoomLocked(ChatAdminData!) ? "Icons/Checked.png" : "", "", true);
-					DrawRect(100, 850, 1125, 70, "#ffff88");
-					DrawEmptyRect(100, 850, 1125, 70, "Black");
-					DrawText("Some settings are not available due to a BCX rule.", 650, 885, "Black", "Gray");
+					DrawRect(125, 885, 1100, 70, "#ffff88");
+					DrawEmptyRect(125, 885, 1100, 70, "Black");
+					DrawText("Some settings are not available due to a BCX rule.", 675, 920, "Black", "Gray");
 				}
-			});
-			hookFunction("ChatAdminClick", 5, (args, next) => {
-				if (state.isEnforced && ChatRoomPlayerIsAdmin() && Player.IsRestrained() && (
-					MouseIn(505, 172, 300, 60) ||
-					MouseIn(1300, 75, 600, 350) ||
-					MouseIn(1840, 450, 60, 60) ||
-					MouseIn(1300, 450, 500, 60) ||
-					MouseIn(1625, 550, 275, 60) ||
-					MouseIn(1426, 728, 64, 64) ||
-					MouseIn(1756, 728, 64, 64) ||
-					MouseIn(125, 770, 250, 65) ||
-					MouseIn(390, 770, 250, 65)
-				))
-					return;
-				return next(args);
 			});
 			hookFunction("CommonSetScreen", 5, (args, next) => {
 				if (state.isEnforced && args[0] === "Online" && args[1] === "ChatBlockItem" && ChatRoomPlayerIsAdmin() && Player.IsRestrained()) {

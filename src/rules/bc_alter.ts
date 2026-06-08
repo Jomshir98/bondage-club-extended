@@ -731,7 +731,7 @@ export function initRules_bc_alter() {
 				return next(args);
 			});
 			hookFunction("ChatRoomAdminAction", 5, (args, next) => {
-				const ActionType = args[1] as string;
+				const ActionType = args[0] as string;
 				if (state.isEnforced && Player.IsRestrained() &&
 					ActionType !== "Kick" && ActionType !== "Ban"
 				) {

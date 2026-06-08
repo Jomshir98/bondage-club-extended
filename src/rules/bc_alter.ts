@@ -2,7 +2,7 @@ import { ConditionsLimit, ModuleCategory } from "../constants";
 import { registerRule, RuleType } from "../modules/rules";
 import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { hookFunction, trackFunction } from "../patching";
-import { ChatRoomActionMessage, getCharacterName, InfoBeep, isRoomLocked, isRoomPrivate, updateChatroom } from "../utilsClub";
+import { ChatRoomActionMessage, getCharacterName, InfoBeep, updateChatroom } from "../utilsClub";
 import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { getAllCharactersInRoom, registerEffectBuilder } from "../characters";
 import { isObject } from "../utils";

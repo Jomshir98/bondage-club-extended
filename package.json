@@ -35,7 +35,7 @@
 		"@types/jest": "^30.0.0",
 		"@typescript-eslint/eslint-plugin": "^8.21.0",
 		"@typescript-eslint/parser": "^8.21.0",
-		"bc-stubs": "128",
+		"bc-stubs": "^129.0.0",
 		"buffer": "^6.0.3",
 		"clean-webpack-plugin": "^4.0.0",
 		"copy-webpack-plugin": "^14.0.0",

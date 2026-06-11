@@ -363,7 +363,7 @@ export function showHelp(helpText: string) {
 	});
 }
 
-type RoomInfo = Omit<ChatRoom, "Character">;
+type RoomInfo = Omit<ChatRoomData, "Character">;
 
 export function getCurrentRoomData(): RoomInfo | null {
 	if (!ChatRoomData)

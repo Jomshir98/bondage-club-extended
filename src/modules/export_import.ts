@@ -95,7 +95,7 @@ export function ExportImportDoImport(category: string, data: string, character: 
 
 	const zodResult = definition.importValidator.safeParse(parsedData[category]);
 	if (!zodResult.success) {
-		return `Invalid input:\n${JSON.stringify(z.treeifyError(zodResult.error), undefined, "\t")}`;
+		return `Invalid input:\n${JSON.stringify(z.prettifyError(zodResult.error), undefined, "\t")}`;
 	}
 
 	if (character) {

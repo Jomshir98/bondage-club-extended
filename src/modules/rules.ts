@@ -1350,7 +1350,7 @@ export class ModuleRules extends BaseModule {
 					});
 					const validationResult = validator.safeParse(data);
 					if (!validationResult.success) {
-						return [false, JSON.stringify(zod.treeifyError(validationResult.error), undefined, "\t")];
+						return [false, JSON.stringify(zod.prettifyError(validationResult.error), undefined, "\t")];
 					}
 					const validatedData = validationResult.data;
 					const definition = rules.get(condition);

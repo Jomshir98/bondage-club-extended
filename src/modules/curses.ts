@@ -880,7 +880,7 @@ export class ModuleCurses extends BaseModule {
 						Color: ItemColorSchema.optional(),
 						Difficulty: zod.number().optional(),
 						Property: zod.custom<ItemProperties>(isObject).optional(),
-						Craft: zod.any(),
+						Craft: zod.any().optional(),
 						itemRemove: zod.literal(true).optional(),
 					}).nullable();
 					const validationResult = validator.safeParse(data);

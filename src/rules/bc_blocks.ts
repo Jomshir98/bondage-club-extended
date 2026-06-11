@@ -965,7 +965,7 @@ export function initRules_bc_blocks() {
 		load(state) {
 			const dominantCheck = (C: Character): boolean =>
 				state.customData?.onlyMoreDominantsToggle ?
-					ReputationCharacterGet(Player, "Dominant") < ReputationCharacterGet(C, "Dominant") :
+					ReputationGet(Player, "Dominant") < ReputationGet(C, "Dominant") :
 					true;
 
 			// @ts-expect-error bcx rule handling

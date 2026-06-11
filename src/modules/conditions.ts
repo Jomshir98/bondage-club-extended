@@ -276,7 +276,7 @@ export function ConditionsRegisterCategory<C extends ConditionsCategories>(categ
 					requirements: schema_ConditionsConditionRequirements,
 					timer: zod.number().nullable(),
 					timerRemove: zod.boolean(),
-					data: zod.custom((data) => handler.validateCategorySpecificGlobalData(data as ConditionsCategorySpecificGlobalData[C])),
+					data: zod.custom((data) => handler.validateCategorySpecificGlobalData(data as ConditionsCategorySpecificGlobalData[C])).optional(),
 				}) as ZodType<ConditionsCategoryConfigurableData>,
 				conditions: zod.record(zod.string(), zod.object({
 					active: zod.boolean(),

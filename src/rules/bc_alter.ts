@@ -786,7 +786,7 @@ export function initRules_bc_alter() {
 				let old = state.internalData;
 				if (old !== undefined) {
 					if (old === Player.Name) {
-						old = "";
+						old = undefined;
 					}
 					if (Player.Nickname !== old) {
 						Player.Nickname = old;

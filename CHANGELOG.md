@@ -14,6 +14,15 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.16
+
+- [FIX] `alt_set_nickname` improperly clearing the nickname when restoring
+
+## 1.1.15
+
+- [CHORE] Fix some deprecated BC R129 things
+- [FIX] Curse imports
+
 ## 1.1.14
 
 - [FIX] Fix the allowed interaction menu in profile (#72)

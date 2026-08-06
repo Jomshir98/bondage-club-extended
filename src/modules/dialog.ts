@@ -95,9 +95,6 @@ export class ModuleDialog extends BaseModule {
 				exitSearchMode(args[0]);
 			} else if (searchBar) {
 				SetDialogMenuButtonArray(["Exit", "BCX_SearchExit"]);
-				if (DialogInventory.length > 12) {
-					GetDialogMenuButtonArray().push("Next");
-				}
 			} else {
 				GetDialogMenuButtonArray().splice(1, 0, "BCX_Search");
 			}
@@ -160,23 +157,6 @@ export class ModuleDialog extends BaseModule {
 			exitSearchMode(C);
 
 			return ret;
-		});
-
-		// Remove some buttons, if there are too many
-		hookFunction("DialogMenuButtonBuild", 10, (args, next) => {
-			next(args);
-			const ICON_REMOVAL_CANDIDATES: BCX_DialogMenuButton[] = [
-				"Prev",
-				"BCX_Search",
-			];
-			for (const toRemove of ICON_REMOVAL_CANDIDATES) {
-				if (GetDialogMenuButtonArray().length <= 9)
-					break;
-				const index = GetDialogMenuButtonArray().indexOf(toRemove);
-				if (index >= 0) {
-					GetDialogMenuButtonArray().splice(index, 1);
-				}
-			}
 		});
 	}
 

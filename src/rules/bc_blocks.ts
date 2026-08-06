@@ -1089,36 +1089,18 @@ export function initRules_bc_blocks() {
 		},
 		defaultLimit: ConditionsLimit.blocked,
 		load(state) {
-			hookFunction("PreferenceSubscreenDifficultyRun", 5, (args, next) => {
-				next(args);
-				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? (Player.Creation ?? 0) : Player.Difficulty.LastChange;
-				if (
-					state.isEnforced &&
-					PreferenceDifficultyLevel != null &&
-					PreferenceDifficultyLevel !== Player.GetDifficulty() &&
-					(PreferenceDifficultyLevel <= 1 || LastChange + 604800000 < CurrentTime) &&
-					PreferenceDifficultyAccept
-				) {
-					DrawButton(500, 825, 300, 64, TextGet("DifficultyChangeMode") + " " + TextGet(`DifficultyLevel${PreferenceDifficultyLevel}`), "#88c", undefined, "Blocked by BCX", true);
-				}
-			});
-			hookFunction("PreferenceSubscreenDifficultyClick", 5, (args, next) => {
-				const LastChange = typeof Player?.Difficulty?.LastChange !== "number" ? (Player.Creation ?? 0) : Player.Difficulty.LastChange;
-				if (
-					state.inEffect &&
-					PreferenceDifficultyLevel != null &&
-					PreferenceDifficultyLevel !== Player.GetDifficulty() &&
-					(PreferenceDifficultyLevel <= 1 || LastChange + 604800000 < CurrentTime) &&
-					PreferenceDifficultyAccept &&
-					MouseIn(500, 825, 300, 64)
-				) {
-					if (state.isEnforced) {
-						state.triggerAttempt();
+			hookFunction("PreferenceSubscreenDifficultyConfirm", 5, (args, next) => {
+				if (state.inEffect) {
+					if (PreferenceDifficultyLevel !== Player.GetDifficulty()) {
+						if (state.isEnforced) {
+							state.triggerAttempt();
+							return;
+						}
+						state.trigger();
 						return;
 					}
-					state.trigger();
 				}
-				next(args);
+				return next(args);
 			});
 		},
 	});

@@ -443,9 +443,9 @@ export function initCommands_definitions() {
 	registerCommand("asylum", {
 		name: "Send to asylum",
 		helpDescription: `<time> | cancel`,
-		shortDescription: "Lock PLAYER_NAME into the aslyum",
+		shortDescription: "Lock PLAYER_NAME into the asylum",
 		longDescription:
-			`This command sends and locks PLAYER_NAME into the asylum for up to 1 week, where she can freely walk around, but cannot leave the area. You can free PLAYER_NAME early by visiting her in the aslyum and using '.asylum cancel'.\n` +
+			`This command sends and locks PLAYER_NAME into the asylum for up to 1 week, where she can freely walk around, but cannot leave the area. You can free PLAYER_NAME early by visiting her in the asylum and using '.asylum cancel'.\n` +
 			`IMPORTANT: The effects of this command is not going away if BCX is turned off or not activated after reloading. This is because this command uses a function present in the base game.\n` +
 			`Usage:\n` +
 			`!asylum HELP_DESCRIPTION`,

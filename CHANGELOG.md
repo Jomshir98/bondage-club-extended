@@ -14,6 +14,13 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.17
+
+- [FIX] Fix typos on the asylum command descriptions
+- [FIX] Update `block_difficulty_change` rule for DOM changes
+- [FIX] Remove Prev/Next button overflow handling from Dialog
+- [CHORE] Update bc-stubs@130
+
 ## 1.1.16
 
 - [FIX] `alt_set_nickname` improperly clearing the nickname when restoring

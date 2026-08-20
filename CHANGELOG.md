@@ -14,6 +14,11 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.18
+
+- [CHORE] Bump bc-stubs to v131
+- [CHORE] Adapt to the R131 Item and `Item.Color` changes
+
 ## 1.1.17
 
 - [FIX] Fix typos on the asylum command descriptions

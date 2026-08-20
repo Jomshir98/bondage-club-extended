@@ -56,7 +56,7 @@ export function itemMergeProperties(sourceProperty: Partial<ItemProperties> | un
 }: {
 	includeNoncursableProperties?: boolean;
 	lockAssignMemberNumber?: number;
-} = {}): Partial<ItemProperties> | undefined {
+} = {}): Partial<ItemProperties> {
 
 	const itemProperty = cloneDeep(sourceProperty ?? {});
 	targetProperty = cloneDeep(targetProperty ?? {});
@@ -109,9 +109,6 @@ export function itemMergeProperties(sourceProperty: Partial<ItemProperties> | un
 		itemProperty.Effect = curseEffects.concat(itemIgnoredEffects);
 	}
 
-	if (Object.keys(targetProperty).length === 0) {
-		return undefined;
-	}
 	return itemProperty;
 }
 
@@ -119,7 +116,7 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 	if (C.Appearance.some(a => isBind(a) && a.Property?.Effect?.includes("Lock"))) {
 		// Looks for all locked items and items blocked by locked items and checks, that none of those change by the import
 		// First find which groups should match
-		const matchedGroups: Set<string> = new Set();
+		const matchedGroups: Set<AssetGroupName> = new Set();
 		const test = (item: Item) => {
 			if (isBind(item)) {
 				// For each blocked group
@@ -144,6 +141,7 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 		for (const testedGroup of matchedGroups) {
 			const currentItem = C.Appearance.find(a => a.Asset.Group.Name === testedGroup);
 			const newItem = data.find(b => b.Group === testedGroup);
+			const newAsset = newItem ? AssetGet("Female3DCG", testedGroup, newItem.Name) : null;
 			if (!currentItem) {
 				if (newItem) {
 					return true;
@@ -155,8 +153,9 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 				continue;
 			if (
 				!newItem ||
+                !newAsset ||
 				currentItem.Asset.Name !== newItem.Name ||
-				!itemColorsEquals(currentItem.Color, newItem.Color) ||
+				!itemColorsEquals(currentItem.Color, newItem.Color, currentItem.Asset, newAsset) ||
 				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, newItem.Property, {
 					includeNoncursableProperties: true,
 					lockAssignMemberNumber: Player.MemberNumber,
@@ -321,14 +320,16 @@ export function j_WardrobeImportSelectionClothes(data: string | ItemBundle[], in
 	// Check if everything (except ignored properties) matches
 	let fullMatch = includeBinds;
 	if (includeBinds) {
-		for (const group of arrayUnique(C.Appearance.filter(Allow).map<string>(item => item.Asset.Group.Name).concat(data.map(item => item.Group)))) {
+		for (const group of arrayUnique(C.Appearance.filter(Allow).map<AssetGroupName>(item => item.Asset.Group.Name).concat(data.map(item => item.Group)))) {
 			const wornItem = C.Appearance.find(item => item.Asset.Group.Name === group);
 			const bundleItem = data.find(item => item.Group === group);
+			const bundleAsset = bundleItem ? AssetGet("Female3DCG", group, bundleItem.Name) : null;
 			if (
 				!wornItem ||
 				!bundleItem ||
+                !bundleAsset ||
 				wornItem.Asset.Name !== bundleItem.Name ||
-				!itemColorsEquals(wornItem.Color, bundleItem.Color) ||
+				!itemColorsEquals(wornItem.Color, bundleItem.Color, wornItem.Asset, bundleAsset) ||
 				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(bundleItem.Property))
 			) {
 				fullMatch = false;

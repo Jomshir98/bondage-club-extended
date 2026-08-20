@@ -24,7 +24,7 @@ export function InvisibilityEarbuds() {
 		Player.Appearance = Player.Appearance.filter(A => A.Asset.Group.Name !== "ItemEars");
 		Player.Appearance.push({
 			Asset: asset,
-			Color: "Default",
+			Color: [...asset.DefaultColor],
 			Difficulty: -100,
 			Property: {
 				Type: "Light",

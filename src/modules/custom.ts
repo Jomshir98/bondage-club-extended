@@ -32,7 +32,7 @@ export class ModuleCustom extends BaseModule {
 				const c = InventoryGet(C.Character, "ItemVulva");
 				const a = AssetGet(C.Character.AssetFamily, "ItemVulva", "DoubleEndDildo");
 				const f = AssetGet(C.Character.AssetFamily, "ItemVulva", "FuturisticVibrator");
-				if (c && c.Asset === a && c.Color === "#A7806F" && f) {
+				if (c && c.Asset === a && c.Color.includes("#A7806F") && f) {
 					InventoryRemove(C.Character, "ItemVulva");
 					C.Character.Appearance.push({
 						Asset: f,

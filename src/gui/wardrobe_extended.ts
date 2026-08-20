@@ -883,10 +883,16 @@ function checkImportItemNoChange(group: AssetGroupName, a: ItemBundle[], b: Item
 		return true;
 	if (item1 === undefined || item2 === undefined)
 		return false;
+
+	const asset1 = AssetGet("Female3DCG", group, item1.Name);
+	const asset2 = AssetGet("Female3DCG", group, item2.Name);
+	if (!asset1 || !asset2) {
+		return false;
+	}
 	return (
 		item1.Group === item2.Group &&
 		item1.Name === item2.Name &&
-		itemColorsEquals(item1.Color, item2.Color) &&
+		itemColorsEquals(item1.Color, item2.Color, asset1, asset2) &&
 		(item1.Difficulty ?? 0) === (item2.Difficulty ?? 0) &&
 		isEqual(
 			item1.Property ?? {},

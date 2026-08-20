@@ -94,7 +94,7 @@ function curseCreateCurseItemInfo(item: Item): CursedItemInfo {
 		Name: item.Asset.Name,
 		curseProperty: false,
 		Difficulty: item.Difficulty || undefined,
-		Color: (item.Color && item.Color !== "Default") ? cloneDeep(item.Color) : undefined,
+		Color: !ItemColorIsDefault(item) ? cloneDeep(item.Color) : undefined,
 		Property: curseMakeSavedProperty(item.Property),
 		Craft: ValidationVerifyCraftData(item.Craft, item.Asset).result,
 	};
@@ -935,11 +935,11 @@ export class ModuleCurses extends BaseModule {
 				const character = getChatroomCharacter(params.sourceMemberNumber);
 				if (curse &&
 					result.item.Asset.Name === curse.Name &&
-					!itemColorsEquals(curse.Color, result.item.Color) &&
+					!itemColorsEquals(curse.Color, result.item.Color, result.item.Asset, result.item.Asset) &&
 					character &&
 					checkPermissionAccess("curses_color", character)
 				) {
-					if (result.item.Color && result.item.Color !== "Default") {
+					if (!ItemColorIsDefault(result.item)) {
 						curse.Color = cloneDeep(result.item.Color);
 					} else {
 						delete curse.Color;
@@ -1089,13 +1089,13 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		if (!currentItem) {
-			currentItem = {
-				Asset: asset,
-				Color: curse.Color != null ? cloneDeep(curse.Color) : "Default",
-				Property: curse.Property != null ? cloneDeep(curse.Property) : {},
-				Craft: ValidationVerifyCraftData(curse.Craft, asset).result,
-				Difficulty: curse.Difficulty != null ? curse.Difficulty : 0,
-			};
+			currentItem = AppearanceItem.fromAsset(asset, {
+				color: curse.Color,
+				property: curse.Property,
+				craft: ValidationVerifyCraftData(curse.Craft, asset).result,
+				difficulty: curse.Difficulty,
+			});
+
 			// re-init extended properties to avoid problems in recent BC versions
 			ExtendedItemInit(Player, currentItem, false, false);
 			curse.Property = curseCreateCurseItemInfo(currentItem).Property;
@@ -1158,12 +1158,9 @@ export class ModuleCurses extends BaseModule {
 			if (!changeType) changeType = "update";
 		}
 
-		if (!itemColorsEquals(curse.Color, currentItem.Color)) {
-			if (curse.Color === undefined || curse.Color === "Default") {
-				delete currentItem.Color;
-			} else {
-				currentItem.Color = cloneDeep(curse.Color);
-			}
+		const curseColor = curse.Color ? ServerParseColor(currentItem.Asset, curse.Color, currentItem.Asset.Group.ColorSchema) : [...currentItem.Asset.DefaultColor];
+		if (!itemColorsEquals(curseColor, currentItem.Color, currentItem.Asset, currentItem.Asset)) {
+			currentItem.Color = cloneDeep(curseColor);
 			if (!changeType) changeType = "color";
 		}
 

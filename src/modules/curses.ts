@@ -10,7 +10,23 @@ import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset, ConditionsLimit } from "../constants";
 import { callOriginal, hookFunction, removeAllHooksByModule, trackFunction } from "../patching";
 import { Command_fixExclamationMark, COMMAND_GENERIC_ERROR, Command_pickAutocomplete, Command_selectGroup, Command_selectGroupAutocomplete, registerWhisperCommand } from "./commands";
-import { ConditionsAutocompleteSubcommand, ConditionsConditionBlockedByRule, ConditionsCheckAccess, ConditionsGetCategoryData, ConditionsGetCategoryPublicData, ConditionsGetCondition, ConditionsRegisterCategory, ConditionsRemoveCondition, ConditionsRunSubcommand, ConditionsSetCondition, ConditionsSubcommand, ConditionsSubcommands, ConditionsUpdate, ConditionsCategoryInfluencedByRule } from "./conditions";
+import {
+	ConditionsIsConditionInEffect,
+	ConditionsAutocompleteSubcommand,
+	ConditionsConditionBlockedByRule,
+	ConditionsCheckAccess,
+	ConditionsGetCategoryData,
+	ConditionsGetCategoryPublicData,
+	ConditionsGetCondition,
+	ConditionsRegisterCategory,
+	ConditionsRemoveCondition,
+	ConditionsRunSubcommand,
+	ConditionsSetCondition,
+	ConditionsSubcommand,
+	ConditionsSubcommands,
+	ConditionsUpdate,
+	ConditionsCategoryInfluencedByRule,
+} from "./conditions";
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
 import { BCX_setInterval } from "../BCXContext";
 import { ValidationVerifyCraftData } from "./wardrobe";
@@ -987,7 +1003,7 @@ export class ModuleCurses extends BaseModule {
 						modStorageSync();
 					}
 				};
-			} else if (curseCondition.active) {
+			} else if (ConditionsIsConditionInEffect("curses", ItemColorItem.Asset.Group.Name)) {
 				options.disabled = true;
 				options.heading = [
 					ElementCreate({ tag: "q", children: [ItemColorItem.Asset.Description] }),

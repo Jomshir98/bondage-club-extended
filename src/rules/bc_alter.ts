@@ -790,20 +790,20 @@ export function initRules_bc_alter() {
 					}
 					if (Player.Nickname !== old) {
 						Player.Nickname = old;
-						ServerAccountUpdate.QueueData({ Nickname: old }, true);
+						ServerAccountUpdate.QueueData({ Nickname: old ?? null as never }, true);
 					}
 				}
 			}
 		},
 		tick(state) {
 			if (state.isEnforced && state.customData) {
-				let nick = state.customData.nickname.trim();
+				let nick: string | undefined = state.customData.nickname.trim();
 				if (nick === Player.Name) {
-					nick = "";
+					nick = undefined;
 				}
 				if (Player.Nickname !== nick) {
 					Player.Nickname = nick;
-					ServerAccountUpdate.QueueData({ Nickname: nick }, true);
+					ServerAccountUpdate.QueueData({ Nickname: nick ?? null as never }, true);
 					state.trigger();
 					return true;
 				}

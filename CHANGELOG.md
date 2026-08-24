@@ -14,6 +14,12 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.19
+
+- [FIX] Ensure that conditional requirements are checked before a curse disables the color picker (#79)
+- [FIX] Update for the nullable nickname changes
+- [CHORE] add the new server to the userscripts
+
 ## 1.1.18
 
 - [CHORE] Bump bc-stubs to v131

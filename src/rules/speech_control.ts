@@ -4,7 +4,7 @@ import { AccessLevel, getCharacterAccessLevel } from "../modules/authority";
 import { registerSpeechHook, SpeechMessageInfo, falteringSpeech, SpeechHookAllow } from "../modules/speech";
 import { callOriginal, hookFunction } from "../patching";
 import { getChatroomCharacter } from "../characters";
-import { dictionaryProcess, escapeRegExp, isObject } from "../utils";
+import { dictionaryProcess, escapeRegExp, isObject, wildcardToWordRegExp } from "../utils";
 import { ChatRoomSendLocal, getCharacterName } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
 import { modStorage } from "../modules/storage";
@@ -229,7 +229,7 @@ export function initRules_bc_speech_control() {
 		name: "Forbid saying certain words in chat",
 		type: RuleType.Speech,
 		shortDescription: "based on a configurable blacklist",
-		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect emotes and OOC text, but does affect whispers.",
+		longDescription: "This rule forbids PLAYER_NAME to use certain words in the chat. The list of banned words can be configured. Checks are not case sensitive (forbidding 'no' also forbids 'NO' and 'No'). Doesn't affect emotes and OOC text, but does affect whispers. Wildcards are supported, use * to match any number of characters. Example: 'no*' forbids 'no', 'nope', 'nonsense', etc.",
 		keywords: ["limit", "restrict", "blacklist", "blocklist", "forbidden"],
 		triggerTexts: {
 			infoBeep: "You are not allowed to use the word 'USED_WORD'!",
@@ -243,7 +243,7 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "All forbidden words:",
 				options: {
-					validate: /^[\p{L} ]*$/iu,
+					validate: /^[\p{L} *]*$/iu,
 				},
 			},
 		},
@@ -254,7 +254,7 @@ export function initRules_bc_speech_control() {
 					return true;
 				transgression = state.customData?.bannedWords.find(i =>
 					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
-						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+						wildcardToWordRegExp(i)
 					)
 				);
 				return transgression === undefined;
@@ -294,7 +294,7 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "All forbidden words:",
 				options: {
-					validate: /^[\p{L} ]*$/iu,
+					validate: /^[\p{L} *]*$/iu,
 				},
 			},
 		},
@@ -305,7 +305,7 @@ export function initRules_bc_speech_control() {
 					return true;
 				transgression = state.customData?.bannedWords.find(i =>
 					(msg.noOOCMessage ?? msg.originalMessage).toLocaleLowerCase().match(
-						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+						wildcardToWordRegExp(i)
 					)
 				);
 				return transgression === undefined;
@@ -812,15 +812,13 @@ export function initRules_bc_speech_control() {
 			registerSpeechHook({
 				allowSend(info) {
 					let status = SpeechHookAllow.ALLOW;
-					if (state.isEnforced) {
-						const replaceSpokenMap = parseStringReplacingSyntax(state.customData?.stringWithRuleSyntax);
-						for (const [name, honorific] of replaceSpokenMap.entries()) {
-							const rx = new RegExp(`(?<!\\b${honorific}\\s+)${name}`, "g");
-							if (rx.test(info.rawMessage)) {
-								state.trigger(null, { "TARGET_NAME": `${honorific} ${name}` });
-								status = SpeechHookAllow.BLOCK;
-							}
-						}
+					if (!state.isEnforced) return status;
+					const replaceSpokenMap = parseStringReplacingSyntax(state.customData?.stringWithRuleSyntax);
+					for (const [name, honorific] of replaceSpokenMap.entries()) {
+						const rx = new RegExp(`(?<!\\b${honorific}\\s+)${name}`, "giu");
+						if (!rx.test(info.rawMessage)) continue;
+						state.trigger(null, { "TARGET_NAME": `${honorific} ${name}` });
+						status = SpeechHookAllow.BLOCK;
 					}
 					return status;
 				},
@@ -1134,7 +1132,7 @@ export function initRules_bc_speech_control() {
 		name: "Establish mandatory words",
 		type: RuleType.Speech,
 		shortDescription: "of which at least one needs to always be included when speaking",
-		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match). Doesn't affect whispers, emotes and OOC text. There is a toggle for affecting whispers, too.",
+		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any chat message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match). Doesn't affect whispers, emotes and OOC text. There is a toggle for affecting whispers, too.  Wildcards are supported, use * to match any number of characters. Example: 'no*' forbids 'no', 'nope', 'nonsense', etc.",
 		keywords: ["force", "require", "talking", "saying", "certain", "specific"],
 		triggerTexts: {
 			infoBeep: "You forgot to include one of the mandatory words!",
@@ -1148,7 +1146,7 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "At least one of these words always needs to be used:",
 				options: {
-					validate: /^[\p{L} ]*$/iu,
+					validate: /^[\p{L} *]*$/iu,
 					pageSize: 3,
 				},
 			},
@@ -1175,7 +1173,7 @@ export function initRules_bc_speech_control() {
 				}
 				return state.customData?.mandatoryWords.some(i =>
 					checkMsg.match(
-						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+						wildcardToWordRegExp(i)
 					)
 				) || checkMsg.split(/[^\p{L}]+/u).some(i => checkMessageForSounds(sounds, i, false));
 			};
@@ -1200,7 +1198,7 @@ export function initRules_bc_speech_control() {
 		name: "Establish mandatory words in emotes",
 		type: RuleType.Speech,
 		shortDescription: "of which at least one needs to always be included",
-		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any emote message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match).",
+		longDescription: "This rule gives PLAYER_NAME a list of words from which at least one has to always be used in any emote message. The list of mandatory words can be configured. Checks are not case sensitive (adding 'miss' also works for 'MISS' and 'Miss' - Note: 'Miiiiissss' would also match).  Wildcards are supported, use * to match any number of characters. Example: 'no*' forbids 'no', 'nope', 'nonsense', etc.",
 		keywords: ["force", "require", "talking", "saying", "certain", "specific"],
 		triggerTexts: {
 			infoBeep: "You forgot to include one of the mandatory words!",
@@ -1214,7 +1212,7 @@ export function initRules_bc_speech_control() {
 				default: [],
 				description: "At least one of these words always needs to be used:",
 				options: {
-					validate: /^[\p{L} ]*$/iu,
+					validate: /^[\p{L} *]*$/iu,
 				},
 			},
 		},
@@ -1229,7 +1227,7 @@ export function initRules_bc_speech_control() {
 				}
 				return state.customData?.mandatoryWords.some(i =>
 					checkMsg.match(
-						new RegExp(`([^\\p{L}]|^)${escapeRegExp(i.trim())}([^\\p{L}]|$)`, "iu")
+						wildcardToWordRegExp(i)
 					)
 				) || checkMsg.split(/[^\p{L}]+/u).some(i => checkMessageForSounds(sounds, i, false));
 			};

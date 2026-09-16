@@ -594,8 +594,8 @@ export class ModuleWardrobe extends BaseModule {
 					],
 					parent: ElementWrap(WardrobeID.screen)?.querySelector(".wardrobe-preview-overlay-content"),
 				});
-				ElementWrap(WardrobeID.screen)?.querySelectorAll("button").forEach(button => {
-					button.style = "flex: 1";
+				ElementWrap(WardrobeID.screen)?.querySelectorAll(".wardrobe-preview-overlay-content button").forEach(button => {
+					(button as HTMLButtonElement).style = "flex: 1";
 				});
 			}
 			return ret;
@@ -613,6 +613,8 @@ export class ModuleWardrobe extends BaseModule {
 			const res = next(args);
 			const showPreviews = WardrobeShowsCharacters();
 			const slotsPerPage = WardrobeGetSlotsPerPage();
+
+			if (!showPreviews) return res;
 
 			const buttonStyle = {
 				"position": "absolute",

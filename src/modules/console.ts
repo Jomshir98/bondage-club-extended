@@ -65,11 +65,11 @@ class ConsoleInterface implements BCX_ConsoleInterface {
 	}
 
 	j_WardrobeExportSelectionClothes(includeBinds: boolean = false): string {
-		return j_WardrobeExportSelectionClothes(includeBinds);
+		return j_WardrobeExportSelectionClothes(Player, includeBinds);
 	}
 
 	j_WardrobeImportSelectionClothes(data: string | ItemBundle[], includeBinds: boolean, force: boolean = false): string | true {
-		return j_WardrobeImportSelectionClothes(data, includeBinds, force);
+		return j_WardrobeImportSelectionClothes(Player, data, includeBinds, force);
 	}
 
 	ToggleInvisibilityEarbuds(): void {

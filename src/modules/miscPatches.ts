@@ -147,7 +147,7 @@ export class ModuleMiscPatches extends BaseModule {
 			ServerPlayerInventorySync();
 		};
 
-		patchFunction("LoginStableItems", { 'LogQuery("JoinedStable", "PonyExam") || LogQuery("JoinedStable", "TrainerExam")': "true" });
+		patchFunction("LoginStableItems", { 'LogQuery("PonyExam", "JoinedStable") || LogQuery("TrainerExam", "JoinedStable")': "true" });
 
 		cheatChangeHooks[MiscCheat.GivePandoraKey] = enabled => {
 			for (const item of PANDORA_CHEAT_ONLY_ITEMS) {

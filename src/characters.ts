@@ -23,7 +23,7 @@ export class ChatroomCharacter {
 	}
 
 	BCXVersion: string | null = null;
-	Character: Character;
+	Character: OnlineCharacter;
 	Effects: BCX_effects;
 
 	typingIndicatorEnable: boolean = true;
@@ -57,7 +57,7 @@ export class ChatroomCharacter {
 		return `${this.Nickname} (${this.MemberNumber})`;
 	}
 
-	constructor(character: Character) {
+	constructor(character: OnlineCharacter) {
 		this.Character = character;
 		if (character.ID === 0) {
 			this.BCXVersion = VERSION;
@@ -497,7 +497,7 @@ export function getAllCharactersInRoom(): ChatroomCharacter[] {
 	if (!ServerPlayerIsInChatRoom()) {
 		return [getPlayerCharacter()];
 	}
-	return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber!)).filter(Boolean);
+	return ChatRoomCharacter.map(c => getChatroomCharacter(c.MemberNumber)).filter(Boolean);
 }
 
 export function getPlayerCharacter(): PlayerCharacter {

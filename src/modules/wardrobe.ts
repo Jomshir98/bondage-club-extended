@@ -346,6 +346,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 
 let j_WardrobeIncludeBinds = false;
 let j_WardrobeBindsAllowedCharacter = -1;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
 let j_ShowHelp = false;
 let holdingShift = false;
 
@@ -522,18 +523,13 @@ export class ModuleWardrobe extends BaseModule {
 			return res;
 		});
 
-		function BCXDoImport(slot: number) {
+		function BCXDoImport(char: Character) {
 			BCX_setTimeout(async () => {
 				if (typeof navigator.clipboard.readText !== "function") {
 					ToastManager.info("Please press Ctrl+V");
 					return;
 				}
 				const data = await navigator.clipboard.readText();
-				const char = WardrobeEnsureSlotCharacter(slot);
-				if (!char) {
-					ToastManager.error(`No character in slot ${slot}`);
-					return;
-				}
 				const res = useExtendedImport() ? openExtendedImport(char, data) : j_WardrobeImportSelectionClothes(char, data, j_WardrobeIncludeBinds, allowMode);
 				if (res) {
 					ToastManager.info(res);
@@ -541,13 +537,8 @@ export class ModuleWardrobe extends BaseModule {
 			}, 0);
 		}
 
-		function BCXDoExport(slot: number) {
+		function BCXDoExport(char: Character) {
 			BCX_setTimeout(async () => {
-				const char = WardrobeEnsureSlotCharacter(slot);
-				if (!char) {
-					ToastManager.error(`No character in slot ${slot}`);
-					return;
-				}
 				await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(char, j_WardrobeIncludeBinds));
 				ToastManager.info("Copied to clipboard!");
 			}, 0);
@@ -571,7 +562,7 @@ export class ModuleWardrobe extends BaseModule {
 					classList: ["wardrobe-bcx"],
 					style: cssStyle,
 					children: [
-						ElementButton.Create("wardrobe-bcx-help", () => j_ShowHelp = !j_ShowHelp),
+						// ElementButton.Create("wardrobe-bcx-help", () => j_ShowHelp = !j_ShowHelp),
 						ElementCheckbox.CreateLabelled("wardrobe-bcx-restraints-checkbox",
 							"Include restraints",
 							function () {
@@ -579,11 +570,25 @@ export class ModuleWardrobe extends BaseModule {
 							}
 						),
 						ElementButton.Create("wardrobe-bcx-import",
-							() => BCXDoImport(slot),
+							() => {
+								const char = WardrobeEnsureSlotCharacter(slot);
+								if (!char) {
+									ToastManager.error(`No character in slot ${slot}`);
+									return;
+								}
+								BCXDoImport(char);
+							},
 							{ label: "Import" }
 						),
 						ElementButton.Create("wardrobe-bcx-export",
-							() => BCXDoExport(slot),
+							() => {
+								const char = WardrobeEnsureSlotCharacter(slot);
+								if (!char) {
+									ToastManager.error(`No character in slot ${slot}`);
+									return;
+								}
+								BCXDoExport(char);
+							},
 							{ label: "Export" }
 						),
 					],
@@ -699,12 +704,19 @@ export class ModuleWardrobe extends BaseModule {
 
 		RedirectGetImage("Icons/BCX_Search.png", "Icons/Search.png");
 		RedirectGetImage("Icons/BCX_SearchExit.png", "Icons/Remove.png");
+		RedirectGetImage("Icons/BCX_Import.png", "Icons/Import.png");
+		RedirectGetImage("Icons/BCX_Export.png", "Icons/Export.png");
 
 		hookFunction("TextGet", 0, (args, next) => {
-			if (args[0] === "BCX_Search") {
+			const [tag] = args;
+			if (tag === "BCX_Search") {
 				return "Filter items";
-			} else if (args[0] === "BCX_SearchExit") {
+			} else if (tag === "BCX_SearchExit") {
 				return "";
+			} else if (tag === "BCX_Import") {
+				return "Import (BCX)";
+			} else if (tag === "BCX_Export") {
+				return "Export (BCX)";
 			}
 			return next(args);
 		});
@@ -712,33 +724,43 @@ export class ModuleWardrobe extends BaseModule {
 		hookFunction("AppearanceMenuBuild", 5, (args, next) => {
 			next(args);
 			const C = args[0];
+			const menu = (AppearanceMenu as BCX_AppearanceMenuButtons[]);
 			if (!allowSearchMode()) {
 				exitSearchMode(C);
 			} else if (searchBar) {
 				AppearanceMenu = [];
 				if (DialogInventory.length > 9)
-					AppearanceMenu.push("Next");
-				(AppearanceMenu as BCX_DialogMenuButton[]).push("BCX_SearchExit");
+					menu.push("Next");
+				menu.push("BCX_SearchExit");
 				if (DialogMenuMode !== "permissions")
-					AppearanceMenu.push("Cancel");
+					menu.push("Cancel");
 				AppearanceMenu.push("Accept");
 			} else {
-				(AppearanceMenu as BCX_DialogMenuButton[]).splice(AppearanceMenu.length - (AppearanceMenu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
+				menu.splice(menu.length - (menu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
+			}
+			if (CharacterAppearanceMode === "") {
+				const pasteIdx = menu.findIndex(btn => btn === "Paste");
+				menu.splice(pasteIdx + 1, 0, "BCX_Import", "BCX_Export");
 			}
 		});
 
 		hookFunction("AppearanceMenuClick", 4, (args, next) => {
-			const X = 2000 - AppearanceMenu.length * 117;
+			const menu = (AppearanceMenu as BCX_AppearanceMenuButtons[]);
+			const X = 2000 - menu.length * 117;
 			const C = args[0];
-			for (let B = 0; B < AppearanceMenu.length; B++) {
+			for (let B = 0; B < menu.length; B++) {
 				if (MouseXIn(X + 117 * B, 90)) {
-					const Button = (AppearanceMenu as BCX_DialogMenuButton[])[B];
+					const Button = menu[B];
 					if (Button === "BCX_Search") {
 						enterSearchMode(C);
 						return;
 					} else if (Button === "BCX_SearchExit") {
 						exitSearchMode(C);
 						return;
+					} else if (Button === "BCX_Import") {
+						BCXDoImport(CharacterAppearanceSelection);
+					} else if (Button === "BCX_Export") {
+						BCXDoExport(CharacterAppearanceSelection);
 					}
 				}
 			}

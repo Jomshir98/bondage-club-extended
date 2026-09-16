@@ -18,6 +18,14 @@ interface PlayerOnlineSettings {
 	BCXDataCleared?: number;
 }
 
+/** BCX added buttons to the appearance menu */
+type BCX_AppearanceMenuButtons =
+	| "BCX_Search"
+	| "BCX_SearchExit"
+	| "BCX_Import"
+	| "BCX_Export"
+	| AppearanceMenuButtonType;
+
 /** BCX added buttons to the character dialog */
 type BCX_DialogMenuButton =
 	| "BCX_RemoteDisabled"

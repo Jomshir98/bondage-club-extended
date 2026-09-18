@@ -82,6 +82,7 @@ export function ExtendedWardrobeInit() {
 export class GuiWardrobeExtended extends GuiSubscreen {
 
 	private screenState: ScreenState = ScreenState.main;
+	private currentPage: number = 0;
 	private readonly hiddenElements = new Set<HTMLElement>();
 
 	private readonly exitCallback: (newScreen: GuiWardrobeExtended | null) => void;
@@ -406,9 +407,18 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		DrawText(`Choose ${category.title}`, 900 + 390, 165 + 34, "Black");
 		MainCanvas.textAlign = "center";
 		DrawButton(900 + 120, 173, 200, 48, "<<< Back", "White");
-		for (let i = 0; i < AssetGroups.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
+
+		const totalPages = Math.max(1, Math.ceil(AssetGroups.length / 30));
+		if (this.currentPage >= totalPages) this.currentPage = Math.max(0, totalPages - 1);
+
+		DrawButton(1600, 173, 100, 48, "< Prev", this.currentPage > 0 ? "White" : "#888");
+		DrawButton(1720, 173, 100, 48, `Page ${this.currentPage + 1}/${totalPages}`, "White");
+		DrawButton(1840, 173, 100, 48, "Next >", this.currentPage < totalPages - 1 ? "White" : "#888");
+
+		for (let i = this.currentPage * 30; i < Math.min((this.currentPage + 1) * 30, AssetGroups.length); i++) {
+			const visualIndex = i % 30;
+			const row = visualIndex % 10;
+			const column = Math.floor(visualIndex / 10);
 			const group = AssetGroups[i];
 
 			const current = this.originalData.find(item => item.Group === group.Name);
@@ -446,13 +456,24 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		const AssetGroups = AssetGroup.filter(category.filter);
 
 		if (MouseIn(900 + 120, 173, 200, 48)) {
+			this.currentPage = 0;
 			this.screenState = ScreenState.main;
 			return;
 		}
 
-		for (let i = 0; i < AssetGroups.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
+		const totalPages = Math.max(1, Math.ceil(AssetGroups.length / 30));
+		if (MouseIn(1600, 173, 100, 48) && this.currentPage > 0) {
+			this.currentPage--;
+			return;
+		} else if (MouseIn(1840, 173, 100, 48) && this.currentPage < totalPages - 1) {
+			this.currentPage++;
+			return;
+		}
+
+		for (let i = this.currentPage * 30; i < Math.min((this.currentPage + 1) * 30, AssetGroups.length); i++) {
+			const visualIndex = i % 30;
+			const row = visualIndex % 10;
+			const column = Math.floor(visualIndex / 10);
 			const group = AssetGroups[i];
 
 			const matches = checkImportItemNoChange(group.Name, this.data, this.originalData);
@@ -483,9 +504,18 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		DrawText(`Choose lock types`, 900 + 390, 165 + 34, "Black");
 		MainCanvas.textAlign = "center";
 		DrawButton(900 + 120, 173, 200, 48, "<<< Back", "White");
-		for (let i = 0; i < LOCK_TYPES_LIST.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
+
+		const totalPages = Math.max(1, Math.ceil(LOCK_TYPES_LIST.length / 30));
+		if (this.currentPage >= totalPages) this.currentPage = Math.max(0, totalPages - 1);
+
+		DrawButton(1600, 173, 100, 48, "< Prev", this.currentPage > 0 ? "White" : "#888");
+		DrawButton(1720, 173, 100, 48, `Page ${this.currentPage + 1}/${totalPages}`, "White");
+		DrawButton(1840, 173, 100, 48, "Next >", this.currentPage < totalPages - 1 ? "White" : "#888");
+
+		for (let i = this.currentPage * 30; i < Math.min((this.currentPage + 1) * 30, LOCK_TYPES_LIST.length); i++) {
+			const visualIndex = i % 30;
+			const row = visualIndex % 10;
+			const column = Math.floor(visualIndex / 10);
 			const lock = LOCK_TYPES_LIST[i];
 
 			const requested = importedLockTypes.has(lock.Name as AssetLockType);
@@ -509,13 +539,24 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			.map(g => g.Property.LockedBy));
 
 		if (MouseIn(900 + 120, 173, 200, 48)) {
+			this.currentPage = 0;
 			this.screenState = ScreenState.main;
 			return;
 		}
 
-		for (let i = 0; i < LOCK_TYPES_LIST.length; i++) {
-			const row = i % 10;
-			const column = Math.floor(i / 10);
+		const totalPages = Math.max(1, Math.ceil(LOCK_TYPES_LIST.length / 30));
+		if (MouseIn(1600, 173, 100, 48) && this.currentPage > 0) {
+			this.currentPage--;
+			return;
+		} else if (MouseIn(1840, 173, 100, 48) && this.currentPage < totalPages - 1) {
+			this.currentPage++;
+			return;
+		}
+
+		for (let i = this.currentPage * 30; i < Math.min((this.currentPage + 1) * 30, LOCK_TYPES_LIST.length); i++) {
+			const visualIndex = i % 30;
+			const row = visualIndex % 10;
+			const column = Math.floor(visualIndex / 10);
 			const lock = LOCK_TYPES_LIST[i];
 
 			const requested = importedLockTypes.has(lock.Name as AssetLockType);
@@ -602,6 +643,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			}
 
 			if (MouseIn(1400, 250, 350, 50) && !this.getGlobalSelectorState("clothes").disabled) {
+				this.currentPage = 0;
 				this.screenState = ScreenState.clothSelect;
 			}
 
@@ -623,6 +665,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			}
 
 			if (MouseIn(1400, 350, 350, 50) && !this.getGlobalSelectorState("cosplay").disabled) {
+				this.currentPage = 0;
 				this.screenState = ScreenState.cosplaySelect;
 			}
 
@@ -644,6 +687,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			}
 
 			if (MouseIn(1400, 450, 350, 50) && !this.getGlobalSelectorState("body").disabled) {
+				this.currentPage = 0;
 				this.screenState = ScreenState.bodySelect;
 			}
 
@@ -715,6 +759,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 			}
 
 			if (MouseIn(1400, 850, 350, 50) && !this.getLocksState().disabled) {
+				this.currentPage = 0;
 				this.screenState = ScreenState.lockSelect;
 			}
 		} else if (this.screenState === ScreenState.clothSelect) {

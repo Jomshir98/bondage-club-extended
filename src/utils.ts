@@ -231,6 +231,17 @@ export function parseBCXVersion(version: string): BCXVersion | null {
 	return null;
 }
 
+export function wildcardToWordRegExp(rule: string) {
+	const trimmed = rule.trim();
+	// Split by *, escape each segment, then join with \S* (matches any non-whitespace)
+	const pattern = trimmed
+		.split("*")
+		.map(segment => escapeRegExp(segment))
+		.join("\\S*");
+
+	return new RegExp(`([^\\p{L}]|^)${pattern}([^\\p{L}]|$)`, "iu");
+}
+
 export function BCXVersionCompare(a: BCXVersion, b: BCXVersion): number {
 	if (a.major !== b.major) {
 		return a.major - b.major;

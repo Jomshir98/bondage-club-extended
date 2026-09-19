@@ -596,6 +596,33 @@ export class ModuleWardrobe extends BaseModule {
 					],
 					parent: ElementWrap(WardrobeID.screen)?.querySelector(".wardrobe-preview-overlay-content"),
 				});
+
+				ElementCreate({
+					tag: "div",
+					classList: ["wardrobe-bcx-row2"],
+					style: { ...cssStyle, "margin-top": "var(--gap, 8px)" },
+					children: [
+						ElementButton.Create("wardrobe-bcx-advanced-import",
+							() => {
+								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
+								const char = WardrobeEnsureSlotCharacter(offset + slot);
+								if (!char) {
+									ToastManager.error(`No character in slot ${slot}`);
+									return;
+								}
+								const result = openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
+								if (result) {
+									ToastManager.error(result);
+								} else {
+									CharacterRefresh(Wardrobe.selectedCharacter);
+									WardrobeInvalidateCanvasCache();
+								}
+							},
+							{ label: "Selective Import" }
+						),
+					],
+					parent: ElementWrap(WardrobeID.screen)?.querySelector(".wardrobe-preview-overlay-content"),
+				});
 				ElementWrap(WardrobeID.screen)?.querySelectorAll(".wardrobe-preview-overlay-content button").forEach(button => {
 					(button as HTMLButtonElement).style = "flex: 1";
 				});

@@ -206,11 +206,11 @@ export class ModuleMiscPatches extends BaseModule {
 
 export function InitAeeWardrobeFix() {
 	hookFunction("CharacterLoadCanvas", 5, (args, next) => {
-		const C = args[0] as Character;
+		const C = args[0];
 		let spoofed = false;
-		let oldPlayer = Player;
-		let oldSelection = CharacterAppearanceSelection;
-		let oldCurrent = CurrentCharacter;
+		const oldPlayer = Player;
+		const oldSelection = CharacterAppearanceSelection;
+		const oldCurrent = CurrentCharacter;
 
 		// Cek apakah ini adalah karakter dummy dari Wardrobe atau Save Preview
 		if (C && C.AccountName && typeof C.AccountName === "string" && C.AccountName.toLowerCase().includes("wardrobe")) {

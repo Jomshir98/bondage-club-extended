@@ -562,7 +562,6 @@ export class ModuleWardrobe extends BaseModule {
 					classList: ["wardrobe-bcx"],
 					style: cssStyle,
 					children: [
-						// ElementButton.Create("wardrobe-bcx-help", () => j_ShowHelp = !j_ShowHelp),
 						ElementCheckbox.CreateLabelled("wardrobe-bcx-restraints-checkbox",
 							"Include restraints",
 							function () {
@@ -581,6 +580,27 @@ export class ModuleWardrobe extends BaseModule {
 							},
 							{ label: "Import" }
 						),
+						ElementButton.Create("wardrobe-bcx-export",
+							() => {
+								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
+								const char = WardrobeEnsureSlotCharacter(offset + slot);
+								if (!char) {
+									ToastManager.error(`No character in slot ${slot}`);
+									return;
+								}
+								BCXDoExport(char);
+							},
+							{ label: "Export" }
+						),
+					],
+					parent: ElementWrap(WardrobeID.screen)?.querySelector(".wardrobe-preview-overlay-content"),
+				});
+
+				ElementCreate({
+					tag: "div",
+					classList: ["wardrobe-bcx-row2"],
+					style: { ...cssStyle, "margin-top": "var(--gap, 8px)" },
+					children: [
 						ElementButton.Create("wardrobe-bcx-advanced-import",
 							() => {
 								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
@@ -597,19 +617,7 @@ export class ModuleWardrobe extends BaseModule {
 									WardrobeInvalidateCanvasCache();
 								}
 							},
-							{ label: "Advanced Import" }
-						),
-						ElementButton.Create("wardrobe-bcx-export",
-							() => {
-								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
-								const char = WardrobeEnsureSlotCharacter(offset + slot);
-								if (!char) {
-									ToastManager.error(`No character in slot ${slot}`);
-									return;
-								}
-								BCXDoExport(char);
-							},
-							{ label: "Export" }
+							{ label: "Selective Import" }
 						),
 					],
 					parent: ElementWrap(WardrobeID.screen)?.querySelector(".wardrobe-preview-overlay-content"),

@@ -645,22 +645,10 @@ export class ModuleWardrobe extends BaseModule {
 
 			if (!showPreviews) return res;
 
-			const buttonStyle = {
-				"position": "absolute",
-				"top": "28px",
-				"right": "0px",
-				"z-index": "2",
-				"width": "var(--slot-load-size)",
-				"height": "var(--slot-load-size)",
-				"box-shadow": "0 0 var(--half-gap) rgb(0 0 0 / 40%)",
-				"--slot-load-icon": "70%",
-				"box-sizing": "border-box",
-				"flex": "0 0 auto",
-				"overflow": "visible",
-			};
-
 			for (let slot = 0; slot < slotsPerPage; slot++) {
-				const cell = ElementWrap(WardrobeID.slotCell(slot));
+				// @ts-expect-error Hotfixed function
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				const cell = ElementWrap(WardrobeID.slotActions(slot));
 				if (!cell) continue;
 				ElementButton.Create(
 					`wardrobe-bcx-import-${slot}`, () => {
@@ -690,7 +678,6 @@ export class ModuleWardrobe extends BaseModule {
 								// hidden: true,
 								...(showPreviews ? { "aria-label": "Import" } : {}),
 							},
-							style: buttonStyle,
 						},
 					}
 				);

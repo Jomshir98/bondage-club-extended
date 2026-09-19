@@ -634,8 +634,6 @@ export class ModuleWardrobe extends BaseModule {
 			const showPreviews = WardrobeShowsCharacters();
 			const slotsPerPage = WardrobeGetSlotsPerPage();
 
-			if (!showPreviews) return res;
-
 			const buttonStyle = {
 				"position": "absolute",
 				"top": "28px",

@@ -581,6 +581,24 @@ export class ModuleWardrobe extends BaseModule {
 							},
 							{ label: "Import" }
 						),
+						ElementButton.Create("wardrobe-bcx-advanced-import",
+							() => {
+								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
+								const char = WardrobeEnsureSlotCharacter(offset + slot);
+								if (!char) {
+									ToastManager.error(`No character in slot ${slot}`);
+									return;
+								}
+								const result = openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
+								if (result) {
+									ToastManager.error(result);
+								} else {
+									CharacterRefresh(Wardrobe.selectedCharacter);
+									WardrobeInvalidateCanvasCache();
+								}
+							},
+							{ label: "Advanced Import" }
+						),
 						ElementButton.Create("wardrobe-bcx-export",
 							() => {
 								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
@@ -621,7 +639,7 @@ export class ModuleWardrobe extends BaseModule {
 			const buttonStyle = {
 				"position": "absolute",
 				"top": "28px",
-				"right": "0px",
+				"right": "calc(var(--slot-load-size) + var(--half-gap, 8px))",
 				"z-index": "2",
 				"width": "var(--slot-load-size)",
 				"height": "var(--slot-load-size)",

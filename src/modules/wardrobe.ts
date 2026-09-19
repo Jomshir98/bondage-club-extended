@@ -562,6 +562,7 @@ export class ModuleWardrobe extends BaseModule {
 					classList: ["wardrobe-bcx"],
 					style: cssStyle,
 					children: [
+						// ElementButton.Create("wardrobe-bcx-help", () => j_ShowHelp = !j_ShowHelp),
 						ElementCheckbox.CreateLabelled("wardrobe-bcx-restraints-checkbox",
 							"Include restraints",
 							function () {

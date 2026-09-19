@@ -571,7 +571,7 @@ export class ModuleWardrobe extends BaseModule {
 						),
 						ElementButton.Create("wardrobe-bcx-import",
 							() => {
-								const offset = typeof (window as any).WardrobeOffset === "number" ? (window as any).WardrobeOffset : 0;
+								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
 								const char = WardrobeEnsureSlotCharacter(offset + slot);
 								if (!char) {
 									ToastManager.error(`No character in slot ${slot}`);
@@ -583,7 +583,7 @@ export class ModuleWardrobe extends BaseModule {
 						),
 						ElementButton.Create("wardrobe-bcx-export",
 							() => {
-								const offset = typeof (window as any).WardrobeOffset === "number" ? (window as any).WardrobeOffset : 0;
+								const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
 								const char = WardrobeEnsureSlotCharacter(offset + slot);
 								if (!char) {
 									ToastManager.error(`No character in slot ${slot}`);
@@ -637,7 +637,7 @@ export class ModuleWardrobe extends BaseModule {
 				if (!cell) continue;
 				ElementButton.Create(
 					`wardrobe-bcx-import-${slot}`, () => {
-						const offset = typeof (window as any).WardrobeOffset === "number" ? (window as any).WardrobeOffset : 0;
+						const offset = typeof WardrobeOffset === "number" ? WardrobeOffset : 0;
 						const char = WardrobeEnsureSlotCharacter(offset + slot);
 						if (!char) return;
 						const result = openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);

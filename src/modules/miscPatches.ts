@@ -190,6 +190,8 @@ export class ModuleMiscPatches extends BaseModule {
 		hookFunction("ServerPlayerIsInChatRoom", 0, (args, next) => {
 			return next(args) || CurrentScreen === "GetUp";
 		});
+
+		InitAeeWardrobeFix();
 	}
 
 	run() {
@@ -200,4 +202,35 @@ export class ModuleMiscPatches extends BaseModule {
 		}
 		ServerPlayerInventorySync();
 	}
+}
+
+export function InitAeeWardrobeFix() {
+	hookFunction("CharacterLoadCanvas", 5, (args, next) => {
+		const C = args[0] as Character;
+		let spoofed = false;
+		let oldPlayer = Player;
+		let oldSelection = CharacterAppearanceSelection;
+		let oldCurrent = CurrentCharacter;
+
+		// Cek apakah ini adalah karakter dummy dari Wardrobe atau Save Preview
+		if (C && C.AccountName && typeof C.AccountName === "string" && C.AccountName.toLowerCase().includes("wardrobe")) {
+			spoofed = true;
+
+			// Lakukan spoofing agar AEE/LSCG mengira ini adalah karakter utama yang sedang diedit
+			(window as any).Player = C;
+			(window as any).CharacterAppearanceSelection = C;
+			(window as any).CurrentCharacter = C;
+		}
+
+		try {
+			return next(args);
+		} finally {
+			// Kembalikan ke state semula setelah proses rendering canvas selesai
+			if (spoofed) {
+				(window as any).Player = oldPlayer;
+				(window as any).CharacterAppearanceSelection = oldSelection;
+				(window as any).CurrentCharacter = oldCurrent;
+			}
+		}
+	});
 }

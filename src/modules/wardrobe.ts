@@ -657,9 +657,8 @@ export class ModuleWardrobe extends BaseModule {
 			};
 
 			for (let slot = 0; slot < slotsPerPage; slot++) {
-				// @ts-expect-error Backward compatibility for R132
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-				const cell = typeof WardrobeID.slotActions === 'function' ? ElementWrap(WardrobeID.slotActions(slot)) : ElementWrap(WardrobeID.slotCell(slot));
+				const cell = typeof (WardrobeID as any).slotActions === 'function' ? ElementWrap((WardrobeID as any).slotActions(slot)) : ElementWrap(WardrobeID.slotCell(slot));
 				if (!cell) continue;
 				ElementButton.Create(
 					`wardrobe-bcx-import-${slot}`, () => {
@@ -690,7 +689,7 @@ export class ModuleWardrobe extends BaseModule {
 								// hidden: true,
 								...(showPreviews ? { "aria-label": "Import" } : {}),
 							},
-							style: typeof WardrobeID.slotActions === 'function' ? undefined : buttonStyle,
+							style: typeof (WardrobeID as any).slotActions === 'function' ? undefined : buttonStyle,
 						},
 					}
 				);

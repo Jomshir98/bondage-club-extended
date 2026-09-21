@@ -643,26 +643,26 @@ export class ModuleWardrobe extends BaseModule {
 			if (!showPreviews) return res;
 
 			const buttonStyle = {
-				position: 'absolute',
-				top: '28px',
-				right: '0px',
-				zIndex: '2',
-				width: 'var(--slot-load-size)',
-				height: 'var(--slot-load-size)',
-				boxShadow: '0 0 var(--half-gap) rgb(0 0 0 / 40%)',
-				'--slot-load-icon': '70%',
-				boxSizing: 'border-box',
-				flex: '0 0 auto',
-				overflow: 'visible',
+				"position": "absolute",
+				"top": "28px",
+				"right": "0px",
+				"zIndex": "2",
+				"width": "var(--slot-load-size)",
+				"height": "var(--slot-load-size)",
+				"boxShadow": "0 0 var(--half-gap) rgb(0 0 0 / 40%)",
+				"--slot-load-icon": "70%",
+				"boxSizing": "border-box",
+				"flex": "0 0 auto",
+				"overflow": "visible",
 			};
 
 			for (let slot = 0; slot < slotsPerPage; slot++) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-				const cell = typeof (WardrobeID as any).slotActions === 'function' ? ElementWrap((WardrobeID as any).slotActions(slot)) : ElementWrap(WardrobeID.slotCell(slot));
+				const cell = typeof (WardrobeID as any).slotActions === "function" ? ElementWrap((WardrobeID as any).slotActions(slot)) : ElementWrap(WardrobeID.slotCell(slot));
 				if (!cell) continue;
 				ElementButton.Create(
 					`wardrobe-bcx-import-${slot}`, () => {
-						const actualSlot = typeof window.WardrobeGetVisibleSlot === 'function' ? window.WardrobeGetVisibleSlot(slot) : (typeof WardrobeOffset === 'number' ? WardrobeOffset + slot : slot);
+						const actualSlot = typeof window.WardrobeGetVisibleSlot === "function" ? window.WardrobeGetVisibleSlot(slot) : (typeof WardrobeOffset === "number" ? WardrobeOffset + slot : slot);
 						if (actualSlot == null) return;
 						const char = WardrobeEnsureSlotCharacter(actualSlot);
 						if (!char) return;
@@ -689,7 +689,7 @@ export class ModuleWardrobe extends BaseModule {
 								// hidden: true,
 								...(showPreviews ? { "aria-label": "Import" } : {}),
 							},
-							style: typeof (WardrobeID as any).slotActions === 'function' ? undefined : buttonStyle,
+							style: typeof (WardrobeID as any).slotActions === "function" ? undefined : buttonStyle,
 						},
 					}
 				);

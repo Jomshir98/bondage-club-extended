@@ -300,7 +300,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 	if (!character) {
 		return "Import error: No character";
 	}
-	if (character.MemberNumber !== j_WardrobeBindsAllowedCharacter && includeBinds) {
+	if (!WardrobeIsPreviewCharacter(character) && character.MemberNumber !== j_WardrobeBindsAllowedCharacter && includeBinds) {
 		return "Import error: Not allowed to import items";
 	}
 

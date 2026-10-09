@@ -1,4 +1,4 @@
-import stylisticTs from "@stylistic/eslint-plugin";
+import stylistic from "@stylistic/eslint-plugin";
 import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
 import path from "node:path";
@@ -33,7 +33,7 @@ const conf = [
 	...compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended"),
 	{
 		plugins: {
-			"@stylistic/ts": stylisticTs,
+			"@stylistic": stylistic,
 		},
 
 		languageOptions: {
@@ -114,14 +114,14 @@ const conf = [
 			"prefer-object-spread": "warn",
 			"radix": "warn",
 			"dot-notation": "warn",
-			"@stylistic/ts/semi": ["warn", "always"],
+			"@stylistic/semi": ["warn", "always"],
 
-			"@stylistic/ts/indent": ["warn", "tab", {
+			"@stylistic/indent": ["warn", "tab", {
 				SwitchCase: 1,
 				ignoredNodes: ["ConditionalExpression"],
 			}],
 
-			"@stylistic/ts/comma-dangle": ["warn", {
+			"@stylistic/comma-dangle": ["warn", {
 				arrays: "always-multiline",
 				objects: "always-multiline",
 				imports: "always-multiline",
@@ -132,7 +132,7 @@ const conf = [
 				tuples: "never",
 			}],
 
-			"@stylistic/ts/member-delimiter-style": ["warn", {
+			"@stylistic/member-delimiter-style": ["warn", {
 				singleline: {
 					requireLast: true,
 				},
@@ -140,7 +140,7 @@ const conf = [
 
 			"no-trailing-spaces": "warn",
 
-			"@stylistic/ts/quotes": ["warn", "double", {
+			"@stylistic/quotes": ["warn", "double", {
 				avoidEscape: true,
 				allowTemplateLiterals: "always",
 			}],
@@ -154,7 +154,7 @@ const conf = [
 
 			"@typescript-eslint/prefer-function-type": "warn",
 			"one-var": ["warn", "never"],
-			"@stylistic/ts/brace-style": ["warn", "1tbs"],
+			"@stylistic/brace-style": ["warn", "1tbs"],
 
 			"space-before-function-paren": ["warn", {
 				anonymous: "always",
@@ -163,14 +163,14 @@ const conf = [
 			}],
 
 			"array-bracket-spacing": ["warn", "never"],
-			"@stylistic/ts/comma-spacing": "warn",
+			"@stylistic/comma-spacing": "warn",
 			"comma-style": "warn",
 			"computed-property-spacing": "warn",
 			"eol-last": "warn",
 			"func-call-spacing": "warn",
 			"key-spacing": "warn",
-			"@stylistic/ts/type-annotation-spacing": "warn",
-			"@stylistic/ts/keyword-spacing": "warn",
+			"@stylistic/type-annotation-spacing": "warn",
+			"@stylistic/keyword-spacing": "warn",
 			"@stylistic/linebreak-style": ["warn", "unix"],
 			"no-whitespace-before-property": "warn",
 
@@ -179,7 +179,7 @@ const conf = [
 				consistent: true,
 			}],
 
-			"@stylistic/ts/object-curly-spacing": ["warn", "always"],
+			"@stylistic/object-curly-spacing": ["warn", "always"],
 			"quote-props": ["warn", "consistent"],
 			"semi-spacing": "warn",
 			"semi-style": "warn",

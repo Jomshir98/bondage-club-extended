@@ -616,6 +616,9 @@ type RuleCustomData = {
 		value: boolean;
 		restore: boolean;
 	};
+	block_BCX_permissions: {
+		onlyWhenRestrainedToggle: boolean;
+	};
 };
 
 type RuleInternalData = {

@@ -1173,6 +1173,13 @@ export function initRules_bc_blocks() {
 		longDescription: "This rule forbids PLAYER_NAME access to some parts of their own BCX they have permission to use, making it as if they do not have 'self access' (see BCX tutorial on permission system) while the rule is active. This rule still leaves access for all permissions where the lowest permitted role ('lowest access') is also set to PLAYER_NAME (to prevent getting stuck). This rule does not affect PLAYER_NAME's permissions to use another users's BCX.",
 		keywords: ["limiting", "preventing", "controlling", "accessing", "self", "rights"],
 		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			onlyWhenRestrainedToggle: {
+				type: "toggle",
+				default: true,
+				description: "Only forbid when player is restrained",
+			},
+		},
 		// Implemented externally
 	});
 

@@ -978,7 +978,7 @@ export function initRules_bc_blocks() {
 				const C = args[1];
 				if (state.inEffect && !C.IsPlayer() && dominantCheck(C)) {
 					// This triggers when an item *is* used on self (i.e. not blocked by disable)
-					if (state.isLogged) state.trigger();
+					if (state.isLogged) state.trigger(C.MemberNumber);
 				}
 				return next(args);
 			}, ModuleCategory.Rules);
@@ -987,7 +987,7 @@ export function initRules_bc_blocks() {
 				const C = DialogMenuMapping.items.C;
 				if (state.inEffect && state.isEnforced && !C.IsPlayer() && dominantCheck(C)) {
 					// This triggers when an item use is blocked by disable
-					if (state.isLogged) state.triggerAttempt();
+					if (state.isLogged) state.triggerAttempt(C.MemberNumber);
 				}
 				return next(args);
 			}, ModuleCategory.Rules);

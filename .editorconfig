@@ -1,0 +1,7 @@
+[*]
+root = true
+
+[{*.ts,*.js,eslint.config.mjs}]
+trim_trailing_whitespace = true
+indent_style = tab
+insert_final_newline = true

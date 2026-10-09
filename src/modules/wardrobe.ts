@@ -769,7 +769,7 @@ export class ModuleWardrobe extends BaseModule {
 			} else {
 				menu.splice(menu.length - (menu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
 			}
-			if (CharacterAppearanceMode === "") {
+			if (CharacterAppearanceMode === "" && (modStorage.showAppearanceImportButton ?? true)) {
 				const pasteIdx = menu.findIndex(btn => btn === "Paste");
 				menu.splice(pasteIdx + 1, 0, "BCX_Import", "BCX_Export");
 			}

@@ -153,7 +153,7 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 				continue;
 			if (
 				!newItem ||
-                !newAsset ||
+				!newAsset ||
 				currentItem.Asset.Name !== newItem.Name ||
 				!itemColorsEquals(currentItem.Color, newItem.Color, currentItem.Asset, newAsset) ||
 				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, newItem.Property, {
@@ -326,7 +326,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 			if (
 				!wornItem ||
 				!bundleItem ||
-                !bundleAsset ||
+				!bundleAsset ||
 				wornItem.Asset.Name !== bundleItem.Name ||
 				!itemColorsEquals(wornItem.Color, bundleItem.Color, wornItem.Asset, bundleAsset) ||
 				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(bundleItem.Property))

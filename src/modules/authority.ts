@@ -111,7 +111,12 @@ export function checkPermissionAccessData(permData: PermissionInfo, accessLevel:
 
 function selfAccessBlockedByRule(permData: PermissionInfo): boolean {
 	const blockRule = RulesGetRuleState("block_BCX_permissions");
-	if (!blockRule.isEnforced || (permData.self && permData.min === AccessLevel.self)) {
+	if (!blockRule.isEnforced) {
+		return false;
+	}
+	if (permData.self && permData.min === AccessLevel.self) {
+		return false;
+	} else if (blockRule.customData?.onlyWhenRestrainedToggle && !Player.IsRestrained()) {
 		return false;
 	}
 	return true;

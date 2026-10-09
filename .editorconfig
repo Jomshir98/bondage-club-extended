@@ -1,7 +1,8 @@
 [*]
 root = true
 
-[{*.ts,*.js,eslint.config.mjs}]
+[{*.ts,*.js,*.mjs,*.json,*.html,*.css,*.yaml,*.yml,*.md}]
 trim_trailing_whitespace = true
 indent_style = tab
 insert_final_newline = true
+end_of_line = lf

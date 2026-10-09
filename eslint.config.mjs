@@ -171,6 +171,7 @@ const conf = [
 			"key-spacing": "warn",
 			"@stylistic/ts/type-annotation-spacing": "warn",
 			"@stylistic/ts/keyword-spacing": "warn",
+			"@stylistic/linebreak-style": ["warn", "unix"],
 			"no-whitespace-before-property": "warn",
 
 			"object-curly-newline": ["warn", {

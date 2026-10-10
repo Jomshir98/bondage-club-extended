@@ -1,7 +1,7 @@
 import { ChatroomCharacter, getChatroomCharacter, getPlayerCharacter } from "../characters";
 import { BaseModule } from "./_BaseModule";
 import { arrayUnique, capitalizeFirstLetter, dictionaryProcess, formatTimeInterval, isObject, typedObjectAssumedEntries, typedObjectAssumedKeys } from "../utils";
-import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, isAssetGroupName, itemColorsEquals } from "../utilsClub";
+import { ChatRoomActionMessage, getCharacterName, getVisibleGroupName, isAssetGroupName, itemColorsEquals, SendNotificationWithCheck } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { modStorageSync } from "./storage";
@@ -193,7 +193,7 @@ export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, 
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s ${group.AllowNone ? currentItem.Asset.Description : group.Description}`);
 			if (showMessage && !character.isPlayer()) {
-				ChatRoomSendLocal(`${character.toNicknamedString()} cursed the ${group.AllowNone ? currentItem.Asset.Description : group.Description} on you`);
+				SendNotificationWithCheck({ msg: `${character.toNicknamedString()} cursed the ${group.AllowNone ? currentItem.Asset.Description : group.Description} on you`, category: ModuleCategory.Curses });
 			}
 		}
 	} else {
@@ -201,7 +201,7 @@ export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, 
 		if (character) {
 			logMessage("curse_change", LogEntryType.plaintext, `${character} cursed ${Player.Name}'s body part to stay exposed (${getVisibleGroupName(group)})`);
 			if (showMessage && !character.isPlayer()) {
-				ChatRoomSendLocal(`${character.toNicknamedString()} put a curse on you, forcing part of your body to stay exposed (${getVisibleGroupName(group)})`);
+				SendNotificationWithCheck({ msg: `${character.toNicknamedString()} put a curse on you, forcing part of your body to stay exposed (${getVisibleGroupName(group)})`, category: ModuleCategory.Curses });
 			}
 		}
 	}
@@ -231,7 +231,7 @@ export function curseBatch(mode: "items" | "clothes" | "body", includingEmpty: b
 		logMessage("curse_change", LogEntryType.plaintext, `${character} cursed all of ${Player.Name}'s ` +
 			`${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : mode === "clothes" ? "clothing" : "body"} slots`);
 		if (!character.isPlayer()) {
-			ChatRoomSendLocal(`${character.toNicknamedString()} cursed all of your ${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : mode === "clothes" ? "clothing" : "body"} slots`);
+			SendNotificationWithCheck({ msg: `${character.toNicknamedString()} cursed all of your ${includingEmpty ? "" : "occupied "}${mode === "items" ? "item" : mode === "clothes" ? "clothing" : "body"} slots`, category: ModuleCategory.Curses });
 		}
 	}
 
@@ -264,12 +264,12 @@ export function curseLift(Group: AssetGroupName, character: ChatroomCharacter | 
 			if (itemName) {
 				logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s ${itemName}`);
 				if (!character.isPlayer()) {
-					ChatRoomSendLocal(`${character.toNicknamedString()} lifted the curse on your ${itemName}`);
+					SendNotificationWithCheck({ msg: `${character.toNicknamedString()} lifted the curse on your ${itemName}`, category: ModuleCategory.Curses });
 				}
 			} else {
 				logMessage("curse_change", LogEntryType.plaintext, `${character} lifted the curse on ${Player.Name}'s body part (${getVisibleGroupName(group)})`);
 				if (!character.isPlayer()) {
-					ChatRoomSendLocal(`${character.toNicknamedString()} lifted the curse on part of your body (${getVisibleGroupName(group)})`);
+					SendNotificationWithCheck({ msg: `${character.toNicknamedString()} lifted the curse on part of your body (${getVisibleGroupName(group)})`, category: ModuleCategory.Curses });
 				}
 			}
 		}
@@ -291,7 +291,7 @@ export function curseLiftAll(character: ChatroomCharacter | null): boolean {
 
 		logMessage("curse_change", LogEntryType.plaintext, `${character} lifted all curse on ${Player.Name}`);
 		if (!character.isPlayer()) {
-			ChatRoomSendLocal(`${character.toNicknamedString()} lifted all curses on you`);
+			SendNotificationWithCheck({ msg: `${character.toNicknamedString()} lifted all curses on you`, category: ModuleCategory.Curses });
 		}
 	}
 	ConditionsRemoveCondition("curses", typedObjectAssumedKeys(ConditionsGetCategoryData("curses").conditions));
@@ -751,7 +751,7 @@ export class ModuleCurses extends BaseModule {
 				logMessage("curse_change", LogEntryType.plaintext,
 					`${character} changed ${Player.Name}'s curse slot '${group}' permission to ${ConditionsLimit[newLimit]}`);
 				if (!character.isPlayer()) {
-					ChatRoomSendLocal(`${character.toNicknamedString()} changed curse slot '${group}' permission to ${ConditionsLimit[newLimit]}`, undefined, character.MemberNumber);
+					SendNotificationWithCheck({ msg: `${character.toNicknamedString()} changed curse slot '${group}' permission to ${ConditionsLimit[newLimit]}`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 				}
 			},
 			logConditionUpdate: (group, character, newData, oldData) => {
@@ -780,22 +780,22 @@ export class ModuleCurses extends BaseModule {
 				}
 				if (!character.isPlayer()) {
 					if (didActiveChange) {
-						ChatRoomSendLocal(`${character.toNicknamedString()} ${newData.active ? "reactivated" : "deactivated"} the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} ${newData.active ? "reactivated" : "deactivated"} the curse on slot '${visibleName}'`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 					}
 					if (newData.timer !== oldData.timer)
 						if (newData.timer === null) {
-							ChatRoomSendLocal(`${character.toNicknamedString()} disabled the timer of the curse on slot '${visibleName}'`, undefined, character.MemberNumber);
+							SendNotificationWithCheck({ msg: `${character.toNicknamedString()} disabled the timer of the curse on slot '${visibleName}'`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 						} else {
-							ChatRoomSendLocal(`${character.toNicknamedString()} changed the remaining time of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, undefined, character.MemberNumber);
+							SendNotificationWithCheck({ msg: `${character.toNicknamedString()} changed the remaining time of the timer of the curse on slot '${visibleName}' to ${formatTimeInterval(newData.timer - Date.now())}`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 						}
 					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
-						ChatRoomSendLocal(`${character.toNicknamedString()} changed the timer behavior of the curse on slot '${visibleName}' to ${newData.timerRemove ? "remove" : "disable"} the curse when time runs out`, undefined, character.MemberNumber);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} changed the timer behavior of the curse on slot '${visibleName}' to ${newData.timerRemove ? "remove" : "disable"} the curse when time runs out`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 					if (didItemRemoveChange) {
-						ChatRoomSendLocal(`${character.toNicknamedString()} set the curse on slot '${visibleName}' to ${newData.data?.itemRemove ? "remove" : "keep"} the item when the curse is no longer in effect`, undefined, character.MemberNumber);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} set the curse on slot '${visibleName}' to ${newData.data?.itemRemove ? "remove" : "keep"} the item when the curse is no longer in effect`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 					}
 					if (didTriggerChange)
 						if (newData.requirements === null) {
-							ChatRoomSendLocal(`${character.toNicknamedString()} set the curse on slot '${visibleName}' to use the global curses configuration`, undefined, character.MemberNumber);
+							SendNotificationWithCheck({ msg: `${character.toNicknamedString()} set the curse on slot '${visibleName}' to use the global curses configuration`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 						} else {
 							const triggers: string[] = [];
 							const r = newData.requirements;
@@ -814,13 +814,13 @@ export class ModuleCurses extends BaseModule {
 								triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
 							}
 							if (triggers.length > 0) {
-								ChatRoomSendLocal(`${character.toNicknamedString()} set the curse on slot ${visibleName} to trigger under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+								SendNotificationWithCheck({ msg: `${character.toNicknamedString()} set the curse on slot ${visibleName} to trigger under following conditions:\n` + triggers.join("\n"), category: ModuleCategory.Curses, sender: character.MemberNumber });
 							} else {
-								ChatRoomSendLocal(`${character.toNicknamedString()} deactivated all trigger conditions of the curse on slot ${visibleName}. The curse will now always trigger, while it is active`, undefined, character.MemberNumber);
+								SendNotificationWithCheck({ msg: `${character.toNicknamedString()} deactivated all trigger conditions of the curse on slot ${visibleName}. The curse will now always trigger, while it is active`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 							}
 						}
 					if (didItemConfigCurseChange)
-						ChatRoomSendLocal(`${character.toNicknamedString()} ${newData.data?.curseProperties ? "cursed" : "lifted the curse of"} the '${visibleName}' item's configuration`, undefined, character.MemberNumber);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} ${newData.data?.curseProperties ? "cursed" : "lifted the curse of"} the '${visibleName}' item's configuration`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 				}
 			},
 			logCategoryUpdate: (character, newData, oldData) => {
@@ -841,14 +841,14 @@ export class ModuleCurses extends BaseModule {
 				if (!character.isPlayer()) {
 					if (newData.timer !== oldData.timer)
 						if (newData.timer === null) {
-							ChatRoomSendLocal(`${character.toNicknamedString()} removed the default timer of the global curses configuration`, undefined, character.MemberNumber);
+							SendNotificationWithCheck({ msg: `${character.toNicknamedString()} removed the default timer of the global curses configuration`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 						} else {
-							ChatRoomSendLocal(`${character.toNicknamedString()} changed the default timer of the global curses configuration to ${formatTimeInterval(newData.timer)}`, undefined, character.MemberNumber);
+							SendNotificationWithCheck({ msg: `${character.toNicknamedString()} changed the default timer of the global curses configuration to ${formatTimeInterval(newData.timer)}`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 						}
 					if (newData.timer !== null && newData.timerRemove !== oldData.timerRemove)
-						ChatRoomSendLocal(`${character.toNicknamedString()} changed the default timeout behavior of the global curses configuration to ${newData.timerRemove ? "removal of curses" : "disabling curses"} when time runs out`, undefined, character.MemberNumber);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} changed the default timeout behavior of the global curses configuration to ${newData.timerRemove ? "removal of curses" : "disabling curses"} when time runs out`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 					if (didItemRemoveChange) {
-						ChatRoomSendLocal(`${character.toNicknamedString()} changed the default curses behaviour to ${newData.data?.itemRemove ? "remove" : "keep"} an item when the curse on it is no longer in effect`, undefined, character.MemberNumber);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} changed the default curses behaviour to ${newData.data?.itemRemove ? "remove" : "keep"} an item when the curse on it is no longer in effect`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 					}
 					if (didTriggerChange) {
 						const triggers: string[] = [];
@@ -868,9 +868,9 @@ export class ModuleCurses extends BaseModule {
 							triggers.push(`When ${r.player.inverted ? "not in" : "in"} room with member '${r.player.memberNumber}'${name ? ` (${name})` : ""}`);
 						}
 						if (triggers.length > 0) {
-							ChatRoomSendLocal(`${character.toNicknamedString()} set the global curses configuration to trigger curses under following conditions:\n` + triggers.join("\n"), undefined, character.MemberNumber);
+							SendNotificationWithCheck({ msg: `${character.toNicknamedString()} set the global curses configuration to trigger curses under following conditions:\n` + triggers.join("\n"), category: ModuleCategory.Curses, sender: character.MemberNumber });
 						} else {
-							ChatRoomSendLocal(`${character.toNicknamedString()} deactivated all trigger conditions for the global curses configuration. Curses set to this default configuration will now always trigger, while active`, undefined, character.MemberNumber);
+							SendNotificationWithCheck({ msg: `${character.toNicknamedString()} deactivated all trigger conditions for the global curses configuration. Curses set to this default configuration will now always trigger, while active`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 						}
 					}
 				}
@@ -923,7 +923,7 @@ export class ModuleCurses extends BaseModule {
 						return;
 					logMessage("curse_change", LogEntryType.plaintext, `${character} imported a curse on ${Player.Name}'s ${getVisibleGroupName(group)}`);
 					if (!character.isPlayer()) {
-						ChatRoomSendLocal(`${character.toNicknamedString()} imported a curse on your ${getVisibleGroupName(group)}`);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} imported a curse on your ${getVisibleGroupName(group)}`, category: ModuleCategory.Curses, sender: character.MemberNumber });
 					}
 				},
 				importRemove(condition, character) {

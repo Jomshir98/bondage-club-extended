@@ -11,7 +11,7 @@ import { modStorage, modStorageSync } from "./storage";
 import { BaseModule } from "./_BaseModule";
 import zod from "zod";
 import { LogEntryType, logMessage } from "./log";
-import { ChatRoomSendLocal, getCharacterName, getCharacterNickname } from "../utilsClub";
+import { ChatRoomSendLocal, getCharacterName, getCharacterNickname, SendNotificationWithCheck } from "../utilsClub";
 import { registerSpeechHook, SpeechHookAllow } from "./speech";
 
 export interface RelationshipData {
@@ -126,7 +126,7 @@ export class ModuleRelationhips extends BaseModule {
 
 			logMessage("relationships_change", LogEntryType.plaintext, `${sender} removed the set custom name for ${getCharacterName(data, "[unknown name]")} (${data})`);
 			if (!sender.isPlayer()) {
-				ChatRoomSendLocal(`${sender.toNicknamedString()} removed the set custom name for ${getCharacterNickname(data, "[unknown name]")} (${data})`, undefined, sender.MemberNumber);
+				SendNotificationWithCheck({ msg: `${sender.toNicknamedString()} removed the set custom name for ${getCharacterNickname(data, "[unknown name]")} (${data})`, category: ModuleCategory.Relationships, sender: sender.MemberNumber });
 			}
 
 			modStorageSync();
@@ -162,14 +162,14 @@ export class ModuleRelationhips extends BaseModule {
 			if (oldData?.nickname !== data.nickname) {
 				logMessage("relationships_change", LogEntryType.plaintext, `${sender} changed the custom name for ${getCharacterName(data.memberNumber, "[unknown name]")} (${data.memberNumber}) to '${data.nickname}'`);
 				if (!sender.isPlayer()) {
-					ChatRoomSendLocal(`${sender.toNicknamedString()} changed the custom name for character ${data.memberNumber} to '${data.nickname}'`, undefined, sender.MemberNumber);
+					SendNotificationWithCheck({ msg: `${sender.toNicknamedString()} changed the custom name for character ${data.memberNumber} to '${data.nickname}'`, category: ModuleCategory.Relationships, sender: sender.MemberNumber });
 				}
 			}
 
 			if ((oldData?.enforceNickname ?? false) !== data.enforceNickname) {
 				logMessage("relationships_change", LogEntryType.plaintext, `${sender} ${data.enforceNickname ? "started" : "stopped"} custom name enforcement for ${getCharacterName(data.memberNumber, "[unknown name]")} (${data.memberNumber})`);
 				if (!sender.isPlayer()) {
-					ChatRoomSendLocal(`${sender.toNicknamedString()} ${data.enforceNickname ? "now requires" : "no longer requires"} you to only use ${getCharacterNickname(data.memberNumber, "[unknown name]")}'s (${data.memberNumber}) custom name.`, undefined, sender.MemberNumber);
+					SendNotificationWithCheck({ msg: `${sender.toNicknamedString()} ${data.enforceNickname ? "now requires" : "no longer requires"} you to only use ${getCharacterNickname(data.memberNumber, "[unknown name]")}'s (${data.memberNumber}) custom name.`, category: ModuleCategory.Relationships, sender: sender.MemberNumber });
 				}
 			}
 
@@ -246,7 +246,7 @@ export class ModuleRelationhips extends BaseModule {
 				if (character) {
 					logMessage("relationships_change", LogEntryType.plaintext, `${character} imported settings for relationships module`);
 					if (!character.isPlayer()) {
-						ChatRoomSendLocal(`${character.toNicknamedString()} settings for relationships module`, undefined, character.MemberNumber);
+						SendNotificationWithCheck({ msg: `${character.toNicknamedString()} settings for relationships module`, category: ModuleCategory.Relationships, sender: character.MemberNumber });
 					}
 				}
 

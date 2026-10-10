@@ -278,6 +278,7 @@ type BCX_Rule =
 	| "block_using_unowned_items"
 	| "block_changing_emoticon"
 	| "block_ui_icons_names"
+	| "block_BCX_access_to_others"
 	| "alt_restrict_hearing"
 	| "alt_restrict_sight"
 	| "alt_eyes_fullblind"
@@ -380,6 +381,9 @@ type RuleCustomData = {
 	};
 	block_tying_others: {
 		onlyMoreDominantsToggle: boolean;
+	};
+	block_BCX_access_to_others: {
+		onlyWhenRestrainedToggle: boolean;
 	};
 	block_keyuse_others: {
 		allowOwnerLocks: boolean;

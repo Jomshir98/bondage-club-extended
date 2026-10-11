@@ -173,6 +173,9 @@ interface DrawImageExOptions {
 	Zoom?: number;
 }
 
+// Grab BC's own DrawImageEx so we can reuse that
+const BCDrawImageEx = globalThis.DrawImageEx;
+
 /**
  * Draws an image on canvas, applying all options
  * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
@@ -204,48 +207,7 @@ export function DrawImageEx(
 		Zoom = 1,
 	}: DrawImageExOptions = {}
 ) {
-	if (typeof Source === "string") {
-		Source = DrawGetImage(Source);
-		if (!Source.complete) return false;
-		if (!Source.naturalWidth) return true;
-	}
-
-	const sizeChanged = Width != null || Height != null;
-	if (Width == null) {
-		Width = SourcePos ? SourcePos[2] : Source.width;
-	}
-	if (Height == null) {
-		Height = SourcePos ? SourcePos[3] : Source.height;
-	}
-
-	Canvas.save();
-
-	Canvas.globalCompositeOperation = "source-over";
-	Canvas.globalAlpha = Alpha;
-	Canvas.translate(X, Y);
-
-	if (Zoom !== 1) {
-		Canvas.scale(Zoom, Zoom);
-	}
-
-	if (Invert) {
-		Canvas.transform(1, 0, 0, -1, 0, Height);
-	}
-
-	if (Mirror) {
-		Canvas.transform(-1, 0, 0, 1, Width, 0);
-	}
-
-	if (SourcePos) {
-		Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
-	} else if (sizeChanged) {
-		Canvas.drawImage(Source, 0, 0, Width, Height);
-	} else {
-		Canvas.drawImage(Source, 0, 0);
-	}
-
-	Canvas.restore();
-	return true;
+	return BCDrawImageEx(Source, Canvas, X, Y, { Alpha, SourcePos, Width, Height, Invert, Mirror, Zoom });
 }
 
 export function DrawImageBCX(Name: string, X: number, Y: number, options?: DrawImageExOptions): boolean {

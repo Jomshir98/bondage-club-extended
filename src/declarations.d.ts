@@ -335,6 +335,9 @@ type BCX_Rule =
 	| "other_track_time"
 	| "other_constant_reminder"
 	| "other_log_money"
+	| "other_forbid_rule_notifications"
+	| "other_forbid_curse_notifications"
+	| "other_forbid_relationship_notifications"
 	// | "other_restrict_console_usage"
 	| "other_track_BCX_activation"
 	| "setting_item_permission"
@@ -818,4 +821,12 @@ interface ModStorage {
 
 interface ExtensionSettings {
 	BCX?: string | null;
+}
+
+interface ISendNotificationWithCheck {
+	msg: string | Node;
+	timeout?: number;
+	sender?: number;
+	category: ModuleCategory;
+	activated?: BCX_Rule;
 }

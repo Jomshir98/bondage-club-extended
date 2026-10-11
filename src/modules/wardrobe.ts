@@ -300,7 +300,12 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 	if (!character) {
 		return "Import error: No character";
 	}
-	if (!WardrobeIsPreviewCharacter(character) && character.MemberNumber !== j_WardrobeBindsAllowedCharacter && includeBinds) {
+
+	const isBindsAllowed = (CurrentScreen === "Wardrobe" ?
+		Wardrobe.selectedCharacter.MemberNumber === j_WardrobeBindsAllowedCharacter
+		: CharacterAppearanceSelection.MemberNumber === j_WardrobeBindsAllowedCharacter);
+
+	if (!isBindsAllowed && includeBinds) {
 		return "Import error: Not allowed to import items";
 	}
 
@@ -367,10 +372,15 @@ function PasteListener(ev: ClipboardEvent) {
 		ev.stopImmediatePropagation();
 		const data = ((ev.clipboardData || (window as any).clipboardData) as DataTransfer).getData("text");
 		const C = Wardrobe.selectedCharacter;
-		const res = useExtendedImport() ? openExtendedImport(C, data) : j_WardrobeImportSelectionClothes(C, data, j_WardrobeIncludeBinds, allowMode);
-		if (res) {
-			ToastManager.info(res);
-		}
+		void doTheImport(C, data);
+	}
+}
+
+async function doTheImport(C: Character, data: string) {
+	const importPromise: Promise<string | null> = useExtendedImport() ? openExtendedImport(C, data) : new Promise(() => j_WardrobeImportSelectionClothes(C, data, j_WardrobeIncludeBinds, allowMode));
+	const res = await importPromise;
+	if (res) {
+		ToastManager.info(res);
 	}
 }
 
@@ -433,7 +443,7 @@ function useExtendedImport(): boolean {
 	return (modStorage.wardrobeDefaultExtended ?? false) !== holdingShift;
 }
 
-function openExtendedImport(character: Character, data: string | ItemBundle[], clothesOnly: boolean = false): string | null {
+async function openExtendedImport(character: Character, data: string | ItemBundle[], clothesOnly: boolean = false): Promise<string | null> {
 	const parsedData = Array.isArray(data) ? data : parseWardrobeImportData(data);
 	if (typeof parsedData === "string")
 		return parsedData;
@@ -441,19 +451,26 @@ function openExtendedImport(character: Character, data: string | ItemBundle[], c
 	if (!character) {
 		return "Import error: No character";
 	}
-	const allowBinds = character.MemberNumber === j_WardrobeBindsAllowedCharacter;
 
-	setAppearanceOverrideScreen(new GuiWardrobeExtended(
-		setAppearanceOverrideScreen,
-		character,
-		allowBinds,
-		parsedData,
-		clothesOnly
-	));
-	return null;
+	const allowBinds = CurrentScreen === "Wardrobe" ?
+		Wardrobe.selectedCharacter.MemberNumber === j_WardrobeBindsAllowedCharacter
+		: CharacterAppearanceSelection.MemberNumber === j_WardrobeBindsAllowedCharacter;
+
+	return new Promise((resolve) => {
+		setAppearanceOverrideScreen(new GuiWardrobeExtended(
+			(newScreen) => {
+				setAppearanceOverrideScreen(newScreen);
+				resolve(null);
+			},
+			character,
+			allowBinds,
+			parsedData,
+			clothesOnly
+		));
+	});
 }
 
-function setAppearanceOverrideScreen(newScreen: GuiWardrobeExtended | null): void {
+export function setAppearanceOverrideScreen(newScreen: GuiWardrobeExtended | null): void {
 	if (appearanceOverrideScreen) {
 		appearanceOverrideScreen.Unload();
 		appearanceOverrideScreen = null;
@@ -523,25 +540,26 @@ export class ModuleWardrobe extends BaseModule {
 			return res;
 		});
 
-		function BCXDoImport(char: Character) {
-			BCX_setTimeout(async () => {
-				if (typeof navigator.clipboard.readText !== "function") {
-					ToastManager.info("Please press Ctrl+V");
-					return;
-				}
+		async function BCXDoImport(char: Character) {
+			if (typeof navigator.clipboard.readText !== "function") {
+				ToastManager.info("Please press Ctrl+V");
+				return;
+			}
+			try {
 				const data = await navigator.clipboard.readText();
-				const res = useExtendedImport() ? openExtendedImport(char, data) : j_WardrobeImportSelectionClothes(char, data, j_WardrobeIncludeBinds, allowMode);
-				if (res) {
-					ToastManager.info(res);
-				}
-			}, 0);
+				await doTheImport(char, data);
+			} catch {
+				ToastManager.error("Failed to import");
+			}
 		}
 
-		function BCXDoExport(char: Character) {
-			BCX_setTimeout(async () => {
+		async function BCXDoExport(char: Character) {
+			try {
 				await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(char, j_WardrobeIncludeBinds));
 				ToastManager.info("Copied to clipboard!");
-			}, 0);
+			} catch {
+				ToastManager.error("Failed to copy to clipboard");
+			}
 		}
 
 		hookFunction("WardrobeTogglePreviewOverlay", 2, (args, next) => {
@@ -570,24 +588,35 @@ export class ModuleWardrobe extends BaseModule {
 							}
 						),
 						ElementButton.Create("wardrobe-bcx-import",
-							() => {
-								const char = WardrobeEnsureSlotCharacter(slot);
+							async () => {
+								let char = WardrobeEnsureSlotCharacter(slot);
 								if (!char) {
-									ToastManager.error(`No character in slot ${slot}`);
-									return;
+									WardrobeDeletePreviewCharacter(WardrobeID.loadPreview);
+									char = CharacterLoadSimple(WardrobeID.loadPreview);
+									CharacterAppearanceSetDefault(char);
 								}
-								BCXDoImport(char);
+								await BCXDoImport(char);
+								// Hand-rolled WardrobeFastSave
+								Player.Wardrobe[slot] = char.Appearance.map(i => WardrobeAssetBundle(i));
+								WardrobeFixLength();
+								WardrobeInvalidateFilteredSlots();
+								ServerAccountUpdate.QueueData({ Wardrobe: CharacterCompressWardrobe(Player.Wardrobe) });
+
+								char = WardrobeEnsureSlotCharacter(slot)!;
+								WardrobeDoImport(char, Player.Wardrobe[slot], () => true, true);
+								Wardrobe.previewLoadCharacter = char;
+								WardrobeDoImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char?.Appearance), () => true, true);
 							},
 							{ label: "Import" }
 						),
 						ElementButton.Create("wardrobe-bcx-export",
-							() => {
+							async () => {
 								const char = WardrobeEnsureSlotCharacter(slot);
 								if (!char) {
 									ToastManager.error(`No character in slot ${slot}`);
 									return;
 								}
-								BCXDoExport(char);
+								await BCXDoExport(char);
 							},
 							{ label: "Export" }
 						),
@@ -601,13 +630,13 @@ export class ModuleWardrobe extends BaseModule {
 					style: { ...cssStyle, "margin-top": "var(--gap, 8px)" },
 					children: [
 						ElementButton.Create("wardrobe-bcx-advanced-import",
-							() => {
+							async () => {
 								const char = WardrobeEnsureSlotCharacter(slot);
 								if (!char) {
 									ToastManager.error(`No character in slot ${slot}`);
 									return;
 								}
-								const result = openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
+								const result = await openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
 								if (result) {
 									ToastManager.error(result);
 								} else {
@@ -661,12 +690,12 @@ export class ModuleWardrobe extends BaseModule {
 				const cell = typeof (WardrobeID as any).slotActions === "function" ? ElementWrap((WardrobeID as any).slotActions(slot)) : ElementWrap(WardrobeID.slotCell(slot));
 				if (!cell) continue;
 				ElementButton.Create(
-					`wardrobe-bcx-import-${slot}`, () => {
-						const actualSlot = typeof window.WardrobeGetVisibleSlot === "function" ? window.WardrobeGetVisibleSlot(slot) : (typeof WardrobeOffset === "number" ? WardrobeOffset + slot : slot);
+					`wardrobe-bcx-import-${slot}`, async () => {
+						const actualSlot = WardrobeGetVisibleSlot(slot);
 						if (actualSlot == null) return;
 						const char = WardrobeEnsureSlotCharacter(actualSlot);
 						if (!char) return;
-						const result = openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
+						const result = await openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
 						if (result) {
 							ToastManager.error(result);
 						} else {
@@ -789,9 +818,9 @@ export class ModuleWardrobe extends BaseModule {
 						exitSearchMode(C);
 						return;
 					} else if (Button === "BCX_Import") {
-						BCXDoImport(CharacterAppearanceSelection);
+						void BCXDoImport(CharacterAppearanceSelection);
 					} else if (Button === "BCX_Export") {
-						BCXDoExport(CharacterAppearanceSelection);
+						void BCXDoExport(CharacterAppearanceSelection);
 					}
 				}
 			}

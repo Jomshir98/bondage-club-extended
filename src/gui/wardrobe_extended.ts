@@ -2,9 +2,9 @@ import { isEqual } from "lodash-es";
 import { BCX_setTimeout } from "../BCXContext";
 import { getChatroomCharacter } from "../characters";
 import { sendQuery } from "../modules/messaging";
-import { itemMergeProperties, parseWardrobeImportData, ValidationCanAccessCheck, WardrobeDoImport, WardrobeImportCheckChangesLockedItem, WardrobeImportMakeFilterFunction } from "../modules/wardrobe";
+import { itemMergeProperties, parseWardrobeImportData, setAppearanceOverrideScreen, ValidationCanAccessCheck, WardrobeDoImport, WardrobeImportCheckChangesLockedItem, WardrobeImportMakeFilterFunction } from "../modules/wardrobe";
 import { arrayUnique, clampWrap, isObject } from "../utils";
-import { DrawImageEx, getVisibleGroupName, InfoBeep, isBind, isBody, isCloth, isCosplay, itemColorsEquals, smartGetAssetGroup } from "../utilsClub";
+import { DrawImageEx, getVisibleGroupName, isBind, isBody, isCloth, isCosplay, itemColorsEquals, smartGetAssetGroup } from "../utilsClub";
 import { GuiSubscreen } from "./subscreen";
 
 enum ScreenState {
@@ -128,8 +128,8 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		this.data = data;
 
 		const chatroomCharacter = character.MemberNumber && getChatroomCharacter(character.MemberNumber);
-		this.allowCosplay = character.IsPlayer() || character.OnlineSharedSettings?.BlockBodyCosplay === false;
-		this.allowBody = character.IsPlayer() || character.OnlineSharedSettings?.AllowFullWardrobeAccess === true;
+		this.allowCosplay = character.IsPlayer() || character.OnlineSharedSettings?.BlockBodyCosplay === false || WardrobeIsPreviewCharacter(character);
+		this.allowBody = character.IsPlayer() || character.OnlineSharedSettings?.AllowFullWardrobeAccess === true || WardrobeIsPreviewCharacter(character);
 		if (chatroomCharacter && chatroomCharacter.BCXVersion && (!this.allowCosplay || !this.allowBody)) {
 			sendQuery("rule_alt_allow_changing_appearance", undefined, chatroomCharacter.MemberNumber).then(res => {
 				if (res) {
@@ -585,17 +585,18 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		if (MouseIn(1515, 45, 207, 50)) {
 			BCX_setTimeout(async () => {
 				if (typeof navigator.clipboard.readText !== "function") {
-					InfoBeep("Please press Ctrl+V", 5_000);
+					ToastManager.info("Please press Ctrl+V", { duration: 5_000 });
 					return;
 				}
 				const data = await navigator.clipboard.readText();
 				const parsedData = parseWardrobeImportData(data);
 				if (typeof parsedData === "string") {
-					InfoBeep(parsedData, 5_000);
+					ToastManager.info(parsedData, { duration: 5_000 });
 					return;
 				}
 
-				this.exitCallback(new GuiWardrobeExtended(
+				// We swap in a new screen with the pasted data
+				setAppearanceOverrideScreen(new GuiWardrobeExtended(
 					this.exitCallback,
 					this.character,
 					this.allowBindsBase,

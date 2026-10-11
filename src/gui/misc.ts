@@ -71,6 +71,7 @@ export class GuiMisc extends GuiSubscreen {
 			ElementPosition("BCX_RoomSearchValueField", 1320, 827, 460, 64);
 		} else if (this.page === 1) {
 			DrawCheckbox(125, 200, 64, 64, "Use the extended wardrobe importer as default", modStorage.wardrobeDefaultExtended ?? true);
+			DrawCheckbox(125, 300, 64, 64, "Show import/export BCX buttons on the Appearance screen", modStorage.showAppearanceImportButton ?? true);
 		}
 
 		// help text
@@ -131,6 +132,10 @@ export class GuiMisc extends GuiSubscreen {
 		} else if (this.page === 1) {
 			if (MouseIn(125, 200, 64, 64)) {
 				modStorage.wardrobeDefaultExtended = !modStorage.wardrobeDefaultExtended;
+				modStorageSync();
+			}
+			if (MouseIn(125, 300, 64, 64)) {
+				modStorage.showAppearanceImportButton = !modStorage.showAppearanceImportButton;
 				modStorageSync();
 			}
 		}

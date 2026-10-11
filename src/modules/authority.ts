@@ -109,6 +109,16 @@ export function checkPermissionAccessData(permData: PermissionInfo, accessLevel:
 	return accessLevel <= permData.min;
 }
 
+export function othersBCXAccessBlockedByRule(): boolean {
+	const blockRule = RulesGetRuleState("block_BCX_access_to_others");
+	if (!blockRule.isEnforced) {
+		return false;
+	}  else if (blockRule.customData?.onlyWhenRestrainedToggle && !Player.IsRestrained()) {
+		return false;
+	}
+	return true;
+}
+
 function selfAccessBlockedByRule(permData: PermissionInfo): boolean {
 	const blockRule = RulesGetRuleState("block_BCX_permissions");
 	if (!blockRule.isEnforced) {

@@ -1183,6 +1183,24 @@ export function initRules_bc_blocks() {
 		// Implemented externally
 	});
 
+	registerRule("block_BCX_access_to_others", {
+		name: "Prevent BCX access to others",
+		loggable: false,
+		type: RuleType.Block,
+		shortDescription: "PLAYER_NAME accessing others BCX",
+		longDescription: "This rule forbids PLAYER_NAME access to others BCX completely. It has an option to not allow access to others BCX only when player is restrained which is enabled by default, disabling it will make it active all the time.",
+		keywords: ["limiting", "preventing", "controlling", "accessing", "others"],
+		defaultLimit: ConditionsLimit.blocked,
+		dataDefinition: {
+			onlyWhenRestrainedToggle: {
+				type: "toggle",
+				default: true,
+				description: "Only forbid when player is restrained",
+			},
+		},
+		// Implemented externally
+	});
+
 	registerRule("block_curses_self_by_others", {
 		name: "Prevent accessing curses by others",
 		loggable: false,

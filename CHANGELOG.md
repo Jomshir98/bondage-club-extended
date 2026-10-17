@@ -14,6 +14,26 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.22
+
+- [FIX] Allow importing restraints into the preview dummies in the wardrobe
+- [CHORE] Remove rule forcing unix EOL + .editorconfig
+- [CHORE] Keep the rule but set .gitattributes
+- [CHORE] Do a check for .editorconfig violations
+- [CHORE] Fix stylistic/eslint-plugin being imported weirdly
+- [ADD] update block_BCX_permissions rule to also trigger if tied (#89)
+- [FIX] Reuse BC's own DrawImageEx
+- [FIX] Make the binding import more consistent
+
+## 1.1.21
+
+- [ADD] Added wildcard support and made speech honorifics case-insensitive (#81)
+- [FIX] Add pagination to wardrobe selectors
+- [FIX] Use WardrobeOffset for slot character lookups (#85)
+- [ADD] Adjust wardrobe slider button position and add Selective Import button
+- [FIX] Remove extra style stuff now that the CSS is cleaner on BC's side
+- [FIX] Fix wardrobe import slot lookups (#87)
+
 ## 1.1.20
 
 - [CHORE] Update for R132

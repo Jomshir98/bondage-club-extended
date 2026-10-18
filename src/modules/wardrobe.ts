@@ -203,7 +203,7 @@ export function ValidationCanAccessCheck(character: Character, group: AssetGroup
 }
 
 export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): {
-	result: CraftingItem | undefined;
+	result: CraftingPartialItem | undefined;
 	messages: string[];
 } {
 	if (Craft === undefined) {
@@ -226,9 +226,9 @@ export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): 
 				messages.push(m);
 			}
 		};
-		const result = CraftingValidate(Craft as CraftingItem, Asset, true);
+		const result = CraftingValidate(Craft as CraftingPartialItem, Asset, true, false, true);
 		return {
-			result: result > CraftingStatusType.CRITICAL_ERROR ? Craft as CraftingItem : undefined,
+			result: result > CraftingStatusType.CRITICAL_ERROR ? Craft as CraftingPartialItem : undefined,
 			messages,
 		};
 	} catch (error) {

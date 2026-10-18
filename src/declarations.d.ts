@@ -115,7 +115,7 @@ interface CursedItemInfo {
 	Color?: ItemColor;
 	Difficulty?: number;
 	Property?: ItemProperties;
-	Craft?: CraftingItem;
+	Craft?: CraftingPartialItem;
 	itemRemove?: true | undefined;
 }
 

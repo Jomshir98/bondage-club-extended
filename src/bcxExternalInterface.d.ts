@@ -84,7 +84,7 @@ interface BCX_CurseInfo {
 	/** The properties that are enforced */
 	readonly property?: ItemProperties;
 	/** Crafting data, always cursed */
-	readonly craft?: CraftingItem;
+	readonly craft?: CraftingPartialItem;
 }
 
 //#endregion

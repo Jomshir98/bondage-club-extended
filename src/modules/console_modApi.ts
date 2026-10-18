@@ -89,7 +89,7 @@ export class ModCurseInfo implements BCX_CurseInfo {
 	readonly color?: ItemColor;
 	readonly curseProperty: boolean;
 	readonly property?: ItemProperties;
-	readonly craft?: CraftingItem;
+	readonly craft?: CraftingPartialItem;
 
 	constructor(group: AssetGroupName, state: ConditionsConditionData<"curses">) {
 		this.group = group;

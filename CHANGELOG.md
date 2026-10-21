@@ -14,6 +14,11 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.23
+
+- [FIX] Ensure that BCX curses validate the crafts as partial (#94)
+- [FIX] Correct status icons URLs
+
 ## 1.1.22
 
 - [FIX] Allow importing restraints into the preview dummies in the wardrobe

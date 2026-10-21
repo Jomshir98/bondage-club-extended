@@ -310,7 +310,7 @@ export class ModuleChatroom extends BaseModule {
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Color:
-					DrawImageEx("Assets/Female3DCG/Emoticon/Spectator/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+					DrawImageEx("Assets/Female3DCG/Emoticon/Spectator/Emoticon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});
@@ -320,13 +320,13 @@ export class ModuleChatroom extends BaseModule {
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Wardrobe:
-					DrawImageEx("Assets/Female3DCG/Emoticon/Wardrobe/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+					DrawImageEx("Assets/Female3DCG/Emoticon/Wardrobe/Emoticon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Profile:
-					DrawImageEx("Assets/Female3DCG/Emoticon/Read/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+					DrawImageEx("Assets/Female3DCG/Emoticon/Read/Emoticon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});

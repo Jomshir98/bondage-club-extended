@@ -323,7 +323,7 @@ export function showHelp(helpText: string) {
 	});
 }
 
-type RoomInfo = Omit<ChatRoomData, "Character">;
+type RoomInfo = Omit<ServerChatRoomData, "Character">;
 
 export function getCurrentRoomData(): RoomInfo | null {
 	if (!ChatRoomData)

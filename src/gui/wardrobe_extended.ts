@@ -2,7 +2,7 @@ import { isEqual } from "lodash-es";
 import { BCX_setTimeout } from "../BCXContext";
 import { getChatroomCharacter } from "../characters";
 import { sendQuery } from "../modules/messaging";
-import { itemMergeProperties, parseWardrobeImportData, setAppearanceOverrideScreen, ValidationCanAccessCheck, WardrobeDoImport, WardrobeImportCheckChangesLockedItem, WardrobeImportMakeFilterFunction } from "../modules/wardrobe";
+import { itemBundleGetProperty, itemMergeProperties, parseWardrobeImportData, setAppearanceOverrideScreen, ValidationCanAccessCheck, WardrobeDoImport, WardrobeImportCheckChangesLockedItem, WardrobeImportMakeFilterFunction } from "../modules/wardrobe";
 import { arrayUnique, clampWrap, isObject } from "../utils";
 import { DrawImageEx, getVisibleGroupName, isBind, isBody, isCloth, isCosplay, itemColorsEquals, smartGetAssetGroup } from "../utilsClub";
 import { GuiSubscreen } from "./subscreen";
@@ -792,7 +792,7 @@ export class GuiWardrobeExtended extends GuiSubscreen {
 		const piercingsState = this.getGlobalSelectorState("piercings");
 
 		this.allowLocks =
-			this.data.some(a => a.Property?.Effect?.includes("Lock")) &&
+			this.data.some(a => itemBundleGetProperty(a)?.Effect?.includes("Lock")) &&
 			(this.allowBinds && itemsState.checked !== "no" && !itemsState.disabled ||
 				this.allowPiercings && piercingsState.checked !== "no" && !piercingsState.disabled ||
 				this.allowCollar && collarState.checked !== "no" && !collarState.disabled);
@@ -941,8 +941,8 @@ function checkImportItemNoChange(group: AssetGroupName, a: ItemBundle[], b: Item
 		itemColorsEquals(item1.Color, item2.Color, asset1, asset2) &&
 		(item1.Difficulty ?? 0) === (item2.Difficulty ?? 0) &&
 		isEqual(
-			item1.Property ?? {},
-			itemMergeProperties(item1.Property, item2.Property, { includeNoncursableProperties: true, lockAssignMemberNumber: Player.MemberNumber }) ?? {}
+			itemBundleGetProperty(item1) ?? {},
+			itemMergeProperties(itemBundleGetProperty(item1), itemBundleGetProperty(item2), { includeNoncursableProperties: true, lockAssignMemberNumber: Player.MemberNumber }) ?? {}
 		) &&
 		isEqual(item1.Craft, item2.Craft)
 	);

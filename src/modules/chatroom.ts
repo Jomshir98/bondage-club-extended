@@ -261,9 +261,9 @@ export class ModuleChatroom extends BaseModule {
 			next(args);
 
 			const [C, CharX, CharY, Zoom] = args;
-			const Char = getChatroomCharacter(C.MemberNumber!);
-			const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
-			const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
+			const Char = getChatroomCharacter(C.MemberNumber);
+			const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber);
+			const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber);
 			if (Char?.BCXVersion &&
 				!Ghosted &&
 				ChatRoomHideIconState === 0 &&

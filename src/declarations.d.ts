@@ -353,6 +353,7 @@ type BCX_Rule =
 	| "setting_relog_keeps_restraints"
 	| "setting_leashed_roomchange"
 	| "setting_room_rejoin"
+	| "setting_lock_timer_limit"
 	| "setting_plug_vibe_events"
 	| "setting_allow_tint_effects"
 	| "setting_allow_blur_effects"
@@ -599,6 +600,9 @@ type RuleCustomData = {
 	setting_room_rejoin: {
 		value: boolean;
 		remakeRooms: boolean;
+	};
+	setting_lock_timer_limit: {
+		value: LockTimerLimitName;
 	};
 	setting_plug_vibe_events: {
 		value: boolean;

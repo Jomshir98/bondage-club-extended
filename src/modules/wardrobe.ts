@@ -50,6 +50,15 @@ export function parseWardrobeImportData(data: string): string | ItemBundle[] {
 	}
 }
 
+const itemBundlePropertyCache = new WeakMap<ItemBundle, ItemProperties | undefined>();
+
+export function itemBundleGetProperty(bundle: ItemBundle): ItemProperties | undefined {
+	if (!itemBundlePropertyCache.has(bundle)) {
+		itemBundlePropertyCache.set(bundle, ServerBundledItemToAppearanceItem("Female3DCG", bundle)?.Property);
+	}
+	return itemBundlePropertyCache.get(bundle);
+}
+
 export function itemMergeProperties(sourceProperty: Partial<ItemProperties> | undefined, targetProperty: Partial<ItemProperties> | undefined, {
 	includeNoncursableProperties = false,
 	lockAssignMemberNumber,
@@ -156,7 +165,7 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 				!newAsset ||
 				currentItem.Asset.Name !== newItem.Name ||
 				!itemColorsEquals(currentItem.Color, newItem.Color, currentItem.Asset, newAsset) ||
-				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, newItem.Property, {
+				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, itemBundleGetProperty(newItem), {
 					includeNoncursableProperties: true,
 					lockAssignMemberNumber: Player.MemberNumber,
 				}) ?? {})
@@ -266,7 +275,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 					if (!isObject(cloth.Property)) {
 						item.Property = cloneDeep(cloth.Property);
 					} else {
-						item.Property = itemMergeProperties(item.Property, cloth.Property, {
+						item.Property = itemMergeProperties(item.Property, itemBundleGetProperty(cloth), {
 							includeNoncursableProperties: (
 								typeof cloth.Property.LockedBy === "string" &&
 								ValidationCanAccessCheck(C, "ItemMisc", cloth.Property.LockedBy, undefined) &&
@@ -334,7 +343,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 				!bundleAsset ||
 				wornItem.Asset.Name !== bundleItem.Name ||
 				!itemColorsEquals(wornItem.Color, bundleItem.Color, wornItem.Asset, bundleAsset) ||
-				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(bundleItem.Property))
+				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(itemBundleGetProperty(bundleItem)))
 			) {
 				fullMatch = false;
 			}
@@ -345,7 +354,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 
 	return (!fullMatch &&
 		includeBinds &&
-		data.some(i => Array.isArray(i.Property?.Effect) && i.Property?.Effect.includes("Lock"))
+		data.some(i => itemBundleGetProperty(i)?.Effect?.includes("Lock"))
 	) ? "Imported! Repeat to also import locks." : "Imported!";
 }
 

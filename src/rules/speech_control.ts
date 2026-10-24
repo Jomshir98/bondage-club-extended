@@ -679,6 +679,7 @@ export function initRules_bc_speech_control() {
 								MemberName: Player.FriendNames?.get(data.MemberNumber) || "Unknown",
 								ChatRoomName: undefined,
 								Sent: true,
+								Read: true,
 								Private: false,
 								Time: new Date(),
 								Message: msg,

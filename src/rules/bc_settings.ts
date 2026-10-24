@@ -431,6 +431,36 @@ export function initRules_bc_settings() {
 		},
 	});
 
+	registerRule("setting_lock_timer_limit", {
+		...settingHelper("Lock timer limits setting", ConditionsLimit.blocked),
+		dataDefinition: {
+			value: {
+				type: "listSelect",
+				options: [
+					["LockTimerLimitDefault", "Default"],
+					["LockTimerLimitDay", "1 Day"],
+					["LockTimerLimitWeek", "1 Week"],
+					["LockTimerLimitMonth", "1 Month"],
+					["LockTimerLimitYear", "1 Year"],
+					["LockTimerLimitUnlimited", "Unlimited"],
+				],
+				default: "LockTimerLimitDefault",
+				description: "Lock timer limits setting",
+			},
+		},
+		tick(state) {
+			if (state.isEnforced && state.customData && Player.OnlineSharedSettings) {
+				if (Player.OnlineSharedSettings.LockTimerLimit !== state.customData.value) {
+					Player.OnlineSharedSettings.LockTimerLimit = state.customData.value;
+					state.trigger();
+					preferenceSync();
+					return true;
+				}
+			}
+			return false;
+		},
+	});
+
 	toggleSettingHelper({
 		id: "setting_plug_vibe_events",
 		setting: "Events while plugged or vibed",

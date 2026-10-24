@@ -10,6 +10,7 @@ import { developmentMode } from "../utilsClub";
 import { ChatroomSM } from "./chatroom";
 import { GuiTutorial } from "../gui/tutorial";
 import { BCXGlobalEventSystem } from "../event";
+import { othersBCXAccessBlockedByRule } from "./authority";
 
 export function getCurrentSubscreen(): GuiSubscreen | null {
 	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
@@ -113,7 +114,11 @@ export class ModuleGUI extends BaseModule {
 				}
 			} else if (C && C.BCXVersion !== null) {
 				const playerHasAccessToCharacter = C.playerHasAccessToCharacter();
-				DrawButton(1815, 685, 90, 90, "", playerHasAccessToCharacter ? "White" : "#ddd", icon_BCX, playerHasAccessToCharacter ? "BCX" : "Needs BC item permission", !playerHasAccessToCharacter);
+				if (!playerHasAccessToCharacter) {
+					DrawButton(1815, 685, 90, 90, "", "#ddd", icon_BCX, "Needs BC item permission");
+				} else if (!C.isPlayer() && othersBCXAccessBlockedByRule())
+					DrawButton(1815, 685, 90, 90, "", "#ddd", icon_BCX, "Access blocked by a BCX rule");
+				else DrawButton(1815, 685, 90, 90, "", "White", icon_BCX,  "BCX");
 			}
 		});
 
@@ -134,8 +139,10 @@ export class ModuleGUI extends BaseModule {
 						this.currentSubscreen = new GuiTutorial(C, true);
 					}
 				} else if (C && C.BCXVersion !== null && C.playerHasAccessToCharacter()) {
-					unloadInfoSheet();
-					this.currentSubscreen = new GuiMainMenu(C);
+					if (C.isPlayer() ? true : !othersBCXAccessBlockedByRule()) {
+						unloadInfoSheet();
+						this.currentSubscreen = new GuiMainMenu(C);
+					}
 				}
 			} else {
 				return next(args);

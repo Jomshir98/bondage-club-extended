@@ -814,6 +814,7 @@ interface ModStorage {
 	relationships: import("./modules/relationships").RelationshipData[];
 	wardrobeDefaultExtended: boolean;
 	compatibilityCheckerWarningIgnore?: string;
+	showAppearanceImportButton: boolean;
 }
 
 interface ExtensionSettings {

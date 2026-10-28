@@ -586,20 +586,15 @@ export class ModuleChatroomAdmin extends BaseModule {
 			if (onThemeRoomSubpage) {
 				ChatSettingsThemeRoomExit();
 			}
-			// needed to auto apply a template correctly again
-			ChatBlockItemReturnScreen = null;
 		});
 		hookFunction("ChatAdminLoad", 0, (args, next) => {
 			const ret = next(args);
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
 			if (ChatAdminMode === "create" &&
-				template &&
-				!ChatBlockItemReturnScreen
+				template
 			) {
 				applyTemplate(template);
 			}
-			// needed to auto apply a template correctly again
-			ChatBlockItemReturnScreen = null;
 			return ret;
 		});
 		patchFunction("ChatAdminRun", {
@@ -663,13 +658,22 @@ export class ModuleChatroomAdmin extends BaseModule {
 			}
 			return next(args);
 		});
-		hookFunction("ChatAdminRun", 0, (args, next) => {
-			if (!ChatAdminPreviewBackgroundMode) {
-				DrawText("More", 169, 95, "Black", "Gray");
-				DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
-				if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
-			}
-			return next(args);
+		hookFunction("ChatAdminLoad", 0, async (args, next) => {
+			const ret = await next(args);
+
+			const button = ElementButton.Create("bcx-more-options",
+				() => {
+					onSecondPage = !onSecondPage;
+					ElementToggleGeneratedElements("ChatAdmin", false);
+				},
+				{
+					image: icon_BCX,
+					tooltip: "More options [BCX]",
+				}
+			);
+			ElementWrap("chat-admin-screen-menu")?.append(button);
+
+			return ret;
 		});
 		//#endregion
 		hookFunction("ChatAdminClick", 10, (args, next) => {
@@ -677,15 +681,6 @@ export class ModuleChatroomAdmin extends BaseModule {
 				ChatSettingsExtraClick((data) => {
 					applyTemplate(data);
 				});
-				return true;
-			}
-			return next(args);
-		});
-		hookFunction("ChatAdminClick", 0, (args, next) => {
-			// click event for second page button
-			if (MouseIn(124, 132, 90, 90) && !ChatAdminPreviewBackgroundMode) {
-				onSecondPage = !onSecondPage;
-				ElementToggleGeneratedElements("ChatAdmin", false);
 				return true;
 			}
 			return next(args);

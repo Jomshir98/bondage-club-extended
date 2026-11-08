@@ -68,11 +68,62 @@ export class ModuleGUI extends BaseModule {
 	}
 
 	load() {
-		patchFunction("InformationSheetRun", {
-			"DrawButton(1815, 765, 90, 90,": "DrawButton(1815, 800, 90, 90,",
-		});
-		patchFunction("InformationSheetClick", {
-			"MouseIn(1815, 765, 90, 90)": "MouseIn(1815, 800, 90, 90)",
+		hookFunction("InformationSheetLoad", 10, async (args, next) => {
+			const ret = await next(args);
+
+			const C = this.getInformationSheetCharacter();
+
+			if (!C) return ret;
+
+			const playerHasAccessToCharacter = C.playerHasAccessToCharacter();
+
+			let button: HTMLButtonElement | null = null;
+			if (firstTimeInit && C.isPlayer()) {
+				button = ElementButton.Create(null, () => {
+					unloadInfoSheet();
+					this.currentSubscreen = new GuiTutorial(C, true);
+				},
+				{
+					image: icon_BCX,
+					disabled: !playerHasAccessToCharacter,
+					tooltip: "You can find BCX here ►",
+				},
+				{
+					tooltip: {
+						style: {
+							visibility: "visible",
+						},
+					},
+					button: {
+						style: {
+							marginTop: "auto",
+						},
+					},
+				});
+			} else if (!firstTimeInit && C.BCXVersion !== null) {
+				const tooltip = playerHasAccessToCharacter ? "BCX" : "Needs BC item permission";
+				button = ElementButton.Create(null, () => {
+					unloadInfoSheet();
+					this.currentSubscreen = new GuiMainMenu(C);
+				},
+				{
+					image: icon_BCX,
+					disabled: !playerHasAccessToCharacter,
+					tooltip,
+				},
+				{
+					button: {
+						style: {
+							marginTop: "auto",
+						},
+					},
+				});
+			}
+			if (button) {
+			// @ts-expect-error - bc-stubs need update
+				const menu = ElementWrap(`${InformationSheetIDs.screen}-menu`);
+				menu?.append(button);
+			}
 		});
 		hookFunction("InformationSheetRun", 10, (args, next) => {
 			if (this._currentSubscreen) {
@@ -104,17 +155,6 @@ export class ModuleGUI extends BaseModule {
 			}
 
 			next(args);
-			const C = this.getInformationSheetCharacter();
-			if (firstTimeInit) {
-				if (C && C.isPlayer()) {
-					DrawButton(1815, 685, 90, 90, "", "White", icon_BCX);
-					DrawRect(1300, 685, 500, 90, "Black");
-					DrawText(`You can find BCX here ►`, 1550, 685 + 45, "White");
-				}
-			} else if (C && C.BCXVersion !== null) {
-				const playerHasAccessToCharacter = C.playerHasAccessToCharacter();
-				DrawButton(1815, 685, 90, 90, "", playerHasAccessToCharacter ? "White" : "#ddd", icon_BCX, playerHasAccessToCharacter ? "BCX" : "Needs BC item permission", !playerHasAccessToCharacter);
-			}
 		});
 
 		const unloadInfoSheet = () => {
@@ -126,20 +166,7 @@ export class ModuleGUI extends BaseModule {
 				return this._currentSubscreen.Click();
 			}
 
-			const C = this.getInformationSheetCharacter();
-			if (MouseIn(1815, 685, 90, 90)) {
-				if (firstTimeInit) {
-					unloadInfoSheet();
-					if (C && C.isPlayer()) {
-						this.currentSubscreen = new GuiTutorial(C, true);
-					}
-				} else if (C && C.BCXVersion !== null && C.playerHasAccessToCharacter()) {
-					unloadInfoSheet();
-					this.currentSubscreen = new GuiMainMenu(C);
-				}
-			} else {
-				return next(args);
-			}
+			return next(args);
 		});
 
 		hookFunction("InformationSheetExit", 10, (args, next) => {

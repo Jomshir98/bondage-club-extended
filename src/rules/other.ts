@@ -284,4 +284,37 @@ export function initRules_other() {
 			return false;
 		},
 	});
+
+	registerRule("other_forbid_rule_notifications", {
+		name: "Prevent rules change notifications",
+		loggable: false,
+		type: RuleType.Other,
+		shortDescription: "PLAYER_NAME will not see a notification if rule was added, changed, deleted, etc.",
+		longDescription: "This rule forbids PLAYER_NAME receiving notifications related to any rule changes. So when other player adds, changes or deletes rules in BCX, PLAYER_NAME will not be notified about it.",
+		keywords: ["limiting", "preventing", "controling", "accessing", "self", "rights"],
+		defaultLimit: ConditionsLimit.blocked,
+		// Implemented externally
+	});
+
+	registerRule("other_forbid_curse_notifications", {
+		name: "Prevent curses change notifications",
+		loggable: false,
+		type: RuleType.Other,
+		shortDescription: "PLAYER_NAME will not see a notification if curse was added, changed, deleted, etc.",
+		longDescription: "This rule forbids PLAYER_NAME receiving notifications related to any curse changes. So when other player adds, changes or deletes curses in BCX, PLAYER_NAME will not be notified about it.",
+		keywords: ["limiting", "preventing", "controling", "accessing", "self", "rights"],
+		defaultLimit: ConditionsLimit.blocked,
+		// Implemented externally
+	});
+
+	registerRule("other_forbid_relationship_notifications", {
+		name: "Prevent relationship change notifications",
+		loggable: false,
+		type: RuleType.Other,
+		shortDescription: "PLAYER_NAME will not see a notification if custom nick was added, changed, deleted, etc.",
+		longDescription: "This rule forbids PLAYER_NAME receiving notifications related to any custom nicks changes. So when other player adds, changes or deletes custom nicks in BCX, PLAYER_NAME will not be notified about it.",
+		keywords: ["limiting", "preventing", "controling", "accessing", "self", "rights"],
+		defaultLimit: ConditionsLimit.blocked,
+		// Implemented externally
+	});
 }

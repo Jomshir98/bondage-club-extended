@@ -7,6 +7,8 @@ import { supporterStatus } from "./modules/versionCheck";
 import { BCXGlobalEventSystem } from "./event";
 
 import { omit } from "lodash-es";
+import { ModuleCategory, notificationBlockingRules } from "./constants";
+import { RulesGetRuleState } from "./modules/rules";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -115,6 +117,36 @@ export function ChatRoomActionMessage(msg: string, target: null | number = null,
 			...dictionary,
 		],
 	});
+}
+
+export const getNotificationBlockingRuleName = (category: ModuleCategory): BCX_Rule | undefined => {
+	return notificationBlockingRules[category];
+};
+
+export const isNotificationShouldBeBlocked = ({ category, activated }: { category: ModuleCategory; activated?: BCX_Rule; }) => {
+	const ruleName = getNotificationBlockingRuleName(category);
+	// ruleName wasnt found, something went wrong?
+	if (!ruleName) {
+		return false;
+	}
+
+	// dont want to block the notification if the blocking rule was just added
+	if (activated === ruleName) {
+		return false;
+	}
+
+	const blockRule = RulesGetRuleState(ruleName);
+	if (!blockRule.isEnforced) {
+		return false;
+	}
+	return true;
+};
+
+export function SendNotificationWithCheck({ msg, timeout, sender, category, activated }: ISendNotificationWithCheck): HTMLDivElement | void {
+	const isBlocked = isNotificationShouldBeBlocked({ category, activated });
+	if (!isBlocked) {
+		ChatRoomSendLocal(msg, timeout, sender);
+	}
 }
 
 export function ChatRoomSendLocal(msg: string | Node, timeout?: number, sender?: number): HTMLDivElement | null {

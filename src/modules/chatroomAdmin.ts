@@ -586,90 +586,71 @@ export class ModuleChatroomAdmin extends BaseModule {
 			if (onThemeRoomSubpage) {
 				ChatSettingsThemeRoomExit();
 			}
-			// needed to auto apply a template correctly again
-			ChatBlockItemReturnScreen = null;
 		});
 		hookFunction("ChatAdminLoad", 0, (args, next) => {
 			const ret = next(args);
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
 			if (ChatAdminMode === "create" &&
-				template &&
-				!ChatBlockItemReturnScreen
+				template
 			) {
 				applyTemplate(template);
 			}
-			// needed to auto apply a template correctly again
-			ChatBlockItemReturnScreen = null;
 			return ret;
 		});
-		patchFunction("ChatAdminRun", {
-			'DrawText(TextGet("RoomName"), 250, 105,': 'DrawText(TextGet("RoomName"), 370, 105,',
-		});
-		patchFunction("ChatAdminRun", {
-			'ElementPosition("InputName", 780, 100, 750);': 'ElementPosition("InputName", 830, 100, 650);',
-		});
-		patchFunction("ChatAdminRun", {
-			'DrawText(TextGet("RoomLanguage"), 250, 190,': 'DrawText(TextGet("RoomLanguage"), 390, 190,',
-		});
-		patchFunction("ChatAdminRun", {
-			"DrawButton(405, 157,": "DrawButton(505, 157,",
-		});
-		patchFunction("ChatAdminRun", {
-			'DrawText(TextGet("RoomSize"), 850, 190,': 'DrawText(TextGet("RoomSize"), 950, 190,',
-		});
-		patchFunction("ChatAdminRun", {
-			'ElementPosition("InputSize", 1064, 185, 180);': 'ElementPosition("InputSize", 1106, 185, 96);',
-		});
-		patchFunction("ChatAdminClick", {
-			"if (MouseIn(405, 157,": "if (MouseIn(505, 157,",
-		});
 		hookFunction("ChatAdminRun", 11, (args, next) => {
-			if (onSecondPage) {
-				if (onThemeRoomSubpage) {
-					return ChatSettingsThemeRoomRun();
-				}
-				DrawText("Back", 169, 95, "Black", "Gray");
-				DrawButton(124, 132, 90, 90, "", "White", "Icons/West.png");
-
-				DrawText("Standardize your room description so the room's purpose is clear and it can easily be filtered:", 1000, 300, "Black", "Gray");
-				DrawButton(800, 360, 380, 80, "Create a theme room", "white");
-
-				DrawText("Templates for storing / overwriting current room information & settings (press a name to toggle auto-apply)", 1000, 650, "Black", "Gray");
-
-				for (let i = 0; i < ROOM_TEMPLATES_COUNT; i++) {
-					const X = 124 + i * 455;
-					const template = modStorage.roomTemplates?.[i];
-					let templateName: string = template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -";
-					const tick = Date.now() % 6_000;
-					if (template?.AutoApply && tick < 3_000) {
-						templateName = "- auto-applied default -";
-					}
-
-					if (template) DrawImageEx("Backgrounds/" + template.Background + ".jpg", X, 700, { Alpha: MouseIn(X, 700, 400, 200) ? 0.3 : 1, Width: 400, Height: 200 });
-					DrawButton(X, 700, 340, 64, "", template ? template.AutoApply ? "rgba(136 , 136 , 204, 0.5)" : "rgba(255, 255, 255, 0.5)" : "#ddd", "", !template ? undefined : "Use as room creation dialog default", !template);
-					DrawTextFit(templateName, X + 170, 700 + 34, 325, "Black", "Gray");
-					DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", !template ? undefined : "Delete template", !template);
-					if (overwriteMode === i) {
-						DrawButton(X, 835, 150, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
-						DrawText("Load", X + 51, 835 + 32, "Black");
-						DrawButton(X + 170, 835, 230, 64, "Overwrite ?", "rgba(255, 242, 0, 0.2)", "");
-					} else {
-						DrawButton(X, 835, 230, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
-						DrawText("Load", X + 51, 835 + 32, "Black");
-						DrawButton(X + 250, 835, 150, 64, "    Save", "rgba(255, 255, 255, 0.2)", "");
-					}
-				}
-				return;
+			if (!onSecondPage) return next(args);
+			if (onThemeRoomSubpage) {
+				return ChatSettingsThemeRoomRun();
 			}
-			return next(args);
+			DrawText("Back", 169, 95, "Black", "Gray");
+			DrawButton(124, 132, 90, 90, "", "White", "Icons/West.png");
+
+			DrawText("Standardize your room description so the room's purpose is clear and it can easily be filtered:", 1000, 300, "Black", "Gray");
+			DrawButton(800, 360, 380, 80, "Create a theme room", "white");
+
+			DrawText("Templates for storing / overwriting current room information & settings (press a name to toggle auto-apply)", 1000, 650, "Black", "Gray");
+
+			for (let i = 0; i < ROOM_TEMPLATES_COUNT; i++) {
+				const X = 124 + i * 455;
+				const template = modStorage.roomTemplates?.[i];
+				let templateName: string = template ? (template.Name === "" ? "- template without room name -" : template.Name) : "- empty template slot -";
+				const tick = Date.now() % 6_000;
+				if (template?.AutoApply && tick < 3_000) {
+					templateName = "- auto-applied default -";
+				}
+
+				if (template) DrawImageEx("Backgrounds/" + template.Background + ".jpg", X, 700, { Alpha: MouseIn(X, 700, 400, 200) ? 0.3 : 1, Width: 400, Height: 200 });
+				DrawButton(X, 700, 340, 64, "", template ? template.AutoApply ? "rgba(136 , 136 , 204, 0.5)" : "rgba(255, 255, 255, 0.5)" : "#ddd", "", !template ? undefined : "Use as room creation dialog default", !template);
+				DrawTextFit(templateName, X + 170, 700 + 34, 325, "Black", "Gray");
+				DrawButton(X + 340, 700, 60, 64, "X", template ? "rgba(255, 255, 255, 0.3)" : "#ddd", "", !template ? undefined : "Delete template", !template);
+				if (overwriteMode === i) {
+					DrawButton(X, 835, 150, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
+					DrawText("Load", X + 51, 835 + 32, "Black");
+					DrawButton(X + 170, 835, 230, 64, "Overwrite ?", "rgba(255, 242, 0, 0.2)", "");
+				} else {
+					DrawButton(X, 835, 230, 64, "", template ? "rgba(255, 255, 255, 0.2)" : "#ddd", "", undefined, !template);
+					DrawText("Load", X + 51, 835 + 32, "Black");
+					DrawButton(X + 250, 835, 150, 64, "    Save", "rgba(255, 255, 255, 0.2)", "");
+				}
+			}
+			return;
 		});
-		hookFunction("ChatAdminRun", 0, (args, next) => {
-			if (!ChatAdminPreviewBackgroundMode) {
-				DrawText("More", 169, 95, "Black", "Gray");
-				DrawButton(124, 132, 90, 90, "", "White", icon_BCX);
-				if (MouseIn(124, 132, 90, 90)) DrawButtonHover(-36, 55, 64, 64, `More options [BCX]`);
-			}
-			return next(args);
+		hookFunction("ChatAdminLoad", 0, async (args, next) => {
+			const ret = await next(args);
+
+			const button = ElementButton.Create("bcx-more-options",
+				() => {
+					onSecondPage = !onSecondPage;
+					ElementToggleGeneratedElements("ChatAdmin", false);
+				},
+				{
+					image: icon_BCX,
+					tooltip: "More options [BCX]",
+				}
+			);
+			ElementWrap("chat-admin-screen-menu")?.append(button);
+
+			return ret;
 		});
 		//#endregion
 		hookFunction("ChatAdminClick", 10, (args, next) => {
@@ -677,15 +658,6 @@ export class ModuleChatroomAdmin extends BaseModule {
 				ChatSettingsExtraClick((data) => {
 					applyTemplate(data);
 				});
-				return true;
-			}
-			return next(args);
-		});
-		hookFunction("ChatAdminClick", 0, (args, next) => {
-			// click event for second page button
-			if (MouseIn(124, 132, 90, 90) && !ChatAdminPreviewBackgroundMode) {
-				onSecondPage = !onSecondPage;
-				ElementToggleGeneratedElements("ChatAdmin", false);
 				return true;
 			}
 			return next(args);

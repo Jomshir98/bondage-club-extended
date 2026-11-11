@@ -2,13 +2,12 @@ import { clipboardAvailable, isObject } from "../utils";
 import { modStorage, modStorageSync } from "./storage";
 import { BaseModule } from "./_BaseModule";
 import { icon_BCX } from "../resources";
-import { hookFunction, patchFunction } from "../patching";
+import { hookFunction } from "../patching";
 import { ChatRoomSendLocal, DrawImageEx } from "../utilsClub";
 import cloneDeep from "lodash-es/cloneDeep";
 import { RulesGetRuleState } from "./rules";
 import { InfoBeep } from "../utilsClub";
 import { BCX_setTimeout } from "../BCXContext";
-import { isEqual } from "lodash-es";
 
 enum ThemeRoomType {
 	Afk = 0,
@@ -400,14 +399,13 @@ function ChatSettingsThemeRoomClick() {
 
 	// OK button
 	if (MouseIn(1450, 830, 180, 64)) {
-		const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
-
 		ChatAdminData!.BlockCategory = currentThemeRoom.BlockCategories;
 		ChatAdminData!.Background = currentThemeRoom.Background;
+		ChatAdminApplyBackground(ChatAdminData!.Background);
 
-		if (inputDescription) inputDescription.value = `[${TR_TYPE_NAMES[currentThemeRoom.Type]}]` +
+		ElementValue(ChatAdminID.descriptionInput, `[${TR_TYPE_NAMES[currentThemeRoom.Type]}]` +
 			`${currentThemeRoom.Setting ? " [" + ThemeRoomSetting[currentThemeRoom.Setting] + "]" : ""}` +
-			`${currentThemeRoom.Limits.size === 0 ? "" : " [" + stringifyLimits(currentThemeRoom) + "]"}`;
+			`${currentThemeRoom.Limits.size === 0 ? "" : " [" + stringifyLimits(currentThemeRoom) + "]"}`);
 
 		roomGreeting = currentThemeRoom.IntroText;
 		onSecondPage = !onSecondPage;
@@ -440,6 +438,7 @@ function ChatSettingsThemeRoomExit() {
 		input.remove();
 		input = undefined;
 	}
+	ElementToggleGeneratedElements(CurrentScreen, true);
 }
 //#endregion
 
@@ -504,18 +503,18 @@ function ChatSettingsExtraClick(apply: (data: RoomTemplate) => void) {
 		}
 		if (((MouseIn(X + 250, 835, 150, 64) && !modStorage.roomTemplates[i]) || (overwriteMode === i && MouseIn(X + 170, 835, 230, 64)))) {
 			modStorage.roomTemplates[i] = {
-				Name: ElementValue("InputName") ? ElementValue("InputName").trim() : "",
-				Description: ElementValue("InputDescription") ? ElementValue("InputDescription").trim() : "",
+				Name: ChatAdminData!.Name.trim(),
+				Description: ChatAdminData!.Description.trim(),
 				Background: ChatAdminData!.Background,
-				Visibility: ChatAdminData!.Visibility,
-				Access: ChatAdminData!.Access,
+				Visibility: [...ChatAdminData!.Visibility],
+				Access: [...ChatAdminData!.Access],
 				Game: ChatAdminData!.Game,
-				Admin: ElementValue("InputAdminList") ? CommonConvertStringToArray(ElementValue("InputAdminList").trim()) : [],
-				Whitelist: ElementValue("InputWhitelist") ? CommonConvertStringToArray(ElementValue("InputWhitelist").trim()) : [],
-				Limit: ElementValue("InputSize") ? parseInt(ElementValue("InputSize").trim(), 10) : 10,
+				Admin: [...ChatAdminData!.Admin],
+				Whitelist: [...ChatAdminData!.Whitelist],
+				Limit: ChatAdminData!.Limit,
 				Language: ChatAdminData!.Language,
 				BlockCategory: cloneDeep(ChatAdminData!.BlockCategory),
-				Custom: ChatAdminData!.Custom!,
+				Custom: cloneDeep(ChatAdminData!.Custom!),
 				AutoApply: modStorage.roomTemplates[i]?.AutoApply,
 			};
 			modStorageSync();
@@ -529,35 +528,22 @@ function ChatSettingsExtraClick(apply: (data: RoomTemplate) => void) {
 }
 
 function applyTemplate(template: RoomTemplate) {
-	const inputName = document.getElementById("InputName") as HTMLInputElement | undefined;
-	const inputDescription = document.getElementById("InputDescription") as HTMLInputElement | undefined;
-	const inputAdminList = document.getElementById("InputAdminList") as HTMLTextAreaElement | undefined;
-	const inputWhitelist = document.getElementById("InputWhitelist") as HTMLTextAreaElement | undefined;
-	const inputSize = document.getElementById("InputSize") as HTMLInputElement | undefined;
+	ElementValue(ChatAdminID.nameInput, template.Name ?? "");
+	ElementValue(ChatAdminID.language, template.Language);
+	ElementValue(ChatAdminID.sizeInput, template.Limit.toString());
+	ElementValue(ChatAdminID.descriptionInput, template.Description ?? "");
+	ElementValue(ChatAdminID.adminListInput, template.Admin.join(","));
+	ElementValue(ChatAdminID.whitelistInput, template.Whitelist.join(","));
 
-	const access = "Locked" in template ? (template.Locked ? ["Admin", "Whitelist"] : ["All"]) as ServerChatRoomRole[] : undefined;
-	const visibility = "Private" in template ? (template.Private ? ["Admin", "Whitelist"] : ["All"]) as ServerChatRoomRole[] : undefined;
-
-	if (inputName) inputName.value = template.Name ?? "";
-	if (inputDescription) inputDescription.value = template.Description ?? "";
 	ChatAdminData!.Background = template.Background;
-	if (typeof ChatAdminAccessModeValues !== "undefined") {
-		ChatAdminData!.Access = access ?? template.Access;
-		ChatAdminAccessModeIndex = ChatAdminAccessModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Access));
-		if (ChatAdminAccessModeIndex < 0) ChatAdminAccessModeIndex = 0;
-	}
-	if (typeof ChatAdminVisibilityModeValues !== "undefined") {
-		ChatAdminData!.Visibility = visibility ?? template.Visibility;
-		ChatAdminVisibilityModeIndex = ChatAdminVisibilityModeValues.findIndex(elem => isEqual(elem, ChatAdminData!.Visibility));
-		if (ChatAdminVisibilityModeIndex < 0) ChatAdminVisibilityModeIndex = 0;
-	}
-	ChatAdminData!.Game = template.Game;
-	if (inputAdminList) inputAdminList.value = template.Admin?.toString() ?? "";
-	if (inputWhitelist) inputWhitelist.value = template.Whitelist?.toString() ?? "";
-	if (inputSize) inputSize.value = String(template.Limit);
-	if (template.Language) ChatAdminData!.Language = template.Language;
+	ChatAdminApplyBackground(ChatAdminData!.Background);
 	ChatAdminData!.BlockCategory = template.BlockCategory!;
 	ChatAdminData!.Custom = template.Custom;
+	ElementWrap(ChatAdminID.customization)?.classList.toggle("chat-admin-has-custom", !!ChatAdminData!.Custom);
+
+	ElementValue(ChatAdminID.game, template.Game);
+	ElementValue(ChatAdminID.visibility, ChatAdminModeKey(ChatRoomVisibilityMode, template.Visibility));
+	ElementValue(ChatAdminID.access, ChatAdminModeKey(ChatRoomAccessMode, template.Access));
 }
 
 export class ModuleChatroomAdmin extends BaseModule {
@@ -580,20 +566,33 @@ export class ModuleChatroomAdmin extends BaseModule {
 			}
 		}
 
+		// Track the ChatAdmin screen loads so we can tell openings from coming back from the customization subscreen
+		let loadCount = 0;
+
 		//#region Second page button
 		hookFunction("ChatAdminExit", 0, (args, next) => {
 			next(args);
 			if (onThemeRoomSubpage) {
 				ChatSettingsThemeRoomExit();
 			}
+			if (ChatAdminMode === "create") {
+				loadCount--;
+			}
+		});
+		hookFunction("ChatEditorCreateRoom", 0, (args, next) => {
+			const ret = next(args);
+			loadCount--;
+			return ret;
 		});
 		hookFunction("ChatAdminLoad", 0, (args, next) => {
 			const ret = next(args);
 			const template = modStorage.roomTemplates?.find(t => t?.AutoApply);
 			if (ChatAdminMode === "create" &&
 				template
+				&& loadCount === 0
 			) {
 				applyTemplate(template);
+				loadCount++;
 			}
 			return ret;
 		});

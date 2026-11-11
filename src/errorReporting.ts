@@ -150,8 +150,8 @@ function debugTransformThing(event: PromiseRejectionEvent): ErrorEvent {
 		const stack = `${event.reason.stack}`.split("\n");
 		const lastFrameLoc = stack[1]?.match(/\((.*):(\d+):(\d+)\)$/) ?? stack[0]?.match(/\((.*):(\d+):(\d+)\)$/) ?? [null, "", 0, 0];
 		info.filename = lastFrameLoc[1];
-		info.lineno = parseInt(lastFrameLoc[2], 10);
-		info.colno = parseInt(lastFrameLoc[3], 10);
+		info.lineno = CommonIsInteger(lastFrameLoc[2]) ? lastFrameLoc[2] : CommonParseInt(lastFrameLoc[2]) ?? 0;
+		info.colno = CommonIsInteger(lastFrameLoc[3]) ? lastFrameLoc[3] : CommonParseInt(lastFrameLoc[3]) ?? 0;
 	}
 	const error = new ErrorEvent("ErrorEvent", info);
 	return error;

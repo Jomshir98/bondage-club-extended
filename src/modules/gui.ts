@@ -2,7 +2,7 @@ import { ChatroomCharacter, getChatroomCharacter } from "../characters";
 import { GuiMainMenu } from "../gui/mainmenu";
 import { GuiSubscreen } from "../gui/subscreen";
 import { BaseModule } from "./_BaseModule";
-import { hookFunction, patchFunction } from "../patching";
+import { hookFunction } from "../patching";
 import { icon_BCX } from "../resources";
 import { changeHandlers } from "./messaging";
 import { firstTimeInit } from "./storage";
@@ -120,7 +120,6 @@ export class ModuleGUI extends BaseModule {
 				});
 			}
 			if (button) {
-			// @ts-expect-error - bc-stubs need update
 				const menu = ElementWrap(`${InformationSheetIDs.screen}-menu`);
 				menu?.append(button);
 			}

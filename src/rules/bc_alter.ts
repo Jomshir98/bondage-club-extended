@@ -294,7 +294,7 @@ export function initRules_bc_alter() {
 			if (
 				newState
 				&& DialogSelfMenuSelected === "Expression"
-				&& DialogSelfMenuMapping.Expression.C.IsPlayer()
+				&& DialogSelfMenuMapping.Expression.C?.IsPlayer()
 			) {
 				// If the expression menu is open, reload it in order to re-evaluate the disabled state of the `blindness` menu button
 				DialogSelfMenuMapping.Expression.Reload();

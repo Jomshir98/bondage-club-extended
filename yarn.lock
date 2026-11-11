@@ -2147,10 +2147,10 @@ batch@0.6.1:
   resolved "https://registry.yarnpkg.com/batch/-/batch-0.6.1.tgz#dc34314f4e679318093fc760272525f94bf25c16"
   integrity sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==
 
-bc-stubs@^133.0.0:
-  version "133.0.0"
-  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-133.0.0.tgz#fa6712cb5e5190dd064d87cdb6b4b992cac37b6d"
-  integrity sha512-Gw3r5igtZy4bOurK0GS9y3akL3MnHUOdKXUuliL9hSqMP0AAL+FGrBuBCWHuDLbc8ql06w1DYbeL8yn2454hRw==
+bc-stubs@^134.0.0-Beta.1:
+  version "134.0.0-Beta.1"
+  resolved "https://registry.yarnpkg.com/bc-stubs/-/bc-stubs-134.0.0-Beta.1.tgz#aa450fdb064d60e4364853daeebf89d3b1ef43b8"
+  integrity sha512-dhoUBEIzwOyBeavbBAuw6n6prvvBP3tXzen6lC88X36YC7ys4p2T+pMvyOX1qPsAFeTqiN4Z6A3QlgOuMTHA2A==
   dependencies:
     "@total-typescript/ts-reset" "^0.6.1"
     socket.io-client "4.6.1"

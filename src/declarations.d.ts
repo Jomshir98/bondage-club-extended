@@ -2,6 +2,8 @@
 declare const BCX_VERSION: string;
 declare const BCX_DEVEL: boolean;
 declare const BCX_SAVE_AUTH: string;
+/** The minimum supported BC version for BCX */
+declare const BC_VERSION_MIN: typeof GameVersion;
 
 interface Window {
 	BCX_Loaded?: boolean;

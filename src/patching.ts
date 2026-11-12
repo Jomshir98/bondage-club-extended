@@ -188,6 +188,14 @@ export function unload_patches() {
 	modApi.unload();
 }
 
+/** Abort BCX initialization with a given user-facing error message */
+export function unloadBCX(msg: string) {
+	console.error(`BCX: ${msg}`);
+	console.log("BCX: Unloading BCX from Mod SDK");
+	unload_patches();
+	globalThis.alert(`Aborting BCX initialization\n${msg}`);
+}
+
 export function callOriginal<TFunctionName extends string>(
 	target: TFunctionName,
 	args: [...Parameters<GetDotedPathType<typeof globalThis, TFunctionName>>],

@@ -31,6 +31,7 @@ export default async function (env: WebpackEnv): Promise<Configuration> {
 	const git = simpleGit();
 	let BCX_VERSION = packageJson.version;
 	let BCX_DEVEL = false;
+	let BC_VERSION_MIN = packageJson.minBCVersion;
 	if ((await git.status()).modified.length > 0) {
 		BCX_VERSION += `-DEV-${new Date().toISOString().replace(/[-:T]/g, "").replace(/\.[0-9]*Z/, "")}`;
 		BCX_DEVEL = true;
@@ -93,6 +94,7 @@ export default async function (env: WebpackEnv): Promise<Configuration> {
 				BCX_VERSION: JSON.stringify(BCX_VERSION),
 				BCX_DEVEL: JSON.stringify(BCX_DEVEL),
 				BCX_SAVE_AUTH: JSON.stringify(BCX_SAVE_AUTH),
+				BC_VERSION_MIN: JSON.stringify(BC_VERSION_MIN),
 			}),
 			new BannerPlugin({
 				banner: `// BCX: Bondage Club Extended

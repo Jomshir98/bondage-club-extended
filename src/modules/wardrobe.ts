@@ -397,56 +397,6 @@ function KeyChangeListener(ev: KeyboardEvent) {
 	holdingShift = ev.shiftKey;
 }
 
-let searchBar: HTMLInputElement | null = null;
-let searchBarAutoClose = false;
-
-function allowSearchMode(): boolean {
-	return CurrentScreen === "Appearance" &&
-		CharacterAppearanceSelection != null &&
-		CharacterAppearanceMode === "Cloth" &&
-		DialogFocusItem == null;
-}
-
-function enterSearchMode(C: Character, input?: string) {
-	if (!searchBar) {
-		searchBar = ElementCreateInput("BCXSearch", "text", "", "40");
-		searchBar.oninput = () => {
-			if (searchBar) {
-				if (searchBarAutoClose && !searchBar.value) {
-					exitSearchMode(C);
-					MainCanvas.canvas.focus();
-				} else if (CharacterAppearanceSelectedGroup) {
-					DialogInventoryBuild(C, CharacterAppearanceSelectedGroup);
-					AppearancePreviewBuild(C, CharacterAppearanceSelectedGroup, true);
-					AppearanceMenuBuild(C, CharacterAppearanceSelectedGroup);
-				}
-			}
-		};
-		searchBar.focus();
-		searchBar.setAttribute("value", input ?? "");
-		const insPoint = input?.length ?? 0;
-		searchBar.setSelectionRange(insPoint, insPoint);
-		if (CharacterAppearanceSelectedGroup) {
-			DialogInventoryBuild(C, CharacterAppearanceSelectedGroup);
-			AppearancePreviewBuild(C, CharacterAppearanceSelectedGroup, true);
-			AppearanceMenuBuild(C, CharacterAppearanceSelectedGroup);
-		}
-	}
-}
-
-function exitSearchMode(C: Character) {
-	if (searchBar) {
-		searchBar.remove();
-		searchBar = null;
-		searchBarAutoClose = false;
-		if (CharacterAppearanceSelectedGroup) {
-			DialogInventoryBuild(C, CharacterAppearanceSelectedGroup);
-			AppearancePreviewBuild(C, CharacterAppearanceSelectedGroup, true);
-			AppearanceMenuBuild(C, CharacterAppearanceSelectedGroup);
-		}
-	}
-}
-
 let appearanceOverrideScreen: GuiWardrobeExtended | null = null;
 function useExtendedImport(): boolean {
 	return (modStorage.wardrobeDefaultExtended ?? false) !== holdingShift;
@@ -771,18 +721,12 @@ export class ModuleWardrobe extends BaseModule {
 
 		//#region Search bar
 
-		RedirectGetImage("Icons/BCX_Search.png", "Icons/Search.png");
-		RedirectGetImage("Icons/BCX_SearchExit.png", "Icons/Remove.png");
 		RedirectGetImage("Icons/BCX_Import.png", "Icons/Import.png");
 		RedirectGetImage("Icons/BCX_Export.png", "Icons/Export.png");
 
 		hookFunction("TextGet", 0, (args, next) => {
 			const [tag] = args;
-			if (tag === "BCX_Search") {
-				return "Filter items";
-			} else if (tag === "BCX_SearchExit") {
-				return "";
-			} else if (tag === "BCX_Import") {
+			if (tag === "BCX_Import") {
 				return "Import (BCX)";
 			} else if (tag === "BCX_Export") {
 				return "Export (BCX)";
@@ -792,21 +736,7 @@ export class ModuleWardrobe extends BaseModule {
 
 		hookFunction("AppearanceMenuBuild", 5, (args, next) => {
 			next(args);
-			const C = args[0];
 			const menu = (AppearanceMenu as BCX_AppearanceMenuButtons[]);
-			if (!allowSearchMode()) {
-				exitSearchMode(C);
-			} else if (searchBar) {
-				AppearanceMenu = [];
-				if (DialogInventory.length > 9)
-					menu.push("Next");
-				menu.push("BCX_SearchExit");
-				if (DialogMenuMode !== "permissions")
-					menu.push("Cancel");
-				AppearanceMenu.push("Accept");
-			} else {
-				menu.splice(menu.length - (menu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
-			}
 			if (CharacterAppearanceMode === "" && (modStorage.showAppearanceImportButton ?? true)) {
 				const pasteIdx = menu.findIndex(btn => btn === "Paste");
 				menu.splice(pasteIdx + 1, 0, "BCX_Import", "BCX_Export");
@@ -816,64 +746,15 @@ export class ModuleWardrobe extends BaseModule {
 		hookFunction("AppearanceMenuClick", 4, (args, next) => {
 			const menu = (AppearanceMenu as BCX_AppearanceMenuButtons[]);
 			const X = 2000 - menu.length * 117;
-			const C = args[0];
 			for (let B = 0; B < menu.length; B++) {
 				if (MouseXIn(X + 117 * B, 90)) {
 					const Button = menu[B];
-					if (Button === "BCX_Search") {
-						enterSearchMode(C);
-						return;
-					} else if (Button === "BCX_SearchExit") {
-						exitSearchMode(C);
-						return;
-					} else if (Button === "BCX_Import") {
+					if (Button === "BCX_Import") {
 						void BCXDoImport(CharacterAppearanceSelection);
 					} else if (Button === "BCX_Export") {
 						void BCXDoExport(CharacterAppearanceSelection);
 					}
 				}
-			}
-			next(args);
-		});
-
-		hookFunction("AppearanceKeyDown", 5, (args, next) => {
-			const ev = args[0];
-			const sb = searchBar;
-			if (!sb &&
-				CharacterAppearanceSelection &&
-				allowSearchMode() &&
-				document.activeElement === MainCanvas.canvas &&
-				ev.key.length === 1 &&
-				!ev.altKey && !ev.ctrlKey && !ev.metaKey
-			) {
-				enterSearchMode(CharacterAppearanceSelection, ev.key);
-				searchBarAutoClose = true;
-				return true;
-			}
-			return next(args);
-		});
-
-		hookFunction("DialogInventoryAdd", 5, (args, next) => {
-			if (searchBar) {
-				const item = args[1];
-				if (!searchBar.value
-					.trim()
-					.toLocaleLowerCase()
-					.split(" ")
-					.every(i =>
-						item.Asset.Description.toLocaleLowerCase().includes(i) ||
-						item.Asset.Name.toLocaleLowerCase().includes(i)
-					)
-				) {
-					return;
-				}
-			}
-			next(args);
-		});
-
-		hookFunction("AppearanceMenuDraw", 0, (args, next) => {
-			if (searchBar) {
-				ElementPositionFix("BCXSearch", 40, 900, 35, 600, 60);
 			}
 			next(args);
 		});
@@ -958,7 +839,6 @@ export class ModuleWardrobe extends BaseModule {
 		document.removeEventListener("paste", PasteListener);
 		document.removeEventListener("keydown", KeyChangeListener, { capture: true });
 		document.removeEventListener("keyup", KeyChangeListener, { capture: true });
-		exitSearchMode(CharacterAppearanceSelection ?? Player);
 		setAppearanceOverrideScreen(null);
 		AppearanceMenuBuild(CharacterAppearanceSelection ?? Player, CharacterAppearanceSelectedGroup);
 	}

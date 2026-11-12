@@ -116,7 +116,7 @@ function selfAccessBlockedByRule(permData: PermissionInfo): boolean {
 	}
 	if (permData.self && permData.min === AccessLevel.self) {
 		return false;
-	} else if (blockRule.customData?.onlyWhenRestrainedToggle && !Player.IsRestrained()) {
+	} else if (blockRule.customData?.onlyWhenRestrainedToggle && Player.CanInteract()) {
 		return false;
 	}
 	return true;

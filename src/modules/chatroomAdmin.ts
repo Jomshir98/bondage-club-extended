@@ -399,22 +399,12 @@ function ChatSettingsThemeRoomClick() {
 
 	// OK button
 	if (MouseIn(1450, 830, 180, 64)) {
-		ChatAdminData!.BlockCategory = currentThemeRoom.BlockCategories;
-		ChatAdminData!.Background = currentThemeRoom.Background;
-		ChatAdminApplyBackground(ChatAdminData!.Background);
-
-		ElementValue(ChatAdminID.descriptionInput, `[${TR_TYPE_NAMES[currentThemeRoom.Type]}]` +
-			`${currentThemeRoom.Setting ? " [" + ThemeRoomSetting[currentThemeRoom.Setting] + "]" : ""}` +
-			`${currentThemeRoom.Limits.size === 0 ? "" : " [" + stringifyLimits(currentThemeRoom) + "]"}`);
-
-		roomGreeting = currentThemeRoom.IntroText;
-		onSecondPage = !onSecondPage;
-		ChatSettingsThemeRoomExit();
+		ChatSettingsThemeRoomExit(true);
 		return;
 	}
 
 	if (MouseIn(1670, 830, 200, 64)) {
-		ChatSettingsThemeRoomExit();
+		ChatSettingsThemeRoomExit(false);
 		return;
 	}
 }
@@ -432,13 +422,26 @@ function ChatSettingsThemeRoomLoad() {
 	currentThemeRoom.BlockCategories = [...ChatAdminData!.BlockCategory];
 }
 
-function ChatSettingsThemeRoomExit() {
+function ChatSettingsThemeRoomExit(commit: boolean) {
 	onThemeRoomSubpage = false;
 	if (input) {
 		input.remove();
 		input = undefined;
 	}
-	ElementToggleGeneratedElements(CurrentScreen, true);
+	if (commit) {
+		ChatAdminData!.BlockCategory = currentThemeRoom.BlockCategories;
+		ChatAdminData!.Background = currentThemeRoom.Background;
+		ChatAdminApplyBackground(ChatAdminData!.Background);
+
+		ElementValue(ChatAdminID.descriptionInput, `[${TR_TYPE_NAMES[currentThemeRoom.Type]}]` +
+			`${currentThemeRoom.Setting ? " [" + ThemeRoomSetting[currentThemeRoom.Setting] + "]" : ""}` +
+			`${currentThemeRoom.Limits.size === 0 ? "" : " [" + stringifyLimits(currentThemeRoom) + "]"}`);
+
+		roomGreeting = currentThemeRoom.IntroText;
+		// We exit all the way back to the editor screen here
+		onSecondPage = !onSecondPage;
+		ElementToggleGeneratedElements(CurrentScreen, true);
+	}
 }
 //#endregion
 
@@ -569,15 +572,37 @@ export class ModuleChatroomAdmin extends BaseModule {
 		// Track the ChatAdmin screen loads so we can tell openings from coming back from the customization subscreen
 		let loadCount = 0;
 
+		hookFunction("ChatAdminKeyDown", 0, (args, next) => {
+			const [event] = args;
+			if (onThemeRoomSubpage) {
+				if (CommonKey.IsPressed(event, "Enter")) {
+					ChatSettingsThemeRoomExit(true);
+					return true;
+				}
+				return false;
+			}
+			if (onSecondPage) {
+				return false;
+			}
+			return next(args);
+		});
+
 		//#region Second page button
 		hookFunction("ChatAdminExit", 0, (args, next) => {
-			next(args);
 			if (onThemeRoomSubpage) {
-				ChatSettingsThemeRoomExit();
+				ChatSettingsThemeRoomExit(false);
+				return;
 			}
+			if (onSecondPage) {
+				onSecondPage = false;
+				ElementToggleGeneratedElements(CurrentScreen, true);
+				return;
+			}
+			const ret = next(args);
 			if (ChatAdminMode === "create") {
 				loadCount--;
 			}
+			return ret;
 		});
 		hookFunction("ChatEditorCreateRoom", 0, (args, next) => {
 			const ret = next(args);

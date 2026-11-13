@@ -16,7 +16,30 @@ export function registerModule<T extends BaseModule>(module: T): T {
 	return module;
 }
 
+function displayInvalidVersionMessage(msg: string) {
+	console.error(`BCX: ${msg}`);
+	alert(`Aborting BCX initialization\n${msg}`);
+}
+
+/** Check whether the BC version satisfies BCX's minimum version requirement */
+function validateBCVersion() {
+	if (typeof globalThis.GameVersion !== "string") {
+		// Precaution against `GameVersion` formatting screw ups in BC
+		displayInvalidVersionMessage(`Detected an invalid BC version: "${globalThis.GameVersion}"`);
+		return false;
+	} else if (CommonCompareVersion(GameVersion, BC_VERSION_MIN) !== -1) {
+		displayInvalidVersionMessage(`BCX "${BCX_VERSION}" requires BC "${BC_VERSION_MIN}" or later\nDetected BC version: "${GameVersion}"`);
+		return false;
+	} else {
+		return true;
+	}
+}
+
 export function init_modules(): boolean {
+	if (!validateBCVersion()) {
+		return false;
+	}
+
 	moduleInitPhase = ModuleInitPhase.init;
 	for (const m of modules) {
 		if (m.init() === false) {

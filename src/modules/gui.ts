@@ -39,7 +39,8 @@ export class ModuleGUI extends BaseModule {
 		if (this._currentSubscreen) {
 			this._currentSubscreen.Load();
 		}
-		ChatroomSM.UpdateStatus();
+		// Precaution against the variable still being potentially uninitialized during `unload_modules()` calls
+		ChatroomSM?.UpdateStatus();
 		BCXGlobalEventSystem.emitEvent("bcxSubscreenChange", {
 			inBcxSubscreen: subscreen != null,
 		});

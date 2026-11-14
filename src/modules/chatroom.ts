@@ -429,7 +429,8 @@ export class ModuleChatroom extends BaseModule {
 	}
 
 	unload() {
-		ChatroomSM.unload();
+		// Precaution against the variable still being potentially uninitialized during `unload_modules()` calls
+		ChatroomSM?.unload();
 		if (this.o_ChatRoomSM) {
 			(window as any).ChatRoomSM = this.o_ChatRoomSM;
 		}

@@ -27,7 +27,7 @@ function validateBCVersion() {
 		// Precaution against `GameVersion` formatting screw ups in BC
 		displayInvalidVersionMessage(`Detected an invalid BC version: "${globalThis.GameVersion}"`);
 		return false;
-	} else if (CommonCompareVersion(GameVersion, BC_VERSION_MIN) !== -1) {
+	} else if (CommonCompareVersion(GameVersion, BC_VERSION_MIN) === 1) {
 		displayInvalidVersionMessage(`BCX "${BCX_VERSION}" requires BC "${BC_VERSION_MIN}" or later\nDetected BC version: "${GameVersion}"`);
 		return false;
 	} else {

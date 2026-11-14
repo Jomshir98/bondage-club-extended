@@ -314,7 +314,7 @@ export class ModuleChatroom extends BaseModule {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});
-					DrawImageEx("Icons/ColorPick.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
+					DrawImageEx("Icons/ColorChange.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
 						Width: 40 * Zoom,
 						Height: 40 * Zoom,
 					});

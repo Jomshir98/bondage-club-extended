@@ -14,6 +14,10 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.25
+
+- [FIX] Fix a crash caused by old templates missing visibility/access
+
 ## 1.1.24
 
 - [FIX] Decompress item bundle properties before comparing or merging them

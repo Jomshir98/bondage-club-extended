@@ -545,8 +545,8 @@ function applyTemplate(template: RoomTemplate) {
 	ElementWrap(ChatAdminID.customization)?.classList.toggle("chat-admin-has-custom", !!ChatAdminData!.Custom);
 
 	ElementValue(ChatAdminID.game, template.Game);
-	ElementValue(ChatAdminID.visibility, ChatAdminModeKey(ChatRoomVisibilityMode, template.Visibility));
-	ElementValue(ChatAdminID.access, ChatAdminModeKey(ChatRoomAccessMode, template.Access));
+	ElementValue(ChatAdminID.visibility, ChatAdminModeKey(ChatRoomVisibilityMode, template.Visibility ?? ChatRoomVisibilityMode.PUBLIC));
+	ElementValue(ChatAdminID.access, ChatAdminModeKey(ChatRoomAccessMode, template.Access ?? ChatRoomAccessMode.PUBLIC));
 }
 
 export class ModuleChatroomAdmin extends BaseModule {

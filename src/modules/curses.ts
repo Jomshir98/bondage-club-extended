@@ -4,7 +4,7 @@ import { arrayUnique, capitalizeFirstLetter, dictionaryProcess, formatTimeInterv
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, isAssetGroupName, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
-import { modStorageSync } from "./storage";
+import { modStorageSync, modStorageSyncBatch } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset, ConditionsLimit } from "../constants";
@@ -143,6 +143,11 @@ export function curseDefaultItemCurseProperty(asset: Asset): boolean {
 }
 
 export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, character: ChatroomCharacter | null, showMessage: boolean = true): boolean {
+	// Cursing changes both the curse and the log; save only once (it was saved 3 times per curse)
+	return modStorageSyncBatch(() => curseItemUnbatched(Group, curseProperty, character, showMessage));
+}
+
+function curseItemUnbatched(Group: AssetGroupName, curseProperty: boolean | null, character: ChatroomCharacter | null, showMessage: boolean): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
@@ -235,15 +240,17 @@ export function curseBatch(mode: "items" | "clothes" | "body", includingEmpty: b
 		}
 	}
 
-	for (const group of assetGroups) {
-		if (ConditionsGetCondition("curses", group.Name))
-			continue;
-		if (character && !ConditionsCheckAccess("curses", group.Name, character))
-			continue;
-		if (!curseItem(group.Name, null, character, false))
-			return false;
-	}
-	return true;
+	return modStorageSyncBatch(() => {
+		for (const group of assetGroups) {
+			if (ConditionsGetCondition("curses", group.Name))
+				continue;
+			if (character && !ConditionsCheckAccess("curses", group.Name, character))
+				continue;
+			if (!curseItem(group.Name, null, character, false))
+				return false;
+		}
+		return true;
+	});
 }
 
 export function curseLift(Group: AssetGroupName, character: ChatroomCharacter | null): boolean {
@@ -311,6 +318,8 @@ export class ModuleCurses extends BaseModule {
 		color: [],
 		autoremove: [],
 	};
+
+	private pendingAppearanceUpdate: boolean = false;
 
 	init() {
 		registerPermission("curses_normal", {
@@ -1075,8 +1084,7 @@ export class ModuleCurses extends BaseModule {
 		if (curse === null) {
 			if (currentItem && currentItem.Asset.Group.AllowNone) {
 				InventoryRemove(Player, group, false);
-				CharacterRefresh(Player, true);
-				ChatRoomCharacterUpdate(Player);
+				this.pendingAppearanceUpdate = true;
 				this.pendingMessages.remove.push(currentItem.Asset.Description);
 				BCXGlobalEventSystem.emitEvent("curseTrigger", {
 					action: "remove",
@@ -1181,8 +1189,7 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		if (changeType) {
-			CharacterRefresh(Player, true);
-			ChatRoomCharacterUpdate(Player);
+			this.pendingAppearanceUpdate = true;
 			this.pendingMessages[changeType].push(asset.Description);
 			BCXGlobalEventSystem.emitEvent("curseTrigger", {
 				action: changeType,
@@ -1202,6 +1209,12 @@ export class ModuleCurses extends BaseModule {
 	}
 
 	private afterCurseTick(): void {
+		if (this.pendingAppearanceUpdate) {
+			this.pendingAppearanceUpdate = false;
+			CharacterRefresh(Player, true);
+			ChatRoomCharacterUpdate(Player);
+		}
+
 		for (const changeType of Object.keys(this.pendingMessages) as (cursedChange | "autoremove")[]) {
 			const list = this.pendingMessages[changeType];
 			if (list.length === 0)

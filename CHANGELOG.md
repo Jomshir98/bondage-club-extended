@@ -14,6 +14,50 @@ On the bright side we also aren't simply going away. There is a certain secret p
 
 # BCX Changelog
 
+## 1.1.25
+
+- [FIX] Fix a crash caused by old templates missing visibility/access
+
+## 1.1.24
+
+- [FIX] Decompress item bundle properties before comparing or merging them
+- [CHORE] Update for R133
+- [ADD] Rules: Lock timer limits setting
+- [FIX] Update ChatAdmin changes for BC R134
+- [FIX] Update InformationSheet changes for BC R134
+- [CHORE] Update to R134b1
+- [FIX] Update the room template application to work with the new admin screen
+- [FIX]: wrong target when block_tying_others rule triggers (#88)
+- [ADD]: import/export appearence buttons optional (#90)
+- [FIX] Make the keyboard handling consistent in the extra ChatAdmin screens
+- [FIX]: remove search buttons (#101)
+- [ADD] Add a minimum BC version check
+
+## 1.1.23
+
+- [FIX] Ensure that BCX curses validate the crafts as partial (#94)
+- [FIX] Correct status icons URLs
+
+## 1.1.22
+
+- [FIX] Allow importing restraints into the preview dummies in the wardrobe
+- [CHORE] Remove rule forcing unix EOL + .editorconfig
+- [CHORE] Keep the rule but set .gitattributes
+- [CHORE] Do a check for .editorconfig violations
+- [CHORE] Fix stylistic/eslint-plugin being imported weirdly
+- [ADD] update block_BCX_permissions rule to also trigger if tied (#89)
+- [FIX] Reuse BC's own DrawImageEx
+- [FIX] Make the binding import more consistent
+
+## 1.1.21
+
+- [ADD] Added wildcard support and made speech honorifics case-insensitive (#81)
+- [FIX] Add pagination to wardrobe selectors
+- [FIX] Use WardrobeOffset for slot character lookups (#85)
+- [ADD] Adjust wardrobe slider button position and add Selective Import button
+- [FIX] Remove extra style stuff now that the CSS is cleaner on BC's side
+- [FIX] Fix wardrobe import slot lookups (#87)
+
 ## 1.1.20
 
 - [CHORE] Update for R132

@@ -27,7 +27,7 @@ export function InvisibilityEarbuds() {
 			Color: [...asset.DefaultColor],
 			Difficulty: -100,
 			Property: {
-				Type: "Light",
+				TypeRecord: { typed: 1 }, // Light
 				Effect: [],
 				Hide: AssetGroup.map(A => A.Name).filter(A => A !== "ItemEars"),
 			},

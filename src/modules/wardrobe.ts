@@ -50,6 +50,15 @@ export function parseWardrobeImportData(data: string): string | ItemBundle[] {
 	}
 }
 
+const itemBundlePropertyCache = new WeakMap<ItemBundle, ItemProperties | undefined>();
+
+export function itemBundleGetProperty(bundle: ItemBundle): ItemProperties | undefined {
+	if (!itemBundlePropertyCache.has(bundle)) {
+		itemBundlePropertyCache.set(bundle, ServerBundledItemToAppearanceItem("Female3DCG", bundle)?.Property);
+	}
+	return itemBundlePropertyCache.get(bundle);
+}
+
 export function itemMergeProperties(sourceProperty: Partial<ItemProperties> | undefined, targetProperty: Partial<ItemProperties> | undefined, {
 	includeNoncursableProperties = false,
 	lockAssignMemberNumber,
@@ -156,7 +165,7 @@ export function WardrobeImportCheckChangesLockedItem(C: Character, data: ItemBun
 				!newAsset ||
 				currentItem.Asset.Name !== newItem.Name ||
 				!itemColorsEquals(currentItem.Color, newItem.Color, currentItem.Asset, newAsset) ||
-				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, newItem.Property, {
+				!isEqual(currentItem.Property ?? {}, itemMergeProperties(currentItem.Property, itemBundleGetProperty(newItem), {
 					includeNoncursableProperties: true,
 					lockAssignMemberNumber: Player.MemberNumber,
 				}) ?? {})
@@ -203,7 +212,7 @@ export function ValidationCanAccessCheck(character: Character, group: AssetGroup
 }
 
 export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): {
-	result: CraftingItem | undefined;
+	result: CraftingPartialItem | undefined;
 	messages: string[];
 } {
 	if (Craft === undefined) {
@@ -226,9 +235,9 @@ export function ValidationVerifyCraftData(Craft: unknown, Asset: Asset | null): 
 				messages.push(m);
 			}
 		};
-		const result = CraftingValidate(Craft as CraftingItem, Asset, true);
+		const result = CraftingValidate(Craft as CraftingPartialItem, Asset, true, false, true);
 		return {
-			result: result > CraftingStatusType.CRITICAL_ERROR ? Craft as CraftingItem : undefined,
+			result: result > CraftingStatusType.CRITICAL_ERROR ? Craft as CraftingPartialItem : undefined,
 			messages,
 		};
 	} catch (error) {
@@ -266,7 +275,7 @@ export function WardrobeDoImport(C: Character, data: ItemBundle[], filter: (a: I
 					if (!isObject(cloth.Property)) {
 						item.Property = cloneDeep(cloth.Property);
 					} else {
-						item.Property = itemMergeProperties(item.Property, cloth.Property, {
+						item.Property = itemMergeProperties(item.Property, itemBundleGetProperty(cloth), {
 							includeNoncursableProperties: (
 								typeof cloth.Property.LockedBy === "string" &&
 								ValidationCanAccessCheck(C, "ItemMisc", cloth.Property.LockedBy, undefined) &&
@@ -300,7 +309,12 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 	if (!character) {
 		return "Import error: No character";
 	}
-	if (!WardrobeIsPreviewCharacter(character) && character.MemberNumber !== j_WardrobeBindsAllowedCharacter && includeBinds) {
+
+	const isBindsAllowed = (CurrentScreen === "Wardrobe" ?
+		Wardrobe.selectedCharacter.MemberNumber === j_WardrobeBindsAllowedCharacter
+		: CharacterAppearanceSelection.MemberNumber === j_WardrobeBindsAllowedCharacter);
+
+	if (!isBindsAllowed && includeBinds) {
 		return "Import error: Not allowed to import items";
 	}
 
@@ -329,7 +343,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 				!bundleAsset ||
 				wornItem.Asset.Name !== bundleItem.Name ||
 				!itemColorsEquals(wornItem.Color, bundleItem.Color, wornItem.Asset, bundleAsset) ||
-				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(bundleItem.Property))
+				!isEqual(curseMakeSavedProperty(wornItem.Property, wornItem.Asset.Group), curseMakeSavedProperty(itemBundleGetProperty(bundleItem), wornItem.Asset.Group))
 			) {
 				fullMatch = false;
 			}
@@ -340,7 +354,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 
 	return (!fullMatch &&
 		includeBinds &&
-		data.some(i => Array.isArray(i.Property?.Effect) && i.Property?.Effect.includes("Lock"))
+		data.some(i => itemBundleGetProperty(i)?.Effect?.includes("Lock"))
 	) ? "Imported! Repeat to also import locks." : "Imported!";
 }
 
@@ -367,10 +381,15 @@ function PasteListener(ev: ClipboardEvent) {
 		ev.stopImmediatePropagation();
 		const data = ((ev.clipboardData || (window as any).clipboardData) as DataTransfer).getData("text");
 		const C = Wardrobe.selectedCharacter;
-		const res = useExtendedImport() ? openExtendedImport(C, data) : j_WardrobeImportSelectionClothes(C, data, j_WardrobeIncludeBinds, allowMode);
-		if (res) {
-			ToastManager.info(res);
-		}
+		void doTheImport(C, data);
+	}
+}
+
+async function doTheImport(C: Character, data: string) {
+	const importPromise: Promise<string | null> = useExtendedImport() ? openExtendedImport(C, data) : new Promise(() => j_WardrobeImportSelectionClothes(C, data, j_WardrobeIncludeBinds, allowMode));
+	const res = await importPromise;
+	if (res) {
+		ToastManager.info(res);
 	}
 }
 
@@ -378,62 +397,12 @@ function KeyChangeListener(ev: KeyboardEvent) {
 	holdingShift = ev.shiftKey;
 }
 
-let searchBar: HTMLInputElement | null = null;
-let searchBarAutoClose = false;
-
-function allowSearchMode(): boolean {
-	return CurrentScreen === "Appearance" &&
-		CharacterAppearanceSelection != null &&
-		CharacterAppearanceMode === "Cloth" &&
-		DialogFocusItem == null;
-}
-
-function enterSearchMode(C: Character, input?: string) {
-	if (!searchBar) {
-		searchBar = ElementCreateInput("BCXSearch", "text", "", "40");
-		searchBar.oninput = () => {
-			if (searchBar) {
-				if (searchBarAutoClose && !searchBar.value) {
-					exitSearchMode(C);
-					MainCanvas.canvas.focus();
-				} else if (CharacterAppearanceSelectedGroup) {
-					DialogInventoryBuild(C, CharacterAppearanceSelectedGroup);
-					AppearancePreviewBuild(C, CharacterAppearanceSelectedGroup, true);
-					AppearanceMenuBuild(C, CharacterAppearanceSelectedGroup);
-				}
-			}
-		};
-		searchBar.focus();
-		searchBar.setAttribute("value", input ?? "");
-		const insPoint = input?.length ?? 0;
-		searchBar.setSelectionRange(insPoint, insPoint);
-		if (CharacterAppearanceSelectedGroup) {
-			DialogInventoryBuild(C, CharacterAppearanceSelectedGroup);
-			AppearancePreviewBuild(C, CharacterAppearanceSelectedGroup, true);
-			AppearanceMenuBuild(C, CharacterAppearanceSelectedGroup);
-		}
-	}
-}
-
-function exitSearchMode(C: Character) {
-	if (searchBar) {
-		searchBar.remove();
-		searchBar = null;
-		searchBarAutoClose = false;
-		if (CharacterAppearanceSelectedGroup) {
-			DialogInventoryBuild(C, CharacterAppearanceSelectedGroup);
-			AppearancePreviewBuild(C, CharacterAppearanceSelectedGroup, true);
-			AppearanceMenuBuild(C, CharacterAppearanceSelectedGroup);
-		}
-	}
-}
-
 let appearanceOverrideScreen: GuiWardrobeExtended | null = null;
 function useExtendedImport(): boolean {
 	return (modStorage.wardrobeDefaultExtended ?? false) !== holdingShift;
 }
 
-function openExtendedImport(character: Character, data: string | ItemBundle[], clothesOnly: boolean = false): string | null {
+async function openExtendedImport(character: Character, data: string | ItemBundle[], clothesOnly: boolean = false): Promise<string | null> {
 	const parsedData = Array.isArray(data) ? data : parseWardrobeImportData(data);
 	if (typeof parsedData === "string")
 		return parsedData;
@@ -441,19 +410,26 @@ function openExtendedImport(character: Character, data: string | ItemBundle[], c
 	if (!character) {
 		return "Import error: No character";
 	}
-	const allowBinds = character.MemberNumber === j_WardrobeBindsAllowedCharacter;
 
-	setAppearanceOverrideScreen(new GuiWardrobeExtended(
-		setAppearanceOverrideScreen,
-		character,
-		allowBinds,
-		parsedData,
-		clothesOnly
-	));
-	return null;
+	const allowBinds = CurrentScreen === "Wardrobe" ?
+		Wardrobe.selectedCharacter.MemberNumber === j_WardrobeBindsAllowedCharacter
+		: CharacterAppearanceSelection.MemberNumber === j_WardrobeBindsAllowedCharacter;
+
+	return new Promise((resolve) => {
+		setAppearanceOverrideScreen(new GuiWardrobeExtended(
+			(newScreen) => {
+				setAppearanceOverrideScreen(newScreen);
+				resolve(null);
+			},
+			character,
+			allowBinds,
+			parsedData,
+			clothesOnly
+		));
+	});
 }
 
-function setAppearanceOverrideScreen(newScreen: GuiWardrobeExtended | null): void {
+export function setAppearanceOverrideScreen(newScreen: GuiWardrobeExtended | null): void {
 	if (appearanceOverrideScreen) {
 		appearanceOverrideScreen.Unload();
 		appearanceOverrideScreen = null;
@@ -523,25 +499,26 @@ export class ModuleWardrobe extends BaseModule {
 			return res;
 		});
 
-		function BCXDoImport(char: Character) {
-			BCX_setTimeout(async () => {
-				if (typeof navigator.clipboard.readText !== "function") {
-					ToastManager.info("Please press Ctrl+V");
-					return;
-				}
+		async function BCXDoImport(char: Character) {
+			if (typeof navigator.clipboard.readText !== "function") {
+				ToastManager.info("Please press Ctrl+V");
+				return;
+			}
+			try {
 				const data = await navigator.clipboard.readText();
-				const res = useExtendedImport() ? openExtendedImport(char, data) : j_WardrobeImportSelectionClothes(char, data, j_WardrobeIncludeBinds, allowMode);
-				if (res) {
-					ToastManager.info(res);
-				}
-			}, 0);
+				await doTheImport(char, data);
+			} catch {
+				ToastManager.error("Failed to import");
+			}
 		}
 
-		function BCXDoExport(char: Character) {
-			BCX_setTimeout(async () => {
+		async function BCXDoExport(char: Character) {
+			try {
 				await navigator.clipboard.writeText(j_WardrobeExportSelectionClothes(char, j_WardrobeIncludeBinds));
 				ToastManager.info("Copied to clipboard!");
-			}, 0);
+			} catch {
+				ToastManager.error("Failed to copy to clipboard");
+			}
 		}
 
 		hookFunction("WardrobeTogglePreviewOverlay", 2, (args, next) => {
@@ -570,24 +547,35 @@ export class ModuleWardrobe extends BaseModule {
 							}
 						),
 						ElementButton.Create("wardrobe-bcx-import",
-							() => {
-								const char = WardrobeEnsureSlotCharacter(slot);
+							async () => {
+								let char = WardrobeEnsureSlotCharacter(slot);
 								if (!char) {
-									ToastManager.error(`No character in slot ${slot}`);
-									return;
+									WardrobeDeletePreviewCharacter(WardrobeID.loadPreview);
+									char = CharacterLoadSimple(WardrobeID.loadPreview);
+									CharacterAppearanceSetDefault(char);
 								}
-								BCXDoImport(char);
+								await BCXDoImport(char);
+								// Hand-rolled WardrobeFastSave
+								Player.Wardrobe[slot] = char.Appearance.map(i => WardrobeAssetBundle(i));
+								WardrobeFixLength();
+								WardrobeInvalidateFilteredSlots();
+								ServerAccountUpdate.QueueData({ Wardrobe: CharacterCompressWardrobe(Player.Wardrobe) });
+
+								char = WardrobeEnsureSlotCharacter(slot)!;
+								WardrobeDoImport(char, Player.Wardrobe[slot], () => true, true);
+								Wardrobe.previewLoadCharacter = char;
+								WardrobeDoImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char?.Appearance), () => true, true);
 							},
 							{ label: "Import" }
 						),
 						ElementButton.Create("wardrobe-bcx-export",
-							() => {
+							async () => {
 								const char = WardrobeEnsureSlotCharacter(slot);
 								if (!char) {
 									ToastManager.error(`No character in slot ${slot}`);
 									return;
 								}
-								BCXDoExport(char);
+								await BCXDoExport(char);
 							},
 							{ label: "Export" }
 						),
@@ -601,13 +589,13 @@ export class ModuleWardrobe extends BaseModule {
 					style: { ...cssStyle, "margin-top": "var(--gap, 8px)" },
 					children: [
 						ElementButton.Create("wardrobe-bcx-advanced-import",
-							() => {
+							async () => {
 								const char = WardrobeEnsureSlotCharacter(slot);
 								if (!char) {
 									ToastManager.error(`No character in slot ${slot}`);
 									return;
 								}
-								const result = openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
+								const result = await openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
 								if (result) {
 									ToastManager.error(result);
 								} else {
@@ -661,12 +649,12 @@ export class ModuleWardrobe extends BaseModule {
 				const cell = typeof (WardrobeID as any).slotActions === "function" ? ElementWrap((WardrobeID as any).slotActions(slot)) : ElementWrap(WardrobeID.slotCell(slot));
 				if (!cell) continue;
 				ElementButton.Create(
-					`wardrobe-bcx-import-${slot}`, () => {
-						const actualSlot = typeof window.WardrobeGetVisibleSlot === "function" ? window.WardrobeGetVisibleSlot(slot) : (typeof WardrobeOffset === "number" ? WardrobeOffset + slot : slot);
+					`wardrobe-bcx-import-${slot}`, async () => {
+						const actualSlot = WardrobeGetVisibleSlot(slot);
 						if (actualSlot == null) return;
 						const char = WardrobeEnsureSlotCharacter(actualSlot);
 						if (!char) return;
-						const result = openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
+						const result = await openExtendedImport(Wardrobe.selectedCharacter, ServerAppearanceBundle(char.Appearance), true);
 						if (result) {
 							ToastManager.error(result);
 						} else {
@@ -733,18 +721,12 @@ export class ModuleWardrobe extends BaseModule {
 
 		//#region Search bar
 
-		RedirectGetImage("Icons/BCX_Search.png", "Icons/Search.png");
-		RedirectGetImage("Icons/BCX_SearchExit.png", "Icons/Remove.png");
 		RedirectGetImage("Icons/BCX_Import.png", "Icons/Import.png");
 		RedirectGetImage("Icons/BCX_Export.png", "Icons/Export.png");
 
 		hookFunction("TextGet", 0, (args, next) => {
 			const [tag] = args;
-			if (tag === "BCX_Search") {
-				return "Filter items";
-			} else if (tag === "BCX_SearchExit") {
-				return "";
-			} else if (tag === "BCX_Import") {
+			if (tag === "BCX_Import") {
 				return "Import (BCX)";
 			} else if (tag === "BCX_Export") {
 				return "Export (BCX)";
@@ -754,22 +736,8 @@ export class ModuleWardrobe extends BaseModule {
 
 		hookFunction("AppearanceMenuBuild", 5, (args, next) => {
 			next(args);
-			const C = args[0];
 			const menu = (AppearanceMenu as BCX_AppearanceMenuButtons[]);
-			if (!allowSearchMode()) {
-				exitSearchMode(C);
-			} else if (searchBar) {
-				AppearanceMenu = [];
-				if (DialogInventory.length > 9)
-					menu.push("Next");
-				menu.push("BCX_SearchExit");
-				if (DialogMenuMode !== "permissions")
-					menu.push("Cancel");
-				AppearanceMenu.push("Accept");
-			} else {
-				menu.splice(menu.length - (menu.includes("Cancel") ? 2 : 1), 0, "BCX_Search");
-			}
-			if (CharacterAppearanceMode === "") {
+			if (CharacterAppearanceMode === "" && (modStorage.showAppearanceImportButton ?? true)) {
 				const pasteIdx = menu.findIndex(btn => btn === "Paste");
 				menu.splice(pasteIdx + 1, 0, "BCX_Import", "BCX_Export");
 			}
@@ -778,64 +746,15 @@ export class ModuleWardrobe extends BaseModule {
 		hookFunction("AppearanceMenuClick", 4, (args, next) => {
 			const menu = (AppearanceMenu as BCX_AppearanceMenuButtons[]);
 			const X = 2000 - menu.length * 117;
-			const C = args[0];
 			for (let B = 0; B < menu.length; B++) {
 				if (MouseXIn(X + 117 * B, 90)) {
 					const Button = menu[B];
-					if (Button === "BCX_Search") {
-						enterSearchMode(C);
-						return;
-					} else if (Button === "BCX_SearchExit") {
-						exitSearchMode(C);
-						return;
-					} else if (Button === "BCX_Import") {
-						BCXDoImport(CharacterAppearanceSelection);
+					if (Button === "BCX_Import") {
+						void BCXDoImport(CharacterAppearanceSelection);
 					} else if (Button === "BCX_Export") {
-						BCXDoExport(CharacterAppearanceSelection);
+						void BCXDoExport(CharacterAppearanceSelection);
 					}
 				}
-			}
-			next(args);
-		});
-
-		hookFunction("AppearanceKeyDown", 5, (args, next) => {
-			const ev = args[0];
-			const sb = searchBar;
-			if (!sb &&
-				CharacterAppearanceSelection &&
-				allowSearchMode() &&
-				document.activeElement === MainCanvas.canvas &&
-				ev.key.length === 1 &&
-				!ev.altKey && !ev.ctrlKey && !ev.metaKey
-			) {
-				enterSearchMode(CharacterAppearanceSelection, ev.key);
-				searchBarAutoClose = true;
-				return true;
-			}
-			return next(args);
-		});
-
-		hookFunction("DialogInventoryAdd", 5, (args, next) => {
-			if (searchBar) {
-				const item = args[1];
-				if (!searchBar.value
-					.trim()
-					.toLocaleLowerCase()
-					.split(" ")
-					.every(i =>
-						item.Asset.Description.toLocaleLowerCase().includes(i) ||
-						item.Asset.Name.toLocaleLowerCase().includes(i)
-					)
-				) {
-					return;
-				}
-			}
-			next(args);
-		});
-
-		hookFunction("AppearanceMenuDraw", 0, (args, next) => {
-			if (searchBar) {
-				ElementPositionFix("BCXSearch", 40, 900, 35, 600, 60);
 			}
 			next(args);
 		});
@@ -920,7 +839,6 @@ export class ModuleWardrobe extends BaseModule {
 		document.removeEventListener("paste", PasteListener);
 		document.removeEventListener("keydown", KeyChangeListener, { capture: true });
 		document.removeEventListener("keyup", KeyChangeListener, { capture: true });
-		exitSearchMode(CharacterAppearanceSelection ?? Player);
 		setAppearanceOverrideScreen(null);
 		AppearanceMenuBuild(CharacterAppearanceSelection ?? Player, CharacterAppearanceSelectedGroup);
 	}

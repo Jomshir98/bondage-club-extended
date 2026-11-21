@@ -261,9 +261,9 @@ export class ModuleChatroom extends BaseModule {
 			next(args);
 
 			const [C, CharX, CharY, Zoom] = args;
-			const Char = getChatroomCharacter(C.MemberNumber!);
-			const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
-			const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
+			const Char = getChatroomCharacter(C.MemberNumber);
+			const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber);
+			const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber);
 			if (Char?.BCXVersion &&
 				!Ghosted &&
 				ChatRoomHideIconState === 0 &&
@@ -310,23 +310,23 @@ export class ModuleChatroom extends BaseModule {
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Color:
-					DrawImageEx("Assets/Female3DCG/Emoticon/Spectator/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+					DrawImageEx("Assets/Female3DCG/Emoticon/Spectator/Emoticon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});
-					DrawImageEx("Icons/ColorPick.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
+					DrawImageEx("Icons/ColorChange.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
 						Width: 40 * Zoom,
 						Height: 40 * Zoom,
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Wardrobe:
-					DrawImageEx("Assets/Female3DCG/Emoticon/Wardrobe/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+					DrawImageEx("Assets/Female3DCG/Emoticon/Wardrobe/Emoticon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});
 					break;
 				case ChatRoomStatusManagerStatusType.Profile:
-					DrawImageEx("Assets/Female3DCG/Emoticon/Read/Icon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
+					DrawImageEx("Assets/Female3DCG/Emoticon/Read/Emoticon.png", CharX + 375 * Zoom, CharY + 50 * Zoom, {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});
@@ -429,7 +429,8 @@ export class ModuleChatroom extends BaseModule {
 	}
 
 	unload() {
-		ChatroomSM.unload();
+		// Precaution against the variable still being potentially uninitialized during `unload_modules()` calls
+		ChatroomSM?.unload();
 		if (this.o_ChatRoomSM) {
 			(window as any).ChatRoomSM = this.o_ChatRoomSM;
 		}

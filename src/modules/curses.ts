@@ -81,7 +81,11 @@ const ItemColorSchema = zod.union([
 	zod.array(BCColorSchema),
 ]);
 
-export function curseMakeSavedProperty(properties: ItemProperties | undefined): ItemProperties {
+export function curseShouldCurseDifficulty(group: AssetGroup | null | undefined): boolean {
+	return group?.Category !== "Appearance";
+}
+
+export function curseMakeSavedProperty(properties: ItemProperties | undefined, group?: AssetGroup | null): ItemProperties {
 	const result: ItemProperties = {};
 
 	if (isObject(properties)) {
@@ -95,6 +99,8 @@ export function curseMakeSavedProperty(properties: ItemProperties | undefined): 
 				} else {
 					console.error(`BCX: Bad effect of properties: `, properties.Effect);
 				}
+			} else if (key === "Difficulty" && !curseShouldCurseDifficulty(group)) {
+				continue;
 			} else if (!CURSE_IGNORED_PROPERTIES.has(key) && properties[key] !== undefined) {
 				// @ts-expect-error: Copying member between same type objects
 				result[key] = cloneDeep(properties[key]);
@@ -111,7 +117,7 @@ function curseCreateCurseItemInfo(item: Item): CursedItemInfo {
 		curseProperty: false,
 		Difficulty: item.Difficulty || undefined,
 		Color: !ItemColorIsDefault(item) ? cloneDeep(item.Color) : undefined,
-		Property: curseMakeSavedProperty(item.Property),
+		Property: curseMakeSavedProperty(item.Property, item.Asset.Group),
 		Craft: ValidationVerifyCraftData(item.Craft, item.Asset).result,
 	};
 
@@ -671,6 +677,14 @@ export class ModuleCurses extends BaseModule {
 					console.warn(`BCX: Unknown cursed item ${group}:${info.Name}, removing it`, info);
 					return false;
 				}
+
+				if (isObject(info.Property) && "Difficulty" in info.Property && !curseShouldCurseDifficulty(assetGroup)) {
+					delete info.Property.Difficulty;
+					if (Object.keys(info.Property).length === 0) {
+						delete info.Property;
+					}
+					console.info(`BCX: Removed cursed Difficulty from clothing/body curse ${group}:${info.Name}`);
+				}
 				return true;
 			},
 			loadCategorySpecificGlobalData: (data) => {
@@ -1128,6 +1142,11 @@ export class ModuleCurses extends BaseModule {
 					continue;
 
 				if (CURSE_IGNORED_PROPERTIES.has(key)) {
+					delete curseProperty[key];
+					continue;
+				}
+
+				if (key === "Difficulty" && !curseShouldCurseDifficulty(assetGroup)) {
 					delete curseProperty[key];
 					continue;
 				}

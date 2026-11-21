@@ -314,7 +314,7 @@ export class ModuleChatroom extends BaseModule {
 						Width: 50 * Zoom,
 						Height: 50 * Zoom,
 					});
-					DrawImageEx("Icons/ColorPick.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
+					DrawImageEx("Icons/ColorChange.png", CharX + 380 * Zoom, CharY + 51 * Zoom, {
 						Width: 40 * Zoom,
 						Height: 40 * Zoom,
 					});
@@ -429,7 +429,8 @@ export class ModuleChatroom extends BaseModule {
 	}
 
 	unload() {
-		ChatroomSM.unload();
+		// Precaution against the variable still being potentially uninitialized during `unload_modules()` calls
+		ChatroomSM?.unload();
 		if (this.o_ChatRoomSM) {
 			(window as any).ChatRoomSM = this.o_ChatRoomSM;
 		}

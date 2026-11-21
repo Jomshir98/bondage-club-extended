@@ -6,7 +6,7 @@ import { BCX_VERSION_PARSED } from "./utils";
 import { supporterStatus } from "./modules/versionCheck";
 import { BCXGlobalEventSystem } from "./event";
 
-import { omit, zip } from "lodash-es";
+import { omit } from "lodash-es";
 
 const GROUP_NAME_OVERRIDES: Record<string, string> = {
 	"ItemNeckAccessories": "Collar Addon",
@@ -503,43 +503,4 @@ export function isRoomPrivate(room: ServerChatRoomData | ServerChatRoomSearchDat
 
 export function isRoomLocked(room: ServerChatRoomData | ServerChatRoomSearchData | ServerChatRoomSettings) {
 	return ChatRoomDataIsLocked(room);
-}
-
-/** Maping of Alpha/Beta/etc. tags to a numeric priority qualifier */
-const betaTagPriority = {
-	Alpha: 0,
-	Beta: 1,
-	[""]: 2, // Release
-} as const;
-
-/** Numeric tuple representation of {@link GameVersionFormat}-valid strings */
-type VersionTuple = [version: number, betaTagPriority: number, betaVersion: number];
-
-/** Check whether the passed version is greater than or equal to the target version (see {@link GameVersionFormat}) */
-export function bcVersionGreaterThan(version: string, targetVersion: string): boolean {
-	const match = GameVersionFormat.exec(version);
-	const targetMatch = GameVersionFormat.exec(targetVersion);
-	if (!match || !targetMatch) {
-		return false;
-	}
-
-	const versionComponents: VersionTuple = [
-		Number.parseInt(match[1], 10),
-		betaTagPriority[match[2] as "" | "Alpha" | "Beta"],
-		CommonParseInt(match[3]) ?? 0,
-	];
-	const targetVersionComponents: VersionTuple = [
-		Number.parseInt(targetMatch[1], 10),
-		betaTagPriority[targetMatch[2] as "" | "Alpha" | "Beta"],
-		CommonParseInt(targetMatch[3]) ?? 0,
-	];
-
-	for (const [num, targetNum] of zip(versionComponents, targetVersionComponents)) {
-		if (num! > targetNum!) {
-			return true;
-		} else if (num !== targetNum) {
-			return false;
-		}
-	}
-	return true;
 }

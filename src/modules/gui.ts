@@ -10,6 +10,7 @@ import { developmentMode } from "../utilsClub";
 import { ChatroomSM } from "./chatroom";
 import { GuiTutorial } from "../gui/tutorial";
 import { BCXGlobalEventSystem } from "../event";
+import { othersBCXAccessBlockedByRule } from "./authority";
 
 export function getCurrentSubscreen(): GuiSubscreen | null {
 	return ModuleGUI.instance && ModuleGUI.instance.currentSubscreen;
@@ -77,6 +78,7 @@ export class ModuleGUI extends BaseModule {
 			if (!C) return ret;
 
 			const playerHasAccessToCharacter = C.playerHasAccessToCharacter();
+			const otherAccessBlocked = !C.isPlayer() && othersBCXAccessBlockedByRule();
 
 			let button: HTMLButtonElement | null = null;
 			if (firstTimeInit && C.isPlayer()) {
@@ -86,7 +88,7 @@ export class ModuleGUI extends BaseModule {
 				},
 				{
 					image: icon_BCX,
-					disabled: !playerHasAccessToCharacter,
+					disabled: !playerHasAccessToCharacter || otherAccessBlocked,
 					tooltip: "You can find BCX here ►",
 				},
 				{
@@ -102,14 +104,18 @@ export class ModuleGUI extends BaseModule {
 					},
 				});
 			} else if (!firstTimeInit && C.BCXVersion !== null) {
-				const tooltip = playerHasAccessToCharacter ? "BCX" : "Needs BC item permission";
+				const tooltip = !playerHasAccessToCharacter ?
+					"Needs BC item permission"
+					: otherAccessBlocked ?
+					"Access blocked by a BCX rule"
+					: "BCX";
 				button = ElementButton.Create(null, () => {
 					unloadInfoSheet();
 					this.currentSubscreen = new GuiMainMenu(C);
 				},
 				{
 					image: icon_BCX,
-					disabled: !playerHasAccessToCharacter,
+					disabled: !playerHasAccessToCharacter || otherAccessBlocked,
 					tooltip,
 				},
 				{

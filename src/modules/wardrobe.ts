@@ -343,7 +343,7 @@ export function j_WardrobeImportSelectionClothes(character: Character, data: str
 				!bundleAsset ||
 				wornItem.Asset.Name !== bundleItem.Name ||
 				!itemColorsEquals(wornItem.Color, bundleItem.Color, wornItem.Asset, bundleAsset) ||
-				!isEqual(curseMakeSavedProperty(wornItem.Property), curseMakeSavedProperty(itemBundleGetProperty(bundleItem)))
+				!isEqual(curseMakeSavedProperty(wornItem.Property, wornItem.Asset.Group), curseMakeSavedProperty(itemBundleGetProperty(bundleItem), wornItem.Asset.Group))
 			) {
 				fullMatch = false;
 			}

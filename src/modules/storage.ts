@@ -108,7 +108,27 @@ export function calculateSaveHmac(save: string, key: string): string {
 	return result;
 }
 
+let syncBatchDepth = 0;
+let syncBatchPending = false;
+
+export function modStorageSyncBatch<T>(callback: () => T): T {
+	syncBatchDepth++;
+	try {
+		return callback();
+	} finally {
+		syncBatchDepth--;
+		if (syncBatchDepth === 0 && syncBatchPending) {
+			syncBatchPending = false;
+			modStorageSync();
+		}
+	}
+}
+
 export function modStorageSync() {
+	if (syncBatchDepth > 0) {
+		syncBatchPending = true;
+		return;
+	}
 	if (moduleInitPhase !== ModuleInitPhase.ready && moduleInitPhase !== ModuleInitPhase.destroy)
 		return;
 	if (deletionPending || firstTimeInit)

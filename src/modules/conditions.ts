@@ -4,7 +4,7 @@ import { capitalizeFirstLetter, isObject, typedObjectAssumedEntries, typedObject
 import { notifyOfChange, queryHandlers } from "./messaging";
 import { moduleIsEnabled } from "./presets";
 import { RulesGetRuleState } from "./rules";
-import { modStorage, modStorageSync } from "./storage";
+import { modStorage, modStorageSync, modStorageSyncBatch } from "./storage";
 import { BaseModule } from "./_BaseModule";
 
 import cloneDeep from "lodash-es/cloneDeep";
@@ -619,6 +619,11 @@ export function ConditionsUpdateMultiple<C extends ConditionsCategories>(categor
 	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	if (!moduleIsEnabled(handler.category))
 		return false;
+	return modStorageSyncBatch(() => ConditionsUpdateMultipleInner(category, conditions, data, character));
+}
+
+function ConditionsUpdateMultipleInner<C extends ConditionsCategories>(category: C, conditions: ConditionsCategoryKeys[C][], data: Partial<ConditionsConditionPublicDataBase>, character: ChatroomCharacter | null): boolean {
+	const handler = ConditionsGetCategoryHandler<ConditionsCategories>(category);
 	let didChange = false;
 	for (const condition of conditions) {
 		const conditionData = ConditionsGetCondition<ConditionsCategories>(category, condition);

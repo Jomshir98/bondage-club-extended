@@ -197,12 +197,16 @@ export class GuiCursesAdd extends GuiSubscreen {
 		const category = CATEGORIES[this.page];
 
 		if (MouseIn(...this.curseOccupiedBtn) && !this.permissionMode) {
-			this.character.curseBatch(category.batchType, false);
+			this.character.curseBatch(category.batchType, false).catch(err => {
+				console.warn(`BCX: Error cursing ${category.batchType} on ${this.character}: `, err);
+			});
 			return;
 		}
 
 		if (MouseIn(...this.curseAllBtn) && !this.permissionMode) {
-			this.character.curseBatch(category.batchType, true);
+			this.character.curseBatch(category.batchType, true).catch(err => {
+				console.warn(`BCX: Error cursing ${category.batchType} on ${this.character}: `, err);
+			});
 			return;
 		}
 
@@ -218,7 +222,9 @@ export class GuiCursesAdd extends GuiSubscreen {
 				if (this.permissionMode) {
 					this.character.conditionSetLimit("curses", group.Name, (accessLevel + 1) % 3);
 				} else if (!itemIsCursed && allowCurse) {
-					this.character.curseItem(group.Name, null);
+					this.character.curseItem(group.Name, null).catch(err => {
+						console.warn(`BCX: Error cursing ${group.Name} on ${this.character}: `, err);
+					});
 				}
 				return true;
 			}

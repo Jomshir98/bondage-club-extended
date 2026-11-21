@@ -4,7 +4,7 @@ import { arrayUnique, capitalizeFirstLetter, dictionaryProcess, formatTimeInterv
 import { ChatRoomActionMessage, ChatRoomSendLocal, getCharacterName, getVisibleGroupName, isAssetGroupName, itemColorsEquals } from "../utilsClub";
 import { AccessLevel, checkPermissionAccess, registerPermission } from "./authority";
 import { notifyOfChange, queryHandlers } from "./messaging";
-import { modStorageSync } from "./storage";
+import { modStorageSync, modStorageSyncBatch } from "./storage";
 import { LogEntryType, logMessage } from "./log";
 import { moduleIsEnabled } from "./presets";
 import { ModuleCategory, Preset, ConditionsLimit } from "../constants";
@@ -28,7 +28,7 @@ import {
 	ConditionsCategoryInfluencedByRule,
 } from "./conditions";
 import { cursedChange, CURSES_TRIGGER_TEXTS, CURSES_TRIGGER_TEXTS_BATCH } from "./cursesConstants";
-import { BCX_setInterval } from "../BCXContext";
+import { BCX_setInterval, BCX_setTimeout } from "../BCXContext";
 import { ValidationVerifyCraftData } from "./wardrobe";
 import { BCXGlobalEventSystem } from "../event";
 
@@ -149,6 +149,11 @@ export function curseDefaultItemCurseProperty(asset: Asset): boolean {
 }
 
 export function curseItem(Group: AssetGroupName, curseProperty: boolean | null, character: ChatroomCharacter | null, showMessage: boolean = true): boolean {
+	// Cursing changes both the curse and the log; save only once (it was saved 3 times per curse)
+	return modStorageSyncBatch(() => curseItemUnbatched(Group, curseProperty, character, showMessage));
+}
+
+function curseItemUnbatched(Group: AssetGroupName, curseProperty: boolean | null, character: ChatroomCharacter | null, showMessage: boolean): boolean {
 	if (!moduleIsEnabled(ModuleCategory.Curses))
 		return false;
 
@@ -241,15 +246,17 @@ export function curseBatch(mode: "items" | "clothes" | "body", includingEmpty: b
 		}
 	}
 
-	for (const group of assetGroups) {
-		if (ConditionsGetCondition("curses", group.Name))
-			continue;
-		if (character && !ConditionsCheckAccess("curses", group.Name, character))
-			continue;
-		if (!curseItem(group.Name, null, character, false))
-			return false;
-	}
-	return true;
+	return modStorageSyncBatch(() => {
+		for (const group of assetGroups) {
+			if (ConditionsGetCondition("curses", group.Name))
+				continue;
+			if (character && !ConditionsCheckAccess("curses", group.Name, character))
+				continue;
+			if (!curseItem(group.Name, null, character, false))
+				return false;
+		}
+		return true;
+	});
 }
 
 export function curseLift(Group: AssetGroupName, character: ChatroomCharacter | null): boolean {
@@ -317,6 +324,9 @@ export class ModuleCurses extends BaseModule {
 		color: [],
 		autoremove: [],
 	};
+
+	private pendingAppearanceUpdate: boolean = false;
+	private appearanceUpdateTimer: number | null = null;
 
 	init() {
 		registerPermission("curses_normal", {
@@ -1044,6 +1054,10 @@ export class ModuleCurses extends BaseModule {
 			clearInterval(this.resetTimer);
 			this.resetTimer = null;
 		}
+		if (this.appearanceUpdateTimer !== null) {
+			clearTimeout(this.appearanceUpdateTimer);
+			this.appearanceUpdateTimer = null;
+		}
 		removeAllHooksByModule(ModuleCategory.Curses);
 	}
 
@@ -1089,8 +1103,7 @@ export class ModuleCurses extends BaseModule {
 		if (curse === null) {
 			if (currentItem && currentItem.Asset.Group.AllowNone) {
 				InventoryRemove(Player, group, false);
-				CharacterRefresh(Player, true);
-				ChatRoomCharacterUpdate(Player);
+				this.queueAppearanceUpdate();
 				this.pendingMessages.remove.push(currentItem.Asset.Description);
 				BCXGlobalEventSystem.emitEvent("curseTrigger", {
 					action: "remove",
@@ -1200,8 +1213,7 @@ export class ModuleCurses extends BaseModule {
 		}
 
 		if (changeType) {
-			CharacterRefresh(Player, true);
-			ChatRoomCharacterUpdate(Player);
+			this.queueAppearanceUpdate();
 			this.pendingMessages[changeType].push(asset.Description);
 			BCXGlobalEventSystem.emitEvent("curseTrigger", {
 				action: changeType,
@@ -1220,7 +1232,35 @@ export class ModuleCurses extends BaseModule {
 		}
 	}
 
+	/**
+	 * Marks the player's appearance as changed by a curse. The refresh and server update are done once for all changes:
+	 * at the end of the curse tick, or right after the current action when outside of it (e.g. lifting all curses).
+	 */
+	private queueAppearanceUpdate(): void {
+		this.pendingAppearanceUpdate = true;
+		if (this.appearanceUpdateTimer === null) {
+			this.appearanceUpdateTimer = BCX_setTimeout(() => {
+				this.appearanceUpdateTimer = null;
+				this.flushAppearanceUpdate();
+			}, 0);
+		}
+	}
+
+	private flushAppearanceUpdate(): void {
+		if (this.appearanceUpdateTimer !== null) {
+			clearTimeout(this.appearanceUpdateTimer);
+			this.appearanceUpdateTimer = null;
+		}
+		if (!this.pendingAppearanceUpdate)
+			return;
+		this.pendingAppearanceUpdate = false;
+		CharacterRefresh(Player, true);
+		ChatRoomCharacterUpdate(Player);
+	}
+
 	private afterCurseTick(): void {
+		this.flushAppearanceUpdate();
+
 		for (const changeType of Object.keys(this.pendingMessages) as (cursedChange | "autoremove")[]) {
 			const list = this.pendingMessages[changeType];
 			if (list.length === 0)
@@ -1260,8 +1300,8 @@ export class ModuleCurses extends BaseModule {
 				currentItem.Asset.Name === data.data.Name &&
 				InventoryGetLock(currentItem) == null
 			) {
-				InventoryRemove(Player, curse, true);
-				ChatRoomCharacterUpdate(Player);
+				InventoryRemove(Player, curse, false);
+				this.queueAppearanceUpdate();
 				this.pendingMessages.autoremove.push(currentItem.Asset.Description);
 				BCXGlobalEventSystem.emitEvent("curseTrigger", {
 					action: "autoremove",

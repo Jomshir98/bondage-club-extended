@@ -75,3 +75,9 @@ export enum ConditionsLimit {
 export const defaultBCXEffects: Readonly<BCX_effects> = {
 	Effect: [],
 };
+
+export const notificationBlockingRules: Partial<Record<ModuleCategory, BCX_Rule>> = {
+	[ModuleCategory.Curses]: "other_forbid_curse_notifications",
+	[ModuleCategory.Rules]: "other_forbid_rule_notifications",
+	[ModuleCategory.Relationships]: "other_forbid_relationship_notifications",
+};
